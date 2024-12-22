@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import React from 'react'
+import React from "react"
 
 export function BaggerFlowIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

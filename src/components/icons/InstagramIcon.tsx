@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 export function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

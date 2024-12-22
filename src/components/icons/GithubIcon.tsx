@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import React from 'react'
+import React from "react"
 
 export function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

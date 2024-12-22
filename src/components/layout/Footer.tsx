@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/config"
 
 export function Footer() {
   return (
-    <footer className="mx-auto flex w-full items-center justify-between border-t border-zinc-900/10 bg-zinc-800 px-4 py-4 pt-4 backdrop-blur-xl dark:border-white/10 dark:bg-inherit sm:px-6 lg:px-8 lg:py-8 lg:pt-8">
+    <footer className="mx-auto flex w-full items-center justify-between border-t bg-zinc-800 px-4 py-4 pt-4 backdrop-blur-xl dark:bg-inherit sm:px-6 lg:px-8 lg:py-8 lg:pt-8">
       <div className="flex flex-col items-start justify-start gap-0">
         <p className="text-2xs leading-5 text-zinc-400 dark:text-zinc-500 md:text-sm">
           Built by{" "}

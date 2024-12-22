@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 export function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
