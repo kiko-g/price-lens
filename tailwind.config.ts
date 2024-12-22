@@ -1,7 +1,12 @@
 import type { Config } from "tailwindcss"
+import formsPlugin from "@tailwindcss/forms"
+import animatePlugin from "tailwindcss-animate"
+import scrollbarPlugin from "tailwind-scrollbar"
+import typographyPlugin from "@tailwindcss/typography"
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 export default {
-  darkMode: ["class"],
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -58,5 +63,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [scrollbarPlugin, formsPlugin, animatePlugin, typographyPlugin],
 } satisfies Config
