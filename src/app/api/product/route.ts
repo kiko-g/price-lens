@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from "next/server"
 import * as cheerio from "cheerio"
-import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
+import type { Product } from "@/types"
+import { NextRequest, NextResponse } from "next/server"
 
-type Data = {
-  name: string
-}
+import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 
 export async function GET(req: NextRequest) {
   const url = "https://www.continente.pt/produto/gelado-baunilha-e-brownie-de-caramelo-haagen-dazs-7931544.html"
-  const response = await fetch(url)
 
   try {
     const rawResponse = await fetch(url, {
@@ -32,7 +29,7 @@ export async function GET(req: NextRequest) {
       image: $(".ct-product-image").attr("src") || "",
     }
 
-    const product = {
+    const product: Product = {
       ...rawProduct,
       pack: packageToUnit(rawProduct.pack),
       price: priceToNumber(rawProduct.price),
