@@ -5,6 +5,7 @@ export type NavigationItem = {
 }
 
 export type Product = {
+  url: string
   name: string
   brand: string
   pack: string
@@ -14,4 +15,7 @@ export type Product = {
   majorUnit: string
   discount: number
   image: string
+  category: string
+  subCategory: string
+  innerCategory: string
 }

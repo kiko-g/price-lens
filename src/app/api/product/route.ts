@@ -2,23 +2,35 @@ import * as cheerio from "cheerio"
 import type { Product } from "@/types"
 import { NextRequest, NextResponse } from "next/server"
 
+import { html as mockHtml } from "@/lib/html"
 import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 
 export async function GET(req: NextRequest) {
-  const url = "https://www.continente.pt/produto/gelado-baunilha-e-brownie-de-caramelo-haagen-dazs-7931544.html"
+  const { searchParams } = new URL(req.url)
+  const url = searchParams.get("url")
+
+  if (!url) return
 
   try {
-    const rawResponse = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-      },
-      cache: "no-store",
-    })
+    // const rawResponse = await fetch(url, {
+    //   headers: {
+    //     "User-Agent": "Mozilla/5.0",
+    //   },
+    //   cache: "no-store",
+    // })
 
-    const html = await rawResponse.text()
-    const $ = cheerio.load(html)
+    // const html = await rawResponse.text()
+    const $ = cheerio.load(mockHtml)
+
+    const breadcrumbs = $(".breadcrumbs")
+      .map((i, el) => $(el).text().trim())
+      .get()[0]
+      .split("\n")
+      .map((item) => item.trim())
+      .filter((item) => item !== "" && item !== "Página inicial")
 
     const rawProduct = {
+      url,
       name: $("h1").text().trim(),
       brand: $(".ct-pdp--brand").text().trim(),
       pack: $(".ct-pdp--unit").text().trim(),
@@ -27,6 +39,9 @@ export async function GET(req: NextRequest) {
       pricePerMajorUnit: $(".ct-price-value").text().trim(),
       majorUnit: $(".ct-price-value").siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim(),
       image: $(".ct-product-image").attr("src") || "",
+      category: breadcrumbs[0] || "",
+      subCategory: breadcrumbs[1] || "",
+      innerCategory: breadcrumbs[2] || "",
     }
 
     const product: Product = {

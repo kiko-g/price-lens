@@ -1,9 +1,7 @@
-import Link from "next/link"
 import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
-import { Button } from "@/components/ui/button"
-import { AppWindowMacIcon } from "lucide-react"
+import { ButtonApiTest } from "@/components/ButtonApiTest"
 
 export const metadata: Metadata = {
   title: "Price Lens",
@@ -14,12 +12,7 @@ export default function Home() {
   return (
     <Layout>
       <div className="flex w-full flex-1 flex-col items-center justify-center gap-3">
-        <Button asChild>
-          <Link href="/api/" target="_blank">
-            <AppWindowMacIcon />
-            Test API
-          </Link>
-        </Button>
+        <ButtonApiTest />
       </div>
     </Layout>
   )
