@@ -2,12 +2,12 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function ButtonSupabase() {
   const supabase = createClient()
-  const data = await supabase.from("products").select("*")
-  console.debug(data)
+  const { data: products } = await supabase.from("products").select("*")
+  console.debug(products)
 
   return (
-    <>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </>
+    <div className="max-w-md p-4">
+      <pre className="text-wrap text-xs">{JSON.stringify(products, null, 2)}</pre>
+    </div>
   )
 }
