@@ -10,12 +10,12 @@ export type Product = {
   brand: string
   pack: string
   price: number
-  priceRecommended: number
-  pricePerMajorUnit: number
-  majorUnit: string
+  price_recommended: number
+  price_per_major_unit: number
+  major_unit: string
   discount: number
   image: string
   category: string
-  subCategory: string
-  innerCategory: string
+  sub_category: string
+  inner_category: string
 }

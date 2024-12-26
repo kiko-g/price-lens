@@ -5,9 +5,8 @@ import { AppWindowMacIcon } from "lucide-react"
 
 async function handleFetch() {
   try {
-    const response = await fetch(
-      "/api/product?url=https://www.continente.pt/produto/gelado-baunilha-e-brownie-de-caramelo-haagen-dazs-7931544.html",
-    )
+    const url = "https://www.continente.pt/produto/gelado-baunilha-e-brownie-de-caramelo-haagen-dazs-7931544.html"
+    const response = await fetch(`/api/product?url=${url}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
