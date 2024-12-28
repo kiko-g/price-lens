@@ -1,7 +1,7 @@
 import type { Product } from "@/types"
 import * as cheerio from "cheerio"
 
-import { html as mockHtml } from "@/lib/html"
+import { html as mockHtml } from "@/lib/data/html"
 import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 
 export const fetchHtml = async (url: string) => {
