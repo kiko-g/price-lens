@@ -1,59 +1,18 @@
-import * as cheerio from "cheerio"
 import type { Product } from "@/types"
 import { NextRequest, NextResponse } from "next/server"
 
-import { html as mockHtml } from "@/lib/html"
-import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
+import { continenteProductPageScraper } from "@/lib/scraper"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const url = searchParams.get("url")
 
-  if (!url) return
+  if (!url) {
+    return NextResponse.json({ error: "Invalid product page URL provided" }, { status: 400 })
+  }
 
   try {
-    // const rawResponse = await fetch(url, {
-    //   headers: {
-    //     "User-Agent": "Mozilla/5.0",
-    //   },
-    //   cache: "no-store",
-    // })
-
-    // const html = await rawResponse.text()
-    const $ = cheerio.load(mockHtml)
-
-    const breadcrumbs = $(".breadcrumbs")
-      .map((i, el) => $(el).text().trim())
-      .get()[0]
-      .split("\n")
-      .map((item) => item.trim())
-      .filter((item) => item !== "" && item !== "Página inicial")
-
-    const rawProduct = {
-      url,
-      name: $("h1").text().trim(),
-      brand: $(".ct-pdp--brand").text().trim(),
-      pack: $(".ct-pdp--unit").text().trim(),
-      price: $(".ct-price-formatted").text().trim(),
-      price_recommended: $(".pwc-discount-amount-pvpr").text().trim(),
-      price_per_major_unit: $(".ct-price-value").text().trim(),
-      major_unit: $(".ct-price-value").siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim(),
-      image: $(".ct-product-image").attr("src") || "",
-      category: breadcrumbs[0] || "",
-      sub_category: breadcrumbs[1] || "",
-      inner_category: breadcrumbs[2] || "",
-    }
-
-    const product: Product = {
-      ...rawProduct,
-      pack: packageToUnit(rawProduct.pack),
-      price: priceToNumber(rawProduct.price),
-      price_recommended: priceToNumber(rawProduct.price_recommended),
-      price_per_major_unit: priceToNumber(rawProduct.price_per_major_unit),
-      discount: 1 - priceToNumber(rawProduct.price) / priceToNumber(rawProduct.price_recommended),
-      image: resizeImgSrc(rawProduct.image, 500, 500),
-    }
-
+    const product: Product = await continenteProductPageScraper(url)
     return NextResponse.json({ ...product }, { status: 200 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
