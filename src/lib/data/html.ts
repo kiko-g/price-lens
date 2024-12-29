@@ -1,4 +1,4 @@
-export const html = `<!DOCTYPE html>
+export const mockProductHtml = `<!DOCTYPE html>
 <html lang="pt">
     <head>
 

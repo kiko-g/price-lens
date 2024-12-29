@@ -1,8 +1,11 @@
 import type { Product } from "@/types"
 import * as cheerio from "cheerio"
+import axios from "axios"
 
-import { html as mockHtml } from "@/lib/data/html"
+import { mockProductHtml } from "@/lib/data/html"
 import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
+import { categories } from "./data/continente"
+import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 
 export const fetchHtml = async (url: string) => {
   const response = await fetch(url, {
@@ -16,7 +19,7 @@ export const fetchHtml = async (url: string) => {
 export const continenteProductPageScraper = async (url: string) => {
   // const html = await fetchHtml(url)
   // const $ = cheerio.load(html)
-  const $ = cheerio.load(mockHtml)
+  const $ = cheerio.load(mockProductHtml)
 
   const breadcrumbs = $(".breadcrumbs")
     .map((i, el) => $(el).text().trim())
@@ -51,4 +54,69 @@ export const continenteProductPageScraper = async (url: string) => {
   }
 
   return product
+}
+
+export const continenteCategoryPageScraper = async (url: string): Promise<string[]> => {
+  const links: string[] = []
+
+  const getPaginatedUrl = (url: string, start: number): string => {
+    if (url.includes("?start=")) return url.replace(/(\?start=)\d+/, `$1${start}`)
+    else {
+      const separator = url.includes("?") ? "&" : "?"
+      return `${url}${separator}start=${start}`
+    }
+  }
+
+  const fetchHtml = async (url: string): Promise<string> => {
+    const response = await axios.get(url)
+    return response.data
+  }
+
+  const grabLinksInPage = ($: cheerio.CheerioAPI): string[] => {
+    const pageLinks: string[] = []
+    $(".product-tile").each((index, element) => {
+      const firstLink = $(element).find("a[href]").first()
+      if (firstLink.length) {
+        const href = firstLink.attr("href")
+        if (href) pageLinks.push(href)
+      }
+    })
+    return pageLinks
+  }
+
+  let start = 0
+  let hasMorePages = true
+
+  while (hasMorePages) {
+    const paginatedUrl = getPaginatedUrl(url, start)
+    console.log(`Fetching: ${paginatedUrl}`)
+
+    const html = await fetchHtml(paginatedUrl)
+    const $ = cheerio.load(html)
+
+    const newLinks = grabLinksInPage($)
+    if (newLinks.length > 0) {
+      links.push(...newLinks)
+      start += newLinks.length
+    } else {
+      hasMorePages = false
+    }
+  }
+
+  return links
+}
+
+export const crawlContinenteCategoryPages = async () => {
+  for (const category of Object.values(categories)) {
+    console.debug("Crawling", category.url)
+    const start = performance.now()
+    const links = await continenteCategoryPageScraper(category.url)
+    console.debug("Finished scraping", category.name, links.length)
+    for (const link of links) {
+      const product = createEmptyProduct()
+      product.url = link
+      await createOrUpdateProduct(product)
+    }
+    console.log("Finished storing", category.name, links.length, performance.now() - start)
+  }
 }
