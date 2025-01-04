@@ -2,10 +2,10 @@ import type { Product } from "@/types"
 import * as cheerio from "cheerio"
 import axios from "axios"
 
-import { mockProductHtml } from "@/lib/data/html"
-import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { categories } from "./data/continente"
+import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
+import { createClient } from "./supabase/client"
 
 export const fetchHtml = async (url: string) => {
   const response = await fetch(url, {
@@ -17,16 +17,17 @@ export const fetchHtml = async (url: string) => {
 }
 
 export const continenteProductPageScraper = async (url: string) => {
-  // const html = await fetchHtml(url)
-  // const $ = cheerio.load(html)
-  const $ = cheerio.load(mockProductHtml)
+  const html = await fetchHtml(url)
+  const $ = cheerio.load(html)
 
-  const breadcrumbs = $(".breadcrumbs")
-    .map((i, el) => $(el).text().trim())
-    .get()[0]
-    .split("\n")
-    .map((item) => item.trim())
-    .filter((item) => item !== "" && item !== "Página inicial")
+  const breadcrumbs =
+    $(".breadcrumbs")
+      .map((i, el) => $(el).text().trim())
+      .get()
+      .at(0)
+      ?.split("\n")
+      ?.map((item) => item?.trim() ?? "")
+      .filter((item) => item !== "" && item !== "Página inicial") ?? []
 
   const rawProduct = {
     url,
@@ -119,4 +120,25 @@ export const crawlContinenteCategoryPages = async () => {
     }
     console.log("Finished storing", category.name, links.length, performance.now() - start)
   }
+}
+
+export const batchUrls = (urls: string[], batchSize: number) => {
+  const batches = []
+  for (let i = 0; i < urls.length; i += batchSize) {
+    batches.push(urls.slice(i, i + batchSize))
+  }
+  return batches
+}
+
+export const processBatch = async (urls: string[]) => {
+  const products = await Promise.all(
+    urls.map((url) => continenteProductPageScraper(url).catch((err) => ({ url, error: err }))),
+  )
+  return products
+}
+
+export const createOrUpdateProducts = async (products: Product[]) => {
+  const supabase = createClient()
+  const { data, error } = await supabase.from("products").upsert(products)
+  return { data, error }
 }
