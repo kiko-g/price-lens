@@ -13,9 +13,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const product: Product = await continenteProductPageScraper(url)
-    await createOrUpdateProduct(product)
-    return NextResponse.json({ ...product }, { status: 200 })
+    const product = await continenteProductPageScraper(url)
+    if (Object.keys(product).length === 0) {
+      return NextResponse.json({ error: "Invalid product page URL provided" }, { status: 400 })
+    }
+    const validProduct = product as Product
+    await createOrUpdateProduct(validProduct)
+    return NextResponse.json({ ...validProduct }, { status: 200 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

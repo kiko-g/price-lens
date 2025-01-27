@@ -20,6 +20,8 @@ export const continenteProductPageScraper = async (url: string) => {
   const html = await fetchHtml(url)
   const $ = cheerio.load(html)
 
+  if (!$(".ct-product-image").length) return {}
+
   const breadcrumbs =
     $(".breadcrumbs")
       .map((i, el) => $(el).text().trim())
