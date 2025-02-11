@@ -8,10 +8,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const pageParam = req.nextUrl.searchParams.get("page") ?? "1"
-    const limitParam = req.nextUrl.searchParams.get("limit") ?? "40"
+    const limitParam = req.nextUrl.searchParams.get("limit") ?? "20"
 
     const page = parseInt(pageParam, 10) || 1
-    const limit = parseInt(limitParam, 10) || 40
+    const limit = parseInt(limitParam, 10) || 20
     const offset = (page - 1) * limit
 
     const { data, error, count } = await supabase

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   return (
     <Layout>
-      <div className="flex w-full flex-col items-center justify-center gap-4 p-4">
+      <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
         <ProductsGrid />
       </div>
     </Layout>
