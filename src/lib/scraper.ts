@@ -54,7 +54,7 @@ export const continenteProductPageScraper = async (url: string) => {
     price_per_major_unit: priceToNumber(rawProduct.price_per_major_unit),
     discount: 1 - priceToNumber(rawProduct.price) / priceToNumber(rawProduct.price_recommended),
     image: resizeImgSrc(rawProduct.image, 500, 500),
-    updated_at: null,
+    updated_at: new Date().toISOString().replace("Z", "+00:00"),
     created_at: null,
   }
 

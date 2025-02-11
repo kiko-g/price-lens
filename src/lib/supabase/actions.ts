@@ -11,9 +11,12 @@ export const createEmptyProduct = (): Product => {
   return emptyProduct as Product
 }
 
-export const createOrUpdateProduct = async (product: Product) => {
+export async function createOrUpdateProduct(product: Product) {
   const supabase = createClient()
-  const { data, error } = await supabase.from("products").upsert(product)
+  const { data, error } = await supabase.from("products").upsert(product, {
+    onConflict: "url",
+    ignoreDuplicates: false,
+  })
   return { data, error }
 }
 

@@ -35,7 +35,6 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         icon: `p-2`,
         "icon-sm": `p-1`,
         "icon-xs": `p-0.5`,
-        "dropdown-item": `px-2 py-1.5`,
       },
       roundedness: {
         default: `rounded-md`,

@@ -7,12 +7,18 @@ import type { Product } from "@/types"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon } from "lucide-react"
 import { cn, imagePlaceholder } from "@/lib/utils"
+import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
 
 export function ProductCard({ product }: { product: Product }) {
   if (!product.url) {
     return null
+  }
+
+  async function handleUpdateProduct() {
+    const response = await fetch(`/api/products/put?url=${product.url}`)
+    const data = await response.json()
+    console.debug(data)
   }
 
   return (
@@ -42,18 +48,14 @@ export function ProductCard({ product }: { product: Product }) {
 
             <DropdownMenuContent className="w-48" align="end">
               <DropdownMenuItem asChild>
-                <Button
-                  size="dropdown-item"
-                  variant="dropdown-item"
-                  onClick={() => navigator.clipboard.writeText(product.url || "")}
-                >
+                <Button variant="dropdown-item" onClick={() => navigator.clipboard.writeText(product.url || "")}>
                   Copy
                   <CopyIcon />
                 </Button>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <Button variant="dropdown-item" size="dropdown-item" asChild>
+                <Button variant="dropdown-item" asChild>
                   <Link
                     href={product.url || "#"}
                     target="_blank"
@@ -62,6 +64,13 @@ export function ProductCard({ product }: { product: Product }) {
                     Open in new tab
                     <ArrowUpRightIcon />
                   </Link>
+                </Button>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Button variant="dropdown-item" onClick={handleUpdateProduct}>
+                  Update
+                  <RefreshCcwIcon />
                 </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
