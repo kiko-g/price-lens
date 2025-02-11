@@ -18,4 +18,6 @@ export type Product = {
   category: string
   sub_category: string
   inner_category: string
+  created_at?: string
+  updated_at?: string
 }
