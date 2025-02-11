@@ -11,7 +11,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
     variants: {
       variant: {
         default: `bg-zinc-800 text-white shadow hover:bg-zinc-800/90 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
-        "default-inverted": `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700`,
+        "default-inverted": `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-700`,
         secondary: `bg-indigo-600 text-white shadow-sm hover:bg-indigo-600/90 dark:bg-indigo-700 dark:hover:bg-indigo-700/90 dark:text-white`,
         glass: `bg-zinc-700/10 text-zinc-800 hover:bg-zinc-700/20 dark:bg-zinc-100/5 dark:text-zinc-200 dark:hover:bg-zinc-100/10`,
         dangerous: `bg-rose-600 text-white shadow-sm hover:bg-rose-600/90 dark:bg-rose-700 dark:hover:bg-rose-700/90 dark:text-white`,
@@ -23,6 +23,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         "ghost-light": `hover:bg-zinc-200/80`,
         "ghost-dark": `hover:bg-zinc-100/20`,
         link: `text-primary underline-offset-4 hover:underline`,
+        "dropdown-item": `bg-transparent font-normal w-full justify-between border-0`,
       },
       size: {
         default: `px-3.5 py-1.5`,
@@ -32,8 +33,9 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         lg: `px-3.5 py-2`,
         xl: `px-6 py-4`,
         icon: `p-2`,
-        "icon-sm": `p-1.5`,
+        "icon-sm": `p-1`,
         "icon-xs": `p-0.5`,
+        "dropdown-item": `px-2 py-1.5`,
       },
       roundedness: {
         default: `rounded-md`,

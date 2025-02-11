@@ -5,9 +5,11 @@ import Image from "next/image"
 import type { Product } from "@/types"
 
 import { Button } from "@/components/ui/button"
-import { ArrowUpRightIcon } from "lucide-react"
+import { ButtonCopy } from "@/components/ui/combo/ButtonCopy"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
+import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon } from "lucide-react"
 import { cn, imagePlaceholder } from "@/lib/utils"
-import clsx from "clsx"
 
 export function ProductCard({ product }: { product: Product }) {
   if (!product.url) {
@@ -32,11 +34,34 @@ export function ProductCard({ product }: { product: Product }) {
         )}
 
         <div className="absolute right-2 top-2">
-          <Button variant="ghost" size="icon-xs" asChild>
-            <Link href={product.url || "#"} target="_blank">
-              <ArrowUpRightIcon className="h-4 w-4" />
-            </Link>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="default-inverted" size="icon-sm" className="shadow-none">
+                <EllipsisVerticalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="w-48" align="end">
+              <DropdownMenuItem asButton>
+                <ButtonCopy content={product.url || ""} variant="dropdown-item" size="dropdown-item">
+                  Copy
+                </ButtonCopy>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asButton>
+                <Button variant="dropdown-item" size="dropdown-item" asChild>
+                  <Link
+                    href={product.url || "#"}
+                    target="_blank"
+                    className="flex w-full items-center justify-between gap-1"
+                  >
+                    Open in new tab
+                    <ArrowUpRightIcon className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
