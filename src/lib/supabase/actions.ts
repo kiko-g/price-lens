@@ -13,10 +13,19 @@ export const createEmptyProduct = (): Product => {
 
 export async function createOrUpdateProduct(product: Product) {
   const supabase = createClient()
-  const { data, error } = await supabase.from("products").upsert(product, {
+
+  const { data: existingProduct } = await supabase.from("products").select("created_at").eq("url", product.url).single()
+
+  const productToUpsert = {
+    ...product,
+    created_at: existingProduct?.created_at || product.updated_at,
+  }
+
+  const { data, error } = await supabase.from("products").upsert(productToUpsert, {
     onConflict: "url",
     ignoreDuplicates: false,
   })
+
   return { data, error }
 }
 

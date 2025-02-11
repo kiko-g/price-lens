@@ -8,7 +8,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-import { cn, imagePlaceholder } from "@/lib/utils"
+import { cn, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
@@ -91,12 +91,10 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
       </div>
 
       <div className="flex flex-col items-start">
-        {product.brand && (
-          <span className="text-sm font-semibold uppercase tracking-tighter text-zinc-500 dark:text-zinc-400">
-            {product.brand}
-          </span>
-        )}
-        <h2 className="text-sm font-medium tracking-tighter">{product.name || "Untitled"}</h2>
+        <span className="text-sm font-semibold uppercase tracking-tight text-zinc-500 dark:text-zinc-400">
+          {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
+        </span>
+        <h2 className="max-w-full truncate text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
       </div>
 
       {product.price_recommended && product.price ? (
@@ -116,9 +114,8 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
       )}
 
       {(product.created_at || product.updated_at) && (
-        <footer className="mt-3 flex flex-col items-center justify-end gap-2 border-t pt-2">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{product.created_at}</p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{product.updated_at}</p>
+        <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-4">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">{formatTimestamptz(product.updated_at)}</p>
         </footer>
       )}
     </div>
@@ -143,7 +140,6 @@ export function ProductCardSkeleton() {
       </div>
 
       <footer className="mt-3 flex flex-col items-end justify-end gap-2 border-t pt-2">
-        <span className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
         <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
       </footer>
     </div>
