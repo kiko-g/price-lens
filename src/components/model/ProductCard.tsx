@@ -5,7 +5,6 @@ import Image from "next/image"
 import type { Product } from "@/types"
 
 import { Button } from "@/components/ui/button"
-import { ButtonCopy } from "@/components/ui/combo/ButtonCopy"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon } from "lucide-react"
@@ -42,13 +41,18 @@ export function ProductCard({ product }: { product: Product }) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-48" align="end">
-              <DropdownMenuItem asButton>
-                <ButtonCopy content={product.url || ""} variant="dropdown-item" size="dropdown-item">
+              <DropdownMenuItem asChild>
+                <Button
+                  size="dropdown-item"
+                  variant="dropdown-item"
+                  onClick={() => navigator.clipboard.writeText(product.url || "")}
+                >
                   Copy
-                </ButtonCopy>
+                  <CopyIcon />
+                </Button>
               </DropdownMenuItem>
 
-              <DropdownMenuItem asButton>
+              <DropdownMenuItem asChild>
                 <Button variant="dropdown-item" size="dropdown-item" asChild>
                   <Link
                     href={product.url || "#"}
@@ -56,7 +60,7 @@ export function ProductCard({ product }: { product: Product }) {
                     className="flex w-full items-center justify-between gap-1"
                   >
                     Open in new tab
-                    <ArrowUpRightIcon className="h-4 w-4" />
+                    <ArrowUpRightIcon />
                   </Link>
                 </Button>
               </DropdownMenuItem>
