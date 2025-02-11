@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import type { Product } from "@/types"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -10,20 +11,31 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn, imagePlaceholder } from "@/lib/utils"
 import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
 
-export function ProductCard({ product }: { product: Product }) {
-  if (!product.url) {
+export function ProductCard({ product: initialProduct }: { product: Product }) {
+  const [product, setProduct] = useState<Product | null>(initialProduct)
+  const [isFetching, setIsFetching] = useState(false)
+
+  if (!product || !product.url) {
     return null
   }
 
+  if (isFetching) {
+    return <ProductCardSkeleton />
+  }
+
   async function handleUpdateProduct() {
+    if (!product || !product.url) return
+
+    setIsFetching(true)
     const response = await fetch(`/api/products/put?url=${product.url}`)
     const data = await response.json()
-    console.debug(data)
+    setProduct(data.product as Product)
+    setIsFetching(false)
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 rounded-lg border bg-white p-4 dark:bg-zinc-950">
-      <div className="relative flex items-center justify-between gap-2">
+    <div className="flex w-full flex-col rounded-lg border bg-white p-4 dark:bg-zinc-950">
+      <div className="relative mb-3 flex items-center justify-between gap-2">
         {product.image ? (
           <Image
             src={product.image}
@@ -79,21 +91,29 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
 
       <div className="flex flex-col items-start">
-        <span className="text-xs font-semibold uppercase tracking-tighter text-zinc-500 dark:text-zinc-400">
-          {product.brand}
-        </span>
+        {product.brand && (
+          <span className="text-sm font-semibold uppercase tracking-tighter text-zinc-500 dark:text-zinc-400">
+            {product.brand}
+          </span>
+        )}
         <h2 className="text-sm font-medium tracking-tighter">{product.name || "Untitled"}</h2>
       </div>
 
-      {product.price_recommended || product.price ? (
+      {product.price_recommended && product.price ? (
         <div className="flex items-center gap-2">
           <p className={cn("text-sm", product.price_recommended !== product.price && "line-through opacity-50")}>
             {product.price_recommended}€
           </p>
 
-          <p className="text-sm font-semibold text-emerald-400">{product.price}€</p>
+          <p className="font-semibold text-emerald-600">{product.price}€</p>
         </div>
       ) : null}
+
+      {!product.price_recommended && product.price && (
+        <div className="flex items-center gap-2">
+          <p className="font-semibold text-rose-700">{product.price}€</p>
+        </div>
+      )}
 
       {(product.created_at || product.updated_at) && (
         <footer className="mt-3 flex flex-col items-center justify-end gap-2 border-t pt-2">
@@ -101,6 +121,31 @@ export function ProductCard({ product }: { product: Product }) {
           <p className="text-xs text-zinc-500 dark:text-zinc-400">{product.updated_at}</p>
         </footer>
       )}
+    </div>
+  )
+}
+
+export function ProductCardSkeleton() {
+  return (
+    <div className="flex w-full flex-col rounded-lg border bg-white p-4 dark:bg-zinc-950">
+      <div className="relative mb-3 flex items-center justify-between gap-2">
+        <div className="aspect-square w-full animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-900" />
+      </div>
+
+      <div className="mb-2 flex flex-col items-start gap-2">
+        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        <span className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+      </div>
+
+      <footer className="mt-3 flex flex-col items-end justify-end gap-2 border-t pt-2">
+        <span className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+      </footer>
     </div>
   )
 }

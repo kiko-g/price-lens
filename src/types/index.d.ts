@@ -4,7 +4,7 @@ export type NavigationItem = {
   isNew?: boolean
 }
 
-export type Product = {
+export interface Product {
   url: string
   name: string
   brand: string
@@ -21,3 +21,5 @@ export type Product = {
   created_at: string | null
   updated_at: string | null
 }
+
+export type ProductWithId = Product & { id: string }
