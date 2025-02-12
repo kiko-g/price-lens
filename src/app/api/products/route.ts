@@ -8,16 +8,16 @@ export async function GET(req: NextRequest) {
 
   try {
     const pageParam = req.nextUrl.searchParams.get("page") ?? "1"
+    const queryParam = req.nextUrl.searchParams.get("q")
     const limitParam = req.nextUrl.searchParams.get("limit") ?? "20"
 
     const page = parseInt(pageParam, 10) || 1
     const limit = parseInt(limitParam, 10) || 20
     const offset = (page - 1) * limit
 
-    const { data, error, count } = await supabase
-      .from("products")
-      .select("*", { count: "exact" })
-      .range(offset, offset + limit - 1)
+    let query = supabase.from("products").select("*", { count: "exact" })
+    if (queryParam) query = query.ilike("name", `%${queryParam}%`)
+    const { data, error, count } = await query.range(offset, offset + limit - 1)
 
     if (error) {
       throw new Error(error.message)

@@ -60,11 +60,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border scrollbar-thin scrollbar-thumb-zinc-300;
   }
 
   *::selection {
-    @apply bg-teal-700/50 text-white dark:bg-teal-500/50;
+    @apply bg-zinc-900 text-white dark:bg-teal-600/30 dark:text-teal-400;
   }
 
   pre *::selection {

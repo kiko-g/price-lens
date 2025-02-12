@@ -6,7 +6,13 @@ import type { Product } from "@/types"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import { cn, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
@@ -60,13 +66,6 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
             <DropdownMenuContent className="w-48" align="end">
               <DropdownMenuItem asChild>
-                <Button variant="dropdown-item" onClick={() => navigator.clipboard.writeText(product.url || "")}>
-                  Copy
-                  <CopyIcon />
-                </Button>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem asChild>
                 <Button variant="dropdown-item" asChild>
                   <Link
                     href={product.url || "#"}
@@ -78,6 +77,15 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
                   </Link>
                 </Button>
               </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Button variant="dropdown-item" onClick={() => navigator.clipboard.writeText(product.url || "")}>
+                  Copy URL
+                  <CopyIcon />
+                </Button>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
 
               <DropdownMenuItem asChild>
                 <Button variant="dropdown-item" onClick={handleUpdateProduct}>
@@ -109,15 +117,21 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
       {!product.price_recommended && product.price && (
         <div className="flex items-center gap-2">
-          <p className="font-semibold text-rose-700">{product.price}€</p>
+          <p className="font-semibold text-rose-700 dark:text-rose-600">{product.price}€</p>
         </div>
       )}
 
-      {(product.created_at || product.updated_at) && (
-        <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-4">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{formatTimestamptz(product.updated_at)}</p>
-        </footer>
+      {!product.price_recommended && !product.price && (
+        <div className="flex items-center gap-2">
+          <p className="font-semibold text-zinc-600 dark:text-zinc-500">€€€€</p>
+        </div>
       )}
+
+      <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-4">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          {product.created_at || product.updated_at ? formatTimestamptz(product.updated_at) : "No update record"}
+        </p>
+      </footer>
     </div>
   )
 }
