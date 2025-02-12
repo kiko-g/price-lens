@@ -40,3 +40,12 @@ export function formatTimestamptz(timestamptz: string | null) {
     year: "numeric",
   })
 }
+
+export function isValidJson(json: string) {
+  try {
+    JSON.parse(json)
+    return true
+  } catch (error) {
+    return false
+  }
+}

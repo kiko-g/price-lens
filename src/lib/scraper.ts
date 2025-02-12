@@ -3,7 +3,7 @@ import * as cheerio from "cheerio"
 import axios from "axios"
 
 import { categories } from "./data/continente"
-import { packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
+import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { createClient } from "./supabase/client"
 
@@ -19,6 +19,13 @@ export const fetchHtml = async (url: string) => {
 export const continenteProductPageScraper = async (url: string) => {
   const html = await fetchHtml(url)
   const $ = cheerio.load(html)
+
+  const productDetailJson = $("#maincontent [data-product-detail-impression]").attr("data-product-detail-impression")
+
+  if (!productDetailJson || !isValidJson(productDetailJson)) return {}
+
+  const productDetail = JSON.parse(productDetailJson)
+  console.debug(productDetail)
 
   const firstImage = $(".ct-product-image").first()
   if (!firstImage.length) return {}
@@ -47,17 +54,23 @@ export const continenteProductPageScraper = async (url: string) => {
     inner_category: breadcrumbs[2] || "",
   }
 
+  const price = priceToNumber(rawProduct.price)
+  const priceRecommended = priceToNumber(rawProduct.price_recommended)
+  const pricePerMajorUnit = priceToNumber(rawProduct.price_per_major_unit)
+
   const product: Product = {
     ...rawProduct,
     pack: packageToUnit(rawProduct.pack),
-    price: priceToNumber(rawProduct.price),
-    price_recommended: priceToNumber(rawProduct.price_recommended),
-    price_per_major_unit: priceToNumber(rawProduct.price_per_major_unit),
-    discount: 1 - priceToNumber(rawProduct.price) / priceToNumber(rawProduct.price_recommended),
+    price,
+    price_recommended: priceRecommended,
+    price_per_major_unit: pricePerMajorUnit,
+    discount: priceRecommended === 0 ? 0 : 1 - price / priceRecommended,
     image: resizeImgSrc(rawProduct.image, 500, 500),
     updated_at: new Date().toISOString().replace("Z", "+00:00"),
     created_at: null,
   }
+
+  console.debug(product)
 
   return product
 }
