@@ -41,7 +41,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     setIsFetching(false)
   }
 
-  const categoryText = `${product.category}${product.sub_category ? ` > ${product.sub_category}` : ""}${product.inner_category ? ` > ${product.inner_category}` : ""}`
+  const categoryText = `${product.category}${product.category_2 ? ` > ${product.category_2}` : ""}${product.category_3 ? ` > ${product.category_3}` : ""}`
 
   return (
     <div className="flex w-full flex-col rounded-lg border bg-white p-4 dark:bg-zinc-950">
@@ -65,7 +65,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             <Badge variant="retail" size="xs" roundedness="sm" className="text-2xs">
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
-                  <TooltipTrigger>{product.inner_category || product.sub_category || product.category}</TooltipTrigger>
+                  <TooltipTrigger>{product.category_3 || product.category_2 || product.category}</TooltipTrigger>
                   <TooltipContent
                     side="top"
                     align="start"

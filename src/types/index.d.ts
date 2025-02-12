@@ -16,8 +16,8 @@ export interface Product {
   discount: number
   image: string
   category: string
-  sub_category: string
-  inner_category: string
+  category_2: string
+  category_3: string
   created_at: string | null
   updated_at: string | null
 }

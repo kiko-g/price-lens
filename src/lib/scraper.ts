@@ -50,8 +50,8 @@ export const continenteProductPageScraper = async (url: string) => {
     major_unit: $(".ct-price-value").siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim(),
     image: firstImage.attr("data-src") || "",
     category: breadcrumbs[0] || "",
-    sub_category: breadcrumbs[1] || "",
-    inner_category: breadcrumbs[2] || "",
+    category_2: breadcrumbs[1] || "",
+    category_3: breadcrumbs[2] || "",
   }
 
   const price = priceToNumber(rawProduct.price)
