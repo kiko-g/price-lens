@@ -48,9 +48,18 @@ export function ProductsGrid() {
     }
   }
 
-  useEffect(() => {
+  function handleSubmit() {
+    setPage(1)
     fetchProducts()
-  }, [])
+  }
+
+  function handleNextPage() {
+    setPage((p) => p + 1)
+  }
+
+  function handlePrevPage() {
+    setPage((p) => p - 1)
+  }
 
   useEffect(() => {
     fetchProducts()
@@ -90,13 +99,13 @@ export function ProductsGrid() {
           <Button
             variant="outline"
             className="rounded-r-none focus:z-10"
-            onClick={() => setPage(page - 1)}
+            onClick={handlePrevPage}
             disabled={page === 1}
           >
             Prev
           </Button>
 
-          <Button variant="outline" className="rounded-l-none focus:z-10" onClick={() => setPage(page + 1)}>
+          <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
             Next
           </Button>
         </div>
@@ -105,7 +114,7 @@ export function ProductsGrid() {
           <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
         </Button>
 
-        <Button variant="default" onClick={fetchProducts} disabled={isLoading}>
+        <Button variant="default" disabled={isLoading} onClick={handleSubmit}>
           Submit
         </Button>
       </div>

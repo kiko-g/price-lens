@@ -16,8 +16,8 @@ export function Header() {
       <div className="flex items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
-          <span className="inline-flex items-center rounded-full bg-gradient-to-br from-indigo-600/70 to-blue-600/70 px-1.5 py-0.5 text-xs/4 font-bold uppercase tracking-tight text-white">
-            Beta
+          <span className="inline-flex items-center rounded-full bg-gradient-to-br from-indigo-600/70 to-blue-600/70 px-1.5 py-0.5 text-xs/4 font-bold capitalize tracking-tight text-white">
+            Early Access
           </span>
         </div>
 
