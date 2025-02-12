@@ -5,6 +5,7 @@ import Image from "next/image"
 import type { Product } from "@/types"
 import { useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { cn, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
@@ -39,6 +41,8 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     setIsFetching(false)
   }
 
+  const categoryText = `${product.category}${product.sub_category ? ` > ${product.sub_category}` : ""}${product.inner_category ? ` > ${product.inner_category}` : ""}`
+
   return (
     <div className="flex w-full flex-col rounded-lg border bg-white p-4 dark:bg-zinc-950">
       <div className="relative mb-3 flex items-center justify-between gap-2">
@@ -55,6 +59,29 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
         ) : (
           <div className="aspect-square w-full rounded-md bg-zinc-100 dark:bg-zinc-900" />
         )}
+
+        <div className="absolute bottom-2 left-2 flex items-start justify-start">
+          {categoryText && (
+            <Badge variant="retail" size="xs" roundedness="sm" className="text-2xs">
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger>{product.inner_category || product.sub_category || product.category}</TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="start"
+                    sideOffset={6}
+                    alignOffset={-6}
+                    size="xs"
+                    variant="glass"
+                    className="max-w-52"
+                  >
+                    {categoryText}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Badge>
+          )}
+        </div>
 
         <div className="absolute right-2 top-2">
           <DropdownMenu>

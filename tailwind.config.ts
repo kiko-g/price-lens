@@ -3,7 +3,6 @@ import formsPlugin from "@tailwindcss/forms"
 import animatePlugin from "tailwindcss-animate"
 import scrollbarPlugin from "tailwind-scrollbar"
 import typographyPlugin from "@tailwindcss/typography"
-import { fontFamily } from "tailwindcss/defaultTheme"
 
 export default {
   darkMode: "class",
@@ -14,6 +13,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        "2xs": ["0.65rem", { lineHeight: "0.75rem" }],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

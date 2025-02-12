@@ -20,7 +20,8 @@ export const continenteProductPageScraper = async (url: string) => {
   const html = await fetchHtml(url)
   const $ = cheerio.load(html)
 
-  if (!$(".ct-product-image").length) return {}
+  const firstImage = $(".ct-product-image").first()
+  if (!firstImage.length) return {}
 
   const breadcrumbs =
     $(".breadcrumbs")
@@ -40,7 +41,7 @@ export const continenteProductPageScraper = async (url: string) => {
     price_recommended: $(".pwc-discount-amount-pvpr").text().trim(),
     price_per_major_unit: $(".ct-price-value").text().trim(),
     major_unit: $(".ct-price-value").siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim(),
-    image: $(".ct-product-image").attr("src") || "",
+    image: firstImage.attr("data-src") || "",
     category: breadcrumbs[0] || "",
     sub_category: breadcrumbs[1] || "",
     inner_category: breadcrumbs[2] || "",
