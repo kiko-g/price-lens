@@ -65,7 +65,9 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             <Badge variant="retail" size="xs" roundedness="sm" className="text-2xs">
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
-                  <TooltipTrigger>{product.category_3 || product.category_2 || product.category}</TooltipTrigger>
+                  <TooltipTrigger>
+                    {product.category_3 || product.category_2 || product.category || "No category"}
+                  </TooltipTrigger>
                   <TooltipContent
                     side="top"
                     align="start"

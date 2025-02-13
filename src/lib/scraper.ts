@@ -25,7 +25,6 @@ export const continenteProductPageScraper = async (url: string) => {
   if (!productDetailJson || !isValidJson(productDetailJson)) return {}
 
   const productDetail = JSON.parse(productDetailJson)
-  console.debug(productDetail)
 
   const firstImage = $(".ct-product-image").first()
   if (!firstImage.length) return {}
@@ -48,7 +47,7 @@ export const continenteProductPageScraper = async (url: string) => {
     price_recommended: $(".pwc-discount-amount-pvpr").text().trim(),
     price_per_major_unit: $(".ct-price-value").text().trim(),
     major_unit: $(".ct-price-value").siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim(),
-    image: firstImage.attr("data-src") || "",
+    image: firstImage.attr("data-src") || firstImage.attr("src") || "",
     category: breadcrumbs[0] || "",
     category_2: breadcrumbs[1] || "",
     category_3: breadcrumbs[2] || "",
@@ -69,8 +68,6 @@ export const continenteProductPageScraper = async (url: string) => {
     updated_at: new Date().toISOString().replace("Z", "+00:00"),
     created_at: null,
   }
-
-  console.debug(product)
 
   return product
 }

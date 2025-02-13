@@ -16,7 +16,10 @@ export async function GET(req: NextRequest) {
     const offset = (page - 1) * limit
 
     let query = supabase.from("products").select("*", { count: "exact" })
-    if (queryParam) query = query.ilike("name", `%${queryParam}%`)
+    if (queryParam) {
+      const normalizedQuery = queryParam.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      query = query.ilike("name", `%${normalizedQuery}%`)
+    }
     const { data, error, count } = await query.range(offset, offset + limit - 1)
 
     if (error) {
