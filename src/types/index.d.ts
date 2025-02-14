@@ -10,14 +10,14 @@ export interface Product {
   brand: string
   pack: string
   price: number
-  price_recommended: number
-  price_per_major_unit: number
-  major_unit: string
-  discount: number
-  image: string
-  category: string
-  category_2: string
-  category_3: string
+  price_recommended: number | null
+  price_per_major_unit: number | null
+  major_unit: string | null
+  discount: number | null
+  image: string | null
+  category: string | null
+  category_2: string | null
+  category_3: string | null
   created_at: string | null
   updated_at: string | null
 }

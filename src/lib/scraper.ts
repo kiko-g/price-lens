@@ -21,10 +21,10 @@ export const continenteProductPageScraper = async (url: string) => {
   const $ = cheerio.load(html)
 
   const productDetailJson = $("#maincontent [data-product-detail-impression]").attr("data-product-detail-impression")
-
   if (!productDetailJson || !isValidJson(productDetailJson)) return {}
 
-  const productDetail = JSON.parse(productDetailJson)
+  const root = ".product-images-container"
+  const details = JSON.parse(productDetailJson)
 
   const firstImage = $(".ct-product-image").first()
   if (!firstImage.length) return {}
@@ -40,22 +40,23 @@ export const continenteProductPageScraper = async (url: string) => {
 
   const rawProduct = {
     url,
-    name: $("h1").text().trim(),
-    brand: $(".ct-pdp--brand").text().trim(),
-    pack: $(".ct-pdp--unit").text().trim(),
-    price: $(".ct-price-formatted").text().trim(),
-    price_recommended: $(".pwc-discount-amount-pvpr").text().trim(),
-    price_per_major_unit: $(".ct-price-value").text().trim(),
-    major_unit: $(".ct-price-value").siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim(),
-    image: firstImage.attr("data-src") || firstImage.attr("src") || "",
-    category: breadcrumbs[0] || "",
-    category_2: breadcrumbs[1] || "",
-    category_3: breadcrumbs[2] || "",
+    name: $(`${root} h1`).text().trim(),
+    brand: $(`${root} .ct-pdp--brand`).text().trim(),
+    pack: $(`${root} .ct-pdp--unit`).text().trim(),
+    price: details.items[0].price || $(`${root} .ct-price-formatted`).parent().attr("content") || "",
+    price_recommended:
+      details.items[0].pre_discount_price || $(`${root} .pwc-discount-amount-pvpr`).text().trim() || null,
+    price_per_major_unit: details.items[0].price_per_major_unit || $(`${root} .ct-price-value`).text().trim() || null,
+    major_unit: $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim() || null,
+    image: $(`${root} .ct-product-image`).attr("data-src") || $(`${root} .ct-product-image`).attr("src") || null,
+    category: breadcrumbs[0] || null,
+    category_2: breadcrumbs[1] || null,
+    category_3: breadcrumbs[2] || null,
   }
 
   const price = priceToNumber(rawProduct.price)
-  const priceRecommended = priceToNumber(rawProduct.price_recommended)
-  const pricePerMajorUnit = priceToNumber(rawProduct.price_per_major_unit)
+  const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
+  const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
   const product: Product = {
     ...rawProduct,
@@ -63,8 +64,8 @@ export const continenteProductPageScraper = async (url: string) => {
     price,
     price_recommended: priceRecommended,
     price_per_major_unit: pricePerMajorUnit,
-    discount: priceRecommended === 0 ? 0 : 1 - price / priceRecommended,
-    image: resizeImgSrc(rawProduct.image, 500, 500),
+    discount: !priceRecommended ? 0 : 1 - price / priceRecommended,
+    image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
     updated_at: new Date().toISOString().replace("Z", "+00:00"),
     created_at: null,
   }
