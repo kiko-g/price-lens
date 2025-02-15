@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { cn, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
+import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
@@ -60,29 +60,18 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           <div className="aspect-square w-full rounded-md bg-zinc-100 dark:bg-zinc-900" />
         )}
 
-        <div className="absolute bottom-2 left-2 flex items-start justify-start">
-          {categoryText && (
-            <Badge variant="retail" size="xs" roundedness="sm" className="text-2xs">
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    {product.category_3 || product.category_2 || product.category || "No category"}
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    align="start"
-                    sideOffset={6}
-                    alignOffset={-6}
-                    size="xs"
-                    variant="glass"
-                    className="max-w-52"
-                  >
-                    {categoryText}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+        <div className="absolute left-2 top-2 flex flex-col gap-1">
+          {product.price_per_major_unit && product.major_unit && (
+            <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
+              {product.price_per_major_unit}€{product.major_unit}
             </Badge>
           )}
+
+          {product.discount ? (
+            <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
+              -{discountValueToPercentage(product.discount)}
+            </Badge>
+          ) : null}
         </div>
 
         <div className="absolute right-2 top-2">
@@ -127,34 +116,62 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
         </div>
       </div>
 
-      <div className="flex flex-col items-start">
-        <span className="text-sm font-semibold uppercase tracking-tight text-zinc-500 dark:text-zinc-400">
-          {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
-        </span>
-        <h2 className="max-w-full truncate text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
+      <div className="flex flex-1 flex-col items-start">
+        <div className="flex flex-col items-start">
+          {categoryText && (
+            <Badge variant="secondary" size="xs" roundedness="sm" className="text-2xs">
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    {product.category_3 || product.category_2 || product.category || "No category"}
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="start"
+                    sideOffset={6}
+                    alignOffset={-6}
+                    size="xs"
+                    variant="glass"
+                    className="max-w-52"
+                  >
+                    {categoryText}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Badge>
+          )}
+
+          <span className="mt-1 text-sm font-medium capitalize tracking-tight text-zinc-500 dark:text-zinc-400">
+            {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
+          </span>
+
+          <h2 className="max-w-full truncate text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
+        </div>
+
+        <div className="mt-1 flex w-full flex-wrap items-center justify-between gap-2 lg:mt-2">
+          {product.price_recommended && product.price && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  product.price_recommended !== product.price && "line-through opacity-50",
+                )}
+              >
+                {product.price_recommended}€
+              </span>
+              <span className="text-sm font-medium text-green-600 dark:text-green-500">{product.price}€</span>
+            </div>
+          )}
+
+          {!product.price_recommended && product.price && (
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">{product.price}€</span>
+          )}
+
+          {!product.price_recommended && !product.price && (
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">€€€€</span>
+          )}
+        </div>
       </div>
-
-      {product.price_recommended && product.price ? (
-        <div className="flex items-center gap-2">
-          <p className={cn("text-sm", product.price_recommended !== product.price && "line-through opacity-50")}>
-            {product.price_recommended}€
-          </p>
-
-          <p className="font-semibold text-emerald-600">{product.price}€</p>
-        </div>
-      ) : null}
-
-      {!product.price_recommended && product.price && (
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-rose-700 dark:text-rose-600">{product.price}€</p>
-        </div>
-      )}
-
-      {!product.price_recommended && !product.price && (
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-zinc-600 dark:text-zinc-500">€€€€</p>
-        </div>
-      )}
 
       <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-4">
         <p className="text-xs text-zinc-500 dark:text-zinc-400">

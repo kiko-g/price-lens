@@ -60,6 +60,10 @@ export function formatTimestamptz(timestamptz: string | null) {
   })
 }
 
+export function discountValueToPercentage(discount: number) {
+  return `${Math.round(discount * 100).toFixed(1)}%`
+}
+
 export function isValidJson(json: string) {
   try {
     JSON.parse(json)

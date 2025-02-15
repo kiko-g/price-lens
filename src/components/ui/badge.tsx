@@ -13,7 +13,7 @@ const badgeVariants = cva(
         secondary:
           "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
         destructive:
-          "border-transparent bg-rose-600 text-zinc-50 hover:bg-rose-600/80 dark:border-transparent dark:bg-rose-800 dark:text-zinc-50 dark:hover:bg-rose-800/80 [&_span.bubble]:bg-rose-600",
+          "border-transparent bg-red-600 text-zinc-50 hover:bg-red-600/80 dark:border-transparent dark:bg-red-700 dark:text-zinc-50 dark:hover:bg-red-700/80 [&_span.bubble]:bg-red-600",
         success:
           "border-transparent bg-emerald-600 text-zinc-50 hover:bg-emerald-600/80 dark:border-transparent dark:bg-emerald-800 dark:text-zinc-50 dark:hover:bg-emerald-800/80 [&_span.bubble]:bg-emerald-600",
         warning:
@@ -25,9 +25,11 @@ const badgeVariants = cva(
         "outline-success":
           "border-emerald-600 bg-emerald-600/5 text-emerald-600 dark:border-emerald-800 dark:text-emerald-50 dark:bg-emerald-600/10 [&_span.bubble]:bg-emerald-500 dark:[&_span.bubble]:bg-emerald-600",
         "outline-destructive":
-          "border-rose-600 bg-rose-600/5 text-rose-600 dark:border-rose-800 dark:text-rose-50 dark:bg-rose-600/10 [&_span.bubble]:bg-rose-500 dark:[&_span.bubble]:bg-rose-600",
+          "border-red-600 bg-red-600/5 text-red-600 dark:border-red-800 dark:text-red-50 dark:bg-red-600/10 [&_span.bubble]:bg-red-500 dark:[&_span.bubble]:bg-red-600",
         "outline-warning":
           "border-yellow-600 bg-yellow-600/5 text-yellow-600 dark:border-yellow-800 dark:text-yellow-50 dark:bg-yellow-600/10 [&_span.bubble]:bg-yellow-500 dark:[&_span.bubble]:bg-yellow-800",
+        "price-per-unit":
+          "border-transparent bg-yellow-400 text-zinc-800 hover:bg-yellow-400/80 dark:border-transparent dark:bg-yellow-500 dark:text-zinc-700 dark:hover:bg-yellow-500/80 [&_span.bubble]:bg-yellow-400 dark:[&_span.bubble]:bg-yellow-500",
       },
       size: {
         default: `px-3 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,
@@ -39,12 +41,13 @@ const badgeVariants = cva(
       },
       roundedness: {
         default: `rounded-xl`,
+        none: `rounded-none`,
+        xs: `rounded-xs`,
         sm: `rounded-sm`,
         md: `rounded-md`,
         lg: `rounded-lg`,
         xl: `rounded-xl`,
         "2xl": `rounded-2xl`,
-        none: `rounded-none`,
       },
     },
     defaultVariants: {
