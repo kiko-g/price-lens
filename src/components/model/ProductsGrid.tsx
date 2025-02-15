@@ -123,7 +123,7 @@ export function ProductsGrid() {
         <span>Page {page}</span>
       </div>
 
-      <div className="mb-3 grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="mb-3 grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product, productIdx) => (
           <ProductCard key={`product-${productIdx}`} product={product} />
         ))}

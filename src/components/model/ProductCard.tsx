@@ -17,7 +17,15 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
-import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, RefreshCcwIcon } from "lucide-react"
+import {
+  ArrowUpRightIcon,
+  BracesIcon,
+  CopyIcon,
+  EllipsisVerticalIcon,
+  HeartIcon,
+  RefreshCcwIcon,
+  SearchIcon,
+} from "lucide-react"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
   const [product, setProduct] = useState<Product | null>(initialProduct)
@@ -52,7 +60,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             alt={product.name || "Product Image"}
             width={100}
             height={100}
-            className="aspect-square w-full rounded-md border"
+            className="aspect-square w-full rounded-md border border-zinc-200 dark:border-zinc-800"
             placeholder="blur"
             blurDataURL={imagePlaceholder.productBlur}
           />
@@ -141,39 +149,46 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             </Badge>
           )}
 
-          <span className="mt-1 text-sm font-medium capitalize tracking-tight text-zinc-500 dark:text-zinc-400">
+          <span className="mt-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
             {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
           </span>
 
-          <h2 className="max-w-full truncate text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
+          <h2 className="mb-2 line-clamp-2 text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
         </div>
 
-        <div className="mt-1 flex w-full flex-wrap items-center justify-between gap-2 lg:mt-2">
-          {product.price_recommended && product.price && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span
-                className={cn(
-                  "text-sm font-medium",
-                  product.price_recommended !== product.price && "line-through opacity-50",
-                )}
-              >
-                {product.price_recommended}€
-              </span>
-              <span className="text-sm font-medium text-green-600 dark:text-green-500">{product.price}€</span>
-            </div>
-          )}
+        <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {product.price_recommended && product.price && product.price_recommended !== product.price ? (
+              <div className="flex flex-col">
+                <span className="text-sm text-zinc-500 line-through dark:text-zinc-400">
+                  {product.price_recommended}€
+                </span>
+                <span className="text-lg font-bold text-green-600 dark:text-green-500">{product.price}€</span>
+              </div>
+            ) : null}
 
-          {!product.price_recommended && product.price && (
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">{product.price}€</span>
-          )}
+            {!product.price_recommended && product.price && (
+              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{product.price}€</span>
+            )}
 
-          {!product.price_recommended && !product.price && (
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">€€€€</span>
-          )}
+            {!product.price_recommended && !product.price && (
+              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon-sm">
+              <HeartIcon />
+            </Button>
+
+            <Button size="icon-sm">
+              <SearchIcon />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-4">
+      <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-2">
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           {product.created_at || product.updated_at ? formatTimestamptz(product.updated_at) : "No update record"}
         </p>
