@@ -7,8 +7,8 @@ export async function GET(req: NextRequest) {
   const supabase = createClient()
 
   try {
-    const pageParam = req.nextUrl.searchParams.get("page") ?? "1"
     const queryParam = req.nextUrl.searchParams.get("q")
+    const pageParam = req.nextUrl.searchParams.get("page") ?? "1"
     const limitParam = req.nextUrl.searchParams.get("limit") ?? "20"
 
     const page = parseInt(pageParam, 10) || 1
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       {
         data,
         pagination: {
-          currentPage: page,
+          page,
           limit,
           total: totalCount,
           totalPages,

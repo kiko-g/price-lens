@@ -4,8 +4,9 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import type { Product } from "@/types"
 
-import { Input } from "@/components/ui/input"
 import { ProductCard } from "./ProductCard"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -60,6 +61,10 @@ export function ProductsGrid() {
     setPage((p) => p - 1)
   }
 
+  function handlePageChange(value: string) {
+    setPage(parseInt(value))
+  }
+
   useEffect(() => {
     fetchProducts()
   }, [page])
@@ -103,6 +108,19 @@ export function ProductsGrid() {
           >
             Prev
           </Button>
+
+          <Select value={page.toString()} onValueChange={handlePageChange}>
+            <SelectTrigger className="rounded-none">
+              <SelectValue placeholder={page} />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
+                <SelectItem key={num} value={num.toString()}>
+                  {num}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
             Next

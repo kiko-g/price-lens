@@ -23,3 +23,10 @@ export interface Product {
 }
 
 export type ProductWithId = Product & { id: string }
+
+export type Pagination = {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
