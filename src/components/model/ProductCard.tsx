@@ -28,31 +28,45 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
-import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, HeartIcon, RefreshCcwIcon, GlassesIcon } from "lucide-react"
+import { discountValueToPercentage, formatTimestamptz, imagePlaceholder, PageStatus } from "@/lib/utils"
+import {
+  ArrowUpRightIcon,
+  CopyIcon,
+  EllipsisVerticalIcon,
+  HeartIcon,
+  RefreshCcwIcon,
+  GlassesIcon,
+  CloudAlertIcon,
+} from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
   const [product, setProduct] = useState<Product | null>(initialProduct)
-  const [isFetching, setIsFetching] = useState(false)
+  const [status, setStatus] = useState<PageStatus>(PageStatus.Loaded)
 
   if (!product || !product.url) {
     return null
   }
 
-  if (isFetching) {
+  if (status === PageStatus.Loading) {
     return <ProductCardSkeleton />
   }
 
+  console.debug(status === "error")
   async function handleUpdateProduct() {
     if (!product || !product.url) return
 
-    setIsFetching(true)
+    setStatus(PageStatus.Loading)
     const response = await fetch(`/api/products/put?url=${product.url}`)
     const data = await response.json()
-    console.debug(data)
-    setProduct(data.product as Product)
-    setIsFetching(false)
+
+    if (response.status === 200) {
+      setProduct(data.product as Product)
+      setStatus(PageStatus.Loaded)
+    } else {
+      console.error(data)
+      setStatus(PageStatus.Error)
+    }
   }
 
   const categoryText = product.category
@@ -87,6 +101,29 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
               -{discountValueToPercentage(product.discount)}
             </Badge>
+          ) : null}
+
+          {status === "error" ? (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge variant="destructive">
+                    <CloudAlertIcon />
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="start"
+                  sideOffset={6}
+                  alignOffset={-6}
+                  size="xs"
+                  variant="glass"
+                  className="max-w-60"
+                >
+                  Product may be unavailable or the URL may be invalid.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : null}
         </div>
 
@@ -134,26 +171,26 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
       <div className="flex flex-1 flex-col items-start">
         <div className="flex flex-col items-start">
-          <Badge variant="secondary" size="xs" roundedness="sm" className="text-2xs">
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge variant="secondary" size="xs" roundedness="sm" className="text-2xs">
                   {product.category_3 || product.category_2 || product.category || "No category"}
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="start"
-                  sideOffset={6}
-                  alignOffset={-6}
-                  size="xs"
-                  variant="glass"
-                  className="max-w-60"
-                >
-                  {categoryText || "No category set available"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </Badge>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                align="start"
+                sideOffset={6}
+                alignOffset={-6}
+                size="xs"
+                variant="glass"
+                className="max-w-60"
+              >
+                {categoryText || "No category set available"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           <span className="mt-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
             {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
@@ -212,23 +249,30 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="flex w-full flex-col rounded-lg border bg-white p-4 dark:bg-zinc-950">
+    <div className="flex w-full flex-col rounded-lg bg-white dark:bg-zinc-950">
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <div className="aspect-square w-full animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-900" />
+        <div className="aspect-square w-full animate-pulse rounded-md border border-zinc-300 bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900" />
       </div>
 
       <div className="mb-2 flex flex-col items-start gap-2">
-        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
         <span className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        <span className="h-4 w-48 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
-        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+      <div className="flex w-full items-end justify-between gap-2">
+        <div className="flex flex-col gap-2">
+          <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+          <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="h-7 w-7 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+          <span className="h-7 w-7 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        </div>
       </div>
 
       <footer className="mt-3 flex flex-col items-end justify-end gap-2 border-t pt-2">
-        <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        <span className="h-4 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
       </footer>
     </div>
   )

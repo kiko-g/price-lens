@@ -30,7 +30,6 @@ export function ProductsGrid() {
           page,
         },
       })
-      console.debug(data)
       setProducts(data.data || [])
       setPageTotal(data.pagination.totalPages || 50)
     } catch (err) {
