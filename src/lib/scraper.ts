@@ -8,12 +8,12 @@ import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { createClient } from "./supabase/client"
 
 export const fetchHtml = async (url: string) => {
-  const response = await fetch(url, {
+  const response = await axios.get(url, {
     headers: {
       "User-Agent": "Mozilla/5.0",
     },
   })
-  return response.text()
+  return response.data
 }
 
 export const continenteProductPageScraper = async (url: string) => {
@@ -54,6 +54,7 @@ export const continenteProductPageScraper = async (url: string) => {
     category_3: breadcrumbs[2] || null,
   }
 
+  console.debug(rawProduct.image)
   const price = priceToNumber(rawProduct.price)
   const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
   const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
@@ -125,10 +126,10 @@ export const continenteCategoryPageScraper = async (url: string): Promise<string
 
 export const crawlContinenteCategoryPages = async () => {
   for (const category of Object.values(categories)) {
-    console.debug("Crawling", category.url)
+    console.info("Crawling", category.url)
     const start = performance.now()
     const links = await continenteCategoryPageScraper(category.url)
-    console.debug("Finished scraping", category.name, links.length)
+    console.info("Finished scraping", category.name, links.length)
     for (const link of links) {
       const product = createEmptyProduct()
       product.url = link

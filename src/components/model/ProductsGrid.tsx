@@ -28,9 +28,11 @@ export function ProductsGrid() {
         params: {
           ...(query && { q: query }),
           page,
+          limit: 40,
         },
       })
       setProducts(data.data || [])
+      console.debug(data)
       setPageTotal(data.pagination.totalPages || 50)
     } catch (err) {
       setStatus(PageStatus.Error)

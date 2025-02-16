@@ -52,7 +52,6 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     return <ProductCardSkeleton />
   }
 
-  console.debug(status === "error")
   async function handleUpdateProduct() {
     if (!product || !product.url) return
 
@@ -150,7 +149,11 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <Button variant="dropdown-item" onClick={() => navigator.clipboard.writeText(product.url || "")}>
+                <Button
+                  variant="dropdown-item"
+                  onClick={() => navigator.clipboard.writeText(product.url || "")}
+                  title={product.url || ""}
+                >
                   Copy URL
                   <CopyIcon />
                 </Button>
@@ -225,7 +228,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             </Button>
 
             <DrawerSheet title={`${product.name}`}>
-              <Tabs defaultValue="details">
+              <Tabs defaultValue="details" className="w-full">
                 <TabsList>
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="technical">Technical</TabsTrigger>
@@ -304,7 +307,7 @@ function DrawerSheet({
             <SheetDescription>{description}</SheetDescription>
           </SheetHeader>
 
-          <div className="py-4">{children}</div>
+          <div className="pb-4 pt-2">{children}</div>
         </SheetContent>
       </Sheet>
     )
@@ -323,7 +326,7 @@ function DrawerSheet({
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
 
-        <div className="p-4 pb-0">{children}</div>
+        <div className="px-4 pb-4 pt-2">{children}</div>
 
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>

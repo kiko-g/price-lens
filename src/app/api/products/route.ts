@@ -7,9 +7,10 @@ export async function GET(req: NextRequest) {
   const supabase = createClient()
 
   try {
-    const queryParam = req.nextUrl.searchParams.get("q")
-    const pageParam = req.nextUrl.searchParams.get("page") ?? "1"
-    const limitParam = req.nextUrl.searchParams.get("limit") ?? "20"
+    const params = req.nextUrl.searchParams
+    const queryParam = params.get("q")
+    const pageParam = params.get("page") ?? "1"
+    const limitParam = params.get("limit") ?? "20"
 
     const page = parseInt(pageParam, 10) || 1
     const limit = parseInt(limitParam, 10) || 20
@@ -26,8 +27,8 @@ export async function GET(req: NextRequest) {
       throw new Error(error.message)
     }
 
-    const totalCount = count ?? 0
-    const totalPages = Math.ceil(totalCount / limit)
+    const pagedCount = count ?? 0
+    const totalPages = Math.ceil(pagedCount / limit)
 
     return NextResponse.json(
       {
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
         pagination: {
           page,
           limit,
-          total: totalCount,
+          pagedCount,
           totalPages,
         },
       },
