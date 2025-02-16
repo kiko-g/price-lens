@@ -47,6 +47,7 @@ export function packageToUnit(pack: string) {
 }
 
 export function priceToNumber(price: string) {
+  if (typeof price === "number") return price
   return Number(price.replace(",", ".").replace(/[^0-9.-]+/g, "")) // assuming PT locale
 }
 

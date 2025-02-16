@@ -25,6 +25,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
@@ -49,6 +50,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     setIsFetching(true)
     const response = await fetch(`/api/products/put?url=${product.url}`)
     const data = await response.json()
+    console.debug(data)
     setProduct(data.product as Product)
     setIsFetching(false)
   }
@@ -64,8 +66,8 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           <Image
             src={product.image}
             alt={product.name || "Product Image"}
-            width={100}
-            height={100}
+            width={500}
+            height={500}
             className="aspect-square w-full rounded-md border border-zinc-200 dark:border-zinc-800"
             placeholder="blur"
             blurDataURL={imagePlaceholder.productBlur}
@@ -185,10 +187,15 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
               <HeartIcon />
             </Button>
 
-            <DrawerSheet>
-              <div>
-                <h1>Product Details</h1>
-              </div>
+            <DrawerSheet title={`${product.name}`}>
+              <Tabs defaultValue="details">
+                <TabsList>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="technical">Technical</TabsTrigger>
+                </TabsList>
+                <TabsContent value="details"></TabsContent>
+                <TabsContent value="technical"></TabsContent>
+              </Tabs>
             </DrawerSheet>
           </div>
         </div>
@@ -227,7 +234,15 @@ export function ProductCardSkeleton() {
   )
 }
 
-function DrawerSheet({ children }: { children: React.ReactNode }) {
+function DrawerSheet({
+  children,
+  title,
+  description,
+}: {
+  children: React.ReactNode
+  title?: string
+  description?: string
+}) {
   const [open, setOpen] = useState(false)
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
@@ -241,12 +256,11 @@ function DrawerSheet({ children }: { children: React.ReactNode }) {
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Product Details</SheetTitle>
-            <SheetDescription>
-              This action cannot be undone. This will permanently delete your account and remove your data from our
-              servers.
-            </SheetDescription>
+            <SheetTitle>{title}</SheetTitle>
+            <SheetDescription>{description}</SheetDescription>
           </SheetHeader>
+
+          <div className="py-4">{children}</div>
         </SheetContent>
       </Sheet>
     )
@@ -261,10 +275,12 @@ function DrawerSheet({ children }: { children: React.ReactNode }) {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Edit profile</DrawerTitle>
-          <DrawerDescription>Make changes to your profile here. Click save when you're done.</DrawerDescription>
+          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        {children}
+
+        <div className="p-4 pb-0">{children}</div>
+
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
