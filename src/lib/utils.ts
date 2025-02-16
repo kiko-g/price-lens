@@ -79,3 +79,19 @@ export function isValidJson(json: string) {
     return false
   }
 }
+
+export function getCenteredArray(length: number, page: number, rightmostBoundary: number | null = null) {
+  const halfLength = Math.floor(length / 2)
+  let start = Math.max(1, page - halfLength)
+
+  if (page <= halfLength) {
+    start = 1 // near the start
+  }
+
+  if (rightmostBoundary && start + length > rightmostBoundary) {
+    start = Math.max(1, rightmostBoundary - length + 1) // near the end
+  }
+
+  const array = Array.from({ length }, (_, i) => start + i)
+  return array
+}

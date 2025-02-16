@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { CircleOffIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
-import { cn, PageStatus } from "@/lib/utils"
+import { cn, getCenteredArray, PageStatus } from "@/lib/utils"
 
 export function ProductsGrid() {
   const [page, setPage] = useState(1)
+  const [pageTotal, setPageTotal] = useState(50)
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
@@ -29,7 +30,9 @@ export function ProductsGrid() {
           page,
         },
       })
+      console.debug(data)
       setProducts(data.data || [])
+      setPageTotal(data.pagination.totalPages || 50)
     } catch (err) {
       setStatus(PageStatus.Error)
       console.error("Failed to fetch products:", err)
@@ -126,7 +129,7 @@ export function ProductsGrid() {
               <SelectValue placeholder={page} />
             </SelectTrigger>
             <SelectContent>
-              {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
+              {getCenteredArray(50, page, pageTotal ? pageTotal : null).map((num: number) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
                 </SelectItem>
