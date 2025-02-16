@@ -2,7 +2,7 @@ import axios from "axios"
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
-export default async function handler(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const BATCH_SIZE = 50
 
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
