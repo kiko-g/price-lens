@@ -14,18 +14,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
-  BracesIcon,
   CopyIcon,
   EllipsisVerticalIcon,
   HeartIcon,
   RefreshCcwIcon,
-  SearchIcon,
+  ScanSearchIcon,
 } from "lucide-react"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
   const [product, setProduct] = useState<Product | null>(initialProduct)
@@ -49,10 +60,12 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     setIsFetching(false)
   }
 
-  const categoryText = `${product.category}${product.category_2 ? ` > ${product.category_2}` : ""}${product.category_3 ? ` > ${product.category_3}` : ""}`
+  const categoryText = product.category
+    ? `${product.category}${product.category_2 ? ` > ${product.category_2}` : ""}${product.category_3 ? ` > ${product.category_3}` : ""}`
+    : null
 
   return (
-    <div className="flex w-full flex-col rounded-lg border bg-white p-4 dark:bg-zinc-950">
+    <div className="flex w-full flex-col rounded-lg bg-white dark:bg-zinc-950">
       <div className="relative mb-3 flex items-center justify-between gap-2">
         {product.image ? (
           <Image
@@ -126,28 +139,26 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
       <div className="flex flex-1 flex-col items-start">
         <div className="flex flex-col items-start">
-          {categoryText && (
-            <Badge variant="secondary" size="xs" roundedness="sm" className="text-2xs">
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    {product.category_3 || product.category_2 || product.category || "No category"}
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    align="start"
-                    sideOffset={6}
-                    alignOffset={-6}
-                    size="xs"
-                    variant="glass"
-                    className="max-w-52"
-                  >
-                    {categoryText}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </Badge>
-          )}
+          <Badge variant="secondary" size="xs" roundedness="sm" className="text-2xs">
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger>
+                  {product.category_3 || product.category_2 || product.category || "No category"}
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="start"
+                  sideOffset={6}
+                  alignOffset={-6}
+                  size="xs"
+                  variant="glass"
+                  className="max-w-60"
+                >
+                  {categoryText || "No category set available"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Badge>
 
           <span className="mt-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
             {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
@@ -181,14 +192,16 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
               <HeartIcon />
             </Button>
 
-            <Button size="icon-sm">
-              <SearchIcon />
-            </Button>
+            <DrawerSheet>
+              <div>
+                <h1>Product Details</h1>
+              </div>
+            </DrawerSheet>
           </div>
         </div>
       </div>
 
-      <footer className="mt-3 flex flex-col items-end justify-end gap-0 border-t pt-2">
+      <footer className="mt-2 flex flex-col items-end justify-end gap-0 border-t pt-2">
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           {product.created_at || product.updated_at ? formatTimestamptz(product.updated_at) : "No update record"}
         </p>
@@ -218,5 +231,53 @@ export function ProductCardSkeleton() {
         <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
       </footer>
     </div>
+  )
+}
+
+function DrawerSheet({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const isDesktop = useMediaQuery("(min-width: 768px)")
+
+  if (isDesktop) {
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button size="icon-sm">
+            <ScanSearchIcon />
+          </Button>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Product Details</SheetTitle>
+            <SheetDescription>
+              This action cannot be undone. This will permanently delete your account and remove your data from our
+              servers.
+            </SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
+        <Button variant="default" size="icon-sm">
+          <ScanSearchIcon />
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader className="text-left">
+          <DrawerTitle>Edit profile</DrawerTitle>
+          <DrawerDescription>Make changes to your profile here. Click save when you're done.</DrawerDescription>
+        </DrawerHeader>
+        {children}
+        <DrawerFooter className="pt-2">
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
