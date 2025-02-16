@@ -27,15 +27,8 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
-import {
-  ArrowUpRightIcon,
-  CopyIcon,
-  EllipsisVerticalIcon,
-  HeartIcon,
-  RefreshCcwIcon,
-  ScanSearchIcon,
-} from "lucide-react"
+import { discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
+import { ArrowUpRightIcon, CopyIcon, EllipsisVerticalIcon, HeartIcon, RefreshCcwIcon, GlassesIcon } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
@@ -243,7 +236,7 @@ function DrawerSheet({ children }: { children: React.ReactNode }) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button size="icon-sm">
-            <ScanSearchIcon />
+            <GlassesIcon />
           </Button>
         </SheetTrigger>
         <SheetContent>
@@ -263,7 +256,7 @@ function DrawerSheet({ children }: { children: React.ReactNode }) {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="default" size="icon-sm">
-          <ScanSearchIcon />
+          <GlassesIcon />
         </Button>
       </DrawerTrigger>
       <DrawerContent>

@@ -2,6 +2,12 @@ import type { Product } from "@/types"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+export enum PageStatus {
+  Loading = "loading",
+  Loaded = "loaded",
+  Error = "error",
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

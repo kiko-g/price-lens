@@ -2,24 +2,26 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import type { Product } from "@/types"
+import { type Product } from "@/types"
 
 import { ProductCard } from "./ProductCard"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import { Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { CircleOffIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
+import { cn, PageStatus } from "@/lib/utils"
 
 export function ProductsGrid() {
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-
+  const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
 
+  const isLoading = status === PageStatus.Loading
+
   async function fetchProducts() {
-    setIsLoading(true)
+    setStatus(PageStatus.Loading)
     try {
       const { data } = await axios.get("/api/products", {
         params: {
@@ -29,23 +31,24 @@ export function ProductsGrid() {
       })
       setProducts(data.data || [])
     } catch (err) {
+      setStatus(PageStatus.Error)
       console.error("Failed to fetch products:", err)
     } finally {
-      setIsLoading(false)
+      setStatus(PageStatus.Loaded)
     }
   }
 
   async function updateProductsInPage() {
-    setIsLoading(true)
+    setStatus(PageStatus.Loading)
     const urls = products.map((product) => product.url)
 
     try {
       await Promise.all(urls.map((url) => fetch(`/api/products/put?url=${url}`)))
       await fetchProducts()
     } catch (err) {
-      console.error("Failed to update products:", err)
+      console.warn("Failed to update products:", err)
     } finally {
-      setIsLoading(false)
+      setStatus(PageStatus.Loaded)
     }
   }
 
@@ -69,16 +72,25 @@ export function ProductsGrid() {
     fetchProducts()
   }, [page])
 
+  if (status === PageStatus.Error) {
+    return (
+      <Wrapper status={PageStatus.Error}>
+        <CircleOffIcon className="h-6 w-6" />
+        <p>Error fetching products. Please try again.</p>
+      </Wrapper>
+    )
+  }
+
   if (isLoading) {
     return (
-      <Wrapper>
+      <Wrapper status={PageStatus.Loading}>
         <Loader2Icon className="h-6 w-6 animate-spin" />
         <p>Loading...</p>
       </Wrapper>
     )
   }
 
-  if (products.length === 0) {
+  if (products.length === 0 && status === PageStatus.Loaded) {
     return <Wrapper>No products found. Check back soon!</Wrapper>
   }
 
@@ -175,9 +187,16 @@ export function ProductsGrid() {
   )
 }
 
-function Wrapper({ children }: { children: React.ReactNode }) {
+function Wrapper({ children, status = PageStatus.Loaded }: { children: React.ReactNode; status?: PageStatus }) {
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-4 rounded-lg border bg-zinc-100 p-4 dark:bg-zinc-900">
+    <div
+      className={cn(
+        "flex w-full flex-1 flex-col items-center justify-center gap-4 rounded-lg border p-4",
+        status === PageStatus.Loading && "border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10",
+        status === PageStatus.Loaded && "bg-zinc-100 dark:bg-zinc-900",
+        status === PageStatus.Error && "border-red-500/20 bg-red-500/5 dark:border-red-500/30 dark:bg-red-500/10",
+      )}
+    >
       {children}
     </div>
   )
