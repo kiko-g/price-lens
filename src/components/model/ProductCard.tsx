@@ -119,7 +119,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem variant="warning" asChild>
                 <Button variant="dropdown-item" onClick={handleUpdateProduct}>
                   Update
                   <RefreshCcwIcon />
