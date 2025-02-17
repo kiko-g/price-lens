@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
 
 export async function GET(req: NextRequest) {
-  const BATCH_SIZE = 100
+  const BATCH_SIZE = 500
 
   // if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
   //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -56,8 +56,10 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    for (const product of products) {
-      await scrapeAndReplaceProduct(product.url)
+    const CONCURRENT_REQUESTS = 5
+    for (let i = 0; i < products.length; i += CONCURRENT_REQUESTS) {
+      const batch = products.slice(i, i + CONCURRENT_REQUESTS)
+      await Promise.all(batch.map((product) => scrapeAndReplaceProduct(product.url)))
     }
 
     const batchCount = products.length
