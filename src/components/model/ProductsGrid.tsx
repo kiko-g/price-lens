@@ -142,7 +142,13 @@ export function ProductsGrid() {
           </Button>
         </div>
 
-        <Button variant="outline" size="icon" onClick={updateProductsInPage} disabled={isLoading}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={updateProductsInPage}
+          disabled={isLoading}
+          title="Update products on page"
+        >
           <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
         </Button>
 
