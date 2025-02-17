@@ -5,6 +5,7 @@ import Image from "next/image"
 import type { Product } from "@/types"
 import { useState } from "react"
 
+import { Code } from "@/components/Code"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -234,7 +235,9 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
                   <TabsTrigger value="technical">Technical</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details"></TabsContent>
-                <TabsContent value="technical"></TabsContent>
+                <TabsContent value="technical">
+                  <Code code={JSON.stringify(product, null, 2)} language="json" options={{ margin: "0" }} />
+                </TabsContent>
               </Tabs>
             </DrawerSheet>
           </div>
