@@ -68,7 +68,7 @@ export const continenteProductPageScraper = async (url: string) => {
       details.items[0].pre_discount_price || $(`${root} .pwc-discount-amount-pvpr`).text().trim() || null,
     price_per_major_unit: details.items[0].price_per_major_unit || $(`${root} .ct-price-value`).text().trim() || null,
     major_unit: $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim() || null,
-    image: $(`${root} .ct-product-image`).attr("data-src") || $(`${root} .ct-product-image`).attr("src") || null,
+    image: firstImage.attr("data-src") || firstImage.attr("src") || null,
     category: breadcrumbs[0] || null,
     category_2: breadcrumbs[1] || null,
     category_3: breadcrumbs[2] || null,
