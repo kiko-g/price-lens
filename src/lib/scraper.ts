@@ -74,7 +74,6 @@ export const continenteProductPageScraper = async (url: string) => {
     category_3: breadcrumbs[2] || null,
   }
 
-  console.debug(rawProduct.image)
   const price = priceToNumber(rawProduct.price)
   const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
   const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
