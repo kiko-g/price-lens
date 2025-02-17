@@ -9,7 +9,10 @@ import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { createClient } from "./supabase/client"
 
 export const fetchHtml = async (url: string) => {
-  if (!url) throw new Error("URL is required")
+  if (!url) {
+    console.warn("URL is required. Skipping product.")
+    return {}
+  }
 
   try {
     const response = await axios.get(url, {
@@ -20,19 +23,21 @@ export const fetchHtml = async (url: string) => {
     })
 
     if (!response.data) {
-      throw new Error("Empty response received")
+      console.warn("Empty response received. Skipping product.")
+      return {}
     }
 
     return response.data
   } catch (error) {
-    console.error(`Failed to fetch HTML for URL ${url}:`, error)
+    console.warn(`Failed to fetch HTML for URL ${url}:`, error)
     if (axios.isAxiosError(error)) {
       if (error.code === "ECONNABORTED") {
-        throw new Error("Request timed out")
+        console.warn("Request timed out. Skipping product.")
+      } else {
+        console.warn(error.message)
       }
-      throw new Error(`Failed to fetch HTML: ${error.message}`)
     }
-    throw error
+    return {}
   }
 }
 
