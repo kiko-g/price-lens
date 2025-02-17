@@ -1,10 +1,9 @@
-import axios from "axios"
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
 
 export async function GET(req: NextRequest) {
-  const BATCH_SIZE = 1000
+  const BATCH_SIZE = 100
 
   // if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
   //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -40,9 +39,6 @@ export async function GET(req: NextRequest) {
 
     const start = next_page * BATCH_SIZE
     const end = start + BATCH_SIZE - 1
-
-    console.debug(`Fetching products from ${start} to ${end}`)
-
     const { data: products, error: productsError } = await supabase.from("products").select("url").range(start, end)
 
     if (productsError) {
