@@ -9,12 +9,31 @@ import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { createClient } from "./supabase/client"
 
 export const fetchHtml = async (url: string) => {
-  const response = await axios.get(url, {
-    headers: {
-      "User-Agent": "Mozilla/5.0",
-    },
-  })
-  return response.data
+  if (!url) throw new Error("URL is required")
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+      },
+      timeout: 10000,
+    })
+
+    if (!response.data) {
+      throw new Error("Empty response received")
+    }
+
+    return response.data
+  } catch (error) {
+    console.error(`Failed to fetch HTML for URL ${url}:`, error)
+    if (axios.isAxiosError(error)) {
+      if (error.code === "ECONNABORTED") {
+        throw new Error("Request timed out")
+      }
+      throw new Error(`Failed to fetch HTML: ${error.message}`)
+    }
+    throw error
+  }
 }
 
 export const continenteProductPageScraper = async (url: string) => {
@@ -84,11 +103,6 @@ export const continenteCategoryPageScraper = async (url: string): Promise<string
       const separator = url.includes("?") ? "&" : "?"
       return `${url}${separator}start=${start}`
     }
-  }
-
-  const fetchHtml = async (url: string): Promise<string> => {
-    const response = await axios.get(url)
-    return response.data
   }
 
   const grabLinksInPage = ($: cheerio.CheerioAPI): string[] => {

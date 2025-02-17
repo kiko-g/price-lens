@@ -59,7 +59,13 @@ export async function GET(req: NextRequest) {
     const CONCURRENT_REQUESTS = 5
     for (let i = 0; i < products.length; i += CONCURRENT_REQUESTS) {
       const batch = products.slice(i, i + CONCURRENT_REQUESTS)
-      await Promise.all(batch.map((product) => scrapeAndReplaceProduct(product.url)))
+      const results = await Promise.allSettled(batch.map((product) => scrapeAndReplaceProduct(product.url)))
+
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(`Failed to scrape product ${batch[index].url}:`, result.reason)
+        }
+      })
     }
 
     const batchCount = products.length
