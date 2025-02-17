@@ -1,6 +1,7 @@
-import type { Product } from "@/types"
-import * as cheerio from "cheerio"
 import axios from "axios"
+import * as cheerio from "cheerio"
+import type { Product } from "@/types"
+import { NextRequest, NextResponse } from "next/server"
 
 import { categories } from "./data/continente"
 import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
@@ -158,4 +159,32 @@ export const createOrUpdateProducts = async (products: Product[]) => {
   const supabase = createClient()
   const { data, error } = await supabase.from("products").upsert(products)
   return { data, error }
+}
+
+export function isValidProduct(product: any): product is Product {
+  return typeof product === "object" && product !== null && typeof product.url === "string"
+}
+
+export const scrapeAndReplaceProduct = async (url: string | null) => {
+  if (!url) {
+    return NextResponse.json({ error: "URL is required" }, { status: 400 })
+  }
+
+  const product = await continenteProductPageScraper(url)
+
+  if (!product || Object.keys(product).length === 0) {
+    return NextResponse.json({ error: "Product scraping failed", url }, { status: 404 })
+  }
+
+  if (!isValidProduct(product)) {
+    return NextResponse.json({ error: "Invalid product data structure", url }, { status: 422 })
+  }
+
+  const { data, error } = await createOrUpdateProduct(product)
+
+  if (error) {
+    return NextResponse.json({ error: "Database operation failed", details: error }, { status: 500 })
+  }
+
+  return NextResponse.json({ product, data, message: "Product upserted" })
 }
