@@ -5,8 +5,8 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/products",
-      "schedule": "10 * * * *"
+      "path": "/api/cron/scrape",
+      "schedule": "10 * * *"
     }
   ]
 }
