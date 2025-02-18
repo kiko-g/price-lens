@@ -8,11 +8,17 @@ export const metadata: Metadata = {
   description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
 }
 
-export default async function Home() {
+type SearchParams = {
+  page?: string
+}
+
+export default async function Home({ searchParams }: { searchParams: SearchParams }) {
+  const page = searchParams.page ? parseInt(searchParams.page) : 1
+
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <ProductsGrid />
+        <ProductsGrid page={page} />
       </div>
     </Layout>
   )

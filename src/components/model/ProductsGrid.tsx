@@ -3,6 +3,8 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { type Product } from "@/types"
+import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
+import { cn, getCenteredArray, PageStatus } from "@/lib/utils"
 
 import { ProductCard } from "./ProductCard"
 import { Input } from "@/components/ui/input"
@@ -10,14 +12,15 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { CircleOffIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
-import { cn, getCenteredArray, PageStatus } from "@/lib/utils"
 
-export function ProductsGrid() {
-  const [page, setPage] = useState(1)
-  const [pageTotal, setPageTotal] = useState(50)
+export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
+  const [page, setPage] = useState(initialPage)
   const [query, setQuery] = useState("")
+  const [paginationTotal, setPaginationTotal] = useState(50)
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
+
+  const updateParams = useUpdateSearchParams()
 
   const isLoading = status === PageStatus.Loading
 
@@ -28,11 +31,11 @@ export function ProductsGrid() {
         params: {
           ...(query && { q: query }),
           page,
-          limit: 40,
+          limit: 10,
         },
       })
       setProducts(data.data || [])
-      setPageTotal(data.pagination.totalPages || 50)
+      setPaginationTotal(data.pagination.totalPages || 50)
     } catch (err) {
       setStatus(PageStatus.Error)
       console.error("Failed to fetch products:", err)
@@ -56,18 +59,22 @@ export function ProductsGrid() {
   }
 
   function handleSubmit() {
+    updateParams({ page: 1 })
     setPage(1)
   }
 
   function handleNextPage() {
+    updateParams({ page: page + 1 })
     setPage((p) => p + 1)
   }
 
   function handlePrevPage() {
+    updateParams({ page: page - 1 })
     setPage((p) => p - 1)
   }
 
   function handlePageChange(value: string) {
+    updateParams({ page: parseInt(value) })
     setPage(parseInt(value))
   }
 
@@ -129,7 +136,7 @@ export function ProductsGrid() {
               <SelectValue placeholder={page} />
             </SelectTrigger>
             <SelectContent>
-              {getCenteredArray(50, page, pageTotal ? pageTotal : null).map((num: number) => (
+              {getCenteredArray(50, page, paginationTotal ? paginationTotal : null).map((num: number) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
                 </SelectItem>
@@ -143,7 +150,7 @@ export function ProductsGrid() {
         </div>
 
         <Button
-          variant="outline"
+          variant="outline-warning"
           size="icon"
           onClick={updateProductsInPage}
           disabled={isLoading}
@@ -162,14 +169,14 @@ export function ProductsGrid() {
         <span>Page {page}</span>
       </div>
 
-      <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4">
+      <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
         {products.map((product, productIdx) => (
           <ProductCard key={`product-${productIdx}`} product={product} />
         ))}
       </div>
 
       <div className="flex w-full items-center justify-end gap-3">
-        <Button variant="outline" size="icon" onClick={updateProductsInPage} disabled={isLoading}>
+        <Button variant="outline-warning" size="icon" onClick={updateProductsInPage} disabled={isLoading}>
           <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
         </Button>
 

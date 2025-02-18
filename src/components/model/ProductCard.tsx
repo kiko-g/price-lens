@@ -178,7 +178,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger>
-                <Badge variant="secondary" size="xs" roundedness="sm" className="text-2xs">
+                <Badge variant="secondary" size="xs" roundedness="sm" className="line-clamp-1 text-left text-2xs">
                   {product.category_3 || product.category_2 || product.category || "No category"}
                 </Badge>
               </TooltipTrigger>
