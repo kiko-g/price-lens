@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
 
 export async function GET(req: NextRequest) {
-  const BATCH_SIZE = 40000
+  const BATCH_SIZE = 50
   const CONCURRENT_REQUESTS = 5
 
   const supabase = createClient()
