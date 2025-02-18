@@ -42,60 +42,78 @@ export const fetchHtml = async (url: string) => {
 }
 
 export const continenteProductPageScraper = async (url: string) => {
-  const html = await fetchHtml(url)
-  const $ = cheerio.load(html)
+  try {
+    const html = await fetchHtml(url)
+    if (!html || typeof html !== "string") {
+      console.warn(`Failed to fetch HTML from: ${url}`)
+      return {}
+    }
 
-  const productDetailJson = $("#maincontent [data-product-detail-impression]").attr("data-product-detail-impression")
-  if (!productDetailJson || !isValidJson(productDetailJson)) return {}
+    const $ = cheerio.load(html)
 
-  const root = ".product-images-container"
-  const details = JSON.parse(productDetailJson)
+    const productDetailJson = $("#maincontent [data-product-detail-impression]").attr("data-product-detail-impression")
+    if (!productDetailJson || !isValidJson(productDetailJson)) {
+      console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
+      return {}
+    }
 
-  const firstImage = $(".ct-product-image").first()
-  if (!firstImage.length) return {}
+    const root = ".product-images-container"
+    let details
+    try {
+      details = JSON.parse(productDetailJson)
+    } catch (jsonError) {
+      console.warn(`Error parsing product detail JSON for URL: ${url}`, jsonError)
+      return {}
+    }
 
-  const breadcrumbs =
-    $(".breadcrumbs")
-      .map((i, el) => $(el).text().trim())
-      .get()
-      .at(0)
-      ?.split("\n")
-      ?.map((item) => item?.trim() ?? "")
-      .filter((item) => item !== "" && item !== "Página inicial") ?? []
+    const firstImage = $(".ct-product-image").first()
+    const breadcrumbs =
+      $(".breadcrumbs")
+        .map((i, el) => $(el).text().trim())
+        .get()
+        .at(0)
+        ?.split("\n")
+        ?.map((item) => item?.trim() ?? "")
+        .filter((item) => item !== "" && item !== "Página inicial") ?? []
 
-  const rawProduct = {
-    url,
-    name: $(`${root} h1`).text().trim(),
-    brand: $(`${root} .ct-pdp--brand`).text().trim(),
-    pack: $(`${root} .ct-pdp--unit`).text().trim(),
-    price: details.items[0].price || $(`${root} .ct-price-formatted`).parent().attr("content") || "",
-    price_recommended:
-      details.items[0].pre_discount_price || $(`${root} .pwc-discount-amount-pvpr`).text().trim() || null,
-    price_per_major_unit: details.items[0].price_per_major_unit || $(`${root} .ct-price-value`).text().trim() || null,
-    major_unit: $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim() || null,
-    image: firstImage.attr("data-src") || firstImage.attr("src") || null,
-    category: breadcrumbs[0] || null,
-    category_2: breadcrumbs[1] || null,
-    category_3: breadcrumbs[2] || null,
+    const rawProduct = {
+      url,
+      name: $(`${root} h1`).text().trim() || "Unknown Product",
+      brand: $(`${root} .ct-pdp--brand`).text().trim() || "No Brand",
+      pack: $(`${root} .ct-pdp--unit`).text().trim() || null,
+      price: details?.items?.[0]?.price || $(`${root} .ct-price-formatted`).parent().attr("content") || null,
+      price_recommended:
+        details?.items?.[0]?.pre_discount_price || $(`${root} .pwc-discount-amount-pvpr`).text().trim() || null,
+      price_per_major_unit:
+        details?.items?.[0]?.price_per_major_unit || $(`${root} .ct-price-value`).text().trim() || null,
+      major_unit: $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim() || null,
+      image: firstImage.attr("data-src") || firstImage.attr("src") || null,
+      category: breadcrumbs[0] || null,
+      category_2: breadcrumbs[1] || null,
+      category_3: breadcrumbs[2] || null,
+    }
+
+    const price = rawProduct.price ? priceToNumber(rawProduct.price) : null
+    const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
+    const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
+
+    const product: Product = {
+      ...rawProduct,
+      pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
+      price: price || 0,
+      price_recommended: priceRecommended || null,
+      price_per_major_unit: pricePerMajorUnit || null,
+      discount: priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0,
+      image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
+      updated_at: new Date().toISOString().replace("Z", "+00:00"),
+      created_at: null,
+    }
+
+    return product
+  } catch (error) {
+    console.error(`Unexpected error in continenteProductPageScraper for URL: ${url}`, error)
+    return {} // Fail gracefully instead of breaking the route
   }
-
-  const price = priceToNumber(rawProduct.price)
-  const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
-  const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
-
-  const product: Product = {
-    ...rawProduct,
-    pack: packageToUnit(rawProduct.pack),
-    price,
-    price_recommended: priceRecommended,
-    price_per_major_unit: pricePerMajorUnit,
-    discount: !priceRecommended ? 0 : 1 - price / priceRecommended,
-    image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
-    updated_at: new Date().toISOString().replace("Z", "+00:00"),
-    created_at: null,
-  }
-
-  return product
 }
 
 export const continenteCategoryPageScraper = async (url: string): Promise<string[]> => {

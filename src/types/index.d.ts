@@ -8,7 +8,7 @@ export interface Product {
   url: string
   name: string
   brand: string
-  pack: string
+  pack: string | null
   price: number
   price_recommended: number | null
   price_per_major_unit: number | null

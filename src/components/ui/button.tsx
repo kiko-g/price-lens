@@ -18,6 +18,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         orange: `bg-orange-600 text-white shadow-sm hover:bg-orange-600/90 dark:bg-orange-700 dark:hover:bg-orange-700/90 dark:text-white`,
         success: `bg-emerald-600 text-white shadow-sm hover:bg-emerald-600/90 dark:bg-emerald-700 dark:hover:bg-emerald-700/90 dark:text-white`,
         outline: `border-input bg-transparent shadow-sm hover:bg-zinc-100 dark:bg-zinc-800/10 dark:hover:bg-zinc-800`,
+        active: `bg-zinc-200/80 dark:bg-zinc-100/20`,
         ghost: `hover:bg-zinc-200/80 dark:hover:bg-zinc-100/20`,
         "ghost-inverted": `hover:bg-zinc-100/20 dark:hover:bg-zinc-200/80`,
         "ghost-light": `hover:bg-zinc-200/80`,

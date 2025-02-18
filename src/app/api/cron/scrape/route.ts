@@ -4,10 +4,7 @@ import { scrapeAndReplaceProduct } from "@/lib/scraper"
 
 export async function GET(req: NextRequest) {
   const BATCH_SIZE = 40000
-
-  // if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  // }
+  const CONCURRENT_REQUESTS = 5
 
   const supabase = createClient()
 
@@ -19,20 +16,20 @@ export async function GET(req: NextRequest) {
       .single()
 
     if (trackerError) {
-      throw new Error(`Error reading scrape_jobs: ${trackerError.message}`)
+      console.error(`Error reading scrape_jobs: ${trackerError.message}`)
+      return NextResponse.json({ error: "Failed to fetch scrape job" }, { status: 500 })
     }
 
     if (!trackerData) {
-      throw new Error("No scrape_jobs row found with id = 1")
+      console.error("No scrape_jobs row found with id = 1")
+      return NextResponse.json({ error: "Scrape job missing" }, { status: 500 })
     }
 
     const { next_page, is_done } = trackerData
 
     if (is_done) {
       return NextResponse.json(
-        {
-          message: `Scraping is already marked complete at page ${next_page}.`,
-        },
+        { message: `Scraping is already marked complete at page ${next_page}.` },
         { status: 200 },
       )
     }
@@ -42,36 +39,45 @@ export async function GET(req: NextRequest) {
     const { data: products, error: productsError } = await supabase.from("products").select("url").range(start, end)
 
     if (productsError) {
-      throw new Error(`Error fetching products: ${productsError.message}`)
+      console.error(`Error fetching products: ${productsError.message}`)
+      return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 })
     }
 
     if (!products || products.length === 0) {
       await supabase.from("scrape_jobs").update({ is_done: true, last_update: new Date().toISOString() }).eq("id", 1)
-
-      return NextResponse.json(
-        {
-          message: "No more products to scrape. Marked scrape as done.",
-        },
-        { status: 200 },
-      )
+      return NextResponse.json({ message: "No more products to scrape. Marked scrape as done." }, { status: 200 })
     }
 
-    const CONCURRENT_REQUESTS = 5
+    console.info(`Scraping ${products.length} products...`)
+
+    let failedScrapes = 0
     for (let i = 0; i < products.length; i += CONCURRENT_REQUESTS) {
       const batch = products.slice(i, i + CONCURRENT_REQUESTS)
-      const results = await Promise.allSettled(batch.map((product) => scrapeAndReplaceProduct(product.url)))
+      const results = await Promise.allSettled(
+        batch.map(async (product) => {
+          try {
+            return await scrapeAndReplaceProduct(product.url)
+          } catch (error) {
+            console.warn(`Failed to scrape product ${product.url}:`, error)
+            failedScrapes++
+            return null
+          }
+        }),
+      )
 
       results.forEach((result, index) => {
         if (result.status === "rejected") {
-          console.error(`Failed to scrape product ${batch[index].url}:`, result.reason)
+          console.warn(`Scrape failed for ${batch[index].url}:`, result.reason)
+          failedScrapes++
         }
       })
     }
 
-    const batchCount = products.length
+    console.info(`Completed batch #${next_page}. Processed: ${products.length}, Failed: ${failedScrapes}`)
+
     const updatedFields = {
       next_page: next_page + 1,
-      is_done: batchCount < BATCH_SIZE,
+      is_done: products.length < BATCH_SIZE,
       last_update: new Date().toISOString(),
     }
 
@@ -79,19 +85,14 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: `Scraped page #${next_page} (processed ${batchCount} products).`,
+        message: `Scraped page #${next_page} (processed ${products.length} products, failed ${failedScrapes}).`,
         next_page: updatedFields.next_page,
         is_done: updatedFields.is_done,
       },
       { status: 200 },
     )
   } catch (err) {
-    console.error("Error scraping batched products in cron job:", err)
-    return NextResponse.json(
-      {
-        error: err instanceof Error ? err.message : "Unknown error",
-      },
-      { status: 500 },
-    )
+    console.error("Unexpected error in scraping batch:", err)
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 })
   }
 }
