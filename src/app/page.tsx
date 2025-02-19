@@ -12,8 +12,13 @@ type SearchParams = {
   page?: string
 }
 
-export default async function Home({ searchParams }: { searchParams: SearchParams }) {
-  const page = searchParams.page ? parseInt(searchParams.page) : 1
+type HomeProps = {
+  searchParams: Promise<SearchParams>
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await Promise.resolve(searchParams)
+  const page = params.page ? parseInt(params.page) : 1
 
   return (
     <Layout>

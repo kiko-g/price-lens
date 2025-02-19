@@ -150,7 +150,7 @@ export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
         </div>
 
         <Button
-          variant="outline-warning"
+          variant="secondary"
           size="icon"
           onClick={updateProductsInPage}
           disabled={isLoading}
@@ -173,31 +173,6 @@ export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
         {products.map((product, productIdx) => (
           <ProductCard key={`product-${productIdx}`} product={product} />
         ))}
-      </div>
-
-      <div className="flex w-full items-center justify-end gap-3">
-        <Button variant="outline-warning" size="icon" onClick={updateProductsInPage} disabled={isLoading}>
-          <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-        </Button>
-
-        <div className="isolate flex -space-x-px">
-          <Button
-            variant="outline"
-            className="rounded-r-none focus:z-10"
-            onClick={handlePrevPage}
-            disabled={page === 1}
-          >
-            Prev
-          </Button>
-
-          <Button variant="outline" className="rounded-none disabled:cursor-not-allowed disabled:opacity-100" disabled>
-            {page}
-          </Button>
-
-          <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
-            Next
-          </Button>
-        </div>
       </div>
     </div>
   )
