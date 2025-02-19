@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 }
 
 type SearchParams = {
+  q?: string
   page?: string
 }
 
@@ -19,11 +20,12 @@ type HomeProps = {
 export default async function Home({ searchParams }: HomeProps) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
+  const q = params.q ?? ""
 
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <ProductsGrid page={page} />
+        <ProductsGrid page={page} q={q} />
       </div>
     </Layout>
   )

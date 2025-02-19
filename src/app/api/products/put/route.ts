@@ -5,7 +5,7 @@ import { scrapeAndReplaceProduct } from "@/lib/scraper"
 export async function GET(req: NextRequest) {
   try {
     const url = req.nextUrl.searchParams.get("url")
-    await scrapeAndReplaceProduct(url)
+    return await scrapeAndReplaceProduct(url)
   } catch (error) {
     console.error("Unexpected error:", error)
     return NextResponse.json(

@@ -13,10 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { CircleOffIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
 
-export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
+type Props = {
+  page?: number
+  q?: string
+}
+
+export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Props) {
   const [page, setPage] = useState(initialPage)
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState(initialQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
+  const [isTypingTimeout, setIsTypingTimeout] = useState<NodeJS.Timeout | null>(null)
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
 
@@ -37,6 +43,7 @@ export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
       setProducts(data.data || [])
       setPaginationTotal(data.pagination.totalPages || 50)
     } catch (err) {
+      setPage(1)
       setStatus(PageStatus.Error)
       console.error("Failed to fetch products:", err)
     } finally {
@@ -59,28 +66,30 @@ export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
   }
 
   function handleSubmit() {
-    updateParams({ page: 1 })
     setPage(1)
+    if (page === 1) fetchProducts()
   }
 
   function handleNextPage() {
-    updateParams({ page: page + 1 })
     setPage((p) => p + 1)
   }
 
   function handlePrevPage() {
-    updateParams({ page: page - 1 })
     setPage((p) => p - 1)
   }
 
   function handlePageChange(value: string) {
-    updateParams({ page: parseInt(value) })
     setPage(parseInt(value))
   }
 
   useEffect(() => {
+    updateParams({ page })
     fetchProducts()
   }, [page])
+
+  useEffect(() => {
+    updateParams({ ...(query && { q: query }) })
+  }, [query])
 
   if (status === PageStatus.Error) {
     return (
@@ -115,9 +124,13 @@ export function ProductsGrid({ page: initialPage = 1 }: { page?: number }) {
             className="pl-8"
             value={query}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-              if (e.key === "Enter") fetchProducts()
+              if (e.key === "Enter") handleSubmit()
             }}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setQuery(e.target.value)
+              if (e.target.value) setIsTypingTimeout(setTimeout(() => handleSubmit(), 2000))
+              else if (isTypingTimeout) clearTimeout(isTypingTimeout)
+            }}
           />
         </div>
 
