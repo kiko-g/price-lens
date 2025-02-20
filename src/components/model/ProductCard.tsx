@@ -130,7 +130,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
         <div className="absolute right-2 top-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="glass" size="icon-sm" className="shadow-none">
+              <Button variant="default-inverted" size="icon-sm" className="shadow-none">
                 <EllipsisVerticalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

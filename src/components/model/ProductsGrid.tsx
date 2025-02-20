@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import { CircleOffIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
+import { CircleOffIcon, EraserIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
 
 type Props = {
   page?: number
@@ -22,7 +22,6 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
   const [page, setPage] = useState(initialPage)
   const [query, setQuery] = useState(initialQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
-  const [isTypingTimeout, setIsTypingTimeout] = useState<NodeJS.Timeout | null>(null)
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
 
@@ -56,7 +55,10 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
     const urls = products.map((product) => product.url)
 
     try {
-      await Promise.all(urls.map((url) => fetch(`/api/products/put?url=${url}`)))
+      for (const url of urls) {
+        await fetch(`/api/products/put?url=${url}`)
+        await new Promise((resolve) => setTimeout(resolve, 50))
+      }
       await fetchProducts()
     } catch (err) {
       console.warn("Failed to update products:", err)
@@ -88,7 +90,7 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
   }, [page])
 
   useEffect(() => {
-    updateParams({ ...(query && { q: query }) })
+    updateParams({ q: query })
   }, [query])
 
   if (status === PageStatus.Error) {
@@ -127,11 +129,18 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
               if (e.key === "Enter") handleSubmit()
             }}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setQuery(e.target.value)
-              if (e.target.value) setIsTypingTimeout(setTimeout(() => handleSubmit(), 2000))
-              else if (isTypingTimeout) clearTimeout(isTypingTimeout)
+              const value = e.target.value
+              if (typeof value === "string") setQuery(value)
             }}
           />
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => setQuery("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/50 dark:hover:text-white"
+          >
+            <EraserIcon />
+          </Button>
         </div>
 
         <div className="isolate flex -space-x-px">

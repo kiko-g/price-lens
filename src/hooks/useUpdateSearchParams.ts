@@ -9,8 +9,11 @@ export function useUpdateSearchParams() {
   function updateParams(newParams: Record<string, string | number | null | undefined>) {
     const params = new URLSearchParams(searchParams.toString())
     for (const [key, value] of Object.entries(newParams)) {
-      if (value === undefined || value === null) params.delete(key)
-      else params.set(key, String(value))
+      if (value === undefined || value === null || (key === "q" && value === "")) {
+        params.delete(key)
+      } else {
+        params.set(key, String(value))
+      }
     }
 
     router.push(`?${params.toString()}`)

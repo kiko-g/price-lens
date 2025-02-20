@@ -3,7 +3,7 @@ import * as cheerio from "cheerio"
 import type { Product } from "@/types"
 import { NextRequest, NextResponse } from "next/server"
 
-import { categories } from "./data/continente"
+import { categories } from "./mock/continente"
 import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { createClient } from "./supabase/client"
