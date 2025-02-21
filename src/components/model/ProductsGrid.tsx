@@ -188,7 +188,9 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>Showing {products.length} products</span>
-        <span>Page {page}</span>
+        <span>
+          Page {page}/{paginationTotal}
+        </span>
       </div>
 
       <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">

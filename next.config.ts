@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
         hostname: "www.continente.pt",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "www.zu.pt",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "wells.pt",
+        pathname: "/**",
+      },
     ],
   },
 }

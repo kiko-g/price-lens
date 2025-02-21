@@ -27,11 +27,23 @@ export async function GET(req: NextRequest) {
     const start = new Date()
     console.debug("Starting to process", urls.length, "urls", start.toISOString())
 
-    for (const [index, url] of urls.entries()) {
+    const BATCH_SIZE = 5
+    for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+      const batch = urls.slice(i, i + BATCH_SIZE)
       const now = new Date()
       const timeTakenSoFar = `${Math.floor((now.getTime() - start.getTime()) / 60000)}m ${Math.floor(((now.getTime() - start.getTime()) % 60000) / 1000)}s`
-      console.debug(`[${index + 1}/${urls.length}]`, now.toISOString(), `(${timeTakenSoFar} so far)`, url)
-      await scrapeAndReplaceProduct(url)
+      console.debug(
+        `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(urls.length / BATCH_SIZE)}`,
+        now.toISOString(),
+        `(${timeTakenSoFar} so far)`,
+      )
+
+      await Promise.all(
+        batch.map((url, batchIndex) => {
+          console.debug(`[${i + batchIndex + 1}/${urls.length}] Processing ${url}`)
+          return scrapeAndReplaceProduct(url)
+        }),
+      )
     }
 
     const end = new Date()
