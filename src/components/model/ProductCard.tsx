@@ -57,7 +57,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     if (!product || !product.url) return
 
     setStatus(PageStatus.Loading)
-    const response = await fetch(`/api/products/put?url=${product.url}`)
+    const response = await fetch(`/api/products/replace?url=${product.url}`)
     const data = await response.json()
 
     if (response.status === 200) {

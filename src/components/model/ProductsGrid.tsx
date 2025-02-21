@@ -56,7 +56,7 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
 
     try {
       for (const url of urls) {
-        await fetch(`/api/products/put?url=${url}`)
+        await fetch(`/api/products/replace?url=${url}`)
         await new Promise((resolve) => setTimeout(resolve, 50))
       }
       await fetchProducts()

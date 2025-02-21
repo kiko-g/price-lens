@@ -7,6 +7,7 @@ import { categories } from "./mock/continente"
 import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { createClient } from "./supabase/client"
+import { productQueries } from "./db/queries/products"
 
 export const fetchHtml = async (url: string) => {
   if (!url) {
@@ -111,8 +112,9 @@ export const continenteProductPageScraper = async (url: string) => {
 
     return product
   } catch (error) {
+    // Fail gracefully instead of breaking the route
     console.error(`Unexpected error in continenteProductPageScraper for URL: ${url}`, error)
-    return {} // Fail gracefully instead of breaking the route
+    return {}
   }
 }
 
@@ -209,6 +211,10 @@ export const scrapeAndReplaceProduct = async (url: string | null) => {
   const product = await continenteProductPageScraper(url)
 
   if (!product || Object.keys(product).length === 0) {
+    await productQueries.upsertBlank({
+      url,
+      created_at: new Date().toISOString().replace("Z", "+00:00"),
+    })
     return NextResponse.json({ error: "Product scraping failed", url }, { status: 404 })
   }
 

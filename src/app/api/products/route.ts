@@ -1,27 +1,19 @@
-import type { Product } from "@/types"
 import { NextRequest, NextResponse } from "next/server"
 
-import { createClient } from "@/lib/supabase/server"
+import { productQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
-  const supabase = createClient()
-
   try {
     const params = req.nextUrl.searchParams
-    const queryParam = params.get("q")
+    const queryParam = params.get("q") ?? ""
     const pageParam = params.get("page") ?? "1"
     const limitParam = params.get("limit") ?? "20"
 
+    const query = queryParam
     const page = parseInt(pageParam, 10) || 1
     const limit = parseInt(limitParam, 10) || 20
-    const offset = (page - 1) * limit
 
-    let query = supabase.from("products").select("*", { count: "exact" })
-    if (queryParam) {
-      const normalizedQuery = queryParam.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      query = query.ilike("name", `%${normalizedQuery}%`)
-    }
-    const { data, error, count } = await query.range(offset, offset + limit - 1)
+    const { data, error, count } = await productQueries.getAll({ page, limit, query })
 
     if (error) {
       throw new Error(error.message)
