@@ -40,6 +40,7 @@ import {
   CloudAlertIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { ProductChart } from "./ProductChart"
 
 export function ProductCard({ product: initialProduct }: { product: Product }) {
   const [product, setProduct] = useState<Product | null>(initialProduct)
@@ -130,7 +131,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
         <div className="absolute right-2 top-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="default-inverted" size="icon-sm" className="shadow-none">
+              <Button variant="inverted" size="icon-sm" className="shadow-none">
                 <EllipsisVerticalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -234,7 +235,9 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="technical">Technical</TabsTrigger>
                 </TabsList>
-                <TabsContent value="details"></TabsContent>
+                <TabsContent value="details">
+                  <ProductChart />
+                </TabsContent>
                 <TabsContent value="technical">
                   <Code code={JSON.stringify(product, null, 2)} language="json" options={{ margin: "0" }} />
                 </TabsContent>

@@ -57,7 +57,7 @@ function CopyCodeButton({ text }: { text: string }) {
   }, [text])
 
   return (
-    <Button onClick={copyToClipboard} disabled={isCopied} variant="default-inverted" size="icon-sm">
+    <Button onClick={copyToClipboard} disabled={isCopied} variant="inverted" size="icon-sm">
       {isCopied ? <CheckIcon className="size-4" /> : <ClipboardIcon className="size-4" />}
     </Button>
   )
@@ -86,7 +86,7 @@ function DownloadButton({ text, filename }: { text: string; filename: string }) 
   }
 
   return (
-    <Button onClick={download} disabled={isDownloading} variant="default-inverted" size="icon-sm">
+    <Button onClick={download} disabled={isDownloading} variant="inverted" size="icon-sm">
       {isDownloading ? <CheckIcon className="size-4" /> : <DownloadIcon className="size-4" />}
     </Button>
   )

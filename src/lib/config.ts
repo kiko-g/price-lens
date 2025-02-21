@@ -12,3 +12,21 @@ export const siteConfig = {
     repo: "https://github.com/kiko-g/price-lens",
   },
 }
+
+export const navigation = [
+  {
+    label: "Home",
+    href: "/",
+    shown: true,
+  },
+  {
+    label: "Selected",
+    href: "/selected",
+    shown: true,
+  },
+  {
+    label: "Admin",
+    href: "/admin",
+    shown: process.env.NODE_ENV === "development",
+  },
+]
