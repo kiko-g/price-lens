@@ -236,7 +236,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
                   <TabsTrigger value="technical">Technical</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
-                  <ProductChart />
+                  <ProductChart product={product} />
                 </TabsContent>
                 <TabsContent value="technical">
                   <Code code={JSON.stringify(product, null, 2)} language="json" options={{ margin: "0" }} />

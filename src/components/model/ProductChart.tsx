@@ -1,10 +1,14 @@
 "use client"
 
+import * as React from "react"
+import { Product } from "@/types"
 import { TrendingUp } from "lucide-react"
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -12,6 +16,7 @@ const chartData = [
   { month: "April", desktop: 73, mobile: 190 },
   { month: "May", desktop: 209, mobile: 130 },
   { month: "June", desktop: 214, mobile: 140 },
+  // ... You can add more data to handle 1Y, 5Y, etc. if needed
 ]
 
 const chartConfig = {
@@ -25,7 +30,40 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ProductChart() {
+// Possible range options
+const RANGES = ["1M", "3M", "6M", "1Y", "5Y", "Max"] as const
+type Range = (typeof RANGES)[number]
+
+export function ProductChart({ product }: { product: Product }) {
+  // Track the selected range
+  const [selectedRange, setSelectedRange] = React.useState<Range>("6M")
+
+  // A helper to filter the data based on the selected range
+  // (Right now, we only have 6 data points, so the slice logic is minimal,
+  // but you can expand with more data for 1Y, 5Y, etc.)
+  const filteredData = React.useMemo(() => {
+    switch (selectedRange) {
+      case "1M":
+        // last 1 month of data
+        return chartData.slice(-1)
+      case "3M":
+        // last 3 months
+        return chartData.slice(-3)
+      case "6M":
+        // last 6 months
+        return chartData.slice(-6)
+      case "1Y":
+        // If you had 12 months in chartData, you'd do chartData.slice(-12)
+        return chartData.slice(-6) // fallback, since we only have 6 data points
+      case "5Y":
+        // If you had multiple years of data, you can filter accordingly
+        return chartData
+      case "Max":
+      default:
+        return chartData
+    }
+  }, [selectedRange])
+
   return (
     <Card>
       <CardHeader>
@@ -33,6 +71,18 @@ export function ProductChart() {
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {RANGES.map((range) => (
+            <Button
+              key={range}
+              variant={range === selectedRange ? "secondary" : "ghost"}
+              onClick={() => setSelectedRange(range)}
+            >
+              {range}
+            </Button>
+          ))}
+        </div>
+
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
@@ -43,6 +93,7 @@ export function ProductChart() {
             }}
           >
             <CartesianGrid vertical={false} />
+            <YAxis tickLine={false} axisLine={false} width={24} />
             <XAxis
               dataKey="month"
               tickLine={false}
@@ -68,7 +119,7 @@ export function ProductChart() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 text-emerald-600" />
         </div>
         <div className="leading-none text-muted-foreground">Showing total visitors for the last 6 months</div>
       </CardFooter>
