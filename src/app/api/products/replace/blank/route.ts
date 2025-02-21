@@ -24,12 +24,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "No urls found" }, { status: 404 })
     }
 
+    const start = new Date()
+    console.debug("Starting to process", urls.length, "urls", start.toISOString())
+
     for (const [index, url] of urls.entries()) {
-      console.debug(`${index + 1}/${urls.length}`, url)
+      const now = new Date()
+      const timeTakenSoFar = `${Math.floor((now.getTime() - start.getTime()) / 60000)}m ${Math.floor(((now.getTime() - start.getTime()) % 60000) / 1000)}s`
+      console.debug(`[${index + 1}/${urls.length}]`, now.toISOString(), `(${timeTakenSoFar} so far)`, url)
       await scrapeAndReplaceProduct(url)
     }
 
-    return NextResponse.json({ urls, error })
+    const end = new Date()
+    console.debug("Done", end.toISOString())
+    console.debug(
+      "Time taken:",
+      `${Math.floor((end.getTime() - start.getTime()) / 60000)}m ${Math.floor(((end.getTime() - start.getTime()) % 60000) / 1000)}s`,
+    )
+
+    return NextResponse.json({ message: `Processed ${urls.length} blank urls` }, { status: 200 })
   } catch (error) {
     console.error("Unexpected error:", error)
     return NextResponse.json(
