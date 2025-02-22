@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
-import { ProductsGrid } from "@/components/model/ProductsGrid"
+import { Button } from "@/components/ui/button"
+import { GridHome } from "@/components/home/GridHome"
 
 export const metadata: Metadata = {
   title: "Price Lens",
@@ -13,21 +14,30 @@ type SearchParams = {
   page?: string
 }
 
-type HomeProps = {
+type Props = {
   searchParams: Promise<SearchParams>
 }
 
-export default async function Home({ searchParams }: HomeProps) {
+export default async function Home({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
 
   return (
     <Layout>
-      <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <h3>Price Lens</h3>
-        <p>
-          A location for users to see through prices. Track prices on relevant products that everyone cares about, get a
-          sense of what inflation actually feels like on Supermarkets.
+      <GridHome />
+      <div className="z-20 flex w-full flex-1 flex-col items-start justify-start gap-4 px-20 py-20">
+        <h1 className="animate-fade-in z-10 translate-y-[-1rem] text-balance bg-gradient-to-br from-black from-30% to-black/40 bg-clip-text py-2 text-4xl font-medium leading-none tracking-tighter text-transparent opacity-0 [--animation-delay:200ms] dark:from-white dark:to-white/40 sm:text-5xl md:text-6xl lg:text-7xl">
+          Price Lens
+          <br className="hidden md:block" />
+          See through prices
+        </h1>
+        <p className="animate-fade-in translate-y-[-1rem] text-balance tracking-tight text-gray-400 opacity-0 [--animation-delay:400ms] md:text-lg">
+          Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware
+          of how supermarket prices change. See beyond the headlines and tags.
         </p>
+
+        <div className="mt-3 flex gap-2">
+          <Button size="lg">Get Started</Button>
+        </div>
       </div>
     </Layout>
   )

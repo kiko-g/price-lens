@@ -13,11 +13,11 @@ type SearchParams = {
   page?: string
 }
 
-type HomeProps = {
+type Props = {
   searchParams: Promise<SearchParams>
 }
 
-export default async function Home({ searchParams }: HomeProps) {
+export default async function Home({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
   const q = params.q ?? ""
