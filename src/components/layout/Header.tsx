@@ -23,7 +23,7 @@ export function Header() {
             Early Access
           </span>
 
-          <nav className="ml-3 flex items-center gap-1.5">
+          <nav className="ml-3 hidden items-center gap-1.5 md:flex">
             {navigation.map((item) => (
               <Button
                 variant="ghost"

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 
 export function AdminActions() {
   return (
-    <div className="grid w-full grid-cols-1 gap-4 p-4 md:grid-cols-2">
+    <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-2">
       <QueueUrlsCard />
       <ReplaceBlankCard />
     </div>

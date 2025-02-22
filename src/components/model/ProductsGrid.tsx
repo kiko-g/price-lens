@@ -117,8 +117,8 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <div className="mb-2 flex w-full items-center justify-between gap-3">
-        <div className="relative flex-1">
+      <div className="mb-2 flex w-full flex-col items-end justify-between gap-3 lg:flex-row lg:items-center">
+        <div className="relative w-full flex-1">
           <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
@@ -143,47 +143,49 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
           </Button>
         </div>
 
-        <div className="isolate flex -space-x-px">
+        <div className="flex flex-wrap gap-2">
+          <div className="isolate flex -space-x-px">
+            <Button
+              variant="outline"
+              className="rounded-r-none focus:z-10"
+              onClick={handlePrevPage}
+              disabled={page === 1}
+            >
+              Prev
+            </Button>
+
+            <Select value={page.toString()} onValueChange={handlePageChange}>
+              <SelectTrigger className="rounded-none">
+                <SelectValue placeholder={page} />
+              </SelectTrigger>
+              <SelectContent>
+                {getCenteredArray(50, page, paginationTotal ? paginationTotal : null).map((num: number) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
+              Next
+            </Button>
+          </div>
+
           <Button
-            variant="outline"
-            className="rounded-r-none focus:z-10"
-            onClick={handlePrevPage}
-            disabled={page === 1}
+            variant="secondary"
+            size="icon"
+            onClick={updateProductsInPage}
+            disabled={isLoading}
+            title="Update products on page"
           >
-            Prev
+            <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
           </Button>
 
-          <Select value={page.toString()} onValueChange={handlePageChange}>
-            <SelectTrigger className="rounded-none">
-              <SelectValue placeholder={page} />
-            </SelectTrigger>
-            <SelectContent>
-              {getCenteredArray(50, page, paginationTotal ? paginationTotal : null).map((num: number) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
-            Next
+          <Button variant="default" disabled={isLoading} onClick={handleSubmit}>
+            Submit
           </Button>
         </div>
-
-        <Button
-          variant="secondary"
-          size="icon"
-          onClick={updateProductsInPage}
-          disabled={isLoading}
-          title="Update products on page"
-        >
-          <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-        </Button>
-
-        <Button variant="default" disabled={isLoading} onClick={handleSubmit}>
-          Submit
-        </Button>
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">

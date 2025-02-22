@@ -9,6 +9,23 @@ import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
+function getRangeLabel(range: Range) {
+  switch (range) {
+    case "1M":
+      return "1 month"
+    case "3M":
+      return "3 months"
+    case "6M":
+      return "6 months"
+    case "1Y":
+      return "1 year"
+    case "5Y":
+      return "5 years"
+    case "Max":
+      return "all available months"
+  }
+}
+
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -67,7 +84,7 @@ export function ProductChart({ product }: { product: Product }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Line Chart - Dots</CardTitle>
+        <CardTitle>Price Evolution</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
@@ -119,9 +136,12 @@ export function ProductChart({ product }: { product: Product }) {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 text-emerald-600" />
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 text-green-500" />
         </div>
-        <div className="leading-none text-muted-foreground">Showing total visitors for the last 6 months</div>
+        <div className="leading-none text-muted-foreground">
+          Showing price evolution for the last{" "}
+          <strong className="dark:text-white">{getRangeLabel(selectedRange)}</strong>
+        </div>
       </CardFooter>
     </Card>
   )

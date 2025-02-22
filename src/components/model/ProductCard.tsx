@@ -36,7 +36,7 @@ import {
   EllipsisVerticalIcon,
   HeartIcon,
   RefreshCcwIcon,
-  GlassesIcon,
+  ChartSplineIcon,
   CloudAlertIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -304,7 +304,7 @@ function DrawerSheet({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button size="icon-sm">
-            <GlassesIcon />
+            <ChartSplineIcon />
           </Button>
         </SheetTrigger>
         <SheetContent>
@@ -323,7 +323,7 @@ function DrawerSheet({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="default" size="icon-sm">
-          <GlassesIcon />
+          <ChartSplineIcon />
         </Button>
       </DrawerTrigger>
       <DrawerContent>

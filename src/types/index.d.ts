@@ -1,7 +1,7 @@
 export type NavigationItem = {
-  name: string
   href: string
-  isNew?: boolean
+  label: string
+  shown?: boolean
 }
 
 export interface Product {

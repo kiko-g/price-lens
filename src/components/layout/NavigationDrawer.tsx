@@ -16,6 +16,7 @@ import {
 
 import { MenuIcon } from "lucide-react"
 import { NavigationItem } from "@/types"
+import { navigation } from "@/lib/config"
 
 export function NavigationDrawer() {
   const pathname = usePathname()
@@ -31,16 +32,22 @@ export function NavigationDrawer() {
           <DrawerDescription className="sr-only">Drawer menu to navigate through the site</DrawerDescription>
         </DrawerHeader>
 
-        <ScrollArea className="h-[400px] pt-4"></ScrollArea>
+        <ScrollArea className="h-[400px] pt-4">
+          {navigation.map((item) => (
+            <Entry key={item.href} item={item} isActive={pathname === item.href} />
+          ))}
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   )
 }
 
 function Entry({ item, isActive }: { item: NavigationItem; isActive: boolean }) {
+  if (!item.shown) return null
+
   return (
     <Link
-      title={item.name}
+      title={item.label}
       href={item.href}
       className={cn(
         isActive ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100" : "text-zinc-500 dark:text-zinc-400",
@@ -48,12 +55,7 @@ function Entry({ item, isActive }: { item: NavigationItem; isActive: boolean }) 
       )}
     >
       <div className="w-full items-center gap-1.5 pr-4 lg:pr-16">
-        <span>{item.name}</span>
-        {item.isNew && (
-          <span className="inline-flex items-center rounded-full bg-teal-700 px-[5px] py-[3px] text-white dark:bg-teal-600">
-            <span className="text-3xs font-semibold leading-none tracking-tight">New</span>
-          </span>
-        )}
+        <span>{item.label}</span>
       </div>
     </Link>
   )
