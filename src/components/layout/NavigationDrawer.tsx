@@ -2,8 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import type { NavigationItem } from "@/types"
 
+import { cn } from "@/lib/utils"
+import { navigation } from "@/lib/config"
+import { MenuIcon } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Drawer,
@@ -13,10 +18,6 @@ import {
   DrawerTrigger,
   DrawerDescription,
 } from "@/components/ui/drawer"
-
-import { MenuIcon } from "lucide-react"
-import { NavigationItem } from "@/types"
-import { navigation } from "@/lib/config"
 
 export function NavigationDrawer() {
   const pathname = usePathname()
@@ -32,10 +33,12 @@ export function NavigationDrawer() {
           <DrawerDescription className="sr-only">Drawer menu to navigate through the site</DrawerDescription>
         </DrawerHeader>
 
-        <ScrollArea className="h-[400px] pt-4">
-          {navigation.map((item) => (
-            <Entry key={item.href} item={item} isActive={pathname === item.href} />
-          ))}
+        <ScrollArea className="h-[400px] w-full px-4 pt-4">
+          <div className="flex w-full flex-1 flex-col items-start gap-2">
+            {navigation.map((item) => (
+              <Entry key={item.href} item={item} isActive={pathname === item.href} />
+            ))}
+          </div>
         </ScrollArea>
       </DrawerContent>
     </Drawer>
@@ -46,17 +49,11 @@ function Entry({ item, isActive }: { item: NavigationItem; isActive: boolean }) 
   if (!item.shown) return null
 
   return (
-    <Link
-      title={item.label}
-      href={item.href}
-      className={cn(
-        isActive ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100" : "text-zinc-500 dark:text-zinc-400",
-        "mx-3 flex cursor-pointer items-center justify-start gap-2 rounded-md border-0 px-3 py-2.5 leading-none transition ease-in-out",
-      )}
-    >
-      <div className="w-full items-center gap-1.5 pr-4 lg:pr-16">
+    <Link title={item.label} href={item.href} className="w-full">
+      <Button variant={isActive ? "default" : "ghost"} className="w-full justify-start pr-4 lg:pr-16">
+        {item.icon && <item.icon className="size-4" />}
         <span>{item.label}</span>
-      </div>
+      </Button>
     </Link>
   )
 }

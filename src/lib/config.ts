@@ -1,3 +1,5 @@
+import { HomeIcon, ShieldIcon, ShoppingBasketIcon, StoreIcon } from "lucide-react"
+
 export const siteConfig = {
   name: "Price Lens",
   author: "Francisco Goncalves",
@@ -15,21 +17,25 @@ export const siteConfig = {
 
 export const navigation = [
   {
+    icon: HomeIcon,
     label: "Home",
     href: "/",
     shown: true,
   },
   {
-    label: "Supermarket",
-    href: "/supermarket",
-    shown: true,
-  },
-  {
+    icon: ShoppingBasketIcon,
     label: "Selected",
     href: "/selected",
     shown: true,
   },
   {
+    icon: StoreIcon,
+    label: "Supermarket",
+    href: "/supermarket",
+    shown: true,
+  },
+  {
+    icon: ShieldIcon,
     label: "Admin",
     href: "/admin",
     shown: process.env.NODE_ENV === "development",

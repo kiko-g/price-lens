@@ -2,6 +2,7 @@ export type NavigationItem = {
   href: string
   label: string
   shown?: boolean
+  icon?: React.ElementType
 }
 
 export interface Product {
