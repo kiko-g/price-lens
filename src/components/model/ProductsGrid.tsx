@@ -1,6 +1,7 @@
 "use client"
 
 import axios from "axios"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { type Product } from "@/types"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import { CircleOffIcon, EraserIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
+import { CircleOffIcon, DeleteIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
 
 type Props = {
   page?: number
@@ -19,6 +20,8 @@ type Props = {
 }
 
 export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Props) {
+  const router = useRouter()
+
   const [page, setPage] = useState(initialPage)
   const [query, setQuery] = useState(initialQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
@@ -112,18 +115,33 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
   }
 
   if (products.length === 0 && status === PageStatus.Loaded) {
-    return <Wrapper>No products found. Check back soon!</Wrapper>
+    return (
+      <Wrapper>
+        <CircleOffIcon className="h-8 w-8" />
+        <p>No products found. Check back soon!</p>
+        <Button
+          variant="default"
+          onClick={() => {
+            updateParams({ q: "", page: 1 })
+            location.reload()
+          }}
+        >
+          <span>Clear search</span>
+          <DeleteIcon />
+        </Button>
+      </Wrapper>
+    )
   }
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <div className="mb-2 flex w-full flex-col items-end justify-between gap-3 lg:flex-row lg:items-center">
-        <div className="relative w-full flex-1">
+      <div className="mb-4 flex w-full flex-col items-end justify-between gap-2 md:mb-2 md:gap-6 lg:flex-row lg:items-center">
+        <div className="relative flex w-full flex-1 gap-2">
           <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search products..."
-            className="pl-8"
+            className="max-w-4xl pl-8"
             value={query}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter") handleSubmit()
@@ -133,18 +151,14 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
               if (typeof value === "string") setQuery(value)
             }}
           />
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={() => setQuery("")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/50 dark:hover:text-white"
-          >
-            <EraserIcon />
+
+          <Button variant="outline-destructive" size="icon" onClick={() => setQuery("")}>
+            <DeleteIcon />
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <div className="isolate flex -space-x-px">
+        <div className="flex w-full flex-wrap gap-2 md:w-auto">
+          <div className="isolate flex flex-1 -space-x-px">
             <Button
               variant="outline"
               className="rounded-r-none focus:z-10"
@@ -155,7 +169,7 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
             </Button>
 
             <Select value={page.toString()} onValueChange={handlePageChange}>
-              <SelectTrigger className="rounded-none">
+              <SelectTrigger className="w-full justify-center rounded-none">
                 <SelectValue placeholder={page} />
               </SelectTrigger>
               <SelectContent>

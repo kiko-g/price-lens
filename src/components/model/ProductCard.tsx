@@ -225,7 +225,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon-sm">
+            <Button variant="outline" size="icon-sm" className="text-red-600 dark:text-red-500" disabled>
               <HeartIcon />
             </Button>
 
@@ -334,7 +334,7 @@ function DrawerSheet({
 
         <div className="px-4 pb-4 pt-2">{children}</div>
 
-        <DrawerFooter className="pt-2">
+        <DrawerFooter className="sr-only pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
           </DrawerClose>

@@ -85,7 +85,7 @@ export function ProductChart({ product }: { product: Product }) {
     <Card>
       <CardHeader>
         <CardTitle>Price Evolution</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardDescription>Select a range to see the price variations.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-6 flex flex-wrap gap-2">
@@ -121,7 +121,7 @@ export function ProductChart({ product }: { product: Product }) {
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Line
               dataKey="desktop"
-              type="natural"
+              type="linear"
               stroke="var(--color-desktop)"
               strokeWidth={2}
               dot={{
