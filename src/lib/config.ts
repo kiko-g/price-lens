@@ -20,6 +20,11 @@ export const navigation = [
     shown: true,
   },
   {
+    label: "Supermarket",
+    href: "/supermarket",
+    shown: true,
+  },
+  {
     label: "Selected",
     href: "/selected",
     shown: true,

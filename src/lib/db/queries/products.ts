@@ -1,6 +1,21 @@
 import { createClient } from "@/lib/supabase/server"
 import type { Product } from "@/types"
 
+export const selectedProducts = [
+  {
+    id: "2575",
+    name: "Leite Meio Gordo Pastagem",
+  },
+  {
+    id: "3526",
+    name: "Gelado Cheesecake Morango",
+  },
+  {
+    id: "5912",
+    name: "Creatina Creapure",
+  },
+]
+
 export const productQueries = {
   async getAll({ page = 1, limit = 20, query = "" }: { page: number; limit: number; query?: string }) {
     const supabase = createClient()

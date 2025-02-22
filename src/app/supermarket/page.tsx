@@ -19,15 +19,13 @@ type HomeProps = {
 
 export default async function Home({ searchParams }: HomeProps) {
   const params = await Promise.resolve(searchParams)
+  const page = params.page ? parseInt(params.page) : 1
+  const q = params.q ?? ""
 
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <h3>Price Lens</h3>
-        <p>
-          A location for users to see through prices. Track prices on relevant products that everyone cares about, get a
-          sense of what inflation actually feels like on Supermarkets.
-        </p>
+        <ProductsGrid page={page} q={q} />
       </div>
     </Layout>
   )

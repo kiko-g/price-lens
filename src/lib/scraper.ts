@@ -1,12 +1,11 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
 import type { Product } from "@/types"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
 import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
-import { createClient } from "./supabase/client"
 import { productQueries } from "./db/queries/products"
 
 export const fetchHtml = async (url: string) => {
@@ -20,7 +19,7 @@ export const fetchHtml = async (url: string) => {
       headers: {
         "User-Agent": "Mozilla/5.0",
       },
-      timeout: 10000,
+      timeout: 5000,
     })
 
     if (!response.data) {
@@ -191,12 +190,6 @@ export const processBatch = async (urls: string[]) => {
     urls.map((url) => continenteProductPageScraper(url).catch((err) => ({ url, error: err }))),
   )
   return products
-}
-
-export const createOrUpdateProducts = async (products: Product[]) => {
-  const supabase = createClient()
-  const { data, error } = await supabase.from("products").upsert(products)
-  return { data, error }
 }
 
 export function isValidProduct(product: any): product is Product {
