@@ -4,25 +4,37 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { type Product } from "@/types"
+import { searchTypes, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, getCenteredArray, PageStatus } from "@/lib/utils"
 
-import { ProductCard } from "./ProductCard"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ProductCard, ProductCardSkeleton } from "./ProductCard"
 
 import { CircleOffIcon, DeleteIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
 
 type Props = {
   page?: number
   q?: string
+  t?: SearchType
 }
 
-export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Props) {
+export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "", t: initialSearchType = "name" }: Props) {
+  const limit = 10
   const router = useRouter()
 
   const [page, setPage] = useState(initialPage)
+  const [searchType, setSearchType] = useState<SearchType>(initialSearchType)
   const [query, setQuery] = useState(initialQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [status, setStatus] = useState(PageStatus.Loading)
@@ -39,7 +51,8 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
         params: {
           ...(query && { q: query }),
           page,
-          limit: 10,
+          limit,
+          searchType,
         },
       })
       setProducts(data.data || [])
@@ -87,30 +100,45 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
     setPage(parseInt(value))
   }
 
+  function clearSearch() {
+    setQuery("")
+    setSearchType("name")
+    page !== 1 ? setPage(1) : fetchProducts()
+  }
+
   useEffect(() => {
-    updateParams({ page })
     fetchProducts()
   }, [page])
 
   useEffect(() => {
-    updateParams({ q: query })
-  }, [query])
+    updateParams({ page, q: query, t: searchType })
+  }, [page, query, searchType])
 
   if (status === PageStatus.Error) {
     return (
       <Wrapper status={PageStatus.Error}>
         <CircleOffIcon className="h-6 w-6" />
         <p>Error fetching products. Please try again.</p>
+        <Button
+          variant="default"
+          onClick={() => {
+            location.reload()
+          }}
+        >
+          <span>Try again</span>
+          <RefreshCcwIcon />
+        </Button>
       </Wrapper>
     )
   }
 
   if (isLoading) {
     return (
-      <Wrapper status={PageStatus.Loading}>
-        <Loader2Icon className="h-6 w-6 animate-spin" />
-        <p>Loading...</p>
-      </Wrapper>
+      <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+        {Array.from({ length: limit }).map((_, index) => (
+          <ProductCardSkeleton key={`product-skeleton-${index}`} />
+        ))}
+      </div>
     )
   }
 
@@ -136,23 +164,39 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "" }: Pr
   return (
     <div className="flex w-full flex-col gap-1">
       <div className="mb-4 flex w-full flex-col items-end justify-between gap-2 md:mb-2 md:gap-6 lg:flex-row lg:items-center">
-        <div className="relative flex w-full flex-1 gap-2">
-          <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search products..."
-            className="max-w-4xl pl-8"
-            value={query}
-            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-              if (e.key === "Enter") handleSubmit()
-            }}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const value = e.target.value
-              if (typeof value === "string") setQuery(value)
-            }}
-          />
-
-          <Button variant="outline-destructive" size="icon" onClick={() => setQuery("")}>
+        <div className="flex w-full flex-1 gap-2">
+          <div className="relative w-full max-w-4xl">
+            <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pl-8"
+              value={query}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === "Enter") handleSubmit()
+              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value
+                if (typeof value === "string") setQuery(value)
+              }}
+            />
+            <Select value={searchType} onValueChange={(value) => setSearchType(value as SearchType)}>
+              <SelectTrigger className="absolute right-2 top-1/2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pl-1 pr-0 text-xs text-muted-foreground shadow-none transition hover:bg-black/5 dark:hover:bg-white/5">
+                <SelectValue placeholder="Search by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Search by</SelectLabel>
+                  {searchTypes.map((type) => (
+                    <SelectItem key={type} value={type} className="capitalize">
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button variant="outline-destructive" size="icon" onClick={clearSearch}>
             <DeleteIcon />
           </Button>
         </div>

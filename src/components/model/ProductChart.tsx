@@ -82,7 +82,7 @@ export function ProductChart({ product }: { product: Product }) {
   }, [selectedRange])
 
   return (
-    <Card>
+    <Card className="border-blue-700/10 bg-blue-700/[3%] shadow-none dark:border-transparent dark:bg-blue-600/10">
       <CardHeader>
         <CardTitle>Price Evolution</CardTitle>
         <CardDescription>Select a range to see the price variations.</CardDescription>

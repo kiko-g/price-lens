@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import type { Product } from "@/types"
+import type { SearchType } from "@/types/extra"
 
 export const selectedProducts = [
   {
@@ -17,7 +18,17 @@ export const selectedProducts = [
 ]
 
 export const productQueries = {
-  async getAll({ page = 1, limit = 20, query = "" }: { page: number; limit: number; query?: string }) {
+  async getAll({
+    page = 1,
+    limit = 20,
+    query = "",
+    searchType = "name",
+  }: {
+    page: number
+    limit: number
+    query?: string
+    searchType?: SearchType
+  }) {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
@@ -25,7 +36,7 @@ export const productQueries = {
 
     if (query) {
       const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      dbQuery = dbQuery.ilike("name", `%${normalizedQuery}%`)
+      dbQuery = dbQuery.ilike(searchType, `%${normalizedQuery}%`)
     }
 
     return dbQuery.range(offset, offset + limit - 1)

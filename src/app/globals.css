@@ -64,7 +64,7 @@
   }
 
   *::selection {
-    @apply bg-zinc-900 text-white dark:bg-teal-600/30 dark:text-teal-400;
+    @apply bg-zinc-900 text-white dark:bg-blue-600/40 dark:text-blue-300;
   }
 
   pre *::selection {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
+import { SearchType } from "@/types/extra"
 import { productQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
@@ -8,12 +9,14 @@ export async function GET(req: NextRequest) {
     const queryParam = params.get("q") ?? ""
     const pageParam = params.get("page") ?? "1"
     const limitParam = params.get("limit") ?? "20"
+    const searchTypeParam = params.get("searchType") ?? "name"
 
     const query = queryParam
     const page = parseInt(pageParam, 10) || 1
     const limit = parseInt(limitParam, 10) || 20
+    const searchType = searchTypeParam as SearchType
 
-    const { data, error, count } = await productQueries.getAll({ page, limit, query })
+    const { data, error, count } = await productQueries.getAll({ page, limit, query, searchType })
 
     if (error) {
       throw new Error(error.message)

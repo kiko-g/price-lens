@@ -25,7 +25,7 @@ export default async function Home({ searchParams }: Props) {
   return (
     <Layout>
       <GridHome />
-      <div className="z-20 flex w-full flex-1 flex-col items-center justify-start gap-3 px-4 py-8 md:items-start md:gap-4 md:px-20 md:py-20">
+      <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 md:items-start md:justify-start md:gap-4 md:px-20 md:py-20">
         <h1 className="animate-fade-in z-10 translate-y-[-1rem] text-balance bg-gradient-to-br from-black from-30% to-black/40 bg-clip-text py-2 text-center text-4xl font-medium leading-none tracking-tighter text-transparent opacity-0 [--animation-delay:200ms] dark:from-white dark:to-white/40 sm:text-5xl md:text-left md:text-6xl lg:text-7xl">
           Price Lens
           <br className="block" />

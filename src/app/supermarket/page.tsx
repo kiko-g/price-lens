@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getSearchType, type SearchType } from "@/types/extra"
 
 import { Layout } from "@/components/layout"
 import { ProductsGrid } from "@/components/model/ProductsGrid"
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 
 type SearchParams = {
   q?: string
+  t?: SearchType
   page?: string
 }
 
@@ -20,12 +22,13 @@ type Props = {
 export default async function Home({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
+  const searchType = getSearchType(params.t ?? "name")
   const q = params.q ?? ""
 
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <ProductsGrid page={page} q={q} />
+        <ProductsGrid page={page} q={q} t={searchType} />
       </div>
     </Layout>
   )
