@@ -105,6 +105,7 @@ export const continenteProductPageScraper = async (url: string) => {
       discount: priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0,
       image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
       updated_at: new Date().toISOString().replace("Z", "+00:00"),
+      origin_id: 1,
       created_at: null,
     }
 

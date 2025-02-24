@@ -33,6 +33,28 @@ export const productUnavailable: Product = {
   category_3: "",
   created_at: null,
   updated_at: null,
+  origin_id: 1,
+}
+
+export const mockProduct: Product = {
+  url: "https://www.continente.pt/produto/gelado-cheesecake-morango-haagen-dazs-6787662.html",
+  name: "Gelado Cheesecake Morango",
+  brand: "Häagen-Dazs",
+  pack: "460 ml",
+  price: 7.79,
+  price_recommended: null,
+  price_per_major_unit: 16.93,
+  major_unit: "/lt",
+  image:
+    "https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw971b0b0f/images/col/678/6787662-hero.jpg?sw=500&sh=500",
+  category: "Congelados",
+  category_2: "Gelados",
+  category_3: "Gelados Americanos",
+  discount: 0,
+  id: 3526,
+  created_at: "2025-02-21T12:31:34.343+00:00",
+  updated_at: "2025-02-21T12:31:34.343+00:00",
+  origin_id: 1,
 }
 
 export function resizeImgSrc(src: string, width: number, height: number) {

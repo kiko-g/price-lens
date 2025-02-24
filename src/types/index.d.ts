@@ -6,6 +6,7 @@ export type NavigationItem = {
 }
 
 export interface Product {
+  id?: number
   url: string
   name: string
   brand: string
@@ -21,6 +22,7 @@ export interface Product {
   category_3: string | null
   created_at: string | null
   updated_at: string | null
+  origin_id: number | null
 }
 
 export type ProductWithId = Product & { id: string }
