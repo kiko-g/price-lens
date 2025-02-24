@@ -4,12 +4,20 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { type Product } from "@/types"
-import { searchTypes, type SearchType } from "@/types/extra"
+import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, getCenteredArray, PageStatus } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -21,21 +29,36 @@ import {
 } from "@/components/ui/select"
 import { ProductCard, ProductCardSkeleton } from "./ProductCard"
 
-import { CircleOffIcon, DeleteIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
+import {
+  ArrowDownAZ,
+  ArrowDownAZIcon,
+  ArrowDownWideNarrowIcon,
+  ArrowUpAZ,
+  ArrowUpAZIcon,
+  ArrowUpWideNarrowIcon,
+  CircleOffIcon,
+  DeleteIcon,
+  RefreshCcwIcon,
+  SearchIcon,
+} from "lucide-react"
 
 type Props = {
   page?: number
   q?: string
   t?: SearchType
+  sort?: SortByType
 }
 
-export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "", t: initialSearchType = "name" }: Props) {
+export function ProductsGrid(props: Props) {
+  const { page: initPage = 1, q: initQuery = "", t: initSearchType = "name", sort: initSortBy = "a-z" } = props
+
   const limit = 10
   const router = useRouter()
 
-  const [page, setPage] = useState(initialPage)
-  const [searchType, setSearchType] = useState<SearchType>(initialSearchType)
-  const [query, setQuery] = useState(initialQuery)
+  const [page, setPage] = useState(initPage)
+  const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
+  const [searchType, setSearchType] = useState<SearchType>(initSearchType)
+  const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
@@ -111,8 +134,8 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "", t: i
   }, [page])
 
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType })
-  }, [page, query, searchType])
+    updateParams({ page, q: query, t: searchType, sort: sortBy })
+  }, [page, query, searchType, sortBy])
 
   if (status === PageStatus.Error) {
     return (
@@ -165,7 +188,7 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "", t: i
     <div className="flex w-full flex-col gap-1">
       <div className="mb-4 flex w-full flex-col items-end justify-between gap-2 md:mb-2 md:gap-6 lg:flex-row lg:items-center">
         <div className="flex w-full flex-1 gap-2">
-          <div className="relative w-full max-w-4xl">
+          <div className="relative w-full">
             <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
@@ -229,6 +252,38 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "", t: i
               Next
             </Button>
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-[120px] justify-start">
+                {sortBy === "a-z" && <ArrowDownAZIcon className="mr-2 h-4 w-4" />}
+                {sortBy === "z-a" && <ArrowUpAZIcon className="mr-2 h-4 w-4" />}
+                {sortBy === "price-low-high" && <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />}
+                {sortBy === "price-high-low" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
+                Sort by
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSortBy("a-z")}>
+                <ArrowDownAZ className="mr-2 h-4 w-4" />
+                Name A-Z
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("z-a")}>
+                <ArrowUpAZ className="mr-2 h-4 w-4" />
+                Name Z-A
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("price-low-high")}>
+                <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />
+                Price: Low to High
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
+                <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />
+                Price: High to Low
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             variant="secondary"

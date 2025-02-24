@@ -4,7 +4,25 @@ export function getSearchType(searchType: string): SearchType {
   if (searchTypes.includes(searchType as SearchType)) {
     return searchType as SearchType
   }
-  return "name"
+  return searchTypes[0]
 }
 
 export type SearchType = (typeof searchTypes)[number]
+
+export const sortByTypes = ["a-z", "z-a", "price-low-high", "price-high-low"]
+export const sortTypesLabels: {
+  [key in SortByType]: string
+} = {
+  "a-z": "A to Z",
+  "z-a": "Z to A",
+  "price-low-high": "Price: Low to High",
+  "price-high-low": "Price: High to Low",
+}
+export const getSortByType = (sortBy: string) => {
+  if (sortByTypes.includes(sortBy as SortByType)) {
+    return sortBy as SortByType
+  }
+  return sortByTypes[0]
+}
+
+export type SortByType = (typeof sortByTypes)[number]

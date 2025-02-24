@@ -92,11 +92,11 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
         )}
 
         <div className="absolute left-2 top-2 flex flex-col gap-1">
-          {product.price_per_major_unit && product.major_unit && (
+          {product.price_per_major_unit && product.major_unit ? (
             <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
               {product.price_per_major_unit}€{product.major_unit}
             </Badge>
-          )}
+          ) : null}
 
           {product.discount ? (
             <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
@@ -198,7 +198,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           </TooltipProvider>
 
           <span className="mt-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
-            {product.brand ? product.brand : <span className="opacity-30">No Brand</span>}
+            {product.brand ? product.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
           <h2 className="mb-2 line-clamp-2 text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
@@ -215,13 +215,13 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
               </div>
             ) : null}
 
-            {!product.price_recommended && product.price && (
+            {!product.price_recommended && product.price ? (
               <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{product.price}€</span>
-            )}
+            ) : null}
 
-            {!product.price_recommended && !product.price && (
+            {!product.price_recommended && !product.price ? (
               <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span>
-            )}
+            ) : null}
           </div>
 
           <div className="flex items-center gap-2">
