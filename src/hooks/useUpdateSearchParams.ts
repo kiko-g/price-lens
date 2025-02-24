@@ -13,8 +13,14 @@ export function useUpdateSearchParams() {
     }
 
     const params = new URLSearchParams(searchParams.toString())
+    const noQuery = newParams.q === ""
+
     for (const [key, value] of Object.entries(newParams)) {
-      if (value === undefined || value === null || (key === "q" && value === "")) {
+      const isBlank = value === undefined || value === null
+      const isQueryEmpty = key === "q" && value === ""
+      const isSearchTypeName = noQuery && key === "t" && value === "name"
+
+      if (isBlank || isQueryEmpty || isSearchTypeName) {
         params.delete(key)
       } else {
         params.set(key, String(value))

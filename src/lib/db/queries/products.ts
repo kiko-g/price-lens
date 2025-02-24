@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
 import type { Product } from "@/types"
-import type { SearchType } from "@/types/extra"
+import type { SearchType, SortByType } from "@/types/extra"
 
 type GetAllQuery = {
   page: number
   limit: number
   query?: string
+  sort?: SortByType
   searchType?: SearchType
   nonNulls?: boolean
 }
@@ -26,17 +27,40 @@ export const selectedProducts = [
 ]
 
 export const productQueries = {
-  async getAll({ page = 1, limit = 20, query = "", searchType = "name", nonNulls = true }: GetAllQuery) {
+  async getAll({ page = 1, limit = 20, query = "", searchType = "name", nonNulls = true, sort = "a-z" }: GetAllQuery) {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
     let dbQuery = supabase.from("products").select("*", { count: "exact" })
 
-    if (nonNulls) dbQuery = dbQuery.not("name", "is", null)
+    if (sort && sort === "only-nulls") {
+      dbQuery = dbQuery.is("name", null)
+      dbQuery = dbQuery.order("url", { ascending: true })
+      return dbQuery.range(offset, offset + limit - 1)
+    }
+
+    if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 
     if (query) {
       const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       dbQuery = dbQuery.ilike(searchType, `%${normalizedQuery}%`)
+    }
+
+    if (sort) {
+      switch (sort) {
+        case "a-z":
+          dbQuery = dbQuery.order("name", { ascending: true })
+          break
+        case "z-a":
+          dbQuery = dbQuery.order("name", { ascending: false })
+          break
+        case "price-low-high":
+          dbQuery = dbQuery.order("price", { ascending: true })
+          break
+        case "price-high-low":
+          dbQuery = dbQuery.order("price", { ascending: false })
+          break
+      }
     }
 
     return dbQuery.range(offset, offset + limit - 1)

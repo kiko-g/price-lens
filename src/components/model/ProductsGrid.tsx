@@ -27,7 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ProductCard, ProductCardSkeleton } from "./ProductCard"
+
+import { ProductCard, ProductCardSkeleton } from "@/components/model/ProductCard"
+import { Wrapper } from "@/components/SectionWrapper"
 
 import {
   ArrowDownAZ,
@@ -76,6 +78,7 @@ export function ProductsGrid(props: Props) {
           page,
           limit,
           searchType,
+          sort: sortBy,
         },
       })
       setProducts(data.data || [])
@@ -258,8 +261,9 @@ export function ProductsGrid(props: Props) {
               <Button variant="outline" className="w-[120px] justify-start">
                 {sortBy === "a-z" && <ArrowDownAZIcon className="mr-2 h-4 w-4" />}
                 {sortBy === "z-a" && <ArrowUpAZIcon className="mr-2 h-4 w-4" />}
-                {sortBy === "price-low-high" && <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />}
-                {sortBy === "price-high-low" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
+                {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
+                {sortBy === "price-high-low" && <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />}
+                {sortBy === "only-nulls" && <CircleOffIcon className="mr-2 h-4 w-4" />}
                 Sort by
               </Button>
             </DropdownMenuTrigger>
@@ -274,13 +278,17 @@ export function ProductsGrid(props: Props) {
                 <ArrowUpAZ className="mr-2 h-4 w-4" />
                 Name Z-A
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
+                <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />
+                Price: High to Low
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy("price-low-high")}>
                 <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />
                 Price: Low to High
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
-                <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />
-                Price: High to Low
+              <DropdownMenuItem onClick={() => setSortBy("only-nulls")}>
+                <CircleOffIcon className="mr-2 h-4 w-4" />
+                Invalid products
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -313,21 +321,6 @@ export function ProductsGrid(props: Props) {
           <ProductCard key={`product-${productIdx}`} product={product} />
         ))}
       </div>
-    </div>
-  )
-}
-
-function Wrapper({ children, status = PageStatus.Loaded }: { children: React.ReactNode; status?: PageStatus }) {
-  return (
-    <div
-      className={cn(
-        "flex w-full flex-1 flex-col items-center justify-center gap-4 rounded-lg border p-4",
-        status === PageStatus.Loading && "border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10",
-        status === PageStatus.Loaded && "bg-zinc-100 dark:bg-zinc-900",
-        status === PageStatus.Error && "border-red-500/20 bg-red-500/5 dark:border-red-500/30 dark:bg-red-500/10",
-      )}
-    >
-      {children}
     </div>
   )
 }

@@ -225,7 +225,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon-sm" className="text-red-600 dark:text-red-500" disabled>
+            <Button variant="outline" size="icon-sm" disabled>
               <HeartIcon />
             </Button>
 
