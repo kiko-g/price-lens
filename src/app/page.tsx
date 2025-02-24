@@ -3,8 +3,8 @@ import { mockProduct } from "@/lib/utils"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
+import { Brands } from "@/components/home/Brands"
 import { GridHome } from "@/components/home/GridHome"
-import { ProductChart } from "@/components/model/ProductChart"
 
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 import { MockChartA } from "@/components/home/MockChart"
@@ -57,9 +57,13 @@ export default async function Home({ searchParams }: Props) {
               </Link>
             </Button>
           </div>
+
+          <Brands className="mt-8" />
         </div>
 
-        <MockChartA className="my-8 w-full max-w-full flex-1 self-start border-transparent bg-gradient-to-br shadow-none lg:my-0 lg:w-auto lg:max-w-md lg:border-border" />
+        <div className="my-8 w-full max-w-full flex-1 self-start lg:my-0 lg:w-auto lg:max-w-md">
+          <MockChartA className="w-full border-zinc-100 bg-gradient-to-br shadow-none dark:border-zinc-800 lg:border-border" />
+        </div>
       </div>
     </Layout>
   )
