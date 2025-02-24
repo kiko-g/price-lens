@@ -24,8 +24,8 @@ export const navigation = [
   },
   {
     icon: ShoppingBasketIcon,
-    label: "Selected",
-    href: "/selected",
+    label: "Products",
+    href: "/products",
     shown: true,
   },
   {

@@ -8,6 +8,7 @@ import { ProductChart } from "@/components/model/ProductChart"
 
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 import { MockChartA } from "@/components/home/MockChart"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Price Lens",
@@ -42,14 +43,18 @@ export default async function Home({ searchParams }: Props) {
           </p>
 
           <div className="animate-fade-in flex flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">
-            <Button variant="default" size="lg" className="w-full md:w-auto">
-              Start Tracking
-              <BadgeEuroIcon />
+            <Button variant="default" size="lg" className="w-full md:w-auto" asChild>
+              <Link href="/products">
+                Start Tracking
+                <BadgeEuroIcon />
+              </Link>
             </Button>
 
-            <Button variant="outline" size="lg" className="w-full md:w-auto">
-              Supermarket Products
-              <ShoppingBasketIcon />
+            <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
+              <Link href="/supermarket">
+                Supermarket Products
+                <ShoppingBasketIcon />
+              </Link>
             </Button>
           </div>
         </div>
