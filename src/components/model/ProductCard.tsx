@@ -239,19 +239,17 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
                   <ProductChart product={product} />
                 </TabsContent>
                 <TabsContent value="technical">
-                  <Code code={JSON.stringify(product, null, 2)} language="json" options={{ margin: "0" }} />
+                  <p className="mb-3 text-sm text-muted-foreground">Inspect the collected data about this product.</p>
+
+                  <div className="flex flex-col gap-4 pb-8">
+                    <Code code={JSON.stringify(product, null, 2)} language="json" />
+                  </div>
                 </TabsContent>
               </Tabs>
             </DrawerSheet>
           </div>
         </div>
       </div>
-
-      <footer className="mt-2 flex flex-col items-end justify-end gap-0 border-t pt-2">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          {product.created_at || product.updated_at ? formatTimestamptz(product.updated_at) : "No update record"}
-        </p>
-      </footer>
     </div>
   )
 }

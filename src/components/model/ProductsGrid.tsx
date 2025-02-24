@@ -150,7 +150,7 @@ export function ProductsGrid({ page: initialPage = 1, q: initialQuery = "", t: i
         <Button
           variant="default"
           onClick={() => {
-            updateParams({ q: "", page: 1 })
+            updateParams(null)
             location.reload()
           }}
         >

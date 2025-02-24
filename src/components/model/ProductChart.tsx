@@ -8,6 +8,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { formatTimestamptz } from "@/lib/utils"
 
 function getRangeLabel(range: Range) {
   switch (range) {
@@ -141,6 +142,12 @@ export function ProductChart({ product }: { product: Product }) {
         <div className="leading-none text-muted-foreground">
           Showing price evolution for the last{" "}
           <strong className="dark:text-white">{getRangeLabel(selectedRange)}</strong>
+        </div>
+
+        <div className="mt-2 flex w-full items-center justify-end border-t pt-2 text-xs text-muted-foreground">
+          {product.created_at || product.updated_at
+            ? `Last update: ${formatTimestamptz(product.updated_at)}`
+            : "No update record"}
         </div>
       </CardFooter>
     </Card>

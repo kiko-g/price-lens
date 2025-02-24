@@ -2,6 +2,14 @@ import { createClient } from "@/lib/supabase/server"
 import type { Product } from "@/types"
 import type { SearchType } from "@/types/extra"
 
+type GetAllQuery = {
+  page: number
+  limit: number
+  query?: string
+  searchType?: SearchType
+  nonNulls?: boolean
+}
+
 export const selectedProducts = [
   {
     id: "2575",
@@ -18,21 +26,13 @@ export const selectedProducts = [
 ]
 
 export const productQueries = {
-  async getAll({
-    page = 1,
-    limit = 20,
-    query = "",
-    searchType = "name",
-  }: {
-    page: number
-    limit: number
-    query?: string
-    searchType?: SearchType
-  }) {
+  async getAll({ page = 1, limit = 20, query = "", searchType = "name", nonNulls = true }: GetAllQuery) {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
     let dbQuery = supabase.from("products").select("*", { count: "exact" })
+
+    if (nonNulls) dbQuery = dbQuery.not("name", "is", null)
 
     if (query) {
       const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -40,6 +40,16 @@ export const productQueries = {
     }
 
     return dbQuery.range(offset, offset + limit - 1)
+  },
+
+  async getAllNulls({ page = 1, limit = 20 }: { page?: number; limit?: number }) {
+    const supabase = createClient()
+    const offset = (page - 1) * limit
+    return supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .is("name", null)
+      .range(offset, offset + limit - 1)
   },
 
   async getInvalid() {

@@ -6,7 +6,12 @@ export function useUpdateSearchParams() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  function updateParams(newParams: Record<string, string | number | null | undefined>) {
+  function updateParams(newParams: Record<string, string | number | null | undefined> | null) {
+    if (newParams === null) {
+      router.push(window.location.pathname)
+      return
+    }
+
     const params = new URLSearchParams(searchParams.toString())
     for (const [key, value] of Object.entries(newParams)) {
       if (value === undefined || value === null || (key === "q" && value === "")) {
