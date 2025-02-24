@@ -294,7 +294,7 @@ export function ProductsGrid(props: Props) {
           </DropdownMenu>
 
           <Button
-            variant="secondary"
+            variant="outline-secondary"
             size="icon"
             onClick={updateProductsInPage}
             disabled={isLoading}

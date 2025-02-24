@@ -5,7 +5,6 @@ import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
 import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
-import { createEmptyProduct, createOrUpdateProduct } from "./supabase/actions"
 import { productQueries } from "./db/queries/products"
 
 export const fetchHtml = async (url: string) => {
@@ -169,9 +168,10 @@ export const crawlContinenteCategoryPages = async () => {
     const links = await continenteCategoryPageScraper(category.url)
     console.info("Finished scraping", category.name, links.length)
     for (const link of links) {
-      const product = createEmptyProduct()
-      product.url = link
-      await createOrUpdateProduct(product)
+      await productQueries.upsertBlank({
+        url: link,
+        created_at: new Date().toISOString().replace("Z", "+00:00"),
+      })
     }
     console.log("Finished storing", category.name, links.length, performance.now() - start)
   }
@@ -215,7 +215,7 @@ export const scrapeAndReplaceProduct = async (url: string | null) => {
     return NextResponse.json({ error: "Invalid product data structure", url }, { status: 422 })
   }
 
-  const { data, error } = await createOrUpdateProduct(product)
+  const { data, error } = await productQueries.createOrUpdateProduct(product)
 
   if (error) {
     return NextResponse.json({ error: "Database operation failed", details: error }, { status: 500 })

@@ -31,7 +31,7 @@ export const productQueries = {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
-    let dbQuery = supabase.from("products").select("*", { count: "exact" })
+    let dbQuery = supabase.from("supermarket_products").select("*", { count: "exact" })
 
     if (sort && sort === "only-nulls") {
       dbQuery = dbQuery.is("name", null)
@@ -70,7 +70,7 @@ export const productQueries = {
     const supabase = createClient()
     const offset = (page - 1) * limit
     return supabase
-      .from("products")
+      .from("supermarket_products")
       .select("*", { count: "exact" })
       .is("name", null)
       .range(offset, offset + limit - 1)
@@ -78,30 +78,35 @@ export const productQueries = {
 
   async getInvalid() {
     const supabase = createClient()
-    return supabase.from("products").select("*").not("url", "is", null).not("created_at", "is", null).is("name", null)
+    return supabase
+      .from("supermarket_products")
+      .select("*")
+      .not("url", "is", null)
+      .not("created_at", "is", null)
+      .is("name", null)
   },
 
   async getUncharted() {
     const supabase = createClient()
-    return supabase.from("products").select("*").is("created_at", null)
+    return supabase.from("supermarket_products").select("*").is("created_at", null)
   },
 
   async getByIds(ids: string[]) {
     const supabase = createClient()
-    return supabase.from("products").select("*").in("id", ids)
+    return supabase.from("supermarket_products").select("*").in("id", ids)
   },
 
   async getByUrlSubstrs(substrs: string[]) {
     const supabase = createClient()
     return supabase
-      .from("products")
+      .from("supermarket_products")
       .select("*")
       .ilike("url", `%${substrs.join("%")}%`)
   },
 
   async upsert(product: Product) {
     const supabase = createClient()
-    return supabase.from("products").upsert(product, {
+    return supabase.from("supermarket_products").upsert(product, {
       onConflict: "url",
       ignoreDuplicates: false,
     })
@@ -109,7 +114,7 @@ export const productQueries = {
 
   async upsertBlank({ url, created_at }: { url: string; created_at: string }) {
     const supabase = createClient()
-    return supabase.from("products").upsert(
+    return supabase.from("supermarket_products").upsert(
       {
         url,
         created_at,
@@ -119,5 +124,26 @@ export const productQueries = {
         ignoreDuplicates: false,
       },
     )
+  },
+
+  async createOrUpdateProduct(product: Product) {
+    const supabase = createClient()
+    const { data: existingProduct } = await supabase
+      .from("supermarket_products")
+      .select("created_at")
+      .eq("url", product.url)
+      .single()
+
+    const productToUpsert = {
+      ...product,
+      created_at: product.created_at || existingProduct?.created_at || product.updated_at,
+    }
+
+    const { data, error } = await supabase.from("supermarket_products").upsert(productToUpsert, {
+      onConflict: "url",
+      ignoreDuplicates: false,
+    })
+
+    return { data, error }
   },
 }
