@@ -95,6 +95,21 @@ export function ProductsGrid(props: Props) {
     }
   }
 
+  async function updateProduct(product: Product): Promise<boolean> {
+    if (!product || !product.url) return false
+
+    const response = await fetch(`/api/products/replace?url=${product.url}`)
+    const data = await response.json()
+
+    if (response.status === 200) {
+      setProducts(products.map((p) => (p.url === product.url ? (data.product as Product) : p)))
+      return true
+    } else {
+      console.error(data)
+      return false
+    }
+  }
+
   async function updateProductsInPage() {
     setStatus(PageStatus.Loading)
     const urls = products.map((product) => product.url)
@@ -137,7 +152,7 @@ export function ProductsGrid(props: Props) {
 
   useEffect(() => {
     fetchProducts()
-  }, [page])
+  }, [page, sortBy])
 
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy })
@@ -329,7 +344,7 @@ export function ProductsGrid(props: Props) {
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
-          Showing {products.length} to {products.length + (page - 1) * limit} of {pagedCount} results
+          Showing {(page - 1) * limit + 1} to {Math.min(page * limit, pagedCount)} of {pagedCount} results
         </span>
 
         <span>
@@ -339,7 +354,7 @@ export function ProductsGrid(props: Props) {
 
       <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
         {products.map((product, productIdx) => (
-          <ProductCard key={`product-${productIdx}`} product={product} />
+          <ProductCard key={`product-${productIdx}`} product={product} onUpdate={() => updateProduct(product)} />
         ))}
       </div>
     </div>

@@ -29,7 +29,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { discountValueToPercentage, formatTimestamptz, imagePlaceholder, PageStatus } from "@/lib/utils"
+import { discountValueToPercentage, imagePlaceholder, PageStatus } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
   CopyIcon,
@@ -42,8 +42,12 @@ import {
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { ProductChart } from "./ProductChart"
 
-export function ProductCard({ product: initialProduct }: { product: Product }) {
-  const [product, setProduct] = useState<Product | null>(initialProduct)
+type Props = {
+  product: Product
+  onUpdate?: () => Promise<boolean> | undefined
+}
+
+export function ProductCard({ product, onUpdate }: Props) {
   const [status, setStatus] = useState<PageStatus>(PageStatus.Loaded)
 
   if (!product || !product.url) {
@@ -52,22 +56,6 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
   if (status === PageStatus.Loading) {
     return <ProductCardSkeleton />
-  }
-
-  async function handleUpdateProduct() {
-    if (!product || !product.url) return
-
-    setStatus(PageStatus.Loading)
-    const response = await fetch(`/api/products/replace?url=${product.url}`)
-    const data = await response.json()
-
-    if (response.status === 200) {
-      setProduct(data.product as Product)
-      setStatus(PageStatus.Loaded)
-    } else {
-      console.error(data)
-      setStatus(PageStatus.Error)
-    }
   }
 
   const categoryText = product.category
@@ -163,12 +151,22 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem variant="warning" asChild>
-                <Button variant="dropdown-item" onClick={handleUpdateProduct}>
-                  Update
-                  <RefreshCcwIcon />
-                </Button>
-              </DropdownMenuItem>
+              {onUpdate ? (
+                <DropdownMenuItem variant="warning" asChild>
+                  <Button
+                    variant="dropdown-item"
+                    onClick={async () => {
+                      setStatus(PageStatus.Loading)
+                      const success = await onUpdate()
+                      if (success) setStatus(PageStatus.Loaded)
+                      else setStatus(PageStatus.Error)
+                    }}
+                  >
+                    Update
+                    <RefreshCcwIcon />
+                  </Button>
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
