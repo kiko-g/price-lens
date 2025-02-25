@@ -40,6 +40,7 @@ import {
   ArrowUpWideNarrowIcon,
   CircleOffIcon,
   DeleteIcon,
+  EllipsisVerticalIcon,
   RefreshCcwIcon,
   SearchIcon,
 } from "lucide-react"
@@ -62,6 +63,7 @@ export function ProductsGrid(props: Props) {
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
+  const [pagedCount, setPagedCount] = useState(0)
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<Product[]>([])
 
@@ -82,6 +84,7 @@ export function ProductsGrid(props: Props) {
         },
       })
       setProducts(data.data || [])
+      setPagedCount(data.pagination.pagedCount || 0)
       setPaginationTotal(data.pagination.totalPages || 50)
     } catch (err) {
       setPage(1)
@@ -222,9 +225,32 @@ export function ProductsGrid(props: Props) {
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline-destructive" size="icon" onClick={clearSearch}>
-            <DeleteIcon />
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <EllipsisVerticalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="w-48" align="end">
+              <DropdownMenuItem asChild>
+                <Button variant="dropdown-item" onClick={clearSearch}>
+                  Clear search
+                  <DeleteIcon />
+                </Button>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem variant="warning" asChild>
+                <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
+                  Update products
+                  <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="flex w-full flex-wrap gap-2 md:w-auto">
@@ -239,15 +265,17 @@ export function ProductsGrid(props: Props) {
             </Button>
 
             <Select value={page.toString()} onValueChange={handlePageChange}>
-              <SelectTrigger className="w-full justify-center rounded-none">
+              <SelectTrigger className="w-auto justify-center rounded-none lg:w-full">
                 <SelectValue placeholder={page} />
               </SelectTrigger>
               <SelectContent>
-                {getCenteredArray(50, page, paginationTotal ? paginationTotal : null).map((num: number) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num}
-                  </SelectItem>
-                ))}
+                {getCenteredArray(Math.min(paginationTotal, 50), page, paginationTotal ? paginationTotal : null).map(
+                  (num: number) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}
+                    </SelectItem>
+                  ),
+                )}
               </SelectContent>
             </Select>
 
@@ -258,7 +286,7 @@ export function ProductsGrid(props: Props) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[120px] justify-start">
+              <Button variant="outline" className="w-auto justify-start lg:w-[120px]">
                 {sortBy === "a-z" && <ArrowDownAZIcon className="mr-2 h-4 w-4" />}
                 {sortBy === "z-a" && <ArrowUpAZIcon className="mr-2 h-4 w-4" />}
                 {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
@@ -293,16 +321,6 @@ export function ProductsGrid(props: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button
-            variant="outline-secondary"
-            size="icon"
-            onClick={updateProductsInPage}
-            disabled={isLoading}
-            title="Update products on page"
-          >
-            <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-          </Button>
-
           <Button variant="default" disabled={isLoading} onClick={handleSubmit}>
             Submit
           </Button>
@@ -310,7 +328,10 @@ export function ProductsGrid(props: Props) {
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>Showing {products.length} products</span>
+        <span>
+          Showing {products.length} to {products.length + (page - 1) * limit} of {pagedCount} results
+        </span>
+
         <span>
           Page {page}/{paginationTotal}
         </span>

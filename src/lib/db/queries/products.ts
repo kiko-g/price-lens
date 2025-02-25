@@ -42,8 +42,8 @@ export const productQueries = {
     if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 
     if (query) {
-      const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      dbQuery = dbQuery.ilike(searchType, `%${normalizedQuery}%`)
+      const sanitizedQuery = query.replace(/[^a-zA-Z0-9\s]/g, "").trim()
+      dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
     }
 
     if (sort) {
