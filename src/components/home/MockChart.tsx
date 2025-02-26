@@ -9,18 +9,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { BorderBeam } from "@/components/magicui/border-beam"
 
 const chartDataA = [
-  { month: "January", price: 4.99, priceRecommended: 5.99, discount: 17 },
-  { month: "February", price: 5.49, priceRecommended: 5.99, discount: 8 },
-  { month: "March", price: 5.99, priceRecommended: 6.49, discount: 8 },
-  { month: "April", price: 5.49, priceRecommended: 6.49, discount: 15 },
-  { month: "May", price: 4.99, priceRecommended: 6.49, discount: 23 },
-  { month: "June", price: 5.99, priceRecommended: 6.99, discount: 14 },
-  { month: "July", price: 6.49, priceRecommended: 6.99, discount: 7 },
-  { month: "August", price: 5.99, priceRecommended: 6.99, discount: 14 },
-  { month: "September", price: 5.49, priceRecommended: 6.49, discount: 15 },
-  { month: "October", price: 4.99, priceRecommended: 6.49, discount: 23 },
-  { month: "November", price: 5.99, priceRecommended: 6.99, discount: 14 },
-  { month: "December", price: 6.49, priceRecommended: 6.99, discount: 7 },
+  { month: "January", price: 4.99, priceRecommended: 5.99, discount: 17, pricePerUnit: 9.99 },
+  { month: "February", price: 5.49, priceRecommended: 5.99, discount: 8, pricePerUnit: 10.98 },
+  { month: "March", price: 5.99, priceRecommended: 6.49, discount: 8, pricePerUnit: 11.98 },
+  { month: "April", price: 5.49, priceRecommended: 6.49, discount: 15, pricePerUnit: 10.98 },
+  { month: "May", price: 4.99, priceRecommended: 6.49, discount: 23, pricePerUnit: 9.99 },
+  { month: "June", price: 5.99, priceRecommended: 6.99, discount: 14, pricePerUnit: 11.98 },
+  { month: "July", price: 6.49, priceRecommended: 6.99, discount: 7, pricePerUnit: 12.98 },
+  { month: "August", price: 5.99, priceRecommended: 6.99, discount: 14, pricePerUnit: 11.98 },
+  { month: "September", price: 5.49, priceRecommended: 6.49, discount: 15, pricePerUnit: 10.98 },
+  { month: "October", price: 4.99, priceRecommended: 6.49, discount: 23, pricePerUnit: 9.99 },
+  { month: "November", price: 5.99, priceRecommended: 6.99, discount: 14, pricePerUnit: 11.98 },
+  { month: "December", price: 6.49, priceRecommended: 6.99, discount: 7, pricePerUnit: 16.0 },
 ]
 
 const chartConfigA = {
@@ -35,6 +35,10 @@ const chartConfigA = {
   discount: {
     label: "Discount %",
     color: "hsl(var(--chart-3))",
+  },
+  pricePerUnit: {
+    label: "Price Per Unit",
+    color: "hsl(var(--chart-4))",
   },
 } satisfies ChartConfig
 
@@ -98,6 +102,14 @@ export function MockChartA({ className }: { className?: string }) {
               dataKey="priceRecommended"
               type="linear"
               stroke="var(--color-priceRecommended)"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              yAxisId="price"
+              dataKey="pricePerUnit"
+              type="linear"
+              stroke="var(--color-pricePerUnit)"
               strokeWidth={2}
               dot={false}
             />
