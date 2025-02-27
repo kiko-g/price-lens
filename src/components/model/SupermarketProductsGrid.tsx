@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { ProductCard, ProductCardSkeleton } from "@/components/model/ProductCard"
+import { SupermarketProductCard, ProductCardSkeleton } from "@/components/model/SupermarketProductCard"
 import { Wrapper } from "@/components/SectionWrapper"
 
 import {
@@ -54,7 +54,7 @@ type Props = {
   sort?: SortByType
 }
 
-export function ProductsGrid(props: Props) {
+export function SupermarketProductsGrid(props: Props) {
   const { page: initPage = 1, q: initQuery = "", t: initSearchType = "name", sort: initSortBy = "a-z" } = props
 
   const limit = 10
@@ -356,7 +356,11 @@ export function ProductsGrid(props: Props) {
 
       <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
         {products.map((product, productIdx) => (
-          <ProductCard key={`product-${productIdx}`} product={product} onUpdate={() => updateProduct(product)} />
+          <SupermarketProductCard
+            key={`product-${productIdx}`}
+            product={product}
+            onUpdate={() => updateProduct(product)}
+          />
         ))}
       </div>
     </div>

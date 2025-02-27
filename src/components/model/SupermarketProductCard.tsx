@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { type SupermarketProduct } from "@/types"
-import { PageStatus } from "@/types/extra"
+import { PageStatus, SupermarketChain } from "@/types/extra"
 
 import { Code } from "@/components/Code"
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +30,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
+import { resolveSupermarketChain } from "./Supermarket"
+import { ProductChart } from "./ProductChart"
+
 import { discountValueToPercentage, imagePlaceholder } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
@@ -41,14 +44,14 @@ import {
   CloudAlertIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { ProductChart } from "./ProductChart"
+import { cn } from "../../lib/utils"
 
 type Props = {
   product: SupermarketProduct
   onUpdate?: () => Promise<boolean> | undefined
 }
 
-export function ProductCard({ product, onUpdate }: Props) {
+export function SupermarketProductCard({ product, onUpdate }: Props) {
   const [status, setStatus] = useState<PageStatus>(PageStatus.Loaded)
 
   if (!product || !product.url) {
@@ -59,25 +62,31 @@ export function ProductCard({ product, onUpdate }: Props) {
     return <ProductCardSkeleton />
   }
 
+  const supermarketChain = resolveSupermarketChain(product)
   const categoryText = product.category
     ? `${product.category}${product.category_2 ? ` > ${product.category_2}` : ""}${product.category_3 ? ` > ${product.category_3}` : ""}`
     : null
 
   return (
     <div className="flex w-full flex-col rounded-lg bg-white dark:bg-zinc-950">
-      <div className="relative mb-3 flex items-center justify-between gap-2">
+      <div
+        className={cn(
+          "group relative mb-3 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
+          product.image ? "border-zinc-200 dark:border-zinc-800" : "border-transparent",
+        )}
+      >
         {product.image ? (
           <Image
             src={product.image}
             alt={product.name || "Product Image"}
             width={500}
             height={500}
-            className="aspect-square w-full rounded-md border border-zinc-200 dark:border-zinc-800"
+            className="aspect-square w-full transition duration-300 hover:scale-105"
             placeholder="blur"
             blurDataURL={imagePlaceholder.productBlur}
           />
         ) : (
-          <div className="aspect-square w-full rounded-md bg-zinc-100 dark:bg-zinc-900" />
+          <div className="aspect-square w-full" />
         )}
 
         <div className="absolute left-2 top-2 flex flex-col gap-1">
@@ -116,6 +125,8 @@ export function ProductCard({ product, onUpdate }: Props) {
             </TooltipProvider>
           ) : null}
         </div>
+
+        <div className="absolute bottom-2 left-2">{supermarketChain ? supermarketChain.badge : null}</div>
 
         <div className="absolute right-2 top-2">
           <DropdownMenu>

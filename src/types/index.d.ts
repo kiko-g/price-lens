@@ -49,6 +49,10 @@ export interface SupermarketProduct {
   origin_id: number | null
 }
 
+export interface ProductFromSupermarket extends Product {
+  supermarket_product: SupermarketProduct
+}
+
 export interface Price {
   id?: number
   product_id: number

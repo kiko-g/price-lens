@@ -2,18 +2,14 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { type SupermarketProduct } from "@/types"
+import { SupermarketProduct } from "@/types"
 import { PageStatus } from "@/types/extra"
 import { cn } from "@/lib/utils"
 
-import { ProductCard } from "./ProductCard"
+import { SupermarketProductCard } from "./SupermarketProductCard"
 import { Loader2Icon, CircleOffIcon } from "lucide-react"
 
-type Props = {
-  ids: string[]
-}
-
-export function ProductsSelected({ ids }: Props) {
+export function ProductsChosen() {
   const [status, setStatus] = useState(PageStatus.Loading)
   const [products, setProducts] = useState<SupermarketProduct[]>([])
 
@@ -22,12 +18,9 @@ export function ProductsSelected({ ids }: Props) {
   async function fetchProducts() {
     setStatus(PageStatus.Loading)
     try {
-      const { data } = await axios.get("/api/products/ids", {
-        params: {
-          ids: ids.join(","),
-        },
-      })
-      setProducts(data.data || [])
+      const { data } = await axios.get("/api/products/chosen/supermarket")
+      const supermarketProducts = data.data || []
+      setProducts(supermarketProducts)
     } catch (err) {
       setStatus(PageStatus.Error)
       console.error("Failed to fetch products:", err)
@@ -38,7 +31,7 @@ export function ProductsSelected({ ids }: Props) {
 
   useEffect(() => {
     fetchProducts()
-  }, [ids])
+  }, [])
 
   if (status === PageStatus.Error) {
     return (
@@ -66,7 +59,7 @@ export function ProductsSelected({ ids }: Props) {
     <div className="flex w-full flex-col gap-1">
       <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
         {products.map((product, productIdx) => (
-          <ProductCard key={`product-${productIdx}`} product={product} />
+          <SupermarketProductCard key={`product-${productIdx}`} product={product} />
         ))}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { SupermarketProduct } from "@/types"
+import { SupermarketChain } from "@/types/extra"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 

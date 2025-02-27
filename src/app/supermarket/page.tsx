@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { getSearchType, getSortByType, SortByType, type SearchType } from "@/types/extra"
 
 import { Layout } from "@/components/layout"
-import { ProductsGrid } from "@/components/model/ProductsGrid"
+import { SupermarketProductsGrid } from "@/components/model/SupermarketProductsGrid"
 
 export const metadata: Metadata = {
   title: "Price Lens",
@@ -30,7 +30,7 @@ export default async function Home({ searchParams }: Props) {
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <ProductsGrid page={page} q={q} t={searchType} sort={sortBy} />
+        <SupermarketProductsGrid page={page} q={q} t={searchType} sort={sortBy} />
       </div>
     </Layout>
   )

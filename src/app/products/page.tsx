@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
-import { ProductsSelected } from "@/components/model/ProductsSelected"
-import { selectedProducts } from "@/lib/db/queries/products"
+import { ProductsChosen } from "@/components/model/ProductsChosen"
 
 export const metadata: Metadata = {
   title: "Price Lens",
@@ -24,7 +23,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <ProductsSelected ids={selectedProducts.map((p) => p.id)} />
+        <ProductsChosen />
       </div>
     </Layout>
   )

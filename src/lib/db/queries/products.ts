@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { SupermarketProduct } from "@/types"
+import type { Product, SupermarketProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/extra"
 
 type GetAllQuery = {
@@ -25,6 +25,32 @@ export const selectedProducts = [
   //   name: "Creatina Creapure",
   // },
 ]
+
+export const productQueries = {
+  async getAll() {
+    const supabase = createClient()
+    return supabase.from("products").select("*")
+  },
+
+  async getSupermarketProduct(product: Product, supermarketProductId: number | null) {
+    const supabase = createClient()
+
+    const firstRefId = product.product_ref_ids[0]
+    const resolvedId = supermarketProductId
+      ? product.product_ref_ids.find((id) => id === supermarketProductId.toString()) || firstRefId
+      : firstRefId
+
+    if (!resolvedId)
+      return {
+        data: null,
+        error: "No resolved id",
+      }
+
+    const { data, error } = await supabase.from("supermarket_products").select("*").eq("id", resolvedId).single()
+
+    return { data, error }
+  },
+}
 
 export const supermarketProductQueries = {
   async getAll({ page = 1, limit = 20, query = "", searchType = "name", nonNulls = true, sort = "a-z" }: GetAllQuery) {

@@ -4,6 +4,11 @@ export enum PageStatus {
   Error = "error",
 }
 
+export enum SupermarketChain {
+  Continente = 1,
+  PingoDoce = 2,
+}
+
 export const searchTypes = ["name", "brand", "url", "category"] as const
 
 export function getSearchType(searchType: string): SearchType {
