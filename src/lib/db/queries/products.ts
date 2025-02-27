@@ -13,17 +13,17 @@ type GetAllQuery = {
 
 export const selectedProducts = [
   {
-    id: "2575",
-    name: "Leite Meio Gordo Pastagem",
-  },
-  {
     id: "3526",
     name: "Gelado Cheesecake Morango",
   },
-  {
-    id: "5912",
-    name: "Creatina Creapure",
-  },
+  // {
+  //   id: "2575",
+  //   name: "Leite Meio Gordo Pastagem",
+  // },
+  // {
+  //   id: "5912",
+  //   name: "Creatina Creapure",
+  // },
 ]
 
 export const productQueries = {

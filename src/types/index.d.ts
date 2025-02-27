@@ -1,5 +1,6 @@
 import { PageStatus } from "./extra"
 
+// UI types
 export interface NavigationItem {
   href: string
   label: string
@@ -7,6 +8,14 @@ export interface NavigationItem {
   icon?: React.ElementType
 }
 
+export interface Pagination {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
+// Database types
 export interface Product {
   id?: number
   url: string
@@ -27,13 +36,20 @@ export interface Product {
   origin_id: number | null
 }
 
-export interface ProductFrontend extends Product {
-  status: PageStatus
+export interface Price {
+  id?: number
+  product_id: number
+  supermarket_id: number | null
+  price: number | null
+  price_recommended: number | null
+  price_per_major_unit: number | null
+  discount: number | null
+  valid_from: string | null
+  valid_to: string | null
+  created_at: string | null
 }
 
-export interface Pagination {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
+// Frontend types extended from database types
+export interface ProductFrontend extends Product {
+  status: PageStatus
 }
