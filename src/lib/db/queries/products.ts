@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { Product } from "@/types"
+import type { SupermarketProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/extra"
 
 type GetAllQuery = {
@@ -104,7 +104,7 @@ export const productQueries = {
       .ilike("url", `%${substrs.join("%")}%`)
   },
 
-  async upsert(product: Product) {
+  async upsert(product: SupermarketProduct) {
     const supabase = createClient()
     return supabase.from("supermarket_products").upsert(product, {
       onConflict: "url",
@@ -126,7 +126,7 @@ export const productQueries = {
     )
   },
 
-  async createOrUpdateProduct(product: Product) {
+  async createOrUpdateProduct(product: SupermarketProduct) {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
       .from("supermarket_products")

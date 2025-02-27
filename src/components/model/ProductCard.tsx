@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { type Product } from "@/types"
+import { type SupermarketProduct } from "@/types"
 import { PageStatus } from "@/types/extra"
 
 import { Code } from "@/components/Code"
@@ -44,7 +44,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { ProductChart } from "./ProductChart"
 
 type Props = {
-  product: Product
+  product: SupermarketProduct
   onUpdate?: () => Promise<boolean> | undefined
 }
 

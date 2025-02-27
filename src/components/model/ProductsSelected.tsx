@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { type Product } from "@/types"
+import { type SupermarketProduct } from "@/types"
 import { PageStatus } from "@/types/extra"
 import { cn } from "@/lib/utils"
 
@@ -15,7 +15,7 @@ type Props = {
 
 export function ProductsSelected({ ids }: Props) {
   const [status, setStatus] = useState(PageStatus.Loading)
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<SupermarketProduct[]>([])
 
   const isLoading = status === PageStatus.Loading
 

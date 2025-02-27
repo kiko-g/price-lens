@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Product } from "@/types"
+import { SupermarketProduct } from "@/types"
 import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
@@ -31,7 +31,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ProductChart({ product, className }: { product: Product; className?: string }) {
+export function ProductChart({ product, className }: { product: SupermarketProduct; className?: string }) {
   const [selectedRange, setSelectedRange] = React.useState<Range>("6M")
 
   const filteredData = React.useMemo(() => {

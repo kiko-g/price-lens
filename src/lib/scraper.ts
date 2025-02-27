@@ -1,6 +1,6 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
-import type { Product } from "@/types"
+import type { SupermarketProduct } from "@/types"
 import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
@@ -96,7 +96,7 @@ export const continenteProductPageScraper = async (url: string) => {
     const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
-    const product: Product = {
+    const product: SupermarketProduct = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
@@ -193,7 +193,7 @@ export const processBatch = async (urls: string[]) => {
   return products
 }
 
-export function isValidProduct(product: any): product is Product {
+export function isValidProduct(product: any): product is SupermarketProduct {
   return typeof product === "object" && product !== null && typeof product.url === "string"
 }
 
@@ -209,7 +209,7 @@ export const scrapeAndReplaceProduct = async (url: string | null) => {
       url,
       created_at: new Date().toISOString().replace("Z", "+00:00"),
     })
-    return NextResponse.json({ error: "Product scraping failed", url }, { status: 404 })
+    return NextResponse.json({ error: "SupermarketProduct scraping failed", url }, { status: 404 })
   }
 
   if (!isValidProduct(product)) {
@@ -222,5 +222,5 @@ export const scrapeAndReplaceProduct = async (url: string | null) => {
     return NextResponse.json({ error: "Database operation failed", details: error }, { status: 500 })
   }
 
-  return NextResponse.json({ product, data, message: "Product upserted" })
+  return NextResponse.json({ product, data, message: "SupermarketProduct upserted" })
 }

@@ -3,7 +3,7 @@
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { type Product } from "@/types"
+import { type SupermarketProduct } from "@/types"
 import { PageStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
@@ -67,7 +67,7 @@ export function ProductsGrid(props: Props) {
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [pagedCount, setPagedCount] = useState(0)
   const [status, setStatus] = useState(PageStatus.Loading)
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<SupermarketProduct[]>([])
 
   const updateParams = useUpdateSearchParams()
 
@@ -97,14 +97,14 @@ export function ProductsGrid(props: Props) {
     }
   }
 
-  async function updateProduct(product: Product): Promise<boolean> {
+  async function updateProduct(product: SupermarketProduct): Promise<boolean> {
     if (!product || !product.url) return false
 
     const response = await fetch(`/api/products/replace?url=${product.url}`)
     const data = await response.json()
 
     if (response.status === 200) {
-      setProducts(products.map((p) => (p.url === product.url ? (data.product as Product) : p)))
+      setProducts(products.map((p) => (p.url === product.url ? (data.product as SupermarketProduct) : p)))
       return true
     } else {
       console.error(data)

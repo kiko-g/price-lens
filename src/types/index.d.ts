@@ -16,7 +16,20 @@ export interface Pagination {
 }
 
 // Database types
+export interface Supermarket {
+  id: number
+  name: string
+}
+
 export interface Product {
+  id?: number
+  name: string
+  brand: string
+  category: string
+  product_ref_ids: string[]
+}
+
+export interface SupermarketProduct {
   id?: number
   url: string
   name: string
