@@ -1,3 +1,9 @@
+export enum PageStatus {
+  Loading = "loading",
+  Loaded = "loaded",
+  Error = "error",
+}
+
 export const searchTypes = ["name", "brand", "url", "category"] as const
 
 export function getSearchType(searchType: string): SearchType {

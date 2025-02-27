@@ -42,7 +42,7 @@ export const productQueries = {
     if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 
     if (query) {
-      const sanitizedQuery = query.replace(/[^a-zA-Z0-9\s]/g, "").trim()
+      const sanitizedQuery = query.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
       dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
     }
 

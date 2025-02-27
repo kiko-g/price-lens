@@ -3,7 +3,8 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { type Product } from "@/types"
-import { cn, PageStatus } from "@/lib/utils"
+import { PageStatus } from "@/types/extra"
+import { cn } from "@/lib/utils"
 
 import { ProductCard } from "./ProductCard"
 import { Loader2Icon, CircleOffIcon } from "lucide-react"

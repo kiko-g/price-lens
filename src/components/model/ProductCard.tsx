@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import type { Product } from "@/types"
 import { useState } from "react"
+import { type Product } from "@/types"
+import { PageStatus } from "@/types/extra"
 
 import { Code } from "@/components/Code"
 import { Badge } from "@/components/ui/badge"
@@ -29,7 +30,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { discountValueToPercentage, imagePlaceholder, PageStatus } from "@/lib/utils"
+import { discountValueToPercentage, imagePlaceholder } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
   CopyIcon,
@@ -149,7 +150,7 @@ export function ProductCard({ product, onUpdate }: Props) {
                 </Button>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
 
               {onUpdate ? (
                 <DropdownMenuItem variant="warning" asChild>
@@ -275,10 +276,6 @@ export function ProductCardSkeleton() {
           <span className="h-7 w-7 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
         </div>
       </div>
-
-      <footer className="mt-3 flex flex-col items-end justify-end gap-2 border-t pt-2">
-        <span className="h-4 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
-      </footer>
     </div>
   )
 }

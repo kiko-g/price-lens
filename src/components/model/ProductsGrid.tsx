@@ -4,9 +4,11 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { type Product } from "@/types"
+import { PageStatus } from "@/types/extra"
+
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { cn, getCenteredArray, PageStatus } from "@/lib/utils"
+import { getCenteredArray } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"

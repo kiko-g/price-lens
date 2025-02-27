@@ -1,4 +1,5 @@
-import { cn, PageStatus } from "@/lib/utils"
+import { PageStatus } from "@/types/extra"
+import { cn } from "@/lib/utils"
 
 export function Wrapper({ children, status = PageStatus.Loaded }: { children: React.ReactNode; status?: PageStatus }) {
   return (

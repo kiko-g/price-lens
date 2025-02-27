@@ -1,4 +1,6 @@
-export type NavigationItem = {
+import { PageStatus } from "./extra"
+
+export interface NavigationItem {
   href: string
   label: string
   shown?: boolean
@@ -25,9 +27,11 @@ export interface Product {
   origin_id: number | null
 }
 
-export type ProductWithId = Product & { id: string }
+export interface ProductFrontend extends Product {
+  status: PageStatus
+}
 
-export type Pagination = {
+export interface Pagination {
   page: number
   limit: number
   total: number
