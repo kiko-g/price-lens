@@ -74,7 +74,17 @@
 
   pre,
   code {
-    font-family: GeistMono, ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Liberation Mono, DejaVu Sans Mono, Courier New, monospace !important;
+    font-family:
+      GeistMono,
+      ui-monospace,
+      SFMono-Regular,
+      Roboto Mono,
+      Menlo,
+      Monaco,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Courier New,
+      monospace !important;
   }
 
   html {
@@ -108,8 +118,6 @@
     animation: rotate 0.5s backwards;
   }
 }
-
-
 
 @layer base {
   * {

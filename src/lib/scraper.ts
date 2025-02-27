@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
 import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
-import { productQueries } from "./db/queries/products"
+import { supermarketProductQueries } from "./db/queries/products"
 
 export const fetchHtml = async (url: string) => {
   if (!url) {
@@ -169,7 +169,7 @@ export const crawlContinenteCategoryPages = async () => {
     const links = await continenteCategoryPageScraper(category.url)
     console.info("Finished scraping", category.name, links.length)
     for (const link of links) {
-      await productQueries.upsertBlank({
+      await supermarketProductQueries.upsertBlank({
         url: link,
         created_at: new Date().toISOString().replace("Z", "+00:00"),
       })
@@ -205,7 +205,7 @@ export const scrapeAndReplaceProduct = async (url: string | null) => {
   const product = await continenteProductPageScraper(url)
 
   if (!product || Object.keys(product).length === 0) {
-    await productQueries.upsertBlank({
+    await supermarketProductQueries.upsertBlank({
       url,
       created_at: new Date().toISOString().replace("Z", "+00:00"),
     })
@@ -216,7 +216,7 @@ export const scrapeAndReplaceProduct = async (url: string | null) => {
     return NextResponse.json({ error: "Invalid product data structure", url }, { status: 422 })
   }
 
-  const { data, error } = await productQueries.createOrUpdateProduct(product)
+  const { data, error } = await supermarketProductQueries.createOrUpdateProduct(product)
 
   if (error) {
     return NextResponse.json({ error: "Database operation failed", details: error }, { status: 500 })

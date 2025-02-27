@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import clsx from 'clsx'
+import Image from "next/image"
+import clsx from "clsx"
 
-import frame from '@/images/phone-frame.svg'
+import frame from "@/images/phone-frame.svg"
 
-function PlaceholderFrame(props: React.ComponentPropsWithoutRef<'svg'>) {
+function PlaceholderFrame(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 366 729" aria-hidden="true" {...props}>
       <path
@@ -22,9 +22,9 @@ export function PhoneFrame({
   children,
   priority = false,
   ...props
-}: React.ComponentPropsWithoutRef<'div'> & { priority?: boolean }) {
+}: React.ComponentPropsWithoutRef<"div"> & { priority?: boolean }) {
   return (
-    <div className={clsx('relative aspect-[366/729]', className)} {...props}>
+    <div className={clsx("relative aspect-[366/729]", className)} {...props}>
       <div className="absolute inset-y-[calc(1/729*100%)] left-[calc(7/729*100%)] right-[calc(5/729*100%)] rounded-[calc(58/366*100%)/calc(58/729*100%)] shadow-2xl" />
       <div className="absolute left-[calc(23/366*100%)] top-[calc(23/729*100%)] grid h-[calc(686/729*100%)] w-[calc(318/366*100%)] transform grid-cols-1 overflow-hidden bg-gray-900 pt-[calc(23/318*100%)]">
         {children}

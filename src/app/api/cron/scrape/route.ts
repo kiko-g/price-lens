@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
-import { productQueries, selectedProducts } from "@/lib/db/queries/products"
+import { supermarketProductQueries, selectedProducts } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await productQueries.getByIds(selectedProducts.map((p) => p.id))
+    const { data, error } = await supermarketProductQueries.getByIds(selectedProducts.map((p) => p.id))
 
     if (error) {
       console.error("Error fetching uncharted products:", error)

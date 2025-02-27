@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { productQueries } from "@/lib/db/queries/products"
+import { supermarketProductQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     }
 
     const ids = idsParam.split(",")
-    const { data, error } = await productQueries.getByIds(ids)
+    const { data, error } = await supermarketProductQueries.getByIds(ids)
 
     if (error) {
       throw new Error(error.message)

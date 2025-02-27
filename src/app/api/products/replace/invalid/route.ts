@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
-import { productQueries } from "@/lib/db/queries/products"
+import { supermarketProductQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await productQueries.getInvalid()
+    const { data, error } = await supermarketProductQueries.getInvalid()
 
     if (error) {
       console.error("Error fetching uncharted products:", error)
