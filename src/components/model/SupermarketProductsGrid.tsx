@@ -260,7 +260,7 @@ export function SupermarketProductsGrid(props: Props) {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem variant="warning" asChild>
+              <DropdownMenuItem variant="highlight" asChild>
                 <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
                   Update products
                   <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
