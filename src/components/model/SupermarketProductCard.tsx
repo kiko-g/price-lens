@@ -164,7 +164,7 @@ export function SupermarketProductCard({ product, onUpdate }: Props) {
               <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
 
               {onUpdate ? (
-                <DropdownMenuItem variant="highlight" asChild>
+                <DropdownMenuItem variant="warning" asChild>
                   <Button
                     variant="dropdown-item"
                     onClick={async () => {
