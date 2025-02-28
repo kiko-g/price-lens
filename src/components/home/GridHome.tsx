@@ -5,7 +5,7 @@ import { GridPattern } from "@/components/magicui/grid-pattern"
 
 export function GridHome() {
   return (
-    <div className="absolute top-0 flex size-full items-center justify-center overflow-hidden bg-background">
+    <div className="absolute top-0 z-[-1] flex size-full items-center justify-center overflow-hidden bg-background">
       <GridPattern
         width={40}
         height={40}
