@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { Product, SupermarketProduct } from "@/types"
+import type { Product, ProductFromSupermarket, SupermarketProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/extra"
 
 type GetAllQuery = {
@@ -30,6 +30,66 @@ export const productQueries = {
   async getAll() {
     const supabase = createClient()
     return supabase.from("products").select("*")
+  },
+
+  async getAllAttached() {
+    const supabase = createClient()
+
+    const { data: products, error: productsError } = await supabase.from("products").select("*")
+
+    if (productsError) {
+      console.error("Error fetching products:", productsError)
+      return {
+        data: [],
+        error: productsError,
+      }
+    }
+
+    const emptyProducts = products.map((product) => ({
+      ...product,
+      supermarket_products: [],
+    }))
+
+    if (!products || products.length === 0) {
+      return {
+        data: emptyProducts,
+        error: "No products found",
+      }
+    }
+
+    const allRefIds = products.flatMap((product) => product.product_ref_ids)
+    if (allRefIds.length === 0) {
+      return {
+        error: null,
+        data: emptyProducts,
+      }
+    }
+
+    const { data: supermarketProducts, error: supermarketError } = await supabase
+      .from("supermarket_products")
+      .select("*")
+      .in("id", allRefIds)
+
+    if (supermarketError) {
+      console.error("Error fetching supermarket products:", supermarketError)
+      return {
+        error: supermarketError,
+        data: emptyProducts,
+      }
+    }
+
+    const productsWithSupermarket = products.map((p) => {
+      const matchingSupermarketProducts = supermarketProducts.filter((sp) => p.product_ref_ids.includes(sp.id)) || []
+      return {
+        ...p,
+        supermarket_products: matchingSupermarketProducts,
+      }
+    })
+
+    return {
+      error: null,
+      data: productsWithSupermarket,
+    }
   },
 
   async getSupermarketProduct(product: Product, supermarketProductId: number | null) {

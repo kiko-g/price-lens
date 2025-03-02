@@ -49,9 +49,10 @@ import { cn } from "../../lib/utils"
 type Props = {
   product: SupermarketProduct
   onUpdate?: () => Promise<boolean> | undefined
+  onFavorite?: () => Promise<boolean> | undefined
 }
 
-export function SupermarketProductCard({ product, onUpdate }: Props) {
+export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<PageStatus>(PageStatus.Loaded)
 
   if (!product || !product.url) {
@@ -127,61 +128,6 @@ export function SupermarketProductCard({ product, onUpdate }: Props) {
         </div>
 
         <div className="absolute bottom-2 left-2">{supermarketChain ? supermarketChain.badge : null}</div>
-
-        <div className="absolute right-2 top-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="inverted" size="icon-sm" className="shadow-none">
-                <EllipsisVerticalIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="w-48" align="end">
-              <DropdownMenuItem asChild>
-                <Button variant="dropdown-item" asChild>
-                  <Link
-                    href={product.url || "#"}
-                    target="_blank"
-                    className="flex w-full items-center justify-between gap-1"
-                  >
-                    Open in new tab
-                    <ArrowUpRightIcon />
-                  </Link>
-                </Button>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem asChild>
-                <Button
-                  variant="dropdown-item"
-                  onClick={() => navigator.clipboard.writeText(product.url || "")}
-                  title={product.url || ""}
-                >
-                  Copy URL
-                  <CopyIcon />
-                </Button>
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
-
-              {onUpdate ? (
-                <DropdownMenuItem variant="warning" asChild>
-                  <Button
-                    variant="dropdown-item"
-                    onClick={async () => {
-                      setStatus(PageStatus.Loading)
-                      const success = await onUpdate()
-                      if (success) setStatus(PageStatus.Loaded)
-                      else setStatus(PageStatus.Error)
-                    }}
-                  >
-                    Update
-                    <RefreshCcwIcon />
-                  </Button>
-                </DropdownMenuItem>
-              ) : null}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
 
       <div className="flex flex-1 flex-col items-start">
@@ -235,9 +181,75 @@ export function SupermarketProductCard({ product, onUpdate }: Props) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon-sm" disabled>
-              <HeartIcon />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon-sm" className="shadow-none">
+                  <EllipsisVerticalIcon className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-48" align="end">
+                <DropdownMenuItem asChild>
+                  <Button variant="dropdown-item" asChild>
+                    <Link
+                      href={product.url || "#"}
+                      target="_blank"
+                      className="flex w-full items-center justify-between gap-1"
+                    >
+                      Open in new tab
+                      <ArrowUpRightIcon />
+                    </Link>
+                  </Button>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Button
+                    variant="dropdown-item"
+                    onClick={() => navigator.clipboard.writeText(product.url || "")}
+                    title={product.url || ""}
+                  >
+                    Copy URL
+                    <CopyIcon />
+                  </Button>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
+
+                {onFavorite ? (
+                  <DropdownMenuItem variant="love" asChild>
+                    <Button
+                      variant="dropdown-item"
+                      onClick={async () => {
+                        setStatus(PageStatus.Loading)
+                        const success = await onFavorite()
+                        if (success) setStatus(PageStatus.Loaded)
+                        else setStatus(PageStatus.Error)
+                      }}
+                    >
+                      Add to favorites
+                      <HeartIcon />
+                    </Button>
+                  </DropdownMenuItem>
+                ) : null}
+
+                {onUpdate ? (
+                  <DropdownMenuItem variant="warning" asChild>
+                    <Button
+                      variant="dropdown-item"
+                      onClick={async () => {
+                        setStatus(PageStatus.Loading)
+                        const success = await onUpdate()
+                        if (success) setStatus(PageStatus.Loaded)
+                        else setStatus(PageStatus.Error)
+                      }}
+                    >
+                      Update
+                      <RefreshCcwIcon />
+                    </Button>
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DrawerSheet title={`${product.name}`}>
               <Tabs defaultValue="details" className="w-full">

@@ -50,7 +50,7 @@ export interface SupermarketProduct {
 }
 
 export interface ProductFromSupermarket extends Product {
-  supermarket_product: SupermarketProduct
+  supermarket_products: SupermarketProduct[]
 }
 
 export interface Price {

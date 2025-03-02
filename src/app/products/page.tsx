@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
-import { ProductsChosen } from "@/components/model/ProductsChosen"
+import { TrackedProducts } from "@/components/model/TrackedProducts"
+import { getSearchType } from "@/types/extra"
 
 export const metadata: Metadata = {
   title: "Price Lens",
@@ -19,11 +20,13 @@ type HomeProps = {
 
 export default async function Home({ searchParams }: HomeProps) {
   const params = await Promise.resolve(searchParams)
+  const page = params.page ? parseInt(params.page) : 1
+  const q = params.q ?? ""
 
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <ProductsChosen />
+        <TrackedProducts />
       </div>
     </Layout>
   )
