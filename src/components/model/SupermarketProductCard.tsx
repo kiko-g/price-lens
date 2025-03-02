@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { type SupermarketProduct } from "@/types"
-import { PageStatus, SupermarketChain } from "@/types/extra"
+import { FrontendStatus, SupermarketChain } from "@/types/extra"
 
 import { Code } from "@/components/Code"
 import { Badge } from "@/components/ui/badge"
@@ -53,13 +53,13 @@ type Props = {
 }
 
 export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props) {
-  const [status, setStatus] = useState<PageStatus>(PageStatus.Loaded)
+  const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
 
   if (!product || !product.url) {
     return null
   }
 
-  if (status === PageStatus.Loading) {
+  if (status === FrontendStatus.Loading) {
     return <ProductCardSkeleton />
   }
 
@@ -220,10 +220,10 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
                     <Button
                       variant="dropdown-item"
                       onClick={async () => {
-                        setStatus(PageStatus.Loading)
+                        setStatus(FrontendStatus.Loading)
                         const success = await onFavorite()
-                        if (success) setStatus(PageStatus.Loaded)
-                        else setStatus(PageStatus.Error)
+                        if (success) setStatus(FrontendStatus.Loaded)
+                        else setStatus(FrontendStatus.Error)
                       }}
                     >
                       Add to favorites
@@ -237,10 +237,10 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
                     <Button
                       variant="dropdown-item"
                       onClick={async () => {
-                        setStatus(PageStatus.Loading)
+                        setStatus(FrontendStatus.Loading)
                         const success = await onUpdate()
-                        if (success) setStatus(PageStatus.Loaded)
-                        else setStatus(PageStatus.Error)
+                        if (success) setStatus(FrontendStatus.Loaded)
+                        else setStatus(FrontendStatus.Error)
                       }}
                     >
                       Update

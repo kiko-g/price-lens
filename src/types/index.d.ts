@@ -1,4 +1,4 @@
-import { PageStatus } from "./extra"
+import { FrontendStatus } from "./extra"
 
 // UI types
 export interface NavigationItem {
@@ -68,5 +68,5 @@ export interface Price {
 
 // Frontend types extended from database types
 export interface ProductFrontend extends Product {
-  status: PageStatus
+  status: FrontendStatus
 }

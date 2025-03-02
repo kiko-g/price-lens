@@ -4,7 +4,7 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { type SupermarketProduct } from "@/types"
-import { PageStatus } from "@/types/extra"
+import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
@@ -66,15 +66,15 @@ export function SupermarketProductsGrid(props: Props) {
   const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [pagedCount, setPagedCount] = useState(0)
-  const [status, setStatus] = useState(PageStatus.Loading)
+  const [status, setStatus] = useState(FrontendStatus.Loading)
   const [products, setProducts] = useState<SupermarketProduct[]>([])
 
   const updateParams = useUpdateSearchParams()
 
-  const isLoading = status === PageStatus.Loading
+  const isLoading = status === FrontendStatus.Loading
 
   async function fetchProducts() {
-    setStatus(PageStatus.Loading)
+    setStatus(FrontendStatus.Loading)
     try {
       const { data } = await axios.get("/api/products", {
         params: {
@@ -90,10 +90,10 @@ export function SupermarketProductsGrid(props: Props) {
       setPaginationTotal(data.pagination.totalPages || 50)
     } catch (err) {
       setPage(1)
-      setStatus(PageStatus.Error)
+      setStatus(FrontendStatus.Error)
       console.error("Failed to fetch products:", err)
     } finally {
-      setStatus(PageStatus.Loaded)
+      setStatus(FrontendStatus.Loaded)
     }
   }
 
@@ -113,7 +113,7 @@ export function SupermarketProductsGrid(props: Props) {
   }
 
   async function updateProductsInPage() {
-    setStatus(PageStatus.Loading)
+    setStatus(FrontendStatus.Loading)
     const urls = products.map((product) => product.url)
 
     try {
@@ -125,7 +125,7 @@ export function SupermarketProductsGrid(props: Props) {
     } catch (err) {
       console.warn("Failed to update products:", err)
     } finally {
-      setStatus(PageStatus.Loaded)
+      setStatus(FrontendStatus.Loaded)
     }
   }
 
@@ -160,9 +160,9 @@ export function SupermarketProductsGrid(props: Props) {
     updateParams({ page, q: query, t: searchType, sort: sortBy })
   }, [page, query, searchType, sortBy])
 
-  if (status === PageStatus.Error) {
+  if (status === FrontendStatus.Error) {
     return (
-      <Wrapper status={PageStatus.Error}>
+      <Wrapper status={FrontendStatus.Error}>
         <CircleOffIcon className="h-6 w-6" />
         <p>Error fetching products. Please try again.</p>
         <Button
@@ -188,7 +188,7 @@ export function SupermarketProductsGrid(props: Props) {
     )
   }
 
-  if (products.length === 0 && status === PageStatus.Loaded) {
+  if (products.length === 0 && status === FrontendStatus.Loaded) {
     return (
       <Wrapper>
         <CircleOffIcon className="h-8 w-8" />

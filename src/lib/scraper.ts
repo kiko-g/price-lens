@@ -78,7 +78,7 @@ export const continenteProductPageScraper = async (url: string) => {
     const rawProduct = {
       url,
       name: $(`${root} h1`).text().trim() || "Unknown Product",
-      brand: $(`${root} .ct-pdp--brand`).text().trim() || "No Brand",
+      brand: $(`${root} .ct-pdp--brand`).text().trim() || "",
       pack: $(`${root} .ct-pdp--unit`).text().trim() || null,
       price: details?.items?.[0]?.price || $(`${root} .ct-price-formatted`).parent().attr("content") || null,
       price_recommended:

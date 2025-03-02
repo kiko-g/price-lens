@@ -1,4 +1,4 @@
-export enum PageStatus {
+export enum FrontendStatus {
   Loading = "loading",
   Loaded = "loaded",
   Error = "error",
