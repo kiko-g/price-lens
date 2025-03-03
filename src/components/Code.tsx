@@ -9,19 +9,26 @@ import { CheckIcon, ClipboardIcon, DownloadIcon } from "lucide-react"
 import { Button } from "./ui/button"
 
 type Props = {
+  className?: string
   code: string
   language: string
   options?: any
   allowDownload?: boolean
 }
 
-export function Code({ code, language, options, allowDownload = true }: Props) {
+export function Code({ className, code, language, options, allowDownload = true }: Props) {
   const canCopy = useMemo(() => code !== "", [code])
   const canDownload = useMemo(() => allowDownload && code !== "", [allowDownload, code])
 
   return (
-    <div className={cn("group relative mb-4 max-w-7xl overflow-auto rounded-xl", GeistMono.className)}>
-      <div className="absolute right-3 top-3 z-20 flex items-center justify-end gap-2">
+    <div
+      className={cn(
+        "code-block group relative mb-4 max-w-7xl overflow-auto rounded-xl",
+        GeistMono.className,
+        className,
+      )}
+    >
+      <div className="absolute right-3 top-3 z-20 flex items-center justify-end gap-1">
         {canDownload ? <DownloadButton text={code} filename={`code.${language}`} /> : null}
         {canCopy ? <CopyCodeButton text={code} /> : null}
       </div>
@@ -57,8 +64,8 @@ function CopyCodeButton({ text }: { text: string }) {
   }, [text])
 
   return (
-    <Button onClick={copyToClipboard} disabled={isCopied} variant="inverted" size="icon-sm">
-      {isCopied ? <CheckIcon className="size-4" /> : <ClipboardIcon className="size-4" />}
+    <Button onClick={copyToClipboard} disabled={isCopied} variant="ghost" size="icon-xs">
+      {isCopied ? <CheckIcon /> : <ClipboardIcon />}
     </Button>
   )
 }
@@ -86,8 +93,8 @@ function DownloadButton({ text, filename }: { text: string; filename: string }) 
   }
 
   return (
-    <Button onClick={download} disabled={isDownloading} variant="inverted" size="icon-sm">
-      {isDownloading ? <CheckIcon className="size-4" /> : <DownloadIcon className="size-4" />}
+    <Button onClick={download} disabled={isDownloading} variant="ghost" size="icon-xs">
+      {isDownloading ? <CheckIcon /> : <DownloadIcon />}
     </Button>
   )
 }

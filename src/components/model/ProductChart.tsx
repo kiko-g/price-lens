@@ -36,20 +36,17 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
 
   const filteredData = React.useMemo(() => {
     switch (selectedRange) {
+      case "1W":
+        return chartData.slice(-7)
       case "1M":
-        // last 1 month of data
         return chartData.slice(-1)
       case "3M":
-        // last 3 months
         return chartData.slice(-3)
       case "6M":
-        // last 6 months
         return chartData.slice(-6)
       case "1Y":
-        // If you had 12 months in chartData, you'd do chartData.slice(-12)
-        return chartData.slice(-6) // fallback, since we only have 6 data points
+        return chartData.slice(-6)
       case "5Y":
-        // If you had multiple years of data, you can filter accordingly
         return chartData
       case "Max":
       default:
@@ -59,19 +56,65 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
 
   return (
     <div className={cn(className)}>
-      <div className="mb-10 flex items-center gap-3">
-        <span className="flex items-center gap-2 font-bold">{product.price}€</span>
-        <span className="flex items-center gap-1 font-semibold text-green-500">
-          4.5%
-          <TriangleIcon className="h-3 w-3 rotate-180 fill-green-500" />
-        </span>
+      <div className="mb-6 flex max-w-xs flex-col items-center gap-0.5 text-sm font-medium">
+        {/* Price */}
+        <div className="flex w-full items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded bg-chart-1" />
+            <span className="text-muted-foreground">Price</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <span className="mr-1">{product.price}€</span>
+            <PriceChange variation={0.0452} />
+          </div>
+        </div>
+
+        {/* Price Recommended */}
+        <div className="flex w-full items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded bg-chart-2" />
+            <span className="text-muted-foreground">Price Recommended</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <span className="mr-1">{product.price_recommended}€</span>
+            <PriceChange variation={-0.0554} />
+          </div>
+        </div>
+
+        {/* Price Per Major Unit */}
+        <div className="flex w-full items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded bg-chart-3" />
+            <span className="text-muted-foreground">Price Per Major Unit</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <span className="mr-1">{product.price_per_major_unit}€</span>
+            <PriceChange variation={0.0851} />
+          </div>
+        </div>
+
+        {/* Price Recommended */}
+        <div className="flex w-full items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded bg-chart-4" />
+            <span className="text-muted-foreground">Discount</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="mr-1">{product.discount}%</span>
+            <PriceChange variation={-0.0343} />
+          </div>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {RANGES.map((range) => (
           <Button
             key={range}
-            variant={range === selectedRange ? "secondary" : "ghost"}
+            variant={range === selectedRange ? "default" : "ghost"}
             onClick={() => setSelectedRange(range)}
           >
             {range}
@@ -113,7 +156,7 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
         </LineChart>
       </ChartContainer>
 
-      <div className="mt-6 flex w-full justify-between gap-2 border-t pt-3 text-sm">
+      <div className="flex w-full justify-between gap-2 pt-2 text-sm">
         <div className="flex w-full justify-end">
           <span className="text-xs text-muted-foreground">
             {product.created_at || product.updated_at
@@ -122,6 +165,22 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
           </span>
         </div>
       </div>
+    </div>
+  )
+}
+
+function PriceChange({ variation }: { variation: number }) {
+  const percentage = (variation * 100).toFixed(1)
+
+  return (
+    <div className="flex items-center gap-1">
+      <span className={cn(variation < 0 ? "text-green-500" : "text-red-500")}>{percentage}%</span>
+      <TriangleIcon
+        className={cn(
+          "h-3 w-3",
+          variation < 0 ? "rotate-180 fill-green-500 stroke-green-500" : "fill-red-500 stroke-red-500",
+        )}
+      />
     </div>
   )
 }

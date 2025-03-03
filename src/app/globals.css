@@ -24,11 +24,11 @@
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
     --radius: 0.5rem;
-    --chart-1: 222 100% 50%;
-    --chart-2: 140 74% 44%;
-    --chart-3: 357 100% 45%;
-    --chart-4: 28 100% 60%;
-    --chart-5: 273 100% 60%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 340 75% 55%;
+    --chart-5: 280 65% 60%;
   }
 
   .dark {
@@ -51,11 +51,11 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
-    --chart-1: 221 100% 53%;
-    --chart-2: 139 65% 20%;
-    --chart-3: 357 100% 45%;
-    --chart-4: 28 100% 67%;
-    --chart-5: 287 100% 67%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 340 75% 55%;
+    --chart-5: 280 65% 60%;
   }
 }
 
@@ -73,7 +73,8 @@
   }
 
   pre,
-  code {
+  code,
+  .font-mono {
     font-family:
       GeistMono,
       ui-monospace,
@@ -85,6 +86,10 @@
       DejaVu Sans Mono,
       Courier New,
       monospace !important;
+  }
+
+  .code-block .token {
+    @apply text-wrap;
   }
 
   html {

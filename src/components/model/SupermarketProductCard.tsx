@@ -26,8 +26,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { resolveSupermarketChain } from "./Supermarket"
@@ -64,6 +64,13 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
   }
 
   const supermarketChain = resolveSupermarketChain(product)
+
+  const isPriceNotSet = !product.price_recommended && !product.price
+  const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
+  const isNormalPrice =
+    (!product.price_recommended && product.price) ||
+    (product.price_recommended && product.price && product.price_recommended === product.price)
+
   const categoryText = product.category
     ? `${product.category}${product.category_2 ? ` > ${product.category_2}` : ""}${product.category_3 ? ` > ${product.category_3}` : ""}`
     : null
@@ -162,7 +169,7 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
 
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            {product.price_recommended && product.price && product.price_recommended !== product.price ? (
+            {hasDiscount ? (
               <div className="flex flex-col">
                 <span className="text-sm text-zinc-500 line-through dark:text-zinc-400">
                   {product.price_recommended}€
@@ -171,13 +178,11 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
               </div>
             ) : null}
 
-            {!product.price_recommended && product.price ? (
+            {isNormalPrice ? (
               <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{product.price}€</span>
             ) : null}
 
-            {!product.price_recommended && !product.price ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span>
-            ) : null}
+            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
           </div>
 
           <div className="flex items-center gap-2">
@@ -252,22 +257,18 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
             </DropdownMenu>
 
             <DrawerSheet title={`${product.name}`}>
-              <Tabs defaultValue="details" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="technical">Technical</TabsTrigger>
-                </TabsList>
-                <TabsContent value="details">
-                  <ProductChart product={product} />
-                </TabsContent>
-                <TabsContent value="technical">
-                  <p className="mb-3 text-sm text-muted-foreground">Inspect the collected data about this product.</p>
+              <ProductChart product={product} />
 
-                  <div className="flex flex-col gap-4 pb-8">
-                    <Code code={JSON.stringify(product, null, 2)} language="json" />
-                  </div>
-                </TabsContent>
-              </Tabs>
+              <Accordion type="single" collapsible className="mt-4 hidden w-full border-t md:flex">
+                <AccordionItem value="item-1" className="w-full border-0">
+                  <AccordionTrigger>Inspect the collected data</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col gap-4">
+                      <Code code={JSON.stringify(product, null, 2)} language="json" />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </DrawerSheet>
           </div>
         </div>
@@ -323,7 +324,7 @@ function DrawerSheet({
             <ChartSplineIcon />
           </Button>
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="overflow-x-hidden overflow-y-scroll">
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
             <SheetDescription>{description}</SheetDescription>

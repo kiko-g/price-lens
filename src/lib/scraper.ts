@@ -93,7 +93,7 @@ export const continenteProductPageScraper = async (url: string) => {
     }
 
     const price = rawProduct.price ? priceToNumber(rawProduct.price) : null
-    const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : null
+    const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : price
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
     const product: SupermarketProduct = {
