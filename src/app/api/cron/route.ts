@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
-import { supermarketProductQueries, selectedProducts, productQueries } from "@/lib/db/queries/products"
+import { productQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
