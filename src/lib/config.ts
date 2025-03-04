@@ -28,7 +28,10 @@ export const defaultMetadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `/og?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(siteConfig.description)}`,
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 680,
+        alt: siteConfig.name,
       },
     ],
   },
@@ -36,7 +39,7 @@ export const defaultMetadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: `/og?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(siteConfig.description)}`,
+        url: siteConfig.ogImage,
       },
     ],
   },
