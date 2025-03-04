@@ -7,8 +7,8 @@ export const siteConfig = {
   name: titleOrName,
   title: titleOrName,
   author: "Francisco Goncalves",
-  url: "https://pricelens.vercel.app",
-  ogImage: "https://pricelens.vercel.app/og.jpg",
+  url: "https://price-lens.vercel.app",
+  ogImage: "https://price-lens.vercel.app/og.jpg",
   description:
     "Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware of how supermarket prices change. See beyond the headlines and tags.",
   links: {

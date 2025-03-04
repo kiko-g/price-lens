@@ -33,24 +33,34 @@ export const metadata: Metadata = {
   ],
   creator: siteConfig.author,
   openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
     images: [
       {
-        url: `/og?title=${encodeURIComponent(
-          siteConfig.name,
-        )}&description=${encodeURIComponent(siteConfig.description)}`,
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 680,
+        alt: siteConfig.name,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    images: [
-      {
-        url: `/og?title=${encodeURIComponent(
-          siteConfig.name,
-        )}&description=${encodeURIComponent(siteConfig.description)}`,
-      },
-    ],
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+    creator: siteConfig.socialhandle,
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: `${siteConfig.url}/site.webmanifest`,
 }
 
 export default function RootLayout({
