@@ -1,5 +1,6 @@
+import Link from "next/link"
 import type { Metadata } from "next"
-import { mockProduct } from "@/lib/utils"
+import { defaultMetadata } from "@/lib/config"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
@@ -8,11 +9,9 @@ import { GridHome } from "@/components/home/GridHome"
 
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 import { MockChartA } from "@/components/home/MockChart"
-import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Price Lens",
-  description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
+  ...defaultMetadata,
 }
 
 type SearchParams = {

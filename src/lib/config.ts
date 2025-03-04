@@ -1,17 +1,44 @@
 import { HomeIcon, ShieldIcon, ShoppingBasketIcon, StoreIcon } from "lucide-react"
+import { Metadata } from "next"
+
+const titleOrName = "Price Lens"
 
 export const siteConfig = {
-  name: "Price Lens",
+  name: titleOrName,
+  title: titleOrName,
   author: "Francisco Goncalves",
   url: "https://pricelens.vercel.app",
-  ogImage: "https://pricelens.vercel.app/og.png",
-  description: "Price Lens helps you see through prices. Get a real sense of what's going on.",
+  ogImage: "https://pricelens.vercel.app/og.jpg",
+  description:
+    "Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware of how supermarket prices change. See beyond the headlines and tags.",
   links: {
     linkedin: "https://www.linkedin.com/in/kikogoncalves/",
     instagram: "https://www.instagram.com/kikogoncalves_",
     twitter: "https://twitter.com/kikogoncalves_",
     github: "https://github.com/kiko-g",
     repo: "https://github.com/kiko-g/price-lens",
+    website: "https://kikogoncalves.com",
+  },
+  socialhandle: "@kikogoncalves_",
+}
+
+export const defaultMetadata: Metadata = {
+  title: siteConfig.title,
+  description: siteConfig.description,
+  openGraph: {
+    images: [
+      {
+        url: `/og?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(siteConfig.description)}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [
+      {
+        url: `/og?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(siteConfig.description)}`,
+      },
+    ],
   },
 }
 

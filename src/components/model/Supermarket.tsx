@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils"
 function SupermarketBadge({ supermarketChain, className }: { supermarketChain: string; className?: string }) {
   return (
     <Badge
-      variant="default"
       size="xs"
       roundedness="sm"
+      variant="dark"
       className={cn(
-        "line-clamp-1 text-left text-2xs opacity-0 transition-opacity duration-300 group-hover:opacity-100",
+        "line-clamp-1 text-left text-2xs opacity-80 transition-opacity duration-300 group-hover:opacity-100",
         className,
       )}
     >
