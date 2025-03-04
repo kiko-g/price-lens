@@ -110,6 +110,23 @@ export const productQueries = {
 
     return { data, error }
   },
+
+  async createProductFromSupermarketProduct(supermarketProduct: SupermarketProduct) {
+    if (supermarketProduct.is_tracked) {
+      return {
+        data: null,
+        error: "Product is already tracked",
+      }
+    }
+
+    const supabase = createClient()
+    return supabase.from("products").insert({
+      name: supermarketProduct.name,
+      brand: supermarketProduct.brand,
+      category: supermarketProduct.category,
+      product_ref_ids: [supermarketProduct.id],
+    })
+  },
 }
 
 export const supermarketProductQueries = {
@@ -210,6 +227,11 @@ export const supermarketProductQueries = {
         ignoreDuplicates: false,
       },
     )
+  },
+
+  async setIsTracked(id: number, is_tracked: boolean) {
+    const supabase = createClient()
+    return supabase.from("supermarket_products").update({ is_tracked }).eq("id", id)
   },
 
   async createOrUpdateProduct(product: SupermarketProduct) {

@@ -4,7 +4,7 @@ import type { SupermarketProduct } from "@/types"
 import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
-import { isValidJson, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
+import { isValidJson, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { supermarketProductQueries } from "./db/queries/products"
 
 export const fetchHtml = async (url: string) => {
@@ -104,9 +104,10 @@ export const continenteProductPageScraper = async (url: string) => {
       price_per_major_unit: pricePerMajorUnit || null,
       discount: priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0,
       image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
-      updated_at: new Date().toISOString().replace("Z", "+00:00"),
+      updated_at: now(),
       origin_id: 1,
       created_at: null,
+      is_tracked: false,
     }
 
     return product
@@ -171,7 +172,7 @@ export const crawlContinenteCategoryPages = async () => {
     for (const link of links) {
       await supermarketProductQueries.upsertBlank({
         url: link,
-        created_at: new Date().toISOString().replace("Z", "+00:00"),
+        created_at: now(),
       })
     }
     console.log("Finished storing", category.name, links.length, performance.now() - start)
@@ -198,29 +199,23 @@ export function isValidProduct(product: any): product is SupermarketProduct {
 }
 
 export const scrapeAndReplaceProduct = async (url: string | null) => {
-  if (!url) {
-    return NextResponse.json({ error: "URL is required" }, { status: 400 })
-  }
+  if (!url) return NextResponse.json({ error: "URL is required" }, { status: 400 })
 
   const product = await continenteProductPageScraper(url)
 
   if (!product || Object.keys(product).length === 0) {
     await supermarketProductQueries.upsertBlank({
       url,
-      created_at: new Date().toISOString().replace("Z", "+00:00"),
+      created_at: now(),
     })
     return NextResponse.json({ error: "SupermarketProduct scraping failed", url }, { status: 404 })
   }
 
-  if (!isValidProduct(product)) {
-    return NextResponse.json({ error: "Invalid product data structure", url }, { status: 422 })
-  }
+  if (!isValidProduct(product)) return NextResponse.json({ error: "Invalid product data", url }, { status: 422 })
 
   const { data, error } = await supermarketProductQueries.createOrUpdateProduct(product)
 
-  if (error) {
-    return NextResponse.json({ error: "Database operation failed", details: error }, { status: 500 })
-  }
+  if (error) return NextResponse.json({ error: "SupermarketProduct upsert failed", details: error }, { status: 500 })
 
-  return NextResponse.json({ product, data, message: "SupermarketProduct upserted" })
+  return NextResponse.json({ data: product, message: "SupermarketProduct upserted" })
 }

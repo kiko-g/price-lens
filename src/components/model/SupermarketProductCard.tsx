@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { type SupermarketProduct } from "@/types"
-import { FrontendStatus, SupermarketChain } from "@/types/extra"
+import { FrontendStatus } from "@/types/extra"
 
 import { Code } from "@/components/Code"
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +42,7 @@ import {
   RefreshCcwIcon,
   ChartSplineIcon,
   CloudAlertIcon,
+  PlusIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
@@ -52,6 +53,20 @@ type Props = {
   onFavorite?: () => Promise<boolean> | undefined
 }
 
+async function handleAddToTrackingList(sp: SupermarketProduct) {
+  if (sp.is_tracked) return
+
+  try {
+    const response = await fetch("/api/products/add", {
+      method: "POST",
+      body: JSON.stringify({ product: sp }),
+    })
+    const data = await response.json()
+    console.debug(data)
+  } catch (error) {
+    console.error("Error adding to tracking list:", error)
+  }
+}
 export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
 
@@ -217,6 +232,19 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
                     <CopyIcon />
                   </Button>
                 </DropdownMenuItem>
+
+                {process.env.NODE_ENV === "development" ? (
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="dropdown-item"
+                      onClick={() => handleAddToTrackingList(product)}
+                      disabled={product.is_tracked}
+                    >
+                      {product.is_tracked ? "Product already tracked" : "Add to tracking list"}
+                      <PlusIcon />
+                    </Button>
+                  </DropdownMenuItem>
+                ) : null}
 
                 <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
 

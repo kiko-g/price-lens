@@ -29,6 +29,7 @@ export const productUnavailable: SupermarketProduct = {
   created_at: null,
   updated_at: null,
   origin_id: 1,
+  is_tracked: false,
 }
 
 export const mockProduct: SupermarketProduct = {
@@ -50,6 +51,7 @@ export const mockProduct: SupermarketProduct = {
   created_at: "2025-02-21T12:31:34.343+00:00",
   updated_at: "2025-02-21T12:31:34.343+00:00",
   origin_id: 1,
+  is_tracked: false,
 }
 
 export function resizeImgSrc(src: string, width: number, height: number) {
@@ -111,4 +113,8 @@ export function getCenteredArray(length: number, page: number, rightmostBoundary
 
   const array = Array.from({ length }, (_, i) => start + i)
   return array
+}
+
+export function now() {
+  return new Date().toISOString().replace("Z", "+00:00")
 }

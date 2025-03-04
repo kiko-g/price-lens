@@ -47,6 +47,7 @@ export interface SupermarketProduct {
   created_at: string | null
   updated_at: string | null
   origin_id: number | null
+  is_tracked: boolean
 }
 
 export interface ProductFromSupermarket extends Product {
@@ -56,7 +57,7 @@ export interface ProductFromSupermarket extends Product {
 export interface Price {
   id?: number
   product_id: number
-  supermarket_id: number | null
+  supermarket_product_id: number | null
   price: number | null
   price_recommended: number | null
   price_per_major_unit: number | null

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
+
 import { productQueries } from "@/lib/db/queries/products"
+import { updatePricePoint } from "@/lib/pricing"
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,37 +18,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "No uncharted products found" }, { status: 404 })
     }
 
-    const supermarketProducts = data?.flatMap((product) => product.supermarket_products)
-    const urls = supermarketProducts?.map((product) => product.url)
-
-    if (!urls) {
-      console.error("No urls found")
-      return NextResponse.json({ error: "No urls found" }, { status: 404 })
-    }
-
-    console.info(`Scraping ${urls.length} products...`)
-
     let failedScrapes = 0
-    for (const url of urls) {
-      try {
-        console.info(`Scraping product ${url}...`)
-        const product = await scrapeAndReplaceProduct(url)
-        console.info(`Scraped product ${url} successfully`)
-      } catch (error) {
-        console.warn(`Failed to scrape product ${url}:`, error)
-        failedScrapes++
+    for (const product of data) {
+      for (const supermarketProduct of product.supermarket_products) {
+        const url = supermarketProduct.url
+        try {
+          console.info(`Scraping product ${url}...`)
+          const response = await scrapeAndReplaceProduct(url)
+          const json = await response.json()
+
+          await updatePricePoint(product, {
+            ...json.data,
+            id: supermarketProduct.id,
+          })
+        } catch (error) {
+          console.warn(`Failed to scrape product ${url}:`, error)
+          failedScrapes++
+        }
       }
     }
 
-    console.info(`Completed scraping. Processed: ${urls.length}, Failed: ${failedScrapes}`)
+    const message = `Scraped selected products (processed ${data.flatMap((p) => p.supermarket_products).length} products, failed ${failedScrapes}).`
+    console.info(message)
 
-    return NextResponse.json(
-      {
-        message: `Scraped selected products (processed ${urls.length} products, failed ${failedScrapes}).`,
-        is_done: true,
-      },
-      { status: 200 },
-    )
+    return NextResponse.json({ message }, { status: 200 })
   } catch (err) {
     console.error("Unexpected error in scraping batch:", err)
     return NextResponse.json({ error: "Unexpected server error" }, { status: 500 })

@@ -180,7 +180,7 @@ export function SupermarketProductsGrid(props: Props) {
 
   if (isLoading) {
     return (
-      <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5 xl:grid-cols-6">
         {Array.from({ length: limit }).map((_, index) => (
           <ProductCardSkeleton key={`product-skeleton-${index}`} />
         ))}
