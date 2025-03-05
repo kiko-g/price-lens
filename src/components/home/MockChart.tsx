@@ -137,7 +137,7 @@ export function MockChartA({ className }: { className?: string }) {
         </div>
       </CardFooter>
 
-      <BorderBeam duration={8} size={100} />
+      <BorderBeam size={100} />
     </Card>
   )
 }
