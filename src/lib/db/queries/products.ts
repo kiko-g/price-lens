@@ -111,8 +111,8 @@ export const productQueries = {
     return { data, error }
   },
 
-  async createProductFromSupermarketProduct(supermarketProduct: SupermarketProduct) {
-    if (supermarketProduct.is_tracked) {
+  async createProductFromSupermarketProduct(sp: SupermarketProduct) {
+    if (sp.is_tracked) {
       return {
         data: null,
         error: "Product is already tracked",
@@ -121,10 +121,10 @@ export const productQueries = {
 
     const supabase = createClient()
     return supabase.from("products").insert({
-      name: supermarketProduct.name,
-      brand: supermarketProduct.brand,
-      category: supermarketProduct.category,
-      product_ref_ids: [supermarketProduct.id],
+      name: sp.name,
+      brand: sp.brand,
+      category: sp.category,
+      product_ref_ids: [sp.id],
     })
   },
 }
@@ -207,9 +207,9 @@ export const supermarketProductQueries = {
       .ilike("url", `%${substrs.join("%")}%`)
   },
 
-  async upsert(product: SupermarketProduct) {
+  async upsert(sp: SupermarketProduct) {
     const supabase = createClient()
-    return supabase.from("supermarket_products").upsert(product, {
+    return supabase.from("supermarket_products").upsert(sp, {
       onConflict: "url",
       ignoreDuplicates: false,
     })
@@ -234,17 +234,17 @@ export const supermarketProductQueries = {
     return supabase.from("supermarket_products").update({ is_tracked }).eq("id", id)
   },
 
-  async createOrUpdateProduct(product: SupermarketProduct) {
+  async createOrUpdateProduct(sp: SupermarketProduct) {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
       .from("supermarket_products")
       .select("created_at")
-      .eq("url", product.url)
+      .eq("url", sp.url)
       .single()
 
     const productToUpsert = {
-      ...product,
-      created_at: product.created_at || existingProduct?.created_at || product.updated_at,
+      ...sp,
+      created_at: sp.created_at || existingProduct?.created_at || sp.updated_at,
     }
 
     const { data, error } = await supabase.from("supermarket_products").upsert(productToUpsert, {

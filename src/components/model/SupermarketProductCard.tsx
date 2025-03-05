@@ -48,7 +48,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
 
 type Props = {
-  product: SupermarketProduct
+  sp: SupermarketProduct
   onUpdate?: () => Promise<boolean> | undefined
   onFavorite?: () => Promise<boolean> | undefined
 }
@@ -67,10 +67,10 @@ async function handleAddToTrackingList(sp: SupermarketProduct) {
     console.error("Error adding to tracking list:", error)
   }
 }
-export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props) {
+export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
 
-  if (!product || !product.url) {
+  if (!sp || !sp.url) {
     return null
   }
 
@@ -78,30 +78,29 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
     return <ProductCardSkeleton />
   }
 
-  const supermarketChain = resolveSupermarketChain(product)
+  const supermarketChain = resolveSupermarketChain(sp)
 
-  const isPriceNotSet = !product.price_recommended && !product.price
-  const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
+  const isPriceNotSet = !sp.price_recommended && !sp.price
+  const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isNormalPrice =
-    (!product.price_recommended && product.price) ||
-    (product.price_recommended && product.price && product.price_recommended === product.price)
+    (!sp.price_recommended && sp.price) || (sp.price_recommended && sp.price && sp.price_recommended === sp.price)
 
-  const categoryText = product.category
-    ? `${product.category}${product.category_2 ? ` > ${product.category_2}` : ""}${product.category_3 ? ` > ${product.category_3}` : ""}`
+  const categoryText = sp.category
+    ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
     : null
 
   return (
     <div className="flex w-full flex-col rounded-lg bg-white dark:bg-zinc-950">
       <div
         className={cn(
-          "group relative mb-3 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
-          product.image ? "border-zinc-200 dark:border-zinc-800" : "border-transparent",
+          "group relative mb-2 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
+          sp.image ? "border-zinc-200 dark:border-zinc-800" : "border-transparent",
         )}
       >
-        {product.image ? (
+        {sp.image ? (
           <Image
-            src={product.image}
-            alt={product.name || "Product Image"}
+            src={sp.image}
+            alt={sp.name || "Product Image"}
             width={500}
             height={500}
             className="aspect-square w-full transition duration-300 hover:scale-105"
@@ -113,15 +112,15 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
         )}
 
         <div className="absolute left-2 top-2 flex flex-col gap-1">
-          {product.price_per_major_unit && product.major_unit ? (
+          {sp.price_per_major_unit && sp.major_unit ? (
             <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
-              {product.price_per_major_unit}€{product.major_unit}
+              {sp.price_per_major_unit}€{sp.major_unit}
             </Badge>
           ) : null}
 
-          {product.discount ? (
+          {sp.discount ? (
             <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-              -{discountValueToPercentage(product.discount)}
+              -{discountValueToPercentage(sp.discount)}
             </Badge>
           ) : null}
 
@@ -158,7 +157,7 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
             <Tooltip>
               <TooltipTrigger>
                 <Badge variant="secondary" size="xs" roundedness="sm" className="line-clamp-1 text-left text-2xs">
-                  {product.category_3 || product.category_2 || product.category || "No category"}
+                  {sp.category_3 || sp.category_2 || sp.category || "No category"}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent
@@ -175,26 +174,24 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
-            {product.brand ? product.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
+          <span className="mt-1 text-sm font-semibold leading-4 text-blue-600 dark:text-blue-400">
+            {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
-          <h2 className="mb-2 line-clamp-2 text-sm font-medium tracking-tight">{product.name || "Untitled"}</h2>
+          <h2 className="line-clamp-2 w-full text-sm font-medium tracking-tight">{sp.name || "Untitled"}</h2>
         </div>
 
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {hasDiscount ? (
               <div className="flex flex-col">
-                <span className="text-sm text-zinc-500 line-through dark:text-zinc-400">
-                  {product.price_recommended}€
-                </span>
-                <span className="text-lg font-bold text-green-600 dark:text-green-500">{product.price}€</span>
+                <span className="text-sm text-zinc-500 line-through dark:text-zinc-400">{sp.price_recommended}€</span>
+                <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price}€</span>
               </div>
             ) : null}
 
             {isNormalPrice ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{product.price}€</span>
+              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
             ) : null}
 
             {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
@@ -212,7 +209,7 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
                 <DropdownMenuItem asChild>
                   <Button variant="dropdown-item" asChild>
                     <Link
-                      href={product.url || "#"}
+                      href={sp.url || "#"}
                       target="_blank"
                       className="flex w-full items-center justify-between gap-1"
                     >
@@ -225,8 +222,8 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
                 <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"
-                    onClick={() => navigator.clipboard.writeText(product.url || "")}
-                    title={product.url || ""}
+                    onClick={() => navigator.clipboard.writeText(sp.url || "")}
+                    title={sp.url || ""}
                   >
                     Copy URL
                     <CopyIcon />
@@ -237,10 +234,10 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
                   <DropdownMenuItem asChild>
                     <Button
                       variant="dropdown-item"
-                      onClick={() => handleAddToTrackingList(product)}
-                      disabled={product.is_tracked}
+                      onClick={() => handleAddToTrackingList(sp)}
+                      disabled={sp.is_tracked}
                     >
-                      {product.is_tracked ? "Product already tracked" : "Add to tracking list"}
+                      {sp.is_tracked ? "Product already tracked" : "Add to tracking list"}
                       <PlusIcon />
                     </Button>
                   </DropdownMenuItem>
@@ -284,15 +281,15 @@ export function SupermarketProductCard({ product, onUpdate, onFavorite }: Props)
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DrawerSheet title={`${product.name}`}>
-              <ProductChart product={product} />
+            <DrawerSheet title={`${sp.name}`}>
+              <ProductChart sp={sp} />
 
               <Accordion type="single" collapsible className="mt-4 hidden w-full border-t md:flex">
                 <AccordionItem value="item-1" className="w-full border-0">
                   <AccordionTrigger>Inspect the collected data</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
-                      <Code code={JSON.stringify(product, null, 2)} language="json" />
+                      <Code code={JSON.stringify(sp, null, 2)} language="json" />
                     </div>
                   </AccordionContent>
                 </AccordionItem>

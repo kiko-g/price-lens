@@ -10,7 +10,7 @@ export const siteConfig = {
   url: "https://price-lens.vercel.app",
   ogImage: "https://price-lens.vercel.app/og.jpg",
   description:
-    "Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware of how supermarket prices change. See beyond the headlines and tags.",
+    "Monitor daily price changes on essential consumer goods that impact inflation metrics. See beyond the headlines and tags.",
   links: {
     linkedin: "https://www.linkedin.com/in/kikogoncalves/",
     instagram: "https://www.instagram.com/kikogoncalves_",

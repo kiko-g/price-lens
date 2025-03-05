@@ -4,6 +4,10 @@ import { SupermarketChain } from "@/types/extra"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
+import Image from "next/image"
+import ContinenteLogo from "@/images/brands/continente.svg"
+import PingoDoceLogo from "@/images/brands/pingo-doce.svg"
+
 function SupermarketBadge({ supermarketChain, className }: { supermarketChain: string; className?: string }) {
   return (
     <Badge
@@ -20,17 +24,19 @@ function SupermarketBadge({ supermarketChain, className }: { supermarketChain: s
   )
 }
 
-export function resolveSupermarketChain(product: SupermarketProduct) {
-  switch (product.origin_id) {
+export function resolveSupermarketChain(sp: SupermarketProduct) {
+  switch (sp.origin_id) {
     case SupermarketChain.Continente:
       return {
         name: "Continente",
         badge: <SupermarketBadge supermarketChain="Continente" />,
+        logo: <Image src={ContinenteLogo} alt="Continente" width={300} height={300} className="h-5 w-min" />,
       }
     case SupermarketChain.PingoDoce:
       return {
         name: "Pingo Doce",
         badge: <SupermarketBadge supermarketChain="Pingo Doce" />,
+        logo: <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-5 w-min" />,
       }
     default:
       return null

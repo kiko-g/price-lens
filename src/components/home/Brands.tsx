@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 import auchan from "@/images/brands/auchan.svg"
 import continente from "@/images/brands/continente.svg"
-import pingoDoce from "@/images/brands/pingo-doce.png"
+import pingoDoce from "@/images/brands/pingo-doce.svg"
 import lidl from "@/images/brands/lidl.svg"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -29,14 +29,7 @@ export function Brands({ className }: { className?: string }) {
       image: pingoDoce,
       disabled: true,
       shown: true,
-      className: "h-10 rounded",
-    },
-    {
-      name: "Lidl",
-      image: lidl,
-      disabled: true,
-      shown: true,
-      className: "h-10 rounded",
+      className: "h-10 rounded dark:bg-white",
     },
   ]
   return (

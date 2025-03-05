@@ -1,15 +1,16 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { SupermarketProduct } from "@/types"
-import { TrendingUp, TriangleIcon } from "lucide-react"
+import { ExternalLinkIcon, HomeIcon, ImageIcon, Link, TriangleIcon } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn, formatTimestamptz } from "@/lib/utils"
+import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
 import { RANGES, Range } from "@/types/extra"
+import { resolveSupermarketChain } from "./Supermarket"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -31,7 +32,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ProductChart({ product, className }: { product: SupermarketProduct; className?: string }) {
+export function ProductChart({ sp, className }: { sp: SupermarketProduct; className?: string }) {
   const [selectedRange, setSelectedRange] = React.useState<Range>("6M")
 
   const filteredData = React.useMemo(() => {
@@ -55,60 +56,85 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
   }, [selectedRange])
 
   return (
-    <div className={cn(className)}>
-      <div className="mb-6 flex max-w-xs flex-col items-center gap-0.5 text-sm font-medium">
-        {/* Price */}
-        <div className="flex w-full items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded bg-chart-1" />
-            <span className="text-muted-foreground">Price</span>
-          </div>
+    <div className={cn("flex flex-col", className)}>
+      <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
+        <a
+          href={sp.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-1 rounded-md bg-black/10 p-0.5 pl-0 pr-1 transition duration-150 dark:hover:bg-white/10"
+        >
+          {resolveSupermarketChain(sp)?.logo}
+          <ExternalLinkIcon className="h-3 w-3 text-black opacity-30 transition duration-150 group-hover:opacity-100 dark:text-white" />
+        </a>
 
-          <div className="flex items-center gap-1">
-            <span className="mr-1">{product.price}€</span>
-            <PriceChange variation={0.0452} />
-          </div>
-        </div>
-
-        {/* Price Recommended */}
-        <div className="flex w-full items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded bg-chart-2" />
-            <span className="text-muted-foreground">Price Recommended</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <span className="mr-1">{product.price_recommended}€</span>
-            <PriceChange variation={-0.0554} />
-          </div>
-        </div>
-
-        {/* Price Per Major Unit */}
-        <div className="flex w-full items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded bg-chart-3" />
-            <span className="text-muted-foreground">Price Per Major Unit</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <span className="mr-1">{product.price_per_major_unit}€</span>
-            <PriceChange variation={0.0851} />
-          </div>
-        </div>
-
-        {/* Price Recommended */}
-        <div className="flex w-full items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded bg-chart-4" />
-            <span className="text-muted-foreground">Discount</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="mr-1">{product.discount}%</span>
-            <PriceChange variation={-0.0343} />
-          </div>
+        <div className="flex items-center gap-2 divide-x [&>span:not(:first-child)]:pl-1.5">
+          <span>{sp.brand}</span>
+          <span>{sp.category}</span>
         </div>
       </div>
+
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div className="flex max-w-xs flex-1 flex-col items-center gap-0.5 text-sm font-medium">
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-chart-1" />
+              <span className="text-muted-foreground">Price</span>
+            </div>
+            <div className="flex items-center justify-end gap-1">
+              <span className="mr-1">{sp.price}€</span>
+              <PriceChange variation={0.0452} />
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-chart-2" />
+              <span className="text-muted-foreground">Price Recommended</span>
+            </div>
+            <div className="flex items-center justify-end gap-1">
+              <span className="mr-1">{sp.price_recommended}€</span>
+              <PriceChange variation={-0.0554} />
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-chart-3" />
+              <span className="text-muted-foreground">Price Per Major Unit</span>
+            </div>
+            <div className="flex items-center justify-end gap-1">
+              <span className="mr-1">{sp.price_per_major_unit}€</span>
+              <PriceChange variation={0.0851} />
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-chart-4" />
+              <span className="text-muted-foreground">Discount</span>
+            </div>
+            <div className="flex items-center justify-end gap-1">
+              <span className="mr-1">{sp.discount ? discountValueToPercentage(sp.discount) : "N/A"}</span>
+              <PriceChange variation={-0.0343} />
+            </div>
+          </div>
+        </div>
+
+        {sp.image ? (
+          <Image
+            src={sp.image}
+            alt={sp.name}
+            width={100}
+            height={100}
+            className="h-24 w-24 rounded-md bg-white p-1 shadow"
+          />
+        ) : (
+          <div className="flex h-24 w-24 items-center justify-center rounded-md bg-muted">
+            <ImageIcon className="h-4 w-4" />
+          </div>
+        )}
+      </header>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {RANGES.map((range) => (
@@ -159,9 +185,7 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
       <div className="flex w-full justify-between gap-2 pt-2 text-sm">
         <div className="flex w-full justify-end">
           <span className="text-xs text-muted-foreground">
-            {product.created_at || product.updated_at
-              ? `Last updated: ${formatTimestamptz(product.updated_at)}`
-              : "No update record"}
+            {sp.created_at || sp.updated_at ? `Last updated: ${formatTimestamptz(sp.updated_at)}` : "No update record"}
           </span>
         </div>
       </div>
@@ -171,10 +195,14 @@ export function ProductChart({ product, className }: { product: SupermarketProdu
 
 function PriceChange({ variation }: { variation: number }) {
   const percentage = (variation * 100).toFixed(1)
+  const positiveSign = variation > 0 ? "+" : ""
 
   return (
-    <div className="flex items-center gap-1">
-      <span className={cn(variation < 0 ? "text-green-500" : "text-red-500")}>{percentage}%</span>
+    <div className="flex w-16 items-center justify-end gap-1">
+      <span className={cn(variation < 0 ? "text-green-500" : "text-red-500")}>
+        {positiveSign}
+        {percentage}%
+      </span>
       <TriangleIcon
         className={cn(
           "h-3 w-3",

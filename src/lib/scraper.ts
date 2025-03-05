@@ -96,7 +96,7 @@ export const continenteProductPageScraper = async (url: string) => {
     const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : price
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
-    const product: SupermarketProduct = {
+    const sp: SupermarketProduct = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
@@ -110,7 +110,7 @@ export const continenteProductPageScraper = async (url: string) => {
       is_tracked: false,
     }
 
-    return product
+    return sp
   } catch (error) {
     // Fail gracefully instead of breaking the route
     console.error(`Unexpected error in continenteProductPageScraper for URL: ${url}`, error)

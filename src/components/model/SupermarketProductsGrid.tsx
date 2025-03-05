@@ -97,14 +97,14 @@ export function SupermarketProductsGrid(props: Props) {
     }
   }
 
-  async function updateProduct(product: SupermarketProduct): Promise<boolean> {
-    if (!product || !product.url) return false
+  async function updateProduct(sp: SupermarketProduct): Promise<boolean> {
+    if (!sp || !sp.url) return false
 
-    const response = await fetch(`/api/products/replace?url=${product.url}`)
+    const response = await fetch(`/api/products/replace?url=${sp.url}`)
     const data = await response.json()
 
     if (response.status === 200) {
-      setProducts(products.map((p) => (p.url === product.url ? (data.product as SupermarketProduct) : p)))
+      setProducts(products.map((p) => (p.url === sp.url ? (data.product as SupermarketProduct) : p)))
       return true
     } else {
       console.error(data)
@@ -356,11 +356,7 @@ export function SupermarketProductsGrid(props: Props) {
 
       <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
         {products.map((product, productIdx) => (
-          <SupermarketProductCard
-            key={`product-${productIdx}`}
-            product={product}
-            onUpdate={() => updateProduct(product)}
-          />
+          <SupermarketProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
         ))}
       </div>
     </div>
