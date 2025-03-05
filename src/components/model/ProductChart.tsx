@@ -2,8 +2,9 @@
 
 import * as React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { SupermarketProduct } from "@/types"
-import { ExternalLinkIcon, HomeIcon, ImageIcon, Link, TriangleIcon } from "lucide-react"
+import { ExternalLinkIcon, ImageIcon, TriangleIcon } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
 import { Button } from "@/components/ui/button"
@@ -58,15 +59,16 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
-        <a
-          href={sp.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-1 rounded-md bg-black/10 p-0.5 pl-0 pr-1 transition duration-150 dark:hover:bg-white/10"
-        >
-          {resolveSupermarketChain(sp)?.logo}
-          <ExternalLinkIcon className="h-3 w-3 text-black opacity-30 transition duration-150 group-hover:opacity-100 dark:text-white" />
-        </a>
+        <div className="flex items-center gap-1">
+          <Link href={sp.url} target="_blank">
+            {resolveSupermarketChain(sp)?.logo}
+          </Link>
+          <Button asChild variant="ghost" size="icon-xs" roundedness="sm">
+            <Link href={sp.url} target="_blank">
+              <ExternalLinkIcon />
+            </Link>
+          </Button>
+        </div>
 
         <div className="flex items-center gap-2 divide-x [&>span:not(:first-child)]:pl-1.5">
           <span>{sp.brand}</span>
@@ -122,13 +124,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
         </div>
 
         {sp.image ? (
-          <Image
-            src={sp.image}
-            alt={sp.name}
-            width={100}
-            height={100}
-            className="h-24 w-24 rounded-md bg-white p-1 shadow"
-          />
+          <Image src={sp.image} alt={sp.name} width={100} height={100} className="h-28 w-28 rounded-md bg-white p-1" />
         ) : (
           <div className="flex h-24 w-24 items-center justify-center rounded-md bg-muted">
             <ImageIcon className="h-4 w-4" />

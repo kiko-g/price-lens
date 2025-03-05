@@ -31,12 +31,14 @@ export function resolveSupermarketChain(sp: SupermarketProduct) {
         name: "Continente",
         badge: <SupermarketBadge supermarketChain="Continente" />,
         logo: <Image src={ContinenteLogo} alt="Continente" width={300} height={300} className="h-5 w-min" />,
+        logoSmall: <Image src={ContinenteLogo} alt="Continente" width={300} height={300} className="h-3.5 w-min" />,
       }
     case SupermarketChain.PingoDoce:
       return {
         name: "Pingo Doce",
         badge: <SupermarketBadge supermarketChain="Pingo Doce" />,
         logo: <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-5 w-min" />,
+        logoSmall: <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-3.5 w-min" />,
       }
     default:
       return null

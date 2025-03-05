@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { now } from "@/lib/utils"
 import type { Price, SupermarketProduct } from "@/types"
 
 export const priceQueries = {
@@ -26,6 +27,7 @@ export const priceQueries = {
       .from("prices")
       .update({
         valid_to: newPrice.valid_from,
+        updated_at: now(),
       })
       .eq("id", id)
 

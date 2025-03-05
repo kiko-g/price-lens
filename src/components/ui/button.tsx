@@ -38,7 +38,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         xl: `px-4 py-3 text-xl`,
         icon: `p-2`,
         "icon-sm": `p-1.5`,
-        "icon-xs": `p-0.5`,
+        "icon-xs": `p-[1px] [&_svg]:size-3`,
       },
       roundedness: {
         default: `rounded-md`,

@@ -148,7 +148,12 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute bottom-2 left-2">{supermarketChain ? supermarketChain.badge : null}</div>
+        <Badge
+          size="xs"
+          className="absolute bottom-2 right-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        >
+          {supermarketChain ? supermarketChain.logoSmall : null}
+        </Badge>
       </div>
 
       <div className="flex flex-1 flex-col items-start">
@@ -174,7 +179,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1 text-sm font-semibold leading-4 text-blue-600 dark:text-blue-400">
+          <span className="mt-1.5 text-sm font-semibold leading-4 text-blue-600 dark:text-blue-400">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 

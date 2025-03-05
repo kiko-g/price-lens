@@ -65,6 +65,7 @@ export interface Price {
   valid_from: string | null
   valid_to: string | null
   created_at: string | null
+  updated_at: string | null
 }
 
 // Frontend types extended from database types

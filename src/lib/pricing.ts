@@ -29,6 +29,7 @@ export async function updatePricePoint(p: Product, sp: SupermarketProduct) {
     created_at: timestamp,
     valid_from: timestamp,
     valid_to: null,
+    updated_at: timestamp,
   }
 
   const existingPricePoint = await priceQueries.getLatestPricePoint(p.id, sp.id)
