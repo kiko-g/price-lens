@@ -1,10 +1,12 @@
 "use client"
 
-import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import { Price } from "@/types"
 import axios from "axios"
+import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
+import { Price } from "@/types"
 import { useState, useEffect } from "react"
-import { Button } from "../ui/button"
+
+import { Button } from "@/components/ui/button"
+
 import { Loader2, PencilIcon, CircleX } from "lucide-react"
 
 export function AdminDashboard() {
@@ -62,109 +64,41 @@ export function AdminDashboard() {
       <div className="mt-8 flow-root w-full">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table className="min-w-full divide-y divide-gray-300">
+            <table className="min-w-full divide-y">
               <thead>
                 <tr>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
-                    ID
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    PID
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    SPID
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Price
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Price Rec
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Price Unit
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Discount
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Valid From
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Valid To
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Updated At
-                  </th>
-
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Actions
-                  </th>
+                  <HeaderCell>ID</HeaderCell>
+                  <HeaderCell>PID</HeaderCell>
+                  <HeaderCell>SPID</HeaderCell>
+                  <HeaderCell>Price</HeaderCell>
+                  <HeaderCell>Price Rec</HeaderCell>
+                  <HeaderCell>Price Unit</HeaderCell>
+                  <HeaderCell>Discount</HeaderCell>
+                  <HeaderCell>Updated At</HeaderCell>
+                  <HeaderCell>Valid From</HeaderCell>
+                  <HeaderCell>Valid To</HeaderCell>
+                  <HeaderCell>Actions</HeaderCell>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y">
                 {prices.map((price: Price) => (
                   <tr key={price.id}>
-                    <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-0">{price.id}</td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
-                      {price.product_id}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                      {price.supermarket_product_id}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{price.price}€</td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{price.price_recommended}€</td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{price.price_per_major_unit}€</td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                      {price.discount ? discountValueToPercentage(price.discount) : "N/A"}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                      {formatTimestamptz(price.valid_from)}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                      {price.valid_to ? formatTimestamptz(price.valid_to) : "N/A"}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                      {formatTimestamptz(price.updated_at)}
-                    </td>
+                    <Cell>{price.id}</Cell>
+                    <Cell>{price.product_id}</Cell>
+                    <Cell>{price.supermarket_product_id}</Cell>
+                    <Cell>{price.price}€</Cell>
+                    <Cell>{price.price_recommended}€</Cell>
+                    <Cell>{price.price_per_major_unit}€</Cell>
+                    <Cell>{price.discount ? discountValueToPercentage(price.discount) : "N/A"}</Cell>
+                    <Cell>{formatTimestamptz(price.updated_at)}</Cell>
+                    <Cell>{formatTimestamptz(price.valid_from)}</Cell>
+                    <Cell>{price.valid_to ? formatTimestamptz(price.valid_to) : "N/A"}</Cell>
 
-                    <td className="relative flex items-center gap-2 whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                    <Cell>
                       <Button variant="ghost" size="icon-xs">
                         <PencilIcon />
                       </Button>
-                    </td>
+                    </Cell>
                   </tr>
                 ))}
               </tbody>
@@ -178,4 +112,20 @@ export function AdminDashboard() {
 
 const StatusWrapper = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex min-h-full w-full flex-1 flex-col items-center justify-center p-4">{children}</div>
+}
+
+const HeaderCell = ({ className, children }: { className?: string; children: React.ReactNode }) => {
+  return (
+    <th scope="col" className={cn("whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold", className)}>
+      {children}
+    </th>
+  )
+}
+
+const Cell = ({ className, children }: { className?: string; children: React.ReactNode }) => {
+  return (
+    <td className={cn("whitespace-nowrap px-2 py-2 text-sm tracking-tighter text-muted-foreground", className)}>
+      {children}
+    </td>
+  )
 }
