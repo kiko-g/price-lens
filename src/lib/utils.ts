@@ -112,12 +112,7 @@ export function now() {
   return new Date().toISOString().replace("Z", "+00:00")
 }
 
-export function buildChartData(
-  prices: Price[],
-  range: DateRange = "1M",
-  minPoints = 5,
-  maxPoints = 20,
-): ProductChartEntry[] {
+export function buildChartData(prices: Price[], range: DateRange = "1M", minPoints = 5): ProductChartEntry[] {
   if (!prices.length) return []
 
   // Sort prices by valid_from date (oldest first)
@@ -132,121 +127,52 @@ export function buildChartData(
 
   if (!validPrices.length) return []
 
-  // Determine the start and end dates for the chart
-  let startDate: Date
+  // Determine the date range
+  const startDate = new Date(validPrices[0].valid_from!)
   let endDate: Date
 
-  // If we have only one price, determine the date range
   if (validPrices.length === 1) {
-    startDate = new Date(validPrices[0].valid_from!)
-
-    // If valid_to is available, use it; otherwise use updated_at or current date
+    // If only one price, use valid_to, updated_at, or current date
     if (validPrices[0].valid_to) {
       endDate = new Date(validPrices[0].valid_to)
     } else if (validPrices[0].updated_at) {
       endDate = new Date(validPrices[0].updated_at)
     } else {
-      endDate = new Date() // Use current date if no end date is available
+      endDate = new Date() // Current date
     }
-
-    // Ensure we have at least a day difference
-    if (endDate.getTime() - startDate.getTime() < 86400000) {
-      // 24 hours in milliseconds
-      endDate = new Date(startDate.getTime() + 86400000 * 7) // Add a week
-    }
-
-    // Generate evenly spaced points across the date range
-    const pricePoints: ProductChartEntry[] = []
-    const totalDuration = endDate.getTime() - startDate.getTime()
-    const pointCount = Math.min(maxPoints, Math.max(minPoints, 2)) // At least 2 points, at most maxPoints
-    const interval = totalDuration / (pointCount - 1)
-
-    for (let i = 0; i < pointCount; i++) {
-      const pointDate = new Date(startDate.getTime() + interval * i)
-
-      pricePoints.push({
-        date: formatDate(pointDate.toISOString(), range),
-        price: validPrices[0].price!,
-        "price-recommended": validPrices[0].price_recommended || validPrices[0].price!,
-        discount: validPrices[0].discount || 0,
-        "price-per-major-unit": validPrices[0].price_per_major_unit || validPrices[0].price!,
-      })
-    }
-
-    return pricePoints
+  } else {
+    // Use the most recent price's date
+    const lastPrice = validPrices[validPrices.length - 1]
+    endDate = lastPrice.valid_to ? new Date(lastPrice.valid_to) : new Date(lastPrice.valid_from!)
   }
 
-  // If we have between minPoints and maxPoints valid prices, use them directly
-  if (validPrices.length >= minPoints && validPrices.length <= maxPoints) {
-    return validPrices.map((price) => ({
-      date: formatDate(price.valid_from!, range),
-      price: price.price!,
-      "price-recommended": price.price_recommended || price.price!,
-      discount: price.discount || 0,
-      "price-per-major-unit": price.price_per_major_unit || price.price!,
-    }))
+  // Ensure we have at least a day difference
+  if (endDate.getTime() - startDate.getTime() < 86400000) {
+    endDate = new Date(startDate.getTime() + 86400000 * 7) // Add a week
   }
 
-  // If we have fewer than minPoints but more than 1
-  if (validPrices.length < minPoints) {
-    startDate = new Date(validPrices[0].valid_from!)
-    endDate = new Date(validPrices[validPrices.length - 1].valid_from!)
+  // Always generate at least minPoints, evenly distributed across the date range
+  const pointCount = Math.max(minPoints, validPrices.length)
+  const pricePoints: ProductChartEntry[] = []
+  const totalDuration = endDate.getTime() - startDate.getTime()
+  const interval = totalDuration / (pointCount - 1)
 
-    if (endDate.getTime() - startDate.getTime() < 86400000) {
-      endDate = new Date(startDate.getTime() + 86400000 * 7)
-    }
+  for (let i = 0; i < pointCount; i++) {
+    const pointDate = new Date(startDate.getTime() + interval * i)
 
-    const pricePoints: ProductChartEntry[] = []
-    const totalDuration = endDate.getTime() - startDate.getTime()
-    const interval = totalDuration / (minPoints - 1)
+    // Find the price valid at this date
+    const validPrice = findValidPriceAtDate(validPrices, pointDate)
 
-    for (let i = 0; i < minPoints; i++) {
-      const pointDate = new Date(startDate.getTime() + interval * i)
-
-      // Find the price that was valid at this point
-      const validPrice = findValidPriceAtDate(validPrices, pointDate)
-
-      pricePoints.push({
-        date: formatDate(pointDate.toISOString(), range),
-        price: validPrice.price!,
-        "price-recommended": validPrice.price_recommended || validPrice.price!,
-        discount: validPrice.discount || 0,
-        "price-per-major-unit": validPrice.price_per_major_unit || validPrice.price!,
-      })
-    }
-
-    return pricePoints
+    pricePoints.push({
+      date: formatDate(pointDate.toISOString(), range),
+      price: validPrice.price!,
+      "price-recommended": validPrice.price_recommended || validPrice.price!,
+      discount: validPrice.discount || 0,
+      "price-per-major-unit": validPrice.price_per_major_unit || validPrice.price!,
+    })
   }
 
-  // If we have more than maxPoints, sample the data
-  if (validPrices.length > maxPoints) {
-    const step = Math.ceil(validPrices.length / maxPoints)
-    const sampledPrices = []
-
-    // Always include the first point
-    sampledPrices.push(validPrices[0])
-
-    // Sample points in between
-    for (let i = step; i < validPrices.length - 1; i += step) {
-      sampledPrices.push(validPrices[i])
-    }
-
-    // Add the last point if it's not already included
-    if (sampledPrices[sampledPrices.length - 1] !== validPrices[validPrices.length - 1]) {
-      sampledPrices.push(validPrices[validPrices.length - 1])
-    }
-
-    return sampledPrices.map((price) => ({
-      date: formatDate(price.valid_from!, range),
-      price: price.price!,
-      "price-recommended": price.price_recommended || price.price!,
-      discount: price.discount || 0,
-      "price-per-major-unit": price.price_per_major_unit || price.price!,
-    }))
-  }
-
-  // This line should never be reached, but TypeScript requires a return statement
-  return []
+  return pricePoints
 }
 
 // Helper function to find which price was valid at a given date
@@ -271,17 +197,23 @@ function findValidPriceAtDate(prices: Price[], date: Date): Price {
   return priceBeforeDate || prices[0]
 }
 
-// The correct formatDate function
 function formatDate(dateString: string, range: DateRange = "1M"): string {
   const date = new Date(dateString)
 
   switch (range) {
+    case "3M":
+    case "6M":
     case "1Y":
     case "5Y":
     case "Max":
       return date.toLocaleString("en-US", {
-        year: "numeric",
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
       })
+
+    case "1W":
+    case "1M":
     default:
       return date.toLocaleString("en-US", {
         day: "numeric",

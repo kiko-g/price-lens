@@ -53,6 +53,11 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
     fetchPrices()
   }, [sp.id])
 
+  useEffect(() => {
+    const pricePoints = buildChartData(prices, selectedRange)
+    setChartData(pricePoints)
+  }, [selectedRange, prices])
+
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
@@ -195,8 +200,8 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
               dataKey={key}
               type="monotone"
               stroke={config.color}
-              strokeWidth={3}
-              dot={{ r: 4 }}
+              strokeWidth={key === "price" ? 4 : 2}
+              dot={{ r: 0 }}
               activeDot={{ r: 6 }}
             />
           ))}
