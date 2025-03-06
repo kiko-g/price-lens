@@ -4,11 +4,12 @@ import { now } from "./utils"
 import { priceQueries } from "./db/queries/prices"
 
 export function arePricePointsEqual(p1: Price, p2: Price) {
+  if (!p1 || !p2) return false
+
   return (
     p1.price === p2.price &&
     p1.price_recommended === p2.price_recommended &&
-    p1.price_per_major_unit === p2.price_per_major_unit &&
-    p1.discount === p2.discount
+    p1.price_per_major_unit === p2.price_per_major_unit
   )
 }
 

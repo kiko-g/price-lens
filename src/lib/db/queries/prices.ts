@@ -1,4 +1,4 @@
-import { arePricePointsEqual, logPricePoint } from "@/lib/pricing"
+import { arePricePointsEqual } from "@/lib/pricing"
 import { createClient } from "@/lib/supabase/server"
 import { now } from "@/lib/utils"
 import type { Price } from "@/types"
@@ -16,6 +16,7 @@ export const priceQueries = {
 
     return data
   },
+
   async getLatestPricePoint(product_id: number, supermarket_product_id: number) {
     const supabase = createClient()
 
@@ -100,6 +101,7 @@ export const priceQueries = {
       .from("prices")
       .select("*")
       .order("supermarket_product_id", { ascending: true })
+      .order("valid_from", { ascending: false })
 
     if (error) {
       console.error("Error fetching price points:", error)
@@ -112,10 +114,6 @@ export const priceQueries = {
 
       if (p1.supermarket_product_id !== p2.supermarket_product_id) continue
 
-      logPricePoint(p1)
-      logPricePoint(p2)
-      console.debug(arePricePointsEqual(p1, p2))
-      console.debug("--------------------------------")
       if (arePricePointsEqual(p1, p2)) {
         await this.deletePricePoint(p1.id)
       }

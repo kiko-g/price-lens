@@ -96,13 +96,15 @@ export const continenteProductPageScraper = async (url: string) => {
     const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : price
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
+    const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
+    console.debug("DISCOUNT", discount)
     const sp: SupermarketProduct = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
       price_recommended: priceRecommended || null,
       price_per_major_unit: pricePerMajorUnit || null,
-      discount: priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0,
+      discount: discount,
       image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
       updated_at: now(),
       origin_id: 1,
