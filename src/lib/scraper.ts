@@ -97,7 +97,6 @@ export const continenteProductPageScraper = async (url: string) => {
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
-    console.debug("DISCOUNT", discount)
     const sp: SupermarketProduct = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,

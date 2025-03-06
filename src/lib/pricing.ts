@@ -13,17 +13,6 @@ export function arePricePointsEqual(p1: Price, p2: Price) {
   )
 }
 
-export function logPricePoint(p: Price) {
-  console.debug(
-    p.product_id,
-    p.supermarket_product_id,
-    p.price,
-    p.price_recommended,
-    p.price_per_major_unit,
-    p.discount,
-  )
-}
-
 export async function updatePricePoint(p: Product, sp: SupermarketProduct) {
   if (!p.id || !sp.id) {
     console.error("No id for product", p.id, sp.id)

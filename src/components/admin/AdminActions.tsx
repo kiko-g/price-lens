@@ -52,7 +52,6 @@ export function ReplaceBlankCard() {
     setIsLoading(true)
     try {
       const { data } = await axios.get("/api/products/replace/blank")
-      console.debug(data)
     } catch (error) {
       console.error("Error replacing blank products:", error)
     } finally {
@@ -85,7 +84,6 @@ export function ReplaceInvalidCard() {
     setIsLoading(true)
     try {
       const { data } = await axios.get("/api/products/replace/invalid")
-      console.debug(data)
     } catch (error) {
       console.error("Error replacing invalid products:", error)
     } finally {
@@ -120,7 +118,6 @@ export function RunCronJobCard() {
     setIsLoading(true)
     try {
       const { data } = await axios.get("/api/cron")
-      console.debug(data)
     } catch (error) {
       console.error("Error running cron job:", error)
     } finally {
@@ -153,7 +150,6 @@ export function DeleteDuplicatePricePointsCard() {
     setIsLoading(true)
     try {
       await axios.get("/api/prices/delete/duplicate")
-      console.debug("Duplicate price points deleted")
     } catch (error) {
       console.error("Error deleting duplicate price points:", error)
     } finally {
