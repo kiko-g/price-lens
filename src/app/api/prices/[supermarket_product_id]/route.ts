@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import { priceQueries } from "@/lib/db/queries/prices"
 
-export async function GET(request: Request, { params }: { params: { supermarket_product_id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { supermarket_product_id: string } } & { searchParams: URLSearchParams },
+) {
   try {
     const supermarketProductId = parseInt(params.supermarket_product_id)
 

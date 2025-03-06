@@ -44,7 +44,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
     const data = await response.json()
     if (data && data.length > 0) {
       setPrices(data)
-      const pricePoints = buildChartData(data)
+      const pricePoints = buildChartData(data, selectedRange)
       setChartData(pricePoints)
     }
   }
