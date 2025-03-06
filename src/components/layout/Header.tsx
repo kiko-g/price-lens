@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { navigation, siteConfig } from "@/lib/config"
+import { adminNavigation, navigation, siteConfig } from "@/lib/config"
 import { cn } from "@/lib/utils"
 
 import { GithubIcon } from "../icons"
@@ -10,6 +10,17 @@ import { Button } from "@/components/ui/button"
 import { LogoLink } from "./LogoLink"
 import { ThemeToggle } from "./ThemeToggle"
 import { NavigationDrawer } from "./NavigationDrawer"
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+import { ShieldEllipsisIcon } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -37,17 +48,42 @@ export function Header() {
           </nav>
         </div>
 
-        <ul className="flex items-center justify-center gap-0.5 md:gap-1">
+        <div className="flex items-center justify-center gap-0.5 md:gap-1">
           <Button variant="ghost" size="icon-sm" asChild className="hidden md:inline-flex">
             <Link target="_blank" href={siteConfig.links.repo}>
               <GithubIcon />
             </Link>
           </Button>
-
           <ThemeToggle />
           <NavigationDrawer />
-        </ul>
+        </div>
       </div>
     </header>
+  )
+}
+
+function AdminDropdownMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Button variant="ghost" size="icon-sm" className="shadow-none">
+          <ShieldEllipsisIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-48" align="end">
+        <DropdownMenuLabel>Administration</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {adminNavigation.map((item) => (
+          <DropdownMenuItem key={item.href} asChild>
+            <Button variant="dropdown-item" asChild>
+              <Link href={item.href} className="flex w-full items-center justify-between gap-1">
+                {item.label}
+                <item.icon className="h-4 w-4" />
+              </Link>
+            </Button>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

@@ -77,11 +77,11 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
       </div>
 
       <header className="mb-6 flex items-start justify-between gap-4">
-        <div className="flex max-w-xs flex-1 flex-col items-center gap-0.5 text-sm font-medium">
+        <div className="flex max-w-xs flex-1 flex-col items-center gap-0.5 text-xs font-medium md:text-sm">
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded bg-chart-1" />
-              <span className="text-muted-foreground">Price</span>
+              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price</span>
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price}€</span>
@@ -92,7 +92,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded bg-chart-2" />
-              <span className="text-muted-foreground">Price Recommended</span>
+              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Recommended</span>
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price_recommended}€</span>
@@ -103,7 +103,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded bg-chart-3" />
-              <span className="text-muted-foreground">Price Per Major Unit</span>
+              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Per Major Unit</span>
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price_per_major_unit}€</span>
@@ -114,7 +114,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded bg-chart-4" />
-              <span className="text-muted-foreground">Discount</span>
+              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Discount</span>
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.discount ? discountValueToPercentage(sp.discount) : "N/A"}</span>
@@ -124,7 +124,13 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
         </div>
 
         {sp.image ? (
-          <Image src={sp.image} alt={sp.name} width={100} height={100} className="h-28 w-28 rounded-md bg-white p-1" />
+          <Image
+            src={sp.image}
+            alt={sp.name}
+            width={100}
+            height={100}
+            className="h-20 w-20 rounded-md bg-white p-1 md:h-28 md:w-28"
+          />
         ) : (
           <div className="flex h-24 w-24 items-center justify-center rounded-md bg-muted">
             <ImageIcon className="h-4 w-4" />
@@ -194,7 +200,7 @@ function PriceChange({ variation }: { variation: number }) {
   const positiveSign = variation > 0 ? "+" : ""
 
   return (
-    <div className="flex w-16 items-center justify-end gap-1">
+    <div className="flex w-14 items-center justify-end gap-1">
       <span className={cn(variation < 0 ? "text-green-500" : "text-red-500")}>
         {positiveSign}
         {percentage}%

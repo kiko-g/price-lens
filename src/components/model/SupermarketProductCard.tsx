@@ -61,8 +61,7 @@ async function handleAddToTrackingList(sp: SupermarketProduct) {
       method: "POST",
       body: JSON.stringify({ product: sp }),
     })
-    const data = await response.json()
-    console.debug(data)
+    await response.json()
   } catch (error) {
     console.error("Error adding to tracking list:", error)
   }
@@ -150,6 +149,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
 
         <Badge
           size="xs"
+          variant="light"
           className="absolute bottom-2 right-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         >
           {supermarketChain ? supermarketChain.logoSmall : null}

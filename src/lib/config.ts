@@ -1,5 +1,6 @@
-import { HomeIcon, ShieldIcon, ShoppingBasketIcon, StoreIcon } from "lucide-react"
 import { Metadata } from "next"
+
+import { HomeIcon, ShoppingBasketIcon, StoreIcon, WorkflowIcon, GaugeIcon } from "lucide-react"
 
 const titleOrName = "Price Lens"
 
@@ -65,9 +66,22 @@ export const navigation = [
     shown: true,
   },
   {
-    icon: ShieldIcon,
+    icon: WorkflowIcon,
     label: "Admin",
     href: "/admin",
     shown: process.env.NODE_ENV === "development",
+  },
+]
+
+export const adminNavigation = [
+  {
+    icon: WorkflowIcon,
+    label: "Actions",
+    href: "/admin/actions",
+  },
+  {
+    icon: GaugeIcon,
+    label: "Dashboard",
+    href: "/admin/dashboard",
   },
 ]

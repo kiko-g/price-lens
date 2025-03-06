@@ -20,7 +20,6 @@ export function TrackedProducts() {
     try {
       const { data } = await axios.get("/api/products/tracked")
       const products = data.data || []
-      console.debug(products)
       setProducts(products)
     } catch (err) {
       setStatus(FrontendStatus.Error)

@@ -16,6 +16,8 @@ export function Brands({ className }: { className?: string }) {
       disabled: false,
       shown: true,
       className: "h-10",
+      width: 1000,
+      height: 200,
     },
     {
       name: "Auchan",
@@ -23,6 +25,8 @@ export function Brands({ className }: { className?: string }) {
       disabled: true,
       shown: true,
       className: "h-10",
+      width: 1000,
+      height: 2000,
     },
     {
       name: "Pingo Doce",
@@ -30,6 +34,8 @@ export function Brands({ className }: { className?: string }) {
       disabled: true,
       shown: true,
       className: "h-10 rounded dark:bg-white",
+      width: 1000,
+      height: 10000,
     },
   ]
   return (
@@ -48,8 +54,8 @@ export function Brands({ className }: { className?: string }) {
                 <Image
                   src={brand.image}
                   alt={brand.name}
-                  width={300}
-                  height={300}
+                  width={brand.width}
+                  height={brand.height}
                   className={cn(
                     "w-full object-contain md:w-auto",
                     brand.disabled && "opacity-50 grayscale",

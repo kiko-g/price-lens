@@ -12,7 +12,6 @@ const badgeVariants = cva(
           "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80 dark:border-transparent dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
         secondary:
           "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
-        dark: "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80",
         destructive:
           "border-transparent bg-red-600 text-zinc-50 hover:bg-red-600/80 dark:border-transparent dark:bg-red-700 dark:text-zinc-50 dark:hover:bg-red-700/80 [&_span.bubble]:bg-red-600",
         success:
@@ -21,6 +20,8 @@ const badgeVariants = cva(
           "border-transparent bg-yellow-600 text-zinc-50 hover:bg-yellow-600/80 dark:border-transparent dark:bg-yellow-800 dark:text-zinc-50 dark:hover:bg-yellow-800/80 [&_span.bubble]:bg-yellow-600",
         retail:
           "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-800 dark:text-zinc-50 dark:hover:bg-orange-800/80 [&_span.bubble]:bg-orange-600",
+        light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
+        dark: "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80",
         outline:
           "border-zinc-300 text-zinc-950 dark:border-zinc-300 dark:text-zinc-200 [&_span.bubble]:bg-zinc-300 dark:[&_span.bubble]:bg-zinc-800",
         "outline-success":

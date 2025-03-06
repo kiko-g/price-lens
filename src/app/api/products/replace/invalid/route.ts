@@ -25,14 +25,14 @@ export async function GET(req: NextRequest) {
     }
 
     const start = new Date()
-    console.debug("Starting to process", urls.length, "urls", start.toISOString())
+    console.info("Starting to process", urls.length, "urls", start.toISOString())
 
     const BATCH_SIZE = 5
     for (let i = 0; i < urls.length; i += BATCH_SIZE) {
       const batch = urls.slice(i, i + BATCH_SIZE)
       const now = new Date()
       const timeTakenSoFar = `${Math.floor((now.getTime() - start.getTime()) / 60000)}m ${Math.floor(((now.getTime() - start.getTime()) % 60000) / 1000)}s`
-      console.debug(
+      console.info(
         `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(urls.length / BATCH_SIZE)}`,
         now.toISOString(),
         `(${timeTakenSoFar} so far)`,
@@ -40,15 +40,15 @@ export async function GET(req: NextRequest) {
 
       await Promise.all(
         batch.map((url, batchIndex) => {
-          console.debug(`[${i + batchIndex + 1}/${urls.length}] Processing ${url}`)
+          console.info(`[${i + batchIndex + 1}/${urls.length}] Processing ${url}`)
           return scrapeAndReplaceProduct(url)
         }),
       )
     }
 
     const end = new Date()
-    console.debug("Done", end.toISOString())
-    console.debug(
+    console.info("Done", end.toISOString())
+    console.info(
       "Time taken:",
       `${Math.floor((end.getTime() - start.getTime()) / 60000)}m ${Math.floor(((end.getTime() - start.getTime()) % 60000) / 1000)}s`,
     )
