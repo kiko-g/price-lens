@@ -17,6 +17,22 @@ export const priceQueries = {
     return data
   },
 
+  async getPricePointsPerIndividualProduct(supermarket_product_id: number) {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from("prices")
+      .select("*")
+      .eq("supermarket_product_id", supermarket_product_id)
+
+    if (error) {
+      console.error("Error fetching price points:", error)
+      return null
+    }
+
+    return data
+  },
+
   async getLatestPricePoint(product_id: number, supermarket_product_id: number) {
     const supabase = createClient()
 

@@ -1,6 +1,14 @@
 import { FrontendStatus } from "./extra"
 
 // UI types
+export interface ProductChartEntry {
+  date: string
+  price: number
+  "price-recommended": number
+  "price-per-major-unit": number
+  discount: number
+}
+
 export interface NavigationItem {
   href: string
   label: string

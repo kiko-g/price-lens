@@ -40,4 +40,4 @@ export const getSortByType = (sortBy: string) => {
 export type SortByType = (typeof sortByTypes)[number]
 
 export const RANGES = ["1W", "1M", "3M", "6M", "1Y", "5Y", "Max"] as const
-export type Range = (typeof RANGES)[number]
+export type DateRange = (typeof RANGES)[number]

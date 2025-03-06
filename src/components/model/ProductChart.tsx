@@ -1,60 +1,57 @@
 "use client"
 
-import * as React from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { SupermarketProduct } from "@/types"
-import { ExternalLinkIcon, ImageIcon, TriangleIcon } from "lucide-react"
+import { Price, SupermarketProduct, ProductChartEntry } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { RANGES, DateRange } from "@/types/extra"
+import { cn, discountValueToPercentage, formatTimestamptz, buildChartData } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import { RANGES, Range } from "@/types/extra"
 import { resolveSupermarketChain } from "./Supermarket"
-
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-]
+import { ExternalLinkIcon, ImageIcon, TriangleIcon } from "lucide-react"
 
 const chartConfig = {
-  desktop: {
+  price: {
     label: "Price",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Price",
+  "price-recommended": {
+    label: "Price Recommended",
     color: "hsl(var(--chart-2))",
+  },
+  "price-per-major-unit": {
+    label: "Price Per Unit",
+    color: "hsl(var(--chart-3))",
+  },
+  discount: {
+    label: "Discount",
+    color: "hsl(var(--chart-4))",
   },
 } satisfies ChartConfig
 
 export function ProductChart({ sp, className }: { sp: SupermarketProduct; className?: string }) {
-  const [selectedRange, setSelectedRange] = React.useState<Range>("6M")
+  const [selectedRange, setSelectedRange] = useState<DateRange>("6M")
+  const [prices, setPrices] = useState<Price[]>([])
+  const [chartData, setChartData] = useState<ProductChartEntry[]>([])
 
-  const filteredData = React.useMemo(() => {
-    switch (selectedRange) {
-      case "1W":
-        return chartData.slice(-7)
-      case "1M":
-        return chartData.slice(-1)
-      case "3M":
-        return chartData.slice(-3)
-      case "6M":
-        return chartData.slice(-6)
-      case "1Y":
-        return chartData.slice(-6)
-      case "5Y":
-        return chartData
-      case "Max":
-      default:
-        return chartData
+  async function fetchPrices() {
+    if (!sp.id) return
+
+    const response = await fetch(`/api/prices/${sp.id}`)
+    const data = await response.json()
+    if (data && data.length > 0) {
+      setPrices(data)
+      const pricePoints = buildChartData(data)
+      setChartData(pricePoints)
     }
-  }, [selectedRange])
+  }
+
+  useEffect(() => {
+    fetchPrices()
+  }, [sp.id])
 
   return (
     <div className={cn("flex flex-col", className)}>
@@ -157,30 +154,52 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           margin={{
             left: 12,
             right: 12,
+            top: 8,
+            bottom: 30, // Increased bottom margin to accommodate diagonal labels
           }}
         >
           <CartesianGrid vertical={false} />
-          <YAxis tickLine={false} axisLine={false} width={24} />
           <XAxis
-            dataKey="month"
+            dataKey="date"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={10}
+            tickFormatter={(value) => value.slice(0, 10)}
+            tick={{ fontSize: 10 }}
+            interval={Math.ceil(chartData.length / 5) - 1} // Ensure no more than 5 labels are shown
+          />
+          <YAxis
+            yAxisId="price"
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
+            domain={[0, 8]}
+            tickFormatter={(value) => `€${value}`}
+            width={40}
           />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-          <Line
-            dataKey="desktop"
-            type="linear"
-            stroke="var(--color-desktop)"
-            strokeWidth={2}
-            dot={{
-              fill: "var(--color-desktop)",
-            }}
-            activeDot={{
-              r: 6,
-            }}
+          <YAxis
+            yAxisId="discount"
+            orientation="right"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            domain={[0, 100]}
+            tickFormatter={(value) => `${value}%`}
+            width={40}
           />
+          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+          {Object.entries(chartConfig).map(([key, config], index) => (
+            <Line
+              key={key}
+              yAxisId={key.includes("price") ? "price" : "discount"}
+              dataKey={key}
+              type="monotone"
+              stroke={config.color}
+              strokeWidth={3}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          ))}
         </LineChart>
       </ChartContainer>
 
