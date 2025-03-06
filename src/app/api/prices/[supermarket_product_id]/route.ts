@@ -1,9 +1,10 @@
-import { NextResponse, NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 import { priceQueries } from "@/lib/db/queries/prices"
 
-export async function GET(req: NextRequest, { params }: { params: { supermarket_product_id: string } }) {
+export async function GET(_req: Request, { params }: { params: { supermarket_product_id: string } }) {
   try {
-    const supermarketProductId = parseInt(params.supermarket_product_id)
+    const { supermarket_product_id } = await params
+    const supermarketProductId = parseInt(supermarket_product_id)
 
     if (isNaN(supermarketProductId)) {
       return NextResponse.json({ error: "Invalid supermarket_product_id" }, { status: 400 })
