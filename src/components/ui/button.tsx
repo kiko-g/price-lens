@@ -32,7 +32,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
       size: {
         default: `px-3 py-1.5`,
         xs: `px-1.5 py-0.5 text-xs`,
-        sm: `px-2 py-1`,
+        sm: `px-2 py-1 gap-1.5`,
         md: `px-3 py-1.5`,
         lg: `px-3.5 py-2 text-base`,
         xl: `px-4 py-3 text-xl`,

@@ -7,13 +7,14 @@ import { useEffect, useState } from "react"
 import { FrontendStatus } from "@/types/extra"
 import type { SupermarketProduct } from "@/types"
 import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import { ArrowLeftIcon, HeartIcon, Share2Icon, ShoppingCartIcon, MinusIcon, PlusIcon } from "lucide-react"
+import { ArrowLeftIcon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { ProductChart } from "./ProductChart"
 import { resolveSupermarketChain } from "./Supermarket"
 
@@ -116,6 +117,33 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
             <div className="mb-2 flex items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
               {sp.is_tracked && <Badge variant="success">Tracked</Badge>}
+              <HoverCard>
+                <HoverCardTrigger asChild className="h-7 w-7 rounded p-1.5 hover:bg-muted">
+                  <InfoIcon />
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80 text-sm">
+                  <dl className="grid gap-1">
+                    {sp.id && (
+                      <div className="grid grid-cols-2">
+                        <dt className="font-medium">Product ID</dt>
+                        <dd>{sp.id}</dd>
+                      </div>
+                    )}
+                    {sp.created_at && (
+                      <div className="grid grid-cols-2">
+                        <dt className="font-medium">Created</dt>
+                        <dd>{formatTimestamptz(sp.created_at)}</dd>
+                      </div>
+                    )}
+                    {sp.updated_at && (
+                      <div className="grid grid-cols-2">
+                        <dt className="font-medium">Last Updated</dt>
+                        <dd>{formatTimestamptz(sp.updated_at)}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </HoverCardContent>
+              </HoverCard>
             </div>
 
             <h1 className="text-2xl font-bold">{sp.name}</h1>
@@ -150,91 +178,22 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
             ) : null}
           </div>
 
-          <div className="flex gap-2">
-            <Button variant="default">
+          <div className="mt-1 flex items-center gap-2">
+            <Button variant="default" size="sm">
               <HeartIcon className="h-4 w-4" />
               Add to favorites
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" size="sm">
               <Share2Icon className="h-4 w-4" />
               Share
             </Button>
-            <Button variant="outline">
-              <Share2Icon className="h-4 w-4" />
-              Share
+            <Button variant="outline" size="sm" asChild>
+              <Link href={sp.url} target="_blank" rel="noreferrer noopener">
+                {/* <ExternalLinkIcon className="h-4 w-4" /> */}
+                {supermarketChain?.logo}
+              </Link>
             </Button>
           </div>
-
-          <Tabs defaultValue="details" className="mt-2 text-sm">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
-            </TabsList>
-            <TabsContent value="details" className="mt-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <dl className="grid gap-1">
-                    {sp.major_unit && (
-                      <div className="grid grid-cols-3">
-                        <dt className="col-span-1 font-medium">Unit</dt>
-                        <dd className="col-span-2">{sp.major_unit}</dd>
-                      </div>
-                    )}
-                    <div className="grid grid-cols-3">
-                      <dt className="col-span-1 font-medium">Product URL</dt>
-                      <dd className="col-span-2 truncate">
-                        <Link
-                          href={sp.url}
-                          className="flex items-center gap-1 text-primary hover:underline"
-                          target="_blank"
-                          rel="noreferrer noopener"
-                        >
-                          View original from {supermarketChain?.logo}
-                        </Link>
-                      </dd>
-                    </div>
-                    <div className="grid grid-cols-3">
-                      <dt className="col-span-1 font-medium">Category</dt>
-                      <dd className="col-span-2">{categoryText}</dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="info" className="mt-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <dl className="grid gap-1">
-                    {sp.id && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Product ID</dt>
-                        <dd>{sp.id}</dd>
-                      </div>
-                    )}
-                    {sp.origin_id && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Origin ID</dt>
-                        <dd>{sp.origin_id}</dd>
-                      </div>
-                    )}
-                    {sp.created_at && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Created</dt>
-                        <dd>{formatTimestamptz(sp.created_at)}</dd>
-                      </div>
-                    )}
-                    {sp.updated_at && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Updated</dt>
-                        <dd>{formatTimestamptz(sp.updated_at)}</dd>
-                      </div>
-                    )}
-                  </dl>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
 
           <div className="mb-8 mt-8 flex-1">
             <ProductChart sp={sp} />
