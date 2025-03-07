@@ -11,7 +11,7 @@ import { cn, discountValueToPercentage, formatTimestamptz, buildChartData } from
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { resolveSupermarketChain } from "./Supermarket"
-import { ExternalLinkIcon, ImageIcon, TriangleIcon } from "lucide-react"
+import { ExternalLinkIcon, ImageIcon, Loader2Icon, TriangleIcon } from "lucide-react"
 
 const chartConfig = {
   price: {
@@ -33,29 +33,38 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function ProductChart({ sp, className }: { sp: SupermarketProduct; className?: string }) {
+  const [isLoading, setIsLoading] = useState(false)
   const [selectedRange, setSelectedRange] = useState<DateRange>("6M")
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
 
+  console.debug(prices, "\n\n", chartData)
+
+  const ceiling = useMemo(() => {
+    const allPrices = prices
+      .flatMap((p) => [p.price ?? -Infinity, p.price_recommended ?? -Infinity, p.price_per_major_unit ?? -Infinity])
+      .filter((price) => price !== -Infinity && price !== null)
+
+    return allPrices.length > 0 ? Math.ceil(Math.max(...allPrices)) : 0
+  }, [prices])
+
   async function fetchPrices() {
     if (!sp.id) return
 
+    setIsLoading(true)
     const response = await fetch(`/api/prices/get/${sp.id}`)
     const data = await response.json()
-    if (data && data.length > 0) {
-      setPrices(data)
-      const pricePoints = buildChartData(data, selectedRange)
-      setChartData(pricePoints)
-    }
+    if (data && data.length > 0) setPrices(data)
+    setIsLoading(false)
   }
 
   useEffect(() => {
-    console.debug("fetching prices")
     fetchPrices()
-  }, [sp.id])
+  }, [])
 
   useEffect(() => {
-    console.debug("building chart data")
+    if (!prices || prices.length === 0) return
+
     const pricePoints = buildChartData(prices, selectedRange)
     setChartData(pricePoints)
   }, [selectedRange, prices])
@@ -156,61 +165,65 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
         ))}
       </div>
 
-      <ChartContainer config={chartConfig}>
-        <LineChart
-          accessibilityLayer
-          data={chartData}
-          margin={{
-            left: 12,
-            right: 12,
-            top: 8,
-            bottom: 30, // Increased bottom margin to accommodate diagonal labels
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="date"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={10}
-            tickFormatter={(value) => value.slice(0, 10)}
-            tick={{ fontSize: 10 }}
-            interval={Math.ceil(chartData.length / 5) - 1} // Ensure no more than 5 labels are shown
-          />
-          <YAxis
-            yAxisId="price"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            domain={[0, 8]}
-            tickFormatter={(value) => `€${value}`}
-            width={40}
-          />
-          <YAxis
-            yAxisId="discount"
-            orientation="right"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            domain={[0, 100]}
-            tickFormatter={(value) => `${value}%`}
-            width={40}
-          />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-          {Object.entries(chartConfig).map(([key, config], index) => (
-            <Line
-              key={key}
-              yAxisId={key.includes("price") ? "price" : "discount"}
-              dataKey={key}
-              type="monotone"
-              stroke={config.color}
-              strokeWidth={2}
-              dot={{ r: 0 }}
-              activeDot={{ r: 6 }}
+      {isLoading ? (
+        <LoadingChart />
+      ) : (
+        <ChartContainer config={chartConfig}>
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+              top: 8,
+              bottom: 30,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              tickFormatter={(value) => value.slice(0, 10)}
+              tick={{ fontSize: 10 }}
+              interval={Math.ceil(chartData.length / 5) - 1}
             />
-          ))}
-        </LineChart>
-      </ChartContainer>
+            <YAxis
+              yAxisId="price"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              domain={[0, ceiling]}
+              tickFormatter={(value) => `€${value}`}
+              width={40}
+            />
+            <YAxis
+              yAxisId="discount"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+              width={40}
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            {Object.entries(chartConfig).map(([key, config], index) => (
+              <Line
+                key={key}
+                yAxisId={key.includes("price") ? "price" : "discount"}
+                dataKey={key}
+                type="monotone"
+                stroke={config.color}
+                strokeWidth={2}
+                dot={{ r: 0 }}
+                activeDot={{ r: 6 }}
+              />
+            ))}
+          </LineChart>
+        </ChartContainer>
+      )}
 
       <div className="flex w-full justify-between gap-2 pt-2 text-sm">
         <div className="flex w-full justify-end">
@@ -239,6 +252,14 @@ function PriceChange({ variation }: { variation: number }) {
           variation < 0 ? "rotate-180 fill-green-500 stroke-green-500" : "fill-red-500 stroke-red-500",
         )}
       />
+    </div>
+  )
+}
+
+function LoadingChart() {
+  return (
+    <div className="flex h-full w-full items-center justify-center">
+      <Loader2Icon className="h-4 w-4 animate-spin" />
     </div>
   )
 }
