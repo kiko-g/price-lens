@@ -17,13 +17,13 @@ const chartConfig = {
     label: "Price",
     color: "hsl(var(--chart-1))",
   },
-  "price-recommended": {
-    label: "Price Recommended",
-    color: "hsl(var(--chart-2))",
-  },
   "price-per-major-unit": {
     label: "Price Per Unit",
     color: "hsl(var(--chart-3))",
+  },
+  "price-recommended": {
+    label: "Price Recommended",
+    color: "hsl(var(--chart-2))",
   },
   discount: {
     label: "Discount",
@@ -291,10 +291,11 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                     key={key}
                     yAxisId={key.includes("price") ? "price" : "discount"}
                     dataKey={key}
-                    type="monotone"
+                    type="linear"
                     stroke={config.color}
                     strokeWidth={2}
-                    dot={chartData.length > 1 ? { r: 0 } : { r: 2 }}
+                    strokeDasharray={key === "price-recommended" || key === "discount" ? "5 5" : "0"}
+                    dot={chartData.length > 1 ? { r: 2 } : { r: 3 }}
                     activeDot={{ r: 6 }}
                   />
                 ))}

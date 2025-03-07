@@ -66,25 +66,6 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
 
       <button
         className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
-        onClick={actions.onPriceRecommendedChange}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "h-3.5 w-3.5 rounded border-2 border-chart-2",
-              isPriceRecommendedActive ? "bg-chart-2" : "bg-chart-2/20",
-            )}
-          />
-          <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Recommended</span>
-        </div>
-        <div className="flex items-center justify-end gap-1">
-          <span className="mr-1">{priceRecommended ?? "0"}€</span>
-          <PriceChange variation={priceRecommendedVariation} />
-        </div>
-      </button>
-
-      <button
-        className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
         onClick={actions.onPricePerMajorUnitChange}
       >
         <div className="flex items-center gap-2">
@@ -99,6 +80,25 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{pricePerMajorUnit ?? "0"}€</span>
           <PriceChange variation={pricePerMajorUnitVariation} />
+        </div>
+      </button>
+
+      <button
+        className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
+        onClick={actions.onPriceRecommendedChange}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "h-3.5 w-3.5 rounded border-2 border-chart-2",
+              isPriceRecommendedActive ? "bg-chart-2" : "bg-chart-2/20",
+            )}
+          />
+          <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Recommended</span>
+        </div>
+        <div className="flex items-center justify-end gap-1">
+          <span className="mr-1">{priceRecommended ?? "0"}€</span>
+          <PriceChange variation={priceRecommendedVariation} />
         </div>
       </button>
 

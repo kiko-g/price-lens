@@ -239,8 +239,8 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
         entries.push({
           date: dateStr,
           price: price.price ?? 0,
-          "price-recommended": price.price_recommended ?? 0,
           "price-per-major-unit": price.price_per_major_unit ?? 0,
+          "price-recommended": price.price_recommended ?? 0,
           discount: price.discount ? price.discount * 100 : 0,
         })
         break
