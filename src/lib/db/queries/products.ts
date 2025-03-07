@@ -11,21 +11,6 @@ type GetAllQuery = {
   nonNulls?: boolean
 }
 
-export const selectedProducts = [
-  {
-    id: "3526",
-    name: "Gelado Cheesecake Morango",
-  },
-  // {
-  //   id: "2575",
-  //   name: "Leite Meio Gordo Pastagem",
-  // },
-  // {
-  //   id: "5912",
-  //   name: "Creatina Creapure",
-  // },
-]
-
 export const productQueries = {
   async getAll() {
     const supabase = createClient()
@@ -35,7 +20,10 @@ export const productQueries = {
   async getAllAttached() {
     const supabase = createClient()
 
-    const { data: products, error: productsError } = await supabase.from("products").select("*")
+    const { data: products, error: productsError } = await supabase
+      .from("products")
+      .select("*")
+      .order("name", { ascending: true })
 
     if (productsError) {
       console.error("Error fetching products:", productsError)

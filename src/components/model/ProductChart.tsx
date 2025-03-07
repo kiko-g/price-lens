@@ -11,7 +11,7 @@ import { cn, discountValueToPercentage, formatTimestamptz, buildChartData } from
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { resolveSupermarketChain } from "./Supermarket"
-import { ExternalLinkIcon, ImageIcon, Loader2Icon, TriangleIcon } from "lucide-react"
+import { EqualIcon, ExternalLinkIcon, ImageIcon, Loader2Icon, TriangleIcon } from "lucide-react"
 
 const chartConfig = {
   price: {
@@ -39,25 +39,54 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [isMounted, setIsMounted] = useState(false)
 
-  const minDate = useMemo(() => {
-    const validFromDates = prices.map((p) => p.valid_from).filter((date) => date !== null)
-    const updatedAtDates = [sp.updated_at].filter((date) => date !== null)
-    const allDates = [...validFromDates, ...updatedAtDates]
-    return allDates.length > 0 ? Math.min(...allDates.map((d) => new Date(d).getTime())) : null
-  }, [prices, sp.updated_at])
-
-  const maxDate = useMemo(() => {
-    const validToDates = prices.map((p) => p.valid_to).filter((date) => date !== null)
-    const allDates = [...validToDates, sp.updated_at].filter((date) => date !== null)
-    return allDates.length > 0 ? Math.max(...allDates.map((d) => new Date(d).getTime())) : null
-  }, [prices, sp.updated_at])
-
   const ceiling = useMemo(() => {
     const allPrices = prices
       .flatMap((p) => [p.price ?? -Infinity, p.price_recommended ?? -Infinity, p.price_per_major_unit ?? -Infinity])
       .filter((price) => price !== -Infinity && price !== null)
 
     return allPrices.length > 0 ? Math.ceil(Math.max(...allPrices)) : 0
+  }, [prices])
+
+  const priceVariation = useMemo(() => {
+    const lastTwoPrices = prices.slice(-2)
+    if (lastTwoPrices.length < 2) return 0
+
+    const currentPrice = lastTwoPrices[1].price ?? 0
+    const previousPrice = lastTwoPrices[0].price ?? 0
+
+    console.debug("priceVariation", currentPrice, previousPrice)
+
+    return (currentPrice - previousPrice) / previousPrice
+  }, [prices])
+
+  const priceRecommendedVariation = useMemo(() => {
+    const lastTwoPrices = prices.slice(-2)
+    if (lastTwoPrices.length < 2) return 0
+
+    const currentPrice = lastTwoPrices[1].price_recommended ?? 0
+    const previousPrice = lastTwoPrices[0].price_recommended ?? 0
+
+    return (currentPrice - previousPrice) / previousPrice
+  }, [prices])
+
+  const pricePerMajorUnitVariation = useMemo(() => {
+    const lastTwoPrices = prices.slice(-2)
+    if (lastTwoPrices.length < 2) return 0
+
+    const currentPrice = lastTwoPrices[1].price_per_major_unit ?? 0
+    const previousPrice = lastTwoPrices[0].price_per_major_unit ?? 0
+
+    return (currentPrice - previousPrice) / previousPrice
+  }, [prices])
+
+  const discountVariation = useMemo(() => {
+    const lastTwoPrices = prices.slice(-2)
+    if (lastTwoPrices.length < 2) return 0
+
+    const currentDiscount = lastTwoPrices[1].discount ?? 0
+    const previousDiscount = lastTwoPrices[0].discount ?? 0
+
+    return currentDiscount - previousDiscount
   }, [prices])
 
   async function fetchPrices() {
@@ -121,7 +150,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price}€</span>
-              <PriceChange variation={0.0452} />
+              <PriceChange variation={priceVariation} />
             </div>
           </div>
 
@@ -132,7 +161,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price_recommended}€</span>
-              <PriceChange variation={-0.0554} />
+              <PriceChange variation={priceRecommendedVariation} />
             </div>
           </div>
 
@@ -145,7 +174,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price_per_major_unit}€</span>
-              <PriceChange variation={0.0851} />
+              <PriceChange variation={pricePerMajorUnitVariation} />
             </div>
           </div>
 
@@ -155,8 +184,8 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
               <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Discount</span>
             </div>
             <div className="flex items-center justify-end gap-1">
-              <span className="mr-1">{sp.discount ? discountValueToPercentage(sp.discount) : "N/A"}</span>
-              <PriceChange variation={-0.0343} />
+              <span className="mr-1">{sp.discount ? discountValueToPercentage(sp.discount) : "0%"}</span>
+              <PriceChange variation={discountVariation} />
             </div>
           </div>
         </div>
@@ -176,23 +205,22 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
         )}
       </header>
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {RANGES.map((range) => (
-          <Button
-            key={range}
-            variant={range === selectedRange ? "default" : "ghost"}
-            onClick={() => setSelectedRange(range)}
-          >
-            {range}
-          </Button>
-        ))}
-      </div>
-
       {isLoading ? (
         <LoadingChart />
-      ) : (
-        <ChartContainer config={chartConfig}>
-          {chartData.length > 0 ? (
+      ) : chartData.length > 0 ? (
+        <>
+          <div className="mb-4 flex flex-wrap gap-2">
+            {RANGES.map((range) => (
+              <Button
+                key={range}
+                variant={range === selectedRange ? "default" : "ghost"}
+                onClick={() => setSelectedRange(range)}
+              >
+                {range}
+              </Button>
+            ))}
+          </div>
+          <ChartContainer config={chartConfig}>
             <LineChart
               accessibilityLayer
               data={chartData}
@@ -241,17 +269,17 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
                   type="monotone"
                   stroke={config.color}
                   strokeWidth={2}
-                  dot={{ r: 0 }}
+                  dot={chartData.length > 1 ? { r: 0 } : { r: 2 }}
                   activeDot={{ r: 6 }}
                 />
               ))}
             </LineChart>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center rounded border bg-muted">
-              <span className="text-sm text-muted-foreground">No data available</span>
-            </div>
-          )}
-        </ChartContainer>
+          </ChartContainer>
+        </>
+      ) : (
+        <div className="flex h-64 w-full items-center justify-center rounded border bg-muted">
+          <span className="text-sm text-muted-foreground">No price history data available</span>
+        </div>
       )}
 
       <div className="flex w-full justify-between gap-2 pt-2 text-sm">
@@ -266,21 +294,25 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
 }
 
 function PriceChange({ variation }: { variation: number }) {
-  const percentage = (variation * 100).toFixed(1)
+  const percentage = variation === 0 ? 0 : (variation * 100).toFixed(1)
   const positiveSign = variation > 0 ? "+" : ""
 
   return (
-    <div className="flex w-14 items-center justify-end gap-1">
-      <span className={cn(variation < 0 ? "text-green-500" : "text-red-500")}>
+    <div className="flex min-w-16 items-center justify-end gap-1">
+      <span className={cn(variation < 0 ? "text-green-500" : variation > 0 ? "text-red-500" : "text-muted-foreground")}>
         {positiveSign}
         {percentage}%
       </span>
-      <TriangleIcon
-        className={cn(
-          "h-3 w-3",
-          variation < 0 ? "rotate-180 fill-green-500 stroke-green-500" : "fill-red-500 stroke-red-500",
-        )}
-      />
+      {variation === 0 ? (
+        <EqualIcon className="h-3 w-3 text-muted-foreground" />
+      ) : (
+        <TriangleIcon
+          className={cn(
+            "h-3 w-3",
+            variation < 0 ? "rotate-180 fill-green-500 stroke-green-500" : "fill-red-500 stroke-red-500",
+          )}
+        />
+      )}
     </div>
   )
 }
