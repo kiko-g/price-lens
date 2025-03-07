@@ -11,8 +11,8 @@ import { cn, discountValueToPercentage, formatTimestamptz, buildChartData, getDa
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { resolveSupermarketChain } from "./Supermarket"
-import { EqualIcon, ExternalLinkIcon, ImageIcon, Loader2Icon, TriangleIcon } from "lucide-react"
-
+import { ExternalLinkIcon, ImageIcon, Loader2Icon } from "lucide-react"
+import { PriceChange } from "./PriceChange"
 const chartConfig = {
   price: {
     label: "Price",
@@ -329,30 +329,6 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           </span>
         </div>
       </div>
-    </div>
-  )
-}
-
-function PriceChange({ variation }: { variation: number }) {
-  const percentage = variation === 0 ? 0 : (variation * 100).toFixed(1)
-  const positiveSign = variation > 0 ? "+" : ""
-
-  return (
-    <div className="flex min-w-16 items-center justify-end gap-1">
-      <span className={cn(variation < 0 ? "text-green-500" : variation > 0 ? "text-red-500" : "text-muted-foreground")}>
-        {positiveSign}
-        {percentage}%
-      </span>
-      {variation === 0 ? (
-        <EqualIcon className="h-3 w-3 text-muted-foreground" />
-      ) : (
-        <TriangleIcon
-          className={cn(
-            "h-3 w-3",
-            variation < 0 ? "rotate-180 fill-green-500 stroke-green-500" : "fill-red-500 stroke-red-500",
-          )}
-        />
-      )}
     </div>
   )
 }
