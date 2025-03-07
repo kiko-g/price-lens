@@ -33,7 +33,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { resolveSupermarketChain } from "./Supermarket"
 import { ProductChart } from "./ProductChart"
 
-import { discountValueToPercentage, imagePlaceholder } from "@/lib/utils"
+import { discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
   CopyIcon,
@@ -43,6 +43,7 @@ import {
   ChartSplineIcon,
   CloudAlertIcon,
   PlusIcon,
+  ExternalLinkIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
@@ -301,7 +302,33 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
             </DropdownMenu>
 
             <DrawerSheet title={`${sp.name}`}>
+              <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Link href={sp.url} target="_blank">
+                    {resolveSupermarketChain(sp)?.logo}
+                  </Link>
+                  <Button asChild variant="ghost" size="icon-xs" roundedness="sm">
+                    <Link href={sp.url} target="_blank">
+                      <ExternalLinkIcon />
+                    </Link>
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-2 divide-x [&>span:not(:first-child)]:pl-1.5">
+                  <span>{sp.brand}</span>
+                  <span>{sp.category}</span>
+                </div>
+              </div>
               <ProductChart sp={sp} />
+              <div className="flex w-full justify-between gap-2 pt-2 text-sm">
+                <div className="flex w-full justify-end">
+                  <span className="text-xs text-muted-foreground">
+                    {sp.created_at || sp.updated_at
+                      ? `Last updated: ${formatTimestamptz(sp.updated_at)}`
+                      : "No update record"}
+                  </span>
+                </div>
+              </div>
 
               <Accordion type="single" collapsible className="mt-4 hidden w-full border-t md:flex">
                 <AccordionItem value="item-1" className="w-full border-0">

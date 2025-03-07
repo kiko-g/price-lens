@@ -77,7 +77,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
     : null
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col px-4 py-4">
+    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
       <div className="flex w-min">
         <Button variant="ghost" className="mb-2" asChild size="sm">
           <Link href="/supermarket">
@@ -196,7 +196,13 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
           </div>
 
           <div className="mb-8 mt-8 flex-1">
-            <ProductChart sp={sp} />
+            <ProductChart
+              sp={sp}
+              options={{
+                showPricesVariationCard: true,
+                showImage: false,
+              }}
+            />
           </div>
         </div>
       </div>

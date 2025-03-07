@@ -2,17 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { Price, SupermarketProduct, ProductChartEntry } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
-import { cn, discountValueToPercentage, formatTimestamptz, buildChartData, getDaysBetweenDates } from "@/lib/utils"
+import { cn, buildChartData, getDaysBetweenDates } from "@/lib/utils"
+import { ImageIcon, Loader2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { resolveSupermarketChain } from "./Supermarket"
-import { ExternalLinkIcon, ImageIcon, Loader2Icon } from "lucide-react"
-import { PriceChange } from "./PriceChange"
+import { PricesVariationCard } from "./PricesVariationCard"
+
 const chartConfig = {
   price: {
     label: "Price",
@@ -32,7 +31,21 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ProductChart({ sp, className }: { sp: SupermarketProduct; className?: string }) {
+type Props = {
+  sp: SupermarketProduct
+  className?: string
+  options?: {
+    showPricesVariationCard: boolean
+    showImage: boolean
+  }
+}
+
+const defaultOptions: Props["options"] = {
+  showPricesVariationCard: true,
+  showImage: true,
+}
+
+export function ProductChart({ sp, className, options = defaultOptions }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
   const [prices, setPrices] = useState<Price[]>([])
@@ -155,96 +168,48 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
     setChartData(pricePoints)
   }, [selectedRange, prices, isMounted])
 
-  if (!isMounted) {
-    return null
-  }
+  if (!isMounted) return null
 
   return (
     <div className={cn("flex flex-col", className)}>
-      <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Link href={sp.url} target="_blank">
-            {resolveSupermarketChain(sp)?.logo}
-          </Link>
-          <Button asChild variant="ghost" size="icon-xs" roundedness="sm">
-            <Link href={sp.url} target="_blank">
-              <ExternalLinkIcon />
-            </Link>
-          </Button>
-        </div>
+      {options?.showPricesVariationCard || options?.showImage ? (
+        <header className="mb-6 flex items-start justify-between gap-4">
+          {options?.showPricesVariationCard ? (
+            <PricesVariationCard
+              price={sp.price}
+              priceRecommended={sp.price_recommended}
+              pricePerMajorUnit={sp.price_per_major_unit}
+              discount={sp.discount}
+              discountVariation={discountVariation}
+              priceVariation={priceVariation}
+              priceRecommendedVariation={priceRecommendedVariation}
+              pricePerMajorUnitVariation={pricePerMajorUnitVariation}
+              className="max-w-xs text-xs font-medium md:text-sm"
+            />
+          ) : null}
 
-        <div className="flex items-center gap-2 divide-x [&>span:not(:first-child)]:pl-1.5">
-          <span>{sp.brand}</span>
-          <span>{sp.category}</span>
-        </div>
-      </div>
-
-      <header className="mb-6 flex items-start justify-between gap-4">
-        <div className="flex max-w-xs flex-1 flex-col items-center gap-0.5 text-xs font-medium md:text-sm">
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-chart-1" />
-              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price</span>
-            </div>
-            <div className="flex items-center justify-end gap-1">
-              <span className="mr-1">{sp.price}€</span>
-              <PriceChange variation={priceVariation} />
-            </div>
-          </div>
-
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-chart-2" />
-              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Recommended</span>
-            </div>
-            <div className="flex items-center justify-end gap-1">
-              <span className="mr-1">{sp.price_recommended}€</span>
-              <PriceChange variation={priceRecommendedVariation} />
-            </div>
-          </div>
-
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-chart-3" />
-              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">
-                Price Per Unit ({sp.major_unit})
-              </span>
-            </div>
-            <div className="flex items-center justify-end gap-1">
-              <span className="mr-1">{sp.price_per_major_unit}€</span>
-              <PriceChange variation={pricePerMajorUnitVariation} />
-            </div>
-          </div>
-
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-chart-4" />
-              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Discount</span>
-            </div>
-            <div className="flex items-center justify-end gap-1">
-              <span className="mr-1">{sp.discount ? discountValueToPercentage(sp.discount) : "0%"}</span>
-              <PriceChange variation={discountVariation} />
-            </div>
-          </div>
-        </div>
-
-        {sp.image ? (
-          <Image
-            src={sp.image}
-            alt={sp.name}
-            width={100}
-            height={100}
-            className="h-20 w-20 rounded-md bg-white p-1 md:h-28 md:w-28"
-          />
-        ) : (
-          <div className="flex h-24 w-24 items-center justify-center rounded-md bg-muted">
-            <ImageIcon className="h-4 w-4" />
-          </div>
-        )}
-      </header>
+          {options?.showImage ? (
+            sp.image ? (
+              <Image
+                src={sp.image}
+                alt={sp.name}
+                width={100}
+                height={100}
+                className="h-20 w-20 rounded-md bg-white p-1 md:h-28 md:w-28"
+              />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-md bg-muted">
+                <ImageIcon className="h-4 w-4" />
+              </div>
+            )
+          ) : null}
+        </header>
+      ) : null}
 
       {isLoading ? (
-        <LoadingChart />
+        <div className="flex h-full w-full items-center justify-center">
+          <Loader2Icon className="h-4 w-4 animate-spin" />
+        </div>
       ) : chartData.length > 0 ? (
         <>
           <div className="mb-4 flex flex-wrap gap-2">
@@ -321,22 +286,6 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           <span className="text-sm text-muted-foreground">No price history data available</span>
         </div>
       )}
-
-      <div className="flex w-full justify-between gap-2 pt-2 text-sm">
-        <div className="flex w-full justify-end">
-          <span className="text-xs text-muted-foreground">
-            {sp.created_at || sp.updated_at ? `Last updated: ${formatTimestamptz(sp.updated_at)}` : "No update record"}
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function LoadingChart() {
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Loader2Icon className="h-4 w-4 animate-spin" />
     </div>
   )
 }
