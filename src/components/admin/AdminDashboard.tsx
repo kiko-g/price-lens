@@ -7,7 +7,8 @@ import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 
-import { Loader2, PencilIcon, CircleX } from "lucide-react"
+import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon } from "lucide-react"
+import { InsertPriceModal } from "./InsertPriceModal"
 
 export function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
@@ -57,7 +58,7 @@ export function AdminDashboard() {
           <p className="mt-2 text-sm">A table of placeholder stock market data that does not make any sense.</p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <Button variant="default">Export</Button>
+          <InsertPriceModal />
         </div>
       </div>
 
@@ -82,24 +83,7 @@ export function AdminDashboard() {
               </thead>
               <tbody className="divide-y">
                 {prices.map((price: Price) => (
-                  <tr key={price.id}>
-                    <Cell>{price.id}</Cell>
-                    <Cell>{price.product_id}</Cell>
-                    <Cell>{price.supermarket_product_id}</Cell>
-                    <Cell>{price.price}€</Cell>
-                    <Cell>{price.price_recommended}€</Cell>
-                    <Cell>{price.price_per_major_unit}€</Cell>
-                    <Cell>{price.discount ? discountValueToPercentage(price.discount) : "N/A"}</Cell>
-                    <Cell>{formatTimestamptz(price.updated_at)}</Cell>
-                    <Cell>{formatTimestamptz(price.valid_from)}</Cell>
-                    <Cell>{price.valid_to ? formatTimestamptz(price.valid_to) : "N/A"}</Cell>
-
-                    <Cell>
-                      <Button variant="ghost" size="icon-xs">
-                        <PencilIcon />
-                      </Button>
-                    </Cell>
-                  </tr>
+                  <PriceRow key={price.id} price={price} />
                 ))}
               </tbody>
             </table>
@@ -107,6 +91,48 @@ export function AdminDashboard() {
         </div>
       </div>
     </div>
+  )
+}
+
+function PriceRow({ price }: { price: Price }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
+
+  return (
+    <tr key={price.id}>
+      <Cell>{price.id}</Cell>
+      <Cell>{price.product_id}</Cell>
+      <Cell>{price.supermarket_product_id}</Cell>
+      <Cell>{price.price}€</Cell>
+      <Cell>{price.price_recommended}€</Cell>
+      <Cell>{price.price_per_major_unit}€</Cell>
+      <Cell>{price.discount ? discountValueToPercentage(price.discount) : "N/A"}</Cell>
+      <Cell>{formatTimestamptz(price.updated_at)}</Cell>
+      <Cell>{formatTimestamptz(price.valid_from)}</Cell>
+      <Cell>{price.valid_to ? formatTimestamptz(price.valid_to) : "N/A"}</Cell>
+
+      <Cell>
+        <Button variant="ghost" size="icon-xs" onClick={() => setIsEditing(true)}>
+          <PencilIcon />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={async () => {
+            setIsCopying(true)
+            await setTimeout(() => {
+              navigator.clipboard.writeText(JSON.stringify(price, null, 2))
+              setIsCopying(false)
+            }, 1000)
+          }}
+          disabled={isCopying}
+        >
+          {isCopying ? <CheckIcon className="h-4 w-4 text-green-500" /> : <CopyIcon />}
+        </Button>
+      </Cell>
+    </tr>
   )
 }
 

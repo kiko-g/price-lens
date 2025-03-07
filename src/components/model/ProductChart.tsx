@@ -40,7 +40,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
   async function fetchPrices() {
     if (!sp.id) return
 
-    const response = await fetch(`/api/prices/${sp.id}`)
+    const response = await fetch(`/api/prices/get/${sp.id}`)
     const data = await response.json()
     if (data && data.length > 0) {
       setPrices(data)
@@ -105,7 +105,9 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded bg-chart-3" />
-              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Per Major Unit</span>
+              <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">
+                Price Per Unit ({sp.major_unit})
+              </span>
             </div>
             <div className="flex items-center justify-end gap-1">
               <span className="mr-1">{sp.price_per_major_unit}€</span>

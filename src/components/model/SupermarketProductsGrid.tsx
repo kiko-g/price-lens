@@ -57,9 +57,7 @@ type Props = {
 export function SupermarketProductsGrid(props: Props) {
   const { page: initPage = 1, q: initQuery = "", t: initSearchType = "name", sort: initSortBy = "a-z" } = props
 
-  const limit = 10
-  const router = useRouter()
-
+  const limit = 20
   const [page, setPage] = useState(initPage)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
