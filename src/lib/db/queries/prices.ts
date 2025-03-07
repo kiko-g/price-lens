@@ -24,6 +24,7 @@ export const priceQueries = {
       .from("prices")
       .select("*")
       .eq("supermarket_product_id", supermarket_product_id)
+      .order("created_at", { ascending: true })
 
     if (error) {
       console.error("Error fetching price points:", error)

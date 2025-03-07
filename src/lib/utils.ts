@@ -112,89 +112,131 @@ export function now() {
   return new Date().toISOString().replace("Z", "+00:00")
 }
 
-export function buildChartData(prices: Price[], range: DateRange = "1M", minPoints = 5): ProductChartEntry[] {
-  if (!prices.length) return []
+export function buildChartData(prices: Price[], range: DateRange = "1M"): ProductChartEntry[] {
+  // Filter out prices without valid_from and sort them by valid_from
+  const validPrices = prices.filter((p) => p.valid_from !== null)
+  if (validPrices.length === 0) {
+    return []
+  }
+  validPrices.sort((a, b) => a.valid_from!.localeCompare(b.valid_from!))
 
-  // Sort prices by valid_from date (oldest first)
-  const sortedPrices = [...prices].sort((a, b) => {
-    if (!a.valid_from) return 1
-    if (!b.valid_from) return -1
-    return new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
-  })
+  // Preprocess prices into objects with Date instances for valid_from and valid_to
+  type ProcessedPrice = {
+    validFrom: Date
+    validTo: Date | null
+    price: number | null
+    price_recommended: number | null
+    price_per_major_unit: number | null
+    discount: number | null
+  }
 
-  // Filter out entries with null prices or dates
-  const validPrices = sortedPrices.filter((price) => price.valid_from !== null && price.price !== null)
+  const processedPrices: ProcessedPrice[] = validPrices.map((p) => ({
+    validFrom: new Date(p.valid_from!),
+    validTo: p.valid_to ? new Date(p.valid_to) : null,
+    price: p.price,
+    price_recommended: p.price_recommended,
+    price_per_major_unit: p.price_per_major_unit,
+    discount: p.discount,
+  }))
 
-  if (!validPrices.length) return []
+  // Adjust validTo dates to avoid overlaps and gaps
+  for (let i = 0; i < processedPrices.length - 1; i++) {
+    const current = processedPrices[i]
+    const next = processedPrices[i + 1]
+    const adjustedValidTo = new Date(next.validFrom)
+    adjustedValidTo.setDate(adjustedValidTo.getDate() - 1)
 
-  // Determine the date range
-  const startDate = new Date(validPrices[0].valid_from!)
-  let endDate: Date
-
-  if (validPrices.length === 1) {
-    // If only one price, use valid_to, updated_at, or current date
-    if (validPrices[0].valid_to) {
-      endDate = new Date(validPrices[0].valid_to)
-    } else if (validPrices[0].updated_at) {
-      endDate = new Date(validPrices[0].updated_at)
-    } else {
-      endDate = new Date() // Current date
+    if (current.validTo === null || current.validTo > adjustedValidTo) {
+      current.validTo = adjustedValidTo
     }
-  } else {
-    // Use the most recent price's date
-    const lastPrice = validPrices[validPrices.length - 1]
-    endDate = lastPrice.valid_to ? new Date(lastPrice.valid_to) : new Date(lastPrice.valid_from!)
   }
 
-  // Ensure we have at least a day difference
-  if (endDate.getTime() - startDate.getTime() < 86400000) {
-    endDate = new Date(startDate.getTime() + 86400000 * 7) // Add a week
+  // Determine start and end dates based on the range
+  const getStartEndDates = (range: DateRange): { start: Date; end: Date } => {
+    const now = new Date()
+    if (range === "Max") {
+      const earliest = processedPrices[0].validFrom
+      const latestPrice = processedPrices[processedPrices.length - 1]
+      const endDate = latestPrice.validTo || new Date()
+      return { start: earliest, end: endDate }
+    } else {
+      const endDate = new Date()
+      const startDate = new Date(endDate)
+
+      switch (range) {
+        case "1W":
+          startDate.setDate(endDate.getDate() - 7)
+          break
+        case "1M":
+          startDate.setMonth(endDate.getMonth() - 1)
+          break
+        case "3M":
+          startDate.setMonth(endDate.getMonth() - 3)
+          break
+        case "6M":
+          startDate.setMonth(endDate.getMonth() - 6)
+          break
+        case "1Y":
+          startDate.setFullYear(endDate.getFullYear() - 1)
+          break
+        case "5Y":
+          startDate.setFullYear(endDate.getFullYear() - 5)
+          break
+        default:
+          throw new Error(`Unsupported range: ${range}`)
+      }
+      return { start: startDate, end: endDate }
+    }
   }
 
-  // Always generate at least minPoints, evenly distributed across the date range
-  const pointCount = Math.max(minPoints, validPrices.length)
-  const pricePoints: ProductChartEntry[] = []
-  const totalDuration = endDate.getTime() - startDate.getTime()
-  const interval = totalDuration / (pointCount - 1)
+  const { start, end } = getStartEndDates(range)
 
-  for (let i = 0; i < pointCount; i++) {
-    const pointDate = new Date(startDate.getTime() + interval * i)
+  // Generate all dates from start to end, inclusive
+  const generateDateRange = (startDate: Date, endDate: Date): Date[] => {
+    const dates: Date[] = []
+    const current = new Date(startDate)
+    current.setHours(0, 0, 0, 0)
+    const end = new Date(endDate)
+    end.setHours(0, 0, 0, 0)
 
-    // Find the price valid at this date
-    const validPrice = findValidPriceAtDate(validPrices, pointDate)
-
-    pricePoints.push({
-      date: formatDate(pointDate.toISOString(), range),
-      price: validPrice.price!,
-      "price-recommended": validPrice.price_recommended || validPrice.price!,
-      discount: validPrice.discount || 0,
-      "price-per-major-unit": validPrice.price_per_major_unit || validPrice.price!,
-    })
+    while (current <= end) {
+      dates.push(new Date(current))
+      current.setDate(current.getDate() + 1)
+    }
+    return dates
   }
 
-  return pricePoints
-}
+  const dates = generateDateRange(start, end)
 
-// Helper function to find which price was valid at a given date
-function findValidPriceAtDate(prices: Price[], date: Date): Price {
-  // Try to find a price where the date falls between valid_from and valid_to
-  const exactMatch = prices.find((price) => {
-    const priceStartDate = new Date(price.valid_from!)
-    const priceEndDate = price.valid_to ? new Date(price.valid_to) : new Date()
-    return priceStartDate <= date && date <= priceEndDate
-  })
+  // Create the chart entries
+  const entries: ProductChartEntry[] = []
+  let currentPriceIndex = 0
 
-  if (exactMatch) return exactMatch
+  for (const date of dates) {
+    const dateStr = date.toISOString().split("T")[0]
 
-  // If no exact match, find the most recent price before the date
-  const priceBeforeDate = [...prices]
-    .filter((price) => new Date(price.valid_from!) <= date)
-    .sort((a, b) => {
-      return new Date(b.valid_from!).getTime() - new Date(a.valid_from!).getTime()
-    })[0]
+    while (currentPriceIndex < processedPrices.length) {
+      const price = processedPrices[currentPriceIndex]
+      if (date < price.validFrom) {
+        break // No price applies, skip this date
+      }
 
-  // If still no match, return the earliest price
-  return priceBeforeDate || prices[0]
+      if (price.validTo !== null && date > price.validTo) {
+        currentPriceIndex++
+      } else {
+        entries.push({
+          date: formatDate(dateStr, range),
+          price: price.price ?? 0,
+          "price-recommended": price.price_recommended ?? 0,
+          "price-per-major-unit": price.price_per_major_unit ?? 0,
+          discount: price.discount ?? 0,
+        })
+        break
+      }
+    }
+  }
+
+  return entries
 }
 
 function formatDate(dateString: string, range: DateRange = "1M"): string {

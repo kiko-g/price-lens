@@ -50,10 +50,12 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
   }
 
   useEffect(() => {
+    console.debug("fetching prices")
     fetchPrices()
   }, [sp.id])
 
   useEffect(() => {
+    console.debug("building chart data")
     const pricePoints = buildChartData(prices, selectedRange)
     setChartData(pricePoints)
   }, [selectedRange, prices])
@@ -202,7 +204,7 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
               dataKey={key}
               type="monotone"
               stroke={config.color}
-              strokeWidth={key === "price" ? 4 : 2}
+              strokeWidth={2}
               dot={{ r: 0 }}
               activeDot={{ r: 6 }}
             />
