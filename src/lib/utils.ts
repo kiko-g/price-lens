@@ -113,6 +113,12 @@ export function now() {
 }
 
 export function buildChartData(prices: Price[], range: DateRange = "1M"): ProductChartEntry[] {
+  // Helper to parse date strings into UTC dates at midnight
+  const parseUTCDate = (dateStr: string): Date => {
+    const date = new Date(dateStr)
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  }
+
   // Filter out prices without valid_from and sort them by valid_from
   const validPrices = prices.filter((p) => p.valid_from !== null)
   if (validPrices.length === 0) {
@@ -120,7 +126,7 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
   }
   validPrices.sort((a, b) => a.valid_from!.localeCompare(b.valid_from!))
 
-  // Preprocess prices into objects with Date instances for valid_from and valid_to
+  // Preprocess prices into objects with UTC Date instances
   type ProcessedPrice = {
     validFrom: Date
     validTo: Date | null
@@ -130,57 +136,63 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
     discount: number | null
   }
 
-  const processedPrices: ProcessedPrice[] = validPrices.map((p) => ({
-    validFrom: new Date(p.valid_from!),
-    validTo: p.valid_to ? new Date(p.valid_to) : null,
-    price: p.price,
-    price_recommended: p.price_recommended,
-    price_per_major_unit: p.price_per_major_unit,
-    discount: p.discount,
-  }))
+  const processedPrices: ProcessedPrice[] = validPrices.map((p) => {
+    const validFrom = parseUTCDate(p.valid_from!)
+    const validTo = p.valid_to ? parseUTCDate(p.valid_to) : null
+    return {
+      validFrom,
+      validTo,
+      price: p.price,
+      price_recommended: p.price_recommended,
+      price_per_major_unit: p.price_per_major_unit,
+      discount: p.discount,
+    }
+  })
 
-  // Adjust validTo dates to avoid overlaps and gaps
+  // Adjust validTo dates to avoid overlaps and gaps (using UTC)
   for (let i = 0; i < processedPrices.length - 1; i++) {
     const current = processedPrices[i]
     const next = processedPrices[i + 1]
     const adjustedValidTo = new Date(next.validFrom)
-    adjustedValidTo.setDate(adjustedValidTo.getDate() - 1)
+    adjustedValidTo.setUTCDate(adjustedValidTo.getUTCDate() - 1) // Previous day in UTC
 
     if (current.validTo === null || current.validTo > adjustedValidTo) {
       current.validTo = adjustedValidTo
     }
   }
 
-  // Determine start and end dates based on the range
+  // Determine start and end dates based on the range (UTC)
   const getStartEndDates = (range: DateRange): { start: Date; end: Date } => {
     const now = new Date()
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+
     if (range === "Max") {
       const earliest = processedPrices[0].validFrom
       const latestPrice = processedPrices[processedPrices.length - 1]
-      const endDate = latestPrice.validTo || new Date()
+      const endDate = latestPrice.validTo || todayUTC
       return { start: earliest, end: endDate }
     } else {
-      const endDate = new Date()
+      const endDate = todayUTC
       const startDate = new Date(endDate)
 
       switch (range) {
         case "1W":
-          startDate.setDate(endDate.getDate() - 7)
+          startDate.setUTCDate(endDate.getUTCDate() - 7)
           break
         case "1M":
-          startDate.setMonth(endDate.getMonth() - 1)
+          startDate.setUTCMonth(endDate.getUTCMonth() - 1)
           break
         case "3M":
-          startDate.setMonth(endDate.getMonth() - 3)
+          startDate.setUTCMonth(endDate.getUTCMonth() - 3)
           break
         case "6M":
-          startDate.setMonth(endDate.getMonth() - 6)
+          startDate.setUTCMonth(endDate.getUTCMonth() - 6)
           break
         case "1Y":
-          startDate.setFullYear(endDate.getFullYear() - 1)
+          startDate.setUTCFullYear(endDate.getUTCFullYear() - 1)
           break
         case "5Y":
-          startDate.setFullYear(endDate.getFullYear() - 5)
+          startDate.setUTCFullYear(endDate.getUTCFullYear() - 5)
           break
         default:
           throw new Error(`Unsupported range: ${range}`)
@@ -191,24 +203,24 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
 
   const { start, end } = getStartEndDates(range)
 
-  // Generate all dates from start to end, inclusive
+  // Generate all UTC dates from start to end, inclusive at midnight UTC
   const generateDateRange = (startDate: Date, endDate: Date): Date[] => {
     const dates: Date[] = []
     const current = new Date(startDate)
-    current.setHours(0, 0, 0, 0)
-    const end = new Date(endDate)
-    end.setHours(0, 0, 0, 0)
+    current.setUTCHours(0, 0, 0, 0)
+    const endUTC = new Date(endDate)
+    endUTC.setUTCHours(0, 0, 0, 0)
 
-    while (current <= end) {
+    while (current <= endUTC) {
       dates.push(new Date(current))
-      current.setDate(current.getDate() + 1)
+      current.setUTCDate(current.getUTCDate() + 1)
     }
     return dates
   }
 
   const dates = generateDateRange(start, end)
 
-  // Create the chart entries
+  // Create the chart entries by mapping each date to its applicable price
   const entries: ProductChartEntry[] = []
   let currentPriceIndex = 0
 
@@ -218,14 +230,14 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
     while (currentPriceIndex < processedPrices.length) {
       const price = processedPrices[currentPriceIndex]
       if (date < price.validFrom) {
-        break // No price applies, skip this date
+        break // No price applies yet
       }
 
       if (price.validTo !== null && date > price.validTo) {
         currentPriceIndex++
       } else {
         entries.push({
-          date: formatDate(dateStr, range),
+          date: dateStr,
           price: price.price ?? 0,
           "price-recommended": price.price_recommended ?? 0,
           "price-per-major-unit": price.price_per_major_unit ?? 0,

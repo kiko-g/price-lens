@@ -38,7 +38,18 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
 
-  console.debug(prices, "\n\n", chartData)
+  const minDate = useMemo(() => {
+    const validFromDates = prices.map((p) => p.valid_from).filter((date) => date !== null)
+    const updatedAtDates = [sp.updated_at].filter((date) => date !== null)
+    const allDates = [...validFromDates, ...updatedAtDates]
+    return allDates.length > 0 ? Math.min(...allDates.map((d) => new Date(d).getTime())) : null
+  }, [prices, sp.updated_at])
+
+  const maxDate = useMemo(() => {
+    const validToDates = prices.map((p) => p.valid_to).filter((date) => date !== null)
+    const allDates = [...validToDates, sp.updated_at].filter((date) => date !== null)
+    return allDates.length > 0 ? Math.max(...allDates.map((d) => new Date(d).getTime())) : null
+  }, [prices, sp.updated_at])
 
   const ceiling = useMemo(() => {
     const allPrices = prices
@@ -187,26 +198,26 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
               tickMargin={10}
               tickFormatter={(value) => value.slice(0, 10)}
               tick={{ fontSize: 10 }}
-              interval={Math.ceil(chartData.length / 5) - 1}
+              interval={Math.ceil(chartData.length / 6) - 1}
             />
             <YAxis
               yAxisId="price"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
-              domain={[0, ceiling]}
-              tickFormatter={(value) => `€${value}`}
               width={40}
+              tickFormatter={(value) => `€${value.toFixed(1)}`}
+              domain={[0, ceiling]}
+              ticks={[0, ceiling / 4, (ceiling * 2) / 4, (ceiling * 3) / 4, ceiling]}
             />
             <YAxis
               yAxisId="discount"
               orientation="right"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
               width={40}
+              tickFormatter={(value) => `${value}%`}
+              domain={[0, 100]}
+              ticks={[0, 25, 50, 75, 100]}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             {Object.entries(chartConfig).map(([key, config], index) => (
