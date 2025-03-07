@@ -47,10 +47,12 @@ const defaultOptions: Props["options"] = {
 
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
+  const [isMounted, setIsMounted] = useState(false)
+
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
-  const [isMounted, setIsMounted] = useState(false)
+  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
+  const [activeAxis, setActiveAxis] = useState<string[]>(["price", "price-per-major-unit"])
 
   const ceiling = useMemo(() => {
     const allPrices = prices
@@ -150,6 +152,11 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     setIsLoading(false)
   }
 
+  function handleAxisChange(axis: string) {
+    if (activeAxis.includes(axis)) setActiveAxis(activeAxis.filter((a) => a !== axis))
+    else setActiveAxis([...activeAxis, axis])
+  }
+
   useEffect(() => {
     setIsMounted(true)
     return () => setIsMounted(false)
@@ -176,14 +183,22 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         <header className="mb-6 flex items-start justify-between gap-4">
           {options?.showPricesVariationCard ? (
             <PricesVariationCard
-              price={sp.price}
-              priceRecommended={sp.price_recommended}
-              pricePerMajorUnit={sp.price_per_major_unit}
-              discount={sp.discount}
-              discountVariation={discountVariation}
-              priceVariation={priceVariation}
-              priceRecommendedVariation={priceRecommendedVariation}
-              pricePerMajorUnitVariation={pricePerMajorUnitVariation}
+              data={{
+                price: sp.price,
+                priceRecommended: sp.price_recommended,
+                pricePerMajorUnit: sp.price_per_major_unit,
+                discount: sp.discount,
+                discountVariation,
+                priceVariation,
+                priceRecommendedVariation,
+                pricePerMajorUnitVariation,
+              }}
+              actions={{
+                onPriceChange: () => handleAxisChange("price"),
+                onPriceRecommendedChange: () => handleAxisChange("price-recommended"),
+                onPricePerMajorUnitChange: () => handleAxisChange("price-per-major-unit"),
+                onDiscountChange: () => handleAxisChange("discount"),
+              }}
               className="max-w-xs text-xs font-medium md:text-sm"
             />
           ) : null}
@@ -266,18 +281,20 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                 ticks={[0, 25, 50, 75, 100]}
               />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {Object.entries(chartConfig).map(([key, config], index) => (
-                <Line
-                  key={key}
-                  yAxisId={key.includes("price") ? "price" : "discount"}
-                  dataKey={key}
-                  type="monotone"
-                  stroke={config.color}
-                  strokeWidth={2}
-                  dot={chartData.length > 1 ? { r: 0 } : { r: 2 }}
-                  activeDot={{ r: 6 }}
-                />
-              ))}
+              {Object.entries(chartConfig)
+                .filter(([key]) => activeAxis.includes(key))
+                .map(([key, config], index) => (
+                  <Line
+                    key={key}
+                    yAxisId={key.includes("price") ? "price" : "discount"}
+                    dataKey={key}
+                    type="monotone"
+                    stroke={config.color}
+                    strokeWidth={2}
+                    dot={chartData.length > 1 ? { r: 0 } : { r: 2 }}
+                    activeDot={{ r: 6 }}
+                  />
+                ))}
             </LineChart>
           </ChartContainer>
         </>
