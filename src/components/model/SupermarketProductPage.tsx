@@ -11,8 +11,9 @@ import { Undo2Icon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lu
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
+import { ShareButton } from "@/components/ui/combo/ShareButton"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 import { ProductChart } from "./ProductChart"
 import { resolveSupermarketChain } from "./Supermarket"
 
@@ -115,6 +116,12 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
             <div className="mb-2 flex items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
               {sp.is_tracked && <Badge variant="success">Tracked</Badge>}
+              <Button variant="outline" size="sm" roundedness="2xl" asChild>
+                <Link href={sp.url} target="_blank" rel="noreferrer noopener">
+                  {supermarketChain?.logo}
+                </Link>
+              </Button>
+
               <HoverCard>
                 <HoverCardTrigger asChild className="h-7 w-7 rounded p-1.5 hover:bg-muted">
                   <InfoIcon />
@@ -181,16 +188,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
               <HeartIcon className="h-4 w-4" />
               Add to favorites
             </Button>
-            <Button variant="outline" size="sm">
-              <Share2Icon className="h-4 w-4" />
-              Share
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={sp.url} target="_blank" rel="noreferrer noopener">
-                {supermarketChain?.logo}
-                <ExternalLinkIcon className="hidden h-4 w-4 md:block" />
-              </Link>
-            </Button>
+            <ShareButton url={sp.url} title={sp.name} description={sp.name} />
           </div>
 
           <div className="mb-4 mt-4 flex-1">

@@ -1,11 +1,12 @@
+import "./globals.css"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
-import "./globals.css"
-
 import { cn } from "@/lib/utils"
+import { siteConfig } from "@/lib/config"
+
 import { Providers } from "./providers"
 import { Analytics } from "@/components/Analytics"
-import { siteConfig } from "@/lib/config"
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: {
@@ -74,6 +75,7 @@ export default function RootLayout({
         <Providers>
           <Analytics />
           {children}
+          <Toaster />
         </Providers>
       </body>
     </html>
