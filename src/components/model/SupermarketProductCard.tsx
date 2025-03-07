@@ -147,13 +147,23 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <Badge
-          size="xs"
-          variant="light"
-          className="absolute bottom-2 right-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        >
-          {supermarketChain ? supermarketChain.logoSmall : null}
-        </Badge>
+        <div className="absolute right-2 top-2 flex flex-col gap-1">
+          {sp.pack ? (
+            <Badge variant="unit" size="2xs" roundedness="sm" className="line-clamp-1 w-fit max-w-40">
+              {sp.pack}
+            </Badge>
+          ) : null}
+        </div>
+
+        <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+          <Badge
+            size="xs"
+            variant="light"
+            className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          >
+            {supermarketChain ? supermarketChain.logoSmall : null}
+          </Badge>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col items-start">

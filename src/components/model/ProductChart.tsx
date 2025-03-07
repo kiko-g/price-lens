@@ -5,8 +5,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { Price, SupermarketProduct, ProductChartEntry } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { RANGES, DateRange } from "@/types/extra"
-import { cn, discountValueToPercentage, formatTimestamptz, buildChartData } from "@/lib/utils"
+import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
+import { cn, discountValueToPercentage, formatTimestamptz, buildChartData, getDaysBetweenDates } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -34,7 +34,7 @@ const chartConfig = {
 
 export function ProductChart({ sp, className }: { sp: SupermarketProduct; className?: string }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedRange, setSelectedRange] = useState<DateRange>("6M")
+  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [isMounted, setIsMounted] = useState(false)
@@ -53,8 +53,6 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
 
     const currentPrice = lastTwoPrices[1].price ?? 0
     const previousPrice = lastTwoPrices[0].price ?? 0
-
-    console.debug("priceVariation", currentPrice, previousPrice)
 
     return (currentPrice - previousPrice) / previousPrice
   }, [prices])
@@ -88,6 +86,46 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
 
     return currentDiscount - previousDiscount
   }, [prices])
+
+  const minDate = useMemo(() => {
+    if (prices.length === 0) return null
+
+    return prices.reduce<string | null>((min, price) => {
+      const validFrom = price.valid_from ?? null
+      const updatedAt = price.updated_at ?? null
+
+      if (validFrom === null && updatedAt === null) return min
+      if (min === null) return validFrom !== null ? validFrom : updatedAt
+      if (validFrom !== null && validFrom < min) return validFrom
+      if (updatedAt !== null && updatedAt < min) return updatedAt
+
+      return min
+    }, null)
+  }, [prices])
+
+  const maxDate = useMemo(() => {
+    if (prices.length === 0) return null
+
+    return prices.reduce<string | null>((max, price) => {
+      const validTo = price.valid_to ?? null
+      const updatedAt = price.updated_at ?? null
+
+      if (validTo === null && updatedAt === null) return max
+      if (max === null) return validTo !== null ? validTo : updatedAt
+      if (validTo !== null && validTo > max) return validTo
+
+      return max
+    }, null)
+  }, [prices])
+
+  const daysBetweenDates = useMemo(() => {
+    if (!minDate || !maxDate) return 0
+
+    const minDateObj = new Date(minDate)
+    const maxDateObj = new Date(maxDate)
+
+    return getDaysBetweenDates(minDateObj, maxDateObj)
+  }, [minDate, maxDate])
 
   async function fetchPrices() {
     if (!sp.id) return
@@ -215,6 +253,8 @@ export function ProductChart({ sp, className }: { sp: SupermarketProduct; classN
                 key={range}
                 variant={range === selectedRange ? "default" : "ghost"}
                 onClick={() => setSelectedRange(range)}
+                disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
+                className="disabled:text-muted-foreground"
               >
                 {range}
               </Button>

@@ -220,17 +220,16 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
 
   const dates = generateDateRange(start, end)
 
-  // Create the chart entries by mapping each date to its applicable price
   const entries: ProductChartEntry[] = []
   let currentPriceIndex = 0
 
   for (const date of dates) {
-    const dateStr = date.toISOString().split("T")[0]
+    const dateStr = formatDate(date.toISOString(), range)
 
     while (currentPriceIndex < processedPrices.length) {
       const price = processedPrices[currentPriceIndex]
       if (date < price.validFrom) {
-        break // No price applies yet
+        break
       }
 
       if (price.validTo !== null && date > price.validTo) {
@@ -274,4 +273,9 @@ function formatDate(dateString: string, range: DateRange = "1M"): string {
         month: "short",
       })
   }
+}
+
+export function getDaysBetweenDates(startDate: Date, endDate: Date) {
+  const timeDiff = Math.abs(endDate.getTime() - startDate.getTime())
+  return Math.ceil(timeDiff / (1000 * 3600 * 24))
 }

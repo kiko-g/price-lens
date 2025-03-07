@@ -3,7 +3,6 @@ import { NextResponse } from "next/server"
 import { priceQueries } from "@/lib/db/queries/prices"
 
 export async function PUT(request: Request) {
-  console.debug("Hello")
   try {
     let price = (await request.json()) as Price
 

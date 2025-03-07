@@ -32,9 +32,11 @@ const badgeVariants = cva(
           "border-yellow-600 bg-yellow-600/5 text-yellow-600 dark:border-yellow-800 dark:text-yellow-50 dark:bg-yellow-600/10 [&_span.bubble]:bg-yellow-500 dark:[&_span.bubble]:bg-yellow-800",
         "price-per-unit":
           "border-transparent bg-yellow-400 text-zinc-800 hover:bg-yellow-400/80 dark:border-transparent dark:bg-yellow-500 dark:text-zinc-700 dark:hover:bg-yellow-500/80 [&_span.bubble]:bg-yellow-400 dark:[&_span.bubble]:bg-yellow-500",
+        unit: "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
       },
       size: {
         default: `px-3 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,
+        "2xs": `px-1 py-[1px] text-2xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
         xs: `px-1.5 py-0.5 text-xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
         sm: `px-2.5 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,
         md: `px-3 py-1.5 [&_span.bubble]:size-2 [&_svg]:size-3.5`,
