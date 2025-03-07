@@ -182,6 +182,12 @@ export const supermarketProductQueries = {
     return supabase.from("supermarket_products").select("*").is("created_at", null)
   },
 
+  async getById(id: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("supermarket_products").select("*").eq("id", id).single()
+    return { data, error }
+  },
+
   async getByIds(ids: string[]) {
     const supabase = createClient()
     return supabase.from("supermarket_products").select("*").in("id", ids)
