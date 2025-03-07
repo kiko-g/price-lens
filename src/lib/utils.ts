@@ -219,12 +219,13 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
   }
 
   const dates = generateDateRange(start, end)
+  const daysBetweenDates = getDaysBetweenDates(start, end)
 
   const entries: ProductChartEntry[] = []
   let currentPriceIndex = 0
 
   for (const date of dates) {
-    const dateStr = formatDate(date.toISOString(), range)
+    const dateStr = formatDate(date.toISOString(), daysBetweenDates > 30 ? range : "1M")
 
     while (currentPriceIndex < processedPrices.length) {
       const price = processedPrices[currentPriceIndex]

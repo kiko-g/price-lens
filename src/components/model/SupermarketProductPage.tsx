@@ -7,12 +7,10 @@ import { useEffect, useState } from "react"
 import { FrontendStatus } from "@/types/extra"
 import type { SupermarketProduct } from "@/types"
 import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import { ArrowLeftIcon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lucide-react"
+import { Undo2Icon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { ProductChart } from "./ProductChart"
@@ -81,7 +79,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
       <div className="flex w-min">
         <Button variant="ghost" className="mb-2" asChild size="sm">
           <Link href="/supermarket">
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            <Undo2Icon className="h-4 w-4" />
             Back to supermarket products
           </Link>
         </Button>
@@ -146,7 +144,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
               </HoverCard>
             </div>
 
-            <h1 className="text-2xl font-bold">{sp.name}</h1>
+            <h1 className="line-clamp-3 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
             {sp.pack && <p className="text-muted-foreground">{sp.pack}</p>}
           </div>
 
@@ -178,8 +176,8 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
             ) : null}
           </div>
 
-          <div className="mt-1 flex items-center gap-2">
-            <Button variant="default" size="sm">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" disabled>
               <HeartIcon className="h-4 w-4" />
               Add to favorites
             </Button>
@@ -189,13 +187,13 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href={sp.url} target="_blank" rel="noreferrer noopener">
-                {/* <ExternalLinkIcon className="h-4 w-4" /> */}
                 {supermarketChain?.logo}
+                <ExternalLinkIcon className="hidden h-4 w-4 md:block" />
               </Link>
             </Button>
           </div>
 
-          <div className="mb-8 mt-8 flex-1">
+          <div className="mb-4 mt-4 flex-1">
             <ProductChart
               sp={sp}
               options={{

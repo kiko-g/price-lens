@@ -193,6 +193,9 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                 priceRecommendedVariation,
                 pricePerMajorUnitVariation,
               }}
+              state={{
+                activeAxis,
+              }}
               actions={{
                 onPriceChange: () => handleAxisChange("price"),
                 onPriceRecommendedChange: () => handleAxisChange("price-recommended"),
