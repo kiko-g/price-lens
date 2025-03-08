@@ -177,6 +177,8 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
 
   if (!isMounted) return null
 
+  console.debug("hey")
+
   return (
     <div className={cn("flex flex-col", className)}>
       {options?.showPricesVariationCard || options?.showImage ? (

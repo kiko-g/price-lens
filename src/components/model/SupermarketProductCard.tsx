@@ -168,7 +168,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
       </div>
 
       <div className="flex flex-1 flex-col items-start">
-        <div className="flex flex-col items-start">
+        <div className="flex w-full flex-col items-start">
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger>
@@ -190,7 +190,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1.5 text-sm font-semibold leading-4 text-blue-600 dark:text-blue-400">
+          <span className="mt-1.5 w-full text-sm font-semibold leading-4 text-blue-600 dark:text-blue-400">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 

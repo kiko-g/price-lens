@@ -1,5 +1,5 @@
-import { Check } from "lucide-react"
 import Link from "next/link"
+import { CheckIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,23 +33,23 @@ export function PricingSection() {
             <CardContent className="flex-1 p-6 pt-0">
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Track up to 10 products</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Basic price alerts</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Weekly price reports</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Compare 3 supermarkets</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>30-day price history</span>
                 </li>
               </ul>
@@ -79,35 +79,35 @@ export function PricingSection() {
             <CardContent className="flex-1 p-6 pt-0">
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Unlimited product tracking</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Real-time price alerts</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Daily price reports</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Compare all supported supermarkets</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Full price history</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Inflation insights dashboard</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Shopping list optimizer</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="mr-2 h-4 w-4 text-primary" />
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Priority customer support</span>
                 </li>
               </ul>
@@ -122,7 +122,7 @@ export function PricingSection() {
 
         <div className="mt-12 text-center">
           <p className="text-muted-foreground">
-            All plans include our core inflation awareness tools. Need a custom solution for your business?{" "}
+            All plans include our core inflation awareness tools. Any questions?{" "}
             <Link href="/contact" className="text-primary underline underline-offset-4 hover:text-primary/80">
               Contact us
             </Link>
