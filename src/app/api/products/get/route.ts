@@ -11,14 +11,23 @@ export async function GET(req: NextRequest) {
     const limitParam = params.get("limit") ?? "20"
     const searchTypeParam = params.get("searchType") ?? "name"
     const sortParam = params.get("sort") ?? "a-z"
+    const categoriesParam = params.get("categories") ?? ""
 
     const query = queryParam
     const page = parseInt(pageParam, 10) || 1
     const limit = parseInt(limitParam, 10) || 20
     const searchType = searchTypeParam as SearchType
     const sort = sortParam as SortByType
+    const categories = categoriesParam.split(";")
 
-    const { data, error, count } = await supermarketProductQueries.getAll({ page, limit, query, searchType, sort })
+    const { data, error, count } = await supermarketProductQueries.getAll({
+      page,
+      limit,
+      query,
+      searchType,
+      sort,
+      categories,
+    })
 
     if (error) {
       throw new Error(error.message)

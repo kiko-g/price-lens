@@ -9,6 +9,7 @@ type GetAllQuery = {
   sort?: SortByType
   searchType?: SearchType
   nonNulls?: boolean
+  categories?: string[]
 }
 
 export const productQueries = {
@@ -118,7 +119,15 @@ export const productQueries = {
 }
 
 export const supermarketProductQueries = {
-  async getAll({ page = 1, limit = 20, query = "", searchType = "name", nonNulls = true, sort = "a-z" }: GetAllQuery) {
+  async getAll({
+    page = 1,
+    limit = 20,
+    query = "",
+    searchType = "name",
+    nonNulls = true,
+    sort = "a-z",
+    categories = [],
+  }: GetAllQuery) {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
@@ -135,6 +144,10 @@ export const supermarketProductQueries = {
     if (query) {
       const sanitizedQuery = query.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
       dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
+    }
+
+    if (categories.length > 0) {
+      dbQuery = dbQuery.in("category", categories)
     }
 
     if (sort) {

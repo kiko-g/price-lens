@@ -8,7 +8,7 @@ import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { getCenteredArray } from "@/lib/utils"
+import { cn, getCenteredArray } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 import { SupermarketProductCard, ProductCardSkeleton } from "@/components/model/SupermarketProductCard"
 import { Wrapper } from "@/components/SectionWrapper"
@@ -40,6 +44,8 @@ import {
   ArrowUpAZ,
   ArrowUpAZIcon,
   ArrowUpWideNarrowIcon,
+  CheckIcon,
+  ChevronsUpDownIcon,
   CircleOffIcon,
   DeleteIcon,
   EllipsisVerticalIcon,
@@ -54,11 +60,42 @@ type Props = {
   sort?: SortByType
 }
 
+const existingCategories = [
+  "Mercearia",
+  "Congelados",
+  "Bebidas e Garrafeira",
+  "Frescos",
+  "Beleza e Higiene",
+  "Bio, Eco e Saudável",
+  "Bebé",
+  "Limpeza",
+  "Laticínios e Ovos",
+  "Animais",
+  "Brinquedos e Jogos",
+  "Campanhas",
+  "Casa, Bricolage e Jardim",
+  "Cão",
+  "Charcutaria e Queijos",
+  "Continente Navigation Catalog",
+  "Desporto e Malas de Viagem",
+  "Destaques",
+  "Folhetos Pesquisa",
+  "Gato",
+  "Livraria e Papelaria",
+  "Marcas",
+  "Negócios",
+  "Presentes",
+  "Resultado de Pesquisa",
+]
+
+const defaultCategories = ["Mercearia"]
+
 export function SupermarketProductsGrid(props: Props) {
   const { page: initPage = 1, q: initQuery = "", t: initSearchType = "name", sort: initSortBy = "a-z" } = props
 
   const limit = 20
   const [page, setPage] = useState(initPage)
+  const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
@@ -66,6 +103,20 @@ export function SupermarketProductsGrid(props: Props) {
   const [pagedCount, setPagedCount] = useState(0)
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [products, setProducts] = useState<SupermarketProduct[]>([])
+  const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
+    const defaultCategorySet = new Set(defaultCategories)
+    const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
+    return uniqueCategories.map((name) => ({
+      name,
+      selected: defaultCategorySet.has(name),
+    }))
+  })
+
+  const selectedCount = categories.filter((cat) => cat.selected).length
+
+  const toggleCategory = (categoryName: string) => {
+    setCategories((prev) => prev.map((cat) => (cat.name === categoryName ? { ...cat, selected: !cat.selected } : cat)))
+  }
 
   const updateParams = useUpdateSearchParams()
 
@@ -74,13 +125,17 @@ export function SupermarketProductsGrid(props: Props) {
   async function fetchProducts() {
     setStatus(FrontendStatus.Loading)
     try {
-      const { data } = await axios.get("/api/products", {
+      const { data } = await axios.get("/api/products/get", {
         params: {
           ...(query && { q: query }),
           page,
           limit,
           searchType,
           sort: sortBy,
+          categories: categories
+            .filter((cat) => cat.selected)
+            .map((cat) => cat.name)
+            .join(";"),
         },
       })
       setProducts(data.data || [])
@@ -178,10 +233,13 @@ export function SupermarketProductsGrid(props: Props) {
 
   if (isLoading) {
     return (
-      <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5 xl:grid-cols-6">
-        {Array.from({ length: limit }).map((_, index) => (
-          <ProductCardSkeleton key={`product-skeleton-${index}`} />
-        ))}
+      <div className="flex w-full flex-col gap-4">
+        <Skeleton className="h-10 w-full" />
+        <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
+          {Array.from({ length: limit }).map((_, index) => (
+            <ProductCardSkeleton key={`product-skeleton-${index}`} />
+          ))}
+        </div>
       </div>
     )
   }
@@ -298,6 +356,50 @@ export function SupermarketProductsGrid(props: Props) {
               Next
             </Button>
           </div>
+
+          <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={categorySelectorOpen}
+                className="justify-between"
+              >
+                {selectedCount > 0 ? `Categories (${selectedCount})` : "Select categories"}
+                <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search category..." className="border-0 focus:ring-0" />
+                <CommandList>
+                  <CommandEmpty>No categories found.</CommandEmpty>
+                  <CommandGroup>
+                    <ScrollArea className="h-96">
+                      {categories.map((category) => (
+                        <CommandItem
+                          key={category.name}
+                          value={category.name}
+                          onSelect={() => toggleCategory(category.name)}
+                          className="flex items-center justify-between"
+                        >
+                          <span>{category.name}</span>
+                          <div
+                            className={cn(
+                              "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                              category.selected ? "bg-primary text-primary-foreground" : "opacity-50",
+                            )}
+                          >
+                            {category.selected && <CheckIcon className="h-3 w-3" />}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </ScrollArea>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
