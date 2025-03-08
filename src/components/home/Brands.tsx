@@ -32,7 +32,7 @@ export function Brands({ className }: { className?: string }) {
       name: "Pingo Doce",
       image: pingoDoce,
       disabled: true,
-      shown: true,
+      shown: false,
       className: "h-10 rounded dark:bg-white",
       width: 1000,
       height: 10000,
@@ -64,7 +64,7 @@ export function Brands({ className }: { className?: string }) {
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <p>{brand.disabled ? `${brand.name} not supported yet` : brand.name}</p>
+                <p>{brand.disabled ? `${brand.name} will be supported soon` : `${brand.name} is supported`}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

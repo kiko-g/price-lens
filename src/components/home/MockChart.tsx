@@ -28,16 +28,16 @@ const chartConfigA = {
     label: "Price",
     color: "hsl(var(--chart-1))",
   },
+  pricePerUnit: {
+    label: "Price Per Unit",
+    color: "hsl(var(--chart-2))",
+  },
   priceRecommended: {
     label: "Price Recommended",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--chart-3))",
   },
   discount: {
     label: "Discount %",
-    color: "hsl(var(--chart-3))",
-  },
-  pricePerUnit: {
-    label: "Price Per Unit",
     color: "hsl(var(--chart-4))",
   },
 } satisfies ChartConfig
@@ -137,7 +137,7 @@ export function MockChartA({ className }: { className?: string }) {
         </div>
       </CardFooter>
 
-      <BorderBeam duration={8} size={100} />
+      <BorderBeam duration={5} size={150} colorFrom="#2662d9" colorTo="#e23670" />
     </Card>
   )
 }

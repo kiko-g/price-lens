@@ -7,17 +7,19 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 
 export function PricingSection() {
   return (
-    <section className="w-full bg-gradient-to-b from-background to-muted/30 py-12 md:py-24 lg:py-32">
+    <section className="w-full bg-gradient-to-b py-12 md:py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Simple, Transparent Pricing</h2>
-            <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <h2 className="animate-fade-in text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="max-w-[700px] animate-fade-in text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Track supermarket prices and stay aware of inflation with Price Lens. Choose the plan that works for you.
             </p>
           </div>
         </div>
-        <div className="mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:mt-12 lg:gap-10">
+        <div className="mx-auto mt-8 grid max-w-5xl animate-fade-in grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:mt-12 lg:gap-10">
           {/* Free Plan */}
           <Card className="flex flex-col">
             <CardHeader className="flex flex-col space-y-1.5 p-6">
@@ -60,8 +62,8 @@ export function PricingSection() {
           </Card>
 
           {/* Plus Plan */}
-          <Card className="relative flex flex-col overflow-hidden border-blue-600/20 dark:border-border">
-            <BorderBeam duration={1000} size={300} colorFrom="#837ded" colorTo="#6791f1" />
+          <Card className="relative flex flex-col overflow-hidden">
+            <BorderBeam duration={5} size={200} colorFrom="#837ded" colorTo="#6791f1" />
 
             <div className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
               Popular
