@@ -28,6 +28,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         active: `bg-zinc-200/80 dark:bg-zinc-100/20`,
         link: `text-primary underline-offset-4 hover:underline`,
         "dropdown-item": `bg-transparent font-normal w-full justify-between border-0`,
+        "gradient-primary": `bg-gradient-to-br from-indigo-500/70 to-blue-500/70 text-white hover:from-indigo-500/90 hover:to-blue-500/90 transition-all duration-300`,
       },
       size: {
         default: `px-3 py-1.5`,
