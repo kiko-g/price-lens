@@ -1,8 +1,7 @@
 "use client"
 
 import axios from "axios"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { type SupermarketProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
@@ -81,6 +80,9 @@ export function SupermarketProductsGrid(props: Props) {
       selected: defaultCategorySet.has(name),
     }))
   })
+
+  const [showNav, setShowNav] = useState(true)
+  const lastScrollY = useRef(0)
 
   const selectedCount = categories.filter((cat) => cat.selected).length
 
@@ -183,6 +185,21 @@ export function SupermarketProductsGrid(props: Props) {
     page !== 1 ? setPage(1) : fetchProducts()
   }
 
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY
+
+    if (currentScrollY < 50) setShowNav(true)
+    else if (currentScrollY > lastScrollY.current) {
+      // Scrolling down
+      setShowNav(false)
+    } else if (currentScrollY < lastScrollY.current) {
+      // Scrolling up
+      setShowNav(true)
+    }
+
+    lastScrollY.current = currentScrollY
+  }
+
   useEffect(() => {
     fetchProducts()
   }, [page, sortBy])
@@ -190,6 +207,15 @@ export function SupermarketProductsGrid(props: Props) {
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy })
   }, [page, query, searchType, sortBy])
+
+  // Add scroll event listener
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
 
   if (status === FrontendStatus.Error) {
     return (
@@ -265,7 +291,12 @@ export function SupermarketProductsGrid(props: Props) {
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <nav className="sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-1 border-b bg-white bg-opacity-95 px-4 py-3 backdrop-blur backdrop-filter dark:bg-zinc-950 dark:bg-opacity-95">
+      <nav
+        className={cn(
+          "sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-1 border-b bg-white bg-opacity-95 px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950 dark:bg-opacity-95",
+          showNav ? "translate-y-0" : "top-0 -translate-y-full",
+        )}
+      >
         <div className="flex w-full flex-col items-end justify-between gap-2 md:gap-6 lg:flex-row lg:items-center">
           <div className="flex w-full max-w-lg flex-1 gap-2">
             <div className="relative w-full">
