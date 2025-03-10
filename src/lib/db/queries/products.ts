@@ -143,10 +143,14 @@ export const supermarketProductQueries = {
 
     if (query) {
       const sanitizedQuery = query.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
-      dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
+      if (searchType === "url") {
+        dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
+      } else {
+        dbQuery = dbQuery.textSearch(searchType, sanitizedQuery)
+      }
     }
 
-    if (categories.length > 0) {
+    if (categories && categories.length !== 0) {
       dbQuery = dbQuery.in("category", categories)
     }
 

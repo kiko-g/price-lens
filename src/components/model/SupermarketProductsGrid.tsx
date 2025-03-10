@@ -8,7 +8,7 @@ import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { cn, getCenteredArray } from "@/lib/utils"
+import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -60,40 +60,10 @@ type Props = {
   sort?: SortByType
 }
 
-const existingCategories = [
-  "Mercearia",
-  "Congelados",
-  "Bebidas e Garrafeira",
-  "Frescos",
-  "Beleza e Higiene",
-  "Bio, Eco e Saudável",
-  "Bebé",
-  "Limpeza",
-  "Laticínios e Ovos",
-  "Animais",
-  "Brinquedos e Jogos",
-  "Campanhas",
-  "Casa, Bricolage e Jardim",
-  "Cão",
-  "Charcutaria e Queijos",
-  "Continente Navigation Catalog",
-  "Desporto e Malas de Viagem",
-  "Destaques",
-  "Folhetos Pesquisa",
-  "Gato",
-  "Livraria e Papelaria",
-  "Marcas",
-  "Negócios",
-  "Presentes",
-  "Resultado de Pesquisa",
-]
-
-const defaultCategories = ["Mercearia"]
-
 export function SupermarketProductsGrid(props: Props) {
   const { page: initPage = 1, q: initQuery = "", t: initSearchType = "name", sort: initSortBy = "a-z" } = props
 
-  const limit = 20
+  const limit = 30
   const [page, setPage] = useState(initPage)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
@@ -104,7 +74,7 @@ export function SupermarketProductsGrid(props: Props) {
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [products, setProducts] = useState<SupermarketProduct[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
-    const defaultCategorySet = new Set(defaultCategories)
+    const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
     const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
     return uniqueCategories.map((name) => ({
       name,
@@ -116,6 +86,14 @@ export function SupermarketProductsGrid(props: Props) {
 
   const toggleCategory = (categoryName: string) => {
     setCategories((prev) => prev.map((cat) => (cat.name === categoryName ? { ...cat, selected: !cat.selected } : cat)))
+  }
+
+  const selectAllCategories = () => {
+    setCategories((prev) => prev.map((cat) => ({ ...cat, selected: true })))
+  }
+
+  const clearCategories = () => {
+    setCategories((prev) => prev.map((cat) => ({ ...cat, selected: false })))
   }
 
   const updateParams = useUpdateSearchParams()
@@ -248,7 +226,7 @@ export function SupermarketProductsGrid(props: Props) {
     return (
       <Wrapper>
         <CircleOffIcon className="h-8 w-8" />
-        <p>No products found. Check back soon!</p>
+        <p>No products found matching your search.</p>
         <Button
           variant="default"
           onClick={() => {
@@ -259,14 +237,36 @@ export function SupermarketProductsGrid(props: Props) {
           <span>Clear search</span>
           <DeleteIcon />
         </Button>
+
+        <ul className="flex max-w-md flex-col text-sm">
+          <li>
+            <strong>You searched for:</strong> "{query}"
+          </li>
+          <li>
+            <strong>Search type:</strong> {searchType}
+          </li>
+          <li>
+            <strong>Page:</strong> {page}
+          </li>
+          <li>
+            <strong>Categories:</strong>{" "}
+            {categories
+              .filter((cat) => cat.selected)
+              .map((cat) => cat.name)
+              .join(", ") || "None"}
+          </li>
+          <li>
+            <strong>Sort by:</strong> {sortBy}
+          </li>
+        </ul>
       </Wrapper>
     )
   }
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <div className="mb-4 flex w-full flex-col items-end justify-between gap-2 md:mb-2 md:gap-6 lg:flex-row lg:items-center">
-        <div className="flex w-full flex-1 gap-2">
+      <nav className="fixed bottom-0 z-20 mb-4 flex w-full flex-col items-end justify-between gap-2 bg-black md:mb-2 md:gap-6 lg:flex-row lg:items-center">
+        <div className="flex w-full max-w-lg flex-1 gap-2">
           <div className="relative w-full">
             <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -327,6 +327,103 @@ export function SupermarketProductsGrid(props: Props) {
         </div>
 
         <div className="flex w-full flex-wrap gap-2 md:w-auto">
+          <div className="flex flex-1 gap-2">
+            <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={categorySelectorOpen}
+                  className="min-w-[180px] justify-between"
+                >
+                  {selectedCount > 0 ? `Categories (${selectedCount})` : "Select categories"}
+                  <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search category..." className="border-0 focus:ring-0" />
+                  <CommandList>
+                    <CommandEmpty>No categories found.</CommandEmpty>
+                    <CommandGroup>
+                      <ScrollArea className="h-96">
+                        <div className="mb-1 ml-1 flex justify-start gap-2">
+                          <button
+                            onClick={selectAllCategories}
+                            className="flex text-xs text-muted-foreground hover:text-primary hover:underline"
+                          >
+                            Select all
+                          </button>
+                          <button
+                            onClick={clearCategories}
+                            className="flex text-xs text-muted-foreground hover:text-primary hover:underline"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        {categories.map((category) => (
+                          <CommandItem
+                            key={category.name}
+                            value={category.name}
+                            onSelect={() => toggleCategory(category.name)}
+                            className="flex items-center justify-between"
+                          >
+                            <span>{category.name}</span>
+                            <div
+                              className={cn(
+                                "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                category.selected ? "bg-primary text-primary-foreground" : "opacity-50",
+                              )}
+                            >
+                              {category.selected && <CheckIcon className="h-3 w-3" />}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </ScrollArea>
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-start lg:w-[120px]">
+                  {sortBy === "a-z" && <ArrowDownAZIcon className="mr-2 h-4 w-4" />}
+                  {sortBy === "z-a" && <ArrowUpAZIcon className="mr-2 h-4 w-4" />}
+                  {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
+                  {sortBy === "price-high-low" && <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />}
+                  {sortBy === "only-nulls" && <CircleOffIcon className="mr-2 h-4 w-4" />}
+                  Sort by
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[180px]">
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setSortBy("a-z")}>
+                  <ArrowDownAZ className="mr-2 h-4 w-4" />
+                  Name A-Z
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("z-a")}>
+                  <ArrowUpAZ className="mr-2 h-4 w-4" />
+                  Name Z-A
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
+                  <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />
+                  Price: High to Low
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("price-low-high")}>
+                  <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />
+                  Price: Low to High
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("only-nulls")}>
+                  <CircleOffIcon className="mr-2 h-4 w-4" />
+                  Invalid products
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           <div className="isolate flex flex-1 -space-x-px">
             <Button
               variant="outline"
@@ -357,92 +454,11 @@ export function SupermarketProductsGrid(props: Props) {
             </Button>
           </div>
 
-          <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={categorySelectorOpen}
-                className="justify-between"
-              >
-                {selectedCount > 0 ? `Categories (${selectedCount})` : "Select categories"}
-                <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search category..." className="border-0 focus:ring-0" />
-                <CommandList>
-                  <CommandEmpty>No categories found.</CommandEmpty>
-                  <CommandGroup>
-                    <ScrollArea className="h-96">
-                      {categories.map((category) => (
-                        <CommandItem
-                          key={category.name}
-                          value={category.name}
-                          onSelect={() => toggleCategory(category.name)}
-                          className="flex items-center justify-between"
-                        >
-                          <span>{category.name}</span>
-                          <div
-                            className={cn(
-                              "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                              category.selected ? "bg-primary text-primary-foreground" : "opacity-50",
-                            )}
-                          >
-                            {category.selected && <CheckIcon className="h-3 w-3" />}
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </ScrollArea>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-auto justify-start lg:w-[120px]">
-                {sortBy === "a-z" && <ArrowDownAZIcon className="mr-2 h-4 w-4" />}
-                {sortBy === "z-a" && <ArrowUpAZIcon className="mr-2 h-4 w-4" />}
-                {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
-                {sortBy === "price-high-low" && <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />}
-                {sortBy === "only-nulls" && <CircleOffIcon className="mr-2 h-4 w-4" />}
-                Sort by
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[180px]">
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSortBy("a-z")}>
-                <ArrowDownAZ className="mr-2 h-4 w-4" />
-                Name A-Z
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("z-a")}>
-                <ArrowUpAZ className="mr-2 h-4 w-4" />
-                Name Z-A
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
-                <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />
-                Price: High to Low
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("price-low-high")}>
-                <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />
-                Price: Low to High
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("only-nulls")}>
-                <CircleOffIcon className="mr-2 h-4 w-4" />
-                Invalid products
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <Button variant="default" disabled={isLoading} onClick={handleSubmit}>
             Submit
           </Button>
         </div>
-      </div>
+      </nav>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>

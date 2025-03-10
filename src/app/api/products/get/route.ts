@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(limitParam, 10) || 20
     const searchType = searchTypeParam as SearchType
     const sort = sortParam as SortByType
-    const categories = categoriesParam.split(";")
+    const categories = categoriesParam ? categoriesParam.split(";") : []
 
     const { data, error, count } = await supermarketProductQueries.getAll({
       page,

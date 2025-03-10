@@ -47,7 +47,6 @@ const defaultOptions: Props["options"] = {
 
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
   const [isLoading, setIsLoading] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
 
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
@@ -158,26 +157,16 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   }
 
   useEffect(() => {
-    setIsMounted(true)
-    return () => setIsMounted(false)
+    fetchPrices()
   }, [])
 
   useEffect(() => {
-    if (isMounted) {
-      fetchPrices()
-    }
-  }, [isMounted])
-
-  useEffect(() => {
-    if (!prices || prices.length === 0 || !isMounted) return
+    if (!prices || prices.length === 0) return
 
     const pricePoints = buildChartData(prices, selectedRange)
     setChartData(pricePoints)
-  }, [selectedRange, prices, isMounted])
-
-  if (!isMounted) return null
-
-  console.debug("hey")
+    console.debug("set chart data", pricePoints)
+  }, [selectedRange, prices])
 
   return (
     <div className={cn("flex flex-col", className)}>
@@ -226,89 +215,90 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         </header>
       ) : null}
 
-      {isLoading ? (
-        <div className="flex h-full w-full items-center justify-center">
-          <Loader2Icon className="h-4 w-4 animate-spin" />
-        </div>
-      ) : chartData.length > 0 ? (
-        <>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {RANGES.map((range) => (
-              <Button
-                key={range}
-                variant={range === selectedRange ? "default" : "ghost"}
-                onClick={() => setSelectedRange(range)}
-                disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
-                className="disabled:text-muted-foreground"
-              >
-                {range}
-              </Button>
-            ))}
-          </div>
-          <ChartContainer config={chartConfig}>
-            <LineChart
-              accessibilityLayer
-              data={chartData}
-              margin={{
-                left: 12,
-                right: 12,
-                top: 8,
-                bottom: 30,
-              }}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={10}
-                tickFormatter={(value) => value.slice(0, 10)}
-                tick={{ fontSize: 10 }}
-                interval={Math.ceil(chartData.length / 6) - 1}
-              />
-              <YAxis
-                yAxisId="price"
-                tickLine={false}
-                axisLine={false}
-                width={40}
-                tickFormatter={(value) => `€${value.toFixed(1)}`}
-                domain={[0, ceiling]}
-                ticks={[0, ceiling / 4, (ceiling * 2) / 4, (ceiling * 3) / 4, ceiling]}
-              />
-              <YAxis
-                yAxisId="discount"
-                orientation="right"
-                tickLine={false}
-                axisLine={false}
-                width={40}
-                tickFormatter={(value) => `${value}%`}
-                domain={[0, 100]}
-                ticks={[0, 25, 50, 75, 100]}
-              />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {Object.entries(chartConfig)
-                .filter(([key]) => activeAxis.includes(key))
-                .map(([key, config], index) => (
-                  <Line
-                    key={key}
-                    yAxisId={key.includes("price") ? "price" : "discount"}
-                    dataKey={key}
-                    type="linear"
-                    stroke={config.color}
-                    strokeWidth={2}
-                    strokeDasharray={key === "price-recommended" || key === "discount" ? "5 5" : "0"}
-                    dot={chartData.length > 1 ? { r: 2 } : { r: 3 }}
-                    activeDot={{ r: 6 }}
-                  />
-                ))}
-            </LineChart>
-          </ChartContainer>
-        </>
-      ) : (
-        <div className="flex h-64 w-full items-center justify-center rounded border bg-muted">
-          <span className="text-sm text-muted-foreground">No price history data available</span>
-        </div>
-      )}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {RANGES.map((range) => (
+          <Button
+            key={range}
+            variant={range === selectedRange ? "default" : "ghost"}
+            onClick={() => setSelectedRange(range)}
+            disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
+            className="disabled:text-muted-foreground"
+          >
+            {range}
+          </Button>
+        ))}
+      </div>
+      <ChartContainer config={chartConfig}>
+        <LineChart
+          accessibilityLayer
+          data={chartData}
+          margin={{
+            left: 12,
+            right: 12,
+            top: 8,
+            bottom: 30,
+          }}
+        >
+          <CartesianGrid vertical={false} />
+          <XAxis
+            dataKey="date"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={10}
+            interval={Math.ceil(chartData.length / 6) - 1}
+            tick={{ fontSize: 10 }}
+            tickFormatter={(value) => value.slice(0, 10)}
+          />
+          <YAxis
+            dataKey="price"
+            yAxisId="price"
+            tickLine={false}
+            axisLine={false}
+            width={40}
+            domain={[0, ceiling]}
+            ticks={[0, ceiling / 4, (ceiling * 2) / 4, (ceiling * 3) / 4, ceiling]}
+            tickFormatter={(value) => `€${value.toFixed(1)}`}
+            tick={(props) => <CustomTick {...props} yAxisId="price" />}
+          />
+          <YAxis
+            dataKey="discount"
+            yAxisId="discount"
+            orientation="right"
+            tickLine={false}
+            axisLine={false}
+            width={40}
+            domain={[0, 100]}
+            ticks={[0, 25, 50, 75, 100]}
+            tickFormatter={(value) => `${value}%`}
+            tick={(props) => <CustomTick {...props} yAxisId="discount" />}
+          />
+          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+          {chartData.length > 0 &&
+            Object.entries(chartConfig)
+              .filter(([key]) => activeAxis.includes(key))
+              .map(([key, config], index) => (
+                <Line
+                  key={key}
+                  yAxisId={key.includes("price") ? "price" : "discount"}
+                  dataKey={key}
+                  type="linear"
+                  stroke={config.color}
+                  strokeWidth={2}
+                  strokeDasharray={key === "price-recommended" || key === "discount" ? "5 5" : "0"}
+                  dot={chartData.length > 1 ? { r: 2 } : { r: 3 }}
+                  activeDot={{ r: 6 }}
+                />
+              ))}
+        </LineChart>
+      </ChartContainer>
     </div>
+  )
+}
+
+function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: any; yAxisId: string }) {
+  return (
+    <text x={x} y={y} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
+      {yAxisId === "price" ? `€${payload.value.toFixed(1)}` : `${payload.value}%`}
+    </text>
   )
 }

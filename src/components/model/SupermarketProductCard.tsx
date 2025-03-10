@@ -97,19 +97,21 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
           sp.image ? "border-zinc-200 dark:border-zinc-800" : "border-transparent",
         )}
       >
-        {sp.image ? (
-          <Image
-            src={sp.image}
-            alt={sp.name || "Product Image"}
-            width={500}
-            height={500}
-            className="aspect-square w-full transition duration-300 hover:scale-105"
-            placeholder="blur"
-            blurDataURL={imagePlaceholder.productBlur}
-          />
-        ) : (
-          <div className="aspect-square w-full" />
-        )}
+        <Link href={`/supermarket/${sp.id}`}>
+          {sp.image ? (
+            <Image
+              src={sp.image}
+              alt={sp.name || "Product Image"}
+              width={500}
+              height={500}
+              className="aspect-square w-full transition duration-300 hover:scale-105"
+              placeholder="blur"
+              blurDataURL={imagePlaceholder.productBlur}
+            />
+          ) : (
+            <div className="aspect-square w-full" />
+          )}
+        </Link>
 
         <div className="absolute left-2 top-2 flex flex-col gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
