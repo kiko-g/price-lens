@@ -97,14 +97,14 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
           sp.image ? "border-zinc-200 dark:border-zinc-800" : "border-transparent",
         )}
       >
-        <Link href={`/supermarket/${sp.id}`}>
+        <Link href={`/supermarket/${sp.id}`} className="h-full w-full">
           {sp.image ? (
             <Image
               src={sp.image}
               alt={sp.name || "Product Image"}
               width={500}
               height={500}
-              className="aspect-square w-full transition duration-300 hover:scale-105"
+              className="aspect-square h-full w-full transition duration-300 hover:scale-105"
               placeholder="blur"
               blurDataURL={imagePlaceholder.productBlur}
             />
@@ -152,7 +152,12 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
 
         <div className="absolute right-2 top-2 flex flex-col gap-1">
           {sp.pack ? (
-            <Badge variant="unit" size="2xs" roundedness="sm" className="line-clamp-1 w-fit max-w-40">
+            <Badge
+              variant="unit"
+              size="2xs"
+              roundedness="sm"
+              className="line-clamp-3 w-fit max-w-20 md:line-clamp-1 md:max-w-40"
+            >
               {sp.pack}
             </Badge>
           ) : null}

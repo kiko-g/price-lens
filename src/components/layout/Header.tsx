@@ -26,8 +26,8 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 mx-auto w-full border-b bg-zinc-100 bg-opacity-60 backdrop-blur-sm backdrop-filter dark:bg-zinc-950 dark:bg-opacity-50 xl:px-4">
-      <div className="flex items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
+    <header className="sticky top-0 z-50 mx-auto h-[54px] w-full border-b bg-zinc-50 bg-opacity-90 backdrop-blur backdrop-filter dark:bg-zinc-950 dark:bg-opacity-90 xl:px-4">
+      <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
           <span className="inline-flex items-center rounded-full bg-gradient-to-br from-indigo-600/70 to-blue-600/70 px-1.5 py-0.5 text-xs/4 font-bold capitalize tracking-tight text-white">
@@ -37,9 +37,10 @@ export function Header() {
           <nav className="ml-3 hidden items-center gap-1.5 md:flex">
             {navigation.map((item) => (
               <Button
-                variant="ghost"
                 asChild
-                className={cn(pathname === item.href && "bg-zinc-200 dark:bg-zinc-100/20")}
+                variant="ghost"
+                size="sm"
+                className={cn("", pathname === item.href && "bg-zinc-200 dark:bg-zinc-100/20")}
                 key={item.href}
               >
                 <Link href={item.href}>{item.label}</Link>
