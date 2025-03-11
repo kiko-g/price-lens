@@ -79,7 +79,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
       <div className="flex w-min">
         <Button variant="ghost" className="mb-2" asChild size="sm">
-          <Link href="/supermarket">
+          <Link href="javascript:history.back()">
             <Undo2Icon className="h-4 w-4" />
             Back to supermarket products
           </Link>

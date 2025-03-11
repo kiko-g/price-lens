@@ -117,7 +117,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
         </div>
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{discount ? discountValueToPercentage(discount) : "0%"}</span>
-          <PriceChange variation={discountVariation} />
+          <PriceChange invertColors variation={discountVariation} />
         </div>
       </button>
     </div>

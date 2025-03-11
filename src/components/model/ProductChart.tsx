@@ -165,7 +165,6 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
 
     const pricePoints = buildChartData(prices, selectedRange)
     setChartData(pricePoints)
-    console.debug("set chart data", pricePoints)
   }, [selectedRange, prices])
 
   return (
@@ -228,7 +227,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           </Button>
         ))}
       </div>
-      <ChartContainer config={chartConfig}>
+      <ChartContainer config={chartConfig} className="animate-fade-in">
         <LineChart
           accessibilityLayer
           data={chartData}
@@ -252,11 +251,12 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           <YAxis
             dataKey="price"
             yAxisId="price"
+            orientation="left"
             tickLine={false}
             axisLine={false}
             width={40}
             domain={[0, ceiling]}
-            ticks={[0, ceiling / 4, (ceiling * 2) / 4, (ceiling * 3) / 4, ceiling]}
+            ticks={Array.from({ length: 5 }, (_, i) => (ceiling * i) / 4).map((tick, index) => tick + index * 0.0001)}
             tickFormatter={(value) => `€${value.toFixed(1)}`}
             tick={(props) => <CustomTick {...props} yAxisId="price" />}
           />
