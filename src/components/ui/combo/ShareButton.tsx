@@ -130,7 +130,7 @@ export function ShareButton({ url, title, description = "", variant = "outline",
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={shareOnTwitter}>
-              <Twitter className="mr-2 h-4 w-4 fill-blue-500" />
+              <Twitter className="mr-2 h-4 w-4 stroke-blue-500" />
               Twitter
             </DropdownMenuItem>
             <DropdownMenuItem onClick={shareOnWhatsApp}>

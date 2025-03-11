@@ -55,11 +55,15 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
 
   const ceiling = useMemo(() => {
     const allPrices = prices
-      .flatMap((p) => [p.price ?? -Infinity, p.price_recommended ?? -Infinity, p.price_per_major_unit ?? -Infinity])
+      .flatMap((p) => [
+        activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
+        activeAxis.includes("price-recommended") ? (p.price_recommended ?? -Infinity) : -Infinity,
+        activeAxis.includes("price-per-major-unit") ? (p.price_per_major_unit ?? -Infinity) : -Infinity,
+      ])
       .filter((price) => price !== -Infinity && price !== null)
 
     return allPrices.length > 0 ? Math.ceil(Math.max(...allPrices)) : 0
-  }, [prices])
+  }, [prices, activeAxis])
 
   const priceVariation = useMemo(() => {
     const lastTwoPrices = prices.slice(-2)
@@ -238,7 +242,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             bottom: 30,
           }}
         >
-          <CartesianGrid vertical={false} />
+          <CartesianGrid strokeDasharray="4 4" />
           <XAxis
             dataKey="date"
             tickLine={false}
