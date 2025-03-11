@@ -151,7 +151,7 @@ export const supermarketProductQueries = {
     }
 
     if (categories && categories.length !== 0) {
-      dbQuery = dbQuery.in("category", categories)
+      dbQuery = dbQuery.in("category_3", categories)
     }
 
     if (sort) {

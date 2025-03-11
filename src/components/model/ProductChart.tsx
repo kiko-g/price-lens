@@ -54,7 +54,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [activeAxis, setActiveAxis] = useState<string[]>([
     "price",
     "price-per-major-unit",
-    "price-recommended",
+    // "price-recommended",
     "discount",
   ])
 

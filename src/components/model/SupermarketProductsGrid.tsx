@@ -7,7 +7,15 @@ import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
+import {
+  cn,
+  defaultCategories,
+  defaultCategories3,
+  existingCategories,
+  existingCategories2,
+  existingCategories3,
+  getCenteredArray,
+} from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -73,11 +81,11 @@ export function SupermarketProductsGrid(props: Props) {
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [products, setProducts] = useState<SupermarketProduct[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
-    const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
-    const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
+    const defaultCategorySet = defaultCategories3.length > 0 ? new Set(defaultCategories3) : new Set()
+    const uniqueCategories = Array.from(new Set([...existingCategories3, ...defaultCategories3]))
     return uniqueCategories.map((name) => ({
       name,
-      selected: defaultCategorySet.has(name),
+      selected: false, // defaultCategorySet.has(name),
     }))
   })
 
@@ -96,6 +104,10 @@ export function SupermarketProductsGrid(props: Props) {
 
   const clearCategories = () => {
     setCategories((prev) => prev.map((cat) => ({ ...cat, selected: false })))
+  }
+
+  const selectDefaultCategories = () => {
+    setCategories((prev) => prev.map((cat) => ({ ...cat, selected: defaultCategories3.includes(cat.name) })))
   }
 
   const updateParams = useUpdateSearchParams()
@@ -379,20 +391,27 @@ export function SupermarketProductsGrid(props: Props) {
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
                         <ScrollArea className="h-96">
-                          <div className="mb-1 ml-1 flex justify-start gap-2">
+                          <div className="mb-1 flex justify-start divide-x border-b px-1 pb-1">
                             <button
                               onClick={selectAllCategories}
-                              className="flex text-xs text-muted-foreground hover:text-primary hover:underline"
+                              className="flex pr-2 text-xs text-muted-foreground hover:text-primary hover:underline"
                             >
                               Select all
                             </button>
                             <button
+                              onClick={selectDefaultCategories}
+                              className="flex pl-2 pr-2 text-xs text-muted-foreground hover:text-primary hover:underline"
+                            >
+                              Select default
+                            </button>
+                            <button
                               onClick={clearCategories}
-                              className="flex text-xs text-muted-foreground hover:text-primary hover:underline"
+                              className="flex pl-2 text-xs text-muted-foreground hover:text-primary hover:underline"
                             >
                               Clear
                             </button>
                           </div>
+
                           {categories.map((category) => (
                             <CommandItem
                               key={category.name}
