@@ -18,7 +18,7 @@ const chartConfig = {
     color: "hsl(var(--chart-1))",
   },
   "price-per-major-unit": {
-    label: "Price Per Unit",
+    label: "Price Per Major Unit",
     color: "hsl(var(--chart-3))",
   },
   "price-recommended": {
@@ -51,7 +51,12 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
-  const [activeAxis, setActiveAxis] = useState<string[]>(["price", "price-per-major-unit"])
+  const [activeAxis, setActiveAxis] = useState<string[]>([
+    "price",
+    "price-per-major-unit",
+    "price-recommended",
+    "discount",
+  ])
 
   const ceiling = useMemo(() => {
     const allPrices = prices
@@ -259,7 +264,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             tickLine={false}
             axisLine={false}
             width={40}
-            domain={[0, ceiling]}
+            domain={[0, ceiling * 1.1]}
             ticks={Array.from({ length: 5 }, (_, i) => (ceiling * i) / 4).map((tick, index) => tick + index * 0.0001)}
             tickFormatter={(value) => `€${value.toFixed(1)}`}
             tick={(props) => <CustomTick {...props} yAxisId="price" />}

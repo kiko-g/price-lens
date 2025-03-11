@@ -75,7 +75,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
               isPricePerMajorUnitActive ? "bg-chart-3" : "bg-chart-3/20",
             )}
           />
-          <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Per Unit</span>
+          <span className="whitespace-nowrap text-zinc-500 dark:text-zinc-50">Price Per Major Unit</span>
         </div>
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{pricePerMajorUnit ?? "0"}€</span>
