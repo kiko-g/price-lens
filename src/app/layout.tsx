@@ -1,5 +1,9 @@
-import "./globals.css"
+import { Monitoring } from "react-scan/monitoring/next"
+import Script from "next/script"
 import type { Metadata } from "next"
+
+import "./globals.css"
+import React from "react"
 import { GeistSans } from "geist/font/sans"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
@@ -71,6 +75,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
+        <Script src="https://unpkg.com/react-scan/dist/install-hook.global.js" strategy="beforeInteractive" />
+        <Monitoring
+          apiKey="6Hm7zTRByXQvcIe273l-uPC2VeXLbMV7" // Safe to expose publically
+          url="https://monitoring.react-scan.com/api/v1/ingest"
+        />
+      </head>
       <body className={cn(GeistSans.className)}>
         <Providers>
           <Analytics />

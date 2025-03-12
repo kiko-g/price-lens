@@ -1,3 +1,4 @@
+import ReactComponentName from "react-scan/react-component-name/webpack"
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
@@ -22,6 +23,10 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  webpack: (config) => {
+    config.plugins.push(ReactComponentName({}))
+    return config
   },
 }
 
