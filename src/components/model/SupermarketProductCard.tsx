@@ -326,7 +326,9 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                   <span>{sp.category}</span>
                 </div>
               </div>
+
               <ProductChart sp={sp} />
+
               <div className="flex w-full justify-between gap-2 pt-2 text-sm">
                 <div className="flex w-full justify-end">
                   <span className="text-xs text-muted-foreground">
