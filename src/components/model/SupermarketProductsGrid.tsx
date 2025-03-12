@@ -65,10 +65,17 @@ type Props = {
   q?: string
   t?: SearchType
   sort?: SortByType
+  essential?: boolean
 }
 
 export function SupermarketProductsGrid(props: Props) {
-  const { page: initPage = 1, q: initQuery = "", t: initSearchType = "name", sort: initSortBy = "a-z" } = props
+  const {
+    page: initPage = 1,
+    q: initQuery = "",
+    t: initSearchType = "name",
+    sort: initSortBy = "price-low-high",
+    essential = true,
+  } = props
 
   const limit = 30
   const [page, setPage] = useState(initPage)
@@ -85,7 +92,7 @@ export function SupermarketProductsGrid(props: Props) {
     const uniqueCategories = Array.from(new Set([...existingCategories3, ...defaultCategories3]))
     return uniqueCategories.map((name) => ({
       name,
-      selected: false, // defaultCategorySet.has(name),
+      selected: essential ? defaultCategorySet.has(name) : false,
     }))
   })
 
@@ -217,8 +224,8 @@ export function SupermarketProductsGrid(props: Props) {
   }, [page, sortBy])
 
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType, sort: sortBy })
-  }, [page, query, searchType, sortBy])
+    updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString() })
+  }, [page, query, searchType, sortBy, essential])
 
   // Add scroll event listener
   useEffect(() => {
@@ -391,22 +398,24 @@ export function SupermarketProductsGrid(props: Props) {
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
                         <ScrollArea className="h-96">
-                          <div className="mb-1 flex justify-start divide-x border-b px-1 pb-1">
+                          <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 py-1.5">
+                            <button
+                              onClick={selectDefaultCategories}
+                              className="flex rounded-md bg-gradient-to-r from-blue-600/40 to-indigo-500/40 px-1.5 py-0.5 text-xs text-primary-foreground text-white hover:opacity-80"
+                            >
+                              Select essential
+                            </button>
+
                             <button
                               onClick={selectAllCategories}
-                              className="flex pr-2 text-xs text-muted-foreground hover:text-primary hover:underline"
+                              className="flex rounded-md bg-muted px-1.5 py-0.5 text-xs text-primary hover:opacity-80"
                             >
                               Select all
                             </button>
-                            <button
-                              onClick={selectDefaultCategories}
-                              className="flex pl-2 pr-2 text-xs text-muted-foreground hover:text-primary hover:underline"
-                            >
-                              Select default
-                            </button>
+
                             <button
                               onClick={clearCategories}
-                              className="flex pl-2 text-xs text-muted-foreground hover:text-primary hover:underline"
+                              className="flex rounded-md bg-muted px-1.5 py-0.5 text-xs text-primary hover:opacity-80"
                             >
                               Clear
                             </button>
@@ -526,6 +535,48 @@ export function SupermarketProductsGrid(props: Props) {
         {products.map((product, productIdx) => (
           <SupermarketProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
         ))}
+      </div>
+
+      <div className="flex items-center justify-between p-4">
+        <div className="flex w-full flex-col text-xs text-muted-foreground">
+          <span>
+            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, pagedCount)} of {pagedCount} results
+          </span>
+
+          <span>
+            Page {page}/{paginationTotal}
+          </span>
+        </div>
+
+        <div className="isolate flex flex-1 -space-x-px">
+          <Button
+            variant="outline"
+            className="rounded-r-none focus:z-10"
+            onClick={handlePrevPage}
+            disabled={page === 1}
+          >
+            Prev
+          </Button>
+
+          <Select value={page.toString()} onValueChange={handlePageChange}>
+            <SelectTrigger className="w-auto justify-center rounded-none lg:w-full">
+              <SelectValue placeholder={page} />
+            </SelectTrigger>
+            <SelectContent>
+              {getCenteredArray(Math.min(paginationTotal, 50), page, paginationTotal ? paginationTotal : null).map(
+                (num: number) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num}
+                  </SelectItem>
+                ),
+              )}
+            </SelectContent>
+          </Select>
+
+          <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   )

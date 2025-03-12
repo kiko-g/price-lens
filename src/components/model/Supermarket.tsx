@@ -30,7 +30,15 @@ export function resolveSupermarketChain(sp: SupermarketProduct) {
       return {
         name: "Continente",
         badge: <SupermarketBadge supermarketChain="Continente" />,
-        logo: <Image src={ContinenteLogo} alt="Continente" width={300} height={300} className="h-5 w-min" />,
+        logo: (
+          <Image
+            src={ContinenteLogo}
+            alt="Continente"
+            width={300}
+            height={300}
+            className="h-5 w-auto md:h-5 md:w-min"
+          />
+        ),
         logoSmall: <Image src={ContinenteLogo} alt="Continente" width={300} height={300} className="h-3.5 w-min" />,
       }
     case SupermarketChain.PingoDoce:

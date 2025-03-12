@@ -44,6 +44,7 @@ import {
   CloudAlertIcon,
   PlusIcon,
   ExternalLinkIcon,
+  CheckIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
@@ -240,7 +241,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                       target="_blank"
                       className="flex w-full items-center justify-between gap-1"
                     >
-                      Open in new tab
+                      Open in {supermarketChain?.name}
                       <ArrowUpRightIcon />
                     </Link>
                   </Button>
@@ -265,7 +266,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                       disabled={sp.is_tracked}
                     >
                       {sp.is_tracked ? "Product already tracked" : "Add to tracking list"}
-                      <PlusIcon />
+                      {sp.is_tracked ? <CheckIcon /> : <PlusIcon />}
                     </Button>
                   </DropdownMenuItem>
                 ) : null}

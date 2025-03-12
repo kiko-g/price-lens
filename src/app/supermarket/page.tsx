@@ -14,6 +14,7 @@ type SearchParams = {
   t?: SearchType
   s?: SortByType
   page?: string
+  essential?: string
 }
 
 type Props = {
@@ -24,12 +25,13 @@ export default async function Home({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
   const searchType = getSearchType(params.t ?? "name")
-  const sortBy = getSortByType(params.s ?? "a-z")
+  const sortBy = getSortByType(params.s ?? "price-low-high")
   const q = params.q ?? ""
+  const essential = params.essential !== "false"
 
   return (
     <Layout>
-      <SupermarketProductsGrid page={page} q={q} t={searchType} sort={sortBy} />
+      <SupermarketProductsGrid page={page} q={q} t={searchType} sort={sortBy} essential={essential} />
     </Layout>
   )
 }

@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
 import { ProductChart } from "./ProductChart"
 import { resolveSupermarketChain } from "./Supermarket"
 
@@ -115,7 +117,46 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
-              {sp.is_tracked && <Badge variant="success">Tracked</Badge>}
+              {sp.is_tracked ? (
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="success">Tracked</Badge>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="start"
+                      sideOffset={6}
+                      alignOffset={-6}
+                      size="xs"
+                      variant="glass"
+                      className="max-w-60"
+                    >
+                      Prices for this product on this supermarket chain are being tracked by Price Lens.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="outline-destructive">Not tracked</Badge>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="start"
+                      sideOffset={6}
+                      alignOffset={-6}
+                      size="xs"
+                      variant="destructive"
+                      className="max-w-60"
+                    >
+                      <p>Prices for this product on this supermarket chain are NOT being tracked by Price Lens.</p>
+                      <p className="mt-2 font-bold">Add to your favorites to request tracking.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               <Button variant="outline" size="sm" roundedness="2xl" asChild>
                 <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                   {supermarketChain?.logo}
