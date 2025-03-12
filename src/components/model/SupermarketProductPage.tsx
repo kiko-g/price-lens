@@ -3,9 +3,11 @@
 import axios from "axios"
 import Image from "next/image"
 import Link from "next/link"
+import { Metadata } from "next"
 import { useEffect, useState } from "react"
 import { FrontendStatus } from "@/types/extra"
 import type { SupermarketProduct } from "@/types"
+import { siteConfig } from "@/lib/config"
 import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
 import { Undo2Icon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lucide-react"
 
@@ -63,6 +65,19 @@ export function SupermarketProductPageById({ id }: { id: string }) {
   return <SupermarketProductPage sp={supermarketProduct} />
 }
 
+export const metadata: Metadata = {
+  openGraph: {
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 680,
+        alt: siteConfig.name,
+      },
+    ],
+  },
+}
+
 export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
   if (!sp) return null
 
@@ -76,6 +91,20 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
   const categoryText = sp.category
     ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
     : null
+
+  // Update metadata when product loads
+  useEffect(() => {
+    if (sp.image) {
+      metadata.openGraph!.images = [
+        {
+          url: sp.image,
+          width: 600,
+          height: 600,
+          alt: sp.name,
+        },
+      ]
+    }
+  }, [sp])
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
