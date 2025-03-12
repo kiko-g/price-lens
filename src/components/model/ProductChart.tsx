@@ -154,7 +154,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     if (!sp.id) return
 
     setIsLoading(true)
-    console.debug("fetching prices for", sp.id)
+    console.info("fetching prices for", sp.id)
     const response = await fetch(`/api/prices/get/${sp.id}`)
     const data = await response.json()
     if (data && data.length > 0) setPrices(data)
