@@ -105,6 +105,7 @@ export function ShareButton({ url, title, description = "", variant = "outline",
           <TooltipTrigger asChild>
             <Button variant={variant} size={size} onClick={handleShare}>
               <Share2 className="h-4 w-4" />
+              Share
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { type SupermarketProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
@@ -328,7 +328,9 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                 </div>
               </div>
 
-              <ProductChart sp={sp} />
+              <Suspense fallback={<div>Loading...</div>}>
+                <ProductChart sp={sp} />
+              </Suspense>
 
               <div className="flex w-full justify-between gap-2 pt-2 text-sm">
                 <div className="flex w-full justify-end">
@@ -424,7 +426,7 @@ function DrawerSheet({
           <ChartSplineIcon />
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="overflow-y-auto">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>

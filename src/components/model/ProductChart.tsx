@@ -46,8 +46,6 @@ const defaultOptions: Props["options"] = {
 }
 
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
-  const [isLoading, setIsLoading] = useState(false)
-
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
@@ -153,12 +151,9 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   async function fetchPrices() {
     if (!sp.id) return
 
-    setIsLoading(true)
-    console.info("fetching prices for", sp.id)
     const response = await fetch(`/api/prices/get/${sp.id}`)
     const data = await response.json()
     if (data && data.length > 0) setPrices(data)
-    setIsLoading(false)
   }
 
   function handleAxisChange(axis: string) {

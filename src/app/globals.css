@@ -92,7 +92,7 @@
     @apply text-wrap;
   }
 
-  html {
+  html:not(:has(body.fixed)) {
     @apply scroll-smooth;
   }
 
