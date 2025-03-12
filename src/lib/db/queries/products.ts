@@ -10,6 +10,9 @@ type GetAllQuery = {
   searchType?: SearchType
   nonNulls?: boolean
   categories?: string[]
+  options?: {
+    onlyDiscounted: boolean
+  }
 }
 
 export const productQueries = {
@@ -127,6 +130,9 @@ export const supermarketProductQueries = {
     nonNulls = true,
     sort = "a-z",
     categories = [],
+    options = {
+      onlyDiscounted: false,
+    },
   }: GetAllQuery) {
     const supabase = createClient()
     const offset = (page - 1) * limit
@@ -152,6 +158,10 @@ export const supermarketProductQueries = {
 
     if (categories && categories.length !== 0) {
       dbQuery = dbQuery.in("category_3", categories)
+    }
+
+    if (options.onlyDiscounted) {
+      dbQuery = dbQuery.gt("discount", 0)
     }
 
     if (sort) {

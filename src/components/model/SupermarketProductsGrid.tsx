@@ -53,6 +53,7 @@ import {
   ArrowUpWideNarrowIcon,
   CheckIcon,
   ChevronsUpDownIcon,
+  CircleIcon,
   CircleOffIcon,
   DeleteIcon,
   EllipsisVerticalIcon,
@@ -85,6 +86,8 @@ export function SupermarketProductsGrid(props: Props) {
   const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [pagedCount, setPagedCount] = useState(0)
+  const [onlyDiscounted, setOnlyDiscounted] = useState(false)
+
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [products, setProducts] = useState<SupermarketProduct[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
@@ -135,6 +138,7 @@ export function SupermarketProductsGrid(props: Props) {
             .filter((cat) => cat.selected)
             .map((cat) => cat.name)
             .join(";"),
+          onlyDiscounted,
         },
       })
       setProducts(data.data || [])
@@ -221,7 +225,7 @@ export function SupermarketProductsGrid(props: Props) {
 
   useEffect(() => {
     fetchProducts()
-  }, [page, sortBy])
+  }, [page, sortBy, onlyDiscounted])
 
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString() })
@@ -359,20 +363,29 @@ export function SupermarketProductsGrid(props: Props) {
 
               <DropdownMenuContent className="w-48" align="end">
                 <DropdownMenuItem asChild>
+                  <Button variant="dropdown-item" onClick={() => setOnlyDiscounted(!onlyDiscounted)}>
+                    Only discounted
+                    {onlyDiscounted ? <CheckIcon className="h-4 w-4" /> : <CircleIcon className="h-4 w-4" />}
+                  </Button>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem variant="destructive" asChild>
                   <Button variant="dropdown-item" onClick={clearSearch}>
                     Clear search
                     <DeleteIcon />
                   </Button>
                 </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem variant="warning" asChild>
-                  <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
-                    Update products
-                    <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-                  </Button>
-                </DropdownMenuItem>
+                {process.env.NODE_ENV === "development" && (
+                  <DropdownMenuItem variant="warning" asChild>
+                    <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
+                      Update products in page
+                      <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
+                    </Button>
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
