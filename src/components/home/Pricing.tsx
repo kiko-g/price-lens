@@ -50,7 +50,7 @@ export function PricingSection() {
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>30-day price history</span>
+                  <span>14-day price history</span>
                 </li>
               </ul>
             </CardContent>
@@ -65,12 +65,12 @@ export function PricingSection() {
           <Card className="relative flex flex-col overflow-hidden">
             <BorderBeam duration={5} size={200} colorFrom="#837ded" colorTo="#6791f1" />
 
-            <div className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
+            {/* <span className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
               Popular
-            </div>
+            </span> */}
             <CardHeader className="flex flex-col space-y-1.5 p-6">
               <CardTitle className="text-2xl font-bold">Plus</CardTitle>
-              <CardDescription>Advanced tracking for savvy shoppers</CardDescription>
+              <CardDescription>Advanced tracking for savvy shoppers and inflation doomers</CardDescription>
               <div className="mt-4">
                 <span className="text-4xl font-bold">$4.99</span>
                 <span className="ml-1 text-muted-foreground">/month</span>
@@ -80,19 +80,23 @@ export function PricingSection() {
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
+                  <span>Everything in Free</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Unlimited product tracking</span>
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>Real-time price alerts</span>
+                  <span>Request non tracked products</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
+                  <span>Advanced price alerts</span>
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Daily price reports</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>Compare all supported supermarkets</span>
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
@@ -106,15 +110,14 @@ export function PricingSection() {
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Shopping list optimizer</span>
                 </li>
-                <li className="flex items-center">
-                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>Priority customer support</span>
-                </li>
               </ul>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <Button asChild className="w-full" variant="gradient-primary">
+              {/* <Button asChild className="w-full" variant="gradient-primary">
                 <Link href="/signup?plan=plus">Get Plus</Link>
+              </Button> */}
+              <Button disabled className="w-full" variant="gradient-primary">
+                Coming soon
               </Button>
             </CardFooter>
           </Card>
