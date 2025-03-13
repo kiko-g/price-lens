@@ -110,7 +110,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
               blurDataURL={imagePlaceholder.productBlur}
             />
           ) : (
-            <div className="aspect-square w-full" />
+            <div className="aspect-square w-full bg-zinc-100 dark:bg-zinc-800" />
           )}
         </Link>
 

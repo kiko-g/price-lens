@@ -302,7 +302,8 @@ export function SupermarketProductsGrid(props: Props) {
             {categories
               .filter((cat) => cat.selected)
               .map((cat) => cat.name)
-              .join(", ") || "None"}
+              .join(", ")
+              .slice(0, 100) || "None"}
           </li>
           <li>
             <strong>Sort by:</strong> {sortBy}

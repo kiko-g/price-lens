@@ -275,4 +275,39 @@ export const supermarketProductQueries = {
 
     return { data, error }
   },
+
+  async getAllCategories() {
+    const supabase = createClient()
+
+    const { data: category, error: categoryError } = await supabase
+      .from("supermarket_products")
+      .select("category")
+      .not("category", "is", null)
+
+    const { data: category2, error: category2Error } = await supabase
+      .from("supermarket_products")
+      .select("category_2")
+      .not("category_2", "is", null)
+
+    const { data: category3, error: category3Error } = await supabase
+      .from("supermarket_products")
+      .select("category_3")
+      .not("category_3", "is", null)
+
+    if (categoryError || category2Error || category3Error) {
+      return {
+        data: null,
+        error: categoryError || category2Error || category3Error,
+      }
+    }
+
+    return {
+      data: {
+        category: [...new Set(category?.map((c) => c.category).filter(Boolean))].sort(),
+        category_2: [...new Set(category2?.map((c) => c.category_2).filter(Boolean))].sort(),
+        category_3: [...new Set(category3?.map((c) => c.category_3).filter(Boolean))].sort(),
+      },
+      error: null,
+    }
+  },
 }
