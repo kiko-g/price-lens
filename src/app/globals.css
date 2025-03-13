@@ -92,8 +92,12 @@
     @apply text-wrap;
   }
 
-  html:not(:has(body.fixed)) {
+  html {
     @apply scroll-smooth;
+  }
+
+  html:not(:has(body[style*="position: fixed"])) {
+    @apply scroll-smooth text-red-500;
   }
 
   body {

@@ -50,12 +50,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
-  const [activeAxis, setActiveAxis] = useState<string[]>([
-    "price",
-    "price-per-major-unit",
-    // "price-recommended",
-    "discount",
-  ])
+  const [activeAxis, setActiveAxis] = useState<string[]>(["price", "price-per-major-unit", "discount"])
 
   const ceiling = useMemo(() => {
     const allPrices = prices
@@ -153,6 +148,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     if (!sp.id) return
 
     setIsLoading(true)
+    await new Promise((resolve) => setTimeout(resolve, 400))
     const response = await fetch(`/api/prices/get/${sp.id}`)
     const data = await response.json()
     if (data && data.length > 0) setPrices(data)
@@ -222,7 +218,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         </header>
       ) : null}
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         {RANGES.map((range) => (
           <Button
             key={range}
@@ -234,8 +230,9 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             {range}
           </Button>
         ))}
+        {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
       </div>
-      <ChartContainer config={chartConfig} className={cn("animate-fade-in", isLoading && "animate-pulse")}>
+      <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in")}>
         <LineChart
           accessibilityLayer
           data={chartData}

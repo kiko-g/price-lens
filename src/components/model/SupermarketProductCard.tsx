@@ -309,7 +309,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DrawerSheet title={`${sp.name}`}>
+            <DrawerSheet title={sp.name}>
               <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Link href={sp.url} target="_blank">
@@ -433,12 +433,6 @@ function DrawerSheet({
         </DrawerHeader>
 
         <div className="px-4 pb-4 pt-2">{children}</div>
-
-        <DrawerFooter className="sr-only pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )
