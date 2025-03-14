@@ -1,4 +1,4 @@
-import ReactComponentName from "react-scan/react-component-name/webpack"
+// import ReactComponentName from "react-scan/react-component-name/webpack"
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
@@ -24,10 +24,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config) => {
-    config.plugins.push(ReactComponentName({}))
-    return config
-  },
+  // webpack: (config) => {
+  //   config.plugins.push(ReactComponentName({}))
+  //   return config
+  // },
 }
 
 export default nextConfig
