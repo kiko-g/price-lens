@@ -6,6 +6,7 @@ import { ProductFromSupermarket } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
 import { ProductCard } from "@/components/model/ProductCard"
+import { ProductCardSkeleton } from "@/components/model/SupermarketProductCard"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 
 export function TrackedProducts() {
@@ -42,9 +43,11 @@ export function TrackedProducts() {
 
   if (isLoading) {
     return (
-      <SkeletonStatusLoading>
-        <p>Loading...</p>
-      </SkeletonStatusLoading>
+      <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <ProductCardSkeleton key={`product-skeleton-${index}`} />
+        ))}
+      </div>
     )
   }
 
