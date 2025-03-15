@@ -278,34 +278,42 @@ export const supermarketProductQueries = {
 
   async getAllCategories() {
     const supabase = createClient()
+    const PAGE_SIZE = 1000 // Supabase's max limit
+    let allCategories: { category: string; category_2: string; category_3: string }[] = []
+    let page = 0
+    let hasMore = true
 
-    const { data: category, error: categoryError } = await supabase
-      .from("supermarket_products")
-      .select("category")
-      .not("category", "is", null)
+    // Fetch all categories using pagination
+    while (hasMore) {
+      const { data: pageData, error: pageError } = await supabase
+        .from("supermarket_products")
+        .select("category, category_2, category_3")
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
-    const { data: category2, error: category2Error } = await supabase
-      .from("supermarket_products")
-      .select("category_2")
-      .not("category_2", "is", null)
+      if (pageError) {
+        return {
+          data: null,
+          error: pageError,
+        }
+      }
 
-    const { data: category3, error: category3Error } = await supabase
-      .from("supermarket_products")
-      .select("category_3")
-      .not("category_3", "is", null)
-
-    if (categoryError || category2Error || category3Error) {
-      return {
-        data: null,
-        error: categoryError || category2Error || category3Error,
+      if (pageData && pageData.length > 0) {
+        allCategories = [...allCategories, ...pageData]
+        page++
+      } else {
+        hasMore = false
       }
     }
 
+    const categories = [...new Set(allCategories.map((c) => c.category).filter(Boolean))].sort()
+    const categories2 = [...new Set(allCategories.map((c) => c.category_2).filter(Boolean))].sort()
+    const categories3 = [...new Set(allCategories.map((c) => c.category_3).filter(Boolean))].sort()
+
     return {
       data: {
-        category: [...new Set(category?.map((c) => c.category).filter(Boolean))].sort(),
-        category_2: [...new Set(category2?.map((c) => c.category_2).filter(Boolean))].sort(),
-        category_3: [...new Set(category3?.map((c) => c.category_3).filter(Boolean))].sort(),
+        category: categories,
+        category_2: categories2,
+        category_3: categories3,
       },
       error: null,
     }

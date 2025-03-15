@@ -74,7 +74,7 @@ export function SupermarketProductsGrid(props: Props) {
     page: initPage = 1,
     q: initQuery = "",
     t: initSearchType = "name",
-    sort: initSortBy = "price-low-high",
+    sort: initSortBy = "a-z",
     essential = true,
   } = props
 
@@ -93,6 +93,17 @@ export function SupermarketProductsGrid(props: Props) {
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
     const defaultCategorySet = defaultCategories3.length > 0 ? new Set(defaultCategories3) : new Set()
     const uniqueCategories = Array.from(new Set([...existingCategories3, ...defaultCategories3]))
+
+    if (essential) {
+      uniqueCategories.sort((a, b) => {
+        const aIsDefault = defaultCategorySet.has(a)
+        const bIsDefault = defaultCategorySet.has(b)
+        if (aIsDefault && !bIsDefault) return -1
+        if (!aIsDefault && bIsDefault) return 1
+        return a.localeCompare(b)
+      })
+    }
+
     return uniqueCategories.map((name) => ({
       name,
       selected: essential ? defaultCategorySet.has(name) : false,

@@ -25,7 +25,7 @@ export default async function Home({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
   const searchType = getSearchType(params.t ?? "name")
-  const sortBy = getSortByType(params.s ?? "price-low-high")
+  const sortBy = getSortByType(params.s ?? "a-z")
   const q = params.q ?? ""
   const essential = params.essential !== "false"
 
