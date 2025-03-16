@@ -1117,6 +1117,7 @@ export const productUnavailable: SupermarketProduct = {
   updated_at: null,
   origin_id: 1,
   is_tracked: false,
+  is_essential: false,
 }
 
 export function resizeImgSrc(src: string, width: number, height: number) {

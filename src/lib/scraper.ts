@@ -40,7 +40,10 @@ export const fetchHtml = async (url: string) => {
   }
 }
 
-export const continenteProductPageScraper = async (url: string, isTracked: boolean = false) => {
+export const continenteProductPageScraper = async (url: string, prevSp?: SupermarketProduct) => {
+  const isTracked = prevSp?.is_tracked ?? false
+  const isEssential = prevSp?.is_essential ?? false
+
   try {
     const html = await fetchHtml(url)
     if (!html || typeof html !== "string") {
@@ -109,6 +112,7 @@ export const continenteProductPageScraper = async (url: string, isTracked: boole
       origin_id: 1,
       created_at: null,
       is_tracked: isTracked,
+      is_essential: isEssential,
     }
 
     return sp
@@ -199,10 +203,10 @@ export function isValidProduct(product: any): product is SupermarketProduct {
   return typeof product === "object" && product !== null && typeof product.url === "string"
 }
 
-export const scrapeAndReplaceProduct = async (url: string | null, isTracked: boolean = false) => {
+export const scrapeAndReplaceProduct = async (url: string | null, prevSp?: SupermarketProduct) => {
   if (!url) return NextResponse.json({ error: "URL is required" }, { status: 400 })
 
-  const product = await continenteProductPageScraper(url, isTracked)
+  const product = await continenteProductPageScraper(url, prevSp)
 
   if (!product || Object.keys(product).length === 0) {
     await supermarketProductQueries.upsertBlank({

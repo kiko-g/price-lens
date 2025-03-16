@@ -61,6 +61,7 @@ export function TrackedProducts() {
 
   return (
     <div className="flex w-full flex-col gap-1">
+      {/* <h3 className="scroll-m-20 text-2xl font-bold tracking-tight">Price Lens Tracked Products</h3> */}
       <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
         {products.map((product, productIdx) => (
           <ProductCard key={`product-${productIdx}`} product={product} />

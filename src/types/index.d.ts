@@ -56,6 +56,7 @@ export interface SupermarketProduct {
   updated_at: string | null
   origin_id: number | null
   is_tracked: boolean
+  is_essential: boolean
 }
 
 export interface ProductFromSupermarket extends Product {
