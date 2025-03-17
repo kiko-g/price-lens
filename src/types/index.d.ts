@@ -34,10 +34,11 @@ export interface Product {
   name: string
   brand: string
   category: string
+  essential: boolean
   product_ref_ids: string[]
 }
 
-export interface SupermarketProduct {
+export interface StoreProduct {
   id?: number
   url: string
   name: string
@@ -59,14 +60,14 @@ export interface SupermarketProduct {
   is_essential: boolean
 }
 
-export interface ProductFromSupermarket extends Product {
-  supermarket_products: SupermarketProduct[]
+export interface ProductLinked extends Product {
+  store_products: StoreProduct[]
 }
 
 export interface Price {
   id?: number
   product_id: number
-  supermarket_product_id: number | null
+  store_product_id: number | null
   price: number | null
   price_recommended: number | null
   price_per_major_unit: number | null

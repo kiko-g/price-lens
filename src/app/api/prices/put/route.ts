@@ -6,7 +6,7 @@ export async function PUT(request: Request) {
   try {
     let price = (await request.json()) as Price
 
-    if (!price.supermarket_product_id) {
+    if (!price.store_product_id) {
       return NextResponse.json({ error: "(Supermarket) Product IDs are required" }, { status: 400 })
     }
 

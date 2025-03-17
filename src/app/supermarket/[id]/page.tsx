@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout"
-import { SupermarketProductPageById } from "@/components/model/SupermarketProductPage"
+import { SupermarketProductPageById } from "@/components/model/StoreProductPage"
 
 export default async function ProductPageSupermarket({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

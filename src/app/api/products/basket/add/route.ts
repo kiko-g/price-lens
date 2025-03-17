@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const supabase = createClient()
 
     const { error } = await supabase
-      .from("supermarket_products")
+      .from("store_products")
       .update({ is_essential: true })
       .eq("id", supermarketProduct.id)
 

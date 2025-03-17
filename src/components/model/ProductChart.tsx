@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import { Price, SupermarketProduct, ProductChartEntry } from "@/types"
+import { Price, StoreProduct, ProductChartEntry } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
 import { cn, buildChartData, getDaysBetweenDates } from "@/lib/utils"
@@ -32,7 +32,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 type Props = {
-  sp: SupermarketProduct
+  sp: StoreProduct
   className?: string
   options?: {
     showPricesVariationCard: boolean

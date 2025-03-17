@@ -17,13 +17,13 @@ export const priceQueries = {
     return data
   },
 
-  async getPricePointsPerIndividualProduct(supermarket_product_id: number) {
+  async getPricePointsPerIndividualProduct(store_product_id: number) {
     const supabase = createClient()
 
     const { data, error } = await supabase
       .from("prices")
       .select("*")
-      .eq("supermarket_product_id", supermarket_product_id)
+      .eq("store_product_id", store_product_id)
       .order("created_at", { ascending: true })
 
     if (error) {
@@ -34,14 +34,14 @@ export const priceQueries = {
     return data
   },
 
-  async getLatestPricePoint(product_id: number, supermarket_product_id: number) {
+  async getLatestPricePoint(product_id: number, store_product_id: number) {
     const supabase = createClient()
 
     const { data, error } = await supabase
       .from("prices")
       .select("*")
       .eq("product_id", product_id)
-      .eq("supermarket_product_id", supermarket_product_id)
+      .eq("store_product_id", store_product_id)
 
     if (error) {
       console.error("Error fetching price entry:", error)
@@ -117,7 +117,7 @@ export const priceQueries = {
     const { data, error } = await supabase
       .from("prices")
       .select("*")
-      .order("supermarket_product_id", { ascending: true })
+      .order("store_product_id", { ascending: true })
       .order("valid_from", { ascending: false })
 
     if (error) {
@@ -129,7 +129,7 @@ export const priceQueries = {
       const p1 = data[i]
       const p2 = data[i + 1]
 
-      if (p1.supermarket_product_id !== p2.supermarket_product_id) continue
+      if (p1.store_product_id !== p2.store_product_id) continue
 
       if (arePricePointsEqual(p1, p2)) {
         await this.deletePricePoint(p1.id)

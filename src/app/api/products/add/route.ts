@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { productQueries, supermarketProductQueries } from "@/lib/db/queries/products"
-import { SupermarketProduct } from "@/types"
+import { StoreProduct } from "@/types"
 
 export async function POST(req: NextRequest) {
   const { product } = await req.json()
-  const supermarketProduct = product as SupermarketProduct
+  const supermarketProduct = product as StoreProduct
 
   if (supermarketProduct.is_tracked) {
     return NextResponse.json({ message: "Product already in tracking list" }, { status: 400 })
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   await supermarketProductQueries.setIsTracked(product.id, true)
 
-  const productResponse = await productQueries.createProductFromSupermarketProduct(product)
+  const productResponse = await productQueries.createProductLinkedProduct(product)
 
   if (productResponse.error) {
     return NextResponse.json({ message: "Error creating product", error: productResponse.error }, { status: 500 })

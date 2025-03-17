@@ -1,4 +1,4 @@
-import { Product, SupermarketProduct, Price } from "@/types"
+import { Product, StoreProduct, Price } from "@/types"
 
 import { now } from "./utils"
 import { priceQueries } from "./db/queries/prices"
@@ -13,7 +13,7 @@ export function arePricePointsEqual(p1: Price, p2: Price) {
   )
 }
 
-export async function updatePricePoint(p: Product, sp: SupermarketProduct) {
+export async function updatePricePoint(p: Product, sp: StoreProduct) {
   if (!p.id || !sp.id) {
     console.error("No id for product", p.id, sp.id)
     return
@@ -22,7 +22,7 @@ export async function updatePricePoint(p: Product, sp: SupermarketProduct) {
   const timestamp = now()
   const newPricePoint: Price = {
     product_id: p.id,
-    supermarket_product_id: sp.id,
+    store_product_id: sp.id,
     price: sp.price,
     price_recommended: sp.price_recommended,
     price_per_major_unit: sp.price_per_major_unit,

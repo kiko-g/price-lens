@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { Product, ProductFromSupermarket, SupermarketProduct } from "@/types"
+import type { Product, ProductLinked, StoreProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/extra"
 
 type GetAllQuery = {
@@ -39,7 +39,7 @@ export const productQueries = {
 
     const emptyProducts = products.map((product) => ({
       ...product,
-      supermarket_products: [],
+      store_products: [],
     }))
 
     if (!products || products.length === 0) {
@@ -57,13 +57,13 @@ export const productQueries = {
       }
     }
 
-    const { data: supermarketProducts, error: supermarketError } = await supabase
-      .from("supermarket_products")
+    const { data: storeProducts, error: supermarketError } = await supabase
+      .from("store_products")
       .select("*")
       .in("id", allRefIds)
 
     if (supermarketError) {
-      console.error("Error fetching supermarket products:", supermarketError)
+      console.error("Error fetching store products:", supermarketError)
       return {
         error: supermarketError,
         data: emptyProducts,
@@ -71,10 +71,10 @@ export const productQueries = {
     }
 
     const productsWithSupermarket = products.map((p) => {
-      const matchingSupermarketProducts = supermarketProducts.filter((sp) => p.product_ref_ids.includes(sp.id)) || []
+      const matchingStoreProducts = storeProducts.filter((sp) => p.product_ref_ids.includes(sp.id)) || []
       return {
         ...p,
-        supermarket_products: matchingSupermarketProducts,
+        store_products: matchingStoreProducts,
       }
     })
 
@@ -98,12 +98,12 @@ export const productQueries = {
         error: "No resolved id",
       }
 
-    const { data, error } = await supabase.from("supermarket_products").select("*").eq("id", resolvedId).single()
+    const { data, error } = await supabase.from("store_products").select("*").eq("id", resolvedId).single()
 
     return { data, error }
   },
 
-  async createProductFromSupermarketProduct(sp: SupermarketProduct) {
+  async createProductLinkedProduct(sp: StoreProduct) {
     if (sp.is_tracked) {
       return {
         data: null,
@@ -137,7 +137,7 @@ export const supermarketProductQueries = {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
-    let dbQuery = supabase.from("supermarket_products").select("*", { count: "exact" })
+    let dbQuery = supabase.from("store_products").select("*", { count: "exact" })
 
     if (sort && sort === "only-nulls") {
       dbQuery = dbQuery.is("name", null)
@@ -194,7 +194,7 @@ export const supermarketProductQueries = {
     const supabase = createClient()
     const offset = (page - 1) * limit
     return supabase
-      .from("supermarket_products")
+      .from("store_products")
       .select("*", { count: "exact" })
       .is("name", null)
       .range(offset, offset + limit - 1)
@@ -203,7 +203,7 @@ export const supermarketProductQueries = {
   async getInvalid() {
     const supabase = createClient()
     return supabase
-      .from("supermarket_products")
+      .from("store_products")
       .select("*")
       .not("url", "is", null)
       .not("created_at", "is", null)
@@ -212,31 +212,31 @@ export const supermarketProductQueries = {
 
   async getUncharted() {
     const supabase = createClient()
-    return supabase.from("supermarket_products").select("*").is("created_at", null)
+    return supabase.from("store_products").select("*").is("created_at", null)
   },
 
   async getById(id: string) {
     const supabase = createClient()
-    const { data, error } = await supabase.from("supermarket_products").select("*").eq("id", id).single()
+    const { data, error } = await supabase.from("store_products").select("*").eq("id", id).single()
     return { data, error }
   },
 
   async getByIds(ids: string[]) {
     const supabase = createClient()
-    return supabase.from("supermarket_products").select("*").in("id", ids)
+    return supabase.from("store_products").select("*").in("id", ids)
   },
 
   async getByUrlSubstrs(substrs: string[]) {
     const supabase = createClient()
     return supabase
-      .from("supermarket_products")
+      .from("store_products")
       .select("*")
       .ilike("url", `%${substrs.join("%")}%`)
   },
 
-  async upsert(sp: SupermarketProduct) {
+  async upsert(sp: StoreProduct) {
     const supabase = createClient()
-    return supabase.from("supermarket_products").upsert(sp, {
+    return supabase.from("store_products").upsert(sp, {
       onConflict: "url",
       ignoreDuplicates: false,
     })
@@ -244,7 +244,7 @@ export const supermarketProductQueries = {
 
   async upsertBlank({ url, created_at }: { url: string; created_at: string }) {
     const supabase = createClient()
-    return supabase.from("supermarket_products").upsert(
+    return supabase.from("store_products").upsert(
       {
         url,
         created_at,
@@ -258,13 +258,13 @@ export const supermarketProductQueries = {
 
   async setIsTracked(id: number, is_tracked: boolean) {
     const supabase = createClient()
-    return supabase.from("supermarket_products").update({ is_tracked }).eq("id", id)
+    return supabase.from("store_products").update({ is_tracked }).eq("id", id)
   },
 
-  async createOrUpdateProduct(sp: SupermarketProduct) {
+  async createOrUpdateProduct(sp: StoreProduct) {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
-      .from("supermarket_products")
+      .from("store_products")
       .select("created_at")
       .eq("url", sp.url)
       .single()
@@ -274,7 +274,7 @@ export const supermarketProductQueries = {
       created_at: sp.created_at || existingProduct?.created_at || sp.updated_at,
     }
 
-    const { data, error } = await supabase.from("supermarket_products").upsert(productToUpsert, {
+    const { data, error } = await supabase.from("store_products").upsert(productToUpsert, {
       onConflict: "url",
       ignoreDuplicates: false,
     })
@@ -292,7 +292,7 @@ export const supermarketProductQueries = {
     // Fetch all categories using pagination
     while (hasMore) {
       const { data: pageData, error: pageError } = await supabase
-        .from("supermarket_products")
+        .from("store_products")
         .select("category, category_2, category_3")
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 

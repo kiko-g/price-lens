@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Metadata } from "next"
 import { useEffect, useState } from "react"
 import { FrontendStatus } from "@/types/extra"
-import type { SupermarketProduct } from "@/types"
+import type { StoreProduct } from "@/types"
 import { siteConfig } from "@/lib/config"
 import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
 import { Undo2Icon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lucide-react"
@@ -23,7 +23,7 @@ import { resolveSupermarketChain } from "./Supermarket"
 
 export function SupermarketProductPageById({ id }: { id: string }) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
-  const [supermarketProduct, setSupermarketProduct] = useState<SupermarketProduct | null>(null)
+  const [supermarketProduct, setSupermarketProduct] = useState<StoreProduct | null>(null)
 
   async function fetchProduct(id: string) {
     setStatus(FrontendStatus.Loading)
@@ -41,7 +41,7 @@ export function SupermarketProductPageById({ id }: { id: string }) {
   if (status === FrontendStatus.Loading) {
     return (
       <SkeletonStatusLoading>
-        <p>Loading supermarket product {id}...</p>
+        <p>Loading store product {id}...</p>
       </SkeletonStatusLoading>
     )
   }
@@ -49,7 +49,7 @@ export function SupermarketProductPageById({ id }: { id: string }) {
   if (status === FrontendStatus.Error) {
     return (
       <SkeletonStatusError>
-        <p>Error loading supermarket product {id}</p>
+        <p>Error loading store product {id}</p>
       </SkeletonStatusError>
     )
   }
@@ -62,7 +62,7 @@ export function SupermarketProductPageById({ id }: { id: string }) {
     )
   }
 
-  return <SupermarketProductPage sp={supermarketProduct} />
+  return <StoreProductPage sp={supermarketProduct} />
 }
 
 export const metadata: Metadata = {
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
   },
 }
 
-export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
+export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   if (!sp) return null
 
   const supermarketChain = resolveSupermarketChain(sp)
@@ -161,7 +161,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
                       variant="glass"
                       className="max-w-60"
                     >
-                      Prices for this product on this supermarket chain are being tracked by Price Lens.
+                      Prices for this product on this store chain are being tracked by Price Lens.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -180,7 +180,7 @@ export function SupermarketProductPage({ sp }: { sp: SupermarketProduct }) {
                       variant="destructive"
                       className="max-w-60"
                     >
-                      <p>Prices for this product on this supermarket chain are NOT being tracked by Price Lens.</p>
+                      <p>Prices for this product on this store chain are NOT being tracked by Price Lens.</p>
                       <p className="mt-2 font-bold">Add to your favorites to request tracking.</p>
                     </TooltipContent>
                   </Tooltip>

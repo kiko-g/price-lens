@@ -1,6 +1,6 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
-import type { SupermarketProduct } from "@/types"
+import type { StoreProduct } from "@/types"
 import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
@@ -40,7 +40,7 @@ export const fetchHtml = async (url: string) => {
   }
 }
 
-export const continenteProductPageScraper = async (url: string, prevSp?: SupermarketProduct) => {
+export const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
   const isTracked = prevSp?.is_tracked ?? false
   const isEssential = prevSp?.is_essential ?? false
 
@@ -100,7 +100,7 @@ export const continenteProductPageScraper = async (url: string, prevSp?: Superma
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
 
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
-    const sp: SupermarketProduct = {
+    const sp: StoreProduct = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
@@ -199,11 +199,11 @@ export const processBatch = async (urls: string[]) => {
   return products
 }
 
-export function isValidProduct(product: any): product is SupermarketProduct {
+export function isValidProduct(product: any): product is StoreProduct {
   return typeof product === "object" && product !== null && typeof product.url === "string"
 }
 
-export const scrapeAndReplaceProduct = async (url: string | null, prevSp?: SupermarketProduct) => {
+export const scrapeAndReplaceProduct = async (url: string | null, prevSp?: StoreProduct) => {
   if (!url) return NextResponse.json({ error: "URL is required" }, { status: 400 })
 
   const product = await continenteProductPageScraper(url, prevSp)
@@ -213,14 +213,14 @@ export const scrapeAndReplaceProduct = async (url: string | null, prevSp?: Super
       url,
       created_at: now(),
     })
-    return NextResponse.json({ error: "SupermarketProduct scraping failed", url }, { status: 404 })
+    return NextResponse.json({ error: "StoreProduct scraping failed", url }, { status: 404 })
   }
 
   if (!isValidProduct(product)) return NextResponse.json({ error: "Invalid product data", url }, { status: 422 })
 
   const { data, error } = await supermarketProductQueries.createOrUpdateProduct(product)
 
-  if (error) return NextResponse.json({ error: "SupermarketProduct upsert failed", details: error }, { status: 500 })
+  if (error) return NextResponse.json({ error: "StoreProduct upsert failed", details: error }, { status: 500 })
 
-  return NextResponse.json({ data: product, message: "SupermarketProduct upserted" })
+  return NextResponse.json({ data: product, message: "StoreProduct upserted" })
 }

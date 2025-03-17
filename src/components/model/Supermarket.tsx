@@ -1,4 +1,4 @@
-import { SupermarketProduct } from "@/types"
+import { StoreProduct } from "@/types"
 import { SupermarketChain } from "@/types/extra"
 
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +24,7 @@ function SupermarketBadge({ supermarketChain, className }: { supermarketChain: s
   )
 }
 
-export function resolveSupermarketChain(sp: SupermarketProduct) {
+export function resolveSupermarketChain(sp: StoreProduct) {
   switch (sp.origin_id) {
     case SupermarketChain.Continente:
       return {

@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { useEffect, useState, useRef } from "react"
-import { type SupermarketProduct } from "@/types"
+import { type StoreProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
@@ -41,7 +41,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
-import { SupermarketProductCard, ProductCardSkeleton } from "@/components/model/SupermarketProductCard"
+import { StoreProductCard, ProductCardSkeleton } from "@/components/model/StoreProductCard"
 import { Wrapper } from "@/components/SectionWrapper"
 
 import {
@@ -69,7 +69,7 @@ type Props = {
   essential?: boolean
 }
 
-export function SupermarketProductsGrid(props: Props) {
+export function StoreProductsGrid(props: Props) {
   const {
     page: initPage = 1,
     q: initQuery = "",
@@ -89,7 +89,7 @@ export function SupermarketProductsGrid(props: Props) {
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
 
   const [status, setStatus] = useState(FrontendStatus.Loading)
-  const [products, setProducts] = useState<SupermarketProduct[]>([])
+  const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
     const defaultCategorySet = defaultCategories3.length > 0 ? new Set(defaultCategories3) : new Set()
     const uniqueCategories = Array.from(new Set([...existingCategories3, ...defaultCategories3]))
@@ -152,7 +152,7 @@ export function SupermarketProductsGrid(props: Props) {
           onlyDiscounted,
         },
       })
-      setProducts(data.data || [])
+      setStoreProducts(data.data || [])
       setPagedCount(data.pagination.pagedCount || 0)
       setPaginationTotal(data.pagination.totalPages || 50)
     } catch (err) {
@@ -164,7 +164,7 @@ export function SupermarketProductsGrid(props: Props) {
     }
   }
 
-  async function updateProduct(sp: SupermarketProduct): Promise<boolean> {
+  async function updateProduct(sp: StoreProduct): Promise<boolean> {
     if (!sp || !sp.url) return false
 
     const response = await axios.post(`/api/products/replace`, {
@@ -174,7 +174,7 @@ export function SupermarketProductsGrid(props: Props) {
     const newProduct = data.data
 
     if (response.status === 200 && newProduct) {
-      setProducts((currentProducts) => currentProducts.map((p) => (p.url === sp.url ? newProduct : p)))
+      setStoreProducts((currentProducts) => currentProducts.map((p) => (p.url === sp.url ? newProduct : p)))
       return true
     } else {
       console.error("Failed to update product:", data)
@@ -186,7 +186,7 @@ export function SupermarketProductsGrid(props: Props) {
     setStatus(FrontendStatus.Loading)
 
     try {
-      for (const sp of products) {
+      for (const sp of storeProducts) {
         await axios.post(`/api/products/replace`, {
           supermarketProduct: sp,
         })
@@ -286,7 +286,7 @@ export function SupermarketProductsGrid(props: Props) {
     )
   }
 
-  if (products.length === 0 && status === FrontendStatus.Loaded) {
+  if (storeProducts.length === 0 && status === FrontendStatus.Loaded) {
     return (
       <Wrapper>
         <CircleOffIcon className="h-8 w-8" />
@@ -387,7 +387,7 @@ export function SupermarketProductsGrid(props: Props) {
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem variant="destructive" asChild>
+                <DropdownMenuItem variant="default" asChild>
                   <Button variant="dropdown-item" onClick={clearSearch}>
                     Clear search
                     <DeleteIcon />
@@ -561,8 +561,8 @@ export function SupermarketProductsGrid(props: Props) {
       </nav>
 
       <div className="mb-16 grid w-full grid-cols-2 gap-8 px-4 pt-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
-        {products.map((product, productIdx) => (
-          <SupermarketProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
+        {storeProducts.map((product, productIdx) => (
+          <StoreProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
         ))}
       </div>
 

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Suspense, useState } from "react"
-import { type SupermarketProduct } from "@/types"
+import { type StoreProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
 import { Code } from "@/components/Code"
@@ -54,12 +54,12 @@ import { cn } from "../../lib/utils"
 import { toast } from "sonner"
 
 type Props = {
-  sp: SupermarketProduct
+  sp: StoreProduct
   onUpdate?: () => Promise<boolean> | undefined
   onFavorite?: () => Promise<boolean> | undefined
 }
 
-async function handleAddToTrackingList(sp: SupermarketProduct) {
+async function handleAddToTrackingList(sp: StoreProduct) {
   if (sp.is_tracked) return
 
   try {
@@ -73,7 +73,7 @@ async function handleAddToTrackingList(sp: SupermarketProduct) {
   }
 }
 
-async function handleRemoveFromInflationBasket(sp: SupermarketProduct) {
+async function handleRemoveFromInflationBasket(sp: StoreProduct) {
   if (!sp.is_essential) return
 
   try {
@@ -87,7 +87,7 @@ async function handleRemoveFromInflationBasket(sp: SupermarketProduct) {
   }
 }
 
-async function handleAddToInflationBasket(sp: SupermarketProduct) {
+async function handleAddToInflationBasket(sp: StoreProduct) {
   if (sp.is_essential) return
 
   try {
@@ -101,7 +101,7 @@ async function handleAddToInflationBasket(sp: SupermarketProduct) {
   }
 }
 
-export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
+export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
 
   const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)

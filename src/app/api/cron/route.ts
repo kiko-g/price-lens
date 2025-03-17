@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     let failedScrapes = 0
     for (const product of data) {
-      for (const supermarketProduct of product.supermarket_products) {
+      for (const supermarketProduct of product.store_products) {
         const url = supermarketProduct.url
         try {
           console.info(`Scraping product ${url}...`)
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const message = `Scraped selected products (processed ${data.flatMap((p) => p.supermarket_products).length} products, failed ${failedScrapes}).`
+    const message = `Scraped selected products (processed ${data.flatMap((p) => p.store_products).length} products, failed ${failedScrapes}).`
     console.info(message)
 
     return NextResponse.json({ message }, { status: 200 })

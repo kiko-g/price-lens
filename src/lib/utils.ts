@@ -1,4 +1,4 @@
-import type { Price, ProductChartEntry, SupermarketProduct } from "@/types"
+import type { Price, ProductChartEntry, StoreProduct } from "@/types"
 import type { DateRange } from "@/types/extra"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -1084,7 +1084,7 @@ export const mockChartData: ProductChartEntry[] = [
   { date: "December", price: 6.49, "price-recommended": 6.99, discount: 7, "price-per-major-unit": 16.0 },
 ]
 
-export const productUnavailable: SupermarketProduct = {
+export const productUnavailable: StoreProduct = {
   url: "",
   name: "Unavailable",
   brand: "",

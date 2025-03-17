@@ -14,7 +14,7 @@ export function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [prices, setPrices] = useState<any>(null)
 
-  const uniqueSupermarketProductIds = Array.from(new Set(prices?.map((price: Price) => price.supermarket_product_id)))
+  const uniqueSupermarketProductIds = Array.from(new Set(prices?.map((price: Price) => price.store_product_id)))
 
   async function fetchPrices() {
     setIsLoading(true)
@@ -108,7 +108,7 @@ function PriceRow({ price }: { price: Price }) {
     <tr key={price.id}>
       <Cell>{price.id}</Cell>
       <Cell>{price.product_id}</Cell>
-      <Cell>{price.supermarket_product_id}</Cell>
+      <Cell>{price.store_product_id}</Cell>
       <Cell>{price.price}€</Cell>
       <Cell>{price.price_recommended}€</Cell>
       <Cell>{price.price_per_major_unit}€</Cell>

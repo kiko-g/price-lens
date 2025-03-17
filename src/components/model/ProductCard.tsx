@@ -1,7 +1,7 @@
-import { ProductFromSupermarket } from "@/types"
+import { ProductLinked } from "@/types"
 
-import { SupermarketProductCard } from "./SupermarketProductCard"
+import { StoreProductCard } from "./StoreProductCard"
 
-export function ProductCard({ product }: { product: ProductFromSupermarket }) {
-  return <SupermarketProductCard sp={product.supermarket_products[0]} />
+export function ProductCard({ product }: { product: ProductLinked }) {
+  return <StoreProductCard sp={product.store_products[0]} />
 }
