@@ -152,7 +152,13 @@ export const supermarketProductQueries = {
       if (searchType === "url") {
         dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
       } else {
-        dbQuery = dbQuery.textSearch(searchType, sanitizedQuery)
+        // The issue is that textSearch requires a specific format for multi-word queries
+        // For PostgreSQL's ts_query, words need to be connected with operators like & (AND) or | (OR)
+        // Simply passing a space-separated string doesn't work correctly
+        const formattedQuery = sanitizedQuery.split(/\s+/).filter(Boolean).join(" | ")
+        if (formattedQuery) {
+          dbQuery = dbQuery.textSearch(searchType, formattedQuery)
+        }
       }
     }
 
