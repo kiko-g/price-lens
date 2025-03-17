@@ -300,11 +300,13 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                       <Button
                         variant="dropdown-item"
                         disabled={isTracked}
-                        onClick={() => {
+                        onClick={async () => {
                           if (isTracked) return
+                          await handleAddToTrackingList(sp)
                           setIsTracked(true)
-                          toast.success(`Supermarket product <strong>${sp.name}</strong> added to tracking list`)
-                          handleAddToTrackingList(sp)
+                          toast.success(`${sp.name}`, {
+                            description: `Supermarket product added to tracking list`,
+                          })
                         }}
                       >
                         {isTracked ? "Product already tracked" : "Add to tracking list"}
