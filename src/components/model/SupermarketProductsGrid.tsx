@@ -167,25 +167,29 @@ export function SupermarketProductsGrid(props: Props) {
   async function updateProduct(sp: SupermarketProduct): Promise<boolean> {
     if (!sp || !sp.url) return false
 
-    const response = await fetch(`/api/products/replace?url=${sp.url}`)
-    const data = await response.json()
+    const response = await axios.post(`/api/products/replace`, {
+      supermarketProduct: sp,
+    })
+    const data = response.data
+    const newProduct = data.data
 
-    if (response.status === 200) {
-      setProducts(products.map((p) => (p.url === sp.url ? (data.product as SupermarketProduct) : p)))
+    if (response.status === 200 && newProduct) {
+      setProducts((currentProducts) => currentProducts.map((p) => (p.url === sp.url ? newProduct : p)))
       return true
     } else {
-      console.error(data)
+      console.error("Failed to update product:", data)
       return false
     }
   }
 
   async function updateProductsInPage() {
     setStatus(FrontendStatus.Loading)
-    const urls = products.map((product) => product.url)
 
     try {
-      for (const url of urls) {
-        await fetch(`/api/products/replace?url=${url}`)
+      for (const sp of products) {
+        await axios.post(`/api/products/replace`, {
+          supermarketProduct: sp,
+        })
         await new Promise((resolve) => setTimeout(resolve, 50))
       }
       await fetchProducts()

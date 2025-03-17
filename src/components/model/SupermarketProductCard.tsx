@@ -104,8 +104,8 @@ async function handleAddToInflationBasket(sp: SupermarketProduct) {
 export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
 
-  const [isTracked, setIsTracked] = useState(sp.is_tracked ?? false)
-  const [isEssential, setIsEssential] = useState(sp.is_essential ?? false)
+  const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)
+  const [isEssential, setIsEssential] = useState(sp?.is_essential ?? false)
 
   if (!sp || !sp.url) {
     return null
@@ -361,7 +361,7 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                   </DropdownMenuItem>
                 ) : null}
 
-                {onUpdate ? (
+                {onUpdate && process.env.NODE_ENV === "development" ? (
                   <DropdownMenuItem variant="warning" asChild>
                     <Button
                       variant="dropdown-item"
