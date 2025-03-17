@@ -19,7 +19,7 @@ const badgeVariants = cva(
         warning:
           "border-transparent bg-yellow-600 text-zinc-50 hover:bg-yellow-600/80 dark:border-transparent dark:bg-yellow-800 dark:text-zinc-50 dark:hover:bg-yellow-800/80 [&_span.bubble]:bg-yellow-600",
         retail:
-          "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-800 dark:text-zinc-50 dark:hover:bg-orange-800/80 [&_span.bubble]:bg-orange-600",
+          "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-zinc-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
         light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
         dark: "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80",
         outline:
@@ -27,7 +27,7 @@ const badgeVariants = cva(
         "outline-success":
           "border-emerald-600 bg-emerald-600/5 text-emerald-600 dark:border-emerald-800 dark:text-emerald-50 dark:bg-emerald-600/10 [&_span.bubble]:bg-emerald-500 dark:[&_span.bubble]:bg-emerald-600",
         "outline-destructive":
-          "border-red-600 bg-red-600/5 text-red-600 dark:border-red-800 dark:text-red-50 dark:bg-red-600/10 [&_span.bubble]:bg-red-500 dark:[&_span.bubble]:bg-red-600",
+          "border-red-500/50 bg-red-500/10 text-red-600 dark:border-red-500/40 dark:text-red-50 dark:bg-red-600/20 [&_span.bubble]:bg-red-500 dark:[&_span.bubble]:bg-red-600",
         "outline-warning":
           "border-yellow-600 bg-yellow-600/5 text-yellow-600 dark:border-yellow-800 dark:text-yellow-50 dark:bg-yellow-600/10 [&_span.bubble]:bg-yellow-500 dark:[&_span.bubble]:bg-yellow-800",
         "price-per-unit":

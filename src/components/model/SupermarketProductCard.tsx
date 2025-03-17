@@ -45,9 +45,13 @@ import {
   PlusIcon,
   ExternalLinkIcon,
   CheckIcon,
+  CircleIcon,
+  ShoppingBasketIcon,
+  SquareXIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
+import { toast } from "sonner"
 
 type Props = {
   sp: SupermarketProduct
@@ -68,8 +72,40 @@ async function handleAddToTrackingList(sp: SupermarketProduct) {
     console.error("Error adding to tracking list:", error)
   }
 }
+
+async function handleRemoveFromInflationBasket(sp: SupermarketProduct) {
+  if (!sp.is_essential) return
+
+  try {
+    const response = await fetch("/api/products/basket/remove", {
+      method: "POST",
+      body: JSON.stringify({ supermarketProduct: sp }),
+    })
+    await response.json()
+  } catch (error) {
+    console.error("Error removing from inflation basket:", error)
+  }
+}
+
+async function handleAddToInflationBasket(sp: SupermarketProduct) {
+  if (sp.is_essential) return
+
+  try {
+    const response = await fetch("/api/products/basket/add", {
+      method: "POST",
+      body: JSON.stringify({ supermarketProduct: sp }),
+    })
+    await response.json()
+  } catch (error) {
+    console.error("Error adding to inflation basket:", error)
+  }
+}
+
 export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
+
+  const [isTracked, setIsTracked] = useState(sp.is_tracked ?? false)
+  const [isEssential, setIsEssential] = useState(sp.is_essential ?? false)
 
   if (!sp || !sp.url) {
     return null
@@ -259,16 +295,49 @@ export function SupermarketProductCard({ sp, onUpdate, onFavorite }: Props) {
                 </DropdownMenuItem>
 
                 {process.env.NODE_ENV === "development" ? (
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="dropdown-item"
-                      onClick={() => handleAddToTrackingList(sp)}
-                      disabled={sp.is_tracked}
-                    >
-                      {sp.is_tracked ? "Product already tracked" : "Add to tracking list"}
-                      {sp.is_tracked ? <CheckIcon /> : <PlusIcon />}
-                    </Button>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Button
+                        variant="dropdown-item"
+                        disabled={isTracked}
+                        onClick={() => {
+                          if (isTracked) return
+                          setIsTracked(true)
+                          toast.success(`Supermarket product <strong>${sp.name}</strong> added to tracking list`)
+                          handleAddToTrackingList(sp)
+                        }}
+                      >
+                        {isTracked ? "Product already tracked" : "Add to tracking list"}
+                        {isTracked ? <CheckIcon /> : <PlusIcon />}
+                      </Button>
+                    </DropdownMenuItem>
+
+                    {isTracked && (
+                      <DropdownMenuItem asChild>
+                        <Button
+                          variant="dropdown-item"
+                          onClick={async () => {
+                            if (isEssential) {
+                              await handleRemoveFromInflationBasket(sp)
+                              setIsEssential(false)
+                              toast(`${sp.name}`, {
+                                description: `Removed product from inflation basket`,
+                              })
+                            } else {
+                              await handleAddToInflationBasket(sp)
+                              setIsEssential(true)
+                              toast(`${sp.name}`, {
+                                description: `Added product to inflation basket`,
+                              })
+                            }
+                          }}
+                        >
+                          {isEssential ? "Remove from inflation basket" : "Add to inflation basket"}
+                          {isEssential ? <SquareXIcon /> : <ShoppingBasketIcon />}
+                        </Button>
+                      </DropdownMenuItem>
+                    )}
+                  </>
                 ) : null}
 
                 <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
