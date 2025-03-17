@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { type SearchType, type SortByType } from "@/types/extra"
-import { supermarketProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const categories = categoriesParam ? categoriesParam.split(";") : []
     const onlyDiscounted = onlyDiscountedParam === "true"
 
-    const { data, error, count } = await supermarketProductQueries.getAll({
+    const { data, error, count } = await storeProductQueries.getAll({
       page,
       limit,
       query,

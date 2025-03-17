@@ -6,7 +6,7 @@ import { updatePricePoint } from "@/lib/pricing"
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await productQueries.getAllAttached()
+    const { data, error } = await productQueries.getAllLinked()
 
     if (error) {
       console.error("Error fetching uncharted products:", error)
@@ -20,16 +20,16 @@ export async function GET(req: NextRequest) {
 
     let failedScrapes = 0
     for (const product of data) {
-      for (const supermarketProduct of product.store_products) {
-        const url = supermarketProduct.url
+      for (const storeProduct of product.store_products) {
+        const url = storeProduct.url
         try {
           console.info(`Scraping product ${url}...`)
-          const response = await scrapeAndReplaceProduct(url, supermarketProduct)
+          const response = await scrapeAndReplaceProduct(url, storeProduct)
           const json = await response.json()
 
           await updatePricePoint(product, {
             ...json.data,
-            id: supermarketProduct.id,
+            id: storeProduct.id,
           })
         } catch (error) {
           console.warn(`Failed to scrape product ${url}:`, error)

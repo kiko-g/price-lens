@@ -1,8 +1,8 @@
-import { supermarketProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/db/queries/products"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
-  const { data, error } = await supermarketProductQueries.getAllCategories()
+  const { data, error } = await storeProductQueries.getAllCategories()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

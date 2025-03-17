@@ -4,7 +4,7 @@ import { productQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await productQueries.getAllAttached()
+    const { data, error } = await productQueries.getAllLinked()
 
     if (error) {
       return NextResponse.json({ data: data || [], error: error }, { status: 200 })

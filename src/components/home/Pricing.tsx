@@ -46,7 +46,7 @@ export function PricingSection() {
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>Compare 3 supermarkets</span>
+                  <span>Compare multiple supermarkets origins</span>
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />

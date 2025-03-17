@@ -79,7 +79,7 @@ async function handleRemoveFromInflationBasket(sp: StoreProduct) {
   try {
     const response = await fetch("/api/products/basket/remove", {
       method: "POST",
-      body: JSON.stringify({ supermarketProduct: sp }),
+      body: JSON.stringify({ storeProduct: sp }),
     })
     await response.json()
   } catch (error) {
@@ -93,7 +93,7 @@ async function handleAddToInflationBasket(sp: StoreProduct) {
   try {
     const response = await fetch("/api/products/basket/add", {
       method: "POST",
-      body: JSON.stringify({ supermarketProduct: sp }),
+      body: JSON.stringify({ storeProduct: sp }),
     })
     await response.json()
   } catch (error) {

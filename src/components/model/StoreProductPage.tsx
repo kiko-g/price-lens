@@ -21,14 +21,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ProductChart } from "./ProductChart"
 import { resolveSupermarketChain } from "./Supermarket"
 
-export function SupermarketProductPageById({ id }: { id: string }) {
+export function StoreProductPageById({ id }: { id: string }) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
-  const [supermarketProduct, setSupermarketProduct] = useState<StoreProduct | null>(null)
+  const [supermarketProducStoreProductroduct] = useState<StoreProduct | null>(null)
 
   async function fetchProduct(id: string) {
     setStatus(FrontendStatus.Loading)
     const response = await axios.get(`/api/products/get/${id}`)
-    setSupermarketProduct(response.data)
+    setStoreProduct(response.data)
     setStatus(FrontendStatus.Loaded)
   }
 
@@ -54,7 +54,7 @@ export function SupermarketProductPageById({ id }: { id: string }) {
     )
   }
 
-  if (!supermarketProduct) {
+  if (!storeProduct) {
     return (
       <SkeletonStatusLoaded>
         <p>Supermarket product {id} not found</p>
@@ -62,7 +62,7 @@ export function SupermarketProductPageById({ id }: { id: string }) {
     )
   }
 
-  return <StoreProductPage sp={supermarketProduct} />
+  return <StoreProductPage sp={storeProduct} />
 }
 
 export const metadata: Metadata = {

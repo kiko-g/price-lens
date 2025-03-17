@@ -168,7 +168,7 @@ export function StoreProductsGrid(props: Props) {
     if (!sp || !sp.url) return false
 
     const response = await axios.post(`/api/products/replace`, {
-      supermarketProduct: sp,
+      storeProduct: sp,
     })
     const data = response.data
     const newProduct = data.data
@@ -188,7 +188,7 @@ export function StoreProductsGrid(props: Props) {
     try {
       for (const sp of storeProducts) {
         await axios.post(`/api/products/replace`, {
-          supermarketProduct: sp,
+          storeProduct: sp,
         })
         await new Promise((resolve) => setTimeout(resolve, 50))
       }

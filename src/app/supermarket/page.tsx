@@ -21,7 +21,7 @@ type Props = {
   searchParams: Promise<SearchParams>
 }
 
-export default async function Home({ searchParams }: Props) {
+export default async function Supermarket({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
   const searchType = getSearchType(params.t ?? "name")

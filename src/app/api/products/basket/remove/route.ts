@@ -4,18 +4,15 @@ import { createClient } from "@/lib/supabase/server"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { supermarketProduct } = body
+    const { storeProduct } = body
 
-    if (!supermarketProduct || !supermarketProduct.id) {
+    if (!storeProduct || !storeProduct.id) {
       return NextResponse.json({ error: "Product ID is required" }, { status: 400 })
     }
 
     const supabase = createClient()
 
-    const { error } = await supabase
-      .from("store_products")
-      .update({ is_essential: false })
-      .eq("id", supermarketProduct.id)
+    const { error } = await supabase.from("store_products").update({ is_essential: false }).eq("id", storeProduct.id)
 
     if (error) {
       console.error("Error removing product from inflation basket:", error)

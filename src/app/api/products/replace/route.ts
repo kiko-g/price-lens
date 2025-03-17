@@ -5,13 +5,13 @@ import { scrapeAndReplaceProduct } from "@/lib/scraper"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const supermarketProduct = body.supermarketProduct
+    const storeProduct = body.storeProduct
 
-    if (!supermarketProduct || !supermarketProduct.url) {
-      return NextResponse.json({ error: "Bad request", details: "Missing supermarketProduct or url" }, { status: 400 })
+    if (!storeProduct || !storeProduct.url) {
+      return NextResponse.json({ error: "Bad request", details: "Missing storeProduct or url" }, { status: 400 })
     }
 
-    return await scrapeAndReplaceProduct(supermarketProduct.url, supermarketProduct)
+    return await scrapeAndReplaceProduct(storeProduct.url, storeProduct)
   } catch (error) {
     console.error("Unexpected error:", error)
     return NextResponse.json(

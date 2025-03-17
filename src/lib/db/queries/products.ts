@@ -21,7 +21,7 @@ export const productQueries = {
     return supabase.from("products").select("*")
   },
 
-  async getAllAttached() {
+  async getAllLinked() {
     const supabase = createClient()
 
     const { data: products, error: productsError } = await supabase
@@ -57,20 +57,20 @@ export const productQueries = {
       }
     }
 
-    const { data: storeProducts, error: supermarketError } = await supabase
+    const { data: storeProducts, error: storeProductsError } = await supabase
       .from("store_products")
       .select("*")
       .in("id", allRefIds)
 
-    if (supermarketError) {
-      console.error("Error fetching store products:", supermarketError)
+    if (storeProductsError) {
+      console.error("Error fetching store products:", storeProductsError)
       return {
-        error: supermarketError,
+        error: storeProductsError,
         data: emptyProducts,
       }
     }
 
-    const productsWithSupermarket = products.map((p) => {
+    const productsLinked = products.map((p) => {
       const matchingStoreProducts = storeProducts.filter((sp) => p.product_ref_ids.includes(sp.id)) || []
       return {
         ...p,
@@ -80,16 +80,16 @@ export const productQueries = {
 
     return {
       error: null,
-      data: productsWithSupermarket,
+      data: productsLinked,
     }
   },
 
-  async getSupermarketProduct(product: Product, supermarketProductId: number | null) {
+  async getStoreProduct(product: Product, storeProductId: number | null) {
     const supabase = createClient()
 
     const firstRefId = product.product_ref_ids[0]
-    const resolvedId = supermarketProductId
-      ? product.product_ref_ids.find((id) => id === supermarketProductId.toString()) || firstRefId
+    const resolvedId = storeProductId
+      ? product.product_ref_ids.find((id) => id === storeProductId.toString()) || firstRefId
       : firstRefId
 
     if (!resolvedId)
@@ -121,7 +121,7 @@ export const productQueries = {
   },
 }
 
-export const supermarketProductQueries = {
+export const storeProductQueries = {
   async getAll({
     page = 1,
     limit = 20,

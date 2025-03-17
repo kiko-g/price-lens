@@ -4,13 +4,13 @@ import { priceQueries } from "@/lib/db/queries/prices"
 export async function GET(_req: Request, { params }: { params: Promise<{ store_product_id: string }> }) {
   try {
     const { store_product_id } = await params
-    const supermarketProductId = parseInt(store_product_id)
+    const storeProductId = parseInt(store_product_id)
 
-    if (isNaN(supermarketProductId)) {
+    if (isNaN(storeProductId)) {
       return NextResponse.json({ error: "Invalid store_product_id" }, { status: 400 })
     }
 
-    const prices = await priceQueries.getPricePointsPerIndividualProduct(supermarketProductId)
+    const prices = await priceQueries.getPricePointsPerIndividualProduct(storeProductId)
     if (prices === null) {
       return NextResponse.json({ error: "Error fetching price points" }, { status: 500 })
     }

@@ -14,7 +14,7 @@ export function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [prices, setPrices] = useState<any>(null)
 
-  const uniqueSupermarketProductIds = Array.from(new Set(prices?.map((price: Price) => price.store_product_id)))
+  const uniqueStoreProductIds = Array.from(new Set(prices?.map((price: Price) => price.store_product_id)))
 
   async function fetchPrices() {
     setIsLoading(true)
@@ -59,7 +59,7 @@ export function AdminDashboard() {
           <h1 className="text-base font-semibold">Price Points</h1>
           <p className="mt-2 text-sm">A table of placeholder stock market data that does not make any sense.</p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {uniqueSupermarketProductIds.length} unique supermarket product ids. Total: {prices?.length}
+            {uniqueStoreProductIds.length} unique supermarket product ids. Total: {prices?.length}
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
