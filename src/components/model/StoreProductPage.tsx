@@ -14,10 +14,20 @@ import { Undo2Icon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lu
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 
+import { Code } from "../Code"
 import { ProductChart } from "./ProductChart"
 import { resolveSupermarketChain } from "./Supermarket"
 
@@ -106,6 +116,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
     }
   }, [sp])
 
+  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
+
   return (
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
       <div className="flex w-min">
@@ -144,7 +156,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         {/* Product Details */}
         <div className="flex flex-col gap-2">
           <div>
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
               {sp.is_tracked ? (
                 <TooltipProvider delayDuration={200}>
@@ -231,34 +243,6 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                   {supermarketChain?.logo}
                 </Link>
               </Button>
-
-              <HoverCard>
-                <HoverCardTrigger asChild className="h-7 w-7 rounded p-1.5 hover:bg-muted">
-                  <InfoIcon />
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80 text-sm">
-                  <dl className="grid gap-1">
-                    {sp.id && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Product ID</dt>
-                        <dd>{sp.id}</dd>
-                      </div>
-                    )}
-                    {sp.created_at && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Created</dt>
-                        <dd>{formatTimestamptz(sp.created_at)}</dd>
-                      </div>
-                    )}
-                    {sp.updated_at && (
-                      <div className="grid grid-cols-2">
-                        <dt className="font-medium">Last Updated</dt>
-                        <dd>{formatTimestamptz(sp.updated_at)}</dd>
-                      </div>
-                    )}
-                  </dl>
-                </HoverCardContent>
-              </HoverCard>
             </div>
 
             <h1 className="line-clamp-3 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
@@ -299,6 +283,23 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               Add to favorites
             </Button>
             <ShareButton url={sp.url} title={sp.name} description={sp.name} />
+            <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
+              <DrawerTrigger asChild>
+                <Button variant="outline" size="icon-sm">
+                  <InfoIcon />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="overflow-y-auto">
+                <DrawerHeader className="text-left">
+                  <DrawerTitle>Details</DrawerTitle>
+                  <DrawerDescription>Inspect the collected data for this product.</DrawerDescription>
+                </DrawerHeader>
+
+                <div className="max-w-md px-4">
+                  <Code code={JSON.stringify(sp, null, 2)} language="json" />
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
 
           <div className="mb-4 mt-4 flex-1">
