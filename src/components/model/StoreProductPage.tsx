@@ -23,7 +23,7 @@ import { resolveSupermarketChain } from "./Supermarket"
 
 export function StoreProductPageById({ id }: { id: string }) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
-  const [supermarketProducStoreProductroduct] = useState<StoreProduct | null>(null)
+  const [storeProduct, setStoreProduct] = useState<StoreProduct | null>(null)
 
   async function fetchProduct(id: string) {
     setStatus(FrontendStatus.Loading)
