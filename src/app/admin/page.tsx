@@ -1,5 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,8 @@ export const metadata: Metadata = {
 }
 
 export default async function Admin() {
+  if (process.env.NODE_ENV !== "development") redirect("/")
+
   return (
     <Layout>
       <div className="grid w-full grid-cols-1 grid-rows-3 gap-4 p-4 md:grid-cols-3 md:grid-rows-2 md:gap-8 md:p-12">
