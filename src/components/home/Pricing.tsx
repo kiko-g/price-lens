@@ -44,15 +44,11 @@ export function PricingSection() {
                 </li>
                 <li className="flex items-center">
                   <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>Basic price alerts</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
-                  <span>Weekly price reports</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
                   <span>Access and compare multiple supermarkets origins</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckIcon className="mr-2 h-4 w-4 text-primary" />
+                  <span>Basic weekly price alerts</span>
                 </li>
               </ul>
             </CardContent>
