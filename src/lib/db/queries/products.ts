@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { Product, ProductLinked, StoreProduct } from "@/types"
+import type { Product, ProductLinked, ProductQueryType, StoreProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/extra"
 
 type GetAllQuery = {
@@ -28,13 +28,18 @@ export const productQueries = {
     return { data, error }
   },
 
-  async getAllLinked() {
+  async getAllLinked(productQueryType: ProductQueryType = "all") {
     const supabase = createClient()
 
-    const { data: products, error: productsError } = await supabase
-      .from("products")
-      .select("*")
-      .order("name", { ascending: true })
+    let query = supabase.from("products").select("*").order("name", { ascending: true })
+
+    if (productQueryType === "essential") {
+      query = query.eq("essential", true)
+    } else if (productQueryType === "non-essential") {
+      query = query.eq("essential", false)
+    }
+
+    const { data: products, error: productsError } = await query
 
     if (productsError) {
       console.error("Error fetching products:", productsError)

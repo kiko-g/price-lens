@@ -1,6 +1,8 @@
 import { FrontendStatus } from "./extra"
 
 // UI types
+export type ProductQueryType = "all" | "essential" | "non-essential"
+
 export interface ProductChartEntry {
   date: string
   price: number
