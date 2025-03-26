@@ -107,7 +107,7 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
     setIsUpdating(true)
     const response = await axios.post("/api/products/shallow/toggle-essential", { id })
     if (response.status === 200) {
-      setProduct(response.data.data)
+      setProduct((prev) => ({ ...prev, essential: response.data.data }))
     }
     setIsUpdating(false)
   }

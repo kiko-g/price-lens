@@ -93,49 +93,65 @@ export const productQueries = {
 
   async deleteProduct(id: number) {
     const supabase = createClient()
-    const { data, error } = await supabase.from("products").select("*").eq("id", id).single()
 
-    if (error) {
-      console.error("Error fetching product:", error)
+    const selectRes = await supabase.from("products").select("*").eq("id", id).single()
+    if (selectRes.error) {
+      console.error("Error fetching product:", selectRes.error)
       return {
         data: null,
-        error: error,
+        error: selectRes.error,
       }
     }
 
-    return supabase.from("products").delete().eq("id", id)
-  },
-
-  async toggleEssential(id: number) {
-    const supabase = createClient()
-    const { data, error } = await supabase.from("products").select("essential").eq("id", id).single()
-
-    if (error) {
-      console.error("Error fetching product:", error)
+    const deletePriceRes = await supabase.from("prices").delete().eq("product_id", id)
+    if (deletePriceRes.error) {
+      console.error("Error deleting price points:", deletePriceRes.error)
       return {
         data: null,
-        error: error,
+        error: deletePriceRes.error,
       }
     }
 
-    const newEssential = data.essential !== null ? !data.essential : false
-    const { data: updatedProduct, error: updateError } = await supabase
-      .from("products")
-      .update({ essential: newEssential })
-      .eq("id", id)
-      .select()
-      .single()
-
-    if (updateError) {
-      console.error("Error updating product:", updateError)
+    const deleteProdRes = await supabase.from("products").delete().eq("id", id)
+    if (deleteProdRes.error) {
+      console.error("Error deleting product:", deleteProdRes.error)
       return {
         data: null,
-        error: updateError,
+        error: deleteProdRes.error,
       }
     }
 
     return {
-      data: updatedProduct,
+      data: null,
+      error: null,
+    }
+  },
+
+  async toggleEssential(id: number) {
+    const supabase = createClient()
+    const selectRes = await supabase.from("products").select("essential").eq("id", id).single()
+
+    if (selectRes.error) {
+      console.error("Error fetching product:", selectRes.error)
+      return {
+        data: null,
+        error: selectRes.error,
+      }
+    }
+
+    const newEssential = selectRes.data.essential !== null ? !selectRes.data.essential : false
+    const updateRes = await supabase.from("products").update({ essential: newEssential }).eq("id", id)
+
+    if (updateRes.error) {
+      console.error("Error updating product:", updateRes.error)
+      return {
+        data: null,
+        error: updateRes.error,
+      }
+    }
+
+    return {
+      data: newEssential,
       error: null,
     }
   },
