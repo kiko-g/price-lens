@@ -127,7 +127,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
     : null
 
   return (
-    <div className="flex w-full flex-col rounded-lg bg-white dark:bg-zinc-950">
+    <div className="flex w-full flex-col rounded-lg bg-transparent">
       <div
         className={cn(
           "group relative mb-2 flex items-center justify-between gap-2 overflow-hidden rounded-md border",

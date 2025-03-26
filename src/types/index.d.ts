@@ -3,6 +3,13 @@ import { FrontendStatus } from "./extra"
 // UI types
 export type ProductQueryType = "all" | "essential" | "non-essential"
 
+export interface BasketProduct {
+  name_en: string
+  name_pt: string
+  quantity: string
+  category?: string
+}
+
 export interface ProductChartEntry {
   date: string
   price: number

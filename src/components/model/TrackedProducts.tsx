@@ -10,6 +10,7 @@ import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 
 import { BookHeartIcon, ShoppingBasketIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export function TrackedProducts() {
   const [status, setStatus] = useState(FrontendStatus.Loading)
@@ -71,6 +72,7 @@ export function TrackedProducts() {
         icon={<ShoppingBasketIcon className="size-5" />}
         description="Products often found in trustworthy inflation baskets, forever valuable for most people"
         products={essentialProducts.sort((a, b) => a.name.localeCompare(b.name))}
+        className="border-indigo-500/20 bg-indigo-500/5 dark:border-indigo-400/30 dark:bg-indigo-400/10"
       />
       <ProductsSection
         title="Other tracked products"
@@ -80,6 +82,7 @@ export function TrackedProducts() {
           if (a.id !== undefined && b.id !== undefined) return a.id - b.id
           return a.name.localeCompare(b.name)
         })}
+        className="border-slate-500/20 bg-slate-500/5 dark:border-slate-500/20 dark:bg-slate-500/10"
       />
     </div>
   )
@@ -90,25 +93,27 @@ function ProductsSection({
   description,
   icon,
   products,
+  className,
 }: {
   title: React.ReactNode
-  description?: string
-  icon?: React.ReactNode
   products: ProductLinked[]
+  icon?: React.ReactNode
+  className?: string
+  description?: string
 }) {
   return (
     <section className="flex flex-col">
-      <div className="mb-6 border-b pb-2">
-        <h2 className="inline-flex items-center gap-2 text-2xl font-bold">
-          {title}
-          {icon}
-        </h2>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+      <div className="mb-2 flex items-center gap-2">
+        {icon}
+        <h2 className="text-lg font-bold">{title}</h2>
       </div>
-      <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
-        {products.map((product, productIdx) => (
-          <ProductCard key={`product-${productIdx}`} product={product} />
-        ))}
+      {description && <p className="mb-4 text-xs text-muted-foreground">{description}</p>}
+      <div className={cn("rounded-lg border p-3 lg:p-4", className)}>
+        <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 xl:gap-6">
+          {products.map((product, productIdx) => (
+            <ProductCard key={`product-${productIdx}`} product={product} />
+          ))}
+        </div>
       </div>
     </section>
   )
