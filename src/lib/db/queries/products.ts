@@ -18,7 +18,14 @@ type GetAllQuery = {
 export const productQueries = {
   async getAll() {
     const supabase = createClient()
-    return supabase.from("products").select("*")
+    const { data, error } = await supabase.from("products").select("*")
+
+    if (error) {
+      console.error("Error fetching products:", error)
+      return null
+    }
+
+    return { data, error }
   },
 
   async getAllLinked() {
@@ -81,6 +88,55 @@ export const productQueries = {
     return {
       error: null,
       data: productsLinked,
+    }
+  },
+
+  async deleteProduct(id: number) {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("products").select("*").eq("id", id).single()
+
+    if (error) {
+      console.error("Error fetching product:", error)
+      return {
+        data: null,
+        error: error,
+      }
+    }
+
+    return supabase.from("products").delete().eq("id", id)
+  },
+
+  async toggleEssential(id: number) {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("products").select("essential").eq("id", id).single()
+
+    if (error) {
+      console.error("Error fetching product:", error)
+      return {
+        data: null,
+        error: error,
+      }
+    }
+
+    const newEssential = data.essential !== null ? !data.essential : false
+    const { data: updatedProduct, error: updateError } = await supabase
+      .from("products")
+      .update({ essential: newEssential })
+      .eq("id", id)
+      .select()
+      .single()
+
+    if (updateError) {
+      console.error("Error updating product:", updateError)
+      return {
+        data: null,
+        error: updateError,
+      }
+    }
+
+    return {
+      data: updatedProduct,
+      error: null,
     }
   },
 

@@ -6,7 +6,6 @@ import type { Price } from "@/types"
 export const priceQueries = {
   async getPrices() {
     const supabase = createClient()
-
     const { data, error } = await supabase.from("prices").select("*")
 
     if (error) {

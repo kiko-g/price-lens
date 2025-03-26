@@ -5,7 +5,7 @@ import { TrackedProducts } from "@/components/model/TrackedProducts"
 import { getSearchType } from "@/types/extra"
 
 export const metadata: Metadata = {
-  title: "Price Lens",
+  title: "Products",
   description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
 }
 

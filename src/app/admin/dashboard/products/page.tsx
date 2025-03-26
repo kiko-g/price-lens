@@ -1,16 +1,16 @@
 import type { Metadata } from "next"
 import { Layout } from "@/components/layout"
-import { AdminActions } from "@/components/admin/AdminActions"
+import { AdminDashboardProducts } from "@/components/admin/AdminDashboardProducts"
 
 export const metadata: Metadata = {
-  title: "Admin Actions",
+  title: "Dashboard Products",
   description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
 }
 
-export default async function Admin() {
+export default async function AdminDashboardProductsPage() {
   return (
     <Layout>
-      <AdminActions />
+      <AdminDashboardProducts />
     </Layout>
   )
 }

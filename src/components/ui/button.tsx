@@ -24,6 +24,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         "ghost-inverted": `hover:bg-zinc-100/20 dark:hover:bg-zinc-200/80`,
         "ghost-light": `hover:bg-zinc-200/80`,
         "ghost-dark": `hover:bg-zinc-100/20`,
+        "ghost-destructive": `text-rose-600 hover:bg-rose-600/10`,
         glass: `bg-zinc-100 backdrop-blur text-zinc-900 hover:bg-zinc-500/20 dark:bg-zinc-900/80 dark:text-white dark:hover:bg-zinc-950/80`,
         active: `bg-zinc-200/80 dark:bg-zinc-100/20`,
         link: `text-primary underline-offset-4 hover:underline`,

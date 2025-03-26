@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon } from "lucide-react"
 import { InsertPriceModal } from "./InsertPriceModal"
 
-export function AdminDashboard() {
+export function AdminDashboardPrices() {
   const [isLoading, setIsLoading] = useState(true)
   const [prices, setPrices] = useState<any>(null)
 

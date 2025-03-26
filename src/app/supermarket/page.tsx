@@ -5,7 +5,7 @@ import { Layout } from "@/components/layout"
 import { StoreProductsGrid } from "@/components/model/StoreProductsGrid"
 
 export const metadata: Metadata = {
-  title: "Price Lens",
+  title: "Supermarket",
   description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
 }
 

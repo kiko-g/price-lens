@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata: Metadata = {
-  title: "Price Lens",
+  title: "Admin",
   description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
 }
 
@@ -16,9 +16,10 @@ export default async function Admin() {
 
   return (
     <Layout>
-      <div className="grid w-full grid-cols-1 grid-rows-3 gap-4 p-4 md:grid-cols-3 md:grid-rows-2 md:gap-8 md:p-12">
+      <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
         <AdminActionsLink />
-        <AdminDashboardLink />
+        <AdminDashboardProductsLink />
+        <AdminDashboardPricesLink />
       </div>
     </Layout>
   )
@@ -40,16 +41,32 @@ function AdminActionsLink() {
   )
 }
 
-function AdminDashboardLink() {
+function AdminDashboardProductsLink() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Dashboard</CardTitle>
+        <CardTitle>Products</CardTitle>
       </CardHeader>
       <CardContent>Access the admin dashboard to manage your account and settings.</CardContent>
       <CardFooter>
         <Button asChild>
-          <Link href="/admin/dashboard">Access Dashboard</Link>
+          <Link href="/admin/dashboard/products">Access Dashboard for Products</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function AdminDashboardPricesLink() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Prices</CardTitle>
+      </CardHeader>
+      <CardContent>Access the admin dashboard to manage your account and settings.</CardContent>
+      <CardFooter>
+        <Button asChild>
+          <Link href="/admin/dashboard/prices">Access Dashboard for Prices</Link>
         </Button>
       </CardFooter>
     </Card>
