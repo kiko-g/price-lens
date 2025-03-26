@@ -34,7 +34,7 @@ export function InflationBasket() {
   }
 
   return (
-    <section className="w-full bg-white bg-gradient-to-br from-zinc-50 to-white py-12 dark:bg-zinc-950 dark:from-indigo-500/5 dark:to-indigo-500/10 md:py-16 lg:py-24">
+    <section className="w-full bg-white bg-gradient-to-br from-indigo-50 to-indigo-50/50 py-12 dark:bg-zinc-950 dark:from-indigo-500/5 dark:to-indigo-500/10 md:py-16 lg:py-24">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <Badge className="bg-transparent bg-gradient-to-br from-indigo-600/70 to-blue-600/70 text-white dark:text-white">
