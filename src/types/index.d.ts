@@ -7,7 +7,19 @@ export interface BasketProduct {
   name_en: string
   name_pt: string
   quantity: string
-  category?: string
+  category: BasketProductCategory
+}
+
+export type BasketProductCategory = "meat" | "seafood" | "vegetables" | "fruits" | "dairy" | "grocery" | "other"
+
+export const BasketCategoryLabels: Record<BasketProductCategory, { en: string; pt: string }> = {
+  meat: { en: "Meat & Poultry", pt: "Carne & Aves" },
+  seafood: { en: "Seafood", pt: "Peixe & Marisco" },
+  vegetables: { en: "Vegetables", pt: "Legumes" },
+  fruits: { en: "Fruits", pt: "Frutas" },
+  dairy: { en: "Dairy and Eggs", pt: "Laticínios e Ovos" },
+  grocery: { en: "Grocery", pt: "Mercearia" },
+  other: { en: "Other", pt: "Outros" },
 }
 
 export interface ProductChartEntry {

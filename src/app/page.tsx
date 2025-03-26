@@ -4,12 +4,14 @@ import { defaultMetadata } from "@/lib/config"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
+
 import { Brands } from "@/components/home/Brands"
 import { GridHome } from "@/components/home/GridHome"
-
-import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 import { MockChartA } from "@/components/home/MockChart"
 import { PricingSection } from "@/components/home/Pricing"
+import { InflationBasket } from "@/components/home/InflationBasket"
+
+import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   ...defaultMetadata,
@@ -69,6 +71,7 @@ export default async function Home({ searchParams }: Props) {
         </div>
 
         <PricingSection />
+        <InflationBasket />
       </main>
     </Layout>
   )
