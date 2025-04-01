@@ -1,4 +1,5 @@
 import { FrontendStatus } from "./extra"
+import { StaticImageData } from "next/image"
 
 // UI types
 export type ProductQueryType = "all" | "essential" | "non-essential"
@@ -8,6 +9,7 @@ export interface BasketProduct {
   name_pt: string
   quantity: string
   category: BasketProductCategory
+  image?: StaticImageData
 }
 
 export type BasketProductCategory = "meat" | "seafood" | "vegetables" | "fruits" | "dairy" | "grocery" | "other"
