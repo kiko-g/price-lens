@@ -33,8 +33,10 @@ export async function updatePricePoint(p: Product, sp: StoreProduct) {
     updated_at: timestamp,
   }
 
+  const isInvalidPricePoint = sp.price === 0 || sp.price_recommended === 0 || sp.price_per_major_unit === 0
+
   const existingPricePoint = await priceQueries.getLatestPricePoint(p.id, sp.id)
-  if (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint)) {
+  if (isInvalidPricePoint || (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint))) {
     console.info("Price point already exists and is up to date.", existingPricePoint)
     await priceQueries.updatePricePointUpdatedAt(existingPricePoint.id)
     return
