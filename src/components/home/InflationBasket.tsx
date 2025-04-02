@@ -17,6 +17,8 @@ export function InflationBasket() {
   const categories = [...new Set(basketProducts.map((p) => p.category))]
   const filteredProducts = basketProducts.filter((p) => p.category === selectedCategory)
 
+  if (process.env.NODE_ENV === "production") return null
+
   return (
     <section className="w-full border-t border-indigo-50/80 bg-white bg-gradient-to-br from-indigo-50/20 to-indigo-50/20 py-12 dark:border-indigo-500/10 dark:bg-zinc-950 dark:from-indigo-500/5 dark:to-indigo-500/10 md:py-16 lg:py-24">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
@@ -88,9 +90,11 @@ export function InflationBasket() {
                             className="aspect-square w-full rounded-t-2xl object-cover"
                           />
                           <CardContent className="flex flex-col items-start px-3.5 py-3 [&>*]:leading-tight [&>*]:tracking-tight">
-                            <h2 className="text-base font-semibold">{product.name_pt}</h2>
-                            <p className="text-sm font-medium text-muted-foreground">{product.name_en}</p>
-                            <p className="text-sm font-normal text-muted-foreground opacity-80">{product.quantity}</p>
+                            <h2 className="text-left text-base font-semibold">{product.name_pt}</h2>
+                            <p className="text-left text-sm font-medium text-muted-foreground">{product.name_en}</p>
+                            <p className="text-left text-sm font-normal text-muted-foreground opacity-80">
+                              {product.quantity}
+                            </p>
                           </CardContent>
                         </Card>
                       ))}
