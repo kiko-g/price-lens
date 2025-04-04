@@ -4,11 +4,11 @@ import axios from "axios"
 import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
 import { Price } from "@/types"
 import { useState, useEffect } from "react"
+import { InsertPriceModal } from "./InsertPriceModal"
 
 import { Button } from "@/components/ui/button"
 
-import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon } from "lucide-react"
-import { InsertPriceModal } from "./InsertPriceModal"
+import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon, SparklesIcon, RefreshCcwIcon } from "lucide-react"
 
 export function AdminDashboardPrices() {
   const [isLoading, setIsLoading] = useState(true)
@@ -62,7 +62,10 @@ export function AdminDashboardPrices() {
             {uniqueStoreProductIds.length} unique supermarket product ids. Total: {prices?.length}
           </p>
         </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <div className="mt-4 flex items-center gap-2 sm:ml-16 sm:mt-0 sm:flex-none">
+          <Button variant="outline" size="icon" onClick={() => fetchPrices()}>
+            <RefreshCcwIcon />
+          </Button>
           <InsertPriceModal />
         </div>
       </div>
@@ -87,9 +90,15 @@ export function AdminDashboardPrices() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {prices.map((price: Price) => (
-                  <PriceRow key={price.id} price={price} />
-                ))}
+                {prices
+                  .sort((a: Price, b: Price) => {
+                    if (a.product_id !== b.product_id) return a.product_id - b.product_id
+                    if (a.valid_from && b.valid_from)
+                      return new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
+                  })
+                  .map((price: Price) => (
+                    <PriceRow key={price.id} price={price} />
+                  ))}
               </tbody>
             </table>
           </div>
@@ -103,6 +112,17 @@ function PriceRow({ price }: { price: Price }) {
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
+  const [isSanitizing, setIsSanitizing] = useState(false)
+
+  async function handleSanitize() {
+    setIsSanitizing(true)
+    const data = await axios.get(`/api/prices/sanitize/${price.store_product_id}`)
+    if (data.status === 200) {
+      const { deleted, merged } = data.data
+      console.debug("Sanitized prices", { deleted, merged })
+    }
+    setIsSanitizing(false)
+  }
 
   return (
     <tr key={price.id}>
@@ -135,6 +155,10 @@ function PriceRow({ price }: { price: Price }) {
           disabled={isCopying}
         >
           {isCopying ? <CheckIcon className="h-4 w-4 text-green-500" /> : <CopyIcon />}
+        </Button>
+
+        <Button variant="ghost" size="icon-xs" onClick={handleSanitize} disabled={isSanitizing}>
+          {isSanitizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <SparklesIcon />}
         </Button>
       </Cell>
     </tr>
