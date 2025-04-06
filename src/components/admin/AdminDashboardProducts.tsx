@@ -7,7 +7,7 @@ import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 
-import { Loader2, CircleX, TrashIcon, ZapOffIcon, ZapIcon } from "lucide-react"
+import { Loader2, CircleX, TrashIcon, ZapOffIcon, ZapIcon, RefreshCcwIcon } from "lucide-react"
 import { InsertPriceModal } from "./InsertPriceModal"
 
 export function AdminDashboardProducts() {
@@ -55,16 +55,18 @@ export function AdminDashboardProducts() {
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
+        <div className="flex flex-col sm:flex-auto">
           <h1 className="text-base font-semibold">Products</h1>
-          <p className="mt-2 text-sm">A table of the products entries in the database.</p>
+          <p className="mt-2 text-sm">
+            A table of the products entries in the database. Showing {products.length} products.
+          </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <InsertPriceModal />
         </div>
       </div>
 
-      <div className="mt-8 flow-root w-full">
+      <div className="flow-root w-full">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <table className="min-w-full divide-y">

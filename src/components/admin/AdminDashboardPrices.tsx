@@ -125,7 +125,7 @@ function PriceRow({ price }: { price: Price }) {
   }
 
   return (
-    <tr key={price.id}>
+    <tr key={price.id} className="transition-colors duration-200 hover:bg-muted/50">
       <Cell>{price.id}</Cell>
       <Cell>{price.product_id}</Cell>
       <Cell>{price.store_product_id}</Cell>

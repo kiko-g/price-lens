@@ -292,7 +292,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               <DrawerContent className="overflow-y-auto">
                 <DrawerHeader className="text-left">
                   <DrawerTitle>Details</DrawerTitle>
-                  <DrawerDescription>Inspect the collected data for this product.</DrawerDescription>
+                  <DrawerDescription>Inspect store product data</DrawerDescription>
                 </DrawerHeader>
 
                 <div className="max-w-md px-4">

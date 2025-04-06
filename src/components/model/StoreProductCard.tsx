@@ -264,7 +264,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon-sm" className="shadow-none">
+                <Button variant="inverted" size="icon-sm">
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -415,7 +415,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
 
               <Accordion type="single" collapsible className="mt-4 hidden w-full border-t md:flex">
                 <AccordionItem value="item-1" className="w-full border-0">
-                  <AccordionTrigger>Inspect the collected data</AccordionTrigger>
+                  <AccordionTrigger>Inspect store product data</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
                       <Code code={JSON.stringify(sp, null, 2)} language="json" />
