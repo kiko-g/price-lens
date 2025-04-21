@@ -32,7 +32,7 @@ export function Brands({ className }: { className?: string }) {
       name: "Pingo Doce",
       image: pingoDoce,
       disabled: true,
-      shown: false,
+      shown: true,
       className: "h-10 rounded dark:bg-white",
       width: 1000,
       height: 10000,

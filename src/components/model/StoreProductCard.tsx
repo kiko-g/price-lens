@@ -238,7 +238,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
-          <h2 className="line-clamp-2 w-full text-sm font-medium tracking-tight">
+          <h2 className="line-clamp-2 min-h-[45px] w-full text-sm font-medium tracking-tight">
             <Link href={`/supermarket/${sp.id}`} target="_blank" className="hover:underline">
               {sp.name || "Untitled"}
             </Link>
@@ -264,7 +264,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="inverted" size="icon-sm">
+                <Button variant="ghost" size="icon-sm">
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

@@ -43,7 +43,8 @@ export default async function Home({ searchParams }: Props) {
             </h1>
             <p className="max-w-3xl translate-y-[-1rem] animate-fade-in text-balance text-center tracking-tight text-gray-400 opacity-0 [--animation-delay:400ms] md:text-left md:text-lg">
               Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and
-              aware of how supermarket prices change. See beyond the headlines and tags.
+              aware of how supermarket prices change. See beyond the headlines and tags. Data focused on
+              Portugal-available supermarket chains.
             </p>
 
             <div className="flex animate-fade-in flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">

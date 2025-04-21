@@ -72,7 +72,7 @@ export function TrackedProducts() {
         icon={<ShoppingBasketIcon className="size-5" />}
         description="Products often found in trustworthy inflation baskets, forever valuable for most people"
         products={essentialProducts.sort((a, b) => a.name.localeCompare(b.name))}
-        className="border-indigo-500/20 bg-indigo-500/5 dark:border-indigo-400/30 dark:bg-indigo-400/10"
+        className="border-indigo-500/20 bg-indigo-400/5 dark:border-indigo-400/30 dark:bg-indigo-400/10"
       />
       <ProductsSection
         title="Other tracked products"
@@ -109,7 +109,7 @@ function ProductsSection({
       </div>
       {description && <p className="mb-4 text-xs text-muted-foreground">{description}</p>}
       <div className={cn("rounded-lg border p-3 lg:p-4", className)}>
-        <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 xl:gap-6">
+        <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4">
           {products.map((product, productIdx) => (
             <ProductCard key={`product-${productIdx}`} product={product} />
           ))}
