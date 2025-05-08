@@ -12,7 +12,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
       variant: {
         default: `bg-zinc-800 text-white shadow hover:bg-zinc-800/90 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
         inverted: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-700`,
-        secondary: `bg-blue-600 text-white shadow-sm hover:bg-blue-600/90 dark:bg-blue-700 dark:hover:bg-blue-700/90 dark:text-white`,
+        secondary: `bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90 dark:bg-secondary dark:hover:bg-secondary/90 dark:text-secondary-foreground`,
         destructive: `bg-rose-600 text-white shadow-sm hover:bg-rose-600/90 dark:bg-rose-700 dark:hover:bg-rose-700/90 dark:text-white`,
         orange: `bg-orange-600 text-white shadow-sm hover:bg-orange-600/90 dark:bg-orange-700 dark:hover:bg-orange-700/90 dark:text-white`,
         success: `bg-emerald-600 text-white shadow-sm hover:bg-emerald-600/90 dark:bg-emerald-700 dark:hover:bg-emerald-700/90 dark:text-white`,
