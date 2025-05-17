@@ -11,7 +11,6 @@ import { siteConfig } from "@/lib/config"
 import { Providers } from "./providers"
 import { Analytics } from "@/components/Analytics"
 import { Toaster } from "@/components/ui/sonner"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 export const metadata: Metadata = {
   title: {
@@ -69,8 +68,6 @@ export const metadata: Metadata = {
   manifest: `${siteConfig.url}/site.webmanifest`,
 }
 
-const queryClient = new QueryClient()
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -93,13 +90,11 @@ export default function RootLayout({
         )}
       </head>
       <body className={cn(GeistSans.className)}>
-        <QueryClientProvider client={queryClient}>
-          <Providers>
-            <Analytics />
-            {children}
-            <Toaster />
-          </Providers>
-        </QueryClientProvider>
+        <Providers>
+          <Analytics />
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   )

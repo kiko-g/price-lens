@@ -138,7 +138,7 @@ export function StoreProductsGrid(props: Props) {
   async function fetchProducts() {
     setStatus(FrontendStatus.Loading)
     try {
-      const { data } = await axios.get("/api/products/get", {
+      const { data } = await axios.get("/api/products", {
         params: {
           ...(query && { q: query }),
           page,
