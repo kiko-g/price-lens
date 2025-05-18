@@ -9,7 +9,7 @@ export enum SupermarketChain {
   PingoDoce = 2,
 }
 
-export const searchTypes = ["name", "brand", "url", "category"] as const
+export const searchTypes = ["any", "name", "brand", "url", "category"] as const
 
 export function getSearchType(searchType: string): SearchType {
   if (searchTypes.includes(searchType as SearchType)) {

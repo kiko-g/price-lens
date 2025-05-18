@@ -7,15 +7,7 @@ import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import {
-  cn,
-  defaultCategories,
-  defaultCategories3,
-  existingCategories,
-  existingCategories2,
-  existingCategories3,
-  getCenteredArray,
-} from "@/lib/utils"
+import { cn, defaultCategories3, existingCategories3, getCenteredArray } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -145,11 +137,15 @@ export function StoreProductsGrid(props: Props) {
           limit,
           searchType,
           sort: sortBy,
-          categories: categories
-            .filter((cat) => cat.selected)
-            .map((cat) => cat.name)
-            .join(";"),
           onlyDiscounted,
+          ...(query === ""
+            ? {
+                categories: categories
+                  .filter((cat) => cat.selected)
+                  .map((cat) => cat.name)
+                  .join(";"),
+              }
+            : {}),
         },
       })
       setStoreProducts(data.data || [])
@@ -303,9 +299,10 @@ export function StoreProductsGrid(props: Props) {
         </Button>
 
         <ul className="flex max-w-md flex-col text-sm">
-          <li>
+          <li className="mb-4">
             <strong>You searched for:</strong> "{query}"
           </li>
+
           <li>
             <strong>Search type:</strong> {searchType}
           </li>
@@ -313,15 +310,17 @@ export function StoreProductsGrid(props: Props) {
             <strong>Page:</strong> {page}
           </li>
           <li>
-            <strong>Categories:</strong>{" "}
-            {categories
-              .filter((cat) => cat.selected)
-              .map((cat) => cat.name)
-              .join(", ")
-              .slice(0, 100) || "None"}
+            <strong>Sort by:</strong> {sortBy}
           </li>
           <li>
-            <strong>Sort by:</strong> {sortBy}
+            <strong>Categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
+            <span className="text-muted-foreground">
+              {categories
+                .filter((cat) => cat.selected)
+                .map((cat) => cat.name)
+                .join(", ")
+                .slice(0, 200) + "..." || "None"}
+            </span>
           </li>
         </ul>
       </Wrapper>

@@ -226,16 +226,31 @@ export const storeProductQueries = {
 
     if (query) {
       const sanitizedQuery = query.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
-      if (searchType === "url") {
-        dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
+      if (searchType === "url") dbQuery = dbQuery.ilike(searchType, `%${sanitizedQuery}%`)
+      else if (searchType === "any") {
+        // joint search within brand, url, name and category
+        const pattern = `%${sanitizedQuery}%` // wrap in wildcards once
+        const queries = [
+          `brand.ilike.${pattern.replace(/ /g, "%")}`,
+          `url.ilike.${pattern.replace(/ /g, "%")}`,
+          `name.ilike.${pattern.replace(/ /g, "%")}`,
+          `category.ilike.${pattern.replace(/ /g, "%")}`,
+        ]
+        dbQuery = dbQuery.or(queries.join(","))
       } else {
         // The issue is that textSearch requires a specific format for multi-word queries
         // For PostgreSQL's ts_query, words need to be connected with operators like & (AND) or | (OR)
         // Simply passing a space-separated string doesn't work correctly
         const formattedQuery = sanitizedQuery.split(/\s+/).filter(Boolean).join(" & ")
-        if (formattedQuery) {
-          dbQuery = dbQuery.textSearch(searchType, formattedQuery)
-        }
+        if (formattedQuery) dbQuery = dbQuery.textSearch(searchType, formattedQuery)
+
+        // const formattedQuery = sanitizedQuery
+        //   .split(/\s+/)        // break on one or more whitespace characters
+        //   .filter(Boolean)     // remove empty elements
+        //   .join(" & ")         // join terms with AND
+        // if (formattedQuery) {
+        //   dbQuery = dbQuery.textSearch(searchType, formattedQuery)
+        // }
       }
     }
 
