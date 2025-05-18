@@ -27,9 +27,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-import { Code } from "../Code"
-import { ProductChart } from "./ProductChart"
-import { resolveSupermarketChain } from "./Supermarket"
+import { Code } from "@/components/Code"
+import { ProductChart } from "@/components/model/ProductChart"
+import { resolveSupermarketChain } from "@/components/model/Supermarket"
+import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
 
 export function StoreProductPageById({ id }: { id: string }) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
@@ -313,6 +314,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           </div>
         </div>
       </div>
+
+      <RelatedStoreProducts id={sp.id?.toString() || ""} />
     </div>
   )
 }

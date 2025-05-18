@@ -48,11 +48,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ previousPathname }}>
-      <QueryClientProvider client={queryClient}></QueryClientProvider>
-      <ThemeProvider attribute="class" disableTransitionOnChange>
-        <ThemeWatcher />
-        {children}
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" disableTransitionOnChange>
+          <ThemeWatcher />
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
     </AppContext.Provider>
   )
 }
