@@ -204,7 +204,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <Badge
             size="xs"
             variant="light"
-            className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            className="opacity-100 transition-opacity duration-300 group-hover:opacity-100"
           >
             {supermarketChain ? supermarketChain.logoSmall : null}
           </Badge>
@@ -264,7 +264,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm">
+                <Button variant="outline" size="icon-sm" className="bg-background">
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

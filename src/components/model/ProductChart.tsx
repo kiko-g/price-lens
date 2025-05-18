@@ -11,6 +11,7 @@ import { ImageIcon, Loader2Icon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "./PricesVariationCard"
+import { useActiveAxis } from "@/hooks/useActiveAxis"
 
 const chartConfig = {
   price: {
@@ -50,7 +51,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
-  const [activeAxis, setActiveAxis] = useState<string[]>(["price", "price-per-major-unit", "discount"])
+  const [activeAxis, updateActiveAxis] = useActiveAxis()
 
   const ceiling = useMemo(() => {
     const allPrices = prices
@@ -156,8 +157,8 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   }
 
   function handleAxisChange(axis: string) {
-    if (activeAxis.includes(axis)) setActiveAxis(activeAxis.filter((a) => a !== axis))
-    else setActiveAxis([...activeAxis, axis])
+    const newAxis = activeAxis.includes(axis) ? activeAxis.filter((a) => a !== axis) : [...activeAxis, axis]
+    updateActiveAxis(newAxis)
   }
 
   useEffect(() => {
