@@ -37,7 +37,7 @@ export function StoreProductPageById({ id }: { id: string }) {
 
   async function fetchProduct(id: string) {
     setStatus(FrontendStatus.Loading)
-    const response = await axios.get(`/api/products/${id}`)
+    const response = await axios.get(`/api/products/store/${id}`)
     setStoreProduct(response.data)
     setStatus(FrontendStatus.Loaded)
   }

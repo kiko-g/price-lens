@@ -401,4 +401,84 @@ export const storeProductQueries = {
       error: null,
     }
   },
+
+  async getRelatedStoreProducts(id: string, limit: number = 5) {
+    const supabase = createClient()
+    const { data: currentProduct, error } = await supabase.from("store_products").select("*").eq("id", id).single()
+
+    if (error) {
+      console.error("Error fetching store product:", error)
+      return {
+        data: null,
+        error: error,
+      }
+    }
+
+    if (!currentProduct) {
+      return {
+        data: null,
+        error: "Product not found",
+      }
+    }
+
+    // Get products with same brand
+    const { data: sameBrandProducts, error: brandError } = await supabase
+      .from("store_products")
+      .select("*")
+      .eq("brand", currentProduct.brand)
+      .neq("id", id)
+      .limit(limit)
+
+    if (brandError) {
+      console.error("Error fetching same brand products:", brandError)
+      return {
+        data: null,
+        error: brandError,
+      }
+    }
+
+    // Get products with same category
+    const { data: sameCategoryProducts, error: categoryError } = await supabase
+      .from("store_products")
+      .select("*")
+      .eq("category", currentProduct.category)
+      .neq("id", id)
+      .neq("brand", currentProduct.brand) // Exclude products we already found by brand
+      .limit(limit)
+
+    if (categoryError) {
+      console.error("Error fetching same category products:", categoryError)
+      return {
+        data: null,
+        error: categoryError,
+      }
+    }
+
+    // Get products with similar name using text search
+    const { data: similarNameProducts, error: nameError } = await supabase
+      .from("store_products")
+      .select("*")
+      .textSearch("name", currentProduct.name?.split(" ").slice(0, 3).join(" & ") || "")
+      .neq("id", id)
+      .neq("brand", currentProduct.brand) // Exclude products we already found
+      .not("category", "eq", currentProduct.category) // Exclude products we already found
+      .limit(limit)
+
+    if (nameError) {
+      console.error("Error fetching similar name products:", nameError)
+      return {
+        data: null,
+        error: nameError,
+      }
+    }
+
+    // Combine all results, removing duplicates by id
+    const allProducts = [...(sameBrandProducts || []), ...(sameCategoryProducts || []), ...(similarNameProducts || [])]
+    const uniqueProducts = Array.from(new Map(allProducts.map((item) => [item.id, item])).values())
+
+    return {
+      data: uniqueProducts,
+      error: null,
+    }
+  },
 }
