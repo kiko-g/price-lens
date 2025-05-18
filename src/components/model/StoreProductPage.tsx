@@ -31,6 +31,7 @@ import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
+import { Skeleton } from "../ui/skeleton"
 
 export function StoreProductPageById({ id }: { id: string }) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
@@ -50,11 +51,7 @@ export function StoreProductPageById({ id }: { id: string }) {
   }, [id])
 
   if (status === FrontendStatus.Loading) {
-    return (
-      <SkeletonStatusLoading>
-        <p>Loading store product {id}...</p>
-      </SkeletonStatusLoading>
-    )
+    return <StoreProductPageSkeleton />
   }
 
   if (status === FrontendStatus.Error) {
@@ -316,6 +313,60 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       </div>
 
       <RelatedStoreProducts id={sp.id?.toString() || ""} />
+    </div>
+  )
+}
+
+export function StoreProductPageSkeleton() {
+  return (
+    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
+      <div className="mb-4 flex w-min">
+        <Skeleton className="h-10 w-40" />
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        {/* Product Image */}
+        <div className="relative aspect-square overflow-hidden rounded-lg border">
+          <Skeleton className="h-full w-full" />
+        </div>
+
+        {/* Product Details */}
+        <div className="flex flex-col gap-4">
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+
+            <Skeleton className="mb-2 h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-24" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-32" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-36" />
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-9" />
+          </div>
+
+          <div className="flex-1">
+            <Skeleton className="h-[300px] w-full" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <Skeleton className="h-[200px] w-full" />
+      </div>
     </div>
   )
 }
