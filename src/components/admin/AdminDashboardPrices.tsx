@@ -20,7 +20,7 @@ export function AdminDashboardPrices() {
     setIsLoading(true)
 
     try {
-      const data = await axios.get("/api/prices/get")
+      const data = await axios.get("/api/prices")
       if (data.status === 200) {
         setPrices(data.data)
       }

@@ -2,6 +2,11 @@ import { Price } from "@/types"
 import { NextResponse } from "next/server"
 import { priceQueries } from "@/lib/db/queries/prices"
 
+export async function GET() {
+  const prices = await priceQueries.getPrices()
+  return NextResponse.json(prices)
+}
+
 export async function PUT(request: Request) {
   try {
     let price = (await request.json()) as Price

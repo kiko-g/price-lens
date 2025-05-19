@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "./PricesVariationCard"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
+import axios from "axios"
 
 const chartConfig = {
   price: {
@@ -150,9 +151,11 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
 
     setIsLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 400))
-    const response = await fetch(`/api/prices/get/${sp.id}`)
-    const data = await response.json()
-    if (data && data.length > 0) setPrices(data)
+    const response = await axios.get(`/api/prices/${sp.id}`)
+    if (response.status === 200) {
+      const data = response.data
+      if (data && data.length > 0) setPrices(data)
+    }
     setIsLoading(false)
   }
 
