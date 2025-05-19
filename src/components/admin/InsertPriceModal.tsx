@@ -18,7 +18,7 @@ export function InsertPriceModal() {
   const [json, setJson] = useState("")
 
   const handleSubmit = async () => {
-    const response = await fetch("/api/prices/put", {
+    const response = await fetch("/api/prices", {
       method: "PUT",
       body: json,
     })

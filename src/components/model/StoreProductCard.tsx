@@ -103,7 +103,6 @@ async function handleAddToInflationBasket(sp: StoreProduct) {
 
 export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
-
   const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)
   const [isEssential, setIsEssential] = useState(sp?.is_essential ?? false)
 

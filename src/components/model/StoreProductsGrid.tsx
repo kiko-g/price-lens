@@ -268,7 +268,7 @@ export function StoreProductsGrid(props: Props) {
   if (isLoading) {
     return (
       <div className="flex w-full flex-col gap-4 p-4">
-        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full border border-border" />
         <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
           {Array.from({ length: limit }).map((_, index) => (
             <ProductCardSkeleton key={`product-skeleton-${index}`} />

@@ -43,7 +43,7 @@ export function RelatedStoreProducts({ id, limit = 8 }: RelatedStoreProductsProp
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+      <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
         <p>Failed to load related products. Please try again later.</p>
       </div>
     )
@@ -53,7 +53,7 @@ export function RelatedStoreProducts({ id, limit = 8 }: RelatedStoreProductsProp
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-medium">Related Products</h3>
-        {!isLoading && products.length > 0 && (
+        {!isLoading && products && products.length > 0 && (
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -83,18 +83,19 @@ export function RelatedStoreProducts({ id, limit = 8 }: RelatedStoreProductsProp
         <div className="flex h-[300px] items-center justify-center">
           <Loader2Icon className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : products.length === 0 ? (
+      ) : products && products.length === 0 ? (
         <div className="rounded-lg border p-4 text-center text-muted-foreground">
           <p>No related products found.</p>
         </div>
       ) : (
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
-            {products.map((product: StoreProduct) => (
-              <div key={product.id} className="min-w-[220px] flex-[0_0_220px] pl-4 first:pl-0">
-                <StoreProductCard key={product.id} sp={product} />
-              </div>
-            ))}
+            {products &&
+              products.map((product: StoreProduct) => (
+                <div key={product.id} className="min-w-[220px] flex-[0_0_220px] pl-4 first:pl-0">
+                  <StoreProductCard key={product.id} sp={product} />
+                </div>
+              ))}
           </div>
         </div>
       )}
