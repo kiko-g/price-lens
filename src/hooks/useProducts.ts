@@ -3,7 +3,12 @@ import type { GetAllQuery } from "@/types/extra"
 import type { ProductLinked, StoreProduct } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 
-async function fetchProducts(params?: { type?: "essential" | "non-essential" }) {
+type FetchProductsParams = {
+  type?: "essential" | "non-essential"
+  offset?: number
+}
+
+async function fetchProducts(params?: FetchProductsParams) {
   const response = await axios.get("/api/products", { params })
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
@@ -35,10 +40,10 @@ async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
   return response.data as StoreProduct[]
 }
 
-export function useProducts(params?: { type?: "essential" | "non-essential" }) {
+export function useProducts({ type, offset = 0 }: FetchProductsParams) {
   return useQuery({
-    queryKey: ["products", params?.type],
-    queryFn: () => fetchProducts(params),
+    queryKey: ["products", type, offset],
+    queryFn: () => fetchProducts({ type, offset }),
   })
 }
 

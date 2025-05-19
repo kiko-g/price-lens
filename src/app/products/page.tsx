@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
-import { TrackedProducts } from "@/components/model/TrackedProducts"
+import { Products } from "@/components/model/Products"
 import { getSearchType } from "@/types/extra"
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <TrackedProducts />
+        <Products />
       </div>
     </Layout>
   )

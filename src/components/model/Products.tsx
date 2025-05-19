@@ -1,20 +1,19 @@
 "use client"
 
-import axios from "axios"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ProductLinked } from "@/types"
-import { FrontendStatus } from "@/types/extra"
 
 import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
-import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 
 import { BookHeartIcon, ShoppingBasketIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
-export function TrackedProducts() {
-  const { data: products, isLoading } = useProducts()
+export function Products() {
+  const limit = 30
+  const [page, setPage] = useState(1)
+  const { data: products, isLoading } = useProducts({ offset: (page - 1) * limit })
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -27,7 +26,7 @@ export function TrackedProducts() {
             title="Tracked products"
             icon={<ShoppingBasketIcon className="size-5" />}
             description="Products often found in trustworthy inflation baskets, forever valuable for most people"
-            products={products.sort((a, b) => a.name.localeCompare(b.name))}
+            products={products}
           />
         )
       )}
