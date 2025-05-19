@@ -1,13 +1,22 @@
-import type { GetAllQuery } from "@/types/extra"
-import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
+import type { GetAllQuery } from "@/types/extra"
+import type { ProductLinked, StoreProduct } from "@/types"
+import { useQuery } from "@tanstack/react-query"
 
-async function fetchProducts(params: GetAllQuery) {
+async function fetchProducts(params?: { type?: "essential" | "non-essential" }) {
   const response = await axios.get("/api/products", { params })
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
   }
-  return response.data
+  return response.data as ProductLinked[]
+}
+
+async function fetchStoreProducts(params: GetAllQuery) {
+  const response = await axios.get("/api/products/store", { params })
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch products")
+  }
+  return response.data as StoreProduct[]
 }
 
 async function fetchStoreProduct(id: string) {
@@ -15,7 +24,7 @@ async function fetchStoreProduct(id: string) {
   if (response.status !== 200) {
     throw new Error("Failed to fetch store product")
   }
-  return response.data
+  return response.data as StoreProduct
 }
 
 async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
@@ -23,13 +32,20 @@ async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
   if (response.status !== 200) {
     throw new Error("Failed to fetch related store products")
   }
-  return response.data
+  return response.data as StoreProduct[]
 }
 
-export function useProducts(params: GetAllQuery) {
+export function useProducts(params?: { type?: "essential" | "non-essential" }) {
   return useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", params?.type],
     queryFn: () => fetchProducts(params),
+  })
+}
+
+export function useStoreProducts(params: GetAllQuery) {
+  return useQuery({
+    queryKey: ["storeProducts", params],
+    queryFn: () => fetchStoreProducts(params),
   })
 }
 

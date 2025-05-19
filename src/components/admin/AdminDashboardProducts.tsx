@@ -61,7 +61,7 @@ export function AdminDashboardProducts() {
             A table of the products entries in the database. Showing {products.length} products.
           </p>
         </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <div className="flex">
           <InsertPriceModal />
         </div>
       </div>
@@ -73,12 +73,12 @@ export function AdminDashboardProducts() {
               <thead>
                 <tr>
                   <HeaderCell>ID</HeaderCell>
+                  <HeaderCell>Actions</HeaderCell>
                   <HeaderCell>Name</HeaderCell>
                   <HeaderCell>Brand</HeaderCell>
                   <HeaderCell>Category</HeaderCell>
                   <HeaderCell>Essential</HeaderCell>
                   <HeaderCell>Product Ref IDs</HeaderCell>
-                  <HeaderCell>Actions</HeaderCell>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -130,11 +130,6 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
   return (
     <tr key={product.id} className={cn(isUpdating ? "animate-pulse" : "")}>
       <Cell>{product.id}</Cell>
-      <Cell>{product.name}</Cell>
-      <Cell>{product.brand}</Cell>
-      <Cell>{product.category}</Cell>
-      <Cell>{product.essential ? "true" : "false"}</Cell>
-      <Cell>{product.product_ref_ids.join(", ")}</Cell>
       <Cell>
         <Button variant="ghost" size="icon-xs" onClick={() => handleToggleEssential(product.id)} disabled={isUpdating}>
           {product.essential ? <ZapIcon className="text-emerald-400" /> : <ZapOffIcon />}
@@ -148,6 +143,11 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
           <TrashIcon />
         </Button>
       </Cell>
+      <Cell>{product.name}</Cell>
+      <Cell>{product.brand}</Cell>
+      <Cell>{product.category}</Cell>
+      <Cell>{product.essential ? "true" : "false"}</Cell>
+      <Cell>{product.product_ref_ids.join(", ")}</Cell>
     </tr>
   )
 }

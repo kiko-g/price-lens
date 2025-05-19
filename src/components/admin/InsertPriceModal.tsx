@@ -36,7 +36,7 @@ export function InsertPriceModal() {
       <DialogTrigger asChild>
         <Button variant="outline">Insert</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Insert Price</DialogTitle>
           <DialogDescription>Insert a price for a product.</DialogDescription>
