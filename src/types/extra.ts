@@ -53,3 +53,16 @@ export const daysAmountInRange: {
   "5Y": 1825,
   Max: 3650,
 }
+
+export type GetAllQuery = {
+  page: number
+  limit: number
+  query?: string
+  sort?: SortByType
+  searchType?: SearchType
+  nonNulls?: boolean
+  categories?: string[]
+  options?: {
+    onlyDiscounted: boolean
+  }
+}

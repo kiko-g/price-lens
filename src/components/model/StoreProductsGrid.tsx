@@ -52,6 +52,7 @@ import {
   RefreshCcwIcon,
   SearchIcon,
 } from "lucide-react"
+import { useProducts } from "@/hooks/useProducts"
 
 type Props = {
   page?: number
@@ -223,13 +224,8 @@ export function StoreProductsGrid(props: Props) {
     const currentScrollY = window.scrollY
 
     if (currentScrollY < 50) setShowNav(true)
-    else if (currentScrollY > lastScrollY.current) {
-      // Scrolling down
-      setShowNav(false)
-    } else if (currentScrollY < lastScrollY.current) {
-      // Scrolling up
-      setShowNav(true)
-    }
+    else if (currentScrollY > lastScrollY.current) setShowNav(false)
+    else if (currentScrollY < lastScrollY.current) setShowNav(true)
 
     lastScrollY.current = currentScrollY
   }

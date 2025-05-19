@@ -1,19 +1,7 @@
+import type { GetAllQuery } from "@/types/extra"
 import { createClient } from "@/lib/supabase/server"
 import type { Product, ProductLinked, ProductQueryType, StoreProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/extra"
-
-type GetAllQuery = {
-  page: number
-  limit: number
-  query?: string
-  sort?: SortByType
-  searchType?: SearchType
-  nonNulls?: boolean
-  categories?: string[]
-  options?: {
-    onlyDiscounted: boolean
-  }
-}
 
 export const productQueries = {
   async getAll() {
@@ -201,7 +189,7 @@ export const productQueries = {
 export const storeProductQueries = {
   async getAll({
     page = 1,
-    limit = 20,
+    limit = 30,
     query = "",
     searchType = "name",
     nonNulls = true,

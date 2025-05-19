@@ -300,7 +300,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </Drawer>
           </div>
 
-          <div className="mb-4 mt-4 flex-1">
+          <div className="mt-4 flex-1">
             <ProductChart
               sp={sp}
               options={{

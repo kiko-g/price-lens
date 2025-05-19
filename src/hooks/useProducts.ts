@@ -1,8 +1,9 @@
+import type { GetAllQuery } from "@/types/extra"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 
-async function fetchProducts() {
-  const response = await axios.get("/api/products")
+async function fetchProducts(params: GetAllQuery) {
+  const response = await axios.get("/api/products", { params })
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
   }
@@ -25,10 +26,10 @@ async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
   return response.data
 }
 
-export function useProducts() {
+export function useProducts(params: GetAllQuery) {
   return useQuery({
     queryKey: ["products"],
-    queryFn: () => fetchProducts(),
+    queryFn: () => fetchProducts(params),
   })
 }
 
