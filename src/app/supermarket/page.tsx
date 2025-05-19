@@ -24,7 +24,7 @@ type Props = {
 export default async function Supermarket({ searchParams }: Props) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
-  const searchType = getSearchType(params.t ?? "name")
+  const searchType = getSearchType(params.t ?? "any")
   const sortBy = getSortByType(params.s ?? "a-z")
   const q = params.q ?? ""
   const essential = params.essential !== "false"

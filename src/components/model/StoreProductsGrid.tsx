@@ -66,7 +66,7 @@ export function StoreProductsGrid(props: Props) {
   const {
     page: initPage = 1,
     q: initQuery = "",
-    t: initSearchType = "name",
+    t: initSearchType = "any",
     sort: initSortBy = "a-z",
     essential = true,
   } = props
@@ -164,7 +164,7 @@ export function StoreProductsGrid(props: Props) {
   async function updateProduct(sp: StoreProduct): Promise<boolean> {
     if (!sp || !sp.url) return false
 
-    const response = await axios.post(`/api/products/replace`, {
+    const response = await axios.post(`/api/products/store`, {
       storeProduct: sp,
     })
     const data = response.data
@@ -184,7 +184,7 @@ export function StoreProductsGrid(props: Props) {
 
     try {
       for (const sp of storeProducts) {
-        await axios.post(`/api/products/replace`, {
+        await axios.post(`/api/products/store`, {
           storeProduct: sp,
         })
         await new Promise((resolve) => setTimeout(resolve, 50))
@@ -216,7 +216,7 @@ export function StoreProductsGrid(props: Props) {
 
   function clearSearch() {
     setQuery("")
-    setSearchType("name")
+    setSearchType("any")
     page !== 1 ? setPage(1) : fetchProducts()
   }
 

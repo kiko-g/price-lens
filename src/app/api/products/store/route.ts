@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-
 import { type SearchType, type SortByType } from "@/types/extra"
+
+import { scrapeAndReplaceProduct } from "@/lib/scraper"
 import { storeProductQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
@@ -9,7 +10,7 @@ export async function GET(req: NextRequest) {
     const queryParam = params.get("q") ?? ""
     const pageParam = params.get("page") ?? "1"
     const limitParam = params.get("limit") ?? "20"
-    const searchTypeParam = params.get("searchType") ?? "name"
+    const searchTypeParam = params.get("searchType") ?? "any"
     const sortParam = params.get("sort") ?? "a-z"
     const categoriesParam = params.get("categories") ?? ""
     const onlyDiscountedParam = params.get("onlyDiscounted") ?? "false"
@@ -53,6 +54,21 @@ export async function GET(req: NextRequest) {
       },
       { status: 200 },
     )
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const storeProduct = body.storeProduct
+
+    if (!storeProduct || !storeProduct.url) {
+      return NextResponse.json({ error: "Bad request", details: "Missing storeProduct or url" }, { status: 400 })
+    }
+
+    return await scrapeAndReplaceProduct(storeProduct.url, storeProduct)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
