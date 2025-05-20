@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query"
 type FetchProductsParams = {
   type?: "essential" | "non-essential"
   offset?: number
+  limit?: number
+  q?: string
 }
 
 async function fetchProducts(params?: FetchProductsParams) {
@@ -40,10 +42,10 @@ async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
   return response.data as StoreProduct[]
 }
 
-export function useProducts({ type, offset = 0 }: FetchProductsParams) {
+export function useProducts({ type, offset = 0, limit = 30, q = "" }: FetchProductsParams) {
   return useQuery({
-    queryKey: ["products", type, offset],
-    queryFn: () => fetchProducts({ type, offset }),
+    queryKey: ["products", type, offset, limit, q],
+    queryFn: () => fetchProducts({ type, offset, limit, ...(q && { q }) }),
   })
 }
 

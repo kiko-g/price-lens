@@ -16,24 +16,31 @@ export const productQueries = {
     return { data, error }
   },
 
-  async getAllLinked(productQueryType: ProductQueryType = "all") {
+  async getAllLinked(
+    productQueryType: ProductQueryType = "all",
+    offset: number = 0,
+    limit: number = 10,
+    q: string = "",
+  ) {
     const supabase = createClient()
 
-    let query = supabase.from("products").select("*").order("name", { ascending: true })
+    let query = supabase.from("products").select("*", { count: "exact" }).order("name", { ascending: true })
 
-    if (productQueryType === "essential") {
-      query = query.eq("essential", true)
-    } else if (productQueryType === "non-essential") {
-      query = query.eq("essential", false)
-    }
+    if (productQueryType === "essential") query = query.eq("essential", true)
+    else if (productQueryType === "non-essential") query = query.eq("essential", false)
 
-    const { data: products, error: productsError } = await query
+    query = query.range(offset, offset + limit - 1)
+
+    if (q) query = query.textSearch("name", q)
+
+    const { data: products, error: productsError, count } = await query
 
     if (productsError) {
       console.error("Error fetching products:", productsError)
       return {
         data: [],
         error: productsError,
+        pagination: null,
       }
     }
 
@@ -46,6 +53,11 @@ export const productQueries = {
       return {
         data: emptyProducts,
         error: "No products found",
+        pagination: {
+          total: 0,
+          offset,
+          limit,
+        },
       }
     }
 
@@ -54,6 +66,11 @@ export const productQueries = {
       return {
         error: null,
         data: emptyProducts,
+        pagination: {
+          total: count || 0,
+          offset,
+          limit,
+        },
       }
     }
 
@@ -67,6 +84,11 @@ export const productQueries = {
       return {
         error: storeProductsError,
         data: emptyProducts,
+        pagination: {
+          total: count || 0,
+          offset,
+          limit,
+        },
       }
     }
 
@@ -81,6 +103,11 @@ export const productQueries = {
     return {
       error: null,
       data: productsLinked,
+      pagination: {
+        total: count || 0,
+        offset,
+        limit,
+      },
     }
   },
 
