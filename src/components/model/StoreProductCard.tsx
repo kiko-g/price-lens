@@ -105,6 +105,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)
   const [isEssential, setIsEssential] = useState(sp?.is_essential ?? false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   if (!sp || !sp.url) {
     return null
@@ -135,15 +136,23 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
       >
         <Link href={`/supermarket/${sp.id}`} className="h-full w-full">
           {sp.image ? (
-            <Image
-              src={sp.image}
-              alt={sp.name || "Product Image"}
-              width={500}
-              height={500}
-              className="aspect-square h-full w-full transition duration-300 hover:scale-105"
-              placeholder="blur"
-              blurDataURL={imagePlaceholder.productBlur}
-            />
+            <>
+              {!imageLoaded && <div className="aspect-square w-full animate-pulse bg-zinc-100 dark:bg-zinc-800" />}
+              <Image
+                src={sp.image}
+                alt={sp.name || "Product Image"}
+                width={500}
+                height={500}
+                className={cn(
+                  "aspect-square h-full w-full transition duration-300 hover:scale-105",
+                  !imageLoaded && "hidden",
+                )}
+                placeholder="blur"
+                blurDataURL={imagePlaceholder.productBlur}
+                priority={true}
+                onLoad={() => setImageLoaded(true)}
+              />
+            </>
           ) : (
             <div className="aspect-square w-full bg-zinc-100 dark:bg-zinc-800" />
           )}
