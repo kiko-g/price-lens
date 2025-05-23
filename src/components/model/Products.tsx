@@ -20,10 +20,11 @@ export function Products() {
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
+
   const { data: products, isLoading } = useProducts({ offset: (page - 1) * limit, q: debouncedQuery })
 
   useEffect(() => {
-    if (query.length === 0) {
+    if (query.length === 0 || query.length < 3) {
       setDebouncedQuery("")
       setIsSearching(false)
       return
@@ -49,13 +50,6 @@ export function Products() {
       </div>
     )
   }
-
-  if (!products || products.length === 0)
-    return (
-      <div className="flex w-full flex-col gap-y-16">
-        <p>No products found matching your search.</p>
-      </div>
-    )
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -91,11 +85,15 @@ export function Products() {
           </div>
 
           <div className={cn("rounded-lg border p-3 lg:p-4")}>
-            <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-3">
-              {products.map((product, productIdx) => (
-                <ProductCard key={`product-${productIdx}`} product={product} />
-              ))}
-            </div>
+            {products && products.length > 0 ? (
+              <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-3">
+                {products.map((product, productIdx) => (
+                  <ProductCard key={`product-${productIdx}`} product={product} />
+                ))}
+              </div>
+            ) : (
+              <p>No products found matching your search.</p>
+            )}
           </div>
         </div>
       </section>

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
     console.debug(searchParams)
     const type = searchParams.get("type") as ProductQueryType
-    const q = searchParams.get("q")
+    const q = searchParams.get("q") ?? ""
     const limit = searchParams.get("limit")
     const offset = searchParams.get("offset")
 
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       type,
       offset ? parseInt(offset) : 0,
       limit ? parseInt(limit) : 30,
-      q ? q : "",
+      q,
     )
 
     if (error) {

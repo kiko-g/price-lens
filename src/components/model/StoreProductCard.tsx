@@ -441,25 +441,25 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="flex w-full flex-col rounded-lg bg-white dark:bg-zinc-950">
+    <div className="flex w-full flex-col rounded-lg bg-background">
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <div className="aspect-square w-full animate-pulse rounded-md border border-zinc-300 bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900" />
+        <div className="aspect-square w-full animate-pulse rounded-md border border-border bg-muted" />
       </div>
 
       <div className="mb-2 flex flex-col items-start gap-2">
-        <span className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
-        <span className="h-4 w-48 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+        <span className="h-4 w-32 animate-pulse rounded bg-muted"></span>
+        <span className="h-4 w-48 animate-pulse rounded bg-muted"></span>
       </div>
 
       <div className="flex w-full items-end justify-between gap-2">
         <div className="flex flex-col gap-2">
-          <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
-          <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+          <span className="h-4 w-16 animate-pulse rounded bg-muted"></span>
+          <span className="h-4 w-16 animate-pulse rounded bg-muted"></span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="h-7 w-7 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
-          <span className="h-7 w-7 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></span>
+          <span className="h-7 w-7 animate-pulse rounded bg-muted"></span>
+          <span className="h-7 w-7 animate-pulse rounded bg-muted"></span>
         </div>
       </div>
     </div>

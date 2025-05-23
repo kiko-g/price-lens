@@ -1,7 +1,6 @@
 import { FrontendStatus } from "./extra"
 import { StaticImageData } from "next/image"
 
-// UI types
 export type ProductQueryType = "all" | "essential" | "non-essential"
 
 export interface BasketProduct {
