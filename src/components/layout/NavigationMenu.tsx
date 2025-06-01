@@ -10,28 +10,21 @@ import { MenuIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTitle,
-  DrawerHeader,
-  DrawerTrigger,
-  DrawerDescription,
-} from "@/components/ui/drawer"
+import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 
-export function NavigationDrawer() {
+export function NavigationMenu() {
   const pathname = usePathname()
 
   return (
-    <Drawer>
-      <DrawerTrigger className="flex items-center justify-center p-[7px] md:hidden">
+    <Sheet>
+      <SheetTrigger className="flex items-center justify-center p-[7px] md:hidden">
         <MenuIcon className="size-4" />
-      </DrawerTrigger>
-      <DrawerContent className="px-1 pb-4 pt-1">
-        <DrawerHeader className="sr-only">
-          <DrawerTitle className="sr-only">Navigation</DrawerTitle>
-          <DrawerDescription className="sr-only">Drawer menu to navigate through the site</DrawerDescription>
-        </DrawerHeader>
+      </SheetTrigger>
+      <SheetContent side="left" className="px-1 pb-4 pt-1">
+        <SheetHeader className="sr-only">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SheetDescription className="sr-only">Sheet menu to navigate through the site</SheetDescription>
+        </SheetHeader>
 
         <ScrollArea className="h-[400px] w-full px-4 pt-4">
           <div className="flex w-full flex-1 flex-col items-start gap-2">
@@ -40,8 +33,8 @@ export function NavigationDrawer() {
             ))}
           </div>
         </ScrollArea>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   )
 }
 

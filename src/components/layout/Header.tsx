@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation"
 import { adminNavigation, navigation, siteConfig } from "@/lib/config"
 import { cn } from "@/lib/utils"
 
-import { GithubIcon } from "../icons"
-import { Button } from "@/components/ui/button"
-import { LogoLink } from "./LogoLink"
-import { ThemeToggle } from "./ThemeToggle"
-import { NavigationDrawer } from "./NavigationDrawer"
+import { GithubIcon } from "@/components/icons"
+import { LogoLink } from "@/components/layout/LogoLink"
+import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { NavigationMenu } from "@/components/layout/NavigationMenu"
 
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +58,7 @@ export function Header() {
             </Link>
           </Button>
           <ThemeToggle />
-          <NavigationDrawer />
+          <NavigationMenu />
         </div>
       </div>
     </header>
