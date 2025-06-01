@@ -229,7 +229,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             variant={range === selectedRange ? "default" : "ghost"}
             onClick={() => setSelectedRange(range)}
             disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
-            className="disabled:text-muted-foreground"
+            className="px-2 text-xs disabled:text-muted-foreground lg:text-sm"
           >
             {range}
           </Button>

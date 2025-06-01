@@ -117,7 +117,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   return (
-    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
+    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
       <div className="flex w-min">
         <Button variant="ghost" className="mb-2" asChild size="sm">
           <Link href="javascript:history.back()">
@@ -319,7 +319,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
 export function StoreProductPageSkeleton() {
   return (
-    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col px-4 py-4">
+    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
       <div className="mb-4 flex w-min">
         <Skeleton className="h-10 w-40" />
       </div>

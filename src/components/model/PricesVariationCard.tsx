@@ -45,7 +45,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
   const isDiscountActive = activeAxis.includes("discount")
 
   return (
-    <div className={cn("flex flex-1 flex-col items-center gap-0.5", className)}>
+    <div className={cn("flex flex-1 flex-col items-center gap-1", className)}>
       <button
         className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
         onClick={actions.onPriceChange}
