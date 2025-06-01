@@ -17,27 +17,10 @@ export default async function Admin() {
   return (
     <Layout>
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
-        <AdminActionsLink />
         <AdminDashboardProductsLink />
         <AdminDashboardPricesLink />
       </div>
     </Layout>
-  )
-}
-
-function AdminActionsLink() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Actions</CardTitle>
-      </CardHeader>
-      <CardContent>Access the admin actions to manage your account and settings.</CardContent>
-      <CardFooter>
-        <Button asChild>
-          <Link href="/admin/actions">Access Actions</Link>
-        </Button>
-      </CardFooter>
-    </Card>
   )
 }
 

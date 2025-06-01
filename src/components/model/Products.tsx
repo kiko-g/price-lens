@@ -11,8 +11,6 @@ import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 
 export function Products() {
   const limit = 30
@@ -38,18 +36,6 @@ export function Products() {
 
     return () => clearTimeout(timer)
   }, [query])
-
-  if (isLoading) {
-    return (
-      <div className="flex w-full flex-col gap-y-16">
-        <div className="mb-3 grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-3">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <ProductCardSkeleton key={`product-skeleton-${index}`} />
-          ))}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -84,9 +70,17 @@ export function Products() {
             </div>
           </div>
 
-          <div className={cn("rounded-lg border p-3 lg:p-4")}>
-            {products && products.length > 0 ? (
-              <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-3">
+          <div className={cn("rounded-lg border-0 p-0 lg:border lg:p-4")}>
+            {isLoading ? (
+              <div className="flex w-full flex-col gap-y-16">
+                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                  {Array.from({ length: 12 }).map((_, index) => (
+                    <ProductCardSkeleton key={`product-skeleton-${index}`} />
+                  ))}
+                </div>
+              </div>
+            ) : products && products.length > 0 ? (
+              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
                 {products.map((product, productIdx) => (
                   <ProductCard key={`product-${productIdx}`} product={product} />
                 ))}

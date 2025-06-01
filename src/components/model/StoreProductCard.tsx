@@ -447,19 +447,19 @@ export function ProductCardSkeleton() {
       </div>
 
       <div className="mb-2 flex flex-col items-start gap-2">
-        <span className="h-4 w-32 animate-pulse rounded bg-muted"></span>
-        <span className="h-4 w-48 animate-pulse rounded bg-muted"></span>
+        <span className="h-3 w-32 animate-pulse rounded bg-muted lg:w-32"></span>
+        <span className="h-3 w-20 animate-pulse rounded bg-muted lg:w-48"></span>
       </div>
 
       <div className="flex w-full items-end justify-between gap-2">
         <div className="flex flex-col gap-2">
-          <span className="h-4 w-16 animate-pulse rounded bg-muted"></span>
-          <span className="h-4 w-16 animate-pulse rounded bg-muted"></span>
+          <span className="h-4 w-16 animate-pulse rounded bg-muted lg:w-24"></span>
+          <span className="h-4 w-16 animate-pulse rounded bg-muted lg:w-24"></span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="h-7 w-7 animate-pulse rounded bg-muted"></span>
-          <span className="h-7 w-7 animate-pulse rounded bg-muted"></span>
+          <span className="h-7 w-7 animate-pulse rounded bg-muted lg:w-8"></span>
+          <span className="h-7 w-7 animate-pulse rounded bg-muted lg:w-8"></span>
         </div>
       </div>
     </div>
