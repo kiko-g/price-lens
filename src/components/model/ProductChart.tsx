@@ -176,7 +176,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   }, [selectedRange, prices])
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex w-full flex-col", className)}>
       {options?.showPricesVariationCard || options?.showImage ? (
         <header className="mb-6 flex items-start justify-between gap-4">
           {options?.showPricesVariationCard ? (
@@ -241,9 +241,9 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           accessibilityLayer
           data={chartData}
           margin={{
-            left: 12,
-            right: 12,
-            top: 8,
+            left: 4,
+            right: -20,
+            top: 12,
             bottom: 30,
           }}
         >
@@ -294,8 +294,8 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                   stroke={config.color}
                   strokeWidth={2}
                   strokeDasharray={key === "price-recommended" || key === "discount" ? "5 5" : "0"}
-                  dot={chartData.length > 1 ? { r: 2 } : { r: 3 }}
-                  activeDot={{ r: 6 }}
+                  dot={chartData.length > 1 ? { r: 1 } : { r: 4 }}
+                  activeDot={{ r: 2 }}
                 />
               ))}
         </LineChart>

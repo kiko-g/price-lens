@@ -7,6 +7,9 @@ import { type StoreProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
 import { Code } from "@/components/Code"
+import { ProductChart } from "@/components/model/ProductChart"
+import { resolveSupermarketChain } from "@/components/model/Supermarket"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,22 +19,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
-import { resolveSupermarketChain } from "./Supermarket"
-import { ProductChart } from "./ProductChart"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
 import { discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import {
@@ -476,43 +466,22 @@ function DrawerSheet({
   description?: string
 }) {
   const [open, setOpen] = useState(false)
-  const isDesktop = useMediaQuery("(min-width: 768px)")
-
-  if (isDesktop) {
-    return (
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button size="icon-sm">
-            <ChartSplineIcon />
-          </Button>
-        </SheetTrigger>
-        <SheetContent className="overflow-x-hidden overflow-y-scroll">
-          <SheetHeader>
-            <SheetTitle>{title}</SheetTitle>
-            <SheetDescription>{description}</SheetDescription>
-          </SheetHeader>
-
-          <div className="pb-4 pt-2">{children}</div>
-        </SheetContent>
-      </Sheet>
-    )
-  }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <Button variant="default" size="icon-sm">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild className="top-4">
+        <Button size="icon-sm">
           <ChartSplineIcon />
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="overflow-y-auto">
-        <DrawerHeader className="text-left">
-          <DrawerTitle>{title}</DrawerTitle>
-          <DrawerDescription>{description}</DrawerDescription>
-        </DrawerHeader>
+      </SheetTrigger>
+      <SheetContent className="overflow-x-hidden overflow-y-scroll">
+        <SheetHeader>
+          <SheetTitle className="text-left">{title}</SheetTitle>
+          {description ? <SheetDescription>{description}</SheetDescription> : null}
+        </SheetHeader>
 
-        <div className="px-4 pb-4 pt-2">{children}</div>
-      </DrawerContent>
-    </Drawer>
+        <div className="pb-4 pt-2">{children}</div>
+      </SheetContent>
+    </Sheet>
   )
 }
