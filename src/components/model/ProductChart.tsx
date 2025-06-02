@@ -51,7 +51,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [isLoading, setIsLoading] = useState(false)
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
-  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
+  const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
   const [activeAxis, updateActiveAxis] = useActiveAxis()
 
   const ceiling = useMemo(() => {

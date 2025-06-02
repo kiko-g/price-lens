@@ -42,7 +42,7 @@ export function InflationBasket() {
             </p>
           </div>
 
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row">
             <Button size="lg" variant="default" asChild>
               <Link href="/products">
                 Show me essential products

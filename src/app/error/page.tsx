@@ -14,7 +14,7 @@ export default function ErrorPage() {
         <span className="text-lg font-bold text-indigo-400">404</span>
         <h1 className="text-5xl font-bold">Page not found</h1>
         <p>Sorry, something went wrong</p>
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-col gap-4 lg:flex-row">
           <Button variant="default" onClick={() => router.back()}>
             Go back
           </Button>

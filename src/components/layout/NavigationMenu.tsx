@@ -20,13 +20,13 @@ export function NavigationMenu() {
       <SheetTrigger className="flex items-center justify-center p-[7px] md:hidden">
         <MenuIcon className="size-4" />
       </SheetTrigger>
-      <SheetContent side="left" className="px-1 pb-4 pt-1">
-        <SheetHeader className="sr-only">
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <SheetDescription className="sr-only">Sheet menu to navigate through the site</SheetDescription>
+      <SheetContent side="left" className="px-4 py-4">
+        <SheetHeader className="space-y-0">
+          <SheetTitle className="text-left">Navigation</SheetTitle>
+          <SheetDescription className="text-left">Jump to a page</SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="h-[400px] w-full px-4 pt-4">
+        <ScrollArea className="mt-4 h-[400px] w-full">
           <div className="flex w-full flex-1 flex-col items-start gap-2">
             {navigation.map((item) => (
               <Entry key={item.href} item={item} isActive={pathname === item.href} />
