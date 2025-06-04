@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import axios from "axios"
 import Image from "next/image"
+import { useEffect, useMemo, useState } from "react"
 import { Price, StoreProduct, ProductChartEntry } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "./PricesVariationCard"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
-import axios from "axios"
 
 const chartConfig = {
   price: {
@@ -53,6 +53,36 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
   const [activeAxis, updateActiveAxis] = useActiveAxis()
+
+  function getLineChartConfig(axis: string) {
+    switch (axis) {
+      case "price-recommended":
+        return {
+          strokeDasharray: "10 20",
+          dot: { r: 0 },
+          strokeWidth: 3,
+        }
+      case "price-per-major-unit":
+        return {
+          strokeDasharray: "5 10",
+          dot: { r: 0 },
+          strokeWidth: 3,
+        }
+      case "discount":
+        return {
+          strokeDasharray: "10 5",
+          dot: { r: 0 },
+          strokeWidth: 3,
+        }
+      case "price":
+      default:
+        return {
+          strokeDasharray: "0 0",
+          dot: { r: 0 },
+          strokeWidth: 3.5,
+        }
+    }
+  }
 
   const ceiling = useMemo(() => {
     const allPrices = prices
@@ -285,19 +315,23 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           {chartData.length > 0 &&
             Object.entries(chartConfig)
               .filter(([key]) => activeAxis.includes(key))
-              .map(([key, config], index) => (
-                <Line
-                  key={key}
-                  yAxisId={key.includes("price") ? "price" : "discount"}
-                  dataKey={key}
-                  type="linear"
-                  stroke={config.color}
-                  strokeWidth={2}
-                  strokeDasharray={key === "price-recommended" || key === "discount" ? "5 5" : "0"}
-                  dot={chartData.length > 1 ? { r: 1 } : { r: 4 }}
-                  activeDot={{ r: 2 }}
-                />
-              ))}
+              .map(([key, config], index) => {
+                const { dot, strokeDasharray, strokeWidth } = getLineChartConfig(key)
+                return (
+                  <Line
+                    key={key}
+                    yAxisId={key.includes("price") ? "price" : "discount"}
+                    dataKey={key}
+                    type="linear"
+                    stroke={config.color}
+                    strokeOpacity={1}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={strokeDasharray}
+                    dot={dot}
+                    activeDot={{ r: 2 }}
+                  />
+                )
+              })}
         </LineChart>
       </ChartContainer>
     </div>
