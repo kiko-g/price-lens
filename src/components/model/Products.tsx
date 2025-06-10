@@ -6,14 +6,15 @@ import { ProductLinked } from "@/types"
 import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
 
-import { Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
+import { FilterIcon, Loader2Icon, PlusIcon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
 import { Input } from "@/components/ui/input"
+import { Button } from "../ui/button"
 
 export function Products() {
-  const limit = 30
+  const limit = 36
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
@@ -70,23 +71,34 @@ export function Products() {
             </div>
           </div>
 
-          <div className={cn("rounded-lg border-0 p-0 lg:border lg:p-4")}>
+          <div className={cn("mb-4 flex flex-col")}>
             {isLoading ? (
               <div className="flex w-full flex-col gap-y-16">
-                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
                   {Array.from({ length: 12 }).map((_, index) => (
                     <ProductCardSkeleton key={`product-skeleton-${index}`} />
                   ))}
                 </div>
               </div>
             ) : products && products.length > 0 ? (
-              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
-                {products.map((product, productIdx) => (
-                  <ProductCard key={`product-${productIdx}`} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                  {products.map((product, productIdx) => (
+                    <ProductCard key={`product-${productIdx}`} product={product} />
+                  ))}
+                </div>
+              </>
             ) : (
               <p>No products found matching your search.</p>
+            )}
+
+            {products && products.length === limit && (
+              <div className="mt-8 flex items-center justify-center">
+                <Button variant="outline" onClick={() => setPage(page + 1)}>
+                  <PlusIcon className="h-4 w-4" />
+                  Load more products
+                </Button>
+              </div>
             )}
           </div>
         </div>

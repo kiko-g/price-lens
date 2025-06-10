@@ -42,7 +42,7 @@ async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
   return response.data as StoreProduct[]
 }
 
-export function useProducts({ type, offset = 0, limit = 30, q = "" }: FetchProductsParams) {
+export function useProducts({ type, offset = 0, limit = 36, q = "" }: FetchProductsParams) {
   return useQuery({
     queryKey: ["products", type, offset, limit, q],
     queryFn: () => fetchProducts({ type, offset, limit, q }),

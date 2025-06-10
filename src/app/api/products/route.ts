@@ -6,7 +6,6 @@ import { productQueries } from "@/lib/db/queries/products"
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams
-    console.debug(searchParams)
     const type = searchParams.get("type") as ProductQueryType
     const q = searchParams.get("q") ?? ""
     const limit = searchParams.get("limit")
@@ -15,9 +14,11 @@ export async function GET(req: NextRequest) {
     const { data, error } = await productQueries.getAllLinked(
       type,
       offset ? parseInt(offset) : 0,
-      limit ? parseInt(limit) : 30,
+      limit ? parseInt(limit) : 36,
       q,
     )
+
+    console.debug(data)
 
     if (error) {
       return NextResponse.json({ data: [], error: error }, { status: 200 })
