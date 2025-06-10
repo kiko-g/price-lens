@@ -19,8 +19,18 @@ export function Products() {
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
+  const [accumulatedProducts, setAccumulatedProducts] = useState<ProductLinked[]>([])
 
   const { data: products, isLoading } = useProducts({ offset: (page - 1) * limit, q: debouncedQuery })
+
+  useEffect(() => {
+    if (!products) return
+
+    setAccumulatedProducts((prev) => {
+      const isFirstPageOrSearch = page === 1 || debouncedQuery !== ""
+      return isFirstPageOrSearch ? products : [...prev, ...products]
+    })
+  }, [products, page, debouncedQuery])
 
   useEffect(() => {
     if (query.length === 0 || query.length < 3) {
@@ -32,6 +42,7 @@ export function Products() {
     setIsSearching(true)
     const timer = setTimeout(() => {
       setDebouncedQuery(query)
+      setPage(1) // Reset page when search query changes
       setIsSearching(false)
     }, 1500)
 
@@ -72,7 +83,7 @@ export function Products() {
           </div>
 
           <div className={cn("mb-4 flex flex-col")}>
-            {isLoading ? (
+            {isLoading && page === 1 ? (
               <div className="flex w-full flex-col gap-y-16">
                 <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
                   {Array.from({ length: 12 }).map((_, index) => (
@@ -80,10 +91,10 @@ export function Products() {
                   ))}
                 </div>
               </div>
-            ) : products && products.length > 0 ? (
+            ) : accumulatedProducts.length > 0 ? (
               <>
                 <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
-                  {products.map((product, productIdx) => (
+                  {accumulatedProducts.map((product, productIdx) => (
                     <ProductCard key={`product-${productIdx}`} product={product} />
                   ))}
                 </div>
@@ -92,10 +103,10 @@ export function Products() {
               <p>No products found matching your search.</p>
             )}
 
-            {products && products.length === limit && (
+            {products && products.length === limit && !isLoading && (
               <div className="mt-8 flex items-center justify-center">
                 <Button variant="outline" onClick={() => setPage(page + 1)}>
-                  <PlusIcon className="h-4 w-4" />
+                  {isLoading ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <PlusIcon className="h-4 w-4" />}
                   Load more products
                 </Button>
               </div>
