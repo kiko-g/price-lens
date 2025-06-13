@@ -9,7 +9,15 @@ import { FrontendStatus } from "@/types/extra"
 import type { StoreProduct } from "@/types"
 import { siteConfig } from "@/lib/config"
 import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import { Undo2Icon, HeartIcon, Share2Icon, ExternalLinkIcon, InfoIcon } from "lucide-react"
+import {
+  Undo2Icon,
+  HeartIcon,
+  Share2Icon,
+  ExternalLinkIcon,
+  InfoIcon,
+  NavigationIcon,
+  NavigationOffIcon,
+} from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -156,11 +164,15 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
+
               {sp.is_tracked ? (
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Badge variant="success">Tracked</Badge>
+                      <Badge variant="success">
+                        <NavigationIcon className="h-4 w-4" />
+                        Tracked
+                      </Badge>
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
@@ -179,7 +191,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Badge variant="outline-destructive">Not tracked</Badge>
+                      <Badge variant="outline-destructive">
+                        <NavigationOffIcon className="h-4 w-4" />
+                        Not tracked
+                      </Badge>
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
@@ -197,7 +212,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </TooltipProvider>
               )}
 
-              {sp.is_essential ? (
+              {/* {sp.is_essential ? (
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
@@ -235,7 +250,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              )}
+              )} */}
+
               <Button variant="outline" size="sm" roundedness="2xl" asChild>
                 <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                   {supermarketChain?.logo}
