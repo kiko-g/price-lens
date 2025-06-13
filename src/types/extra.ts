@@ -6,7 +6,8 @@ export enum FrontendStatus {
 
 export enum SupermarketChain {
   Continente = 1,
-  PingoDoce = 2,
+  Auchan = 2,
+  PingoDoce = 3,
 }
 
 export interface ScrapedSchemaAuchan {

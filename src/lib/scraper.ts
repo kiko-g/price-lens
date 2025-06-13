@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 import { categories } from "./mock/continente"
 import { formatProductName, isValidJson, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { storeProductQueries } from "./db/queries/products"
-import { ScrapedAddOnAuchan, ScrapedSchemaAuchan } from "@/types/extra"
+import { ScrapedAddOnAuchan, ScrapedSchemaAuchan, SupermarketChain } from "@/types/extra"
 
 export const fetchHtml = async (url: string) => {
   if (!url) {
@@ -298,10 +298,14 @@ export function isValidProduct(product: any): product is StoreProduct {
   return typeof product === "object" && product !== null && typeof product.url === "string"
 }
 
-export const scrapeAndReplaceProduct = async (url: string | null, prevSp?: StoreProduct) => {
+export const scrapeAndReplaceProduct = async (
+  url: string | null,
+  prevSp?: StoreProduct,
+  originId: "continente" | "auchan" = "continente",
+) => {
   if (!url) return NextResponse.json({ error: "URL is required" }, { status: 400 })
 
-  const product = await continenteProductPageScraper(url, prevSp)
+  const product = await Scrapers[originId].productPage(url, prevSp)
 
   if (!product || Object.keys(product).length === 0) {
     await storeProductQueries.upsertBlank({

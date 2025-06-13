@@ -510,4 +510,42 @@ export const storeProductQueries = {
       error: null,
     }
   },
+
+  async getAllEmptyByOriginId(originId: number) {
+    const supabase = createClient()
+    const pageSize = 1000 // Large page size to minimize requests but avoid timeouts
+    let allProducts: StoreProduct[] = []
+    let hasMore = true
+    let page = 0
+
+    while (hasMore) {
+      const { data, error, count } = await supabase
+        .from("store_products")
+        .select("*", { count: "exact" })
+        .is("name", null)
+        .eq("origin_id", originId)
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+
+      if (error) {
+        console.error("Error fetching products:", error)
+        return { data: null, error }
+      }
+
+      if (!data?.length) {
+        hasMore = false
+        break
+      }
+
+      allProducts = [...allProducts, ...data]
+
+      // Check if we've fetched all records
+      if (count && allProducts.length >= count) {
+        hasMore = false
+      }
+
+      page++
+    }
+
+    return { data: allProducts, error: null }
+  },
 }
