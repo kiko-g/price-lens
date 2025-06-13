@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { Products } from "@/components/model/Products"
 import { getSearchType } from "@/types/extra"
+import { Scrapers } from "@/lib/scraper"
 
 export const metadata: Metadata = {
   title: "Products",
@@ -22,6 +23,12 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
   const q = params.q ?? ""
+
+  console.debug(
+    await Scrapers.auchan.productPage(
+      "https://www.auchan.pt/pt/alimentacao/congelados/peixe/peixe-inteiro-e-posta/sardinha-nacional-peniche-congelada-800-g/2736681.html",
+    ),
+  )
 
   return (
     <Layout>

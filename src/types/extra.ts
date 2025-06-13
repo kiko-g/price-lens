@@ -9,6 +9,57 @@ export enum SupermarketChain {
   PingoDoce = 2,
 }
 
+export interface ScrapedSchemaAuchan {
+  "@context": string
+  "@type": string
+  "@id": string
+  name: string
+  description: string
+  sku: string
+  gtin: string
+  brand: {
+    "@type": "Brand"
+    name: string
+  }
+  image: string[]
+  offers: {
+    url: Record<string, unknown>
+    "@type": "Offer"
+    priceCurrency: string
+    priceValidUntil: string
+    price: string
+    pricevaliduntil: string
+    availability: string
+  }
+}
+
+export interface ScrapedAddOnAuchan {
+  event: string
+  ecommerce: {
+    value: number
+    currency: string
+    items: Array<{
+      item_id: string
+      item_name: string
+      item_brand: string
+      item_category: string
+      affiliation: string
+      coupon: string
+      location_id: string
+      item_list_id: string
+      item_list_name: string
+      item_variant: string
+      item_category2: string
+      item_category3: string
+      item_category4: string
+      quantity: string
+      price: string
+      discount: string
+      index: number
+    }>
+  }
+}
+
 export const searchTypes = ["any", "name", "brand", "url", "category"] as const
 
 export function getSearchType(searchType: string): SearchType {

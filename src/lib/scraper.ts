@@ -4,8 +4,9 @@ import type { StoreProduct } from "@/types"
 import { NextResponse } from "next/server"
 
 import { categories } from "./mock/continente"
-import { isValidJson, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
+import { formatProductName, isValidJson, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { storeProductQueries } from "./db/queries/products"
+import { ScrapedAddOnAuchan, ScrapedSchemaAuchan } from "@/types/extra"
 
 export const fetchHtml = async (url: string) => {
   if (!url) {
@@ -40,7 +41,7 @@ export const fetchHtml = async (url: string) => {
   }
 }
 
-export const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
+const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
   const isTracked = prevSp?.is_tracked ?? false
   const isEssential = prevSp?.is_essential ?? false
 
@@ -98,8 +99,8 @@ export const continenteProductPageScraper = async (url: string, prevSp?: StorePr
     const price = rawProduct.price ? priceToNumber(rawProduct.price) : null
     const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : price
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
-
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
+
     const sp: StoreProduct = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
@@ -121,6 +122,100 @@ export const continenteProductPageScraper = async (url: string, prevSp?: StorePr
     console.error(`Unexpected error in continenteProductPageScraper for URL: ${url}`, error)
     return {}
   }
+}
+
+const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
+  const isTracked = prevSp?.is_tracked ?? false
+  const isEssential = prevSp?.is_essential ?? false
+
+  try {
+    const html = await fetchHtml(url)
+    if (!html || typeof html !== "string") {
+      console.warn(`Failed to fetch HTML from: ${url}`)
+      return {}
+    }
+
+    const $ = cheerio.load(html)
+    const jsonSchema = $('script[type="application/ld+json"]').text()
+    if (!jsonSchema || !isValidJson(jsonSchema)) {
+      console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
+      return {}
+    }
+
+    const jsonAddOn = $('input[name="gtmOnLoad"]').attr("value")
+    if (!jsonAddOn || !isValidJson(jsonAddOn)) {
+      console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
+      return {}
+    }
+
+    let addOn: ScrapedAddOnAuchan
+    let schema: ScrapedSchemaAuchan | null = null
+    try {
+      addOn = JSON.parse(jsonAddOn)
+      schema = JSON.parse(jsonSchema)
+    } catch (jsonError) {
+      console.warn(`Error parsing product detail JSON for URL: ${url}`, jsonError)
+      return {}
+    }
+
+    const pricePerMajorUnitStr = $(".auc-measures--price-per-unit").first().text().trim()
+    const pricePerMajorUnit = pricePerMajorUnitStr ? priceToNumber(pricePerMajorUnitStr) : null
+    const majorUnit = pricePerMajorUnitStr.split("/")[pricePerMajorUnitStr.split("/").length - 1]
+    const item = addOn.ecommerce.items[0]
+    const imageSrc = $(".auc-carousel__thumbnail-image").first().attr("src")
+    const imageUrl = imageSrc ? resizeImgSrc(imageSrc, 500, 500) : null
+
+    const rawProduct = {
+      url,
+      name: formatProductName(schema?.name),
+      brand: formatProductName(schema?.brand?.name),
+      pack: $(".attribute-values.auc-pdp-regular").first().text().trim() || null,
+      price: priceToNumber(item.price) || null,
+      price_recommended: priceToNumber(item.price) || null,
+      price_per_major_unit: pricePerMajorUnitStr || null,
+      major_unit: majorUnit || null,
+      image: imageUrl || schema?.image?.[0] || null,
+      category: item.item_category || null,
+      category_2: item.item_category2 || null,
+      category_3: item.item_category3 || null,
+    }
+
+    const price = rawProduct.price ? priceToNumber(rawProduct.price.toString()) : null
+    const priceRecommended = rawProduct.price_recommended
+      ? priceToNumber(rawProduct.price_recommended.toString())
+      : price
+    const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
+
+    const sp: StoreProduct = {
+      ...rawProduct,
+      pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
+      price: price || 0,
+      price_recommended: priceRecommended || null,
+      price_per_major_unit: pricePerMajorUnit || null,
+      discount: discount,
+      image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
+      updated_at: now(),
+      origin_id: 2,
+      created_at: null,
+      is_tracked: isTracked,
+      is_essential: isEssential,
+    }
+
+    return sp
+  } catch (error) {
+    // Fail gracefully instead of breaking the route
+    console.error(`Unexpected error in auchanProductPageScraper for URL: ${url}`, error)
+    return {}
+  }
+}
+
+export const Scrapers = {
+  continente: {
+    productPage: continenteProductPageScraper,
+  },
+  auchan: {
+    productPage: auchanProductPageScraper,
+  },
 }
 
 export const continenteCategoryPageScraper = async (url: string): Promise<string[]> => {

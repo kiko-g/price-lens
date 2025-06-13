@@ -1396,6 +1396,11 @@ export function formatPrice(price: number) {
   return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(price)
 }
 
+export function formatProductName(name: string | undefined) {
+  if (!name) return ""
+  return name.toUpperCase() === name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : name
+}
+
 export function formatTimestamptz(timestamptz: string | null) {
   if (!timestamptz) return ""
 
