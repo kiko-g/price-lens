@@ -7,7 +7,7 @@ import { FrontendStatus } from "@/types/extra"
 
 import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { cn, defaultCategories3, existingCategories3, getCenteredArray } from "@/lib/utils"
+import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -60,6 +60,7 @@ type Props = {
   t?: SearchType
   sort?: SortByType
   essential?: boolean
+  originId?: number | null
 }
 
 export function StoreProductsGrid(props: Props) {
@@ -68,13 +69,16 @@ export function StoreProductsGrid(props: Props) {
     q: initQuery = "",
     t: initSearchType = "any",
     sort: initSortBy = "a-z",
-    essential = true,
+    essential = false,
+    originId: initOriginId = null,
   } = props
 
   const limit = 30
   const [page, setPage] = useState(initPage)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
+  const [originId, setOriginId] = useState<number | null>(initOriginId)
+  console.debug("oi", originId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
@@ -84,8 +88,8 @@ export function StoreProductsGrid(props: Props) {
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
-    const defaultCategorySet = defaultCategories3.length > 0 ? new Set(defaultCategories3) : new Set()
-    const uniqueCategories = Array.from(new Set([...existingCategories3, ...defaultCategories3]))
+    const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
+    const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
 
     if (essential) {
       uniqueCategories.sort((a, b) => {
@@ -121,7 +125,7 @@ export function StoreProductsGrid(props: Props) {
   }
 
   const selectDefaultCategories = () => {
-    setCategories((prev) => prev.map((cat) => ({ ...cat, selected: defaultCategories3.includes(cat.name) })))
+    setCategories((prev) => prev.map((cat) => ({ ...cat, selected: defaultCategories.includes(cat.name) })))
   }
 
   const updateParams = useUpdateSearchParams()
@@ -139,6 +143,7 @@ export function StoreProductsGrid(props: Props) {
           searchType,
           sort: sortBy,
           onlyDiscounted,
+          originId,
           ...(query === ""
             ? {
                 categories: categories

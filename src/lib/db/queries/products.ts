@@ -221,6 +221,7 @@ export const storeProductQueries = {
     nonNulls = true,
     sort = "a-z",
     categories = [],
+    originId = null,
     options = {
       onlyDiscounted: false,
     },
@@ -235,6 +236,8 @@ export const storeProductQueries = {
       dbQuery = dbQuery.order("url", { ascending: true })
       return dbQuery.range(offset, offset + limit - 1)
     }
+
+    if (originId !== null) dbQuery = dbQuery.eq("origin_id", originId)
 
     if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 
@@ -269,7 +272,7 @@ export const storeProductQueries = {
     }
 
     if (categories && categories.length !== 0) {
-      dbQuery = dbQuery.in("category_3", categories)
+      dbQuery = dbQuery.in("category", categories) // FIXME: using main category, consider more
     }
 
     if (options.onlyDiscounted) {
@@ -400,6 +403,7 @@ export const storeProductQueries = {
       const { data: pageData, error: pageError } = await supabase
         .from("store_products")
         .select("category, category_2, category_3")
+        .eq("origin_id", "2")
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
       if (pageError) {

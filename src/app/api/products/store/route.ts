@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     const sortParam = params.get("sort") ?? "a-z"
     const categoriesParam = params.get("categories") ?? ""
     const onlyDiscountedParam = params.get("onlyDiscounted") ?? "false"
+    const originIdParam = params.get("originId") ?? null
 
     const query = queryParam
     const page = parseInt(pageParam, 10) || 1
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     const searchType = searchTypeParam as SearchType
     const sort = sortParam as SortByType
     const categories = categoriesParam ? categoriesParam.split(";") : []
+    const originId = originIdParam ? parseInt(originIdParam, 10) : null
     const onlyDiscounted = onlyDiscountedParam === "true"
 
     const { data, error, count } = await storeProductQueries.getAll({
@@ -30,6 +32,7 @@ export async function GET(req: NextRequest) {
       searchType,
       sort,
       categories,
+      originId,
       options: {
         onlyDiscounted,
       },

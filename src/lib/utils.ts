@@ -279,6 +279,7 @@ export const basketProducts: BasketProduct[] = [
 ]
 
 export const existingCategories = [
+  // Continente
   "Mercearia",
   "Congelados",
   "Bebidas e Garrafeira",
@@ -304,8 +305,44 @@ export const existingCategories = [
   "Negócios",
   "Presentes",
   "Resultado de Pesquisa",
+  // Auchan
+  "Alimentação",
+  "Animais",
+  "Automóvel e Bricolage",
+  "Bebidas e Garrafeira",
+  "Beleza e Higiene",
+  "Biológicos e Alternativas",
+  "Casa e Jardim",
+  "Limpeza e Cuidados do Lar",
+  "Marcas Auchan",
+  "O Mundo do Bebé",
+  "Produtos Frescos",
+  "Produtos Locais",
+  "Saúde e Bem Estar",
+  "Tecnologia e Eletrodomésticos",
 ]
-export const defaultCategories = []
+export const defaultCategories = [
+  // Continente
+  "Mercearia",
+  "Congelados",
+  "Bebidas e Garrafeira",
+  "Frescos",
+  "Beleza e Higiene",
+  "Bio, Eco e Saudável",
+  "Bebé",
+  "Limpeza",
+  "Laticínios e Ovos",
+  "Charcutaria e Queijos",
+  // Auchan
+  "Alimentação",
+  "Bebidas e Garrafeira",
+  "Beleza e Higiene",
+  "Biológicos e Alternativas",
+  "Marcas Auchan",
+  "Produtos Frescos",
+  "Produtos Locais",
+  "Saúde e Bem Estar",
+]
 
 export const existingCategories2 = [
   "Acessórios",

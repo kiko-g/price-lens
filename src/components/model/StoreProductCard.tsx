@@ -129,7 +129,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             <>
               {!imageLoaded && <div className="aspect-square w-full animate-pulse bg-zinc-100 dark:bg-zinc-800" />}
               <Image
-                src={sp.image}
+                src={sp.image?.replace(/&sm=fit/g, "")}
                 alt={sp.name || "Product Image"}
                 width={500}
                 height={500}
@@ -215,7 +215,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             <Tooltip>
               <TooltipTrigger>
                 <Badge variant="secondary" size="xs" roundedness="sm" className="line-clamp-1 text-left text-2xs">
-                  {sp.category_3 || sp.category_2 || sp.category || "No category"}
+                  {sp.category || sp.category_3 || sp.category_2 || "No category"}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent
