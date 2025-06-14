@@ -53,6 +53,7 @@ import {
   SearchIcon,
 } from "lucide-react"
 import { useProducts } from "@/hooks/useProducts"
+import { resolveSupermarketChain } from "./Supermarket"
 
 type Props = {
   page?: number
@@ -60,7 +61,7 @@ type Props = {
   t?: SearchType
   sort?: SortByType
   essential?: boolean
-  originId?: number | null
+  originId?: string | null
 }
 
 export function StoreProductsGrid(props: Props) {
@@ -77,8 +78,7 @@ export function StoreProductsGrid(props: Props) {
   const [page, setPage] = useState(initPage)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
-  const [originId, setOriginId] = useState<number | null>(initOriginId)
-  console.debug("oi", originId)
+  const [originId, setOriginId] = useState<string | null>(initOriginId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
@@ -143,7 +143,7 @@ export function StoreProductsGrid(props: Props) {
           searchType,
           sort: sortBy,
           onlyDiscounted,
-          originId,
+          ...(originId !== null ? { originId: originId.toString() } : {}),
           ...(query === ""
             ? {
                 categories: categories
@@ -291,43 +291,55 @@ export function StoreProductsGrid(props: Props) {
     return (
       <Wrapper>
         <CircleOffIcon className="h-8 w-8" />
-        <p>No products found matching your search.</p>
-        <Button
-          variant="default"
-          onClick={() => {
-            updateParams(null)
-            location.reload()
-          }}
-        >
-          <span>Clear search</span>
-          <DeleteIcon />
-        </Button>
+        <div className="flex flex-col items-start justify-start">
+          <p>No products found matching your search.</p>
+          <p>Your search parameters:</p>
 
-        <ul className="flex max-w-md flex-col text-sm">
-          <li className="mb-4">
-            <strong>You searched for:</strong> "{query}"
-          </li>
+          <ul className="flex max-w-md list-disc flex-col pl-4 text-sm">
+            {query !== "" && (
+              <li>
+                <strong>Query:</strong> "{query}"
+              </li>
+            )}
+            <li>
+              <strong>Search type:</strong> {searchType}
+            </li>
+            <li>
+              <strong>Page:</strong> {page}
+            </li>
+            <li>
+              <strong>Sort by:</strong> {sortBy}
+            </li>
+            {originId !== null && (
+              <li>
+                <strong>Store:</strong> {resolveSupermarketChain(parseInt(originId))?.name}
+              </li>
+            )}
+            <li>
+              <strong>Categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
+              <span className="text-muted-foreground">
+                {categories
+                  .filter((cat) => cat.selected)
+                  .map((cat) => cat.name)
+                  .join(", ") || "None"}
+              </span>
+            </li>
+          </ul>
+        </div>
 
-          <li>
-            <strong>Search type:</strong> {searchType}
-          </li>
-          <li>
-            <strong>Page:</strong> {page}
-          </li>
-          <li>
-            <strong>Sort by:</strong> {sortBy}
-          </li>
-          <li>
-            <strong>Categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
-            <span className="text-muted-foreground">
-              {categories
-                .filter((cat) => cat.selected)
-                .map((cat) => cat.name)
-                .join(", ")
-                .slice(0, 200) + "..." || "None"}
-            </span>
-          </li>
-        </ul>
+        <div className="mt-2 flex w-full items-center justify-center gap-2">
+          <Button variant="outline">Return home</Button>
+          <Button
+            variant="default"
+            onClick={() => {
+              updateParams(null)
+              location.reload()
+            }}
+          >
+            <span>Clear search</span>
+            <DeleteIcon />
+          </Button>
+        </div>
       </Wrapper>
     )
   }
@@ -412,10 +424,7 @@ export function StoreProductsGrid(props: Props) {
 
           <div className="flex w-full flex-wrap gap-2 md:w-auto">
             <div className="flex flex-1 gap-2">
-              <Select
-                value={originId?.toString() ?? "0"}
-                onValueChange={(value) => setOriginId(value ? parseInt(value) : null)}
-              >
+              <Select value={originId ?? "0"} onValueChange={(value) => setOriginId(value === "0" ? null : value)}>
                 <SelectTrigger className="min-w-[120px]">
                   <SelectValue placeholder="Store" />
                 </SelectTrigger>

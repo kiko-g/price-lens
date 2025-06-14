@@ -237,7 +237,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           {options?.showImage ? (
             sp.image ? (
               <Image
-                src={sp.image}
+                src={sp.image.replace(/&sm=fit/g, "")}
                 alt={sp.name}
                 width={100}
                 height={100}

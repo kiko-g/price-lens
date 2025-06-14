@@ -22,7 +22,7 @@ export function Brands({ className }: { className?: string }) {
     {
       name: "Auchan",
       image: auchan,
-      disabled: true,
+      disabled: false,
       shown: true,
       className: "h-10",
       width: 1000,
