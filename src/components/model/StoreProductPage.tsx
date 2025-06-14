@@ -97,7 +97,7 @@ export const metadata: Metadata = {
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   if (!sp) return null
 
-  const supermarketChain = resolveSupermarketChain(sp)
+  const supermarketChain = resolveSupermarketChain(sp?.origin_id)
 
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price

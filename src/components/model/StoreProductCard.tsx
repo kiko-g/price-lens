@@ -105,7 +105,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
     return <ProductCardSkeleton />
   }
 
-  const supermarketChain = resolveSupermarketChain(sp)
+  const supermarketChain = resolveSupermarketChain(sp?.origin_id)
 
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
@@ -382,7 +382,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
               <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Link href={sp.url} target="_blank">
-                    {resolveSupermarketChain(sp)?.logo}
+                    {resolveSupermarketChain(sp?.origin_id)?.logo}
                   </Link>
                   <Button asChild variant="ghost" size="icon-xs" roundedness="sm">
                     <Link href={sp.url} target="_blank">

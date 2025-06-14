@@ -237,7 +237,7 @@ export function StoreProductsGrid(props: Props) {
 
   useEffect(() => {
     fetchProducts()
-  }, [page, sortBy, onlyDiscounted])
+  }, [page, sortBy, onlyDiscounted, originId])
 
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString() })
@@ -412,6 +412,23 @@ export function StoreProductsGrid(props: Props) {
 
           <div className="flex w-full flex-wrap gap-2 md:w-auto">
             <div className="flex flex-1 gap-2">
+              <Select
+                value={originId?.toString() ?? "0"}
+                onValueChange={(value) => setOriginId(value ? parseInt(value) : null)}
+              >
+                <SelectTrigger className="min-w-[120px]">
+                  <SelectValue placeholder="Store" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Store</SelectLabel>
+                    <SelectItem value="0">All stores</SelectItem>
+                    <SelectItem value="1">Continente</SelectItem>
+                    <SelectItem value="2">Auchan</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
               <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
                 <PopoverTrigger asChild>
                   <Button

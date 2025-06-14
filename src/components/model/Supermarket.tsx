@@ -25,8 +25,8 @@ function SupermarketBadge({ supermarketChain, className }: { supermarketChain: s
   )
 }
 
-export function resolveSupermarketChain(sp: StoreProduct) {
-  switch (sp.origin_id) {
+export function resolveSupermarketChain(originId: number | null) {
+  switch (originId) {
     case SupermarketChain.Continente:
       return {
         name: "Continente",
