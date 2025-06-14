@@ -209,6 +209,17 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
   }
 }
 
+export const getScraper = (originId: number) => {
+  switch (originId) {
+    case 1:
+      return Scrapers.continente
+    case 2:
+      return Scrapers.auchan
+    default:
+      throw new Error(`Unknown originId: ${originId}`)
+  }
+}
+
 export const Scrapers = {
   continente: {
     productPage: continenteProductPageScraper,
@@ -298,14 +309,12 @@ export function isValidProduct(product: any): product is StoreProduct {
   return typeof product === "object" && product !== null && typeof product.url === "string"
 }
 
-export const scrapeAndReplaceProduct = async (
-  url: string | null,
-  prevSp?: StoreProduct,
-  originId: "continente" | "auchan" = "continente",
-) => {
+export const scrapeAndReplaceProduct = async (url: string | null, originId: number | null, prevSp?: StoreProduct) => {
   if (!url) return NextResponse.json({ error: "URL is required" }, { status: 400 })
 
-  const product = await Scrapers[originId].productPage(url, prevSp)
+  if (!originId) return NextResponse.json({ error: "Origin ID is required" }, { status: 400 })
+
+  const product = await getScraper(originId).productPage(url, prevSp)
 
   if (!product || Object.keys(product).length === 0) {
     await storeProductQueries.upsertBlank({

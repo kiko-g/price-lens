@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
         const url = storeProduct.url
         try {
           console.info(`Scraping product ${url}...`)
-          const response = await scrapeAndReplaceProduct(url, storeProduct)
+          const response = await scrapeAndReplaceProduct(url, storeProduct.origin_id, storeProduct)
           const json = await response.json()
 
           await updatePricePoint(product, {

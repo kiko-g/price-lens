@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Bad request", details: "Missing storeProduct or url" }, { status: 400 })
     }
 
-    return await scrapeAndReplaceProduct(storeProduct.url, storeProduct)
+    return await scrapeAndReplaceProduct(storeProduct.url, storeProduct.origin_id, storeProduct)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

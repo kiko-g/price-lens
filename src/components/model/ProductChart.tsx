@@ -54,31 +54,33 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
   const [activeAxis, updateActiveAxis] = useActiveAxis()
 
-  function getLineChartConfig(axis: string) {
+  function getLineChartConfig(axis: string, chartDataLength: number) {
+    const isSinglePoint = chartDataLength === 1
+
     switch (axis) {
       case "price-recommended":
         return {
-          strokeDasharray: "10 20",
-          dot: { r: 0 },
+          strokeDasharray: isSinglePoint ? "0 0" : "15 20",
+          dot: isSinglePoint ? { r: 2 } : { r: 0 },
           strokeWidth: 3,
         }
       case "price-per-major-unit":
         return {
-          strokeDasharray: "5 10",
-          dot: { r: 0 },
+          strokeDasharray: isSinglePoint ? "0 0" : "5 10",
+          dot: isSinglePoint ? { r: 2 } : { r: 0 },
           strokeWidth: 3,
         }
       case "discount":
         return {
-          strokeDasharray: "10 5",
-          dot: { r: 0 },
+          strokeDasharray: isSinglePoint ? "0 0" : "10 5",
+          dot: isSinglePoint ? { r: 2 } : { r: 0 },
           strokeWidth: 3,
         }
       case "price":
       default:
         return {
-          strokeDasharray: "0 0",
-          dot: { r: 0 },
+          strokeDasharray: isSinglePoint ? "0 0" : "0 0",
+          dot: isSinglePoint ? { r: 2 } : { r: 0 },
           strokeWidth: 3.5,
         }
     }
@@ -316,7 +318,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             Object.entries(chartConfig)
               .filter(([key]) => activeAxis.includes(key))
               .map(([key, config], index) => {
-                const { dot, strokeDasharray, strokeWidth } = getLineChartConfig(key)
+                const { dot, strokeDasharray, strokeWidth } = getLineChartConfig(key, chartData.length)
                 return (
                   <Line
                     key={key}

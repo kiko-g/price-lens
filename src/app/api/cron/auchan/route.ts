@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
           const elapsedMs = performance.now() - start
           const timeStr = elapsedMsToTimeStr(elapsedMs)
           console.info(`[${index + 1}/${data.length}] [${percent.toFixed(1)}%] [${timeStr}] ${url}`)
-          await scrapeAndReplaceProduct(url, product, "auchan")
+          await scrapeAndReplaceProduct(url, 2, product)
         } catch (error) {
           console.warn(`Failed to scrape product ${url}:`, error)
           failedScrapes++
