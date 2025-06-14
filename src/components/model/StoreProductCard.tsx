@@ -134,7 +134,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                 width={500}
                 height={500}
                 className={cn(
-                  "aspect-square h-full w-full transition duration-300 hover:scale-105",
+                  "aspect-square h-full w-full object-cover object-center transition duration-300 hover:scale-105",
                   !imageLoaded && "hidden",
                 )}
                 placeholder="blur"
@@ -187,14 +187,31 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
 
         <div className="absolute right-2 top-2 flex flex-col gap-1">
           {sp.pack ? (
-            <Badge
-              variant="unit"
-              size="2xs"
-              roundedness="sm"
-              className="line-clamp-3 w-fit max-w-20 tracking-tighter md:line-clamp-1 md:max-w-[132px]"
-            >
-              {sp.pack}
-            </Badge>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge
+                    variant="unit"
+                    size="2xs"
+                    roundedness="sm"
+                    className="line-clamp-3 w-fit max-w-20 tracking-tighter md:line-clamp-1 md:max-w-32"
+                  >
+                    {sp.pack}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="start"
+                  sideOffset={6}
+                  alignOffset={-6}
+                  size="xs"
+                  variant="glass"
+                  className="max-w-60"
+                >
+                  {sp.pack}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : null}
         </div>
 
