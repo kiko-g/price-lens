@@ -19,16 +19,10 @@ type HomeProps = {
   searchParams: Promise<SearchParams>
 }
 
-export default async function Home({ searchParams }: HomeProps) {
+export default async function ProductsPage({ searchParams }: HomeProps) {
   const params = await Promise.resolve(searchParams)
   const page = params.page ? parseInt(params.page) : 1
   const q = params.q ?? ""
-
-  console.debug(
-    await Scrapers.auchan.productPage(
-      "https://www.auchan.pt/pt/alimentacao/congelados/peixe/peixe-inteiro-e-posta/sardinha-nacional-peniche-congelada-800-g/2736681.html",
-    ),
-  )
 
   return (
     <Layout>

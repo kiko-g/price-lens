@@ -278,7 +278,7 @@ export function StoreProductsGrid(props: Props) {
           <Skeleton className="h-3 w-48 rounded" />
           <Skeleton className="h-3 w-24 rounded" />
         </div>
-        <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
+        <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-6">
           {Array.from({ length: limit }).map((_, index) => (
             <ProductCardSkeleton key={`product-skeleton-${index}`} />
           ))}
@@ -590,7 +590,7 @@ export function StoreProductsGrid(props: Props) {
         </div>
       </nav>
 
-      <div className="mb-16 grid w-full grid-cols-2 gap-8 px-4 pt-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-5 2xl:grid-cols-6">
+      <div className="mb-16 grid w-full grid-cols-2 gap-8 px-4 pt-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-6">
         {storeProducts.map((product, productIdx) => (
           <StoreProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
         ))}

@@ -29,7 +29,7 @@ export default async function Supermarket({ searchParams }: Props) {
   const sortBy = getSortByType(params.s ?? "a-z")
   const q = params.q ?? ""
   const essential = params.essential !== "false"
-  const originId = params.origin ? parseInt(params.origin) : null
+  const originId = params.origin || null
 
   return (
     <Layout>
