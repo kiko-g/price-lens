@@ -1,27 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { ProductLinked } from "@/types"
 
 import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
 
-import { FilterIcon, Loader2Icon, PlusIcon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
+import { FilterIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
 import { Input } from "@/components/ui/input"
-import { Button } from "../ui/button"
 
 export function Products() {
-  const limit = 36
+  const limit = 24
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [accumulatedProducts, setAccumulatedProducts] = useState<ProductLinked[]>([])
+  const [hasMore, setHasMore] = useState(true)
+  const loadingRef = useRef(false)
 
-  const { data: products, isLoading } = useProducts({ offset: (page - 1) * limit, q: debouncedQuery })
+  const { data: products, isLoading } = useProducts({ offset: (page - 1) * limit, limit, q: debouncedQuery })
 
   useEffect(() => {
     if (!products) return
@@ -30,6 +31,9 @@ export function Products() {
       const isFirstPageOrSearch = page === 1 || debouncedQuery !== ""
       return isFirstPageOrSearch ? products : [...prev, ...products]
     })
+
+    setHasMore(products.length === limit)
+    loadingRef.current = false
   }, [products, page, debouncedQuery])
 
   useEffect(() => {
@@ -48,6 +52,23 @@ export function Products() {
 
     return () => clearTimeout(timer)
   }, [query])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingRef.current || !hasMore || isLoading) return
+
+      const scrolledToBottom =
+        window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 100
+
+      if (scrolledToBottom) {
+        loadingRef.current = true
+        setPage((prev) => prev + 1)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [hasMore, isLoading])
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -98,18 +119,17 @@ export function Products() {
                     <ProductCard key={`product-${productIdx}`} product={product} />
                   ))}
                 </div>
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                  {accumulatedProducts.length} products found matching your search.
+                </p>
+                {isLoading && (
+                  <div className="mt-8 flex items-center justify-center">
+                    <Loader2Icon className="h-6 w-6 animate-spin" />
+                  </div>
+                )}
               </>
             ) : (
               <p>No products found matching your search.</p>
-            )}
-
-            {products && products.length === limit && !isLoading && (
-              <div className="mt-8 flex items-center justify-center">
-                <Button variant="outline" onClick={() => setPage(page + 1)}>
-                  {isLoading ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <PlusIcon className="h-4 w-4" />}
-                  Load more products
-                </Button>
-              </div>
             )}
           </div>
         </div>
