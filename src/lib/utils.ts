@@ -1591,7 +1591,7 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
   let currentPriceIndex = 0
 
   for (const date of dates) {
-    const dateStr = formatDate(date.toISOString(), daysBetweenDates > 30 ? range : "1M")
+    const dateStr = formatDateForChart(date.toISOString(), daysBetweenDates > 30 ? range : "1M")
 
     while (currentPriceIndex < processedPrices.length) {
       const price = processedPrices[currentPriceIndex]
@@ -1616,8 +1616,7 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
 
   return entries
 }
-
-function formatDate(dateString: string, range: DateRange = "1M"): string {
+function formatDateForChart(dateString: string, range: DateRange = "1M"): string {
   const date = new Date(dateString)
 
   switch (range) {
@@ -1626,16 +1625,15 @@ function formatDate(dateString: string, range: DateRange = "1M"): string {
     case "1Y":
     case "5Y":
     case "Max":
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString(undefined, {
         day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
+        month: "short",
       })
 
     case "1W":
     case "1M":
     default:
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString(undefined, {
         day: "numeric",
         month: "short",
       })
@@ -1644,7 +1642,7 @@ function formatDate(dateString: string, range: DateRange = "1M"): string {
 
 export function getDaysBetweenDates(startDate: Date, endDate: Date) {
   const timeDiff = Math.abs(endDate.getTime() - startDate.getTime())
-  return Math.ceil(timeDiff / (1000 * 3600 * 24))
+  return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1
 }
 
 export function elapsedMsToTimeStr(elapsedMs: number) {

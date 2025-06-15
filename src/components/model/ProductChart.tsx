@@ -51,7 +51,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const [isLoading, setIsLoading] = useState(false)
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
-  const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
+  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
   const [activeAxis, updateActiveAxis] = useActiveAxis()
 
   function getLineChartConfig(axis: string, chartDataLength: number) {
@@ -60,33 +60,37 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     switch (axis) {
       case "price-recommended":
         return {
-          strokeDasharray: isSinglePoint ? "0 0" : "15 20",
+          strokeDasharray: isSinglePoint ? "0 0" : "6 6",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
+          activeDot: { r: 5 },
           strokeWidth: 3,
         }
       case "price-per-major-unit":
         return {
-          strokeDasharray: isSinglePoint ? "0 0" : "5 10",
+          strokeDasharray: isSinglePoint ? "0 0" : "4 4",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
+          activeDot: { r: 5 },
           strokeWidth: 3,
         }
       case "discount":
         return {
-          strokeDasharray: isSinglePoint ? "0 0" : "10 5",
+          strokeDasharray: isSinglePoint ? "0 0" : "5 5",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
-          strokeWidth: 3,
+          activeDot: { r: 5 },
+          strokeWidth: 2,
         }
       case "price":
       default:
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "0 0",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
+          activeDot: { r: 5 },
           strokeWidth: 3.5,
         }
     }
   }
 
-  const ceiling = useMemo(() => {
+  const { floor, ceiling } = useMemo(() => {
     const allPrices = prices
       .flatMap((p) => [
         activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
@@ -95,7 +99,12 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
       ])
       .filter((price) => price !== -Infinity && price !== null)
 
-    return allPrices.length > 0 ? Math.ceil(Math.max(...allPrices)) : 0
+    if (allPrices.length === 0) return { floor: 0, ceiling: 0 }
+
+    return {
+      floor: Math.floor(Math.min(...allPrices)),
+      ceiling: Math.ceil(Math.max(...allPrices)),
+    }
   }, [prices, activeAxis])
 
   const priceVariation = useMemo(() => {
@@ -285,7 +294,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             tickLine={false}
             axisLine={false}
             tickMargin={10}
-            interval={Math.ceil(chartData.length / 6) - 1}
+            interval="preserveEnd"
             tick={{ fontSize: 10 }}
             tickFormatter={(value) => value.slice(0, 10)}
           />
@@ -296,8 +305,10 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             tickLine={false}
             axisLine={false}
             width={40}
-            domain={[0, ceiling * 1.1]}
-            ticks={Array.from({ length: 5 }, (_, i) => (ceiling * i) / 4).map((tick, index) => tick + index * 0.0001)}
+            domain={[floor * 0.9, ceiling * 1.05]}
+            ticks={Array.from({ length: 5 }, (_, i) => floor + ((ceiling - floor) * i) / 4).map(
+              (tick, index) => tick + index * 0.0001,
+            )}
             tickFormatter={(value) => `€${value.toFixed(1)}`}
             tick={(props) => <CustomTick {...props} yAxisId="price" />}
           />
@@ -318,7 +329,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             Object.entries(chartConfig)
               .filter(([key]) => activeAxis.includes(key))
               .map(([key, config], index) => {
-                const { dot, strokeDasharray, strokeWidth } = getLineChartConfig(key, chartData.length)
+                const { dot, strokeDasharray, strokeWidth, activeDot } = getLineChartConfig(key, chartData.length)
                 return (
                   <Line
                     key={key}
@@ -330,7 +341,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                     strokeWidth={strokeWidth}
                     strokeDasharray={strokeDasharray}
                     dot={dot}
-                    activeDot={{ r: 2 }}
+                    activeDot={activeDot}
                   />
                 )
               })}

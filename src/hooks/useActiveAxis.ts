@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 
 const STORAGE_KEY = "activeAxis"
-const DEFAULT_ACTIVE_AXIS = ["price", "price-per-major-unit", "price-recommended", "discount"]
+const DEFAULT_ACTIVE_AXIS = ["price", "price-recommended"]
 
 export function useActiveAxis() {
   const [activeAxis, setActiveAxis] = useState<string[]>(DEFAULT_ACTIVE_AXIS)
