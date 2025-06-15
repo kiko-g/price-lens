@@ -305,8 +305,8 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             tickLine={false}
             axisLine={false}
             width={40}
-            domain={[floor * 0.9, ceiling * 1.05]}
-            ticks={Array.from({ length: 5 }, (_, i) => floor + ((ceiling - floor) * i) / 4).map(
+            domain={[floor * 0.5, ceiling * 1.05]}
+            ticks={Array.from({ length: 5 }, (_, i) => floor / 2 + ((ceiling - floor / 2) * i) / 4).map(
               (tick, index) => tick + index * 0.0001,
             )}
             tickFormatter={(value) => `€${value.toFixed(1)}`}

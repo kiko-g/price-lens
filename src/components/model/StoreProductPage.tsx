@@ -17,11 +17,13 @@ import {
   InfoIcon,
   NavigationIcon,
   NavigationOffIcon,
+  EllipsisVerticalIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
@@ -297,23 +299,35 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               Add to favorites
             </Button>
             <ShareButton url={sp.url} title={sp.name} description={sp.name} />
-            <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
-              <DrawerTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon-sm">
-                  <InfoIcon />
+                  <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
-              </DrawerTrigger>
-              <DrawerContent className="overflow-y-auto">
-                <DrawerHeader className="text-left">
-                  <DrawerTitle>Details</DrawerTitle>
-                  <DrawerDescription>Inspect store product data</DrawerDescription>
-                </DrawerHeader>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
+                    <DrawerTrigger asChild>
+                      <Button variant="dropdown-item" className="flex items-center justify-start gap-2 hover:bg-accent">
+                        <InfoIcon className="h-4 w-4" />
+                        Store product details
+                      </Button>
+                    </DrawerTrigger>
+                    <DrawerContent className="overflow-y-auto">
+                      <DrawerHeader className="text-left">
+                        <DrawerTitle>Details</DrawerTitle>
+                        <DrawerDescription>Inspect store product data</DrawerDescription>
+                      </DrawerHeader>
 
-                <div className="max-w-md px-4">
-                  <Code code={JSON.stringify(sp, null, 2)} language="json" />
-                </div>
-              </DrawerContent>
-            </Drawer>
+                      <div className="max-w-md px-4">
+                        <Code code={JSON.stringify(sp, null, 2)} language="json" />
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="mt-4 flex-1">
