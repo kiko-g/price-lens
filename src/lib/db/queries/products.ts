@@ -17,12 +17,17 @@ export const productQueries = {
     return { data, error }
   },
 
-  async getAllLinked(
-    productQueryType: ProductQueryType = "all",
+  async getAllLinked({
+    productQueryType = "all",
     offset = 0,
     limit = 10,
     q = "",
-  ): Promise<{
+  }: {
+    productQueryType?: ProductQueryType
+    offset?: number
+    limit?: number
+    q?: string
+  }): Promise<{
     data: (Product & { store_products: StoreProduct[] })[]
     error: PostgrestError | null
     pagination: { total: number; offset: number; limit: number } | null

@@ -11,14 +11,12 @@ export async function GET(req: NextRequest) {
     const limit = searchParams.get("limit")
     const offset = searchParams.get("offset")
 
-    const { data, error } = await productQueries.getAllLinked(
-      type,
-      offset ? parseInt(offset) : 0,
-      limit ? parseInt(limit) : 36,
+    const { data, error } = await productQueries.getAllLinked({
+      productQueryType: type,
+      offset: offset ? parseInt(offset) : 0,
+      limit: limit ? parseInt(limit) : 36,
       q,
-    )
-
-    console.debug(data)
+    })
 
     if (error) {
       return NextResponse.json({ data: [], error: error }, { status: 200 })

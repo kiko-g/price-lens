@@ -3,42 +3,63 @@ import { scrapeAndReplaceProduct } from "@/lib/scraper"
 
 import { productQueries } from "@/lib/db/queries/products"
 import { updatePricePoint } from "@/lib/pricing"
-
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await productQueries.getAllLinked()
-
-    if (error) {
-      console.error("Error fetching uncharted products:", error)
-      return NextResponse.json({ error: "Error fetching uncharted products" }, { status: 500 })
-    }
-
-    if (!data) {
-      console.error("No uncharted products found")
-      return NextResponse.json({ error: "No uncharted products found" }, { status: 404 })
-    }
-
+    let offset = 0
+    const limit = 24
     let failedScrapes = 0
-    for (const product of data) {
-      for (const storeProduct of product.store_products) {
-        const url = storeProduct.url
-        try {
-          console.info(`Scraping product ${url}...`)
-          const response = await scrapeAndReplaceProduct(url, storeProduct.origin_id, storeProduct)
-          const json = await response.json()
+    let totalProcessed = 0
+    let hasMore = true
 
-          await updatePricePoint(product, {
-            ...json.data,
-            id: storeProduct.id,
-          })
-        } catch (error) {
-          console.warn(`Failed to scrape product ${url}:`, error)
-          failedScrapes++
+    while (hasMore) {
+      const { data, error, pagination } = await productQueries.getAllLinked({
+        offset,
+        limit,
+      })
+
+      if (error) {
+        console.error("Error fetching products:", error)
+        return NextResponse.json({ error: "Error fetching products" }, { status: 500 })
+      }
+
+      if (!data || data.length === 0) {
+        hasMore = false
+        break
+      }
+
+      console.info(`Processing batch ${Math.floor(offset / limit) + 1} (${data.length} products)...`)
+
+      for (const product of data) {
+        for (const storeProduct of product.store_products) {
+          const url = storeProduct.url
+          try {
+            console.info(`Scraping product ${url}...`)
+            const response = await scrapeAndReplaceProduct(url, storeProduct.origin_id, storeProduct)
+            const json = await response.json()
+
+            await updatePricePoint(product, {
+              ...json.data,
+              id: storeProduct.id,
+            })
+          } catch (error) {
+            console.warn(`Failed to scrape product ${url}:`, error)
+            failedScrapes++
+          }
         }
       }
+
+      totalProcessed += data.flatMap((p) => p.store_products).length
+
+      hasMore = data.length === limit && pagination !== null && pagination.total > offset + limit
+      offset += limit
     }
 
-    const message = `Scraped selected products (processed ${data.flatMap((p) => p.store_products).length} products, failed ${failedScrapes}).`
+    if (totalProcessed === 0) {
+      console.info("No products found to scrape")
+      return NextResponse.json({ message: "No products found to scrape" }, { status: 200 })
+    }
+
+    const message = `Scraped all products (processed ${totalProcessed} products, failed ${failedScrapes}).`
     console.info(message)
 
     return NextResponse.json({ message }, { status: 200 })
