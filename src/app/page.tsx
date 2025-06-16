@@ -57,7 +57,7 @@ export default async function Home({ searchParams }: Props) {
 
               <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
                 <Link href="/supermarket">
-                  Browse Supermarket Products
+                  Browse Supermarket
                   <ShoppingBasketIcon />
                 </Link>
               </Button>
