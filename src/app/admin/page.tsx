@@ -19,6 +19,7 @@ export default async function Admin() {
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
         <AdminDashboardProductsLink />
         <AdminDashboardPricesLink />
+        <TestScrapers />
       </div>
     </Layout>
   )
@@ -50,6 +51,22 @@ function AdminDashboardPricesLink() {
       <CardFooter>
         <Button asChild>
           <Link href="/admin/dashboard/prices">Access Dashboard for Prices</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function TestScrapers() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Test Scrapers</CardTitle>
+      </CardHeader>
+      <CardContent>Test the api scrapers and visualize the results</CardContent>
+      <CardFooter>
+        <Button asChild>
+          <Link href="/admin/test">Test Scrapers</Link>
         </Button>
       </CardFooter>
     </Card>

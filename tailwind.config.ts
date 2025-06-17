@@ -15,7 +15,7 @@ export default {
     extend: {
       fontSize: {
         "2xs": [
-          "0.65rem",
+          "0.625rem",
           {
             lineHeight: "0.75rem",
           },

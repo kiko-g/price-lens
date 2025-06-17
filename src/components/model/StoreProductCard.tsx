@@ -194,7 +194,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                     variant="unit"
                     size="2xs"
                     roundedness="sm"
-                    className="line-clamp-3 w-fit max-w-20 tracking-tighter md:line-clamp-1 md:max-w-32"
+                    className="line-clamp-3 w-fit max-w-20 text-left tracking-tighter md:line-clamp-1 md:max-w-28"
                   >
                     {sp.pack}
                   </Badge>
