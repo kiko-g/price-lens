@@ -170,7 +170,7 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
       name: formatProductName(schema?.name),
       brand: formatProductName(schema?.brand?.name),
       pack: $(".attribute-values.auc-pdp-regular").first().text().trim() || null,
-      price: priceToNumber(item.price) || null,
+      price: addOn.ecommerce.value || null,
       price_recommended: priceToNumber(item.price) || null,
       price_per_major_unit: pricePerMajorUnitStr || null,
       major_unit: majorUnit || null,
