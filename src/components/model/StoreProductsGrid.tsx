@@ -240,8 +240,8 @@ export function StoreProductsGrid(props: Props) {
   }, [page, sortBy, onlyDiscounted, originId])
 
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString() })
-  }, [page, query, searchType, sortBy, essential])
+    updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString(), originId })
+  }, [page, query, searchType, sortBy, essential, originId])
 
   // Add scroll event listener
   useEffect(() => {
@@ -345,10 +345,10 @@ export function StoreProductsGrid(props: Props) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-1">
+    <div className="flex w-full flex-col gap-0">
       <nav
         className={cn(
-          "sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-1 border-b bg-white bg-opacity-95 px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950 dark:bg-opacity-95",
+          "sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white bg-opacity-95 px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950 dark:bg-opacity-95",
           showNav ? "translate-y-0" : "top-0 -translate-y-full",
         )}
       >
@@ -554,7 +554,7 @@ export function StoreProductsGrid(props: Props) {
               </Button>
 
               <Select value={page.toString()} onValueChange={handlePageChange}>
-                <SelectTrigger className="w-auto justify-center rounded-none lg:w-full">
+                <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
                   <SelectValue placeholder={page} />
                 </SelectTrigger>
                 <SelectContent>
@@ -579,16 +579,16 @@ export function StoreProductsGrid(props: Props) {
           </div>
         </div>
 
-        <div className="mt-0.5 flex w-full items-center justify-between text-xs text-muted-foreground">
-          <span>
-            Showing <span className="font-bold text-foreground">{page * limit - limit + 1}</span> to{" "}
-            <span className="font-bold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
-            <span className="font-bold text-foreground">{pagedCount}</span> results
+        <div className="mt-2 flex w-full flex-col items-end justify-end text-xs text-muted-foreground lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
+          <span className="order-2 lg:order-1">
+            Showing <span className="font-semibold text-foreground">{page * limit - limit + 1}</span> to{" "}
+            <span className="font-semibold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
+            <span className="font-semibold text-foreground">{pagedCount}</span> results
           </span>
 
-          <span>
-            Page <span className="font-bold text-foreground">{page}</span> of{" "}
-            <span className="font-bold text-foreground">{paginationTotal}</span>
+          <span className="order-1 lg:order-2">
+            Page <span className="font-semibold text-foreground">{page}</span> of{" "}
+            <span className="font-semibold text-foreground">{paginationTotal}</span>
           </span>
         </div>
       </nav>
@@ -602,9 +602,9 @@ export function StoreProductsGrid(props: Props) {
       <div className="flex items-center justify-between p-4">
         <div className="flex w-full flex-col text-sm text-muted-foreground">
           <span>
-            Showing <span className="font-bold text-foreground">{page * limit - limit + 1}</span> to{" "}
-            <span className="font-bold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
-            <span className="font-bold text-foreground">{pagedCount}</span> results
+            Showing <span className="font-semibold text-foreground">{page * limit - limit + 1}</span> to{" "}
+            <span className="font-semibold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
+            <span className="font-semibold text-foreground">{pagedCount}</span> results
           </span>
         </div>
 
@@ -619,7 +619,7 @@ export function StoreProductsGrid(props: Props) {
           </Button>
 
           <Select value={page.toString()} onValueChange={handlePageChange}>
-            <SelectTrigger className="w-auto justify-center rounded-none lg:w-full">
+            <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
               <SelectValue placeholder={page} />
             </SelectTrigger>
             <SelectContent>
