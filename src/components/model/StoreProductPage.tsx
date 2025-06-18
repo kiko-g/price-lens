@@ -3,35 +3,31 @@
 import axios from "axios"
 import Image from "next/image"
 import Link from "next/link"
-import { Metadata } from "next"
 import { useEffect, useState } from "react"
 import { FrontendStatus } from "@/types/extra"
 import type { StoreProduct } from "@/types"
-import { siteConfig } from "@/lib/config"
-import { discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
+import { discountValueToPercentage } from "@/lib/utils"
 import {
   Undo2Icon,
   HeartIcon,
-  Share2Icon,
-  ExternalLinkIcon,
   InfoIcon,
   NavigationIcon,
   NavigationOffIcon,
   EllipsisVerticalIcon,
+  RefreshCcwIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { SkeletonStatusError, SkeletonStatusLoaded, SkeletonStatusLoading } from "@/components/ui/combo/Loading"
+import { SkeletonStatusError, SkeletonStatusLoaded } from "@/components/ui/combo/Loading"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -41,7 +37,8 @@ import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
-import { Skeleton } from "../ui/skeleton"
+import { useStoreProduct, useUpdateStoreProduct } from "@/hooks/useProducts"
+import { LoadingIcon } from "../icons/LoadingIcon"
 
 export function StoreProductPageById({ id }: { id: string }) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
@@ -83,21 +80,13 @@ export function StoreProductPageById({ id }: { id: string }) {
   return <StoreProductPage sp={storeProduct} />
 }
 
-export const metadata: Metadata = {
-  openGraph: {
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 680,
-        alt: siteConfig.name,
-      },
-    ],
-  },
-}
-
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
-  if (!sp) return null
+  const { data: storeProduct, isLoading } = useStoreProduct(sp.id!.toString())
+  const updateStoreProduct = useUpdateStoreProduct()
+  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
+
+  if (isLoading) return <p>Loading...</p>
+  if (!storeProduct) return <p>No product found.</p>
 
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)
 
@@ -105,26 +94,6 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isNormalPrice =
     (!sp.price_recommended && sp.price) || (sp.price_recommended && sp.price && sp.price_recommended === sp.price)
-
-  const categoryText = sp.category
-    ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
-    : null
-
-  // Update metadata when product loads
-  useEffect(() => {
-    if (sp.image) {
-      metadata.openGraph!.images = [
-        {
-          url: sp.image,
-          width: 600,
-          height: 600,
-          alt: sp.name,
-        },
-      ]
-    }
-  }, [sp])
-
-  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
@@ -325,6 +294,17 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       </div>
                     </DrawerContent>
                   </Drawer>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Button
+                    variant="dropdown-item"
+                    className="flex items-center justify-start gap-2 hover:bg-accent"
+                    onClick={() => updateStoreProduct.mutate(storeProduct)}
+                    disabled={updateStoreProduct.isPending}
+                  >
+                    {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon className="h-4 w-4" />}
+                    Update from source store
+                  </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

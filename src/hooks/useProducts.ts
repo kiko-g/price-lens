@@ -1,16 +1,17 @@
 import axios from "axios"
 import type { GetAllQuery } from "@/types/extra"
 import type { ProductLinked, StoreProduct } from "@/types"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 
-type FetchProductsParams = {
+type GetProductsParams = {
   type?: "essential" | "non-essential"
   offset?: number
   limit?: number
   q?: string
 }
 
-async function fetchProducts(params?: FetchProductsParams) {
+async function getProducts(params?: GetProductsParams) {
   const response = await axios.get("/api/products", { params })
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
@@ -18,7 +19,7 @@ async function fetchProducts(params?: FetchProductsParams) {
   return response.data as ProductLinked[]
 }
 
-async function fetchStoreProducts(params: GetAllQuery) {
+async function getStoreProducts(params: GetAllQuery) {
   const response = await axios.get("/api/products/store", { params })
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
@@ -26,7 +27,7 @@ async function fetchStoreProducts(params: GetAllQuery) {
   return response.data as StoreProduct[]
 }
 
-async function fetchStoreProduct(id: string) {
+async function getStoreProduct(id: string) {
   const response = await axios.get(`/api/products/store/${id}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch store product")
@@ -34,7 +35,7 @@ async function fetchStoreProduct(id: string) {
   return response.data as StoreProduct
 }
 
-async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
+async function getRelatedStoreProducts(id: string, limit: number = 8) {
   const response = await axios.get(`/api/products/store/${id}/related?limit=${limit}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch related store products")
@@ -42,10 +43,22 @@ async function fetchRelatedStoreProducts(id: string, limit: number = 8) {
   return response.data as StoreProduct[]
 }
 
-export function useProducts({ type, offset = 0, limit = 36, q = "" }: FetchProductsParams) {
+async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
+  const id = storeProduct.id
+  if (!id) throw new Error("Cannot update a store product without an ID")
+
+  const response = await axios.post(`/api/products/store/${id}`, { storeProduct })
+  if (response.status !== 200) {
+    throw new Error("Failed to update store product")
+  }
+  return response.data as StoreProduct
+}
+
+// hooks
+export function useProducts({ type, offset = 0, limit = 36, q = "" }: GetProductsParams) {
   return useQuery({
     queryKey: ["products", type, offset, limit, q],
-    queryFn: () => fetchProducts({ type, offset, limit, q }),
+    queryFn: () => getProducts({ type, offset, limit, q }),
     enabled: !q || q.length > 2,
   })
 }
@@ -53,20 +66,38 @@ export function useProducts({ type, offset = 0, limit = 36, q = "" }: FetchProdu
 export function useStoreProducts(params: GetAllQuery) {
   return useQuery({
     queryKey: ["storeProducts", params],
-    queryFn: () => fetchStoreProducts(params),
+    queryFn: () => getStoreProducts(params),
   })
 }
 
 export function useStoreProduct(id: string) {
   return useQuery({
     queryKey: ["storeProduct", id],
-    queryFn: () => fetchStoreProduct(id),
+    queryFn: () => getStoreProduct(id),
   })
 }
 
 export function useRelatedStoreProducts(id: string, limit: number = 8) {
   return useQuery({
     queryKey: ["relatedStoreProducts", id, limit],
-    queryFn: () => fetchRelatedStoreProducts(id, limit),
+    queryFn: () => getRelatedStoreProducts(id, limit),
+  })
+}
+
+export function useUpdateStoreProduct() {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  return useMutation({
+    mutationFn: scrapeAndUpdateStoreProduct,
+    onSuccess: (data) => {
+      const id = data.id?.toString()
+      if (id) {
+        queryClient.invalidateQueries({ queryKey: ["storeProduct", id] })
+      }
+      router.refresh()
+    },
+    onError: () => {
+      // Consider adding a user-facing error message here
+    },
   })
 }

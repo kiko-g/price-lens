@@ -332,6 +332,7 @@ export const defaultCategories = [
   "Charcutaria e Queijos",
   // Auchan
   "Alimentação",
+  "Beleza e Higiene",
   "Biológicos e Alternativas",
   "Marcas Auchan",
   "Produtos Frescos",

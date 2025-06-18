@@ -579,31 +579,32 @@ export function StoreProductsGrid(props: Props) {
           </div>
         </div>
 
-        <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-0.5 flex w-full items-center justify-between text-xs text-muted-foreground">
           <span>
-            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, pagedCount)} of {pagedCount} results
+            Showing <span className="font-bold text-foreground">{page * limit - limit + 1}</span> to{" "}
+            <span className="font-bold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
+            <span className="font-bold text-foreground">{pagedCount}</span> results
           </span>
 
           <span>
-            Page {page}/{paginationTotal}
+            Page <span className="font-bold text-foreground">{page}</span> of{" "}
+            <span className="font-bold text-foreground">{paginationTotal}</span>
           </span>
         </div>
       </nav>
 
-      <div className="mb-16 grid w-full grid-cols-2 gap-8 px-4 pt-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-6">
+      <div className="grid w-full grid-cols-2 gap-8 border-b px-4 pb-16 pt-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-6">
         {storeProducts.map((product, productIdx) => (
           <StoreProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
         ))}
       </div>
 
       <div className="flex items-center justify-between p-4">
-        <div className="flex w-full flex-col text-xs text-muted-foreground">
+        <div className="flex w-full flex-col text-sm text-muted-foreground">
           <span>
-            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, pagedCount)} of {pagedCount} results
-          </span>
-
-          <span>
-            Page {page}/{paginationTotal}
+            Showing <span className="font-bold text-foreground">{page * limit - limit + 1}</span> to{" "}
+            <span className="font-bold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
+            <span className="font-bold text-foreground">{pagedCount}</span> results
           </span>
         </div>
 
@@ -625,7 +626,7 @@ export function StoreProductsGrid(props: Props) {
               {getCenteredArray(Math.min(paginationTotal, 50), page, paginationTotal ? paginationTotal : null).map(
                 (num: number) => (
                   <SelectItem key={num} value={num.toString()}>
-                    {num}
+                    {num} of {paginationTotal}
                   </SelectItem>
                 ),
               )}
