@@ -557,4 +557,13 @@ export const storeProductQueries = {
 
     return { data: allProducts, error: null }
   },
+
+  async getAllNullPriority({ offset = 0, limit = 100 }: { offset?: number; limit?: number }) {
+    const supabase = createClient()
+    return supabase
+      .from("store_products")
+      .select("*")
+      .is("priority", null)
+      .range(offset, offset + limit - 1)
+  },
 }

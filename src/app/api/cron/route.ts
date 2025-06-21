@@ -3,6 +3,7 @@ import { scrapeAndReplaceProduct } from "@/lib/scraper"
 
 import { productQueries } from "@/lib/db/queries/products"
 import { updatePricePoint } from "@/lib/pricing"
+
 export async function GET(req: NextRequest) {
   try {
     let offset = 0
