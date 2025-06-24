@@ -42,6 +42,7 @@ import {
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
 import { toast } from "sonner"
+import { PriorityBadge } from "./priority-badge"
 
 type Props = {
   sp: StoreProduct
@@ -185,7 +186,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute right-2 top-2 flex flex-col gap-1">
+        <div className="absolute right-2 top-2 flex flex-col gap-0.5">
           {sp.pack ? (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -215,7 +216,9 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+        <div className="absolute bottom-2 right-2 flex flex-col items-end gap-0.5">
+          <PriorityBadge priority={sp.priority} />
+
           <Badge
             size="xs"
             variant="light"

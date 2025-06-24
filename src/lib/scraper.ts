@@ -114,6 +114,7 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
       created_at: null,
       is_tracked: isTracked,
       is_essential: isEssential,
+      priority: null,
     }
 
     return sp
@@ -199,6 +200,7 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
       created_at: null,
       is_tracked: isTracked,
       is_essential: isEssential,
+      priority: null,
     }
 
     return sp

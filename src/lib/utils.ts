@@ -295,16 +295,12 @@ export const existingCategories = [
   "Casa, Bricolage e Jardim",
   "Cão",
   "Charcutaria e Queijos",
-  "Continente Navigation Catalog",
   "Desporto e Malas de Viagem",
-  "Destaques",
-  "Folhetos Pesquisa",
   "Gato",
   "Livraria e Papelaria",
   "Marcas",
-  "Negócios",
   "Presentes",
-  "Resultado de Pesquisa",
+  "Outros",
   // Auchan
   "Alimentação",
   "Animais",
@@ -1407,6 +1403,7 @@ export const productUnavailable: StoreProduct = {
   origin_id: 1,
   is_tracked: false,
   is_essential: false,
+  priority: null,
 }
 
 export function resizeImgSrc(src: string, width: number, height: number) {

@@ -80,6 +80,7 @@ export interface StoreProduct {
   origin_id: number | null
   is_tracked: boolean
   is_essential: boolean
+  priority: number | null
 }
 
 export interface ProductLinked extends Product {

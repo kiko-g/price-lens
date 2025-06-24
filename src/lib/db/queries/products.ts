@@ -426,15 +426,33 @@ export const storeProductQueries = {
       }
     }
 
+    // Get unique individual category values
     const categories = [...new Set(allCategories.map((c) => c.category).filter(Boolean))].sort()
     const categories2 = [...new Set(allCategories.map((c) => c.category_2).filter(Boolean))].sort()
     const categories3 = [...new Set(allCategories.map((c) => c.category_3).filter(Boolean))].sort()
+
+    // Get unique 3-way tuples (category, category_2, category_3)
+    const categoryTuples = Array.from(
+      new Set(
+        allCategories
+          .filter((c) => c.category && c.category_2 && c.category_3) // Only include complete tuples
+          .map((c) => JSON.stringify([c.category, c.category_2, c.category_3])),
+      ),
+    )
+      .map((str) => JSON.parse(str))
+      .sort((a, b) => {
+        // Sort by category, then category_2, then category_3
+        if (a[0] !== b[0]) return a[0].localeCompare(b[0])
+        if (a[1] !== b[1]) return a[1].localeCompare(b[1])
+        return a[2].localeCompare(b[2])
+      })
 
     return {
       data: {
         category: categories,
         category_2: categories2,
         category_3: categories3,
+        tuples: categoryTuples,
       },
       error: null,
     }

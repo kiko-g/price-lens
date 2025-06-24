@@ -279,7 +279,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                   <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
                     <DrawerTrigger asChild>
                       <Button variant="dropdown-item" className="flex items-center justify-start gap-2 hover:bg-accent">
-                        <InfoIcon className="h-4 w-4" />
+                        <InfoIcon className="-ml-1 h-4 w-4" />
                         Store product details
                       </Button>
                     </DrawerTrigger>
@@ -295,7 +295,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     </DrawerContent>
                   </Drawer>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"
                     className="flex items-center justify-start gap-2 hover:bg-accent"
