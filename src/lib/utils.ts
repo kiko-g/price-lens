@@ -309,6 +309,7 @@ export const existingCategories = [
   "Beleza e Higiene",
   "Biológicos e Alternativas",
   "Casa e Jardim",
+  "Depilatórios",
   "Limpeza e Cuidados do Lar",
   "Marcas Auchan",
   "O Mundo do Bebé",

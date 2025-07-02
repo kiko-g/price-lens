@@ -54,6 +54,19 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   return response.data as StoreProduct
 }
 
+async function getStoreProductCategories() {
+  const response = await axios.get("/api/categories")
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch store product categories")
+  }
+  return response.data as {
+    category: string[]
+    category_2: string[]
+    category_3: string[]
+    tuples: { category: string; category_2: string; category_3: string }[]
+  }
+}
+
 // hooks
 export function useProducts({ type, offset = 0, limit = 36, q = "" }: GetProductsParams) {
   return useQuery({
@@ -99,5 +112,12 @@ export function useUpdateStoreProduct() {
     onError: () => {
       // Consider adding a user-facing error message here
     },
+  })
+}
+
+export function useStoreProductCategories() {
+  return useQuery({
+    queryKey: ["storeProductCategories"],
+    queryFn: () => getStoreProductCategories(),
   })
 }

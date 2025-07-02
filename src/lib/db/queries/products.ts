@@ -396,7 +396,35 @@ export const storeProductQueries = {
     return { data, error }
   },
 
-  async getAllCategories() {
+  async getAllCategories({
+    category1List = [],
+    category2List = [],
+    category3List = [],
+  }: {
+    category1List?: string[]
+    category2List?: string[]
+    category3List?: string[]
+  }) {
+    if (category3List.length > 0 && (category1List.length === 0 || category2List.length === 0)) {
+      return {
+        data: null,
+        error: {
+          message: "category_1 and category_2 are required when category_3 is specified",
+          status: 400,
+        },
+      }
+    }
+
+    if (category2List.length > 0 && category1List.length === 0) {
+      return {
+        data: null,
+        error: {
+          message: "category_1 is required when category_2 is specified",
+          status: 400,
+        },
+      }
+    }
+
     const supabase = createClient()
     const PAGE_SIZE = 1000 // Supabase's max limit
     let allCategories: { category: string; category_2: string; category_3: string }[] = []
@@ -431,20 +459,39 @@ export const storeProductQueries = {
     const categories2 = [...new Set(allCategories.map((c) => c.category_2).filter(Boolean))].sort()
     const categories3 = [...new Set(allCategories.map((c) => c.category_3).filter(Boolean))].sort()
 
+    // Filter tuples based on provided categories
+    let filteredCategories = allCategories.filter((c) => c.category && c.category_2 && c.category_3)
+
+    if (category1List.length > 0) {
+      filteredCategories = filteredCategories.filter((c) => category1List.includes(c.category))
+    }
+
+    if (category2List.length > 0) {
+      filteredCategories = filteredCategories.filter((c) => category2List.includes(c.category_2))
+    }
+
+    if (category3List.length > 0) {
+      filteredCategories = filteredCategories.filter((c) => category3List.includes(c.category_3))
+    }
+
     // Get unique 3-way tuples (category, category_2, category_3)
     const categoryTuples = Array.from(
       new Set(
-        allCategories
-          .filter((c) => c.category && c.category_2 && c.category_3) // Only include complete tuples
-          .map((c) => JSON.stringify([c.category, c.category_2, c.category_3])),
+        filteredCategories.map((c) =>
+          JSON.stringify({
+            category: c.category,
+            category_2: c.category_2,
+            category_3: c.category_3,
+          }),
+        ),
       ),
     )
       .map((str) => JSON.parse(str))
       .sort((a, b) => {
         // Sort by category, then category_2, then category_3
-        if (a[0] !== b[0]) return a[0].localeCompare(b[0])
-        if (a[1] !== b[1]) return a[1].localeCompare(b[1])
-        return a[2].localeCompare(b[2])
+        if (a.category !== b.category) return a.category.localeCompare(b.category)
+        if (a.category_2 !== b.category_2) return a.category_2.localeCompare(b.category_2)
+        return a.category_3.localeCompare(b.category_3)
       })
 
     return {

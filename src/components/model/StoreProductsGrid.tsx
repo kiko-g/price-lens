@@ -424,29 +424,18 @@ export function StoreProductsGrid(props: Props) {
 
           <div className="flex w-full flex-wrap gap-2 md:w-auto">
             <div className="flex flex-1 gap-2">
-              <Select value={originId ?? "0"} onValueChange={(value) => setOriginId(value === "0" ? null : value)}>
-                <SelectTrigger className="min-w-[120px]">
-                  <SelectValue placeholder="Store" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Store</SelectLabel>
-                    <SelectItem value="0">All stores</SelectItem>
-                    <SelectItem value="1">Continente</SelectItem>
-                    <SelectItem value="2">Auchan</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              {/*  Categories Dialog */}
 
+              {/*  Categories Selector */}
               <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={categorySelectorOpen}
-                    className="min-w-[180px] justify-between"
+                    className="min-w-[150px] justify-between"
                   >
-                    {selectedCount > 0 ? `Categories (${selectedCount})` : "Select categories"}
+                    {selectedCount > 0 ? `Categories (${selectedCount})` : "Categories"}
                     <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -505,6 +494,22 @@ export function StoreProductsGrid(props: Props) {
                 </PopoverContent>
               </Popover>
 
+              {/* Store Origin Filter */}
+              <Select value={originId ?? "0"} onValueChange={(value) => setOriginId(value === "0" ? null : value)}>
+                <SelectTrigger className="min-w-[120px] font-medium">
+                  <SelectValue placeholder="Store" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Store</SelectLabel>
+                    <SelectItem value="0">All stores</SelectItem>
+                    <SelectItem value="1">Continente</SelectItem>
+                    <SelectItem value="2">Auchan</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {/* Sort Filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full justify-start lg:w-[120px]">

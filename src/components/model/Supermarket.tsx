@@ -40,21 +40,41 @@ export function resolveSupermarketChain(originId: number | null) {
             className="h-5 w-auto md:h-5 md:w-min"
           />
         ),
-        logoSmall: <Image src={ContinenteLogo} alt="Continente" width={300} height={300} className="h-3.5 w-min" />,
+        logoSmall: (
+          <Image
+            src={ContinenteLogo}
+            alt="Continente"
+            width={300}
+            height={300}
+            className="h-3.5 w-full md:h-3.5 md:w-min"
+          />
+        ),
       }
     case SupermarketChain.Auchan:
       return {
         name: "Auchan",
         badge: <SupermarketBadge supermarketChain="Auchan" />,
-        logo: <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-5 w-min" />,
-        logoSmall: <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-4 w-min" />,
+        logo: <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-5 w-auto md:h-5 md:w-min" />,
+        logoSmall: (
+          <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-3.5 w-full md:h-3.5 md:w-min" />
+        ),
       }
     case SupermarketChain.PingoDoce:
       return {
         name: "Pingo Doce",
         badge: <SupermarketBadge supermarketChain="Pingo Doce" />,
-        logo: <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-5 w-min" />,
-        logoSmall: <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-3.5 w-min" />,
+        logo: (
+          <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-5 w-auto md:h-5 md:w-min" />
+        ),
+        logoSmall: (
+          <Image
+            src={PingoDoceLogo}
+            alt="Pingo Doce"
+            width={300}
+            height={300}
+            className="h-3.5 w-full md:h-3.5 md:w-min"
+          />
+        ),
       }
     default:
       return null
