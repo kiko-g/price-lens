@@ -156,6 +156,16 @@ export function StoreProductsGrid(props: Props) {
     ]
   }, [rawData, category1, category2])
 
+  const categoriesPriorityQuery = useMemo(() => {
+    if (!category1 || !category2 || !category3) return ""
+
+    return `UPDATE store_products
+SET priority = 5
+WHERE category = '${category1}'
+  AND category_2 = '${category2}'
+  AND category_3 = '${category3}';`
+  }, [category1, category2, category3])
+
   const handleCategory1Change = (value: string) => {
     setCategory1(value)
     setCategory2("")
@@ -317,6 +327,7 @@ export function StoreProductsGrid(props: Props) {
       setPage(1)
       fetchProducts()
     }
+    if (allCategoriesFilled) navigator.clipboard.writeText(categoriesPriorityQuery)
   }, [category1, category2, category3])
 
   useEffect(() => {
@@ -596,7 +607,7 @@ export function StoreProductsGrid(props: Props) {
                 </DialogContent>
               </Dialog>
 
-              {/*  Categories Selector */}
+              {/* Categories Selector */}
               <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
                 <PopoverTrigger asChild>
                   <Button
