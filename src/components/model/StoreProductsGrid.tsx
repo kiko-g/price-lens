@@ -755,31 +755,30 @@ export function StoreProductsGrid(props: Props) {
         </div>
 
         <div className="mt-2 flex w-full flex-col items-end justify-end text-xs text-muted-foreground lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
-          <span className="order-2 lg:order-1">
+          <span className="order-2 leading-3 lg:order-1">
             Showing <span className="font-semibold text-foreground">{page * limit - limit + 1}</span> to{" "}
             <span className="font-semibold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
             <span className="font-semibold text-foreground">{pagedCount}</span> results
           </span>
 
-          <span className="order-1 flex items-center justify-between gap-8 lg:order-2">
+          <span className="order-1 flex items-center justify-between gap-4 lg:order-2">
             {category1 && category2 && category3 ? (
-              <div className="flex items-center gap-2">
-                <span className="font-medium">
+              <Button
+                size="xs"
+                variant="ghost"
+                className="gap-0.5 px-1 font-medium [&_svg]:size-3"
+                onClick={() => {
+                  setCategory1("")
+                  setCategory2("")
+                  setCategory3("")
+                  fetchProducts()
+                }}
+              >
+                <span>
                   {category1} {">"} {category2} {">"} {category3}
                 </span>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => {
-                    setCategory1("")
-                    setCategory2("")
-                    setCategory3("")
-                    fetchProducts()
-                  }}
-                >
-                  <XIcon className="h-3 w-3" />
-                </Button>
-              </div>
+                <XIcon />
+              </Button>
             ) : null}
             <span>
               Page <span className="font-semibold text-foreground">{page}</span> of{" "}
