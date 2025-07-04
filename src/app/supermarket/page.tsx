@@ -28,7 +28,7 @@ export default async function Supermarket({ searchParams }: Props) {
   const searchType = getSearchType(params.t ?? "any")
   const sortBy = getSortByType(params.s ?? "a-z")
   const q = params.q ?? ""
-  const essential = params.essential !== "false"
+  const essential = params.essential === "true"
   const originId = params.origin || null
 
   return (

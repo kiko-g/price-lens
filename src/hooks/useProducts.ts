@@ -59,7 +59,7 @@ async function getStoreProductCategories() {
   if (response.status !== 200) {
     throw new Error("Failed to fetch store product categories")
   }
-  return response.data as {
+  return response.data.data as {
     category: string[]
     category_2: string[]
     category_3: string[]

@@ -1,7 +1,7 @@
 "use client"
 
 import axios from "axios"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import { type StoreProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 
@@ -12,6 +12,15 @@ import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/l
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -19,6 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -51,8 +61,9 @@ import {
   EllipsisVerticalIcon,
   RefreshCcwIcon,
   SearchIcon,
+  SquareLibraryIcon,
 } from "lucide-react"
-import { useProducts } from "@/hooks/useProducts"
+import { useProducts, useStoreProductCategories } from "@/hooks/useProducts"
 import { resolveSupermarketChain } from "./Supermarket"
 
 type Props = {
@@ -84,6 +95,10 @@ export function StoreProductsGrid(props: Props) {
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [pagedCount, setPagedCount] = useState(0)
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [category1, setCategory1] = useState<string>("")
+  const [category2, setCategory2] = useState<string>("")
+  const [category3, setCategory3] = useState<string>("")
 
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([])
@@ -106,6 +121,68 @@ export function StoreProductsGrid(props: Props) {
       selected: essential ? defaultCategorySet.has(name) : false,
     }))
   })
+
+  const storeProductCategories = useStoreProductCategories()
+  const rawData = storeProductCategories?.data?.tuples || []
+
+  const category1Options = useMemo((): string[] => {
+    return [
+      ...new Set(rawData.map((item: { category: string; category_2: string; category_3: string }) => item.category)),
+    ]
+  }, [rawData])
+
+  const category2Options = useMemo((): string[] => {
+    if (!category1) return []
+    return [
+      ...new Set(
+        rawData
+          .filter((item: { category: string; category_2: string; category_3: string }) => item.category === category1)
+          .map((item: { category: string; category_2: string; category_3: string }) => item.category_2),
+      ),
+    ]
+  }, [rawData, category1])
+
+  const category3Options = useMemo((): string[] => {
+    if (!category1 || !category2) return []
+    return [
+      ...new Set(
+        rawData
+          .filter(
+            (item: { category: string; category_2: string; category_3: string }) =>
+              item.category === category1 && item.category_2 === category2,
+          )
+          .map((item: { category: string; category_2: string; category_3: string }) => item.category_3),
+      ),
+    ]
+  }, [rawData, category1, category2])
+
+  const handleCategory1Change = (value: string) => {
+    setCategory1(value)
+    setCategory2("")
+    setCategory3("")
+  }
+
+  const handleCategory2Change = (value: string) => {
+    setCategory2(value)
+    setCategory3("")
+  }
+
+  const handleSubmitCategories = () => {
+    if (category1 && category2 && category3) {
+      console.log("Selected:", {
+        category: category1,
+        category_2: category2,
+        category_3: category3,
+      })
+      setOpen(false)
+    }
+  }
+
+  const resetForm = () => {
+    setCategory1("")
+    setCategory2("")
+    setCategory3("")
+  }
 
   const [showNav, setShowNav] = useState(true)
   const lastScrollY = useRef(0)
@@ -425,6 +502,109 @@ export function StoreProductsGrid(props: Props) {
           <div className="flex w-full flex-wrap gap-2 md:w-auto">
             <div className="flex flex-1 gap-2">
               {/*  Categories Dialog */}
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <SquareLibraryIcon className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm lg:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Select Categories</DialogTitle>
+                    <DialogDescription>
+                      Choose categories in a cascading manner. Each selection unlocks the next level.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="category1">1) Main Category</Label>
+                      <Select value={category1} onValueChange={handleCategory1Change}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria principal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {category1Options.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="category2">2) Subcategory</Label>
+                      <Select value={category2} onValueChange={handleCategory2Change} disabled={!category1}>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              category1 ? "Selecione a subcategoria" : "Selecione a categoria principal primeiro"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {category2Options.map((subcategory) => (
+                            <SelectItem key={subcategory} value={subcategory}>
+                              {subcategory}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="category3">3) Inner Category</Label>
+                      <Select value={category3} onValueChange={setCategory3} disabled={!category2}>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={category2 ? "Selecione o item" : "Selecione a subcategoria primeiro"}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {category3Options.map((item) => (
+                            <SelectItem key={item} value={item}>
+                              {item}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Display current selections */}
+                    {(category1 || category2 || category3) && (
+                      <div className="mt-4 rounded-md bg-muted p-3">
+                        <div className="flex flex-col items-start space-y-1 text-sm md:flex-row md:items-center md:space-x-2 md:space-y-0">
+                          {category1 && (
+                            <>
+                              <code>{category1}</code>
+                              {category2 && <span className="hidden text-muted-foreground md:inline">/</span>}
+                            </>
+                          )}
+                          {category2 && (
+                            <>
+                              <code>{category2}</code>
+                              {category3 && <span className="hidden text-muted-foreground md:inline">/</span>}
+                            </>
+                          )}
+                          {category3 && <code>{category3}</code>}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <DialogFooter className="flex w-full flex-row items-center gap-2">
+                    <Button variant="outline" onClick={resetForm} className="w-full">
+                      Clear
+                    </Button>
+                    <Button
+                      onClick={handleSubmitCategories}
+                      disabled={!category1 || !category2 || !category3}
+                      className="w-full"
+                    >
+                      Confirm
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
               {/*  Categories Selector */}
               <Popover open={categorySelectorOpen} onOpenChange={setCategorySelectorOpen}>
@@ -433,7 +613,7 @@ export function StoreProductsGrid(props: Props) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={categorySelectorOpen}
-                    className="min-w-[150px] justify-between"
+                    className="min-w-[160px] justify-between"
                   >
                     {selectedCount > 0 ? `Categories (${selectedCount})` : "Categories"}
                     <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
