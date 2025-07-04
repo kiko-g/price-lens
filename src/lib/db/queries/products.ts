@@ -226,6 +226,9 @@ export const storeProductQueries = {
     nonNulls = true,
     sort = "a-z",
     categories = [],
+    category = null,
+    category2 = null,
+    category3 = null,
     originId = null,
     options = {
       onlyDiscounted: false,
@@ -276,7 +279,10 @@ export const storeProductQueries = {
       }
     }
 
-    if (categories && categories.length !== 0) {
+    // Handle individual category parameters (takes precedence over categories array)
+    if (category && category2 && category3) {
+      dbQuery = dbQuery.eq("category", category).eq("category_2", category2).eq("category_3", category3)
+    } else if (categories && categories.length !== 0) {
       dbQuery = dbQuery.in("category", categories) // FIXME: using main category, consider more
     }
 

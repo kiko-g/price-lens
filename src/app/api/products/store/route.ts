@@ -13,6 +13,9 @@ export async function GET(req: NextRequest) {
     const searchTypeParam = params.get("searchType") ?? "any"
     const sortParam = params.get("sort") ?? "a-z"
     const categoriesParam = params.get("categories") ?? ""
+    const categoryParam = params.get("category") ?? ""
+    const category2Param = params.get("category_2") ?? ""
+    const category3Param = params.get("category_3") ?? ""
     const onlyDiscountedParam = params.get("onlyDiscounted") ?? "false"
     const originIdParam = params.get("originId") ?? null
 
@@ -22,6 +25,9 @@ export async function GET(req: NextRequest) {
     const searchType = searchTypeParam as SearchType
     const sort = sortParam as SortByType
     const categories = categoriesParam ? categoriesParam.split(";") : []
+    const category = categoryParam || null
+    const category2 = category2Param || null
+    const category3 = category3Param || null
     const originId = originIdParam ? parseInt(originIdParam, 10) : null
     const onlyDiscounted = onlyDiscountedParam === "true"
 
@@ -32,6 +38,9 @@ export async function GET(req: NextRequest) {
       searchType,
       sort,
       categories,
+      category,
+      category2,
+      category3,
       originId,
       options: {
         onlyDiscounted,

@@ -114,6 +114,9 @@ export type GetAllQuery = {
   searchType?: SearchType
   nonNulls?: boolean
   categories?: string[]
+  category?: string | null
+  category2?: string | null
+  category3?: string | null
   originId?: number | null
   options?: {
     onlyDiscounted: boolean

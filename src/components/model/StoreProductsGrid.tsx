@@ -15,7 +15,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -62,6 +61,7 @@ import {
   RefreshCcwIcon,
   SearchIcon,
   SquareLibraryIcon,
+  XIcon,
 } from "lucide-react"
 import { useProducts, useStoreProductCategories } from "@/hooks/useProducts"
 import { resolveSupermarketChain } from "./Supermarket"
@@ -95,7 +95,7 @@ export function StoreProductsGrid(props: Props) {
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [pagedCount, setPagedCount] = useState(0)
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [category1, setCategory1] = useState<string>("")
   const [category2, setCategory2] = useState<string>("")
   const [category3, setCategory3] = useState<string>("")
@@ -167,21 +167,9 @@ export function StoreProductsGrid(props: Props) {
     setCategory3("")
   }
 
-  const handleSubmitCategories = () => {
-    if (category1 && category2 && category3) {
-      console.log("Selected:", {
-        category: category1,
-        category_2: category2,
-        category_3: category3,
-      })
-      setOpen(false)
-    }
-  }
-
-  const resetForm = () => {
-    setCategory1("")
-    setCategory2("")
-    setCategory3("")
+  const handleCategory3Change = (value: string) => {
+    setCategory3(value)
+    setCategoryDialogOpen(false)
   }
 
   const [showNav, setShowNav] = useState(true)
@@ -222,12 +210,18 @@ export function StoreProductsGrid(props: Props) {
           onlyDiscounted,
           ...(originId !== null ? { originId: originId.toString() } : {}),
           ...(query === ""
-            ? {
-                categories: categories
-                  .filter((cat) => cat.selected)
-                  .map((cat) => cat.name)
-                  .join(";"),
-              }
+            ? category1 && category2 && category3
+              ? {
+                  category: category1,
+                  category_2: category2,
+                  category_3: category3,
+                }
+              : {
+                  categories: categories
+                    .filter((cat) => cat.selected)
+                    .map((cat) => cat.name)
+                    .join(";"),
+                }
             : {}),
         },
       })
@@ -317,13 +311,21 @@ export function StoreProductsGrid(props: Props) {
   }, [page, sortBy, onlyDiscounted, originId])
 
   useEffect(() => {
+    const allCategoriesFilled = category1 && category2 && category3
+    const allCategoriesEmpty = !category1 && !category2 && !category3
+    if (allCategoriesFilled || allCategoriesEmpty) {
+      setPage(1)
+      fetchProducts()
+    }
+  }, [category1, category2, category3])
+
+  useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString(), originId })
   }, [page, query, searchType, sortBy, essential, originId])
 
   // Add scroll event listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })
-
     return () => {
       window.removeEventListener("scroll", handleScroll)
     }
@@ -502,7 +504,7 @@ export function StoreProductsGrid(props: Props) {
           <div className="flex w-full flex-wrap gap-2 md:w-auto">
             <div className="flex flex-1 gap-2">
               {/*  Categories Dialog */}
-              <Dialog open={open} onOpenChange={setOpen}>
+              <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline">
                     <SquareLibraryIcon className="h-4 w-4" />
@@ -554,7 +556,7 @@ export function StoreProductsGrid(props: Props) {
 
                     <div className="grid gap-2">
                       <Label htmlFor="category3">3) Inner Category</Label>
-                      <Select value={category3} onValueChange={setCategory3} disabled={!category2}>
+                      <Select value={category3} onValueChange={handleCategory3Change} disabled={!category2}>
                         <SelectTrigger>
                           <SelectValue
                             placeholder={category2 ? "Selecione o item" : "Selecione a subcategoria primeiro"}
@@ -591,18 +593,6 @@ export function StoreProductsGrid(props: Props) {
                       </div>
                     )}
                   </div>
-                  <DialogFooter className="flex w-full flex-row items-center gap-2">
-                    <Button variant="outline" onClick={resetForm} className="w-full">
-                      Clear
-                    </Button>
-                    <Button
-                      onClick={handleSubmitCategories}
-                      disabled={!category1 || !category2 || !category3}
-                      className="w-full"
-                    >
-                      Confirm
-                    </Button>
-                  </DialogFooter>
                 </DialogContent>
               </Dialog>
 
@@ -771,9 +761,30 @@ export function StoreProductsGrid(props: Props) {
             <span className="font-semibold text-foreground">{pagedCount}</span> results
           </span>
 
-          <span className="order-1 lg:order-2">
-            Page <span className="font-semibold text-foreground">{page}</span> of{" "}
-            <span className="font-semibold text-foreground">{paginationTotal}</span>
+          <span className="order-1 flex items-center justify-between gap-8 lg:order-2">
+            {category1 && category2 && category3 ? (
+              <div className="flex items-center gap-2">
+                <span className="font-medium">
+                  {category1} {">"} {category2} {">"} {category3}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => {
+                    setCategory1("")
+                    setCategory2("")
+                    setCategory3("")
+                    fetchProducts()
+                  }}
+                >
+                  <XIcon className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : null}
+            <span>
+              Page <span className="font-semibold text-foreground">{page}</span> of{" "}
+              <span className="font-semibold text-foreground">{paginationTotal}</span>
+            </span>
           </span>
         </div>
       </nav>
