@@ -15,48 +15,48 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
         return {
           label: "Unset",
           tooltip: "Unset",
-          className: `bg-neutral-100 text-neutral-700 border-neutral-300 dark:bg-neutral-500 dark:text-neutral-50 dark:border-neutral-600`,
+          className: `bg-neutral-100 text-neutral-700 dark:bg-neutral-500 dark:text-neutral-50`,
         }
       case 0:
         return {
           label: "0/5",
           tooltip: "Useless",
-          className: `bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-50 dark:border-gray-600`,
+          className: `bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-white`,
         }
       case 1:
         return {
           label: "1/5",
           tooltip: "Low",
-          className: `bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-100 dark:border-rose-800`,
+          className: `bg-rose-50 text-rose-700 dark:bg-rose-600 dark:text-white`,
         }
       case 2:
         return {
           label: "2/5",
           tooltip: "Medium",
-          className: `bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800`,
+          className: `bg-orange-50 text-orange-700 dark:bg-orange-600 dark:text-white`,
         }
       case 3:
         return {
           label: "3/5",
           tooltip: "High",
-          className: `bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800`,
+          className: `bg-amber-50 text-amber-700 dark:bg-amber-600 dark:text-white`,
         }
       case 4:
         return {
           label: "4/5",
           tooltip: "Important",
-          className: `bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800`,
+          className: `bg-sky-50 text-sky-700 dark:bg-sky-600 dark:text-white`,
         }
       case 5:
         return {
           label: "5/5",
           tooltip: "Essential",
-          className: `bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800`,
+          className: `bg-teal-50 text-teal-800 dark:bg-teal-600 dark:text-white`,
         }
       default:
         return {
           label: "Unknown",
-          className: `bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600`,
+          className: `bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-white`,
         }
     }
   }

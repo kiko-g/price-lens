@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { storeProductQueries } from "@/lib/db/queries/products"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const { priority } = await request.json()
 
     const storeProductId = parseInt(id, 10)
