@@ -38,6 +38,7 @@ import {
   CircleIcon,
   ShoppingBasketIcon,
   SquareXIcon,
+  MicroscopeIcon,
 } from "lucide-react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
@@ -92,11 +93,35 @@ async function handleAddToInflationBasket(sp: StoreProduct) {
   }
 }
 
+async function handleUpdatePriority(storeProductId: number, priority: number | null) {
+  try {
+    const response = await fetch(`/api/products/store/${storeProductId}/priority`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ priority }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || "Failed to update priority")
+    }
+
+    const result = await response.json()
+    return result
+  } catch (error) {
+    console.error("Error updating priority:", error)
+    throw error
+  }
+}
+
 export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)
   const [isEssential, setIsEssential] = useState(sp?.is_essential ?? false)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [priority, setPriority] = useState(sp?.priority ?? null)
 
   if (!sp || !sp.url) {
     return null
@@ -217,7 +242,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
         </div>
 
         <div className="absolute bottom-2 right-2 flex flex-col items-end gap-0.5">
-          <PriorityBadge priority={sp.priority} />
+          <PriorityBadge priority={priority} />
 
           <Badge
             size="xs"
@@ -368,8 +393,6 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                   </>
                 ) : null}
 
-                <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
-
                 {onFavorite ? (
                   <DropdownMenuItem variant="love" asChild>
                     <Button
@@ -387,22 +410,89 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                   </DropdownMenuItem>
                 ) : null}
 
-                {onUpdate && process.env.NODE_ENV === "development" ? (
-                  <DropdownMenuItem variant="warning" asChild>
-                    <Button
-                      variant="dropdown-item"
-                      onClick={async () => {
-                        setStatus(FrontendStatus.Loading)
-                        const success = await onUpdate()
-                        if (success) setStatus(FrontendStatus.Loaded)
-                        else setStatus(FrontendStatus.Error)
-                      }}
-                    >
-                      Update
-                      <RefreshCcwIcon />
-                    </Button>
-                  </DropdownMenuItem>
-                ) : null}
+                {process.env.NODE_ENV === "development" && (
+                  <>
+                    <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
+                    {onUpdate && (
+                      <DropdownMenuItem variant="warning" asChild>
+                        <Button
+                          variant="dropdown-item"
+                          onClick={async () => {
+                            setStatus(FrontendStatus.Loading)
+                            const success = await onUpdate()
+                            if (success) setStatus(FrontendStatus.Loaded)
+                            else setStatus(FrontendStatus.Error)
+                          }}
+                        >
+                          Update
+                          <RefreshCcwIcon />
+                        </Button>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem variant="warning" asChild>
+                      <Button
+                        variant="dropdown-item"
+                        onClick={async () => {
+                          if (!sp.id) {
+                            toast.error("Invalid product", {
+                              description: "Product ID is missing",
+                            })
+                            return
+                          }
+
+                          try {
+                            setStatus(FrontendStatus.Loading)
+                            await handleUpdatePriority(sp.id, 5)
+                            setPriority(5)
+                            setStatus(FrontendStatus.Loaded)
+                            toast.success("Priority updated", {
+                              description: "Product priority set to 5 (highest)",
+                            })
+                          } catch (error) {
+                            setStatus(FrontendStatus.Error)
+                            toast.error("Failed to update priority", {
+                              description: error instanceof Error ? error.message : "Unknown error occurred",
+                            })
+                          }
+                        }}
+                      >
+                        Set priority to 5
+                        <MicroscopeIcon />
+                      </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem variant="warning" asChild>
+                      <Button
+                        variant="dropdown-item"
+                        onClick={async () => {
+                          if (!sp.id) {
+                            toast.error("Invalid product", {
+                              description: "Product ID is missing",
+                            })
+                            return
+                          }
+
+                          try {
+                            setStatus(FrontendStatus.Loading)
+                            await handleUpdatePriority(sp.id, null)
+                            setPriority(null)
+                            setStatus(FrontendStatus.Loaded)
+                            toast.success("Priority cleared", {
+                              description: "Product priority set to default",
+                            })
+                          } catch (error) {
+                            setStatus(FrontendStatus.Error)
+                            toast.error("Failed to clear priority", {
+                              description: error instanceof Error ? error.message : "Unknown error occurred",
+                            })
+                          }
+                        }}
+                      >
+                        Clear priority
+                        <CircleIcon />
+                      </Button>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 

@@ -87,7 +87,8 @@ const DropdownMenuItem = React.forwardRef<
       "relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
       variant === "default" && "hover:bg-accent hover:text-accent-foreground",
       variant === "love" && "text-rose-500 hover:bg-rose-500/20 hover:text-rose-500",
-      variant === "warning" && "text-sky-600 hover:bg-sky-600/20 hover:text-sky-600",
+      variant === "warning" &&
+        "text-fuchsia-700 hover:bg-fuchsia-700/20 hover:text-fuchsia-700 dark:text-fuchsia-400 dark:hover:bg-fuchsia-400/20 dark:hover:text-fuchsia-400",
       variant === "destructive" && "text-destructive hover:bg-destructive/20 hover:text-destructive",
       inset && "pl-8",
       asButton && "p-0",

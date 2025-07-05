@@ -381,6 +381,35 @@ export const storeProductQueries = {
     return supabase.from("store_products").update({ is_tracked }).eq("id", id)
   },
 
+  async updatePriority(id: number, priority: number | null) {
+    const supabase = createClient()
+
+    if (priority !== null && (priority < 0 || priority > 5 || !Number.isInteger(priority))) {
+      return {
+        data: null,
+        error: {
+          message: "Priority must be null or an integer between 0 and 5",
+          status: 400,
+        },
+      }
+    }
+
+    const { data, error } = await supabase.from("store_products").update({ priority }).eq("id", id).select().single()
+
+    if (error) {
+      console.error("Error updating priority:", error)
+      return {
+        data: null,
+        error: error,
+      }
+    }
+
+    return {
+      data: data,
+      error: null,
+    }
+  },
+
   async createOrUpdateProduct(sp: StoreProduct) {
     const supabase = createClient()
     const { data: existingProduct } = await supabase

@@ -58,6 +58,7 @@ import {
   CircleOffIcon,
   DeleteIcon,
   EllipsisVerticalIcon,
+  MicroscopeIcon,
   RefreshCcwIcon,
   SearchIcon,
   SquareLibraryIcon,
@@ -286,6 +287,10 @@ WHERE category = '${category1}'
     }
   }
 
+  async function updateProductPriority() {
+    // TODO:
+  }
+
   function handleSubmit() {
     setPage(1)
     if (page === 1) fetchProducts()
@@ -504,9 +509,6 @@ WHERE category = '${category1}'
                     {onlyDiscounted ? <CheckIcon className="h-4 w-4" /> : <CircleIcon className="h-4 w-4" />}
                   </Button>
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
                 <DropdownMenuItem variant="default" asChild>
                   <Button variant="dropdown-item" onClick={clearSearch}>
                     Clear search
@@ -515,12 +517,21 @@ WHERE category = '${category1}'
                 </DropdownMenuItem>
 
                 {process.env.NODE_ENV === "development" && (
-                  <DropdownMenuItem variant="warning" asChild>
-                    <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
-                      Update products in page
-                      <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-                    </Button>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="warning" asChild>
+                      <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
+                        Update products in page
+                        <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
+                      </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem variant="warning" asChild>
+                      <Button variant="dropdown-item" onClick={updateProductPriority} disabled={isLoading}>
+                        Update products priority
+                        <MicroscopeIcon />
+                      </Button>
+                    </DropdownMenuItem>
+                  </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
