@@ -294,7 +294,6 @@ export const existingCategories = [
   "Campanhas",
   "Casa, Bricolage e Jardim",
   "Cão",
-  "Charcutaria e Queijos",
   "Desporto e Malas de Viagem",
   "Gato",
   "Livraria e Papelaria",
@@ -311,10 +310,8 @@ export const existingCategories = [
   "Casa e Jardim",
   "Depilatórios",
   "Limpeza e Cuidados do Lar",
-  "Marcas Auchan",
   "O Mundo do Bebé",
   "Produtos Frescos",
-  "Produtos Locais",
   "Saúde e Bem Estar",
   "Tecnologia e Eletrodomésticos",
 ]
@@ -326,14 +323,11 @@ export const defaultCategories = [
   "Frescos",
   "Bio, Eco e Saudável",
   "Laticínios e Ovos",
-  "Charcutaria e Queijos",
   // Auchan
   "Alimentação",
   "Beleza e Higiene",
   "Biológicos e Alternativas",
-  "Marcas Auchan",
   "Produtos Frescos",
-  "Produtos Locais",
   "Saúde e Bem Estar",
 ]
 

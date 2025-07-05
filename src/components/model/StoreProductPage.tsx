@@ -123,11 +123,14 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
           )}
 
-          {sp.discount ? (
-            <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-              -{discountValueToPercentage(sp.discount)}
-            </Badge>
-          ) : null}
+          {/* Top Left */}
+          <div className="absolute left-2 top-2 z-50 flex items-center gap-2">
+            {sp.category || sp.category_2 || sp.category_3 ? (
+              <Badge variant="secondary" size="2xs" roundedness="sm" className="w-fit">
+                {sp.category} {sp.category_2 && ` > ${sp.category_2}`} {sp.category_3 && ` > ${sp.category_3}`}
+              </Badge>
+            ) : null}
+          </div>
         </div>
 
         {/* Product Details */}

@@ -234,7 +234,15 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger>
-                <Badge variant="secondary" size="xs" roundedness="sm" className="line-clamp-1 text-left text-2xs">
+                <Badge
+                  variant="secondary"
+                  size="xs"
+                  roundedness="sm"
+                  className="line-clamp-1 text-left text-2xs"
+                  onClick={() => {
+                    navigator.clipboard.writeText(sp.category || sp.category_3 || sp.category_2 || "")
+                  }}
+                >
                   {sp.category || sp.category_3 || sp.category_2 || "No category"}
                 </Badge>
               </TooltipTrigger>

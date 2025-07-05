@@ -123,30 +123,33 @@ export function StoreProductsGrid(props: Props) {
   })
 
   const storeProductCategories = useStoreProductCategories()
-  const rawData = storeProductCategories?.data?.tuples || []
+  const tuples = storeProductCategories?.data?.tuples || []
+
+  const allCategoriesFilled = category1 && category2 && category3
+  const allCategoriesEmpty = !category1 && !category2 && !category3
 
   const category1Options = useMemo((): string[] => {
     return [
-      ...new Set(rawData.map((item: { category: string; category_2: string; category_3: string }) => item.category)),
+      ...new Set(tuples.map((item: { category: string; category_2: string; category_3: string }) => item.category)),
     ]
-  }, [rawData])
+  }, [tuples])
 
   const category2Options = useMemo((): string[] => {
     if (!category1) return []
     return [
       ...new Set(
-        rawData
+        tuples
           .filter((item: { category: string; category_2: string; category_3: string }) => item.category === category1)
           .map((item: { category: string; category_2: string; category_3: string }) => item.category_2),
       ),
     ]
-  }, [rawData, category1])
+  }, [tuples, category1])
 
   const category3Options = useMemo((): string[] => {
     if (!category1 || !category2) return []
     return [
       ...new Set(
-        rawData
+        tuples
           .filter(
             (item: { category: string; category_2: string; category_3: string }) =>
               item.category === category1 && item.category_2 === category2,
@@ -154,13 +157,13 @@ export function StoreProductsGrid(props: Props) {
           .map((item: { category: string; category_2: string; category_3: string }) => item.category_3),
       ),
     ]
-  }, [rawData, category1, category2])
+  }, [tuples, category1, category2])
 
   const categoriesPriorityQuery = useMemo(() => {
     if (!category1 || !category2 || !category3) return ""
 
     return `UPDATE store_products
-SET priority = 5
+SET priority = 0
 WHERE category = '${category1}'
   AND category_2 = '${category2}'
   AND category_3 = '${category3}';`
@@ -405,15 +408,26 @@ WHERE category = '${category1}'
                 <strong>Store:</strong> {resolveSupermarketChain(parseInt(originId))?.name}
               </li>
             )}
-            <li>
-              <strong>Categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
-              <span className="text-muted-foreground">
-                {categories
-                  .filter((cat) => cat.selected)
-                  .map((cat) => cat.name)
-                  .join(", ") || "None"}
-              </span>
-            </li>
+            {allCategoriesFilled ? (
+              <li>
+                <strong>Categories:</strong>
+                <ul className="mt-1 flex list-disc flex-col gap-0 pl-4 text-sm">
+                  <li>[1] {category1}</li>
+                  <li>[2] {category2}</li>
+                  <li>[3] {category3}</li>
+                </ul>
+              </li>
+            ) : (
+              <li>
+                <strong>Main categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
+                <span className="text-muted-foreground">
+                  {categories
+                    .filter((cat) => cat.selected)
+                    .map((cat) => cat.name)
+                    .join(", ") || "None"}
+                </span>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -586,20 +600,10 @@ WHERE category = '${category1}'
                     {/* Display current selections */}
                     {(category1 || category2 || category3) && (
                       <div className="mt-4 rounded-md bg-muted p-3">
-                        <div className="flex flex-col items-start space-y-1 text-sm md:flex-row md:items-center md:space-x-2 md:space-y-0">
-                          {category1 && (
-                            <>
-                              <code>{category1}</code>
-                              {category2 && <span className="hidden text-muted-foreground md:inline">/</span>}
-                            </>
-                          )}
-                          {category2 && (
-                            <>
-                              <code>{category2}</code>
-                              {category3 && <span className="hidden text-muted-foreground md:inline">/</span>}
-                            </>
-                          )}
-                          {category3 && <code>{category3}</code>}
+                        <div className="text-sm">
+                          <code className="text-wrap tracking-tight">
+                            {[category1, category2, category3].filter(Boolean).join(" > ")}
+                          </code>
                         </div>
                       </div>
                     )}
@@ -626,8 +630,8 @@ WHERE category = '${category1}'
                     <CommandList>
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
-                        <ScrollArea className="h-96">
-                          <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 py-1.5">
+                        <ScrollArea className="h-[32rem]">
+                          <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 pb-1.5 pt-1">
                             <button
                               onClick={selectDefaultCategories}
                               className="flex rounded-md bg-gradient-to-r from-blue-600/40 to-indigo-500/40 px-1.5 py-0.5 text-xs text-primary-foreground text-white hover:opacity-80"
@@ -655,16 +659,16 @@ WHERE category = '${category1}'
                               key={category.name}
                               value={category.name}
                               onSelect={() => toggleCategory(category.name)}
-                              className="flex items-center justify-between"
+                              className="flex cursor-pointer items-center justify-between py-1 transition duration-100 [&_svg]:size-3"
                             >
-                              <span>{category.name}</span>
+                              <span className={cn(category.selected && "font-medium")}>{category.name}</span>
                               <div
                                 className={cn(
-                                  "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                  "flex h-4 w-4 items-center justify-center rounded-2xl border border-primary transition-all",
                                   category.selected ? "bg-primary text-primary-foreground" : "opacity-50",
                                 )}
                               >
-                                {category.selected && <CheckIcon className="h-3 w-3" />}
+                                {category.selected && <CheckIcon />}
                               </div>
                             </CommandItem>
                           ))}
@@ -772,12 +776,12 @@ WHERE category = '${category1}'
             <span className="font-semibold text-foreground">{pagedCount}</span> results
           </span>
 
-          <span className="order-1 flex items-center justify-between gap-4 lg:order-2">
+          <span className="order-1 flex flex-col items-end justify-end gap-1 lg:order-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
             {category1 && category2 && category3 ? (
               <Button
                 size="xs"
-                variant="ghost"
-                className="gap-0.5 px-1 font-medium [&_svg]:size-3"
+                variant="glass"
+                className="gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
                 onClick={() => {
                   setCategory1("")
                   setCategory2("")
@@ -785,10 +789,10 @@ WHERE category = '${category1}'
                   fetchProducts()
                 }}
               >
-                <span>
-                  {category1} {">"} {category2} {">"} {category3}
-                </span>
                 <XIcon />
+                <span className="max-w-[300px] truncate text-wrap text-end lg:max-w-full">
+                  {[category1, category2, category3].filter(Boolean).join(" > ")}
+                </span>
               </Button>
             ) : null}
             <span>
