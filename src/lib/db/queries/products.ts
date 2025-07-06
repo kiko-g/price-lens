@@ -471,7 +471,6 @@ export const storeProductQueries = {
       const { data: pageData, error: pageError } = await supabase
         .from("store_products")
         .select("category, category_2, category_3")
-        .eq("origin_id", "2")
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
       if (pageError) {
