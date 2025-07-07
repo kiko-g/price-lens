@@ -186,46 +186,6 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </TooltipProvider>
               )}
 
-              {/* {sp.is_essential ? (
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant="retail">Essential</Badge>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      size="xs"
-                      variant="glass"
-                      className="max-w-60"
-                    >
-                      This product is part of the inflation basket and is considered essential.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant="secondary">Non-essential</Badge>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      size="xs"
-                      variant="glass"
-                      className="max-w-60"
-                    >
-                      This product is not part of the inflation basket and is not considered essential.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )} */}
-
               <Button variant="outline" size="sm" roundedness="2xl" asChild>
                 <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                   {supermarketChain?.logo}

@@ -36,11 +36,8 @@ import {
   ExternalLinkIcon,
   CheckIcon,
   CircleIcon,
-  ShoppingBasketIcon,
-  SquareXIcon,
   MicroscopeIcon,
 } from "lucide-react"
-import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { cn } from "../../lib/utils"
 import { toast } from "sonner"
 import { PriorityBadge } from "./priority-badge"
@@ -62,20 +59,6 @@ async function handleAddToTrackingList(sp: StoreProduct) {
     await response.json()
   } catch (error) {
     console.error("Error adding to tracking list:", error)
-  }
-}
-
-async function handleRemoveFromInflationBasket(sp: StoreProduct) {
-  if (!sp.is_essential) return
-
-  try {
-    const response = await fetch("/api/products/basket/remove", {
-      method: "POST",
-      body: JSON.stringify({ storeProduct: sp }),
-    })
-    await response.json()
-  } catch (error) {
-    console.error("Error removing from inflation basket:", error)
   }
 }
 
@@ -119,7 +102,6 @@ async function handleUpdatePriority(storeProductId: number, priority: number | n
 export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)
-  const [isEssential, setIsEssential] = useState(sp?.is_essential ?? false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)
 
@@ -364,32 +346,6 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                         {isTracked ? <CheckIcon /> : <PlusIcon />}
                       </Button>
                     </DropdownMenuItem>
-
-                    {isTracked && (
-                      <DropdownMenuItem asChild>
-                        <Button
-                          variant="dropdown-item"
-                          onClick={async () => {
-                            if (isEssential) {
-                              await handleRemoveFromInflationBasket(sp)
-                              setIsEssential(false)
-                              toast(`${sp.name}`, {
-                                description: `Removed product from inflation basket`,
-                              })
-                            } else {
-                              await handleAddToInflationBasket(sp)
-                              setIsEssential(true)
-                              toast(`${sp.name}`, {
-                                description: `Added product to inflation basket`,
-                              })
-                            }
-                          }}
-                        >
-                          {isEssential ? "Remove from inflation basket" : "Add to inflation basket"}
-                          {isEssential ? <SquareXIcon /> : <ShoppingBasketIcon />}
-                        </Button>
-                      </DropdownMenuItem>
-                    )}
                   </>
                 ) : null}
 
