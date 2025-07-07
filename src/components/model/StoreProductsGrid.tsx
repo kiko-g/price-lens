@@ -708,36 +708,36 @@ WHERE category = '${category1}'
               {/* Sort Filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start lg:w-[120px]">
-                    {sortBy === "a-z" && <ArrowDownAZIcon className="mr-2 h-4 w-4" />}
-                    {sortBy === "z-a" && <ArrowUpAZIcon className="mr-2 h-4 w-4" />}
-                    {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />}
-                    {sortBy === "price-high-low" && <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />}
-                    {sortBy === "only-nulls" && <CircleOffIcon className="mr-2 h-4 w-4" />}
-                    Sort by
+                  <Button variant="outline" className="w-auto justify-start lg:w-[120px]">
+                    {sortBy === "a-z" && <ArrowDownAZIcon className="h-4 w-4" />}
+                    {sortBy === "z-a" && <ArrowUpAZIcon className="h-4 w-4" />}
+                    {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="h-4 w-4" />}
+                    {sortBy === "price-high-low" && <ArrowDownWideNarrowIcon className="h-4 w-4" />}
+                    {sortBy === "only-nulls" && <CircleOffIcon className="h-4 w-4" />}
+                    <span className="hidden lg:block">Sort by</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[180px]">
                   <DropdownMenuLabel>Sort by</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setSortBy("a-z")}>
-                    <ArrowDownAZ className="mr-2 h-4 w-4" />
+                    <ArrowDownAZ className="h-4 w-4" />
                     Name A-Z
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("z-a")}>
-                    <ArrowUpAZ className="mr-2 h-4 w-4" />
+                    <ArrowUpAZ className="h-4 w-4" />
                     Name Z-A
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
-                    <ArrowUpWideNarrowIcon className="mr-2 h-4 w-4" />
+                    <ArrowUpWideNarrowIcon className="h-4 w-4" />
                     Price: High to Low
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("price-low-high")}>
-                    <ArrowDownWideNarrowIcon className="mr-2 h-4 w-4" />
+                    <ArrowDownWideNarrowIcon className="h-4 w-4" />
                     Price: Low to High
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("only-nulls")}>
-                    <CircleOffIcon className="mr-2 h-4 w-4" />
+                    <CircleOffIcon className="h-4 w-4" />
                     Invalid products
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -769,7 +769,12 @@ WHERE category = '${category1}'
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
+              <Button
+                variant="outline"
+                className="rounded-l-none focus:z-10"
+                onClick={handleNextPage}
+                disabled={isLoading || page === paginationTotal}
+              >
                 Next
               </Button>
             </div>
@@ -854,7 +859,12 @@ WHERE category = '${category1}'
             </SelectContent>
           </Select>
 
-          <Button variant="outline" className="rounded-l-none focus:z-10" onClick={handleNextPage}>
+          <Button
+            variant="outline"
+            className="rounded-l-none focus:z-10"
+            onClick={handleNextPage}
+            disabled={isLoading || page === paginationTotal}
+          >
             Next
           </Button>
         </div>

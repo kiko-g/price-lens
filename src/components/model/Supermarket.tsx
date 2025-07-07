@@ -46,7 +46,7 @@ export function resolveSupermarketChain(originId: number | null) {
             alt="Continente"
             width={300}
             height={300}
-            className="h-3.5 w-full md:h-3.5 md:w-min"
+            className="h-3.5 w-auto md:h-3.5 md:w-min"
           />
         ),
       }
@@ -72,7 +72,7 @@ export function resolveSupermarketChain(originId: number | null) {
             alt="Pingo Doce"
             width={300}
             height={300}
-            className="h-3.5 w-full md:h-3.5 md:w-min"
+            className="h-3.5 w-auto md:h-3.5 md:w-min"
           />
         ),
       }
