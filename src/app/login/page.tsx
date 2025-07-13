@@ -5,7 +5,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
-import { login, signup } from "./actions"
+import { login, signup, signInWithGoogle } from "./actions"
 import { Card, CardContent } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -169,16 +169,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <Button variant="outline" type="button" className="w-full">
+          <form action={signInWithGoogle} className="mt-4">
+            <Button variant="outline" type="submit" className="w-full">
               <GoogleIcon />
               Google
             </Button>
-            <Button variant="outline" type="button" className="w-full">
-              <GithubIcon />
-              Github
-            </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>
