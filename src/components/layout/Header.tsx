@@ -19,8 +19,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useUser } from "@/hooks/useUser"
+import { signOut } from "@/app/login/actions"
+import { Skeleton } from "@/components/ui/skeleton"
 
-import { ShieldEllipsisIcon } from "lucide-react"
+import { ShieldEllipsisIcon, LogOut, User as UserIcon, LogInIcon } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -51,17 +55,76 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center justify-center gap-0.5 md:gap-1">
+        <div className="flex items-center justify-center gap-0.5 md:gap-1.5">
           <Button variant="ghost" size="icon-sm" asChild className="hidden md:inline-flex">
             <Link target="_blank" href={siteConfig.links.repo}>
               <GithubIcon />
             </Link>
           </Button>
           <ThemeToggle />
+
+          <UserDropdownMenu />
           <NavigationMenu />
         </div>
       </div>
     </header>
+  )
+}
+
+function UserDropdownMenu() {
+  const { user, isLoading } = useUser()
+
+  if (isLoading) {
+    return <Skeleton className="h-8 w-8 rounded-full" />
+  }
+
+  if (!user) {
+    return (
+      <Button asChild size="icon-sm" variant="ghost" className="shadow-none">
+        <Link href="/login">
+          <LogInIcon className="h-4 w-4" />
+          <span className="sr-only">Login</span>
+        </Link>
+      </Button>
+    )
+  }
+
+  const userInitial = user.email ? user.email.charAt(0).toUpperCase() : "U"
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-7 w-7 rounded-full">
+          <Avatar className="h-7 w-7">
+            <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name ?? "User"} />
+            <AvatarFallback>{userInitial}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{user.user_metadata.full_name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/profile">
+            <UserIcon className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="p-0">
+          <form action={signOut} className="w-full">
+            <Button type="submit" variant="dropdown-item" className="h-full w-full justify-start px-2 font-normal">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </form>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

@@ -35,10 +35,18 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user && !request.nextUrl.pathname.startsWith("/login") && !request.nextUrl.pathname.startsWith("/auth")) {
-    // no user, potentially respond by redirecting the user to the login page
+  const { pathname } = request.nextUrl
+
+  // Define protected routes that require authentication
+  const protectedRoutes = ["/profile", "/admin"]
+
+  // If the user is not authenticated and is trying to access a protected route,
+  // redirect them to the login page.
+  if (!user && protectedRoutes.some((path) => pathname.startsWith(path))) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
+    // store the intended path to redirect back after login
+    url.searchParams.set("next", pathname)
     return NextResponse.redirect(url)
   }
 

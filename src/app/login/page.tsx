@@ -1,182 +1,56 @@
 "use client"
 
-import { useState } from "react"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-
-import { login, signup, signInWithGoogle } from "./actions"
-import { Card, CardContent } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { signInWithGoogle } from "./actions"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Separator } from "@/components/ui/separator"
-import { GithubIcon } from "@/components/icons"
-
-const formSchema = z
-  .object({
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().optional(),
-    remember: z.boolean(),
-  })
-  .refine(
-    (data) => {
-      if (data.confirmPassword) {
-        return data.password === data.confirmPassword
-      }
-      return true
-    },
-    {
-      message: "Passwords do not match",
-      path: ["confirmPassword"],
-    },
-  )
-
-type FormData = z.infer<typeof formSchema>
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowLeftIcon } from "lucide-react"
 
 export default function LoginPage() {
-  const [isRegister, setIsRegister] = useState(false)
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      remember: false,
-    },
-  })
-
-  async function onSubmit(values: FormData) {
-    const formData = new FormData()
-    formData.append("email", values.email)
-    formData.append("password", values.password)
-    formData.append("remember", values.remember.toString())
-
-    try {
-      if (isRegister) {
-        await signup(formData)
-      } else {
-        await login(formData)
-      }
-    } catch (error) {
-      console.error(isRegister ? "Registration failed:" : "Login failed:", error)
-    }
-  }
-
   return (
-    <div className="flex min-h-full flex-1 flex-col items-center justify-center bg-muted py-12 sm:px-6 lg:px-8">
-      <div className="flex flex-col items-center sm:mx-auto sm:w-full sm:max-w-md">
-        <img src="/price-lens.svg" alt="Price Lens" className="logo-animation size-8" />
-        <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
-          {isRegister ? "Create a new account" : "Sign in to your account"}
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-500">
-          {isRegister ? "Already have an account? " : "Don't have an account? "}
-          <Button variant="link" className="p-0" onClick={() => setIsRegister(!isRegister)}>
-            {isRegister ? "Sign in" : "Create one"}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="flex w-full max-w-md flex-col items-center">
+        <div className="absolute left-8 top-8">
+          <Button asChild variant="ghost">
+            <Link href="/">
+              <ArrowLeftIcon className="h-4 w-4" />
+              Back to Core
+            </Link>
           </Button>
+        </div>
+
+        <h1 className="mb-2 flex items-center text-2xl font-semibold text-primary">
+          <span>Login to</span>
+          <div className="ml-2 flex items-center">
+            <Image src="/price-lens.svg" alt="Price Lens" width={24} height={24} className="mr-1" />
+            <span className="tracking-tighter">Price Lens</span>
+          </div>
+        </h1>
+        <p className="mb-4 text-center text-sm text-muted-foreground">
+          Sign in below! We’ll never use your email for spam{" "}
+          <span role="img" aria-label="smile">
+            😊
+          </span>
+        </p>
+
+        <form action={signInWithGoogle} className="w-full">
+          <Button type="submit" variant="default" className="w-full" size="lg">
+            <GoogleIcon />
+            Continue with Google
+          </Button>
+        </form>
+        <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
+          By continuing, you agree to our{" "}
+          <Link href="/terms" className="underline hover:text-primary">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline hover:text-primary">
+            Privacy Policy
+          </Link>
+          .
         </p>
       </div>
-
-      <Card className="mt-4 w-full max-w-md">
-        <CardContent className="pt-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email address</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {isRegister && (
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <div className="flex items-center justify-between">
-                <FormField
-                  control={form.control}
-                  name="remember"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-center space-x-2">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(checked) => field.onChange(checked === true)}
-                        />
-                      </FormControl>
-                      <FormLabel className="mt-0 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        Remember me
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {!isRegister && (
-                  <Button variant="link" className="px-0 text-sm text-muted-foreground">
-                    Forgot password?
-                  </Button>
-                )}
-              </div>
-
-              <Button type="submit" className="w-full">
-                {isRegister ? "Create account" : "Sign in"}
-              </Button>
-            </form>
-          </Form>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-card px-4 text-sm font-medium text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <form action={signInWithGoogle} className="mt-4">
-            <Button variant="outline" type="submit" className="w-full">
-              <GoogleIcon />
-              Google
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
     </div>
   )
 }
