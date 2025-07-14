@@ -26,19 +26,19 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
       case 1:
         return {
           label: "1/5",
-          tooltip: "Low",
+          tooltip: "Minor",
           className: `bg-rose-50 text-rose-700 dark:bg-rose-600 dark:text-white`,
         }
       case 2:
         return {
           label: "2/5",
-          tooltip: "Medium",
+          tooltip: "Low",
           className: `bg-orange-50 text-orange-700 dark:bg-orange-600 dark:text-white`,
         }
       case 3:
         return {
           label: "3/5",
-          tooltip: "High",
+          tooltip: "Medium",
           className: `bg-amber-50 text-amber-700 dark:bg-amber-600 dark:text-white`,
         }
       case 4:

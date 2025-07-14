@@ -16,7 +16,7 @@ import { GoogleIcon } from "@/components/icons/GoogleIcon"
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, isLoading } = useUser()
+  const { user, profile, isLoading } = useUser()
 
   if (isLoading) {
     return <ProfilePageSkeleton />
@@ -79,18 +79,23 @@ export default function ProfilePage() {
           </Avatar>
 
           <p className="mb-0 text-xl font-bold transition-opacity duration-200">{username}</p>
-          <p className="mb-1.5 text-sm text-muted-foreground">{user.email}</p>
-
-          <div className="flex items-center gap-2">
-            <Badge variant={user.email_confirmed_at ? "default" : "secondary"}>
-              {verifiedIcon}
-              <span>{user.email_confirmed_at ? "Verified" : "Unverified"}</span>
-            </Badge>
-
-            <Badge variant="outline">Free plan</Badge>
+          <div className="mb-1 flex items-center gap-1">
+            {verifiedIcon}
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
 
-          <p className="mt-2 text-xs text-muted-foreground">Member since {accountCreatedAt}</p>
+          <div className="flex items-center gap-2">
+            {profile?.plan && (
+              <Badge variant="default" roundedness="sm" className="capitalize">
+                {profile.plan}
+              </Badge>
+            )}
+            {profile?.role && (
+              <Badge variant="outline" roundedness="sm" className="capitalize">
+                {profile.role}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Tabs Column */}
@@ -101,7 +106,9 @@ export default function ProfilePage() {
               <TabsTrigger value="customization">Customization</TabsTrigger>
               <TabsTrigger value="contact-us">Contact Us</TabsTrigger>
             </TabsList>
-            <TabsContent value="account"></TabsContent>
+            <TabsContent value="account">
+              <p>Member since {accountCreatedAt}</p>
+            </TabsContent>
           </Tabs>
         </div>
       </div>

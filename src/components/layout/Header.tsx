@@ -1,15 +1,18 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { adminNavigation, navigation, siteConfig } from "@/lib/config"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 import { GithubIcon } from "@/components/icons"
 import { LogoLink } from "@/components/layout/LogoLink"
-import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
+import { ThemeToggle } from "@/components/layout/ThemeToggle"
 
+import { signOut } from "@/app/login/actions"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -19,12 +22,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useUser } from "@/hooks/useUser"
-import { signOut } from "@/app/login/actions"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useUser } from "@/hooks/useUser"
 
-import { ShieldEllipsisIcon, LogOut, User as UserIcon, LogInIcon } from "lucide-react"
+import { LogInIcon, LogOut, ShieldEllipsisIcon, User as UserIcon } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -72,7 +73,7 @@ export function Header() {
 }
 
 function UserDropdownMenu() {
-  const { user, isLoading } = useUser()
+  const { user, profile, isLoading } = useUser()
 
   if (isLoading) {
     return <Skeleton className="h-8 w-8 rounded-full" />
@@ -89,6 +90,14 @@ function UserDropdownMenu() {
     )
   }
 
+  function getUserBadgeText() {
+    if (profile?.role === "admin") return "Admin"
+    else if (profile?.plan === "free") return "Free"
+    else if (profile?.plan === "plus") return "Plus"
+    else return "User"
+  }
+
+  const userBadgeText = getUserBadgeText()
   const userInitial = user.email ? user.email.charAt(0).toUpperCase() : "U"
 
   return (
@@ -99,6 +108,14 @@ function UserDropdownMenu() {
             <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name ?? "User"} />
             <AvatarFallback>{userInitial}</AvatarFallback>
           </Avatar>
+          <span className="sr-only">User</span>
+          <Badge
+            size="3xs"
+            variant="special"
+            className="absolute -bottom-2 left-1/2 -translate-x-1/2 capitalize leading-none"
+          >
+            {userBadgeText}
+          </Badge>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

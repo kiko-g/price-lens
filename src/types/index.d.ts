@@ -100,3 +100,12 @@ export interface Price {
 export interface ProductFrontend extends Product {
   status: FrontendStatus
 }
+
+export type Profile = {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  plan: "free" | "plus"
+  role: "user" | "admin"
+  updated_at: string | null
+}
