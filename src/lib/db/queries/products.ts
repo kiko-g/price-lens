@@ -1,7 +1,6 @@
 import type { GetAllQuery } from "@/types/extra"
 import { createClient } from "@/lib/supabase/server"
-import type { Product, ProductLinked, ProductQueryType, StoreProduct } from "@/types"
-import type { SearchType, SortByType } from "@/types/extra"
+import type { Product, StoreProduct } from "@/types"
 import { PostgrestError } from "@supabase/supabase-js"
 
 export const productQueries = {
@@ -17,17 +16,7 @@ export const productQueries = {
     return { data, error }
   },
 
-  async getAllLinked({
-    productQueryType = "all",
-    offset = 0,
-    limit = 10,
-    q = "",
-  }: {
-    productQueryType?: ProductQueryType
-    offset?: number
-    limit?: number
-    q?: string
-  }): Promise<{
+  async getAllLinked({ offset = 0, limit = 10, q = "" }: { offset?: number; limit?: number; q?: string }): Promise<{
     data: (Product & { store_products: StoreProduct[] })[]
     error: PostgrestError | null
     pagination: { total: number; offset: number; limit: number } | null
@@ -36,10 +25,6 @@ export const productQueries = {
 
     // ---------- build base query ----------
     let query = supabase.from("products").select("*", { count: "exact" }).order("name")
-
-    // essential filter
-    if (productQueryType === "essential") query = query.eq("essential", true)
-    else if (productQueryType === "non-essential") query = query.eq("essential", false)
 
     // free-text search (min 3 chars)
     if (q && q.trim().length >= 3) {
@@ -147,35 +132,6 @@ export const productQueries = {
 
     return {
       data: null,
-      error: null,
-    }
-  },
-
-  async toggleEssential(id: number) {
-    const supabase = createClient()
-    const selectRes = await supabase.from("products").select("essential").eq("id", id).single()
-
-    if (selectRes.error) {
-      console.error("Error fetching product:", selectRes.error)
-      return {
-        data: null,
-        error: selectRes.error,
-      }
-    }
-
-    const newEssential = selectRes.data.essential !== null ? !selectRes.data.essential : false
-    const updateRes = await supabase.from("products").update({ essential: newEssential }).eq("id", id)
-
-    if (updateRes.error) {
-      console.error("Error updating product:", updateRes.error)
-      return {
-        data: null,
-        error: updateRes.error,
-      }
-    }
-
-    return {
-      data: newEssential,
       error: null,
     }
   },

@@ -1,8 +1,6 @@
 import { FrontendStatus } from "./extra"
 import { StaticImageData } from "next/image"
 
-export type ProductQueryType = "all" | "essential" | "non-essential"
-
 export interface BasketProduct {
   name_en: string
   name_pt: string
@@ -56,7 +54,6 @@ export interface Product {
   name: string
   brand: string
   category: string
-  essential: boolean
   product_ref_ids: string[]
 }
 

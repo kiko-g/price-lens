@@ -64,7 +64,7 @@ import {
   SquareLibraryIcon,
   XIcon,
 } from "lucide-react"
-import { useProducts, useStoreProductCategories } from "@/hooks/useProducts"
+import { useStoreProductCategories } from "@/hooks/useProducts"
 import { resolveSupermarketChain } from "./Supermarket"
 
 type Props = {

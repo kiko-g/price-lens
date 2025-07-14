@@ -77,7 +77,6 @@ export function AdminDashboardProducts() {
                   <HeaderCell>Name</HeaderCell>
                   <HeaderCell>Brand</HeaderCell>
                   <HeaderCell>Category</HeaderCell>
-                  <HeaderCell>Essential</HeaderCell>
                   <HeaderCell>Product Ref IDs</HeaderCell>
                 </tr>
               </thead>
@@ -103,17 +102,6 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
   const [product, setProduct] = useState(initialProduct)
   const [isUpdating, setIsUpdating] = useState(false)
 
-  async function handleToggleEssential(id?: number) {
-    if (!id || typeof id !== "number") return
-
-    setIsUpdating(true)
-    const response = await axios.post("/api/products/shallow/toggle-essential", { id })
-    if (response.status === 200) {
-      setProduct((prev) => ({ ...prev, essential: response.data.data }))
-    }
-    setIsUpdating(false)
-  }
-
   async function handleDeleteProduct(id?: number) {
     if (!id || typeof id !== "number") return
 
@@ -131,9 +119,6 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
     <tr key={product.id} className={cn(isUpdating ? "animate-pulse" : "")}>
       <Cell>{product.id}</Cell>
       <Cell>
-        <Button variant="ghost" size="icon-xs" onClick={() => handleToggleEssential(product.id)} disabled={isUpdating}>
-          {product.essential ? <ZapIcon className="text-emerald-400" /> : <ZapOffIcon />}
-        </Button>
         <Button
           variant="ghost-destructive"
           size="icon-xs"
@@ -146,7 +131,6 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
       <Cell>{product.name}</Cell>
       <Cell>{product.brand}</Cell>
       <Cell>{product.category}</Cell>
-      <Cell>{product.essential ? "true" : "false"}</Cell>
       <Cell>{product.product_ref_ids.join(", ")}</Cell>
     </tr>
   )

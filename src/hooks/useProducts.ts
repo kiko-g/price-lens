@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
 type GetProductsParams = {
-  type?: "essential" | "non-essential"
   offset?: number
   limit?: number
   q?: string
@@ -68,10 +67,10 @@ async function getStoreProductCategories() {
 }
 
 // hooks
-export function useProducts({ type, offset = 0, limit = 36, q = "" }: GetProductsParams) {
+export function useProducts({ offset = 0, limit = 36, q = "" }: GetProductsParams) {
   return useQuery({
-    queryKey: ["products", type, offset, limit, q],
-    queryFn: () => getProducts({ type, offset, limit, q }),
+    queryKey: ["products", offset, limit, q],
+    queryFn: () => getProducts({ offset, limit, q }),
     enabled: !q || q.length > 2,
   })
 }
