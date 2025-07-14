@@ -1397,7 +1397,6 @@ export const productUnavailable: StoreProduct = {
   updated_at: null,
   origin_id: 1,
   is_tracked: false,
-  is_essential: false,
   priority: null,
 }
 

@@ -62,20 +62,6 @@ async function handleAddToTrackingList(sp: StoreProduct) {
   }
 }
 
-async function handleAddToInflationBasket(sp: StoreProduct) {
-  if (sp.is_essential) return
-
-  try {
-    const response = await fetch("/api/products/basket/add", {
-      method: "POST",
-      body: JSON.stringify({ storeProduct: sp }),
-    })
-    await response.json()
-  } catch (error) {
-    console.error("Error adding to inflation basket:", error)
-  }
-}
-
 async function handleUpdatePriority(storeProductId: number, priority: number | null) {
   try {
     const response = await fetch(`/api/products/store/${storeProductId}/priority`, {

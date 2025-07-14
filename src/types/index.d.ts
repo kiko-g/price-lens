@@ -76,7 +76,6 @@ export interface StoreProduct {
   updated_at: string | null
   origin_id: number | null
   is_tracked: boolean
-  is_essential: boolean
   priority: number | null
 }
 
