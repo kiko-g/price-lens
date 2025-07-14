@@ -154,23 +154,6 @@ export const productQueries = {
 
     return { data, error }
   },
-
-  async createProductLinkedProduct(sp: StoreProduct) {
-    if (sp.is_tracked) {
-      return {
-        data: null,
-        error: "Product is already tracked",
-      }
-    }
-
-    const supabase = createClient()
-    return supabase.from("products").insert({
-      name: sp.name,
-      brand: sp.brand,
-      category: sp.category,
-      product_ref_ids: [sp.id],
-    })
-  },
 }
 
 export const storeProductQueries = {
@@ -330,11 +313,6 @@ export const storeProductQueries = {
         ignoreDuplicates: false,
       },
     )
-  },
-
-  async setIsTracked(id: number, is_tracked: boolean) {
-    const supabase = createClient()
-    return supabase.from("store_products").update({ is_tracked }).eq("id", id)
   },
 
   async updatePriority(id: number, priority: number | null) {

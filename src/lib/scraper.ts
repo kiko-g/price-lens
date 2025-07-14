@@ -42,7 +42,7 @@ export const fetchHtml = async (url: string) => {
 }
 
 const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
-  const isTracked = prevSp?.is_tracked ?? false
+  const priority = prevSp?.priority ?? null
 
   try {
     const html = await fetchHtml(url)
@@ -111,8 +111,7 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
       updated_at: now(),
       origin_id: 1,
       created_at: null,
-      is_tracked: isTracked,
-      priority: null,
+      priority,
     }
 
     return sp
@@ -124,7 +123,7 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
 }
 
 const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
-  const isTracked = prevSp?.is_tracked ?? false
+  const priority = prevSp?.priority ?? null
 
   try {
     const html = await fetchHtml(url)
@@ -195,8 +194,7 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
       updated_at: now(),
       origin_id: 2,
       created_at: null,
-      is_tracked: isTracked,
-      priority: null,
+      priority,
     }
 
     return sp

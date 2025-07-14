@@ -139,13 +139,13 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
 
-              {sp.is_tracked ? (
+              {sp.priority && sp.priority >= 3 ? (
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
                       <Badge variant="success">
                         <NavigationIcon className="h-4 w-4" />
-                        Tracked
+                        Priority {sp.priority}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent
@@ -157,7 +157,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       variant="glass"
                       className="max-w-60"
                     >
-                      Prices for this product on this store chain are being tracked by Price Lens.
+                      This product has high tracking priority ({sp.priority}/5) and is being actively tracked.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -167,7 +167,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     <TooltipTrigger>
                       <Badge variant="outline-destructive">
                         <NavigationOffIcon className="h-4 w-4" />
-                        Not tracked
+                        {sp.priority === null ? "Not tracked" : `Priority ${sp.priority}`}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent
@@ -179,8 +179,11 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       variant="destructive"
                       className="max-w-60"
                     >
-                      <p>Prices for this product on this store chain are NOT being tracked by Price Lens.</p>
-                      <p className="mt-2 font-bold">Add to your favorites to request tracking.</p>
+                      <p>
+                        This product has{" "}
+                        {sp.priority === null ? "no tracking priority" : `low tracking priority (${sp.priority}/5)`}.
+                      </p>
+                      <p className="mt-2 font-bold">Add to your favorites to increase tracking priority.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

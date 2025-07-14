@@ -48,20 +48,6 @@ type Props = {
   onFavorite?: () => Promise<boolean> | undefined
 }
 
-async function handleAddToTrackingList(sp: StoreProduct) {
-  if (sp.is_tracked) return
-
-  try {
-    const response = await fetch("/api/products/add", {
-      method: "POST",
-      body: JSON.stringify({ product: sp }),
-    })
-    await response.json()
-  } catch (error) {
-    console.error("Error adding to tracking list:", error)
-  }
-}
-
 async function handleUpdatePriority(storeProductId: number, priority: number | null) {
   try {
     const response = await fetch(`/api/products/store/${storeProductId}/priority`, {
@@ -87,7 +73,6 @@ async function handleUpdatePriority(storeProductId: number, priority: number | n
 
 export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
-  const [isTracked, setIsTracked] = useState(sp?.is_tracked ?? false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)
 
@@ -313,28 +298,6 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                   </Button>
                 </DropdownMenuItem>
 
-                {process.env.NODE_ENV === "development" ? (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="dropdown-item"
-                        disabled={isTracked}
-                        onClick={async () => {
-                          if (isTracked) return
-                          await handleAddToTrackingList(sp)
-                          setIsTracked(true)
-                          toast.success(`${sp.name}`, {
-                            description: `Supermarket product added to tracking list`,
-                          })
-                        }}
-                      >
-                        {isTracked ? "Product already tracked" : "Add to tracking list"}
-                        {isTracked ? <CheckIcon /> : <PlusIcon />}
-                      </Button>
-                    </DropdownMenuItem>
-                  </>
-                ) : null}
-
                 {onFavorite ? (
                   <DropdownMenuItem variant="love" asChild>
                     <Button
@@ -459,9 +422,25 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-2 divide-x [&>span:not(:first-child)]:pl-1.5">
-                  <span>{sp.brand}</span>
-                  <span>{sp.category}</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="tertiary" size="2xs" roundedness="sm">
+                    {sp.brand}
+                  </Badge>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="secondary" size="2xs" roundedness="sm">
+                          {sp.category}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>
+                          {sp.category} {sp.category_2 ? `> ${sp.category_2}` : ""}{" "}
+                          {sp.category_3 ? `> ${sp.category_3}` : ""}
+                        </span>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
 
