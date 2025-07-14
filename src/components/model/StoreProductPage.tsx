@@ -1,10 +1,8 @@
 "use client"
 
-import axios from "axios"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { FrontendStatus } from "@/types/extra"
+import { useState } from "react"
 import type { StoreProduct } from "@/types"
 import { discountValueToPercentage } from "@/lib/utils"
 import {
@@ -41,27 +39,13 @@ import { useStoreProduct, useUpdateStoreProduct } from "@/hooks/useProducts"
 import { LoadingIcon } from "../icons/LoadingIcon"
 
 export function StoreProductPageById({ id }: { id: string }) {
-  const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loading)
-  const [storeProduct, setStoreProduct] = useState<StoreProduct | null>(null)
+  const { data: storeProduct, isLoading, isError } = useStoreProduct(id)
 
-  async function fetchProduct(id: string) {
-    setStatus(FrontendStatus.Loading)
-    const response = await axios.get(`/api/products/store/${id}`)
-    setStoreProduct(response.data)
-    setStatus(FrontendStatus.Loaded)
-  }
-
-  useEffect(() => {
-    if (!id) return
-
-    fetchProduct(id as string)
-  }, [id])
-
-  if (status === FrontendStatus.Loading) {
+  if (isLoading) {
     return <StoreProductPageSkeleton />
   }
 
-  if (status === FrontendStatus.Error) {
+  if (isError) {
     return (
       <SkeletonStatusError>
         <p>Error loading store product {id}</p>
@@ -81,7 +65,8 @@ export function StoreProductPageById({ id }: { id: string }) {
 }
 
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
-  const { data: storeProduct, isLoading } = useStoreProduct(sp.id!.toString())
+  const productId = sp.id!.toString()
+  const { data: storeProduct, isLoading } = useStoreProduct(productId)
   const updateStoreProduct = useUpdateStoreProduct()
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 

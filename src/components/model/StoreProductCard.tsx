@@ -200,7 +200,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <Badge
             size="xs"
             variant="light"
-            className="opacity-100 transition-opacity duration-300 group-hover:opacity-100"
+            className="border border-muted opacity-100 transition-opacity duration-300 group-hover:opacity-100"
           >
             {supermarketChain ? supermarketChain.logoSmall : null}
           </Badge>

@@ -10,6 +10,7 @@ import { CalendarDays, Mail, Shield, Clock, User, ArrowLeftIcon } from "lucide-r
 import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -40,9 +41,10 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto max-w-5xl space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      {/* Header Actions */}
+      <div className="flex items-center justify-between pb-8">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => router.back()}>
+          <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeftIcon className="h-4 w-4" />
             Back to core
           </Button>
@@ -56,10 +58,30 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Header Section */}
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">Manage your account information and preferences</p>
+      {/* Content */}
+      <div className="flex flex-grow flex-col gap-4 md:flex-row">
+        {/* Profile Card Column */}
+        <div className="hidden space-y-8 md:block md:w-1/4">
+          <Avatar className="h-40 w-40">
+            <AvatarImage
+              src={user.user_metadata?.avatar_url || "/placeholder.svg"}
+              alt={user.user_metadata?.full_name || "User avatar"}
+            />
+            <AvatarFallback className="text-2xl">{userInitial}</AvatarFallback>
+          </Avatar>
+        </div>
+
+        {/* Tabs Column */}
+        <div className="md:w-3/4 md:pl-12">
+          <Tabs defaultValue="account">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="account">Account</TabsTrigger>
+              <TabsTrigger value="customization">Customization</TabsTrigger>
+              <TabsTrigger value="contact-us">Contact Us</TabsTrigger>
+            </TabsList>
+            <TabsContent value="account"></TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -67,13 +89,6 @@ export default function ProfilePage() {
         <Card className="md:col-span-2">
           <CardHeader>
             <div className="flex items-center space-x-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage
-                  src={user.user_metadata?.avatar_url || "/placeholder.svg"}
-                  alt={user.user_metadata?.full_name || "User avatar"}
-                />
-                <AvatarFallback className="text-2xl">{userInitial}</AvatarFallback>
-              </Avatar>
               <div className="space-y-1">
                 <CardTitle className="text-2xl">{user.user_metadata?.full_name || "User"}</CardTitle>
                 <CardDescription className="flex items-center gap-2">

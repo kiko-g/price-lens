@@ -68,10 +68,10 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
       <Tooltip>
         <TooltipTrigger>
           <Badge
-            size="2xs"
+            size="xs"
             variant="outline"
             className={cn(
-              "gap-0.5 border-0 opacity-50 transition-opacity duration-300 group-hover:opacity-100",
+              "gap-0.5 border-0 opacity-50 transition-all duration-300 group-hover:opacity-100",
               config.className,
             )}
           >

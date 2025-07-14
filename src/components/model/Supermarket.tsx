@@ -56,7 +56,7 @@ export function resolveSupermarketChain(originId: number | null) {
         badge: <SupermarketBadge supermarketChain="Auchan" />,
         logo: <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-5 w-auto md:h-5 md:w-min" />,
         logoSmall: (
-          <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-3.5 w-full md:h-3.5 md:w-min" />
+          <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-4 w-full md:h-4 md:w-min" />
         ),
       }
     case SupermarketChain.PingoDoce:
