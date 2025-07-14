@@ -20,6 +20,7 @@ export default async function Admin() {
         <AdminDashboardProductsLink />
         <AdminDashboardPricesLink />
         <TestScrapers />
+        <AdminCoreActions />
       </div>
     </Layout>
   )
@@ -69,6 +70,24 @@ function TestScrapers() {
           <Link href="/admin/test">Test Scrapers</Link>
         </Button>
       </CardFooter>
+    </Card>
+  )
+}
+
+function AdminCoreActions() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Core Actions</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="mb-4">Perform administrative actions from the UI.</p>
+        <Button asChild variant="success">
+          <Link href="/api/cron/sync" target="_blank">
+            Sync products with high priority
+          </Link>
+        </Button>
+      </CardContent>
     </Card>
   )
 }

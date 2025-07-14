@@ -154,6 +154,28 @@ export const productQueries = {
 
     return { data, error }
   },
+
+  insertProductFromStoreProduct(sp: StoreProduct) {
+    const supabase = createClient()
+    const productData: Product = {
+      name: sp.name,
+      brand: sp.brand,
+      category: sp.category ?? "",
+      product_ref_ids: [sp.id?.toString() ?? ""],
+    }
+    return supabase.from("products").insert(productData)
+  },
+
+  insertProductsFromStoreProducts(sps: StoreProduct[]) {
+    const supabase = createClient()
+    const productsData = sps.map((sp) => ({
+      name: sp.name,
+      brand: sp.brand,
+      category: sp.category,
+      product_ref_ids: [sp.id?.toString() ?? ""],
+    }))
+    return supabase.from("products").insert(productsData)
+  },
 }
 
 export const storeProductQueries = {
@@ -598,5 +620,35 @@ export const storeProductQueries = {
       .select("*")
       .is("priority", null)
       .range(offset, offset + limit - 1)
+  },
+
+  async getAllByPriority(priority: number | null, { offset = 0, limit = 100 }: { offset?: number; limit?: number }) {
+    if (priority !== null && (priority < 0 || priority > 5 || !Number.isInteger(priority))) {
+      return {
+        data: null,
+        error: {
+          message: "Priority must be null or an integer between 0 and 5",
+          status: 400,
+        },
+      }
+    }
+
+    const supabase = createClient()
+    return supabase
+      .from("store_products")
+      .select("*")
+      .eq("priority", priority)
+      .range(offset, offset + limit - 1)
+  },
+
+  async getUnsyncedHighPriority() {
+    const supabase = createClient()
+    const { data, error } = await supabase.rpc("get_unsynced_high_priority_products")
+
+    if (error) {
+      console.error("Error fetching unsynced high priority products:", error)
+    }
+
+    return { data, error }
   },
 }
