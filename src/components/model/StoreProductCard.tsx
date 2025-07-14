@@ -397,12 +397,20 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                           }
 
                           try {
+                            const priority = window.prompt("Enter priority (0-5):", "5")
+                            const priorityNum = priority ? parseInt(priority) : null
+                            if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
+                              toast.error("Invalid priority", {
+                                description: "Priority must be a number between 0 and 5",
+                              })
+                              return
+                            }
                             setStatus(FrontendStatus.Loading)
-                            await handleUpdatePriority(sp.id, 5)
-                            setPriority(5)
+                            await handleUpdatePriority(sp.id, priorityNum)
+                            setPriority(priorityNum)
                             setStatus(FrontendStatus.Loaded)
                             toast.success("Priority updated", {
-                              description: "Product priority set to 5 (highest)",
+                              description: `Product priority set to ${priorityNum}`,
                             })
                           } catch (error) {
                             setStatus(FrontendStatus.Error)
@@ -412,7 +420,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                           }
                         }}
                       >
-                        Set priority to 5
+                        Set priority
                         <MicroscopeIcon />
                       </Button>
                     </DropdownMenuItem>
