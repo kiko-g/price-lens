@@ -33,6 +33,15 @@ export function Footer() {
             GitHub
           </Link>
         </p>
+
+        <div className="mt-2 flex gap-x-4">
+          <Link href="/terms" className="text-2xs text-muted-foreground hover:underline md:text-sm">
+            Terms
+          </Link>
+          <Link href="/privacy" className="text-2xs text-muted-foreground hover:underline md:text-sm">
+            Privacy
+          </Link>
+        </div>
       </div>
 
       <ul className="flex items-center gap-1">
