@@ -111,7 +111,7 @@ function UserDropdownMenu() {
           <span className="sr-only">User</span>
           <Badge
             size="3xs"
-            variant="special"
+            variant="default"
             className="absolute -bottom-2 left-1/2 -translate-x-1/2 capitalize leading-none"
           >
             {userBadgeText}
@@ -128,14 +128,14 @@ function UserDropdownMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/profile">
-            <UserIcon className="mr-2 h-4 w-4" />
+            <UserIcon className="h-4 w-4" />
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="p-0">
           <form action={signOut} className="w-full">
             <Button type="submit" variant="dropdown-item" className="h-full w-full justify-start px-2 font-normal">
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="h-4 w-4" />
               Sign Out
             </Button>
           </form>

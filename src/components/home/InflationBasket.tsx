@@ -12,7 +12,7 @@ export function InflationBasket() {
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <Badge className="bg-transparent bg-gradient-to-br from-indigo-600/70 to-blue-600/70 text-white dark:text-white">
-            <TrendingUpIcon className="mr-2 h-4 w-4" />
+            <TrendingUpIcon className="h-4 w-4" />
             Inflation depends on basket of selected products
           </Badge>
           <div className="flex flex-col items-center justify-center gap-3">

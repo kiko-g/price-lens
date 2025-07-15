@@ -15,7 +15,7 @@ export default function NotFound() {
 
         <Button asChild>
           <Link href="/" prefetch={false}>
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            <ArrowLeftIcon className="h-4 w-4" />
             Return to website
           </Link>
         </Button>

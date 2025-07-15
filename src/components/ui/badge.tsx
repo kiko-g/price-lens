@@ -38,8 +38,6 @@ const badgeVariants = cva(
         blue: "border-transparent bg-blue-600 text-zinc-50 hover:bg-blue-600/80 dark:border-transparent dark:bg-blue-800 dark:text-zinc-50 dark:hover:bg-blue-800/80 [&_span.bubble]:bg-blue-600 dark:[&_span.bubble]:bg-blue-800",
         white:
           "border-transparent bg-white text-zinc-900 hover:bg-white/80 dark:border-transparent dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-zinc-900",
-        special:
-          "border-transparent bg-gradient-to-br from-blue-400 to-violet-400 text-white hover:opacity-80 dark:border-transparent dark:bg-gradient-to-br dark:from-blue-400 dark:to-violet-400 dark:text-white dark:hover:opacity-80",
       },
       size: {
         default: `px-3 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,
