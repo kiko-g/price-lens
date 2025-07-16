@@ -83,7 +83,7 @@ export default function RootLayout({
             <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
             <Script src="https://unpkg.com/react-scan/dist/install-hook.global.js" strategy="beforeInteractive" />
             <Monitoring
-              apiKey="6Hm7zTRByXQvcIe273l-uPC2VeXLbMV7" // Safe to expose publically
+              apiKey="6Hm7zTRByXQvcIe273l-uPC2VeXLbMV7"
               url="https://monitoring.react-scan.com/api/v1/ingest"
             />
           </>

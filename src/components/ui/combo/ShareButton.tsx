@@ -26,11 +26,9 @@ interface ShareButtonProps {
 export function ShareButton({ url, title, description = "", variant = "outline", size = "sm" }: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
 
-  // Use the current URL if none provided
   const shareUrl = url || typeof window !== "undefined" ? window.location.href : ""
 
   const handleShare = async () => {
-    // Check if the Web Share API is available
     if (navigator.share) {
       try {
         await navigator.share({
@@ -40,10 +38,7 @@ export function ShareButton({ url, title, description = "", variant = "outline",
         })
         toast.success("Shared successfully")
       } catch (error) {
-        // User cancelled or share failed
         console.error("Error sharing:", error)
-
-        // Only show error toast if it's not a user cancellation
         if (error instanceof Error && error.name !== "AbortError") {
           toast.error("Failed to share")
         }
@@ -61,7 +56,6 @@ export function ShareButton({ url, title, description = "", variant = "outline",
           icon: <Check className="h-4 w-4" />,
         })
 
-        // Reset the copied state after 2 seconds
         setTimeout(() => setCopied(false), 2000)
       })
       .catch((err) => {
@@ -95,7 +89,6 @@ export function ShareButton({ url, title, description = "", variant = "outline",
     toast("Sharing on WhatsApp")
   }
 
-  // Check if Web Share API is available
   const isWebShareAvailable = typeof navigator !== "undefined" && !!navigator.share
 
   return (

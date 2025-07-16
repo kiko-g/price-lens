@@ -48,25 +48,16 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
+  const origin = (await headers()).get("origin")
 
-  const getURL = () => {
-    let url =
-      process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production
-      process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel
-      "http://localhost:3000/"
-    // Make sure to include `https://` when not localhost.
-    url = url.includes("http") ? url : `https://${url}`
-    // Make sure to include a trailing `/`.
-    url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
-    return url
+  if (!origin) {
+    return redirect("/login?error=origin-missing")
   }
-
-  const redirectURL = getURL()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${redirectURL}auth/callback`,
+      redirectTo: `${origin}/auth/callback`,
     },
   })
 
@@ -75,11 +66,12 @@ export async function signInWithGoogle() {
     redirect("/error")
   }
 
+  console.debug(data.url)
   return redirect(data.url)
 }
 
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
-  redirect("/login")
+  redirect("/")
 }

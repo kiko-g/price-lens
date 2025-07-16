@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   value: number
   direction?: "up" | "down"
-  delay?: number // delay in s
+  delay?: number
   decimalPlaces?: number
 }
 

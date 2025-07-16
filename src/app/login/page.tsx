@@ -10,7 +10,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="flex w-full max-w-md flex-col items-center">
-        <div className="absolute left-8 top-8">
+        <div className="absolute left-4 top-4 md:left-8 md:top-8">
           <Button asChild variant="ghost">
             <Link href="/">
               <ArrowLeftIcon className="h-4 w-4" />

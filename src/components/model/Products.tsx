@@ -46,7 +46,7 @@ export function Products() {
     setIsSearching(true)
     const timer = setTimeout(() => {
       setDebouncedQuery(query)
-      setPage(1) // Reset page when search query changes
+      setPage(1)
       setIsSearching(false)
     }, 1500)
 

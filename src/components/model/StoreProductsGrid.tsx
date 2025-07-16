@@ -287,10 +287,6 @@ WHERE category = '${category1}'
     }
   }
 
-  async function updateProductPriority() {
-    // TODO:
-  }
-
   function handleSubmit() {
     setPage(1)
     if (page === 1) fetchProducts()
@@ -342,7 +338,6 @@ WHERE category = '${category1}'
     updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString(), originId })
   }, [page, query, searchType, sortBy, essential, originId])
 
-  // Add scroll event listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => {
@@ -523,12 +518,6 @@ WHERE category = '${category1}'
                       <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
                         Update products in page
                         <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem variant="warning" asChild>
-                      <Button variant="dropdown-item" onClick={updateProductPriority} disabled={isLoading}>
-                        Update products priority
-                        <MicroscopeIcon />
                       </Button>
                     </DropdownMenuItem>
                   </>
