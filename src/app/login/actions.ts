@@ -66,7 +66,6 @@ export async function signInWithGoogle() {
     redirect("/error")
   }
 
-  console.debug(data.url)
   return redirect(data.url)
 }
 
