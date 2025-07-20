@@ -3,9 +3,8 @@
 import axios from "axios"
 import { useEffect, useState, useRef, useMemo } from "react"
 import { type StoreProduct } from "@/types"
-import { FrontendStatus } from "@/types/extra"
+import { FrontendStatus, searchTypes, type SortByType, type SearchType } from "@/types/extra"
 
-import { searchTypes, type SortByType, type SearchType } from "@/types/extra"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
