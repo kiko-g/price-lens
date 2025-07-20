@@ -2,17 +2,19 @@
 
 import { signOut } from "@/app/login/actions"
 import { useUser } from "@/hooks/useUser"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { MailIcon, ArrowLeftIcon } from "lucide-react"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
+import { ArrowLeftIcon, BellIcon, BugIcon, ChartNetworkIcon, MailIcon, PlusIcon, ShoppingBagIcon } from "lucide-react"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -25,8 +27,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto max-w-6xl space-y-6 p-6">
-      {/* Header Actions */}
-      <HeaderActions router={router} />
+      <HeaderActions />
 
       {/* Content */}
       {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
@@ -34,7 +35,9 @@ export default function ProfilePage() {
   )
 }
 
-function HeaderActions({ router }: { router: any }) {
+function HeaderActions() {
+  const router = useRouter()
+
   return (
     <div className="flex items-center justify-between pb-8">
       <div className="flex items-center gap-2">
@@ -78,6 +81,68 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
     minute: "numeric",
   })
 
+  const upgradeNow = [
+    {
+      title: "Full price history",
+      description: (
+        <p className="text-sm text-muted-foreground">
+          No more 14-day limit and access to unlimited custom product tracking
+        </p>
+      ),
+      icon: <ChartNetworkIcon className="h-4 w-4" />,
+    },
+    {
+      title: "Price alerts",
+      description: (
+        <p className="text-sm text-muted-foreground">
+          Get notified of price changes and save money. Get breakdowns of evolutions of price points and campaigns.
+        </p>
+      ),
+      icon: <BellIcon className="h-4 w-4" />,
+    },
+    {
+      title: "Shopping list optimizer",
+      description: (
+        <p className="text-sm text-muted-foreground">
+          Optimize your shopping list across different supermarket sources. Get the best deals and save time.
+        </p>
+      ),
+      icon: <ShoppingBagIcon className="h-4 w-4" />,
+    },
+  ]
+
+  const contactUs = [
+    {
+      title: "Questions?",
+      description: (
+        <p className="text-sm text-muted-foreground">
+          Email PriceLens developer directly at{" "}
+          <Link href="mailto:kikojpgoncalves@gmail.com" className="text-blue-500 group-hover:underline">
+            kikojpgoncalves@gmail.com
+          </Link>
+        </p>
+      ),
+      icon: <MailIcon className="h-4 w-4" />,
+      link: "mailto:kikojpgoncalves@gmail.com",
+    },
+    {
+      title: "Found a bug?",
+      description: <p className="text-sm text-muted-foreground">UI glitches or formatting issues? Report them here!</p>,
+      icon: <BugIcon className="h-4 w-4" />,
+      link: "https://github.com/kikogoncalves/pricelens/issues",
+    },
+    {
+      title: "Feature request?",
+      description: (
+        <p className="text-sm text-muted-foreground">
+          We&apos;re always looking for new ideas! Let us know what you&apos;d like to see.
+        </p>
+      ),
+      icon: <PlusIcon className="h-4 w-4" />,
+      link: "https://github.com/kikogoncalves/pricelens/issues",
+    },
+  ]
+
   return (
     <div className="flex flex-grow flex-col gap-4 md:flex-row">
       {/* Profile Card Column */}
@@ -88,6 +153,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
         </Avatar>
 
         <p className="mb-0 text-xl font-bold transition-opacity duration-200">{username}</p>
+
         <div className="mb-1 flex items-center gap-1">
           {verifiedIcon}
           <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -105,6 +171,10 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
             </Badge>
           )}
         </div>
+
+        <p className="mx-auto mt-2 border-t pt-2 text-center text-2xs text-muted-foreground">
+          Member since {accountCreatedAt}
+        </p>
       </div>
 
       {/* Tabs Column */}
@@ -115,8 +185,61 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
             <TabsTrigger value="customization">Customization</TabsTrigger>
             <TabsTrigger value="contact-us">Contact Us</TabsTrigger>
           </TabsList>
-          <TabsContent value="account">
-            <p>Member since {accountCreatedAt}</p>
+
+          <TabsContent value="account" className="mb-8">
+            <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between">
+              <h2 className="text-center text-2xl font-bold md:text-left">Upgrade to Plus</h2>
+              <div className="mt-2 flex flex-col items-center justify-center text-right md:mt-0 md:flex-row md:items-end md:justify-center md:text-right">
+                <div className="text-xl font-bold md:text-3xl">
+                  $5
+                  <span className="text-base font-semibold text-muted-foreground">/month</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {upgradeNow.map((item) => (
+                <Card key={item.title}>
+                  <CardHeader className="p-4 pb-0">
+                    <CardTitle className="flex items-center gap-1 text-base font-semibold">
+                      {item.icon}
+                      {item.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-1.5">{item.description}</CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-4 md:flex-row">
+              <Button variant="default" className="w-full md:w-1/2">
+                Upgrade Now
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="customization" className="mb-8"></TabsContent>
+
+          <TabsContent value="contact-us" className="mb-8">
+            <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between">
+              <h2 className="text-center text-2xl font-bold md:text-left">We can help you out more</h2>
+            </div>
+
+            <div className="mt-4 grid w-3/4 gap-3 md:grid-cols-1">
+              {contactUs.map((item) => (
+                <Link key={item.title} href={item.link} className="block">
+                  <Card className="transition-colors hover:bg-accent hover:text-accent-foreground">
+                    <CardHeader className="p-4 pb-0">
+                      <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                        <span>{item.icon}</span>
+                        {item.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-1.5">{item.description}</CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
