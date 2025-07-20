@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
+
+import { cn } from "@/lib/utils"
 import { MoonIcon, SunIcon } from "lucide-react"
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   let { resolvedTheme, setTheme } = useTheme()
   let otherTheme = resolvedTheme === "dark" ? "light" : "dark"
   let [mounted, setMounted] = useState(false)
@@ -16,11 +18,11 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       aria-label={mounted ? `Switch to ${otherTheme} theme` : "Toggle theme"}
       onClick={() => setTheme(otherTheme)}
-      className="border-border shadow-none md:border-transparent"
+      className={cn("border-border shadow-none md:border-transparent", className)}
     >
       <SunIcon className="dark:hidden" />
       <MoonIcon className="hidden dark:inline-flex" />

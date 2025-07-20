@@ -1,6 +1,6 @@
 "use client"
 
-import { adminNavigation, navigation, siteConfig } from "@/lib/config"
+import { navigation } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -35,7 +35,7 @@ export function Header() {
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
-          <span className="inline-flex items-center rounded-full bg-gradient-to-br from-orange-600/70 to-rose-600/70 px-1.5 py-0.5 text-xs/4 font-bold capitalize tracking-tight text-white">
+          <span className="inline-flex items-center rounded-full bg-gradient-to-br from-orange-600/70 to-rose-600/70 px-1 text-2xs/4 font-bold capitalize tracking-tighter text-white dark:from-orange-400 dark:to-rose-500 md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold">
             Early Access
           </span>
 
@@ -57,19 +57,9 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-center gap-2 md:gap-1.5">
-          <Button
-            variant="outline"
-            size="icon"
-            asChild
-            className="hidden border-border shadow-none md:inline-flex md:border-transparent"
-          >
-            <Link target="_blank" href={siteConfig.links.repo}>
-              <GithubIcon />
-            </Link>
-          </Button>
-          <ThemeToggle />
-          <NavigationMenu />
+          <ThemeToggle className="hidden md:inline-flex" />
           <UserDropdownMenu />
+          <NavigationMenu />
         </div>
       </div>
     </header>
@@ -85,7 +75,7 @@ function UserDropdownMenu() {
 
   if (!user) {
     return (
-      <Button asChild size="icon" variant="outline" className="border-border shadow-none md:border-transparent">
+      <Button asChild size="icon" variant="ghost">
         <Link href="/login">
           <LogInIcon className="h-4 w-4" />
           <span className="sr-only">Login</span>
