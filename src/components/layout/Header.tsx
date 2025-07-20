@@ -70,12 +70,12 @@ function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
 
   if (isLoading) {
-    return <Skeleton className="h-8 w-8 rounded-full" />
+    return <Skeleton className="ml-2 h-8 w-8 rounded-full md:ml-0" />
   }
 
   if (!user) {
     return (
-      <Button asChild size="icon" variant="ghost">
+      <Button asChild size="icon" variant="ghost" className="ml-2 md:ml-0">
         <Link href="/login">
           <LogInIcon className="h-4 w-4" />
           <span className="sr-only">Login</span>

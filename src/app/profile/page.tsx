@@ -18,15 +18,43 @@ export default function ProfilePage() {
   const router = useRouter()
   const { user, profile, isLoading } = useUser()
 
-  if (isLoading) {
-    return <ProfilePageSkeleton />
-  }
-
-  if (!user) {
+  if (!isLoading && !user) {
     router.push("/login")
     return null
   }
 
+  return (
+    <div className="container mx-auto max-w-6xl space-y-6 p-6">
+      {/* Header Actions */}
+      <HeaderActions router={router} />
+
+      {/* Content */}
+      {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
+    </div>
+  )
+}
+
+function HeaderActions({ router }: { router: any }) {
+  return (
+    <div className="flex items-center justify-between pb-8">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" onClick={() => router.back()}>
+          <ArrowLeftIcon className="h-4 w-4" />
+          Back to core
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <Button variant="outline" onClick={() => signOut()} className="border-border shadow-none md:border-transparent">
+          Sign out
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function ProfileContent({ user, profile }: { user: any; profile: any }) {
   function getVerifiedIcon() {
     const provider = user?.app_metadata?.provider
 
@@ -51,119 +79,78 @@ export default function ProfilePage() {
   })
 
   return (
-    <div className="container mx-auto max-w-6xl space-y-6 p-6">
-      {/* Header Actions */}
-      <div className="flex items-center justify-between pb-8">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to core
-          </Button>
+    <div className="flex flex-grow flex-col gap-4 md:flex-row">
+      {/* Profile Card Column */}
+      <div className="hidden flex-col items-center md:flex md:w-1/4">
+        <Avatar className="mx-auto mb-4 h-40 w-40">
+          <AvatarImage src={avatarUrl} alt={user.user_metadata?.full_name || "User avatar"} />
+          <AvatarFallback className="text-2xl">{userInitial}</AvatarFallback>
+        </Avatar>
+
+        <p className="mb-0 text-xl font-bold transition-opacity duration-200">{username}</p>
+        <div className="mb-1 flex items-center gap-1">
+          {verifiedIcon}
+          <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button variant="ghost" onClick={() => signOut()}>
-            Sign out
-          </Button>
+          {profile?.plan && (
+            <Badge variant="default" roundedness="sm" className="capitalize">
+              {profile.plan}
+            </Badge>
+          )}
+          {profile?.role && (
+            <Badge variant="outline" roundedness="sm" className="capitalize">
+              {profile.role}
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex flex-grow flex-col gap-4 md:flex-row">
-        {/* Profile Card Column */}
-        <div className="hidden flex-col items-center md:flex md:w-1/4">
-          <Avatar className="mx-auto mb-4 h-40 w-40">
-            <AvatarImage src={avatarUrl} alt={user.user_metadata?.full_name || "User avatar"} />
-            <AvatarFallback className="text-2xl">{userInitial}</AvatarFallback>
-          </Avatar>
-
-          <p className="mb-0 text-xl font-bold transition-opacity duration-200">{username}</p>
-          <div className="mb-1 flex items-center gap-1">
-            {verifiedIcon}
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {profile?.plan && (
-              <Badge variant="default" roundedness="sm" className="capitalize">
-                {profile.plan}
-              </Badge>
-            )}
-            {profile?.role && (
-              <Badge variant="outline" roundedness="sm" className="capitalize">
-                {profile.role}
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Tabs Column */}
-        <div className="md:w-3/4 md:pl-12">
-          <Tabs defaultValue="account">
-            <TabsList>
-              <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="customization">Customization</TabsTrigger>
-              <TabsTrigger value="contact-us">Contact Us</TabsTrigger>
-            </TabsList>
-            <TabsContent value="account">
-              <p>Member since {accountCreatedAt}</p>
-            </TabsContent>
-          </Tabs>
-        </div>
+      {/* Tabs Column */}
+      <div className="md:w-3/4 md:pl-12">
+        <Tabs defaultValue="account">
+          <TabsList>
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="customization">Customization</TabsTrigger>
+            <TabsTrigger value="contact-us">Contact Us</TabsTrigger>
+          </TabsList>
+          <TabsContent value="account">
+            <p>Member since {accountCreatedAt}</p>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
 }
 
-function ProfilePageSkeleton() {
-  const router = useRouter()
+function ProfileContentSkeleton() {
   return (
-    <div className="container mx-auto max-w-6xl space-y-6 p-6">
-      {/* Header Actions */}
-      <div className="flex items-center justify-between pb-8">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to core
-          </Button>
-        </div>
+    <div className="flex flex-grow flex-col gap-4 md:flex-row">
+      {/* Profile Card Column */}
+      <div className="hidden flex-col items-center md:flex md:w-1/4">
+        <Skeleton className="mx-auto mb-4 h-40 w-40 rounded-full" />
+
+        <Skeleton className="mb-2 h-6 w-3/4" />
+        <Skeleton className="mb-4 h-4 w-full" />
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button variant="ghost" onClick={() => signOut()}>
-            Sign out
-          </Button>
+          <Skeleton className="h-6 w-24 rounded-md" />
+          <Skeleton className="h-6 w-20 rounded-md" />
         </div>
+
+        <Skeleton className="mt-2 h-4 w-1/2" />
       </div>
 
-      {/* Content */}
-      <div className="flex flex-grow flex-col gap-4 md:flex-row">
-        {/* Profile Card Column */}
-        <div className="hidden flex-col items-center md:flex md:w-1/4">
-          <Skeleton className="mx-auto mb-4 h-40 w-40 rounded-full" />
-
-          <Skeleton className="mb-2 h-6 w-3/4" />
-          <Skeleton className="mb-4 h-4 w-full" />
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-6 w-24 rounded-md" />
-            <Skeleton className="h-6 w-20 rounded-md" />
-          </div>
-
-          <Skeleton className="mt-2 h-4 w-1/2" />
+      {/* Tabs Column */}
+      <div className="md:w-3/4 md:pl-12">
+        <div className="inline-flex h-10 items-center justify-center gap-1 rounded-md bg-muted p-1">
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-8 w-28" />
         </div>
-
-        {/* Tabs Column */}
-        <div className="md:w-3/4 md:pl-12">
-          <div className="inline-flex h-10 items-center justify-center gap-1 rounded-md bg-muted p-1">
-            <Skeleton className="h-8 w-24" />
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-8 w-28" />
-          </div>
-          <div className="mt-4 rounded-md border">
-            <Skeleton className="h-60 w-full" />
-          </div>
+        <div className="mt-4 rounded-md border">
+          <Skeleton className="h-60 w-full" />
         </div>
       </div>
     </div>
