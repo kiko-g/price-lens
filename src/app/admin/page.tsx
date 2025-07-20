@@ -12,8 +12,6 @@ export const metadata: Metadata = {
 }
 
 export default async function Admin() {
-  if (process.env.NODE_ENV !== "development") redirect("/")
-
   return (
     <Layout>
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">

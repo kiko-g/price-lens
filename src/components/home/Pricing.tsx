@@ -7,6 +7,23 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 
 export function PricingSection() {
   const isComingSoon = true
+  const freePlan = [
+    "14-day price history",
+    "Track handpicked inflation basket products",
+    "Access and compare multiple supermarkets origins",
+    "Basic weekly price alerts",
+  ]
+
+  const plusPlan = [
+    "Everything in Free",
+    "Full price history (not just 14 days)",
+    "Unlimited custom product tracking",
+    "Daily price reports (vs. weekly in Free)",
+    "Inflation insights dashboard with trends",
+    "Shopping list optimizer across stores",
+    "Purchasing power impact calculator",
+    "Export CSV data and API access",
+  ]
 
   return (
     <section className="w-full bg-gradient-to-b py-12 md:py-16 lg:py-24">
@@ -34,22 +51,12 @@ export function PricingSection() {
             </CardHeader>
             <CardContent className="flex-1 p-6 pt-0">
               <ul className="space-y-3">
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>14-day price history</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Track handpicked inflation basket products</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Access and compare multiple supermarkets origins</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Basic weekly price alerts</span>
-                </li>
+                {freePlan.map((item, itemIdx) => (
+                  <li className="flex items-center gap-1.5" key={`free-${itemIdx}`}>
+                    <CheckIcon className="size-4 flex-shrink-0" />
+                    <span className="text-sm md:text-base">{item}</span>
+                  </li>
+                ))}
               </ul>
             </CardContent>
             <CardFooter className="p-6 pt-0">
@@ -68,6 +75,7 @@ export function PricingSection() {
                 Popular
               </span>
             )}
+
             <CardHeader className="flex flex-col space-y-1.5 p-6">
               <CardTitle className="text-2xl font-bold">Plus</CardTitle>
               <CardDescription>Advanced tracking for savvy shoppers and inflation doomers</CardDescription>
@@ -78,38 +86,12 @@ export function PricingSection() {
             </CardHeader>
             <CardContent className="flex-1 p-6 pt-0">
               <ul className="space-y-3">
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Everything in Free</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Full price history (not just 14 days)</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Unlimited custom product tracking</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Daily price reports (vs. weekly in Free)</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Inflation insights dashboard with trends</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Shopping list optimizer across stores</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Purchasing power impact calculator</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckIcon className="h-4 w-4 text-primary" />
-                  <span>Export CSV data and API access</span>
-                </li>
+                {plusPlan.map((item, itemIdx) => (
+                  <li className="flex items-center gap-1.5" key={`plus-${itemIdx}`}>
+                    <CheckIcon className="size-4 flex-shrink-0" />
+                    <span className="text-sm md:text-base">{item}</span>
+                  </li>
+                ))}
               </ul>
             </CardContent>
             <CardFooter className="p-6 pt-0">

@@ -16,7 +16,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         destructive: `bg-rose-600 text-white shadow-sm hover:bg-rose-600/90 dark:bg-rose-700 dark:hover:bg-rose-700/90 dark:text-white`,
         orange: `bg-orange-600 text-white shadow-sm hover:bg-orange-600/90 dark:bg-orange-700 dark:hover:bg-orange-700/90 dark:text-white`,
         success: `bg-emerald-600 text-white shadow-sm hover:bg-emerald-600/90 dark:bg-emerald-700 dark:hover:bg-emerald-700/90 dark:text-white`,
-        outline: `border-input bg-transparent shadow-sm hover:bg-zinc-100 dark:bg-zinc-800/10 dark:hover:bg-zinc-800`,
+        outline: `border-input bg-transparent shadow-sm hover:bg-zinc-200/80 dark:bg-zinc-800/10 dark:hover:bg-zinc-800`,
         "outline-warning": `border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 shadow-sm dark:bg-orange-500/20 dark:hover:bg-orange-500/30`,
         "outline-destructive": `border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 shadow-sm dark:bg-rose-500/20 dark:hover:bg-rose-500/30`,
         "outline-secondary": `border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 shadow-sm dark:bg-blue-500/20 dark:hover:bg-blue-500/30`,

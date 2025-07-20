@@ -25,7 +25,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/hooks/useUser"
 
-import { LogInIcon, LogOut, ShieldEllipsisIcon, User as UserIcon } from "lucide-react"
+import { LogInIcon, LogOut, User as UserIcon } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -56,8 +56,13 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center justify-center gap-0.5 md:gap-1.5">
-          <Button variant="ghost" size="icon-sm" asChild className="hidden md:inline-flex">
+        <div className="flex items-center justify-center gap-2 md:gap-1.5">
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className="hidden border-border shadow-none md:inline-flex md:border-transparent"
+          >
             <Link target="_blank" href={siteConfig.links.repo}>
               <GithubIcon />
             </Link>
@@ -80,7 +85,7 @@ function UserDropdownMenu() {
 
   if (!user) {
     return (
-      <Button asChild size="icon-sm" variant="ghost" className="shadow-none">
+      <Button asChild size="icon" variant="outline" className="border-border shadow-none md:border-transparent">
         <Link href="/login">
           <LogInIcon className="h-4 w-4" />
           <span className="sr-only">Login</span>
@@ -93,7 +98,7 @@ function UserDropdownMenu() {
     if (profile?.role === "admin") return "Admin"
     else if (profile?.plan === "free") return "Free"
     else if (profile?.plan === "plus") return "Plus"
-    else return "User"
+    else return ""
   }
 
   const userBadgeText = getUserBadgeText()
@@ -102,7 +107,7 @@ function UserDropdownMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="ml-2 md:ml-0">
-        <Button variant="ghost" className="relative h-7 w-7 rounded-full">
+        <Button variant="outline" className="relative h-7 w-7 rounded-full">
           <Avatar className="h-7 w-7">
             <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name ?? "User"} />
             <AvatarFallback>{userInitial}</AvatarFallback>
@@ -139,32 +144,6 @@ function UserDropdownMenu() {
             </Button>
           </form>
         </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-function AdminDropdownMenu() {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button variant="ghost" size="icon-sm" className="shadow-none">
-          <ShieldEllipsisIcon className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48" align="end">
-        <DropdownMenuLabel>Administration</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {adminNavigation.map((item) => (
-          <DropdownMenuItem key={item.href} asChild>
-            <Button variant="dropdown-item" asChild>
-              <Link href={item.href} className="flex w-full items-center justify-between gap-1">
-                {item.label}
-                <item.icon className="h-4 w-4" />
-              </Link>
-            </Button>
-          </DropdownMenuItem>
-        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
