@@ -63,9 +63,8 @@ export function Header() {
             </Link>
           </Button>
           <ThemeToggle />
-
-          <UserDropdownMenu />
           <NavigationMenu />
+          <UserDropdownMenu />
         </div>
       </div>
     </header>
@@ -102,7 +101,7 @@ function UserDropdownMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild className="ml-2 md:ml-0">
         <Button variant="ghost" className="relative h-7 w-7 rounded-full">
           <Avatar className="h-7 w-7">
             <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name ?? "User"} />

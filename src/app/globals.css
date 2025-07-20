@@ -61,7 +61,7 @@
 
 @layer base {
   * {
-    @apply border-border scrollbar-thin scrollbar-thumb-zinc-300 outline-ring/50;
+    @apply border-border outline-ring/50 scrollbar-thin scrollbar-thumb-zinc-300;
   }
 
   *::selection {
@@ -101,7 +101,7 @@
   }
 
   body {
-    @apply bg-background text-foreground flex min-h-screen flex-col font-sans antialiased;
+    @apply flex min-h-screen flex-col bg-background font-sans text-foreground antialiased;
   }
 
   @keyframes rotate {
