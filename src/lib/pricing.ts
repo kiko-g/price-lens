@@ -117,9 +117,9 @@ export function arePricePointsEqual(p1: Price, p2: Price) {
   )
 }
 
-export async function updatePricePoint(p: Product, sp: StoreProduct) {
-  if (!p.id || !sp.id) {
-    console.error("No id for product", p.id, sp.id)
+export async function updatePricePoint(sp: StoreProduct) {
+  if (!sp.id) {
+    console.error("No id for product", sp.id)
     return
   }
 

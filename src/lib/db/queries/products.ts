@@ -645,25 +645,47 @@ export const storeProductQueries = {
     return { data, error }
   },
 
-  async getStaleByPriority({ offset = 0, limit = 10 }: { offset?: number; limit?: number }) {
+  async getStaleByPriority({
+    offset = 0,
+    limit = 10,
+    ignoreHours = false,
+  }: {
+    offset?: number
+    limit?: number
+    ignoreHours?: boolean
+  }) {
     const priorityMap = [
       { level: 5, hours: 8 },
       { level: 4, hours: 12 },
       { level: 3, hours: 24 },
     ]
 
-    const priorityConditions = priorityMap.map(
-      ({ level, hours }) =>
-        `and(priority.eq.${level},updated_at.lt.${new Date(Date.now() - hours * 60 * 60 * 1000).toISOString()})`,
-    )
-
     const supabase = createClient()
-    return supabase
+    const query = supabase
       .from("store_products")
-      .select("*")
+      .select("*", { count: "exact" })
       .in("priority", [5, 4, 3])
-      .or(priorityConditions.join(","))
       .order("priority", { ascending: false })
       .range(offset, offset + limit - 1)
+
+    if (!ignoreHours) {
+      const priorityConditions = priorityMap.map(
+        ({ level, hours }) =>
+          `and(priority.eq.${level},updated_at.lt.${new Date(Date.now() - hours * 60 * 60 * 1000).toISOString()})`,
+      )
+      query.or(priorityConditions.join(","))
+    }
+
+    const { data, count, error } = await query
+
+    return {
+      data,
+      error,
+      pagination: {
+        total: count ?? 0,
+        offset,
+        limit,
+      },
+    }
   },
 }
