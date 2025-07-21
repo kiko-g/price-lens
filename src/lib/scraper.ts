@@ -277,10 +277,7 @@ export const crawlContinenteCategoryPages = async () => {
     const links = await continenteCategoryPageScraper(category.url)
     console.info("Finished scraping", category.name, links.length)
     for (const link of links) {
-      await storeProductQueries.upsertBlank({
-        url: link,
-        created_at: now(),
-      })
+      await storeProductQueries.upsertBlank({ url: link })
     }
     console.log("Finished storing", category.name, links.length, performance.now() - start)
   }
@@ -313,10 +310,7 @@ export const scrapeAndReplaceProduct = async (url: string | null, originId: numb
   const product = await getScraper(originId).productPage(url, prevSp)
 
   if (!product || Object.keys(product).length === 0) {
-    await storeProductQueries.upsertBlank({
-      url,
-      created_at: now(),
-    })
+    await storeProductQueries.upsertBlank({ url })
     return NextResponse.json({ error: "StoreProduct scraping failed", url }, { status: 404 })
   }
 

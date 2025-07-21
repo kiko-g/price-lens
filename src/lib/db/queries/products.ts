@@ -2,6 +2,7 @@ import type { GetAllQuery } from "@/types/extra"
 import { createClient } from "@/lib/supabase/server"
 import type { Product, StoreProduct } from "@/types"
 import { PostgrestError } from "@supabase/supabase-js"
+import { now } from "@/lib/utils"
 
 export const productQueries = {
   async getAll() {
@@ -323,12 +324,13 @@ export const storeProductQueries = {
     })
   },
 
-  async upsertBlank({ url, created_at }: { url: string; created_at: string }) {
+  async upsertBlank({ url }: { url: string }) {
     const supabase = createClient()
     return supabase.from("store_products").upsert(
       {
         url,
-        created_at,
+        created_at: now(),
+        updated_at: now(),
       },
       {
         onConflict: "url",
@@ -650,5 +652,27 @@ export const storeProductQueries = {
     }
 
     return { data, error }
+  },
+
+  async getStaleByPriority({ offset = 0, limit = 10 }: { offset?: number; limit?: number }) {
+    const priorityMap = [
+      { level: 5, hours: 8 },
+      { level: 4, hours: 12 },
+      { level: 3, hours: 24 },
+    ]
+
+    const priorityConditions = priorityMap.map(
+      ({ level, hours }) =>
+        `and(priority.eq.${level},updated_at.lt.${new Date(Date.now() - hours * 60 * 60 * 1000).toISOString()})`,
+    )
+
+    const supabase = createClient()
+    return supabase
+      .from("store_products")
+      .select("*")
+      .in("priority", [5, 4, 3])
+      .or(priorityConditions.join(","))
+      .order("priority", { ascending: false })
+      .range(offset, offset + limit - 1)
   },
 }
