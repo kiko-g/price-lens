@@ -11,7 +11,6 @@ export type Database = {
           price: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
-          product_id: number
           store_product_id: number
           valid_from: string
           valid_to: string | null
@@ -23,7 +22,6 @@ export type Database = {
           price?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
-          product_id: number
           store_product_id: number
           valid_from?: string
           valid_to?: string | null
@@ -35,19 +33,11 @@ export type Database = {
           price?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
-          product_id?: number
           store_product_id?: number
           valid_from?: string
           valid_to?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "prices_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "prices_store_product_id_fkey"
             columns: ["store_product_id"]

@@ -33,14 +33,10 @@ export const priceQueries = {
     return data
   },
 
-  async getLatestPricePoint(product_id: number, store_product_id: number) {
+  async getLatestPricePoint(store_product_id: number) {
     const supabase = createClient()
 
-    const { data, error } = await supabase
-      .from("prices")
-      .select("*")
-      .eq("product_id", product_id)
-      .eq("store_product_id", store_product_id)
+    const { data, error } = await supabase.from("prices").select("*").eq("store_product_id", store_product_id)
 
     if (error) {
       console.error("Error fetching price entry:", error)

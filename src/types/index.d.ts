@@ -84,7 +84,6 @@ export interface ProductLinked extends Product {
 
 export interface Price {
   id?: number
-  product_id: number
   store_product_id: number | null
   price: number | null
   price_recommended: number | null

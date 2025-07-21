@@ -77,7 +77,6 @@ export function AdminDashboardPrices() {
               <thead>
                 <tr>
                   <HeaderCell>ID</HeaderCell>
-                  <HeaderCell>PID</HeaderCell>
                   <HeaderCell>SPID</HeaderCell>
                   <HeaderCell>Price</HeaderCell>
                   <HeaderCell>Price Rec</HeaderCell>
@@ -92,7 +91,7 @@ export function AdminDashboardPrices() {
               <tbody className="divide-y">
                 {prices
                   .sort((a: Price, b: Price) => {
-                    if (a.product_id !== b.product_id) return a.product_id - b.product_id
+                    if (a.store_product_id && b.store_product_id) return a.store_product_id - b.store_product_id
                     if (a.valid_from && b.valid_from)
                       return new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
                   })
@@ -127,7 +126,6 @@ function PriceRow({ price }: { price: Price }) {
   return (
     <tr key={price.id} className="transition-colors duration-200 hover:bg-muted/50">
       <Cell>{price.id}</Cell>
-      <Cell>{price.product_id}</Cell>
       <Cell>{price.store_product_id}</Cell>
       <Cell>{price.price}€</Cell>
       <Cell>{price.price_recommended}€</Cell>

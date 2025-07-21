@@ -125,7 +125,6 @@ export async function updatePricePoint(p: Product, sp: StoreProduct) {
 
   const timestamp = now()
   const newPricePoint: Price = {
-    product_id: p.id,
     store_product_id: sp.id,
     price: sp.price,
     price_recommended: sp.price_recommended,
@@ -139,7 +138,7 @@ export async function updatePricePoint(p: Product, sp: StoreProduct) {
 
   const isInvalidPricePoint = !sp.price || !sp.price_recommended || !sp.price_per_major_unit
 
-  const existingPricePoint = await priceQueries.getLatestPricePoint(p.id, sp.id)
+  const existingPricePoint = await priceQueries.getLatestPricePoint(sp.id)
   if (isInvalidPricePoint || (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint))) {
     console.info("Price point already exists and is up to date.", existingPricePoint)
     await priceQueries.updatePricePointUpdatedAt(existingPricePoint.id)

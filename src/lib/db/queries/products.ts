@@ -113,15 +113,6 @@ export const productQueries = {
       }
     }
 
-    const deletePriceRes = await supabase.from("prices").delete().eq("product_id", id)
-    if (deletePriceRes.error) {
-      console.error("Error deleting price points:", deletePriceRes.error)
-      return {
-        data: null,
-        error: deletePriceRes.error,
-      }
-    }
-
     const deleteProdRes = await supabase.from("products").delete().eq("id", id)
     if (deleteProdRes.error) {
       console.error("Error deleting product:", deleteProdRes.error)
