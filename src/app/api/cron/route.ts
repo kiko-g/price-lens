@@ -4,7 +4,7 @@ import { scrapeAndReplaceProduct } from "@/lib/scraper"
 import { storeProductQueries } from "@/lib/db/queries/products"
 import { updatePricePoint } from "@/lib/pricing"
 
-export const maxDuration = 900 // 15 minutes max duration for Vercel Pro/Plus plans
+export const maxDuration = 300 // 5 minutes max duration for Vercel Pro
 
 export async function GET(req: NextRequest) {
   const startTime = Date.now()
