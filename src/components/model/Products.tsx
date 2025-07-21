@@ -13,7 +13,7 @@ import { useProducts } from "@/hooks/useProducts"
 import { Input } from "@/components/ui/input"
 
 export function Products() {
-  const limit = 24
+  const limit = 42
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
@@ -106,7 +106,7 @@ export function Products() {
           <div className={cn("mb-4 flex flex-col")}>
             {isLoading && page === 1 ? (
               <div className="flex w-full flex-col gap-y-16">
-                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-7 2xl:gap-4">
                   {Array.from({ length: 12 }).map((_, index) => (
                     <ProductCardSkeleton key={`product-skeleton-${index}`} />
                   ))}
@@ -114,7 +114,7 @@ export function Products() {
               </div>
             ) : accumulatedProducts.length > 0 ? (
               <>
-                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-7 2xl:gap-4">
                   {accumulatedProducts.map((product, productIdx) => (
                     <ProductCard key={`product-${productIdx}`} product={product} />
                   ))}
