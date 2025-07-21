@@ -6,7 +6,7 @@ import { ProductLinked } from "@/types"
 import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
 
-import { FilterIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
+import { Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
@@ -72,66 +72,73 @@ export function Products() {
 
   return (
     <div className="flex w-full flex-col gap-y-16">
-      <section className="flex flex-col">
-        <div className="mb-2 flex items-center gap-2">
-          <ShoppingBasketIcon className="size-5" />
-          <h2 className="text-lg font-bold">Tracked products</h2>
+      <section className="relative flex flex-col gap-4 lg:flex-row lg:gap-6">
+        {/* Left side - sticky on desktop */}
+        <div className="flex h-full flex-1 flex-col lg:sticky lg:top-[calc(54px+1rem)] lg:h-fit lg:w-1/5">
+          <div className="mb-2 flex items-center gap-2">
+            <ShoppingBasketIcon className="size-5" />
+            <h2 className="text-lg font-bold">Tracked products</h2>
+          </div>
+
+          <p className="mb-4 text-xs text-muted-foreground">
+            Products often found in trustworthy inflation baskets, forever valuable for most people
+          </p>
+
+          <div className="relative w-full">
+            {isSearching ? (
+              <Loader2Icon className="absolute left-2 top-1/4 h-4 w-4 -translate-y-1/4 animate-spin text-muted-foreground" />
+            ) : (
+              <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            )}
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pl-8"
+              value={query}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value
+                if (typeof value === "string") setQuery(value)
+              }}
+            />
+          </div>
+
+          <div className="mt-1.5">
+            <p className="text-xs text-muted-foreground">
+              <strong className="text-foreground">{accumulatedProducts.length}</strong> products found matching your
+              search
+            </p>
+          </div>
         </div>
 
-        <p className="mb-4 text-xs text-muted-foreground">
-          Products often found in trustworthy inflation baskets, forever valuable for most people
-        </p>
-
-        <div className="flex flex-col gap-4">
-          <div className="relative flex items-center gap-2">
-            <div className="relative w-full">
-              {isSearching ? (
-                <Loader2Icon className="absolute left-2 top-1/4 h-4 w-4 -translate-y-1/4 animate-spin text-muted-foreground" />
-              ) : (
-                <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              )}
-              <Input
-                type="text"
-                placeholder="Search products..."
-                className="pl-8"
-                value={query}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const value = e.target.value
-                  if (typeof value === "string") setQuery(value)
-                }}
-              />
-            </div>
-          </div>
-
-          <div className={cn("mb-4 flex flex-col")}>
-            {isLoading && page === 1 ? (
-              <div className="flex w-full flex-col gap-y-16">
-                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-7 2xl:gap-4">
-                  {Array.from({ length: 12 }).map((_, index) => (
-                    <ProductCardSkeleton key={`product-skeleton-${index}`} />
-                  ))}
-                </div>
+        {/* Right side - scrollable */}
+        <div className={cn("mb-4 flex w-full flex-col lg:w-4/5")}>
+          {isLoading && page === 1 ? (
+            <div className="flex w-full flex-col gap-y-16">
+              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                {Array.from({ length: 12 }).map((_, index) => (
+                  <ProductCardSkeleton key={`product-skeleton-${index}`} />
+                ))}
               </div>
-            ) : accumulatedProducts.length > 0 ? (
-              <>
-                <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-6 xl:gap-4 2xl:grid-cols-7 2xl:gap-4">
-                  {accumulatedProducts.map((product, productIdx) => (
-                    <ProductCard key={`product-${productIdx}`} product={product} />
-                  ))}
+            </div>
+          ) : accumulatedProducts.length > 0 ? (
+            <>
+              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+                {accumulatedProducts.map((product, productIdx) => (
+                  <ProductCard key={`product-${productIdx}`} product={product} />
+                ))}
+              </div>
+              <p className="mt-6 text-center text-sm text-muted-foreground">
+                {accumulatedProducts.length} products found matching your search.
+              </p>
+              {isLoading && (
+                <div className="mt-8 flex items-center justify-center">
+                  <Loader2Icon className="h-6 w-6 animate-spin" />
                 </div>
-                <p className="mt-6 text-center text-sm text-muted-foreground">
-                  {accumulatedProducts.length} products found matching your search.
-                </p>
-                {isLoading && (
-                  <div className="mt-8 flex items-center justify-center">
-                    <Loader2Icon className="h-6 w-6 animate-spin" />
-                  </div>
-                )}
-              </>
-            ) : (
-              <p>No products found matching your search.</p>
-            )}
-          </div>
+              )}
+            </>
+          ) : (
+            <p>No products found matching your search.</p>
+          )}
         </div>
       </section>
     </div>
