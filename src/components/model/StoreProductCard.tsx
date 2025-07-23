@@ -100,7 +100,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
       <div
         className={cn(
           "group relative mb-2 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
-          sp.image ? "border-zinc-200 dark:border-zinc-800" : "border-transparent",
+          sp.image ? "border-border" : "border-transparent",
         )}
       >
         <Link href={`/supermarket/${sp.id}`} className="h-full w-full">
@@ -127,7 +127,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           )}
         </Link>
 
-        <div className="absolute left-2 top-2 flex flex-col gap-1">
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
             <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
               {sp.price_per_major_unit}€{sp.major_unit}
@@ -164,7 +164,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute right-2 top-2 flex flex-col gap-0.5">
+        <div className="absolute top-2 right-2 flex flex-col gap-0.5">
           {sp.pack ? (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -194,13 +194,13 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute bottom-2 right-2 flex flex-col items-end gap-0.5">
+        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0.5">
           <PriorityBadge priority={priority} />
 
           <Badge
             size="xs"
             variant="light"
-            className="border border-muted opacity-100 transition-opacity duration-300 group-hover:opacity-100"
+            className="border-muted border opacity-100 transition-opacity duration-300 group-hover:opacity-100"
           >
             {supermarketChain ? supermarketChain.logoSmall : null}
           </Badge>
@@ -216,7 +216,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                   variant="secondary"
                   size="xs"
                   roundedness="sm"
-                  className="line-clamp-1 text-left text-2xs"
+                  className="text-2xs line-clamp-1 text-left"
                   onClick={() => {
                     navigator.clipboard.writeText(sp.category || sp.category_3 || sp.category_2 || "")
                   }}
@@ -238,7 +238,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1.5 w-full text-sm font-semibold leading-4 text-blue-600 dark:text-blue-400">
+          <span className="mt-1.5 w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-400">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
@@ -410,7 +410,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             </DropdownMenu>
 
             <DrawerSheet title={sp.name}>
-              <div className="-mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs text-muted-foreground">
+              <div className="text-muted-foreground -mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs">
                 <div className="flex items-center gap-1">
                   <Link href={sp.url} target="_blank">
                     {resolveSupermarketChain(sp?.origin_id)?.logo}
@@ -450,7 +450,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
 
               <div className="flex w-full justify-between gap-2 pt-2 text-sm">
                 <div className="flex w-full justify-end">
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     {sp.created_at || sp.updated_at
                       ? `Last updated: ${formatTimestamptz(sp.updated_at)}`
                       : "No update record"}
@@ -478,25 +478,25 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="flex w-full flex-col rounded-lg bg-background">
+    <div className="bg-background flex w-full flex-col rounded-lg">
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <div className="aspect-square w-full animate-pulse rounded-md border border-border bg-muted" />
+        <div className="border-border bg-muted aspect-square w-full animate-pulse rounded-md border" />
       </div>
 
       <div className="mb-2 flex flex-col items-start gap-2">
-        <span className="h-3 w-32 animate-pulse rounded bg-muted lg:w-32"></span>
-        <span className="h-3 w-20 animate-pulse rounded bg-muted lg:w-48"></span>
+        <span className="bg-muted h-3 w-32 animate-pulse rounded lg:w-32"></span>
+        <span className="bg-muted h-3 w-20 animate-pulse rounded lg:w-48"></span>
       </div>
 
       <div className="flex w-full items-end justify-between gap-2">
         <div className="flex flex-col gap-2">
-          <span className="h-4 w-16 animate-pulse rounded bg-muted lg:w-24"></span>
-          <span className="h-4 w-16 animate-pulse rounded bg-muted lg:w-24"></span>
+          <span className="bg-muted h-4 w-16 animate-pulse rounded lg:w-24"></span>
+          <span className="bg-muted h-4 w-16 animate-pulse rounded lg:w-24"></span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="h-7 w-7 animate-pulse rounded bg-muted lg:w-8"></span>
-          <span className="h-7 w-7 animate-pulse rounded bg-muted lg:w-8"></span>
+          <span className="bg-muted h-7 w-7 animate-pulse rounded lg:w-8"></span>
+          <span className="bg-muted h-7 w-7 animate-pulse rounded lg:w-8"></span>
         </div>
       </div>
     </div>
@@ -527,7 +527,7 @@ function DrawerSheet({
           {description ? <SheetDescription>{description}</SheetDescription> : null}
         </SheetHeader>
 
-        <div className="pb-4 pt-2">{children}</div>
+        <div className="pt-2 pb-4">{children}</div>
       </SheetContent>
     </Sheet>
   )

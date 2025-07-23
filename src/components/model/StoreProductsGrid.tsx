@@ -71,7 +71,7 @@ type Props = {
   q?: string
   t?: SearchType
   sort?: SortByType
-  essential?: boolean
+  relevant?: boolean
   originId?: string | null
 }
 
@@ -81,7 +81,7 @@ export function StoreProductsGrid(props: Props) {
     q: initQuery = "",
     t: initSearchType = "any",
     sort: initSortBy = "a-z",
-    essential = false,
+    relevant = false,
     originId: initOriginId = null,
   } = props
 
@@ -106,7 +106,7 @@ export function StoreProductsGrid(props: Props) {
     const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
     const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
 
-    if (essential) {
+    if (relevant) {
       uniqueCategories.sort((a, b) => {
         const aIsDefault = defaultCategorySet.has(a)
         const bIsDefault = defaultCategorySet.has(b)
@@ -118,7 +118,7 @@ export function StoreProductsGrid(props: Props) {
 
     return uniqueCategories.map((name) => ({
       name,
-      selected: essential ? defaultCategorySet.has(name) : false,
+      selected: relevant ? defaultCategorySet.has(name) : false,
     }))
   })
 
@@ -334,8 +334,8 @@ WHERE category = '${category1}'
   }, [category1, category2, category3])
 
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType, sort: sortBy, essential: essential.toString(), originId })
-  }, [page, query, searchType, sortBy, essential, originId])
+    updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: relevant.toString(), originId })
+  }, [page, query, searchType, sortBy, relevant, originId])
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -365,7 +365,7 @@ WHERE category = '${category1}'
   if (isLoading) {
     return (
       <div className="flex w-full flex-col gap-3 p-4">
-        <Skeleton className="h-10 w-full border border-border" />
+        <Skeleton className="border-border h-10 w-full border" />
         <div className="flex w-full items-center justify-between">
           <Skeleton className="h-3 w-48 rounded" />
           <Skeleton className="h-3 w-24 rounded" />
@@ -451,14 +451,14 @@ WHERE category = '${category1}'
     <div className="flex w-full flex-col gap-0">
       <nav
         className={cn(
-          "sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white bg-opacity-95 px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950 dark:bg-opacity-95",
+          "bg-opacity-95 dark:bg-opacity-95 sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950",
           showNav ? "translate-y-0" : "top-0 -translate-y-full",
         )}
       >
         <div className="flex w-full flex-col items-end justify-between gap-2 md:gap-6 lg:flex-row lg:items-center">
           <div className="flex w-full max-w-lg flex-1 gap-2">
             <div className="relative w-full">
-              <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
               <Input
                 type="text"
                 placeholder="Search products..."
@@ -473,7 +473,7 @@ WHERE category = '${category1}'
                 }}
               />
               <Select value={searchType} onValueChange={(value) => setSearchType(value as SearchType)}>
-                <SelectTrigger className="absolute right-2 top-1/2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pl-1 pr-0 text-xs text-muted-foreground shadow-none transition hover:bg-black/5 dark:hover:bg-white/5">
+                <SelectTrigger className="text-muted-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition hover:bg-black/5 dark:hover:bg-white/5">
                   <SelectValue placeholder="Search by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -598,9 +598,9 @@ WHERE category = '${category1}'
 
                     {/* Display current selections */}
                     {(category1 || category2 || category3) && (
-                      <div className="mt-4 rounded-md bg-muted p-3">
+                      <div className="bg-muted mt-4 rounded-md p-3">
                         <div className="text-sm">
-                          <code className="text-wrap tracking-tight">
+                          <code className="tracking-tight text-wrap">
                             {[category1, category2, category3].filter(Boolean).join(" > ")}
                           </code>
                         </div>
@@ -630,24 +630,24 @@ WHERE category = '${category1}'
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
                         <ScrollArea className="h-128">
-                          <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 pb-1.5 pt-1">
+                          <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 pt-1 pb-1.5">
                             <button
                               onClick={selectDefaultCategories}
-                              className="flex rounded-md bg-linear-to-r from-blue-600/40 to-indigo-500/40 px-1.5 py-0.5 text-xs text-primary-foreground text-white hover:opacity-80"
+                              className="flex rounded-md bg-linear-to-r from-blue-600/40 to-indigo-500/40 px-1.5 py-0.5 text-xs text-white hover:opacity-80"
                             >
-                              Select essential
+                              Select relevant
                             </button>
 
                             <button
                               onClick={selectAllCategories}
-                              className="flex rounded-md bg-muted px-1.5 py-0.5 text-xs text-primary hover:opacity-80"
+                              className="bg-muted text-primary flex rounded-md px-1.5 py-0.5 text-xs hover:opacity-80"
                             >
                               Select all
                             </button>
 
                             <button
                               onClick={clearCategories}
-                              className="flex rounded-md bg-muted px-1.5 py-0.5 text-xs text-primary hover:opacity-80"
+                              className="bg-muted text-primary flex rounded-md px-1.5 py-0.5 text-xs hover:opacity-80"
                             >
                               Clear
                             </button>
@@ -663,7 +663,7 @@ WHERE category = '${category1}'
                               <span className={cn(category.selected && "font-medium")}>{category.name}</span>
                               <div
                                 className={cn(
-                                  "flex h-4 w-4 items-center justify-center rounded-2xl border border-primary transition-all",
+                                  "border-primary flex h-4 w-4 items-center justify-center rounded-2xl border transition-all",
                                   category.selected ? "bg-primary text-primary-foreground" : "opacity-50",
                                 )}
                               >
@@ -773,11 +773,11 @@ WHERE category = '${category1}'
           </div>
         </div>
 
-        <div className="mt-2 flex w-full flex-col items-end justify-end text-xs text-muted-foreground lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
+        <div className="text-muted-foreground mt-2 flex w-full flex-col items-end justify-end text-xs lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
           <span className="order-2 leading-3 lg:order-1">
-            Showing <span className="font-semibold text-foreground">{page * limit - limit + 1}</span> to{" "}
-            <span className="font-semibold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
-            <span className="font-semibold text-foreground">{pagedCount}</span> results
+            Showing <span className="text-foreground font-semibold">{page * limit - limit + 1}</span> to{" "}
+            <span className="text-foreground font-semibold">{Math.min(page * limit, pagedCount)}</span> of{" "}
+            <span className="text-foreground font-semibold">{pagedCount}</span> results
           </span>
 
           <span className="order-1 flex flex-col items-end justify-end gap-1 lg:order-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
@@ -794,31 +794,31 @@ WHERE category = '${category1}'
                 }}
               >
                 <XIcon />
-                <span className="max-w-[300px] truncate text-wrap text-end lg:max-w-full">
+                <span className="max-w-[300px] truncate text-end text-wrap lg:max-w-full">
                   {[category1, category2, category3].filter(Boolean).join(" > ")}
                 </span>
               </Button>
             ) : null}
             <span>
-              Page <span className="font-semibold text-foreground">{page}</span> of{" "}
-              <span className="font-semibold text-foreground">{paginationTotal}</span>
+              Page <span className="text-foreground font-semibold">{page}</span> of{" "}
+              <span className="text-foreground font-semibold">{paginationTotal}</span>
             </span>
           </span>
         </div>
       </nav>
 
-      <div className="grid w-full grid-cols-2 gap-8 border-b px-4 pb-16 pt-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-7">
+      <div className="grid w-full grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-7">
         {storeProducts.map((product, productIdx) => (
           <StoreProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
         ))}
       </div>
 
       <div className="flex items-center justify-between p-4">
-        <div className="flex w-full flex-col text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex w-full flex-col text-sm">
           <span>
-            Showing <span className="font-semibold text-foreground">{page * limit - limit + 1}</span> to{" "}
-            <span className="font-semibold text-foreground">{Math.min(page * limit, pagedCount)}</span> of{" "}
-            <span className="font-semibold text-foreground">{pagedCount}</span> results
+            Showing <span className="text-foreground font-semibold">{page * limit - limit + 1}</span> to{" "}
+            <span className="text-foreground font-semibold">{Math.min(page * limit, pagedCount)}</span> of{" "}
+            <span className="text-foreground font-semibold">{pagedCount}</span> results
           </span>
         </div>
 

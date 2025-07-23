@@ -36,7 +36,7 @@ export async function GET() {
     const promptList = batch.map((p, i) => `${i + 1}. ${rowToPromptText(p)}`).join("\n")
 
     const systemPrompt = `
-You are a supermarket product prioritizer. Assign a priority from 0 to 5 to each product based on how essential and frequently purchased it is.
+You are a supermarket product prioritizer. Assign a priority from 0 to 5 to each product based on how essential/relevant and frequently purchased it is.
 
 - 0 = very niche or rare (books, clothing, tools, etc.)
 - 1 = rarely bought (toys, games, etc.)

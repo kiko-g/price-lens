@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss"
 import formsPlugin from "@tailwindcss/forms"
 import animatePlugin from "tailwindcss-animate"
-// import scrollbarPlugin from "tailwind-scrollbar"
+import scrollbarPlugin from "tailwind-scrollbar"
 import typographyPlugin from "@tailwindcss/typography"
 
 export default {
@@ -138,10 +138,5 @@ export default {
       },
     },
   },
-  plugins: [
-    formsPlugin,
-    animatePlugin,
-    typographyPlugin,
-    // scrollbarPlugin,
-  ],
+  plugins: [formsPlugin, animatePlugin, typographyPlugin, scrollbarPlugin],
 } satisfies Config

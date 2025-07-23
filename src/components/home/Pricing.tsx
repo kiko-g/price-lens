@@ -33,20 +33,20 @@ export function PricingSection() {
             <h2 className="animate-fade-in text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Simple, Transparent Pricing
             </h2>
-            <p className="max-w-[700px] animate-fade-in text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <p className="animate-fade-in text-muted-foreground max-w-[700px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Track supermarket prices and stay aware of inflation with Price Lens. Choose the plan that works for you.
             </p>
           </div>
         </div>
-        <div className="mx-auto mt-8 grid max-w-5xl animate-fade-in grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:mt-12 lg:gap-10">
+        <div className="animate-fade-in mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:mt-12 lg:gap-10">
           {/* Free Plan */}
           <Card className="flex flex-col">
             <CardHeader className="flex flex-col space-y-1.5 p-6">
               <CardTitle className="text-2xl font-bold">Free</CardTitle>
-              <CardDescription>Essential price tracking for everyone</CardDescription>
+              <CardDescription>Relevant price tracking for everyone</CardDescription>
               <div className="mt-4">
                 <span className="text-4xl font-bold">$0</span>
-                <span className="ml-1 text-muted-foreground">/month</span>
+                <span className="text-muted-foreground ml-1">/month</span>
               </div>
             </CardHeader>
             <CardContent className="flex-1 p-6 pt-0">
@@ -71,7 +71,7 @@ export function PricingSection() {
             <BorderBeam duration={5} size={200} colorFrom="#837ded" colorTo="#6791f1" />
 
             {!isComingSoon && (
-              <span className="absolute right-0 top-0 rounded-bl-xl bg-linear-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
+              <span className="absolute top-0 right-0 rounded-bl-xl bg-linear-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
                 Popular
               </span>
             )}
@@ -81,7 +81,7 @@ export function PricingSection() {
               <CardDescription>Advanced tracking for savvy shoppers and inflation doomers</CardDescription>
               <div className="mt-4">
                 <span className="text-4xl font-bold">$4.99</span>
-                <span className="ml-1 text-muted-foreground">/month</span>
+                <span className="text-muted-foreground ml-1">/month</span>
               </div>
             </CardHeader>
             <CardContent className="flex-1 p-6 pt-0">
@@ -107,7 +107,7 @@ export function PricingSection() {
             All plans include the core functionality for price transparency and inflation awareness. Any questions?{" "}
             <Link
               href="mailto:kikojpgoncalves@gmail.com"
-              className="text-primary underline underline-offset-4 hover:text-primary/80"
+              className="text-primary hover:text-primary/80 underline underline-offset-4"
             >
               Contact us
             </Link>

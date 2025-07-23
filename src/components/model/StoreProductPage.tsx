@@ -93,7 +93,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
+        <div className="bg-muted relative aspect-square overflow-hidden rounded-lg border">
           {sp.image ? (
             <Image
               src={sp.image || "/placeholder.svg"}
@@ -103,13 +103,13 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-muted">
+            <div className="bg-muted flex h-full w-full items-center justify-center">
               <p className="text-muted-foreground">No image available</p>
             </div>
           )}
 
           {/* Top Left */}
-          <div className="absolute left-2 top-2 z-50 flex items-center gap-2">
+          <div className="absolute top-2 left-2 z-50 flex items-center gap-2">
             {sp.category || sp.category_2 || sp.category_3 ? (
               <Badge variant="secondary" size="2xs" roundedness="sm" className="w-fit">
                 {sp.category} {sp.category_2 && ` > ${sp.category_2}`} {sp.category_3 && ` > ${sp.category_3}`}
@@ -189,7 +189,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             {hasDiscount ? (
               <>
                 <span className="text-xl font-bold text-green-800 dark:text-green-600">{sp.price}€</span>
-                <span className="text-base text-zinc-500 line-through dark:text-zinc-400">{sp.price_recommended}€</span>
+                <span className="text-muted-foreground text-base line-through">{sp.price_recommended}€</span>
               </>
             ) : null}
 
@@ -229,7 +229,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <DropdownMenuItem asChild>
                   <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
                     <DrawerTrigger asChild>
-                      <Button variant="dropdown-item" className="flex items-center justify-start gap-2 hover:bg-accent">
+                      <Button variant="dropdown-item" className="hover:bg-accent flex items-center justify-start gap-2">
                         <InfoIcon className="-ml-1 h-4 w-4" />
                         Store product details
                       </Button>
@@ -249,7 +249,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"
-                    className="flex items-center justify-start gap-2 hover:bg-accent"
+                    className="hover:bg-accent flex items-center justify-start gap-2"
                     onClick={() => updateStoreProduct.mutate(storeProduct)}
                     disabled={updateStoreProduct.isPending}
                   >

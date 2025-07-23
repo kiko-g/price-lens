@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* @plugin 'tailwind-scrollbar'; */
+@plugin 'tailwind-scrollbar';
 @plugin '@tailwindcss/forms';
 @plugin 'tailwindcss-animate';
 @plugin '@tailwindcss/typography';
@@ -192,8 +192,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-    /* scrollbar-thin scrollbar-thumb-zinc-300 */
+    @apply border-border outline-ring/50 scrollbar-thin scrollbar-thumb-zinc-300;
   }
 
   *::selection {
