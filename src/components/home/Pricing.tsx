@@ -26,7 +26,7 @@ export function PricingSection() {
   ]
 
   return (
-    <section className="w-full bg-gradient-to-b py-12 md:py-16 lg:py-24">
+    <section className="w-full bg-linear-to-b py-12 md:py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
@@ -53,7 +53,7 @@ export function PricingSection() {
               <ul className="space-y-3">
                 {freePlan.map((item, itemIdx) => (
                   <li className="flex items-center gap-1.5" key={`free-${itemIdx}`}>
-                    <CheckIcon className="size-4 flex-shrink-0" />
+                    <CheckIcon className="size-4 shrink-0" />
                     <span className="text-sm md:text-base">{item}</span>
                   </li>
                 ))}
@@ -71,7 +71,7 @@ export function PricingSection() {
             <BorderBeam duration={5} size={200} colorFrom="#837ded" colorTo="#6791f1" />
 
             {!isComingSoon && (
-              <span className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
+              <span className="absolute right-0 top-0 rounded-bl-xl bg-linear-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
                 Popular
               </span>
             )}
@@ -88,7 +88,7 @@ export function PricingSection() {
               <ul className="space-y-3">
                 {plusPlan.map((item, itemIdx) => (
                   <li className="flex items-center gap-1.5" key={`plus-${itemIdx}`}>
-                    <CheckIcon className="size-4 flex-shrink-0" />
+                    <CheckIcon className="size-4 shrink-0" />
                     <span className="text-sm md:text-base">{item}</span>
                   </li>
                 ))}

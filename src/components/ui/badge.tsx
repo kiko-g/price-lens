@@ -41,8 +41,8 @@ const badgeVariants = cva(
       },
       size: {
         default: `px-3 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,
-        "3xs": `px-0.5 py-[1px] text-3xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
-        "2xs": `px-1 py-[1px] text-2xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
+        "3xs": `px-0.5 py-px text-3xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
+        "2xs": `px-1 py-px text-2xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
         xs: `px-1.5 py-0.5 text-xs [&_span.bubble]:size-1.5 [&_svg]:size-2.5`,
         sm: `px-2.5 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,
         md: `px-3 py-1.5 [&_span.bubble]:size-2 [&_svg]:size-3.5`,

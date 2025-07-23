@@ -35,7 +35,7 @@ export function Header() {
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
-          <span className="inline-flex items-center rounded-full bg-gradient-to-br from-orange-600/70 to-rose-600/70 px-1 text-2xs/4 font-bold capitalize tracking-tighter text-white dark:from-orange-400 dark:to-rose-500 md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold">
+          <span className="inline-flex items-center rounded-full bg-linear-to-br from-orange-600/70 to-rose-600/70 px-1 text-2xs/4 font-bold capitalize tracking-tighter text-white dark:from-orange-400 dark:to-rose-500 md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold">
             Early Access
           </span>
 

@@ -29,7 +29,7 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         active: `bg-zinc-200/80 dark:bg-zinc-100/20`,
         link: `text-primary underline-offset-4 hover:underline`,
         "dropdown-item": `bg-transparent font-normal w-full justify-between border-0`,
-        "gradient-primary": `bg-gradient-to-r from-indigo-500/80 to-blue-500/80 text-white transition-all duration-300 dark:from-indigo-500/90 dark:to-blue-500/90 hover:opacity-80`,
+        "gradient-primary": `bg-linear-to-r from-indigo-500/80 to-blue-500/80 text-white transition-all duration-300 dark:from-indigo-500/90 dark:to-blue-500/90 hover:opacity-80`,
       },
       size: {
         default: `px-3 py-1.5`,

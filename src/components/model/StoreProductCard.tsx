@@ -317,7 +317,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
 
                 {process.env.NODE_ENV === "development" && (
                   <>
-                    <DropdownMenuSeparator className="[&:not(:has(+*))]:[display:none]" />
+                    <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
                     {onUpdate && (
                       <DropdownMenuItem variant="warning" asChild>
                         <Button

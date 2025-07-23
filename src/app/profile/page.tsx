@@ -144,7 +144,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
   ]
 
   return (
-    <div className="flex flex-grow flex-col gap-4 md:flex-row">
+    <div className="flex grow flex-col gap-4 md:flex-row">
       {/* Profile Card Column */}
       <div className="hidden flex-col items-center md:flex md:w-1/4">
         <Avatar className="mx-auto mb-4 h-40 w-40">
@@ -249,7 +249,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
 
 function ProfileContentSkeleton() {
   return (
-    <div className="flex flex-grow flex-col gap-4 md:flex-row">
+    <div className="flex grow flex-col gap-4 md:flex-row">
       {/* Profile Card Column */}
       <div className="hidden flex-col items-center md:flex md:w-1/4">
         <Skeleton className="mx-auto mb-4 h-40 w-40 rounded-full" />

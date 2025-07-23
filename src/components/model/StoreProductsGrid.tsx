@@ -629,11 +629,11 @@ WHERE category = '${category1}'
                     <CommandList>
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
-                        <ScrollArea className="h-[32rem]">
+                        <ScrollArea className="h-128">
                           <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 pb-1.5 pt-1">
                             <button
                               onClick={selectDefaultCategories}
-                              className="flex rounded-md bg-gradient-to-r from-blue-600/40 to-indigo-500/40 px-1.5 py-0.5 text-xs text-primary-foreground text-white hover:opacity-80"
+                              className="flex rounded-md bg-linear-to-r from-blue-600/40 to-indigo-500/40 px-1.5 py-0.5 text-xs text-primary-foreground text-white hover:opacity-80"
                             >
                               Select essential
                             </button>

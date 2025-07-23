@@ -7,7 +7,7 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 
 export function MissionSection() {
   return (
-    <section className="w-full bg-gradient-to-b py-12 md:py-16 lg:py-24">
+    <section className="w-full bg-linear-to-b py-12 md:py-16 lg:py-24">
       <div></div>
     </section>
   )

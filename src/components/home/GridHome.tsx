@@ -11,7 +11,7 @@ export function GridHome() {
         height={40}
         x={-1}
         y={-1}
-        className={cn("[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)]")}
+        className={cn("mask-[linear-gradient(to_bottom_right,white,transparent,transparent)]")}
       />
     </div>
   )
