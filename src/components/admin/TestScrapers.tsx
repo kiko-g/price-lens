@@ -72,7 +72,7 @@ export function TestScrapers() {
             </div>
             {scraper.result && (
               <div className="mt-4">
-                <pre className="overflow-auto text-wrap rounded bg-gray-100 p-4 font-mono text-xs">
+                <pre className="overflow-auto rounded bg-gray-100 p-4 font-mono text-xs text-wrap">
                   {JSON.stringify(scraper.result, null, 2)}
                 </pre>
               </div>

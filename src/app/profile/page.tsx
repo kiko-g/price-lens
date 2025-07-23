@@ -85,7 +85,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
     {
       title: "Full price history",
       description: (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           No more 14-day limit and access to unlimited custom product tracking
         </p>
       ),
@@ -94,7 +94,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
     {
       title: "Price alerts",
       description: (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Get notified of price changes and save money. Get breakdowns of evolutions of price points and campaigns.
         </p>
       ),
@@ -103,7 +103,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
     {
       title: "Shopping list optimizer",
       description: (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Optimize your shopping list across different supermarket sources. Get the best deals and save time.
         </p>
       ),
@@ -115,7 +115,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
     {
       title: "Questions?",
       description: (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Email PriceLens developer directly at{" "}
           <Link href="mailto:kikojpgoncalves@gmail.com" className="text-blue-500 group-hover:underline">
             kikojpgoncalves@gmail.com
@@ -127,14 +127,14 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
     },
     {
       title: "Found a bug?",
-      description: <p className="text-sm text-muted-foreground">UI glitches or formatting issues? Report them here!</p>,
+      description: <p className="text-muted-foreground text-sm">UI glitches or formatting issues? Report them here!</p>,
       icon: <BugIcon className="h-4 w-4" />,
       link: "https://github.com/kikogoncalves/pricelens/issues",
     },
     {
       title: "Feature request?",
       description: (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           We&apos;re always looking for new ideas! Let us know what you&apos;d like to see.
         </p>
       ),
@@ -156,7 +156,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
 
         <div className="mb-1 flex items-center gap-1">
           {verifiedIcon}
-          <p className="text-sm text-muted-foreground">{user.email}</p>
+          <p className="text-muted-foreground text-sm">{user.email}</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
           )}
         </div>
 
-        <p className="mx-auto mt-2 border-t pt-2 text-center text-2xs text-muted-foreground">
+        <p className="text-2xs text-muted-foreground mx-auto mt-2 border-t pt-2 text-center">
           Member since {accountCreatedAt}
         </p>
       </div>
@@ -192,7 +192,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
               <div className="mt-2 flex flex-col items-center justify-center text-right md:mt-0 md:flex-row md:items-end md:justify-center md:text-right">
                 <div className="text-xl font-bold md:text-3xl">
                   $5
-                  <span className="text-base font-semibold text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground text-base font-semibold">/month</span>
                 </div>
               </div>
             </div>
@@ -228,7 +228,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
             <div className="mt-4 grid w-3/4 gap-3 md:grid-cols-1">
               {contactUs.map((item) => (
                 <Link key={item.title} href={item.link} className="block">
-                  <Card className="transition-colors hover:bg-accent hover:text-accent-foreground">
+                  <Card className="hover:bg-accent hover:text-accent-foreground transition-colors">
                     <CardHeader className="p-4 pb-0">
                       <CardTitle className="flex items-center gap-2 text-base font-semibold">
                         <span>{item.icon}</span>
@@ -267,7 +267,7 @@ function ProfileContentSkeleton() {
 
       {/* Tabs Column */}
       <div className="md:w-3/4 md:pl-12">
-        <div className="inline-flex h-10 items-center justify-center gap-1 rounded-md bg-muted p-1">
+        <div className="bg-muted inline-flex h-10 items-center justify-center gap-1 rounded-md p-1">
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-8 w-28" />

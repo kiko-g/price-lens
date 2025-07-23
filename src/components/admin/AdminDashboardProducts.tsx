@@ -142,7 +142,7 @@ const StatusWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const HeaderCell = ({ className, children }: { className?: string; children: React.ReactNode }) => {
   return (
-    <th scope="col" className={cn("whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold", className)}>
+    <th scope="col" className={cn("px-2 py-3.5 text-left text-sm font-semibold whitespace-nowrap", className)}>
       {children}
     </th>
   )
@@ -151,7 +151,7 @@ const HeaderCell = ({ className, children }: { className?: string; children: Rea
 const Cell = ({ className, children }: { className?: string; children: React.ReactNode }) => {
   return (
     <td
-      className={cn("space-x-1 whitespace-nowrap px-2 py-2 text-sm tracking-tighter text-muted-foreground", className)}
+      className={cn("text-muted-foreground space-x-1 px-2 py-2 text-sm tracking-tighter whitespace-nowrap", className)}
     >
       {children}
     </td>

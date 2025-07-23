@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @plugin 'tailwind-scrollbar';
 @plugin '@tailwindcss/forms';
@@ -52,8 +52,7 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-xs: calc(var(--radius) - 6px);
 
-  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
-    alternate;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
   --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
   --animate-fade-in: fade-in 1s ease-in-out forwards;
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -232,7 +231,7 @@
   }
 
   body {
-    @apply flex min-h-screen flex-col bg-background font-sans text-foreground antialiased;
+    @apply bg-background text-foreground flex min-h-screen flex-col font-sans antialiased;
   }
 
   @keyframes rotate {

@@ -8,9 +8,9 @@ import { ArrowLeftIcon } from "lucide-react"
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center p-4">
       <div className="flex w-full max-w-md flex-col items-center">
-        <div className="absolute left-4 top-4 md:left-8 md:top-8">
+        <div className="absolute top-4 left-4 md:top-8 md:left-8">
           <Button asChild variant="ghost">
             <Link href="/">
               <ArrowLeftIcon className="h-4 w-4" />
@@ -19,14 +19,14 @@ export default function LoginPage() {
           </Button>
         </div>
 
-        <h1 className="mb-2 flex items-center text-2xl font-semibold text-primary">
+        <h1 className="text-primary mb-2 flex items-center text-2xl font-semibold">
           <span>Login to</span>
           <div className="ml-2 flex items-center">
             <Image src="/price-lens.svg" alt="Price Lens" width={24} height={24} className="mr-1" />
             <span className="tracking-tighter">Price Lens</span>
           </div>
         </h1>
-        <p className="mb-4 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground mb-4 text-center text-sm">
           Sign in below! We’ll never use your email for spam{" "}
           <span role="img" aria-label="smile">
             😊
@@ -39,13 +39,13 @@ export default function LoginPage() {
             Continue with Google
           </Button>
         </form>
-        <p className="mt-4 px-8 text-center text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-4 px-8 text-center text-xs">
           By continuing, you agree to our{" "}
-          <Link href="/terms" className="underline hover:text-primary">
+          <Link href="/terms" className="hover:text-primary underline">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="underline hover:text-primary">
+          <Link href="/privacy" className="hover:text-primary underline">
             Privacy Policy
           </Link>
           .

@@ -51,7 +51,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "relative flex size-[17px] items-center justify-center rounded border-[1.5px] border-chart-1",
+              "border-chart-1 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isPriceActive ? "bg-chart-1" : "bg-chart-1/20",
             )}
           ></span>
@@ -70,7 +70,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "relative flex size-[17px] items-center justify-center rounded border-[1.5px] border-chart-3",
+              "border-chart-3 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isPricePerMajorUnitActive ? "bg-chart-3" : "bg-chart-3/20",
             )}
           ></span>
@@ -91,7 +91,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "relative flex size-[17px] items-center justify-center rounded border-[1.5px] border-chart-2",
+              "border-chart-2 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isPriceRecommendedActive ? "bg-chart-2" : "bg-chart-2/20",
             )}
           ></span>
@@ -112,7 +112,7 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "relative flex size-[17px] items-center justify-center rounded border-[1.5px] border-chart-4",
+              "border-chart-4 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isDiscountActive ? "bg-chart-4" : "bg-chart-4/20",
             )}
           ></span>

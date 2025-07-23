@@ -16,7 +16,7 @@ function SupermarketBadge({ supermarketChain, className }: { supermarketChain: s
       roundedness="sm"
       variant="dark"
       className={cn(
-        "line-clamp-1 text-left text-2xs opacity-80 transition-opacity duration-300 group-hover:opacity-100",
+        "text-2xs line-clamp-1 text-left opacity-80 transition-opacity duration-300 group-hover:opacity-100",
         className,
       )}
     >

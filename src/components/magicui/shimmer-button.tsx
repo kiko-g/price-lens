@@ -39,7 +39,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
           } as CSSProperties
         }
         className={cn(
-          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap border border-white/10 px-6 py-3 text-white [background:var(--bg)] [border-radius:var(--radius)] dark:text-black",
+          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-white/10 px-6 py-3 whitespace-nowrap text-white [background:var(--bg)] dark:text-black",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
           className,
         )}
@@ -47,11 +47,11 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         {...props}
       >
         {/* spark container */}
-        <div className={cn("-z-30 blur-[2px]", "absolute inset-0 overflow-visible @container-[size]")}>
+        <div className={cn("-z-30 blur-[2px]", "@container-[size] absolute inset-0 overflow-visible")}>
           {/* spark */}
-          <div className="absolute inset-0 h-[100cqh] animate-shimmer-slide aspect-[1] rounded-none [mask:none]">
+          <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
             {/* spark before */}
-            <div className="absolute -inset-full w-auto rotate-0 animate-spin-around [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))] [translate:0_0]" />
+            <div className="animate-spin-around absolute -inset-full w-auto [translate:0_0] rotate-0 [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
           </div>
         </div>
         {children}
@@ -68,7 +68,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         />
 
         {/* backdrop */}
-        <div className={cn("absolute -z-20 [background:var(--bg)] [border-radius:var(--radius)] inset-(--cut)")} />
+        <div className={cn("absolute inset-(--cut) -z-20 [border-radius:var(--radius)] [background:var(--bg)]")} />
       </button>
     )
   },

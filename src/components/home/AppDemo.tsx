@@ -176,12 +176,12 @@ export function AppDemo() {
           </div>
           <div className="mt-3 border-t border-gray-200 pt-5">
             <div className="flex items-baseline gap-2">
-              <div className="text-2xl tabular-nums tracking-tight text-gray-900">{activeValue.toFixed(2)}</div>
+              <div className="text-2xl tracking-tight text-gray-900 tabular-nums">{activeValue.toFixed(2)}</div>
               <div className="text-sm text-gray-900">USD</div>
               {percentageChange && (
                 <div
                   className={cn(
-                    "ml-auto text-sm tabular-nums tracking-tight",
+                    "ml-auto text-sm tracking-tight tabular-nums",
                     percentageChange >= 0 ? "text-cyan-500" : "text-gray-500",
                   )}
                 >
@@ -197,7 +197,7 @@ export function AppDemo() {
               <div>1Y</div>
               <div>5Y</div>
             </div>
-            <div className="mt-3 rounded-lg bg-gray-50 ring-1 ring-inset ring-black/5">
+            <div className="mt-3 rounded-lg bg-gray-50 ring-1 ring-black/5 ring-inset">
               <Chart
                 width={286}
                 height={208}

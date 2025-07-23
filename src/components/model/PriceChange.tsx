@@ -32,7 +32,7 @@ export function PriceChange({ variation, invertColors }: { variation: number; in
         {percentage}%
       </span>
       {variation === 0 ? (
-        <EqualIcon className="h-3 w-3 text-muted-foreground" />
+        <EqualIcon className="text-muted-foreground h-3 w-3" />
       ) : (
         <TriangleIcon className={cn("h-3 w-3", triangleColor)} />
       )}

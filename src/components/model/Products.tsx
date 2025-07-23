@@ -80,15 +80,15 @@ export function Products() {
             <h2 className="text-lg font-bold">Tracked products</h2>
           </div>
 
-          <p className="mb-4 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mb-4 text-xs">
             Products often found in trustworthy inflation baskets, forever valuable for most people
           </p>
 
           <div className="relative w-full">
             {isSearching ? (
-              <Loader2Icon className="absolute left-2 top-1/4 h-4 w-4 -translate-y-1/4 animate-spin text-muted-foreground" />
+              <Loader2Icon className="text-muted-foreground absolute top-1/4 left-2 h-4 w-4 -translate-y-1/4 animate-spin" />
             ) : (
-              <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
             )}
             <Input
               type="text"
@@ -103,7 +103,7 @@ export function Products() {
           </div>
 
           <div className="mt-1.5">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               <strong className="text-foreground">{accumulatedProducts.length}</strong> products found matching your
               search
             </p>
@@ -127,7 +127,7 @@ export function Products() {
                   <ProductCard key={`product-${productIdx}`} product={product} />
                 ))}
               </div>
-              <p className="mt-6 text-center text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-6 text-center text-sm">
                 {accumulatedProducts.length} products found matching your search.
               </p>
               {isLoading && (

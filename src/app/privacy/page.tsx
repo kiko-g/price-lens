@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <Layout>
       <div className="container mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-12">
-        <div className="prose mb-16 dark:prose-invert">
+        <div className="prose dark:prose-invert mb-16">
           <h1>Privacy Policy</h1>
           <p>
             Your privacy is important to us. It is Price Lens' policy to respect your privacy regarding any information

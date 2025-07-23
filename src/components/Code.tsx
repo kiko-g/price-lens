@@ -28,7 +28,7 @@ export function Code({ className, code, language, options, allowDownload = true 
         className,
       )}
     >
-      <div className="absolute right-3 top-3 z-20 flex items-center justify-end gap-1">
+      <div className="absolute top-3 right-3 z-20 flex items-center justify-end gap-1">
         {canDownload ? <DownloadButton text={code} filename={`code.${language}`} /> : null}
         {canCopy ? <CopyCodeButton text={code} /> : null}
       </div>

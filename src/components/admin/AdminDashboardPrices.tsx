@@ -58,11 +58,11 @@ export function AdminDashboardPrices() {
         <div className="sm:flex-auto">
           <h1 className="text-base font-semibold">Price Points</h1>
           <p className="mt-2 text-sm">A table of placeholder stock market data that does not make any sense.</p>
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-xs">
             {uniqueStoreProductIds.length} unique supermarket product ids. Total: {prices?.length}
           </p>
         </div>
-        <div className="mt-4 flex items-center gap-2 sm:ml-16 sm:mt-0 sm:flex-none">
+        <div className="mt-4 flex items-center gap-2 sm:mt-0 sm:ml-16 sm:flex-none">
           <Button variant="outline" size="icon" onClick={() => fetchPrices()}>
             <RefreshCcwIcon />
           </Button>
@@ -124,7 +124,7 @@ function PriceRow({ price }: { price: Price }) {
   }
 
   return (
-    <tr key={price.id} className="transition-colors duration-200 hover:bg-muted/50">
+    <tr key={price.id} className="hover:bg-muted/50 transition-colors duration-200">
       <Cell>{price.id}</Cell>
       <Cell>{price.store_product_id}</Cell>
       <Cell>{price.price}€</Cell>
@@ -169,7 +169,7 @@ const StatusWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const HeaderCell = ({ className, children }: { className?: string; children: React.ReactNode }) => {
   return (
-    <th scope="col" className={cn("whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold", className)}>
+    <th scope="col" className={cn("px-2 py-3.5 text-left text-sm font-semibold whitespace-nowrap", className)}>
       {children}
     </th>
   )
@@ -177,7 +177,7 @@ const HeaderCell = ({ className, children }: { className?: string; children: Rea
 
 const Cell = ({ className, children }: { className?: string; children: React.ReactNode }) => {
   return (
-    <td className={cn("whitespace-nowrap px-2 py-2 text-sm tracking-tighter text-muted-foreground", className)}>
+    <td className={cn("text-muted-foreground px-2 py-2 text-sm tracking-tighter whitespace-nowrap", className)}>
       {children}
     </td>
   )

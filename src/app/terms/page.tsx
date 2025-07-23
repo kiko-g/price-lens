@@ -10,7 +10,7 @@ export default function TermsPage() {
   return (
     <Layout>
       <div className="container mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-12">
-        <div className="prose mb-16 dark:prose-invert">
+        <div className="prose dark:prose-invert mb-16">
           <h1>Terms of Service</h1>
           <p>
             By accessing the website at Price Lens, you are agreeing to be bound by these terms of service, all

@@ -43,7 +43,7 @@ export function RelatedStoreProducts({ id, limit = 8 }: RelatedStoreProductsProp
 
   if (error) {
     return (
-      <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+      <div className="border-destructive bg-destructive/10 text-destructive rounded-lg border p-4">
         <p>Failed to load related products. Please try again later.</p>
       </div>
     )
@@ -81,10 +81,10 @@ export function RelatedStoreProducts({ id, limit = 8 }: RelatedStoreProductsProp
 
       {isLoading ? (
         <div className="flex h-[300px] items-center justify-center">
-          <Loader2Icon className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2Icon className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : products && products.length === 0 ? (
-        <div className="rounded-lg border p-4 text-center text-muted-foreground">
+        <div className="text-muted-foreground rounded-lg border p-4 text-center">
           <p>No related products found.</p>
         </div>
       ) : (

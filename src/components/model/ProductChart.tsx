@@ -255,7 +255,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                 className="h-20 w-20 rounded-md bg-white p-1 md:h-28 md:w-28"
               />
             ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-md bg-muted">
+              <div className="bg-muted flex h-24 w-24 items-center justify-center rounded-md">
                 <ImageIcon className="h-4 w-4" />
               </div>
             )
@@ -270,7 +270,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             variant={range === selectedRange ? "default" : "ghost"}
             onClick={() => setSelectedRange(range)}
             disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
-            className="px-2 text-xs disabled:text-muted-foreground lg:text-sm"
+            className="disabled:text-muted-foreground px-2 text-xs lg:text-sm"
           >
             {range}
           </Button>
