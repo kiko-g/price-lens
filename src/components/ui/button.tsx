@@ -17,19 +17,21 @@ rounded-md text-sm font-medium border border-transparent transition-colors disab
         orange: `bg-orange-600 text-white shadow-sm hover:bg-orange-600/90 dark:bg-orange-700 dark:hover:bg-orange-700/90 dark:text-white`,
         success: `bg-emerald-600 text-white shadow-sm hover:bg-emerald-600/90 dark:bg-emerald-700 dark:hover:bg-emerald-700/90 dark:text-white`,
         outline: `border-input bg-transparent shadow-sm hover:bg-zinc-200/80 dark:bg-zinc-800/10 dark:hover:bg-zinc-800`,
-        "outline-warning": `border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 shadow-sm dark:bg-orange-500/20 dark:hover:bg-orange-500/30`,
-        "outline-destructive": `border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 shadow-sm dark:bg-rose-500/20 dark:hover:bg-rose-500/30`,
-        "outline-secondary": `border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 shadow-sm dark:bg-blue-500/20 dark:hover:bg-blue-500/30`,
+
         ghost: `hover:bg-zinc-200/80 dark:hover:bg-zinc-100/20`,
         "ghost-inverted": "bg-accent hover:bg-accent/80",
         "ghost-light": `hover:bg-zinc-200/80`,
         "ghost-dark": `hover:bg-zinc-100/20`,
         "ghost-destructive": `text-rose-600 hover:bg-rose-600/10`,
+
         glass: `bg-zinc-100 backdrop-blur text-zinc-900 hover:bg-zinc-500/20 dark:bg-zinc-900/80 dark:text-white dark:hover:bg-zinc-950/80`,
+
         active: `bg-zinc-200/80 dark:bg-zinc-100/20`,
+
         link: `text-primary underline-offset-4 hover:underline`,
         "dropdown-item": `bg-transparent font-normal w-full justify-between border-0`,
-        "gradient-primary": `bg-linear-to-r from-indigo-500/80 to-blue-500/80 text-white transition-all duration-300 dark:from-indigo-500/90 dark:to-blue-500/90 hover:opacity-80`,
+        "gradient-primary": `bg-linear-to-r from-teal-500/80 to-blue-500/80 text-white transition-all duration-300 dark:from-teal-500/90 dark:to-violet-500/90 hover:opacity-80`,
+
         marketing: `bg-primary text-primary-foreground ring-primary before:from-primary-foreground/20 after:from-primary-foreground/10 relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-gradient-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-gradient-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,
 
         "marketing-secondary": `bg-secondary text-secondary-foreground ring-secondary-foreground/10 before:from-secondary-foreground/10 after:from-secondary-foreground/5 relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-gradient-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-gradient-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,

@@ -238,7 +238,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1.5 w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-400">
+          <span className="mt-1.5 w-full text-sm leading-4 font-semibold text-violet-600 dark:text-violet-400">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 

@@ -71,7 +71,7 @@ export function PricingSection() {
             <BorderBeam duration={5} size={200} colorFrom="#837ded" colorTo="#6791f1" />
 
             {!isComingSoon && (
-              <span className="absolute top-0 right-0 rounded-bl-xl bg-linear-to-r from-indigo-600/70 to-blue-600/70 px-3 py-1 text-xs font-medium text-white">
+              <span className="absolute top-0 right-0 rounded-bl-xl bg-linear-to-r from-teal-600/70 to-violet-600/70 px-3 py-1 text-xs font-medium text-white">
                 Popular
               </span>
             )}
