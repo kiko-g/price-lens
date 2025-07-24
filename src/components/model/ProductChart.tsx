@@ -17,19 +17,19 @@ import { useActiveAxis } from "@/hooks/useActiveAxis"
 const chartConfig = {
   price: {
     label: "Price",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
   "price-per-major-unit": {
     label: "Price Per Major Unit",
-    color: "hsl(var(--chart-3))",
+    color: "var(--chart-3)",
   },
   "price-recommended": {
     label: "Price Recommended",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
   },
   discount: {
     label: "Discount",
-    color: "hsl(var(--chart-4))",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig
 

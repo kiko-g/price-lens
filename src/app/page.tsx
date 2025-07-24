@@ -48,14 +48,14 @@ export default async function Home({ searchParams }: Props) {
             </p>
 
             <div className="animate-fade-in flex flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">
-              <Button variant="default" size="lg" className="w-full md:w-auto" asChild>
+              <Button variant="marketing" size="lg" className="w-full md:w-auto" asChild>
                 <Link href="/products">
                   Start Tracking
                   <BadgeEuroIcon />
                 </Link>
               </Button>
 
-              <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
+              <Button variant="marketing-secondary" size="lg" className="w-full md:w-auto" asChild>
                 <Link href="/supermarket">
                   Browse Supermarket
                   <ShoppingBasketIcon />

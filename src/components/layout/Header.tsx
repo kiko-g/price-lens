@@ -4,13 +4,13 @@ import { navigation } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "@/app/login/actions"
+import { useUser } from "@/hooks/useUser"
 
 import { GithubIcon } from "@/components/icons"
 import { LogoLink } from "@/components/layout/LogoLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
-
-import { signOut } from "@/app/login/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useUser } from "@/hooks/useUser"
+import { Separator } from "@/components/ui/separator"
 
 import { LogInIcon, LogOut, User as UserIcon } from "lucide-react"
 
@@ -56,8 +56,11 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center justify-center gap-2 md:gap-1.5">
+        <div className="flex items-center justify-center gap-2 md:gap-2.5">
           <ThemeToggle className="hidden md:inline-flex" />
+
+          <Separator orientation="vertical" className="h-8" />
+
           <UserDropdownMenu />
           <NavigationMenu />
         </div>

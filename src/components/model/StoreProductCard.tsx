@@ -483,20 +483,22 @@ export function ProductCardSkeleton() {
         <div className="border-border bg-muted aspect-square w-full animate-pulse rounded-md border" />
       </div>
 
-      <div className="mb-2 flex flex-col items-start gap-2">
-        <span className="bg-muted h-3 w-32 animate-pulse rounded lg:w-32"></span>
-        <span className="bg-muted h-3 w-20 animate-pulse rounded lg:w-48"></span>
+      <div className="mb-5 flex flex-col items-start gap-2">
+        {/* Category, Brand and Name */}
+        <span className="bg-muted h-3 w-16 animate-pulse rounded lg:w-16"></span>
+        <span className="bg-muted h-3 w-24 animate-pulse rounded lg:w-24"></span>
+        <span className="bg-muted h-3 w-full animate-pulse rounded lg:w-full"></span>
       </div>
 
-      <div className="flex w-full items-end justify-between gap-2">
+      <div className="mb-1 flex w-full items-start justify-between gap-2">
         <div className="flex flex-col gap-2">
-          <span className="bg-muted h-4 w-16 animate-pulse rounded lg:w-24"></span>
-          <span className="bg-muted h-4 w-16 animate-pulse rounded lg:w-24"></span>
+          <span className="bg-muted h-4 w-12 animate-pulse rounded lg:w-12"></span>
+          <span className="bg-muted h-4 w-20 animate-pulse rounded lg:w-20"></span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="bg-muted h-7 w-7 animate-pulse rounded lg:w-8"></span>
-          <span className="bg-muted h-7 w-7 animate-pulse rounded lg:w-8"></span>
+          <span className="bg-muted size-6 animate-pulse rounded lg:size-7"></span>
+          <span className="bg-muted size-6 animate-pulse rounded lg:size-7"></span>
         </div>
       </div>
     </div>

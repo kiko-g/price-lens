@@ -18,11 +18,11 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   return (
     <Button
-      variant="ghost"
-      size="icon"
+      variant="outline"
+      size="icon-sm"
       aria-label={mounted ? `Switch to ${otherTheme} theme` : "Toggle theme"}
       onClick={() => setTheme(otherTheme)}
-      className={cn("border-border shadow-none md:border-transparent", className)}
+      className={cn("shadow-none", className)}
     >
       <SunIcon className="dark:hidden" />
       <MoonIcon className="hidden dark:inline-flex" />

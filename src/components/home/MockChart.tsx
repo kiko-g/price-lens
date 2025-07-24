@@ -26,19 +26,19 @@ const chartDataA = [
 const chartConfigA = {
   price: {
     label: "Price",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
   pricePerUnit: {
     label: "Price Per Unit",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
   },
   priceRecommended: {
     label: "Price Recommended",
-    color: "hsl(var(--chart-3))",
+    color: "var(--chart-3)",
   },
   discount: {
     label: "Discount %",
-    color: "hsl(var(--chart-4))",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig
 

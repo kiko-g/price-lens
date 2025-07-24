@@ -8,7 +8,7 @@ import { TrendingUpIcon, ArrowRightIcon } from "lucide-react"
 
 export function InflationBasket() {
   return (
-    <section className="w-full border-t border-indigo-50/80 bg-white bg-linear-to-br from-indigo-50/20 to-indigo-50/20 py-12 md:py-16 lg:py-24 dark:border-transparent dark:bg-zinc-950 dark:from-indigo-200/5 dark:to-indigo-500/10">
+    <section className="w-full border-t border-indigo-50/80 bg-white bg-linear-to-br from-indigo-50/20 to-indigo-50/20 py-12 md:py-16 lg:py-24 dark:border-transparent dark:bg-zinc-950 dark:from-indigo-300/5 dark:to-indigo-300/5">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <Badge className="bg-transparent bg-linear-to-br from-indigo-600/70 to-blue-600/70 text-white dark:text-white">

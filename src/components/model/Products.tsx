@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function Products() {
-  const limit = 42
+  const limit = 30
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
@@ -102,11 +103,15 @@ export function Products() {
             />
           </div>
 
-          <div className="mt-1.5">
-            <p className="text-muted-foreground text-xs">
-              <strong className="text-foreground">{accumulatedProducts.length}</strong> products found matching your
-              search
-            </p>
+          <div className="mt-1.5 flex flex-col gap-2">
+            {isLoading ? (
+              <Skeleton className="h-4 w-full rounded-md" />
+            ) : (
+              <p className="text-muted-foreground text-xs">
+                <strong className="text-foreground">{accumulatedProducts.length}</strong> products found matching your
+                search
+              </p>
+            )}
           </div>
         </div>
 
@@ -115,7 +120,7 @@ export function Products() {
           {isLoading && page === 1 ? (
             <div className="flex w-full flex-col gap-y-16">
               <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
-                {Array.from({ length: 12 }).map((_, index) => (
+                {Array.from({ length: limit }).map((_, index) => (
                   <ProductCardSkeleton key={`product-skeleton-${index}`} />
                 ))}
               </div>
@@ -128,7 +133,14 @@ export function Products() {
                 ))}
               </div>
               <p className="text-muted-foreground mt-6 text-center text-sm">
-                {accumulatedProducts.length} products found matching your search.
+                Showing <strong className="text-foreground">{accumulatedProducts.length}</strong> products in total.{" "}
+                <button
+                  className="cursor-pointer underline transition hover:text-blue-500"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                >
+                  Back to top
+                </button>
+                .
               </p>
               {isLoading && (
                 <div className="mt-8 flex items-center justify-center">
