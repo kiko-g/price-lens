@@ -55,7 +55,7 @@ export default async function Home({ searchParams }: Props) {
                 </Link>
               </Button>
 
-              <Button variant="marketing-secondary" size="lg" className="w-full md:w-auto" asChild>
+              <Button variant="marketing-white" size="lg" className="w-full md:w-auto" asChild>
                 <Link href="/supermarket">
                   Browse Supermarket
                   <ShoppingBasketIcon />

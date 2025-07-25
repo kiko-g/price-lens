@@ -213,7 +213,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             <Tooltip>
               <TooltipTrigger>
                 <Badge
-                  variant="secondary"
+                  variant="boring"
                   size="xs"
                   roundedness="sm"
                   className="text-2xs line-clamp-1 text-left"
@@ -238,7 +238,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1.5 w-full text-sm leading-4 font-semibold text-violet-600 dark:text-violet-400">
+          <span className="text-secondary-500 dark:text-secondary-400 mt-1.5 w-full text-sm leading-4 font-semibold">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
@@ -423,13 +423,13 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge variant="tertiary" size="2xs" roundedness="sm">
+                  <Badge variant="secondary" size="2xs" roundedness="sm">
                     {sp.brand}
                   </Badge>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Badge variant="secondary" size="2xs" roundedness="sm">
+                        <Badge variant="boring" size="2xs" roundedness="sm">
                           {sp.category}
                         </Badge>
                       </TooltipTrigger>

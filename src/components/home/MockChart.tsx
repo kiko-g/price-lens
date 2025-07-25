@@ -137,7 +137,7 @@ export function MockChartA({ className }: { className?: string }) {
         </div>
       </CardFooter>
 
-      <BorderBeam duration={5} size={150} colorFrom="#2662d9" colorTo="#e23670" />
+      <BorderBeam duration={5} size={150} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
     </Card>
   )
 }

@@ -33,7 +33,7 @@ export function NavigationMenu() {
   return (
     <Sheet>
       <SheetTrigger className="flex items-center justify-center rounded-md p-2 md:hidden" asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="outline" size="icon-sm">
           <MenuIcon className="size-4" />
         </Button>
       </SheetTrigger>

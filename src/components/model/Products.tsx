@@ -135,7 +135,7 @@ export function Products() {
               <p className="text-muted-foreground mt-6 text-center text-sm">
                 Showing <strong className="text-foreground">{accumulatedProducts.length}</strong> products in total.{" "}
                 <button
-                  className="cursor-pointer underline transition hover:text-violet-500"
+                  className="hover:text-secondary cursor-pointer underline transition"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                   Back to top

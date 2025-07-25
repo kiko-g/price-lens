@@ -4,28 +4,13 @@ import { navigation } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut } from "@/app/login/actions"
-import { useUser } from "@/hooks/useUser"
 
 import { GithubIcon } from "@/components/icons"
 import { LogoLink } from "@/components/layout/LogoLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
-import { ThemeToggle } from "@/components/layout/ThemeToggle"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Separator } from "@/components/ui/separator"
+import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 
-import { LogInIcon, LogOut, User as UserIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function Header() {
   const pathname = usePathname()
@@ -56,88 +41,11 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center justify-center gap-2 md:gap-2.5">
-          <ThemeToggle className="hidden md:inline-flex" />
-
-          <Separator orientation="vertical" className="h-8" />
-
+        <div className="flex items-center justify-center gap-3">
           <UserDropdownMenu />
           <NavigationMenu />
         </div>
       </div>
     </header>
-  )
-}
-
-function UserDropdownMenu() {
-  const { user, profile, isLoading } = useUser()
-
-  if (isLoading) {
-    return <Skeleton className="ml-2 h-8 w-8 rounded-full md:ml-0" />
-  }
-
-  if (!user) {
-    return (
-      <Button asChild size="icon" variant="ghost" className="ml-2 md:ml-0">
-        <Link href="/login">
-          <LogInIcon className="h-4 w-4" />
-          <span className="sr-only">Login</span>
-        </Link>
-      </Button>
-    )
-  }
-
-  function getUserBadgeText() {
-    if (profile?.role === "admin") return "Admin"
-    else if (profile?.plan === "free") return "Free"
-    else if (profile?.plan === "plus") return "Plus"
-    else return ""
-  }
-
-  const userBadgeText = getUserBadgeText()
-  const userInitial = user.email ? user.email.charAt(0).toUpperCase() : "U"
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild className="ml-2 md:ml-0">
-        <Button variant="outline" className="relative h-7 w-7 rounded-full">
-          <Avatar className="h-7 w-7">
-            <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name ?? "User"} />
-            <AvatarFallback>{userInitial}</AvatarFallback>
-          </Avatar>
-          <span className="sr-only">User</span>
-          <Badge
-            size="3xs"
-            variant="default"
-            className="absolute -bottom-2 left-1/2 -translate-x-1/2 leading-none capitalize"
-          >
-            {userBadgeText}
-          </Badge>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm leading-none font-medium">{user.user_metadata.full_name}</p>
-            <p className="text-muted-foreground text-xs leading-none">{user.email}</p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/profile">
-            <UserIcon className="h-4 w-4" />
-            <span>Profile</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="p-0">
-          <form action={signOut} className="w-full">
-            <Button type="submit" variant="dropdown-item" className="h-full w-full justify-start px-2 font-normal">
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
-          </form>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }
