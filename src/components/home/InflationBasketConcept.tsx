@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button"
 
 import { TrendingUpIcon, MicroscopeIcon, ShoppingBasketIcon } from "lucide-react"
 
-export function InflationBasket() {
+export function InflationBasketConcept() {
   return (
-    <section className="border-border dark:bg-muted w-full border-t bg-white py-12 md:py-16 lg:py-24 dark:border-transparent">
-      <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+    <section className="border-border dark:bg-primary/10 bg-primary/5 w-full border-t py-12 md:py-16 lg:py-24">
+      <div className="mx-auto w-full px-5 md:px-16">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center md:items-center">
           <Badge variant="secondary">
             <TrendingUpIcon className="h-4 w-4" />
-            Inflation depends on basket of selected products
+            <span className="font-medium tracking-tighter md:tracking-normal">
+              Inflation depends on a selected basket of products
+            </span>
           </Badge>
           <div className="flex flex-col items-center justify-center gap-3">
             <h2 className="max-w-5xl text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">

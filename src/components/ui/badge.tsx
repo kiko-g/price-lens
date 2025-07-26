@@ -10,10 +10,8 @@ const badgeVariants = cva(
       variant: {
         default:
           "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80 dark:border-transparent dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
-
         boring:
           "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
-
         primary:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80 dark:border-transparent dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         secondary:
@@ -21,7 +19,7 @@ const badgeVariants = cva(
         tertiary:
           "border-transparent bg-blue-500 text-white hover:opacity-80 dark:border-transparent dark:bg-blue-800 dark:text-blue-50 dark:hover:bg-blue-800/80 [&_span.bubble]:bg-blue-500 dark:[&_span.bubble]:bg-blue-800",
         destructive:
-          "border-transparent bg-red-600 text-zinc-50 hover:bg-red-600/80 dark:border-transparent dark:bg-red-700 dark:text-zinc-50 dark:hover:bg-red-700/80 [&_span.bubble]:bg-red-600",
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80 dark:border-transparent dark:bg-destructive dark:text-destructive-foreground dark:hover:bg-destructive/80 [&_span.bubble]:bg-destructive",
         success:
           "border-transparent bg-emerald-600 text-zinc-50 hover:bg-emerald-600/80 dark:border-transparent dark:bg-emerald-800 dark:text-zinc-50 dark:hover:bg-emerald-800/80 [&_span.bubble]:bg-emerald-600",
         warning:

@@ -62,6 +62,7 @@
   --accent: var(--base-100);
   --accent-foreground: var(--base-800);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: var(--color-white);
   --border: var(--base-200);
   --input: var(--base-300);
   --ring: var(--primary-500);
@@ -90,13 +91,14 @@
   --popover-foreground: var(--base-200);
   --primary: var(--primary-600);
   --primary-foreground: var(--color-white);
-  --secondary: var(--secondary-400);
+  --secondary: var(--secondary-500);
   --secondary-foreground: var(--color-white);
   --muted: var(--base-900);
   --muted-foreground: var(--base-400);
   --accent: var(--base-900);
   --accent-foreground: var(--base-200);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.50 0.20 23.33);
+  --destructive-foreground: var(--color-white);
   --border: var(--base-800);
   --input: var(--base-700);
   --ring: var(--primary-600);

@@ -1,15 +1,16 @@
-import Link from "next/link"
-import type { Metadata } from "next"
 import { defaultMetadata } from "@/lib/config"
+import type { Metadata } from "next"
+import Link from "next/link"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 
 import { Brands } from "@/components/home/Brands"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+import { InflationBasketConcept } from "@/components/home/InflationBasketConcept"
+import { InflationTrends } from "@/components/home/InflationTrends"
 import { MockChartA } from "@/components/home/MockChart"
 import { PricingSection } from "@/components/home/Pricing"
-import { InflationBasket } from "@/components/home/InflationBasket"
 
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 
@@ -75,7 +76,8 @@ export default async function Home({ searchParams }: Props) {
         </div>
 
         <PricingSection />
-        <InflationBasket />
+        <InflationBasketConcept />
+        <InflationTrends />
       </main>
     </Layout>
   )

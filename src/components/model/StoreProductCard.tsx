@@ -9,6 +9,7 @@ import { FrontendStatus } from "@/types/extra"
 import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
+import { PriorityBadge } from "@/components/model/PriorityBadge"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -38,7 +39,6 @@ import {
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { toast } from "sonner"
-import { PriorityBadge } from "./priority-badge"
 
 type Props = {
   sp: StoreProduct
