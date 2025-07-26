@@ -1,8 +1,8 @@
+import type React from "react"
 import { useId } from "react"
-
 import { cn } from "@/lib/utils"
 
-interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
+export interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   width?: number
   height?: number
   x?: number
@@ -10,6 +10,7 @@ interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   squares?: Array<[x: number, y: number]>
   strokeDasharray?: string
   className?: string
+  variant?: "grid" | "diagonal" | "diagonal-crossed"
   [key: string]: unknown
 }
 
@@ -21,9 +22,22 @@ export function GridPattern({
   strokeDasharray = "0",
   squares,
   className,
+  variant = "grid",
   ...props
 }: GridPatternProps) {
   const id = useId()
+
+  const getPatternPath = () => {
+    switch (variant) {
+      case "diagonal":
+        return `M0 0 L${width} ${height}`
+      case "diagonal-crossed":
+        return `M0 0 L${width} ${height} M${width} 0 L0 ${height}`
+      case "grid":
+      default:
+        return `M.5 ${height}V.5H${width}`
+    }
+  }
 
   return (
     <svg
@@ -36,7 +50,7 @@ export function GridPattern({
     >
       <defs>
         <pattern id={id} width={width} height={height} patternUnits="userSpaceOnUse" x={x} y={y}>
-          <path d={`M.5 ${height}V.5H${width}`} fill="none" strokeDasharray={strokeDasharray} />
+          <path d={getPatternPath()} fill="none" strokeDasharray={strokeDasharray} />
         </pattern>
       </defs>
       <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />

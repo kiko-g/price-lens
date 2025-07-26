@@ -6,7 +6,7 @@ import { ProductLinked } from "@/types"
 import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
 
-import { Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
+import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProducts } from "@/hooks/useProducts"
 
@@ -135,12 +135,11 @@ export function Products() {
               <p className="text-muted-foreground mt-6 text-center text-sm">
                 Showing <strong className="text-foreground">{accumulatedProducts.length}</strong> products in total.{" "}
                 <button
-                  className="hover:text-secondary cursor-pointer underline transition"
+                  className="hover:text-secondary inline-flex cursor-pointer items-center gap-1 underline transition"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
-                  Back to top
+                  Back to top <ArrowUpIcon className="size-4" />
                 </button>
-                .
               </p>
               {isLoading && (
                 <div className="mt-8 flex items-center justify-center">

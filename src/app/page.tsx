@@ -6,7 +6,7 @@ import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 
 import { Brands } from "@/components/home/Brands"
-import { GridHome } from "@/components/home/GridHome"
+import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { MockChartA } from "@/components/home/MockChart"
 import { PricingSection } from "@/components/home/Pricing"
 import { InflationBasket } from "@/components/home/InflationBasket"
@@ -31,7 +31,10 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <Layout>
-      <GridHome />
+      <HeroGridPattern
+        variant="grid"
+        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+      />
 
       <main className="flex w-full flex-col items-center justify-center">
         <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">

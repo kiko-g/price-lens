@@ -6,6 +6,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -26,11 +28,19 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl space-y-6 p-6">
-      <HeaderActions />
+    <div className="flex h-screen w-full flex-col">
+      <HeroGridPattern
+        variant="grid"
+        className="mask-[linear-gradient(to_top_left,rgba(255,255,255,0.4))]"
+        width={16}
+        height={16}
+      />
+      <div className="container mx-auto max-w-6xl space-y-6 p-6">
+        <HeaderActions />
 
-      {/* Content */}
-      {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
+        {/* Content */}
+        {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
+      </div>
     </div>
   )
 }
