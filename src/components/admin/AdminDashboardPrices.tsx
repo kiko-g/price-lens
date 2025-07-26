@@ -108,8 +108,7 @@ export function AdminDashboardPrices() {
 }
 
 function PriceRow({ price }: { price: Price }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isEditing, setIsEditing] = useState(false) // TODO: add edit price modal
   const [isCopying, setIsCopying] = useState(false)
   const [isSanitizing, setIsSanitizing] = useState(false)
 

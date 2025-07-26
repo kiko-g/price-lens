@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { XTwitterIcon } from "@/components/icons"
-import { MailIcon, CopyIcon } from "lucide-react"
 
 interface ShareButtonProps {
   url: string

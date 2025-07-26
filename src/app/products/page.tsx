@@ -2,8 +2,6 @@ import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
 import { Products } from "@/components/model/Products"
-import { getSearchType } from "@/types/extra"
-import { Scrapers } from "@/lib/scraper"
 
 export const metadata: Metadata = {
   title: "Products",
@@ -21,8 +19,8 @@ type HomeProps = {
 
 export default async function ProductsPage({ searchParams }: HomeProps) {
   const params = await Promise.resolve(searchParams)
-  const page = params.page ? parseInt(params.page) : 1
-  const q = params.q ?? ""
+  const page = params.page ? parseInt(params.page) : 1 // TODO: add pagination ?
+  const q = params.q ?? "" // TODO: add search
 
   return (
     <Layout>

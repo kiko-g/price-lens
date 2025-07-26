@@ -1,6 +1,6 @@
 import axios from "axios"
 import type { Price } from "@/types"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 
 async function fetchPrices(storeProductId: string) {
   const response = await axios.get(`/api/prices/${storeProductId}`)

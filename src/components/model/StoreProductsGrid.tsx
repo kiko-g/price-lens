@@ -57,7 +57,6 @@ import {
   CircleOffIcon,
   DeleteIcon,
   EllipsisVerticalIcon,
-  MicroscopeIcon,
   RefreshCcwIcon,
   SearchIcon,
   SquareLibraryIcon,
@@ -126,7 +125,6 @@ export function StoreProductsGrid(props: Props) {
   const tuples = storeProductCategories?.data?.tuples || []
 
   const allCategoriesFilled = category1 && category2 && category3
-  const allCategoriesEmpty = !category1 && !category2 && !category3
 
   const category1Options = useMemo((): string[] => {
     return [

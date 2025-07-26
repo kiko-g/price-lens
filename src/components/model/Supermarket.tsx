@@ -1,4 +1,3 @@
-import { StoreProduct } from "@/types"
 import { SupermarketChain } from "@/types/extra"
 
 import { Badge } from "@/components/ui/badge"

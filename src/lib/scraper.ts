@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 import { categories } from "./mock/continente"
 import { formatProductName, isValidJson, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
 import { storeProductQueries } from "./db/queries/products"
-import { ScrapedAddOnAuchan, ScrapedSchemaAuchan, SupermarketChain } from "@/types/extra"
+import { ScrapedAddOnAuchan, ScrapedSchemaAuchan } from "@/types/extra"
 
 export const fetchHtml = async (url: string) => {
   if (!url) {
@@ -318,7 +318,9 @@ export const scrapeAndReplaceProduct = async (url: string | null, originId: numb
 
   const { data, error } = await storeProductQueries.createOrUpdateProduct(product)
 
-  if (error) return NextResponse.json({ error: "StoreProduct upsert failed", details: error }, { status: 500 })
+  if (error) {
+    return NextResponse.json({ data, error: "StoreProduct upsert failed", details: error, product }, { status: 500 })
+  }
 
   return NextResponse.json({ data: product, message: "StoreProduct upserted" })
 }

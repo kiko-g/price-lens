@@ -20,17 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 
-import { LogInIcon, LogOut, Monitor, Moon, MoonIcon, Sun, SunIcon, User as UserIcon } from "lucide-react"
+import { LogInIcon, LogOut, MoonIcon, SunIcon, User as UserIcon } from "lucide-react"
 import { GithubIcon } from "../icons"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
   const { resolvedTheme: theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   if (isLoading) {
     return <Skeleton className="ml-2 h-8 w-8 rounded-full md:ml-0" />

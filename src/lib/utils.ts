@@ -1,8 +1,10 @@
-import { productsImages } from "@/images/products"
-import type { BasketProduct, BasketProductCategory, Price, ProductChartEntry, StoreProduct } from "@/types"
-import type { DateRange } from "@/types/extra"
-import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx"
+
+import { productsImages } from "@/images/products"
+
+import type { DateRange } from "@/types/extra"
+import type { BasketProduct, Price, ProductChartEntry, StoreProduct } from "@/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

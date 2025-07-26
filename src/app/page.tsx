@@ -27,7 +27,7 @@ type Props = {
 }
 
 export default async function Home({ searchParams }: Props) {
-  const params = await Promise.resolve(searchParams)
+  const params = await Promise.resolve(searchParams) // TODO: add search params
 
   return (
     <Layout>

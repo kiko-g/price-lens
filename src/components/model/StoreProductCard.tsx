@@ -32,9 +32,7 @@ import {
   RefreshCcwIcon,
   ChartSplineIcon,
   CloudAlertIcon,
-  PlusIcon,
   ExternalLinkIcon,
-  CheckIcon,
   CircleIcon,
   MicroscopeIcon,
 } from "lucide-react"

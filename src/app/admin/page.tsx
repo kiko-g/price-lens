@@ -1,6 +1,5 @@
 import Link from "next/link"
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
 
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"

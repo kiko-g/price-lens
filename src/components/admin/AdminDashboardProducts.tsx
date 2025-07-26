@@ -7,7 +7,7 @@ import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 
-import { Loader2, CircleX, TrashIcon, ZapOffIcon, ZapIcon, RefreshCcwIcon } from "lucide-react"
+import { Loader2, CircleX, TrashIcon } from "lucide-react"
 import { InsertPriceModal } from "./InsertPriceModal"
 
 export function AdminDashboardProducts() {

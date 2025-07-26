@@ -5,12 +5,6 @@ import { storeProductQueries } from "@/lib/db/queries/products"
 
 export const maxDuration = 60
 
-function jsonToCSV(data: { id: string; name: string; priority: number }[]): string {
-  const header = "id,name,priority"
-  const rows = data.map((row) => `"${row.id}","${row.name.replace(/"/g, '""')}",${row.priority}`)
-  return [header, ...rows].join("\n")
-}
-
 function rowToPromptText(sp: any) {
   const categories = [sp.category, sp.category_2, sp.category_3]
     .filter(Boolean)
@@ -24,7 +18,7 @@ export async function GET() {
   try {
     const limit = 5
     const offset = 0
-    const results: { id: string; name: string; priority: number }[] = []
+    const results: { id: string; name: string; priority: number }[] = [] // TODO: add results to db ?
 
     const { data: batch, error } = await storeProductQueries.getAllNullPriority({ offset, limit })
 

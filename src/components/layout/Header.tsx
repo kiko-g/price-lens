@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { GithubIcon } from "@/components/icons"
 import { LogoLink } from "@/components/layout/LogoLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"

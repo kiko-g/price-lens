@@ -1,4 +1,4 @@
-import { Product, StoreProduct, Price } from "@/types"
+import { StoreProduct, Price } from "@/types"
 
 import { now } from "./utils"
 import { priceQueries } from "./db/queries/prices"
