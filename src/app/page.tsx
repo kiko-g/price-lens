@@ -44,7 +44,7 @@ export default async function Home({ searchParams }: Props) {
               <br className="block" />
               See through prices
             </h1>
-            <p className="animate-fade-in max-w-3xl -translate-y-4 text-center tracking-tight text-balance text-gray-400 opacity-0 [--animation-delay:400ms] md:text-left md:text-lg">
+            <p className="animate-fade-in text-muted-foreground max-w-3xl -translate-y-4 text-center tracking-tight text-balance opacity-0 [--animation-delay:400ms] md:text-left md:text-lg">
               Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and
               aware of how supermarket prices change. See beyond the headlines and tags. Data focused on
               Portugal-available supermarket chains.

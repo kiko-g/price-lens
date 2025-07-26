@@ -251,7 +251,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             {hasDiscount ? (
               <div className="flex flex-col">
-                <span className="text-sm text-zinc-500 line-through dark:text-zinc-400">{sp.price_recommended}€</span>
+                <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
                 <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price}€</span>
               </div>
             ) : null}

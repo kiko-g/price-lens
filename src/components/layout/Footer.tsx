@@ -16,7 +16,7 @@ export function Footer() {
           <Link
             target="_blank"
             href={siteConfig.links.github}
-            className="inline-flex items-center gap-2 font-medium text-white hover:underline hover:opacity-80 dark:text-zinc-100"
+            className="text-primary inline-flex items-center gap-2 font-medium hover:underline hover:opacity-80"
           >
             Francisco Gonçalves
             <Image src="/profile.svg" alt="author" width={24} height={24} className="rounded-full" />
@@ -28,7 +28,7 @@ export function Footer() {
           <Link
             target="_blank"
             href={siteConfig.links.repo}
-            className="inline-flex items-center gap-2 font-medium text-white hover:underline hover:opacity-80 dark:text-zinc-100"
+            className="inline-flex items-center gap-2 font-semibold text-white hover:underline hover:opacity-80"
           >
             GitHub
           </Link>
