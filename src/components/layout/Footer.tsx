@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer className="mx-auto flex w-full items-center justify-between border-t bg-zinc-900 px-4 py-4 pt-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-8 lg:pt-8 dark:bg-inherit">
       <div className="flex flex-col items-start justify-start gap-0">
-        <p className="text-2xs leading-5 text-zinc-400 md:text-sm dark:text-zinc-500">
+        <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
           Built by{" "}
           <Link
             target="_blank"
@@ -23,7 +23,7 @@ export function Footer() {
           </Link>
         </p>
 
-        <p className="text-2xs leading-5 text-zinc-400 md:text-sm dark:text-zinc-500">
+        <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
           Code is open source and available on{" "}
           <Link
             target="_blank"

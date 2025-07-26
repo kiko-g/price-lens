@@ -74,7 +74,7 @@ export function NavigationMenu() {
               </Button>
             )}
 
-            <Button variant="outline" size="icon" asChild className="border-border shadow-none md:border-transparent">
+            <Button variant="outline" size="icon" asChild>
               <Link target="_blank" href={siteConfig.links.repo}>
                 <GithubIcon />
               </Link>
@@ -92,7 +92,7 @@ function Entry({ item, isActive }: { item: NavigationItem; isActive: boolean }) 
 
   return (
     <Link title={item.label} href={item.href} className="w-full">
-      <Button variant={isActive ? "default" : "ghost"} className="w-full justify-start pr-4 lg:pr-16">
+      <Button variant={isActive ? "primary" : "outline"} className="w-full justify-start pr-4 lg:pr-16">
         {item.icon && <item.icon className="size-4" />}
         <span>{item.label}</span>
       </Button>

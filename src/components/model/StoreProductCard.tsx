@@ -194,7 +194,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0.5">
+        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0 md:gap-0.5">
           <PriorityBadge priority={priority} />
 
           <Badge
@@ -238,7 +238,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="text-secondary-500 dark:text-secondary-400 mt-1.5 w-full text-sm leading-4 font-semibold">
+          <span className="text-primary-500 dark:text-primary-400 mt-1.5 w-full text-sm leading-4 font-semibold">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 

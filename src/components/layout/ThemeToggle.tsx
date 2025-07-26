@@ -19,7 +19,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   return (
     <Button
       variant="outline"
-      size="icon-sm"
+      size="icon"
       aria-label={mounted ? `Switch to ${otherTheme} theme` : "Toggle theme"}
       onClick={() => setTheme(otherTheme)}
       className={cn("shadow-none", className)}

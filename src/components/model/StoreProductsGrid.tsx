@@ -633,7 +633,7 @@ WHERE category = '${category1}'
                           <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 pt-1 pb-1.5">
                             <button
                               onClick={selectDefaultCategories}
-                              className="flex rounded-md bg-linear-to-r from-violet-600/40 to-teal-500/40 px-1.5 py-0.5 text-xs text-white hover:opacity-80"
+                              className="from-primary/50 to-secondary/50 flex rounded-md bg-linear-to-r px-1.5 py-0.5 text-xs text-white hover:opacity-80"
                             >
                               Select relevant
                             </button>
@@ -767,7 +767,7 @@ WHERE category = '${category1}'
               </Button>
             </div>
 
-            <Button variant="default" disabled={isLoading} onClick={handleSubmit}>
+            <Button variant="primary" disabled={isLoading} onClick={handleSubmit}>
               Submit
             </Button>
           </div>

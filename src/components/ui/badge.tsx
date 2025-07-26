@@ -13,6 +13,9 @@ const badgeVariants = cva(
 
         boring:
           "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
+
+        primary:
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80 dark:border-transparent dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:border-transparent dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 [&_span.bubble]:bg-secondary dark:[&_span.bubble]:bg-secondary",
         tertiary:

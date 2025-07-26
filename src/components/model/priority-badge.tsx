@@ -15,48 +15,48 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
         return {
           label: "Unset",
           tooltip: "Unset",
-          className: `bg-neutral-100 text-neutral-700 dark:bg-neutral-500 dark:text-neutral-50`,
+          className: `bg-neutral-500 dark:text-neutral-50`,
         }
       case 0:
         return {
           label: "0/5",
           tooltip: "Useless",
-          className: `bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-white`,
+          className: `bg-gray-800 dark:text-white`,
         }
       case 1:
         return {
           label: "1/5",
           tooltip: "Minor",
-          className: `bg-rose-50 text-rose-700 dark:bg-rose-600 dark:text-white`,
+          className: `bg-rose-600 dark:text-white`,
         }
       case 2:
         return {
           label: "2/5",
           tooltip: "Low",
-          className: `bg-orange-50 text-orange-700 dark:bg-orange-600 dark:text-white`,
+          className: `bg-orange-600 dark:text-white`,
         }
       case 3:
         return {
           label: "3/5",
           tooltip: "Medium",
-          className: `bg-amber-50 text-amber-700 dark:bg-amber-600 dark:text-white`,
+          className: `bg-amber-600 dark:text-white`,
         }
       case 4:
         return {
           label: "4/5",
           tooltip: "Important",
-          className: `bg-sky-50 text-sky-700 dark:bg-sky-600 dark:text-white`,
+          className: `bg-sky-600 dark:text-white`,
         }
       case 5:
         return {
           label: "5/5",
           tooltip: "Essential",
-          className: `bg-teal-50 text-teal-800 dark:bg-teal-600 dark:text-white`,
+          className: `bg-teal-600 dark:text-white`,
         }
       default:
         return {
           label: "Unknown",
-          className: `bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-white`,
+          className: `bg-gray-800 dark:text-white`,
         }
     }
   }
@@ -68,10 +68,10 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
       <Tooltip>
         <TooltipTrigger>
           <Badge
-            size="xs"
+            size="2xs"
             variant="outline"
             className={cn(
-              "gap-0.5 border-0 opacity-50 transition-all duration-300 group-hover:opacity-100",
+              "gap-0.5 border-0 text-white opacity-100 transition-all duration-300 group-hover:opacity-100 md:opacity-50",
               config.className,
             )}
           >

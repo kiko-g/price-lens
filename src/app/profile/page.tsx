@@ -49,7 +49,7 @@ function HeaderActions() {
 
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <Button variant="outline" onClick={() => signOut()} className="border-border shadow-none md:border-transparent">
+        <Button variant="outline" onClick={() => signOut()}>
           Sign out
         </Button>
       </div>
@@ -117,9 +117,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
       description: (
         <p className="text-muted-foreground text-sm">
           Email PriceLens developer directly at{" "}
-          <Link href="mailto:kikojpgoncalves@gmail.com" className="text-blue-500 group-hover:underline">
-            kikojpgoncalves@gmail.com
-          </Link>
+          <span className="text-primary group-hover:underline">kikojpgoncalves@gmail.com</span>
         </p>
       ),
       icon: <MailIcon className="h-4 w-4" />,
@@ -154,19 +152,19 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
 
         <p className="mb-0 text-xl font-bold transition-opacity duration-200">{username}</p>
 
-        <div className="mb-1 flex items-center gap-1">
+        <Badge variant="default" size="xs" className="mb-2 flex items-center gap-1">
           {verifiedIcon}
-          <p className="text-muted-foreground text-sm">{user.email}</p>
-        </div>
+          <span className="text-2xs">{user.email}</span>
+        </Badge>
 
         <div className="flex items-center gap-2">
           {profile?.plan && (
-            <Badge variant="default" roundedness="sm" className="capitalize">
+            <Badge variant="primary" roundedness="sm" className="capitalize">
               {profile.plan}
             </Badge>
           )}
           {profile?.role && (
-            <Badge variant="outline" roundedness="sm" className="capitalize">
+            <Badge variant="secondary" roundedness="sm" className="capitalize">
               {profile.role}
             </Badge>
           )}
@@ -212,7 +210,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
             </div>
 
             <div className="mt-4 flex flex-col gap-4 md:flex-row">
-              <Button variant="default" className="w-full md:w-1/2">
+              <Button variant="marketing" className="w-full md:w-1/2">
                 Upgrade Now
               </Button>
             </div>

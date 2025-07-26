@@ -11,19 +11,16 @@ export function Brands({ className }: { className?: string }) {
       name: "Continente",
       component: ContinenteSvg,
       disabled: false,
-      shown: true,
     },
     {
       name: "Auchan",
       component: AuchanSvg,
       disabled: false,
-      shown: true,
     },
     {
       name: "Pingo Doce",
       component: PingoDoceSvg,
-      disabled: true,
-      shown: true,
+      disabled: false,
     },
   ]
 
@@ -34,27 +31,25 @@ export function Brands({ className }: { className?: string }) {
         className,
       )}
     >
-      {brands
-        .filter((brand) => brand.shown)
-        .map((brand) => (
-          <div key={brand.name} className="flex w-full justify-center">
-            <TooltipProvider>
-              <Tooltip key={brand.name} delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <brand.component
-                    className={cn(
-                      "h-auto w-24 sm:w-36 md:w-32 lg:w-32 xl:w-36",
-                      brand.disabled && "opacity-50 grayscale",
-                    )}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{brand.disabled ? `${brand.name} will be supported soon` : `${brand.name} is supported`}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        ))}
+      {brands.map((brand) => (
+        <div key={brand.name} className="flex w-full justify-center">
+          <TooltipProvider>
+            <Tooltip key={brand.name} delayDuration={300}>
+              <TooltipTrigger asChild>
+                <brand.component
+                  className={cn(
+                    "h-auto w-24 sm:w-36 md:w-32 lg:w-32 xl:w-36",
+                    brand.disabled && "opacity-50 grayscale",
+                  )}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{brand.disabled ? `${brand.name} will be supported soon` : `${brand.name} is supported`}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      ))}
     </div>
   )
 }

@@ -34,7 +34,7 @@ export default function LoginPage() {
         </p>
 
         <form action={signInWithGoogle} className="w-full">
-          <Button type="submit" variant="default" className="w-full" size="lg">
+          <Button type="submit" variant="primary" className="w-full" size="lg">
             <GoogleIcon />
             Continue with Google
           </Button>
