@@ -16,7 +16,7 @@ export function Footer() {
           <Link
             target="_blank"
             href={siteConfig.links.github}
-            className="text-primary inline-flex items-center gap-2 font-medium hover:underline hover:opacity-80"
+            className="inline-flex items-center gap-2 font-medium text-white hover:underline hover:opacity-80"
           >
             Francisco Gonçalves
             <Image src="/profile.svg" alt="author" width={24} height={24} className="rounded-full" />
@@ -34,7 +34,7 @@ export function Footer() {
           </Link>
         </p>
 
-        <div className="mt-2 flex w-full gap-x-4 border-t pt-2">
+        <div className="border-muted-foreground mt-2 flex w-full gap-x-4 border-t pt-2">
           <Link href="/terms" className="text-2xs text-muted-foreground hover:underline md:text-sm">
             Terms
           </Link>

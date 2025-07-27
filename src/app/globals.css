@@ -62,7 +62,6 @@
   --accent: var(--base-100);
   --accent-foreground: var(--base-800);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: var(--color-white);
   --border: var(--base-200);
   --input: var(--base-300);
   --ring: var(--primary-500);
@@ -97,8 +96,7 @@
   --muted-foreground: var(--base-400);
   --accent: var(--base-900);
   --accent-foreground: var(--base-200);
-  --destructive: oklch(0.50 0.20 23.33);
-  --destructive-foreground: var(--color-white);
+  --destructive: oklch(0.5 0.2 23.33);
   --border: var(--base-800);
   --input: var(--base-700);
   --ring: var(--primary-600);
@@ -284,7 +282,7 @@
   }
 
   *::selection {
-    @apply bg-primary/70 text-white dark:bg-secondary/50 dark:text-white;
+    @apply bg-primary/70 dark:bg-secondary/50 text-white dark:text-white;
   }
 
   pre *::selection {
