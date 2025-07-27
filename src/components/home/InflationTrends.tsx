@@ -234,7 +234,7 @@ export function InflationTrends() {
 
   return (
     <>
-      <section className="border-border w-full px-4 py-12 md:py-16 lg:py-24">
+      <section className="border-primary/30 bg-primary/5 w-full border-y px-4 py-12 md:py-16 lg:py-24">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 md:px-16">
           <div className="flex flex-col items-center justify-center gap-3">
             <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -540,7 +540,7 @@ export function InflationTrends() {
         </div>
       </section>
 
-      <section className="bg-secondary/5 border-secondary/30 hidden w-full border-y px-4 py-12 md:py-16 lg:py-24">
+      <section className="bg-secondary/5 border-secondary/30 hidden w-full border-b px-4 py-12 md:py-16 lg:py-24">
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
             Impact on Portugal 🇵🇹
@@ -587,7 +587,7 @@ export function InflationTrends() {
         </div>
       </section>
 
-      <section className="border-border w-full border-t px-4 py-12 md:py-16 lg:py-24">
+      <section className="border-border w-full px-4 py-12 md:py-16 lg:py-24">
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
             Economic Period Comparisons
@@ -676,7 +676,7 @@ export function InflationTrends() {
             </div>
 
             {/* Key Economic Events */}
-            <Card className="bg-primary/10 border-primary/30">
+            <Card className="border-foreground/20 bg-foreground/5">
               <CardHeader>
                 <CardTitle className="text-lg">Notable Economic Events</CardTitle>
               </CardHeader>

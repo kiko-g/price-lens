@@ -8,7 +8,7 @@ import { TrendingUpIcon, MicroscopeIcon, ShoppingBasketIcon } from "lucide-react
 
 export function InflationBasketConcept() {
   return (
-    <section className="border-primary/30 dark:bg-primary/10 bg-primary/5 w-full border-y py-12 md:py-16 lg:py-24">
+    <section className="border-foreground/20 bg-foreground/5 dark:bg-foreground/5 w-full border-t py-12 md:py-16 lg:py-24">
       <div className="mx-auto w-full px-5 md:px-16">
         <div className="flex flex-col items-center justify-center space-y-4 text-center md:items-center">
           <Badge variant="secondary">

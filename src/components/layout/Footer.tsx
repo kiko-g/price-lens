@@ -34,11 +34,12 @@ export function Footer() {
           </Link>
         </p>
 
-        <div className="border-muted-foreground mt-2 flex w-full gap-x-4 border-t pt-2">
-          <Link href="/terms" className="text-2xs text-muted-foreground hover:underline md:text-sm">
-            Terms
+        {/* TODO: add decent text to terms and privacy */}
+        <div className="text-muted-foreground mt-4 hidden w-full gap-x-4">
+          <Link href="/terms" className="text-2xs hover:underline md:text-sm">
+            Terms of Service
           </Link>
-          <Link href="/privacy" className="text-2xs text-muted-foreground hover:underline md:text-sm">
+          <Link href="/privacy" className="text-2xs hover:underline md:text-sm">
             Privacy
           </Link>
         </div>
