@@ -687,17 +687,17 @@ WHERE category = '${category1}'
                   <SelectGroup>
                     <SelectLabel>Store</SelectLabel>
                     <SelectItem value="0" className="flex items-center">
-                      <StoreIcon className="mr-2 inline-flex h-4 w-4" />
+                      <StoreIcon className="mr-2 inline-flex size-4" />
                       All stores
                     </SelectItem>
                     <SelectItem value="1" className="flex items-center gap-2">
-                      <ContinenteSvg className="inline-flex h-4 w-auto" />
+                      <ContinenteSvg className="inline-flex h-4 min-h-4 w-auto" />
                     </SelectItem>
                     <SelectItem value="2" className="flex items-center gap-2">
-                      <AuchanSvg className="inline-flex h-4 w-auto" />
+                      <AuchanSvg className="inline-flex h-4 min-h-4 w-auto" />
                     </SelectItem>
                     <SelectItem value="3" className="flex items-center gap-2">
-                      <PingoDoceSvg className="inline-flex h-4 w-auto" />
+                      <PingoDoceSvg className="inline-flex h-4 min-h-4 w-auto" />
                     </SelectItem>
                   </SelectGroup>
                 </SelectContent>

@@ -636,7 +636,7 @@ export const storeProductQueries = {
 
   async getUnsyncedHighPriority() {
     const supabase = createClient()
-    const { data, error } = await supabase.rpc("get_unsynced_high_priority_products")
+    const { data, error } = await supabase.rpc("get_unsynced_high_priority_products") // TODO: fix this because sync job is not correct
 
     if (error) {
       console.error("Error fetching unsynced high priority products:", error)

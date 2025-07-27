@@ -228,6 +228,34 @@ const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) =
     const majorUnit = `/${pricePerMajorUnitStr?.match(/€\s*\/\s*([A-Za-z]+)/i)?.[1]?.toLowerCase()}` || null
     const pricePerMajorUnitRaw = pricePerMajorUnitStr?.match(/^([\d,.]+)/)?.[1] || null
 
+    let categoryRaw: string | null = null
+    let category_2Raw: string | null = null
+    let category_3Raw: string | null = null
+    try {
+      const urlObj = new URL(url)
+      const pathParts = urlObj.pathname.split("/").filter(Boolean)
+      const produtosIdx = pathParts.findIndex((p) => p === "produtos")
+      if (produtosIdx !== -1) {
+        categoryRaw = pathParts[produtosIdx + 1] ?? null
+        category_2Raw = pathParts[produtosIdx + 2] ?? null
+        category_3Raw = pathParts[produtosIdx + 4] ? pathParts[produtosIdx + 3] : null
+      }
+    } catch (e) {
+      console.warn("Failed to parse categories from URL:", url)
+    }
+
+    const normalizeCategory = (categoryRaw: string | null): string | null => {
+      if (!categoryRaw) return null
+      return categoryRaw
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    }
+
+    const category = normalizeCategory(categoryRaw)
+    const category_2 = normalizeCategory(category_2Raw)
+    const category_3 = normalizeCategory(category_3Raw)
+
     const rawProduct = {
       url,
       name: productJson.item_name || "",
@@ -238,9 +266,9 @@ const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) =
       price_per_major_unit: pricePerMajorUnitRaw || null,
       major_unit: majorUnit || null,
       image: $(".primary-images .carousel-inner img").first().attr("src"),
-      category: null,
-      category_2: null,
-      category_3: null,
+      category,
+      category_2,
+      category_3,
     }
 
     const price = rawProduct.price ? priceToNumber(rawProduct.price.toString()) : null

@@ -316,6 +316,28 @@ export const existingCategories = [
   "Produtos Frescos",
   "Saúde e Bem Estar",
   "Tecnologia e Eletrodomésticos",
+  // Pingo Doce
+  "Alternativas Alimentares",
+  "Animais",
+  "As Nossas Marcas",
+  "Bazar",
+  "Bebidas",
+  "Casa",
+  "Charcutaria",
+  "Congelados",
+  "Frigorifico",
+  "Frutas E Vegetais",
+  "Higiene Pessoal E Beleza",
+  "Infantil",
+  "Leite Natas E Ovos",
+  "Mercearia",
+  "Padaria E Pastelaria",
+  "Parafarmacia",
+  "Peixaria",
+  "Promoções",
+  "Take Away",
+  "Talho",
+  "Amaciadores e Máscaras de Cabelo",
 ]
 export const defaultCategories = [
   // Continente
@@ -331,6 +353,11 @@ export const defaultCategories = [
   "Biológicos e Alternativas",
   "Produtos Frescos",
   "Saúde e Bem Estar",
+  // Pingo Doce
+  "Frutas E Vegetais",
+  "Leite Natas E Ovos",
+  "Bebidas",
+  "Higiene Pessoal E Beleza",
 ]
 
 export const existingCategories2 = [

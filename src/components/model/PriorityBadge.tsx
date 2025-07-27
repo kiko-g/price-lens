@@ -74,7 +74,7 @@ export function PriorityBadge({ priority, size = "2xs", variant = "compact", cla
             size={size}
             variant="outline"
             className={cn(
-              "gap-0.5 border-0 text-white opacity-0 transition-all duration-300 group-hover:opacity-100",
+              "gap-0.5 border-0 text-white opacity-100 transition-all duration-300 group-hover:opacity-0",
               config.className,
               className,
             )}
