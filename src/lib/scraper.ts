@@ -205,12 +205,81 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
   }
 }
 
+const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
+  const priority = prevSp?.priority ?? null
+
+  try {
+    const html = await fetchHtml(url)
+    if (!html || typeof html !== "string") {
+      console.warn(`Failed to fetch HTML from: ${url}`)
+      return {}
+    }
+
+    const $ = cheerio.load(html)
+    const productJsonAttr = $(".product-detail.product-wrapper").attr("data-gtm-info")
+    if (!productJsonAttr || !isValidJson(productJsonAttr)) {
+      console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
+      return {}
+    }
+
+    const productJson = JSON.parse(productJsonAttr).items[0]
+    const subText = $(".product-unit-measure").first().text().trim().split(" | ")
+    const [pack, pricePerMajorUnitStr] = subText // e.g. [ "0.4 Kg", "5,73 €/Kg" ]
+    const majorUnit = `/${pricePerMajorUnitStr?.match(/€\s*\/\s*([A-Za-z]+)/i)?.[1]?.toLowerCase()}` || null
+    const pricePerMajorUnitRaw = pricePerMajorUnitStr?.match(/^([\d,.]+)/)?.[1] || null
+
+    const rawProduct = {
+      url,
+      name: productJson.item_name || "",
+      brand: productJson.item_brand || "",
+      pack: pack || null,
+      price: productJson.price || null,
+      price_recommended: $(".product-wrapper .prices .price .strike-through .value").attr("content") || null,
+      price_per_major_unit: pricePerMajorUnitRaw || null,
+      major_unit: majorUnit || null,
+      image: $(".primary-images .carousel-inner img").first().attr("src"),
+      category: null,
+      category_2: null,
+      category_3: null,
+    }
+
+    const price = rawProduct.price ? priceToNumber(rawProduct.price.toString()) : null
+    const priceRecommended = rawProduct.price_recommended
+      ? priceToNumber(rawProduct.price_recommended.toString())
+      : price
+    const pricePerMajorUnit = pricePerMajorUnitRaw ? priceToNumber(pricePerMajorUnitRaw) : null
+    const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
+
+    const sp: StoreProduct = {
+      ...rawProduct,
+      pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
+      price: price || 0,
+      price_recommended: priceRecommended || null,
+      price_per_major_unit: pricePerMajorUnit || null,
+      discount: discount,
+      image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
+      updated_at: now(),
+      origin_id: 3,
+      created_at: null,
+      priority,
+    }
+
+    return sp
+  } catch (error) {
+    // Fail grace fully instead of breaking the route
+    console.error(`Unexpected error in pingoDoceProductPageScraper for URL: ${url}`, error)
+    return {}
+  }
+}
+
 export const getScraper = (originId: number) => {
   switch (originId) {
     case 1:
       return Scrapers.continente
     case 2:
       return Scrapers.auchan
+    case 3:
+      return Scrapers.pingoDoce
     default:
       throw new Error(`Unknown originId: ${originId}`)
   }
@@ -222,6 +291,9 @@ export const Scrapers = {
   },
   auchan: {
     productPage: auchanProductPageScraper,
+  },
+  pingoDoce: {
+    productPage: pingoDoceProductPageScraper,
   },
 }
 

@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
         hostname: "www.auchan.pt",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "www.pingodoce.pt",
+        pathname: "/**",
+      },
     ],
   },
   // webpack: (config) => {

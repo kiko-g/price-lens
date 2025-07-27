@@ -6,22 +6,26 @@ import { storeProductQueries } from "@/lib/db/queries/products"
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await storeProductQueries.getAllEmptyByOriginId(2)
+    const ORIGIN_STORE = {
+      id: 3,
+      name: "Pingo Doce",
+    }
+    const { data, error } = await storeProductQueries.getAllEmptyByOriginId(ORIGIN_STORE.id)
 
     if (error) {
-      console.error("Error fetching empty products:", error)
-      return NextResponse.json({ error: "Error fetching empty products" }, { status: 500 })
+      console.error(`Error fetching empty products for ${ORIGIN_STORE.name}:`, error)
+      return NextResponse.json({ error: `Error fetching empty products for ${ORIGIN_STORE.name}` }, { status: 500 })
     }
 
     if (!data) {
-      console.error("No auchan products found")
-      return NextResponse.json({ error: "No auchan products found" }, { status: 404 })
+      console.error(`No ${ORIGIN_STORE.name} products found`)
+      return NextResponse.json({ error: `No ${ORIGIN_STORE.name} products found` }, { status: 404 })
     }
 
-    console.info(`Found empty products for Auchan: ${data.length}`)
+    console.info(`Found empty products for ${ORIGIN_STORE.name}: ${data.length}`)
     const start = performance.now()
     const startTime = new Date().toLocaleTimeString("en-US", { hour12: false })
-    console.info(`Starting to scrape empty products for Auchan at ${startTime}`)
+    console.info(`Starting to scrape empty products for ${ORIGIN_STORE.name} at ${startTime}`)
 
     let failedScrapes = 0
     const batchSize = 5
@@ -36,7 +40,7 @@ export async function GET(req: NextRequest) {
           const elapsedMs = performance.now() - start
           const timeStr = elapsedMsToTimeStr(elapsedMs)
           console.info(`[${index + 1}/${data.length}] [${percent.toFixed(1)}%] [${timeStr}] ${url}`)
-          await scrapeAndReplaceProduct(url, 2, product)
+          await scrapeAndReplaceProduct(url, ORIGIN_STORE.id, product)
         } catch (error) {
           console.warn(`Failed to scrape product ${url}:`, error)
           failedScrapes++
@@ -46,7 +50,7 @@ export async function GET(req: NextRequest) {
       await Promise.all(promises)
     }
 
-    const message = `Scraped selected products (processed ${data.length} products, failed ${failedScrapes}).`
+    const message = `Scraped selected products for ${ORIGIN_STORE.name} (processed ${data.length} products, failed ${failedScrapes}).`
     console.info(message)
 
     return NextResponse.json({ message }, { status: 200 })

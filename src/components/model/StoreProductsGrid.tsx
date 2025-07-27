@@ -60,10 +60,12 @@ import {
   RefreshCcwIcon,
   SearchIcon,
   SquareLibraryIcon,
+  StoreIcon,
   XIcon,
 } from "lucide-react"
 import { useStoreProductCategories } from "@/hooks/useProducts"
 import { resolveSupermarketChain } from "./Supermarket"
+import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "../logos"
 
 type Props = {
   page?: number
@@ -638,14 +640,14 @@ WHERE category = '${category1}'
 
                             <button
                               onClick={selectAllCategories}
-                              className="bg-muted text-primary flex rounded-md px-1.5 py-0.5 text-xs hover:opacity-80"
+                              className="bg-muted text-foreground flex rounded-md px-1.5 py-0.5 text-xs hover:opacity-80"
                             >
                               Select all
                             </button>
 
                             <button
                               onClick={clearCategories}
-                              className="bg-muted text-primary flex rounded-md px-1.5 py-0.5 text-xs hover:opacity-80"
+                              className="bg-muted text-foreground flex rounded-md px-1.5 py-0.5 text-xs hover:opacity-80"
                             >
                               Clear
                             </button>
@@ -684,9 +686,19 @@ WHERE category = '${category1}'
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Store</SelectLabel>
-                    <SelectItem value="0">All stores</SelectItem>
-                    <SelectItem value="1">Continente</SelectItem>
-                    <SelectItem value="2">Auchan</SelectItem>
+                    <SelectItem value="0" className="flex items-center">
+                      <StoreIcon className="mr-2 inline-flex h-4 w-4" />
+                      All stores
+                    </SelectItem>
+                    <SelectItem value="1" className="flex items-center gap-2">
+                      <ContinenteSvg className="inline-flex h-4 w-auto" />
+                    </SelectItem>
+                    <SelectItem value="2" className="flex items-center gap-2">
+                      <AuchanSvg className="inline-flex h-4 w-auto" />
+                    </SelectItem>
+                    <SelectItem value="3" className="flex items-center gap-2">
+                      <PingoDoceSvg className="inline-flex h-4 w-auto" />
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
