@@ -408,7 +408,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             </DropdownMenu>
 
             <DrawerSheet title={sp.name}>
-              <div className="text-muted-foreground -mt-2 mb-2 flex w-full items-center justify-between space-x-2 border-b pb-2 text-xs">
+              <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-center justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
                 <div className="flex items-center gap-1">
                   <Link href={sp.url} target="_blank">
                     {resolveSupermarketChain(sp?.origin_id)?.logo}
@@ -421,9 +421,17 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <PriorityBadge
+                    priority={sp.priority}
+                    size="xs"
+                    variant="default"
+                    className="text-2xs font-semibold"
+                  />
+
                   <Badge variant="secondary" size="2xs" roundedness="sm">
                     {sp.brand}
                   </Badge>
+
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger>

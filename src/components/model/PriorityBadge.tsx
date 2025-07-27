@@ -6,9 +6,12 @@ import { MicroscopeIcon } from "lucide-react"
 
 interface PriorityBadgeProps {
   priority: number | null
+  variant?: "default" | "compact"
+  size?: "default" | "3xs" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl"
+  className?: string
 }
 
-export function PriorityBadge({ priority }: PriorityBadgeProps) {
+export function PriorityBadge({ priority, size = "2xs", variant = "compact", className }: PriorityBadgeProps) {
   const getPriorityConfig = (priority: number | null) => {
     switch (priority) {
       case null:
@@ -68,15 +71,25 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
       <Tooltip>
         <TooltipTrigger>
           <Badge
-            size="2xs"
+            size={size}
             variant="outline"
             className={cn(
-              "gap-0.5 border-0 text-white opacity-100 transition-all duration-300 group-hover:opacity-100 md:opacity-50",
+              "gap-0.5 border-0 text-white opacity-0 transition-all duration-300 group-hover:opacity-100",
               config.className,
+              className,
             )}
           >
-            <MicroscopeIcon className="h-3 w-3" />
-            <span className="font-normal">{config.label}</span>
+            {variant === "compact" ? (
+              <>
+                <MicroscopeIcon className="size-3" />
+                <span>{config.label}</span>
+              </>
+            ) : (
+              <>
+                Priority
+                <span>{config.label}</span>
+              </>
+            )}
           </Badge>
         </TooltipTrigger>
         <TooltipContent
