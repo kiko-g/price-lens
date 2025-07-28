@@ -16,7 +16,7 @@ import { BadgeEuroIcon, ShoppingBasketIcon, TrendingUp } from "lucide-react"
 export function Hero() {
   return (
     <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">
-      <div className="flex w-full flex-1 flex-col gap-4 pt-16 pb-8 md:gap-4 lg:pt-0 lg:pb-0">
+      <div className="flex w-full flex-1 flex-col gap-4 pt-12 pb-4 md:gap-4 lg:pt-0 lg:pb-0">
         <h1 className="animate-fade-in z-10 -translate-y-4 bg-linear-to-br from-black from-30% to-black/40 bg-clip-text py-2 text-center text-4xl leading-none font-medium tracking-tighter text-balance text-transparent opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-left md:text-6xl lg:text-7xl dark:from-white dark:to-white/40">
           Price Lens
           <br className="block" />
@@ -76,7 +76,7 @@ function Brands({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "mx-auto mt-10 grid max-w-lg grid-cols-2 items-center justify-items-center gap-x-8 gap-y-10 sm:max-w-md sm:grid-cols-3 sm:gap-x-10 md:mx-0 md:grid-cols-3 lg:max-w-lg lg:grid-cols-3 xl:max-w-xl xl:grid-cols-3",
+        "sm:max-w-m mx-auto mt-10 grid max-w-lg grid-cols-3 items-center justify-items-center gap-6 sm:gap-10 md:mx-0 lg:max-w-lg xl:max-w-xl",
         className,
       )}
     >
