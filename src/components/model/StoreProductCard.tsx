@@ -240,7 +240,7 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
-          <h2 className="line-clamp-2 min-h-[45px] w-full text-sm font-medium tracking-tight">
+          <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
             <Link href={`/supermarket/${sp.id}`} target="_blank" className="hover:underline">
               {sp.name || "Untitled"}
             </Link>
