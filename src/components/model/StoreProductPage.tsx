@@ -225,6 +225,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
@@ -246,6 +247,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     </DrawerContent>
                   </Drawer>
                 </DropdownMenuItem>
+
                 <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"

@@ -72,6 +72,9 @@ export function useProducts({ offset = 0, limit = 36, q = "" }: GetProductsParam
     queryKey: ["products", offset, limit, q],
     queryFn: () => getProducts({ offset, limit, q }),
     enabled: !q || q.length > 2,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 }
 
@@ -79,6 +82,9 @@ export function useStoreProducts(params: GetAllQuery) {
   return useQuery({
     queryKey: ["storeProducts", params],
     queryFn: () => getStoreProducts(params),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 }
 
@@ -86,6 +92,9 @@ export function useStoreProduct(id: string) {
   return useQuery({
     queryKey: ["storeProduct", id],
     queryFn: () => getStoreProduct(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 }
 
@@ -93,6 +102,9 @@ export function useRelatedStoreProducts(id: string, limit: number = 8) {
   return useQuery({
     queryKey: ["relatedStoreProducts", id, limit],
     queryFn: () => getRelatedStoreProducts(id, limit),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 }
 
@@ -118,5 +130,8 @@ export function useStoreProductCategories() {
   return useQuery({
     queryKey: ["storeProductCategories"],
     queryFn: () => getStoreProductCategories(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 }

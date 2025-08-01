@@ -24,80 +24,23 @@ export const productQueries = {
   }> {
     const supabase = createClient()
 
-    // ---------- build base query ----------
-    let query = supabase.from("products").select("*", { count: "exact" }).order("name")
+    let query = supabase
+      .from("products")
+      .select(`*, store_products ( * )`, { count: "exact" })
+      .order("name", { ascending: true })
+      .range(offset, offset + limit - 1)
 
-    // free-text search (min 3 chars)
-    if (q && q.trim().length >= 3) {
+    if (q.trim().length >= 3) {
       const sanitized = q.replace(/[^\p{L}\p{N}\s]/gu, "").trim()
       query = query.ilike("name", `%${sanitized}%`)
     }
 
-    // pagination
-    query = query.range(offset, offset + limit - 1)
-
-    // ---------- run first query ----------
-    const { data: products = [], error: productsError, count } = await query
-
-    if (productsError) {
-      console.error("Error fetching products:", productsError)
-      return { data: [], error: productsError, pagination: null }
-    }
-
-    if (!products || products.length === 0) {
-      return {
-        data: [],
-        error: null,
-        pagination: { total: count ?? 0, offset, limit },
-      }
-    }
-
-    // ---------- gather all referenced store-product IDs ----------
-    const refIds = products.flatMap((p) => p.product_ref_ids ?? [])
-    if (refIds.length === 0) {
-      return {
-        data: products.map((p) => ({ ...p, store_products: [] })),
-        error: null,
-        pagination: { total: count ?? 0, offset, limit },
-      }
-    }
-
-    // ---------- second query ----------
-    const { data: storeProducts = [], error: storeProductsError } = await supabase
-      .from("store_products")
-      .select("*")
-      .in("id", refIds)
-
-    if (storeProductsError) {
-      console.error("Error fetching store products:", storeProductsError)
-      return {
-        data: products.map((p) => ({ ...p, store_products: [] })),
-        error: storeProductsError,
-        pagination: { total: count ?? 0, offset, limit },
-      }
-    }
-
-    if (!storeProducts || storeProducts.length === 0) {
-      return {
-        data: products.map((p) => ({ ...p, store_products: [] })),
-        error: null,
-        pagination: { total: count ?? 0, offset, limit },
-      }
-    }
-
-    // ---------- attach children ----------
-    const byId = new Map(storeProducts.map((sp) => [String(sp.id), sp]))
-    const linked = products.map((p) => ({
-      ...p,
-      store_products: (p.product_ref_ids ?? [])
-        .map((id: string) => byId.get(String(id)))
-        .filter(Boolean) as StoreProduct[],
-    }))
+    const { data, error, count } = await query
 
     return {
-      data: linked,
-      error: null,
-      pagination: { total: count ?? 0, offset, limit },
+      data: data ?? [],
+      error,
+      pagination: error ? null : { total: count ?? 0, offset, limit },
     }
   },
 
