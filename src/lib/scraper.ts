@@ -100,7 +100,7 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
     const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
 
-    const sp: StoreProduct = {
+    const sp: Omit<StoreProduct, "id" | "product_id"> = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
@@ -110,7 +110,7 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
       image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
       updated_at: now(),
       origin_id: 1,
-      created_at: null,
+      created_at: "",
       priority,
     }
 
@@ -183,7 +183,7 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
       : price
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
 
-    const sp: StoreProduct = {
+    const sp: Omit<StoreProduct, "id" | "product_id"> = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
@@ -193,7 +193,7 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
       image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
       updated_at: now(),
       origin_id: 2,
-      created_at: null,
+      created_at: "",
       priority,
     }
 
@@ -278,7 +278,7 @@ const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) =
     const pricePerMajorUnit = pricePerMajorUnitRaw ? priceToNumber(pricePerMajorUnitRaw) : null
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
 
-    const sp: StoreProduct = {
+    const sp: Omit<StoreProduct, "id" | "product_id"> = {
       ...rawProduct,
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
@@ -288,7 +288,7 @@ const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) =
       image: rawProduct.image ? resizeImgSrc(rawProduct.image, 500, 500) : null,
       updated_at: now(),
       origin_id: 3,
-      created_at: null,
+      created_at: "",
       priority,
     }
 

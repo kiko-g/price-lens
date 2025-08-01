@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { ProductLinked } from "@/types"
+import { ProductWithListings } from "@/types"
 
 import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton } from "@/components/model/StoreProductCard"
@@ -19,7 +19,7 @@ export function Products() {
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [accumulatedProducts, setAccumulatedProducts] = useState<ProductLinked[]>([])
+  const [accumulatedProducts, setAccumulatedProducts] = useState<ProductWithListings[]>([])
   const [hasMore, setHasMore] = useState(true)
   const loadingRef = useRef(false)
 

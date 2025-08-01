@@ -1408,7 +1408,7 @@ export const mockChartData: ProductChartEntry[] = [
   { date: "December", price: 6.49, "price-recommended": 6.99, discount: 7, "price-per-major-unit": 16.0 },
 ]
 
-export const productUnavailable: StoreProduct = {
+export const productUnavailable: Omit<StoreProduct, "id" | "product_id" | "created_at" | "updated_at"> = {
   url: "",
   name: "Unavailable",
   brand: "",
@@ -1422,8 +1422,6 @@ export const productUnavailable: StoreProduct = {
   category: "",
   category_2: "",
   category_3: "",
-  created_at: null,
-  updated_at: null,
   origin_id: 1,
   priority: null,
 }

@@ -50,18 +50,25 @@ export interface Supermarket {
 }
 
 export interface Product {
-  id?: number
+  id: number
   name: string
-  brand: string
-  category: string
-  product_ref_ids: string[]
+  brand: string | null
+  category: string | null
+  is_generic: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ProductWithListings extends Product {
+  store_products: StoreProduct[]
 }
 
 export interface StoreProduct {
-  id?: number
+  id: number
+  origin_id: number
   url: string
   name: string
-  brand: string
+  brand: string | null
   pack: string | null
   price: number
   price_recommended: number | null
@@ -72,14 +79,10 @@ export interface StoreProduct {
   category: string | null
   category_2: string | null
   category_3: string | null
-  created_at: string | null
-  updated_at: string | null
-  origin_id: number | null
   priority: number | null
-}
-
-export interface ProductLinked extends Product {
-  store_products: StoreProduct[]
+  product_id: number | null
+  created_at: string
+  updated_at: string
 }
 
 export interface Price {

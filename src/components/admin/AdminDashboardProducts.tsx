@@ -77,7 +77,7 @@ export function AdminDashboardProducts() {
                   <HeaderCell>Name</HeaderCell>
                   <HeaderCell>Brand</HeaderCell>
                   <HeaderCell>Category</HeaderCell>
-                  <HeaderCell>Product Ref IDs</HeaderCell>
+                  <HeaderCell>Generic</HeaderCell>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -131,7 +131,7 @@ function ProductRow({ product: initialProduct }: { product: Product }) {
       <Cell>{product.name}</Cell>
       <Cell>{product.brand}</Cell>
       <Cell>{product.category}</Cell>
-      <Cell>{product.product_ref_ids.join(", ")}</Cell>
+      <Cell>{product.is_generic ? "Generic" : "Brand"}</Cell>
     </tr>
   )
 }

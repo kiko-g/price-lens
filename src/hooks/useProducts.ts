@@ -1,6 +1,6 @@
 import axios from "axios"
 import type { GetAllQuery } from "@/types/extra"
-import type { ProductLinked, StoreProduct } from "@/types"
+import type { ProductWithListings, StoreProduct } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
@@ -15,7 +15,7 @@ async function getProducts(params?: GetProductsParams) {
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
   }
-  return response.data as ProductLinked[]
+  return response.data as ProductWithListings[]
 }
 
 async function getStoreProducts(params: GetAllQuery) {

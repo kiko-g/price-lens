@@ -1,6 +1,6 @@
 import type { GetAllQuery } from "@/types/extra"
 import { createClient } from "@/lib/supabase/server"
-import type { Product, StoreProduct } from "@/types"
+import type { Product, ProductWithListings, StoreProduct } from "@/types"
 import { PostgrestError } from "@supabase/supabase-js"
 import { now } from "@/lib/utils"
 
@@ -128,34 +128,59 @@ export const productQueries = {
     }
   },
 
-  async getStoreProduct(product: Product, storeProductId: number | null) {
+  async getStoreProduct(product: ProductWithListings, storeProductId?: number) {
     const supabase = createClient()
 
-    const firstRefId = product.product_ref_ids[0]
-    const resolvedId = storeProductId
-      ? product.product_ref_ids.find((id) => id === storeProductId.toString()) || firstRefId
-      : firstRefId
+    if (product.store_products) {
+      const pick = product.store_products.find((sp) => sp.id === storeProductId) ?? product.store_products[0]
+      return { data: pick, error: null }
+    }
 
-    if (!resolvedId)
-      return {
-        data: null,
-        error: "No resolved id",
-      }
+    const query = supabase.from("store_products").select("*").eq("product_id", product.id)
 
-    const { data, error } = await supabase.from("store_products").select("*").eq("id", resolvedId).single()
+    if (storeProductId != null) {
+      query.eq("id", storeProductId)
+    }
 
-    return { data, error }
+    const { data, error } = await (storeProductId != null ? query.single() : query)
+
+    if (error) return { data: null, error }
+
+    if (Array.isArray(data)) {
+      return { data: data[0] ?? null, error: data.length ? null : "No rows" }
+    } else {
+      return { data, error: error as string | null }
+    }
   },
 
-  insertProductFromStoreProduct(sp: StoreProduct) {
+  async insertProductFromStoreProduct(sp: StoreProduct) {
     const supabase = createClient()
-    const productData: Product = {
-      name: sp.name,
-      brand: sp.brand,
-      category: sp.category ?? "",
-      product_ref_ids: [sp.id?.toString() ?? ""],
+
+    const { data: newProduct, error: productError }: { data: Product | null; error: any } = await supabase
+      .from("products")
+      .insert({
+        name: sp.name,
+        brand: sp.brand,
+        category: sp.category, // already nullable in your type
+        is_generic: false, // exact-match bucket
+      })
+      .single()
+
+    if (productError || !newProduct) {
+      return { product: null, error: productError ?? "Failed to insert product" }
     }
-    return supabase.from("products").insert(productData)
+
+    // 2) Link this store_product to its new product
+    const { error: linkError } = await supabase
+      .from("store_products")
+      .update({ product_id: newProduct.id })
+      .eq("id", sp.id)
+
+    if (linkError) {
+      return { product: newProduct, error: linkError }
+    }
+
+    return { product: newProduct, error: null }
   },
 
   insertProductsFromStoreProducts(sps: StoreProduct[]) {
