@@ -189,14 +189,6 @@ export const storeProductQueries = {
         // Simply passing a space-separated string doesn't work correctly
         const formattedQuery = sanitizedQuery.split(/\s+/).filter(Boolean).join(" & ")
         if (formattedQuery) dbQuery = dbQuery.textSearch(searchType, formattedQuery)
-
-        // const formattedQuery = sanitizedQuery
-        //   .split(/\s+/)        // break on one or more whitespace characters
-        //   .filter(Boolean)     // remove empty elements
-        //   .join(" & ")         // join terms with AND
-        // if (formattedQuery) {
-        //   dbQuery = dbQuery.textSearch(searchType, formattedQuery)
-        // }
       }
     }
 
@@ -344,6 +336,17 @@ export const storeProductQueries = {
       onConflict: "url",
       ignoreDuplicates: false,
     })
+
+    // Clear categories cache when products are updated as they might introduce new categories
+    if (!error) {
+      try {
+        const { clearCategoriesCache } = await import("@/lib/kv")
+        await clearCategoriesCache()
+      } catch (cacheError) {
+        console.error("Failed to clear categories cache:", cacheError)
+        // Don't fail the product operation if cache clearing fails
+      }
+    }
 
     return { data, error }
   },
