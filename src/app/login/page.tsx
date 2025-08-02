@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeftIcon } from "lucide-react"
+import { ThemeToggle } from "@/components/layout/ThemeToggle"
 
 export default function LoginPage() {
   return (
     <div className="bg-background flex min-h-screen flex-col items-center justify-center p-4">
       <div className="flex w-full max-w-md flex-col items-center">
         <div className="absolute top-4 left-4 md:top-8 md:left-8">
-          <Button asChild variant="ghost">
+          <Button asChild variant="outline">
             <Link href="/">
               <ArrowLeftIcon className="h-4 w-4" />
               Back to Core
@@ -19,7 +20,11 @@ export default function LoginPage() {
           </Button>
         </div>
 
-        <h1 className="text-primary mb-2 flex items-center text-2xl font-semibold">
+        <div className="absolute top-4 right-4 md:top-8 md:right-8">
+          <ThemeToggle />
+        </div>
+
+        <h1 className="text-foreground mb-2 flex items-center text-2xl font-semibold">
           <span>Login to</span>
           <div className="ml-2 flex items-center">
             <Image src="/price-lens.svg" alt="Price Lens" width={24} height={24} className="mr-1" />
@@ -34,22 +39,11 @@ export default function LoginPage() {
         </p>
 
         <form action={signInWithGoogle} className="w-full">
-          <Button type="submit" variant="primary" className="w-full" size="lg">
+          <Button type="submit" variant="marketing-default" className="w-full" size="lg">
             <GoogleIcon />
             Continue with Google
           </Button>
         </form>
-        <p className="text-muted-foreground mt-4 px-8 text-center text-xs">
-          By continuing, you agree to our{" "}
-          <Link href="/terms" className="hover:text-primary underline">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="hover:text-primary underline">
-            Privacy Policy
-          </Link>
-          .
-        </p>
       </div>
     </div>
   )
