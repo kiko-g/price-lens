@@ -12,6 +12,7 @@ import { useProducts } from "@/hooks/useProducts"
 
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 
 export function Products() {
   const limit = 35
@@ -116,7 +117,7 @@ export function Products() {
         </div>
 
         {/* Right side - scrollable */}
-        <div className={cn("mb-4 flex w-full flex-col lg:w-4/5")}>
+        <div className={cn("flex w-full flex-col lg:w-4/5")}>
           {isLoading && page === 1 ? (
             <div className="flex w-full flex-col gap-y-16">
               <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
@@ -132,15 +133,21 @@ export function Products() {
                   <ProductCard key={`product-${productIdx}`} product={product} />
                 ))}
               </div>
-              <p className="text-muted-foreground mt-6 text-center text-sm">
-                Showing <strong className="text-foreground">{accumulatedProducts.length}</strong> products in total.{" "}
-                <button
-                  className="hover:text-secondary inline-flex cursor-pointer items-center gap-1 underline transition"
+
+              <div className="mt-8 flex flex-col items-start gap-2 border-t pt-4 md:flex-row md:items-center md:justify-between">
+                <p className="text-muted-foreground text-center text-sm">
+                  Showing <strong className="text-foreground">{accumulatedProducts.length}</strong> products in total
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="cursor-pointer"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                   Back to top <ArrowUpIcon className="size-4" />
-                </button>
-              </p>
+                </Button>
+              </div>
+
               {isLoading && (
                 <div className="mt-8 flex items-center justify-center">
                   <Loader2Icon className="h-6 w-6 animate-spin" />
