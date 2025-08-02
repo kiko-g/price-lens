@@ -378,12 +378,11 @@ export const storeProductQueries = {
     }
 
     const supabase = createClient()
-    const PAGE_SIZE = 1000 // Supabase's max limit
+    const PAGE_SIZE = 1000 // supabase limit
     let allCategories: { category: string; category_2: string; category_3: string }[] = []
     let page = 0
     let hasMore = true
 
-    // Fetch all categories using pagination
     while (hasMore) {
       const { data: pageData, error: pageError } = await supabase
         .from("store_products")
@@ -405,30 +404,30 @@ export const storeProductQueries = {
       }
     }
 
-    // Get unique individual category values
     const categories = [...new Set(allCategories.map((c) => c.category).filter(Boolean))].sort()
     const categories2 = [...new Set(allCategories.map((c) => c.category_2).filter(Boolean))].sort()
     const categories3 = [...new Set(allCategories.map((c) => c.category_3).filter(Boolean))].sort()
 
-    // Filter tuples based on provided categories
-    let filteredCategories = allCategories.filter((c) => c.category && c.category_2 && c.category_3)
+    let filtered3WayCategories = allCategories.filter((c) => c.category && c.category_2 && c.category_3)
+    let filtered2WayCategories = allCategories.filter((c) => c.category && c.category_2)
 
     if (category1List.length > 0) {
-      filteredCategories = filteredCategories.filter((c) => category1List.includes(c.category))
+      filtered3WayCategories = filtered3WayCategories.filter((c) => category1List.includes(c.category))
+      filtered2WayCategories = filtered2WayCategories.filter((c) => category1List.includes(c.category))
     }
 
     if (category2List.length > 0) {
-      filteredCategories = filteredCategories.filter((c) => category2List.includes(c.category_2))
+      filtered3WayCategories = filtered3WayCategories.filter((c) => category2List.includes(c.category_2))
+      filtered2WayCategories = filtered2WayCategories.filter((c) => category2List.includes(c.category_2))
     }
 
     if (category3List.length > 0) {
-      filteredCategories = filteredCategories.filter((c) => category3List.includes(c.category_3))
+      filtered3WayCategories = filtered3WayCategories.filter((c) => category3List.includes(c.category_3))
     }
 
-    // Get unique 3-way tuples (category, category_2, category_3)
-    const categoryTuples = Array.from(
+    const threeWayTuples = Array.from(
       new Set(
-        filteredCategories.map((c) =>
+        filtered3WayCategories.map((c) =>
           JSON.stringify({
             category: c.category,
             category_2: c.category_2,
@@ -436,14 +435,27 @@ export const storeProductQueries = {
           }),
         ),
       ),
-    )
-      .map((str) => JSON.parse(str))
-      .sort((a, b) => {
-        // Sort by category, then category_2, then category_3
-        if (a.category !== b.category) return a.category.localeCompare(b.category)
-        if (a.category_2 !== b.category_2) return a.category_2.localeCompare(b.category_2)
-        return a.category_3.localeCompare(b.category_3)
-      })
+    ).map((str) => JSON.parse(str))
+
+    const twoWayTuples = Array.from(
+      new Set(
+        filtered2WayCategories.map((c) =>
+          JSON.stringify({
+            category: c.category,
+            category_2: c.category_2,
+          }),
+        ),
+      ),
+    ).map((str) => JSON.parse(str))
+
+    // combine and sort all tuples
+    const categoryTuples = [...threeWayTuples, ...twoWayTuples].sort((a, b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category)
+      if (a.category_2 !== b.category_2) return a.category_2.localeCompare(b.category_2)
+      const aCat3 = a.category_3 || ""
+      const bCat3 = b.category_3 || ""
+      return aCat3.localeCompare(bCat3)
+    })
 
     return {
       data: {
