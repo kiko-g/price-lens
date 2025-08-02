@@ -191,6 +191,13 @@ WHERE category = '${category1}'
 
   const selectedCount = categories.filter((cat) => cat.selected).length
 
+  // Check if currently selected categories exactly match default categories
+  const selectedCategoryNames = categories.filter((cat) => cat.selected).map((cat) => cat.name)
+  const isRelevant =
+    selectedCategoryNames.length === defaultCategories.length &&
+    selectedCategoryNames.every((name) => defaultCategories.includes(name)) &&
+    defaultCategories.every((name) => selectedCategoryNames.includes(name))
+
   const toggleCategory = (categoryName: string) => {
     setCategories((prev) => prev.map((cat) => (cat.name === categoryName ? { ...cat, selected: !cat.selected } : cat)))
   }
@@ -335,8 +342,8 @@ WHERE category = '${category1}'
   }, [category1, category2, category3])
 
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: relevant.toString(), originId })
-  }, [page, query, searchType, sortBy, relevant, originId])
+    updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), originId })
+  }, [page, query, searchType, sortBy, isRelevant, originId])
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })

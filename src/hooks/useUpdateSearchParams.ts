@@ -19,8 +19,9 @@ export function useUpdateSearchParams() {
       const isBlank = value === undefined || value === null
       const isQueryEmpty = key === "q" && value === ""
       const isSearchTypeName = noQuery && key === "t" && value === "name"
+      const isRelevantFalse = key === "relevant" && value === "false"
 
-      if (isBlank || isQueryEmpty || isSearchTypeName) {
+      if (isBlank || isQueryEmpty || isSearchTypeName || isRelevantFalse) {
         params.delete(key)
       } else {
         params.set(key, String(value))
