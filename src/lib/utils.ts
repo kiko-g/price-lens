@@ -343,21 +343,21 @@ export const defaultCategories = [
   // Continente
   "Mercearia",
   "Congelados",
-  "Bebidas e Garrafeira",
-  "Frescos",
+  // "Bebidas e Garrafeira",
+  // "Frescos",
   "Bio, Eco e Saudável",
   "Laticínios e Ovos",
   // Auchan
   "Alimentação",
-  "Beleza e Higiene",
+  // "Beleza e Higiene",
   "Biológicos e Alternativas",
   "Produtos Frescos",
-  "Saúde e Bem Estar",
+  // "Saúde e Bem Estar",
   // Pingo Doce
   "Frutas E Vegetais",
   "Leite Natas E Ovos",
   "Bebidas",
-  "Higiene Pessoal E Beleza",
+  // "Higiene Pessoal E Beleza",
 ]
 
 export const existingCategories2 = [

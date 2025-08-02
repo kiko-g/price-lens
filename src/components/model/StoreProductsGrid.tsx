@@ -631,7 +631,7 @@ WHERE category = '${category1}'
                     <CommandList>
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
-                        <ScrollArea className="h-128">
+                        <ScrollArea className="h-96">
                           <div className="mb-1 flex justify-start gap-1.5 border-b px-0.5 pt-1 pb-1.5">
                             <button
                               onClick={selectDefaultCategories}
@@ -662,7 +662,9 @@ WHERE category = '${category1}'
                               onSelect={() => toggleCategory(category.name)}
                               className="flex cursor-pointer items-center justify-between py-1 transition duration-100 [&_svg]:size-3"
                             >
-                              <span className={cn(category.selected && "font-medium")}>{category.name}</span>
+                              <span className={cn(category.selected ? "font-medium" : "text-muted-foreground")}>
+                                {category.name}
+                              </span>
                               <div
                                 className={cn(
                                   "border-foreground flex h-4 w-4 items-center justify-center rounded-2xl border transition-all",
