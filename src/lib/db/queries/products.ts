@@ -141,7 +141,7 @@ export const productQueries = {
 export const storeProductQueries = {
   async getAll({
     page = 1,
-    limit = 30,
+    limit = 36,
     query = "",
     searchType = "name",
     nonNulls = true,

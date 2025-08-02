@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function Products() {
-  const limit = 30
+  const limit = 35
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")

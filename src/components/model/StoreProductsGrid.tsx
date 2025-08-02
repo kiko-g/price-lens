@@ -87,7 +87,7 @@ export function StoreProductsGrid(props: Props) {
     originId: initOriginId = null,
   } = props
 
-  const limit = 30
+  const limit = 36
   const [page, setPage] = useState(initPage)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
