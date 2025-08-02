@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { GithubIcon } from "@/components/icons"
 import { LogInIcon, LogOut, MoonIcon, SunIcon, User as UserIcon } from "lucide-react"
-import { GithubIcon } from "../icons"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()

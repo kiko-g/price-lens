@@ -36,7 +36,7 @@ import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
 import { useStoreProduct, useUpdateStoreProduct } from "@/hooks/useProducts"
-import { LoadingIcon } from "../icons/LoadingIcon"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function StoreProductPageById({ id }: { id: string }) {
   const { data: storeProduct, isLoading, isError } = useStoreProduct(id)

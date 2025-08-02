@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Suspense, useState } from "react"
 import { type StoreProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
+import { toast } from "sonner"
 
 import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
@@ -24,7 +25,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
-import { discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
+import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
   CopyIcon,
@@ -37,8 +38,6 @@ import {
   CircleIcon,
   MicroscopeIcon,
 } from "lucide-react"
-import { cn } from "../../lib/utils"
-import { toast } from "sonner"
 
 type Props = {
   sp: StoreProduct

@@ -1,15 +1,16 @@
 "use client"
 
-import axios from "axios"
-import { useEffect, useState, useRef, useMemo } from "react"
 import { type StoreProduct } from "@/types"
-import { FrontendStatus, searchTypes, type SortByType, type SearchType } from "@/types/extra"
+import { FrontendStatus, searchTypes, type SearchType, type SortByType } from "@/types/extra"
+import axios from "axios"
+import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Select,
   SelectContent,
@@ -37,13 +41,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
-import { StoreProductCard, ProductCardSkeleton } from "@/components/model/StoreProductCard"
+import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
+import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { Wrapper } from "@/components/SectionWrapper"
 
+import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import {
   ArrowDownAZ,
   ArrowDownAZIcon,
@@ -58,14 +61,12 @@ import {
   DeleteIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
+  RadarIcon,
   SearchIcon,
   SquareLibraryIcon,
   StoreIcon,
   XIcon,
 } from "lucide-react"
-import { useStoreProductCategories } from "@/hooks/useProducts"
-import { resolveSupermarketChain } from "./Supermarket"
-import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "../logos"
 
 type Props = {
   page?: number
@@ -541,6 +542,7 @@ WHERE category = '${category1}'
                       Choose categories in a cascading manner. Each selection unlocks the next level.
                     </DialogDescription>
                   </DialogHeader>
+
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="category1">1) Main Category</Label>
@@ -663,8 +665,8 @@ WHERE category = '${category1}'
                               <span className={cn(category.selected && "font-medium")}>{category.name}</span>
                               <div
                                 className={cn(
-                                  "border-primary flex h-4 w-4 items-center justify-center rounded-2xl border transition-all",
-                                  category.selected ? "bg-primary text-primary-foreground" : "opacity-50",
+                                  "border-foreground flex h-4 w-4 items-center justify-center rounded-2xl border transition-all",
+                                  category.selected ? "bg-foreground text-background" : "opacity-50",
                                 )}
                               >
                                 {category.selected && <CheckIcon />}
@@ -777,8 +779,9 @@ WHERE category = '${category1}'
               </Button>
             </div>
 
-            <Button variant="primary" disabled={isLoading} onClick={handleSubmit}>
-              Submit
+            <Button variant="marketing" disabled={isLoading} onClick={handleSubmit} className="w-auto ring-0">
+              Search
+              <RadarIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>
