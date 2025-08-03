@@ -91,7 +91,7 @@ function FavoritesGrid() {
           <Badge variant="primary" className="text-sm" size="sm">
             {pagination.total} {pagination.total === 1 ? "favorite" : "favorites"}
           </Badge>
-          <Badge variant="light" className="text-sm" size="sm">
+          <Badge variant="outline" className="text-sm" size="sm">
             Page {pagination.page} of {pagination.totalPages}
           </Badge>
         </div>
