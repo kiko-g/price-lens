@@ -7,6 +7,9 @@ import { type StoreProduct } from "@/types"
 import { FrontendStatus } from "@/types/extra"
 import { toast } from "sonner"
 
+import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
+import { useUser } from "@/hooks/useUser"
+
 import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
@@ -30,13 +33,13 @@ import {
   ArrowUpRightIcon,
   CopyIcon,
   EllipsisVerticalIcon,
-  HeartIcon,
   RefreshCcwIcon,
   ChartSplineIcon,
   CloudAlertIcon,
   ExternalLinkIcon,
   CircleIcon,
   MicroscopeIcon,
+  HeartIcon,
 } from "lucide-react"
 
 type Props = {
@@ -72,6 +75,21 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)
+  const [isFavorited, setIsFavorited] = useState(sp?.is_favorited ?? false)
+
+  const { user } = useUser()
+  const { toggleFavorite, isLoading } = useFavoriteToggle()
+
+  const favoriteLoading = isLoading(sp?.id ?? 0)
+
+  const handleToggleFavorite = async () => {
+    if (!sp?.id) return
+
+    const result = await toggleFavorite(sp.id, isFavorited)
+    if (result.success) {
+      setIsFavorited(result.newState)
+    }
+  }
 
   if (!sp || !sp.url) {
     return null
@@ -191,6 +209,27 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
           ) : null}
         </div>
 
+        <div className="absolute bottom-2 left-2 flex flex-col items-end gap-0 md:gap-0.5">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className={cn(
+              "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
+              favoriteLoading && "disabled:opacity-50",
+            )}
+            onClick={handleToggleFavorite}
+            disabled={favoriteLoading || !user}
+            title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Log in to add favorites"}
+          >
+            <HeartIcon
+              className={cn(
+                "h-4 w-4",
+                isFavorited ? "fill-destructive/80 stroke-destructive" : "stroke-foreground fill-none",
+              )}
+            />
+          </Button>
+        </div>
+
         <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0 md:gap-0.5">
           <PriorityBadge priority={priority} />
 
@@ -295,18 +334,18 @@ export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
                   </Button>
                 </DropdownMenuItem>
 
-                {onFavorite ? (
+                {user ? (
                   <DropdownMenuItem variant="love" asChild>
                     <Button
                       variant="dropdown-item"
                       onClick={async () => {
                         setStatus(FrontendStatus.Loading)
-                        const success = await onFavorite()
-                        if (success) setStatus(FrontendStatus.Loaded)
-                        else setStatus(FrontendStatus.Error)
+                        await handleToggleFavorite()
+                        setStatus(FrontendStatus.Loaded)
                       }}
+                      disabled={favoriteLoading}
                     >
-                      Add to favorites
+                      {isFavorited ? "Remove from favorites" : "Add to favorites"}
                       <HeartIcon />
                     </Button>
                   </DropdownMenuItem>

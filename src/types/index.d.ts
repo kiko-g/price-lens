@@ -83,6 +83,7 @@ export interface StoreProduct {
   product_id: number | null
   created_at: string
   updated_at: string
+  is_favorited?: boolean
 }
 
 export interface Price {
@@ -96,6 +97,13 @@ export interface Price {
   valid_to: string | null
   created_at: string | null
   updated_at: string | null
+}
+
+export interface UserFavorite {
+  id: number
+  user_id: string
+  store_product_id: number
+  created_at: string
 }
 
 export type Profile = {

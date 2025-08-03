@@ -37,6 +37,54 @@ import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
 import { useStoreProduct, useUpdateStoreProduct } from "@/hooks/useProducts"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
+import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
+import { useUser } from "@/hooks/useUser"
+import { cn } from "@/lib/utils"
+
+function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
+  const { user } = useUser()
+  const { toggleFavorite, isLoading } = useFavoriteToggle()
+  const [isFavorited, setIsFavorited] = useState(storeProduct.is_favorited ?? false)
+
+  const favoriteLoading = isLoading(storeProduct.id ?? 0)
+
+  const handleToggleFavorite = async () => {
+    if (!storeProduct.id) return
+
+    const result = await toggleFavorite(storeProduct.id, isFavorited)
+    if (result.success) {
+      setIsFavorited(result.newState)
+    }
+  }
+
+  if (!user) {
+    return (
+      <Button variant="outline" size="sm" disabled title="Log in to add favorites">
+        <HeartIcon className="h-4 w-4" />
+        Add to favorites
+      </Button>
+    )
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleToggleFavorite}
+      disabled={favoriteLoading}
+      title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+    >
+      <HeartIcon
+        className={cn(
+          "h-4 w-4",
+          isFavorited ? "fill-destructive/80 stroke-destructive" : "stroke-foreground fill-none",
+          favoriteLoading && "animate-pulse",
+        )}
+      />
+      {isFavorited ? "Remove from favorites" : "Add to favorites"}
+    </Button>
+  )
+}
 
 export function StoreProductPageById({ id }: { id: string }) {
   const { data: storeProduct, isLoading, isError } = useStoreProduct(id)
@@ -214,10 +262,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           </div>
 
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" disabled>
-              <HeartIcon className="h-4 w-4" />
-              Add to favorites
-            </Button>
+            <FavoriteButton storeProduct={sp} />
             <ShareButton url={sp.url} title={sp.name} description={sp.name} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

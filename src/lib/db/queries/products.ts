@@ -164,6 +164,7 @@ export const storeProductQueries = {
     category2 = null,
     category3 = null,
     originId = null,
+    userId = null,
     options = {
       onlyDiscounted: false,
     },
@@ -176,7 +177,29 @@ export const storeProductQueries = {
     if (sort && sort === "only-nulls") {
       dbQuery = dbQuery.is("name", null)
       dbQuery = dbQuery.order("url", { ascending: true })
-      return dbQuery.range(offset, offset + limit - 1)
+      const result = await dbQuery.range(offset, offset + limit - 1)
+
+      // Even for null products, we can show favorite status
+      if (userId && result.data) {
+        const storeProductIds = result.data.map((sp) => sp.id).filter(Boolean)
+
+        if (storeProductIds.length > 0) {
+          const { data: favorites } = await supabase
+            .from("user_favorites")
+            .select("store_product_id")
+            .eq("user_id", userId)
+            .in("store_product_id", storeProductIds)
+
+          const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) || [])
+
+          result.data = result.data.map((sp) => ({
+            ...sp,
+            is_favorited: favoriteIds.has(sp.id),
+          }))
+        }
+      }
+
+      return result
     }
 
     if (originId !== null) dbQuery = dbQuery.eq("origin_id", originId)
@@ -233,7 +256,29 @@ export const storeProductQueries = {
       }
     }
 
-    return dbQuery.range(offset, offset + limit - 1)
+    const result = await dbQuery.range(offset, offset + limit - 1)
+
+    // If user is provided, augment with favorite status
+    if (userId && result.data) {
+      const storeProductIds = result.data.map((sp) => sp.id).filter(Boolean)
+
+      if (storeProductIds.length > 0) {
+        const { data: favorites } = await supabase
+          .from("user_favorites")
+          .select("store_product_id")
+          .eq("user_id", userId)
+          .in("store_product_id", storeProductIds)
+
+        const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) || [])
+
+        result.data = result.data.map((sp) => ({
+          ...sp,
+          is_favorited: favoriteIds.has(sp.id),
+        }))
+      }
+    }
+
+    return result
   },
 
   async getAllNulls({ page = 1, limit = 20 }: { page?: number; limit?: number }) {
@@ -261,9 +306,28 @@ export const storeProductQueries = {
     return supabase.from("store_products").select("*").is("created_at", null)
   },
 
-  async getById(id: string) {
+  async getById(id: string, userId?: string | null) {
     const supabase = createClient()
     const { data, error } = await supabase.from("store_products").select("*").eq("id", id).single()
+
+    // If user is provided and product exists, check if it's favorited
+    if (userId && data && !error) {
+      const { data: favorite } = await supabase
+        .from("user_favorites")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("store_product_id", data.id)
+        .single()
+
+      return {
+        data: {
+          ...data,
+          is_favorited: !!favorite,
+        },
+        error,
+      }
+    }
+
     return { data, error }
   },
 

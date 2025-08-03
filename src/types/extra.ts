@@ -118,6 +118,7 @@ export type GetAllQuery = {
   category2?: string | null
   category3?: string | null
   originId?: number | null
+  userId?: string | null
   options?: {
     onlyDiscounted: boolean
   }

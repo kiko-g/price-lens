@@ -109,6 +109,7 @@ export type Database = {
           price: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
+          priority: number | null
           updated_at: string | null
           url: string | null
         }
@@ -128,6 +129,7 @@ export type Database = {
           price?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
+          priority?: number | null
           updated_at?: string | null
           url?: string | null
         }
@@ -147,6 +149,7 @@ export type Database = {
           price?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
+          priority?: number | null
           updated_at?: string | null
           url?: string | null
         }
@@ -174,6 +177,42 @@ export type Database = {
           name?: string | null
         }
         Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          id: number
+          user_id: string
+          store_product_id: number
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          store_product_id: number
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          user_id?: string
+          store_product_id?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_store_product_id_fkey"
+            columns: ["store_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

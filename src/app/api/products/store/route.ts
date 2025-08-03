@@ -3,6 +3,7 @@ import { type SearchType, type SortByType } from "@/types/extra"
 
 import { scrapeAndReplaceProduct } from "@/lib/scraper"
 import { storeProductQueries } from "@/lib/db/queries/products"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,6 +32,12 @@ export async function GET(req: NextRequest) {
     const originId = originIdParam ? parseInt(originIdParam, 10) : null
     const onlyDiscounted = onlyDiscountedParam === "true"
 
+    // Get current user for favorites
+    const supabase = createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     const { data, error, count } = await storeProductQueries.getAll({
       page,
       limit,
@@ -42,6 +49,7 @@ export async function GET(req: NextRequest) {
       category2,
       category3,
       originId,
+      userId: user?.id || null,
       options: {
         onlyDiscounted,
       },
