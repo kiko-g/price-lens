@@ -45,7 +45,6 @@ import {
 type Props = {
   sp: StoreProduct
   onUpdate?: () => Promise<boolean> | undefined
-  onFavorite?: () => Promise<boolean> | undefined
 }
 
 async function handleUpdatePriority(storeProductId: number, priority: number | null) {
@@ -71,7 +70,7 @@ async function handleUpdatePriority(storeProductId: number, priority: number | n
   }
 }
 
-export function StoreProductCard({ sp, onUpdate, onFavorite }: Props) {
+export function StoreProductCard({ sp, onUpdate }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)

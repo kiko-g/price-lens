@@ -125,6 +125,8 @@ export function StoreProductsGrid(props: Props) {
     }))
   })
 
+  console.debug(storeProducts)
+
   const { profile } = useUser()
   const storeProductCategories = useStoreProductCategories()
   const tuples = storeProductCategories?.data?.tuples || []

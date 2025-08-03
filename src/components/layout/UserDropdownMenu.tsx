@@ -55,8 +55,8 @@ export function UserDropdownMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="relative h-7 w-7 rounded-full bg-transparent">
-          <Avatar className="h-7 w-7">
+        <Button variant="outline" className="relative size-[34px] rounded-full bg-transparent">
+          <Avatar className="size-[34px]">
             <AvatarImage
               src={user.user_metadata.avatar_url || "/placeholder.svg"}
               alt={user.user_metadata.full_name ?? "User"}
@@ -109,6 +109,8 @@ export function UserDropdownMenu() {
             <span>Favorites</span>
           </Link>
         </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
           <Button

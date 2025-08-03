@@ -44,7 +44,7 @@ export default function FavoritesPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto max-w-7xl px-4 py-6">
+      <div className="container mx-auto mb-8 max-w-7xl px-4 py-6">
         <div className="flex items-center gap-2">
           <h1 className="text-3xl font-bold">My Favorites</h1>
           <HeartIcon className="fill-destructive/80 stroke-destructive h-6 w-6" />
@@ -86,15 +86,16 @@ function FavoritesGrid() {
   return (
     <div className="space-y-6">
       {/* Stats Bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Badge variant="primary" className="text-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="primary" className="text-sm" size="sm">
             {pagination.total} {pagination.total === 1 ? "favorite" : "favorites"}
           </Badge>
-          <Badge variant="light" className="text-sm">
+          <Badge variant="light" className="text-sm" size="sm">
             Page {pagination.page} of {pagination.totalPages}
           </Badge>
         </div>
+
         <Button variant="outline" size="sm" onClick={() => refresh(currentPage, 20)} disabled={isLoading}>
           <RefreshCcwIcon className="h-4 w-4" />
           Refresh
@@ -102,7 +103,7 @@ function FavoritesGrid() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {favorites.map((favorite) => (
           <StoreProductCard
             key={favorite.id}
