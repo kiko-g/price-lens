@@ -96,7 +96,7 @@
   --muted-foreground: var(--base-400);
   --accent: var(--base-900);
   --accent-foreground: var(--base-200);
-  --destructive: oklch(0.5 0.2 23.33);
+  --destructive: oklch(0.5609 0.2257 24.91);
   --border: var(--base-800);
   --input: var(--base-700);
   --ring: var(--primary-600);

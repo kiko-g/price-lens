@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     const category3Param = params.get("category_3") ?? ""
     const onlyDiscountedParam = params.get("onlyDiscounted") ?? "false"
     const originIdParam = params.get("originId") ?? null
+    const trackedParam = params.get("tracked") ?? null
 
     const query = queryParam
     const page = parseInt(pageParam, 10) || 1
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
     const category3 = category3Param || null
     const originId = originIdParam ? parseInt(originIdParam, 10) : null
     const onlyDiscounted = onlyDiscountedParam === "true"
+    const tracked = trackedParam ? true : false
 
     // Get current user for favorites
     const supabase = createClient()
@@ -50,6 +52,7 @@ export async function GET(req: NextRequest) {
       category3,
       originId,
       userId: user?.id || null,
+      tracked,
       options: {
         onlyDiscounted,
       },

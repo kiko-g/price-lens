@@ -159,6 +159,7 @@ export const storeProductQueries = {
     searchType = "name",
     nonNulls = true,
     sort = "a-z",
+    tracked = false,
     categories = [],
     category = null,
     category2 = null,
@@ -173,6 +174,7 @@ export const storeProductQueries = {
     const offset = (page - 1) * limit
 
     let dbQuery = supabase.from("store_products").select("*", { count: "exact" })
+    if (tracked) dbQuery = dbQuery.in("priority", [3, 4, 5])
 
     if (sort && sort === "only-nulls") {
       dbQuery = dbQuery.is("name", null)
@@ -202,7 +204,7 @@ export const storeProductQueries = {
       return result
     }
 
-    if (originId !== null) dbQuery = dbQuery.eq("origin_id", originId)
+    if (originId !== null && originId !== 0) dbQuery = dbQuery.eq("origin_id", originId)
 
     if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 

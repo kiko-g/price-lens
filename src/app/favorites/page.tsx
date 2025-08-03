@@ -21,7 +21,7 @@ import {
 import { Layout } from "@/components/layout"
 
 import { StoreProductCard } from "@/components/model/StoreProductCard"
-import { HeartIcon, ArrowLeftIcon, LogInIcon, RefreshCcwIcon } from "lucide-react"
+import { HeartIcon, ArrowLeftIcon, LogInIcon, RefreshCcwIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 export default function FavoritesPage() {
   const { user, isLoading } = useUser()
@@ -164,12 +164,15 @@ function FavoritesPagination({
 
   return (
     <Pagination>
-      <PaginationContent>
+      <PaginationContent className="gap-2">
         <PaginationItem>
           <PaginationPrevious
             onClick={() => pagination.hasPreviousPage && onPageChange(pagination.page - 1)}
             className={!pagination.hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          />
+          >
+            <ChevronLeftIcon className="h-4 w-4" />
+            <span className="sr-only">Previous page</span>
+          </PaginationPrevious>
         </PaginationItem>
 
         {generatePageNumbers().map((page, index) => (
@@ -177,13 +180,15 @@ function FavoritesPagination({
             {typeof page === "string" ? (
               <PaginationEllipsis />
             ) : (
-              <PaginationLink
-                onClick={() => onPageChange(page)}
-                isActive={page === pagination.page}
-                className="cursor-pointer"
-              >
-                {page}
-              </PaginationLink>
+              <Button asChild variant={page === pagination.page ? "marketing" : "outline"} size="icon">
+                <PaginationLink
+                  onClick={() => onPageChange(page)}
+                  isActive={page === pagination.page}
+                  className="cursor-pointer px-3"
+                >
+                  {page}
+                </PaginationLink>
+              </Button>
             )}
           </PaginationItem>
         ))}
@@ -192,7 +197,10 @@ function FavoritesPagination({
           <PaginationNext
             onClick={() => pagination.hasNextPage && onPageChange(pagination.page + 1)}
             className={!pagination.hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          />
+          >
+            <ChevronRightIcon className="h-4 w-4" />
+            <span className="sr-only">Next page</span>
+          </PaginationNext>
         </PaginationItem>
       </PaginationContent>
     </Pagination>

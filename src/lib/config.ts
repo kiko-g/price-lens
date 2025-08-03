@@ -1,6 +1,14 @@
 import { Metadata } from "next"
 
-import { HomeIcon, ShoppingBasketIcon, StoreIcon, WorkflowIcon, GaugeIcon, HeartIcon } from "lucide-react"
+import {
+  HomeIcon,
+  ShoppingBasketIcon,
+  StoreIcon,
+  WorkflowIcon,
+  GaugeIcon,
+  HeartIcon,
+  MicroscopeIcon,
+} from "lucide-react"
 
 const titleOrName = "Price Lens"
 
@@ -57,6 +65,12 @@ export const navigation = [
     icon: ShoppingBasketIcon,
     label: "Products",
     href: "/products",
+    shown: false,
+  },
+  {
+    icon: MicroscopeIcon,
+    label: "Tracked",
+    href: "/tracked",
     shown: true,
   },
   {

@@ -24,7 +24,7 @@ async function getStoreProducts(params: GetAllQuery) {
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")
   }
-  return response.data as StoreProduct[]
+  return response.data.data as StoreProduct[]
 }
 
 async function getStoreProduct(id: string) {

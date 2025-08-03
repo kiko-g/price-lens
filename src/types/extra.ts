@@ -109,6 +109,7 @@ export const daysAmountInRange: {
 export type GetAllQuery = {
   page: number
   limit: number
+  tracked?: boolean // priority 3, 4, 5 (or more if needed in the future)
   query?: string
   sort?: SortByType
   searchType?: SearchType
