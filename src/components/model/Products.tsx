@@ -13,18 +13,29 @@ import { useProducts } from "@/hooks/useProducts"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+
+import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 
 export function Products() {
-  const limit = 35
+  const limit = 25
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [accumulatedProducts, setAccumulatedProducts] = useState<ProductWithListings[]>([])
   const [hasMore, setHasMore] = useState(true)
+  const [selectedOrigin, setSelectedOrigin] = useState<number>(0)
+
   const loadingRef = useRef(false)
 
-  const { data: products, isLoading } = useProducts({ offset: (page - 1) * limit, limit, q: debouncedQuery })
+  const { data: products, isLoading } = useProducts({
+    offset: (page - 1) * limit,
+    limit,
+    q: debouncedQuery,
+    origin: selectedOrigin,
+  })
 
   useEffect(() => {
     if (!products) return
@@ -76,7 +87,7 @@ export function Products() {
     <div className="flex w-full flex-col gap-y-16">
       <section className="relative flex flex-col gap-4 lg:flex-row lg:gap-6">
         {/* Left side - sticky on desktop */}
-        <div className="flex h-full flex-1 flex-col lg:sticky lg:top-[calc(54px+1rem)] lg:h-fit lg:w-1/5">
+        <aside className="flex h-full flex-1 flex-col lg:sticky lg:top-[calc(54px+1rem)] lg:h-fit lg:w-1/5">
           <div className="mb-2 flex items-center gap-2">
             <ShoppingBasketIcon className="size-5" />
             <h2 className="text-lg font-bold">Tracked products</h2>
@@ -113,8 +124,57 @@ export function Products() {
                 search
               </p>
             )}
+
+            {/* TODO: */}
+            <div className="flex flex-col gap-2 border-t pt-2">
+              <h3 className="text-foreground text-sm font-medium">Store Origin</h3>
+              <RadioGroup value={selectedOrigin.toString()} onValueChange={(value) => setSelectedOrigin(Number(value))}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="0" id="all-stores" />
+                  <Label
+                    htmlFor="all-stores"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    All stores
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="1" id="continente" />
+                  <Label
+                    htmlFor="continente"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <ContinenteSvg className="h-4 min-h-4 w-auto" />
+                    <span className="sr-only">Continente</span>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="2" id="auchan" />
+                  <Label
+                    htmlFor="auchan"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <AuchanSvg className="h-4 min-h-4 w-auto" />
+                    <span className="sr-only">Auchan</span>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="3" id="pingo-doce" />
+                  <Label
+                    htmlFor="pingo-doce"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <PingoDoceSvg className="h-4 min-h-4 w-auto" />
+                    <span className="sr-only">Pingo Doce</span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
-        </div>
+        </aside>
 
         {/* Right side - scrollable */}
         <div className={cn("flex w-full flex-col lg:w-4/5")}>

@@ -17,7 +17,17 @@ export const productQueries = {
     return { data, error }
   },
 
-  async getAllLinked({ offset = 0, limit = 10, q = "" }: { offset?: number; limit?: number; q?: string }): Promise<{
+  async getAllLinked({
+    offset = 0,
+    limit = 10,
+    q = "",
+    origin = 0,
+  }: {
+    offset?: number
+    limit?: number
+    q?: string
+    origin?: number
+  }): Promise<{
     data: (Product & { store_products: StoreProduct[] })[]
     error: PostgrestError | null
     pagination: { total: number; offset: number; limit: number } | null
@@ -28,7 +38,10 @@ export const productQueries = {
       .from("products")
       .select(`*, store_products ( * )`, { count: "exact" })
       .order("name", { ascending: true })
-      .range(offset, offset + limit - 1)
+
+    if (origin !== 0) query = query.eq("store_products.origin_id", origin)
+
+    query = query.range(offset, offset + limit - 1)
 
     if (q.trim().length >= 3) {
       const sanitized = q.replace(/[^\p{L}\p{N}\s]/gu, "").trim()

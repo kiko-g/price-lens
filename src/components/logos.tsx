@@ -2,7 +2,7 @@
 
 export function ContinenteSvg(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 1083 196" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="40 0 1083 196" {...props}>
       <path
         fill="#E31E24"
         fillRule="evenodd"

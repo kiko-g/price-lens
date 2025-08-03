@@ -8,6 +8,7 @@ type GetProductsParams = {
   offset?: number
   limit?: number
   q?: string
+  origin?: number
 }
 
 async function getProducts(params?: GetProductsParams) {
@@ -67,10 +68,10 @@ async function getStoreProductCategories() {
 }
 
 // hooks
-export function useProducts({ offset = 0, limit = 36, q = "" }: GetProductsParams) {
+export function useProducts({ offset = 0, limit = 36, q = "", origin = 0 }: GetProductsParams) {
   return useQuery({
-    queryKey: ["products", offset, limit, q],
-    queryFn: () => getProducts({ offset, limit, q }),
+    queryKey: ["products", offset, limit, q, origin],
+    queryFn: () => getProducts({ offset, limit, q, origin }),
     enabled: !q || q.length > 2,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
