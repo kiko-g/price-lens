@@ -5,6 +5,7 @@ import { FrontendStatus, searchTypes, type SearchType, type SortByType } from "@
 import axios from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useUser } from "@/hooks/useUser"
 import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
@@ -124,6 +125,7 @@ export function StoreProductsGrid(props: Props) {
     }))
   })
 
+  const { profile } = useUser()
   const storeProductCategories = useStoreProductCategories()
   const tuples = storeProductCategories?.data?.tuples || []
 
@@ -518,7 +520,7 @@ WHERE category = '${category1}'
                   </Button>
                 </DropdownMenuItem>
 
-                {process.env.NODE_ENV === "development" && (
+                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="warning" asChild>
@@ -629,7 +631,7 @@ WHERE category = '${category1}'
                     className="min-w-[160px] justify-between"
                   >
                     {selectedCount > 0 ? `Categories (${selectedCount})` : "Categories"}
-                    <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDownIcon className="h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0" align="start">

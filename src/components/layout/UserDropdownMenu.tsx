@@ -21,21 +21,21 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { GithubIcon } from "@/components/icons"
-import { LogInIcon, LogOut, MoonIcon, SunIcon, User as UserIcon, HeartIcon } from "lucide-react"
+import { LogOut, MoonIcon, SunIcon, UserIcon, HeartIcon } from "lucide-react"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
   const { resolvedTheme: theme, setTheme } = useTheme()
 
   if (isLoading) {
-    return <Skeleton className="ml-2 h-8 w-8 rounded-full md:ml-0" />
+    return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
   }
 
   if (!user) {
     return (
-      <Button asChild size="icon" variant="ghost" className="ml-2 md:ml-0">
+      <Button asChild size="icon" variant="outline" className="md:ml-0">
         <Link href="/login">
-          <LogInIcon className="h-4 w-4" />
+          <UserIcon className="h-4 w-4" />
           <span className="sr-only">Login</span>
         </Link>
       </Button>
@@ -54,7 +54,7 @@ export function UserDropdownMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="ml-2 md:ml-0">
+      <DropdownMenuTrigger asChild>
         <Button variant="outline" className="relative h-7 w-7 rounded-full bg-transparent">
           <Avatar className="h-7 w-7">
             <AvatarImage

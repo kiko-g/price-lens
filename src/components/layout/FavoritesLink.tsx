@@ -1,13 +1,18 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { HeartIcon } from "lucide-react"
 import { useFavorites } from "@/hooks/useFavorites"
+import { useUser } from "@/hooks/useUser"
+
+import { HeartIcon } from "lucide-react"
 
 export function FavoritesLink() {
+  const { user } = useUser()
   const { favorites } = useFavorites(1, 10)
 
+  if (!user) return null
+
   return (
-    <Button variant="outline" size="icon-sm" className="relative" asChild>
+    <Button variant="outline" size="icon" className="relative" asChild>
       <Link href="/favorites">
         <HeartIcon className="h-4 w-4" />
         {favorites && favorites.length > 0 && (

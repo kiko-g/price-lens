@@ -41,7 +41,7 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2.5">
           <FavoritesLink />
           <UserDropdownMenu />
           <NavigationMenu />
