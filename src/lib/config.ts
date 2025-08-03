@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 
-import { HomeIcon, ShoppingBasketIcon, StoreIcon, WorkflowIcon, GaugeIcon } from "lucide-react"
+import { HomeIcon, ShoppingBasketIcon, StoreIcon, WorkflowIcon, GaugeIcon, HeartIcon } from "lucide-react"
 
 const titleOrName = "Price Lens"
 

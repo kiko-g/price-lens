@@ -21,7 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { GithubIcon } from "@/components/icons"
-import { LogInIcon, LogOut, MoonIcon, SunIcon, User as UserIcon } from "lucide-react"
+import { LogInIcon, LogOut, MoonIcon, SunIcon, User as UserIcon, HeartIcon } from "lucide-react"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
@@ -67,7 +67,7 @@ export function UserDropdownMenu() {
           <Badge
             size="3xs"
             variant="default"
-            className="absolute -bottom-2 left-1/2 -translate-x-1/2 leading-none capitalize"
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 leading-none capitalize"
           >
             {userBadgeText}
           </Badge>
@@ -100,6 +100,13 @@ export function UserDropdownMenu() {
           <Link href="/profile">
             <UserIcon className="h-4 w-4" />
             <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/favorites">
+            <HeartIcon className="h-4 w-4" />
+            <span>Favorites</span>
           </Link>
         </DropdownMenuItem>
 

@@ -21,9 +21,9 @@ export default {
           },
         ],
         "3xs": [
-          "0.5rem",
+          "0.45rem",
           {
-            lineHeight: "0.625rem",
+            lineHeight: "0",
           },
         ],
       },

@@ -105,8 +105,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get user's favorites with store product details
-    const { data, error } = await supabase
+    // Get pagination parameters
+    const searchParams = req.nextUrl.searchParams
+    const page = parseInt(searchParams.get("page") || "1", 10)
+    const limit = parseInt(searchParams.get("limit") || "20", 10)
+    const offset = (page - 1) * limit
+
+    // Get user's favorites with store product details and pagination
+    const { data, error, count } = await supabase
       .from("user_favorites")
       .select(
         `
@@ -115,16 +121,31 @@ export async function GET(req: NextRequest) {
         store_product_id,
         store_products (*)
       `,
+        { count: "exact" },
       )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error("Error fetching favorites:", error)
       return NextResponse.json({ error: "Failed to fetch favorites" }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    const totalCount = count || 0
+    const totalPages = Math.ceil(totalCount / limit)
+
+    return NextResponse.json({
+      data,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    })
   } catch (error) {
     console.error("Error in favorites GET route:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { LogoLink } from "@/components/layout/LogoLink"
+import { FavoritesLink } from "@/components/layout/FavoritesLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 
@@ -41,6 +42,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-center gap-3">
+          <FavoritesLink />
           <UserDropdownMenu />
           <NavigationMenu />
         </div>

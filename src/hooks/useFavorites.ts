@@ -9,27 +9,56 @@ interface FavoriteWithProduct extends UserFavorite {
   store_products: StoreProduct
 }
 
-export function useFavorites() {
+interface PaginatedFavoritesResponse {
+  data: FavoriteWithProduct[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
+}
+
+export function useFavorites(page: number = 1, limit: number = 20) {
   const { user } = useUser()
   const [favorites, setFavorites] = useState<FavoriteWithProduct[]>([])
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  })
   const [isLoading, setIsLoading] = useState(false)
 
-  const fetchFavorites = useCallback(async () => {
-    if (!user) return
+  const fetchFavorites = useCallback(
+    async (pageNum: number = page, limitNum: number = limit) => {
+      if (!user) return
 
-    setIsLoading(true)
-    try {
-      const response = await fetch("/api/favorites")
-      if (response.ok) {
-        const data = await response.json()
-        setFavorites(data)
+      setIsLoading(true)
+      try {
+        const searchParams = new URLSearchParams({
+          page: pageNum.toString(),
+          limit: limitNum.toString(),
+        })
+
+        const response = await fetch(`/api/favorites?${searchParams}`)
+        if (response.ok) {
+          const result: PaginatedFavoritesResponse = await response.json()
+          setFavorites(result.data)
+          setPagination(result.pagination)
+        }
+      } catch (error) {
+        console.error("Error fetching favorites:", error)
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Error fetching favorites:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [user])
+    },
+    [user, page, limit],
+  )
 
   useEffect(() => {
     fetchFavorites()
@@ -118,14 +147,39 @@ export function useFavorites() {
     [favorites],
   )
 
+  const goToNextPage = useCallback(() => {
+    if (pagination.hasNextPage) {
+      fetchFavorites(pagination.page + 1, pagination.limit)
+    }
+  }, [pagination, fetchFavorites])
+
+  const goToPreviousPage = useCallback(() => {
+    if (pagination.hasPreviousPage) {
+      fetchFavorites(pagination.page - 1, pagination.limit)
+    }
+  }, [pagination, fetchFavorites])
+
+  const goToPage = useCallback(
+    (pageNum: number) => {
+      if (pageNum >= 1 && pageNum <= pagination.totalPages) {
+        fetchFavorites(pageNum, pagination.limit)
+      }
+    },
+    [pagination, fetchFavorites],
+  )
+
   return {
     favorites,
+    pagination,
     isLoading,
     addFavorite,
     removeFavorite,
     toggleFavorite,
     isFavorited,
     refresh: fetchFavorites,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
   }
 }
 
