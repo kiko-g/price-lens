@@ -96,8 +96,12 @@ export function UserDropdownMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel></DropdownMenuLabel>
-
+        <DropdownMenuLabel>
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-sm leading-none font-medium"></p>
+          </div>
+          Preferences
+        </DropdownMenuLabel>
         <DropdownMenuItem asChild>
           <Button
             variant="dropdown-item"
