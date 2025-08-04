@@ -716,17 +716,20 @@ export const storeProductQueries = {
     limit?: number
     ignoreHours?: boolean
   }) {
+    const isDev = process.env.NODE_ENV === "development"
     const priorityMap = [
       { level: 5, hours: 8 },
       { level: 4, hours: 12 },
       { level: 3, hours: 24 },
-    ]
+      { level: 2, hours: 1 },
+      { level: 1, hours: 1 },
+    ].filter(Boolean) as { level: number; hours: number }[]
 
     const supabase = createClient()
     const query = supabase
       .from("store_products")
       .select("*", { count: "exact" })
-      .in("priority", [5, 4, 3])
+      .in("priority", isDev ? [5, 4, 3, 2, 1] : [5, 4, 3])
       .order("priority", { ascending: false })
       .range(offset, offset + limit - 1)
 

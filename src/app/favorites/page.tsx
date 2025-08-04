@@ -58,7 +58,7 @@ export default function FavoritesPage() {
       <div className="container mx-auto mb-8 max-w-7xl px-4 py-6">
         <div className="flex items-center gap-2">
           <h1 className="text-3xl font-bold">My Favorites</h1>
-          <HeartIcon className="fill-destructive/80 stroke-destructive h-6 w-6" />
+          <HeartIcon className="fill-destructive stroke-destructive h-6 w-6" />
         </div>
         <p className="text-muted-foreground mt-1 mb-6">Products you've saved for easy access and price tracking</p>
 

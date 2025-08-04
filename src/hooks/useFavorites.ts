@@ -22,6 +22,34 @@ interface PaginatedFavoritesResponse {
   }
 }
 
+export function useFavoritesCount(userId: string) {
+  const [count, setCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const fetchFavoritesCount = useCallback(async () => {
+    if (!userId) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/favorites/count/${userId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCount(data.count)
+      }
+    } catch (error) {
+      console.error("Error fetching favorites count:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userId])
+
+  useEffect(() => {
+    fetchFavoritesCount()
+  }, [fetchFavoritesCount])
+
+  return { count, isLoading }
+}
+
 export function useFavorites(page: number = 1, limit: number = 20) {
   const { user } = useUser()
   const [favorites, setFavorites] = useState<FavoriteWithProduct[]>([])

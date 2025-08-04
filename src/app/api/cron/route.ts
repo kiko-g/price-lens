@@ -7,11 +7,12 @@ import { updatePricePoint } from "@/lib/pricing"
 export const maxDuration = 300 // 5 minutes max duration for Vercel Pro
 
 export async function GET(req: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development"
   const startTime = Date.now()
 
   try {
     const limit = 42
-    const ignoreHours = process.env.NODE_ENV === "development"
+    const ignoreHours = isDev
 
     let offset = 0
     let failedScrapes = 0

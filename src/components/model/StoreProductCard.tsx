@@ -47,6 +47,17 @@ type Props = {
   onUpdate?: () => Promise<boolean> | undefined
 }
 
+function resolveImageUrl(image: string, size = 400) {
+  const url = new URL(image)
+  const p = url.searchParams
+  const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
+  fieldsToDelete.forEach((k) => p.delete(k))
+  p.set("sw", String(size))
+  p.set("sh", String(size))
+  p.set("fit", "crop")
+  return url.toString()
+}
+
 async function handleUpdatePriority(storeProductId: number, priority: number | null) {
   try {
     const response = await fetch(`/api/products/store/${storeProductId}/priority`, {
@@ -122,7 +133,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
             <>
               {!imageLoaded && <div className="aspect-square w-full animate-pulse bg-zinc-100 dark:bg-zinc-800" />}
               <Image
-                src={sp.image?.replace(/&sm=fit/g, "")}
+                src={resolveImageUrl(sp.image, 300)}
                 alt={sp.name || "Product Image"}
                 width={500}
                 height={500}
@@ -465,9 +476,11 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                     className="text-2xs font-semibold"
                   />
 
-                  <Badge variant="secondary" size="2xs" roundedness="sm">
-                    {sp.brand}
-                  </Badge>
+                  {sp.brand ? (
+                    <Badge variant="secondary" size="2xs" roundedness="sm">
+                      {sp.brand}
+                    </Badge>
+                  ) : null}
 
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
