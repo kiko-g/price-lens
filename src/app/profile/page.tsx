@@ -28,13 +28,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col">
+    <div className="flex w-full items-start justify-start">
       <HeroGridPattern
         variant="grid"
         className="mask-[linear-gradient(to_top_left,rgba(255,255,255,0.4))]"
         width={16}
         height={16}
       />
+
       <div className="container mx-auto max-w-6xl space-y-6 p-6">
         <HeaderActions />
 

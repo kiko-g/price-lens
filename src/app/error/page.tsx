@@ -9,7 +9,7 @@ export default function ErrorPage() {
   const router = useRouter()
 
   return (
-    <Layout options={{ hideHeader: false, hideFooter: true }}>
+    <Layout>
       <div className="my-auto flex w-full flex-col items-center justify-start gap-4 p-4">
         <span className="text-primary text-lg font-bold">404</span>
         <h1 className="text-5xl font-bold">Page not found</h1>

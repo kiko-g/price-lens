@@ -96,7 +96,7 @@ export function UserDropdownMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel>Preferences</DropdownMenuLabel>
+        <DropdownMenuLabel></DropdownMenuLabel>
 
         <DropdownMenuItem asChild>
           <Button
@@ -127,18 +127,14 @@ export function UserDropdownMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem className="p-0">
-          <form action={signOut} className="w-full">
-            <Button
-              type="submit"
-              variant="ghost"
-              className="hover:bg-accent h-full w-full justify-start px-2 font-normal"
-            >
+        <form action={signOut}>
+          <DropdownMenuItem variant="destructive" asChild>
+            <Button variant="dropdown-item" type="submit" className="w-full">
               <LogOut className="h-4 w-4" />
-              Sign Out
+              <span className="w-full text-left">Sign Out</span>
             </Button>
-          </form>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        </form>
       </DropdownMenuContent>
     </DropdownMenu>
   )
