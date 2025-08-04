@@ -187,7 +187,7 @@ export function StoreProductsTracked() {
         <div className={cn("flex w-full flex-col lg:w-4/5")}>
           {isLoading && page === 1 ? (
             <div className="flex w-full flex-col gap-y-16">
-              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5">
                 {Array.from({ length: limit }).map((_, index) => (
                   <ProductCardSkeleton key={`product-skeleton-${index}`} />
                 ))}
