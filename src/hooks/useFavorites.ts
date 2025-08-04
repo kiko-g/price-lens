@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { toast } from "sonner"
 import { useUser } from "@/hooks/useUser"
 import type { UserFavorite, StoreProduct } from "@/types"
@@ -253,5 +253,181 @@ export function useFavoriteStatus(storeProductId: number | null) {
     isLoading,
     toggleFavorite,
     refresh: checkFavoriteStatus,
+  }
+}
+
+export function useFavoritesInfiniteScroll(limit: number = 20) {
+  const { user } = useUser()
+  const [accumulatedFavorites, setAccumulatedFavorites] = useState<FavoriteWithProduct[]>([])
+  const [page, setPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [total, setTotal] = useState(0)
+  const loadingRef = useRef(false)
+
+  const fetchFavorites = useCallback(
+    async (pageNum: number = 1, reset: boolean = false) => {
+      if (!user) return
+
+      setIsLoading(true)
+      try {
+        const searchParams = new URLSearchParams({
+          page: pageNum.toString(),
+          limit: limit.toString(),
+        })
+
+        const response = await fetch(`/api/favorites?${searchParams}`)
+        if (response.ok) {
+          const result: PaginatedFavoritesResponse = await response.json()
+
+          setAccumulatedFavorites((prev) => {
+            return reset || pageNum === 1 ? result.data : [...prev, ...result.data]
+          })
+
+          setTotal(result.pagination.total)
+          setHasMore(result.pagination.hasNextPage)
+          loadingRef.current = false
+        }
+      } catch (error) {
+        console.error("Error fetching favorites:", error)
+        loadingRef.current = false
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [user, limit],
+  )
+
+  useEffect(() => {
+    if (user) {
+      fetchFavorites(1, true)
+    }
+  }, [fetchFavorites, user])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingRef.current || !hasMore || isLoading) return
+
+      const scrolledToBottom =
+        window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 100
+
+      if (scrolledToBottom) {
+        loadingRef.current = true
+        setPage((prev) => prev + 1)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [hasMore, isLoading])
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchFavorites(page, false)
+    }
+  }, [page, fetchFavorites])
+
+  const addFavorite = useCallback(
+    async (storeProductId: number) => {
+      if (!user) {
+        toast.error("Please log in to add favorites")
+        return false
+      }
+
+      try {
+        const response = await fetch("/api/favorites", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ store_product_id: storeProductId }),
+        })
+
+        if (response.ok) {
+          toast.success("Added to favorites")
+          // Reset and refetch from the beginning
+          setPage(1)
+          await fetchFavorites(1, true)
+          return true
+        } else {
+          const error = await response.json()
+          toast.error(error.error || "Failed to add to favorites")
+          return false
+        }
+      } catch (error) {
+        console.error("Error adding favorite:", error)
+        toast.error("Failed to add to favorites")
+        return false
+      }
+    },
+    [user, fetchFavorites],
+  )
+
+  const removeFavorite = useCallback(
+    async (storeProductId: number) => {
+      if (!user) return false
+
+      try {
+        const response = await fetch("/api/favorites", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ store_product_id: storeProductId }),
+        })
+
+        if (response.ok) {
+          toast.success("Removed from favorites")
+          // Reset and refetch from the beginning
+          setPage(1)
+          await fetchFavorites(1, true)
+          return true
+        } else {
+          const error = await response.json()
+          toast.error(error.error || "Failed to remove from favorites")
+          return false
+        }
+      } catch (error) {
+        console.error("Error removing favorite:", error)
+        toast.error("Failed to remove from favorites")
+        return false
+      }
+    },
+    [user, fetchFavorites],
+  )
+
+  const toggleFavorite = useCallback(
+    async (storeProductId: number, isFavorited: boolean) => {
+      if (isFavorited) {
+        return await removeFavorite(storeProductId)
+      } else {
+        return await addFavorite(storeProductId)
+      }
+    },
+    [addFavorite, removeFavorite],
+  )
+
+  const isFavorited = useCallback(
+    (storeProductId: number) => {
+      return accumulatedFavorites.some((fav) => fav.store_product_id === storeProductId)
+    },
+    [accumulatedFavorites],
+  )
+
+  const refresh = useCallback(() => {
+    setPage(1)
+    fetchFavorites(1, true)
+  }, [fetchFavorites])
+
+  return {
+    favorites: accumulatedFavorites,
+    total,
+    isLoading,
+    hasMore,
+    addFavorite,
+    removeFavorite,
+    toggleFavorite,
+    isFavorited,
+    refresh,
   }
 }

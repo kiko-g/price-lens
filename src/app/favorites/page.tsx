@@ -1,27 +1,17 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { useUser } from "@/hooks/useUser"
-import { useFavorites } from "@/hooks/useFavorites"
+import { useFavoritesInfiniteScroll } from "@/hooks/useFavorites"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 import { Layout } from "@/components/layout"
 
 import { StoreProductCard } from "@/components/model/StoreProductCard"
-import { HeartIcon, ArrowLeftIcon, LogInIcon, RefreshCcwIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { HeartIcon, LogInIcon, RefreshCcwIcon, Loader2Icon } from "lucide-react"
 
 export default function FavoritesPage() {
   const { user, isLoading } = useUser()
@@ -58,19 +48,14 @@ export default function FavoritesPage() {
 }
 
 function FavoritesGrid() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const { favorites, pagination, isLoading, goToPage, refresh } = useFavorites(currentPage, 20)
+  const limit = 24
+  const { favorites, total, isLoading, hasMore, refresh } = useFavoritesInfiniteScroll(limit)
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    goToPage(page)
-  }
-
-  if (isLoading) {
+  if (isLoading && favorites.length === 0) {
     return <FavoritesGridSkeleton />
   }
 
-  if (favorites.length === 0) {
+  if (favorites.length === 0 && !isLoading) {
     return (
       <div className="py-12 text-center">
         <HeartIcon className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
@@ -89,14 +74,16 @@ function FavoritesGrid() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="primary" className="text-sm" size="sm">
-            {pagination.total} {pagination.total === 1 ? "favorite" : "favorites"}
+            {total} {total === 1 ? "favorite" : "favorites"}
           </Badge>
-          <Badge variant="outline" className="text-sm" size="sm">
-            Page {pagination.page} of {pagination.totalPages}
-          </Badge>
+          {favorites.length > 0 && (
+            <Badge variant="outline" className="text-sm" size="sm">
+              Showing {favorites.length} of {total}
+            </Badge>
+          )}
         </div>
 
-        <Button variant="outline" size="sm" onClick={() => refresh(currentPage, 20)} disabled={isLoading}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={isLoading}>
           <RefreshCcwIcon className="h-4 w-4" />
           Refresh
         </Button>
@@ -115,95 +102,23 @@ function FavoritesGrid() {
         ))}
       </div>
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && <FavoritesPagination pagination={pagination} onPageChange={handlePageChange} />}
+      {/* Loading indicator for infinite scroll */}
+      {isLoading && favorites.length > 0 && (
+        <div className="flex justify-center py-8">
+          <div className="text-muted-foreground flex items-center gap-2">
+            <Loader2Icon className="h-4 w-4 animate-spin" />
+            <span>Loading more favorites...</span>
+          </div>
+        </div>
+      )}
+
+      {/* End of list indicator */}
+      {!hasMore && favorites.length > 0 && (
+        <div className="py-8 text-center">
+          <p className="text-muted-foreground text-sm">Showing all {favorites.length} favorites</p>
+        </div>
+      )}
     </div>
-  )
-}
-
-function FavoritesPagination({
-  pagination,
-  onPageChange,
-}: {
-  pagination: {
-    page: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-  }
-  onPageChange: (page: number) => void
-}) {
-  const generatePageNumbers = () => {
-    const pages = []
-    const currentPage = pagination.page
-    const totalPages = pagination.totalPages
-
-    // Always show first page
-    if (currentPage > 3) {
-      pages.push(1)
-      if (currentPage > 4) {
-        pages.push("ellipsis1")
-      }
-    }
-
-    // Show pages around current page
-    for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
-      pages.push(i)
-    }
-
-    // Always show last page
-    if (currentPage < totalPages - 2) {
-      if (currentPage < totalPages - 3) {
-        pages.push("ellipsis2")
-      }
-      pages.push(totalPages)
-    }
-
-    return pages
-  }
-
-  return (
-    <Pagination>
-      <PaginationContent className="gap-2">
-        <PaginationItem>
-          <PaginationPrevious
-            onClick={() => pagination.hasPreviousPage && onPageChange(pagination.page - 1)}
-            className={!pagination.hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-            <span className="sr-only">Previous page</span>
-          </PaginationPrevious>
-        </PaginationItem>
-
-        {generatePageNumbers().map((page, index) => (
-          <PaginationItem key={index}>
-            {typeof page === "string" ? (
-              <PaginationEllipsis />
-            ) : (
-              <Button asChild variant={page === pagination.page ? "marketing" : "outline"} size="icon">
-                <PaginationLink
-                  onClick={() => onPageChange(page)}
-                  isActive={page === pagination.page}
-                  className="cursor-pointer px-3"
-                >
-                  {page}
-                </PaginationLink>
-              </Button>
-            )}
-          </PaginationItem>
-        ))}
-
-        <PaginationItem>
-          <PaginationNext
-            onClick={() => pagination.hasNextPage && onPageChange(pagination.page + 1)}
-            className={!pagination.hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          >
-            <ChevronRightIcon className="h-4 w-4" />
-            <span className="sr-only">Next page</span>
-          </PaginationNext>
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
   )
 }
 

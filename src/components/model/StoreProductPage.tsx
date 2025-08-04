@@ -77,7 +77,7 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
       <HeartIcon
         className={cn(
           "h-4 w-4",
-          isFavorited ? "fill-destructive/80 stroke-destructive" : "stroke-foreground fill-none",
+          isFavorited ? "fill-destructive stroke-destructive" : "stroke-foreground fill-none",
           favoriteLoading && "animate-pulse",
         )}
       />

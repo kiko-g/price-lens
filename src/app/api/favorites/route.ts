@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient()
 
-    // Get current user
     const {
       data: { user },
       error: authError,
@@ -20,7 +19,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if already favorited
     const { data: existing } = await supabase
       .from("user_favorites")
       .select("id")
@@ -32,7 +30,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Product already favorited" }, { status: 409 })
     }
 
-    // Add to favorites
     const { data, error } = await supabase
       .from("user_favorites")
       .insert({

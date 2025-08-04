@@ -96,6 +96,21 @@ export function UserDropdownMenu() {
 
         <DropdownMenuSeparator />
 
+        <DropdownMenuLabel>Preferences</DropdownMenuLabel>
+
+        <DropdownMenuItem asChild>
+          <Button
+            variant="dropdown-item"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="w-full"
+          >
+            {theme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+            <span className="w-full text-left">{theme === "dark" ? "Light" : "Dark"} Theme</span>
+          </Button>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
         <DropdownMenuItem asChild>
           <Link href="/profile">
             <UserIcon className="h-4 w-4" />
@@ -108,19 +123,6 @@ export function UserDropdownMenu() {
             <HeartIcon className="h-4 w-4" />
             <span>Favorites</span>
           </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem asChild>
-          <Button
-            variant="dropdown-item"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-full"
-          >
-            {theme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
-            <span className="w-full text-left">{theme === "dark" ? "Light" : "Dark"} Theme</span>
-          </Button>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
