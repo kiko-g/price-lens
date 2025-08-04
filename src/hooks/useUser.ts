@@ -12,6 +12,8 @@ export function useUser() {
   // Create the client only once per component instance to prevent race conditions
   const [supabase] = useState(() => createClient())
 
+  console.debug("user")
+
   useEffect(() => {
     const fetchUserAndProfile = async () => {
       const {
