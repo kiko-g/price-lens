@@ -80,18 +80,11 @@ function AdminCoreActions() {
       </CardHeader>
       <CardContent>
         <p className="mb-4">Perform administrative actions from the UI.</p>
-        <div className="flex w-3/4 flex-col gap-2">
-          <Button asChild variant="success" className="justify-start">
-            <Link href="/api/cron/sync" target="_blank">
-              <MicroscopeIcon className="h-4 w-4" />
-              Sync products with high priority
-            </Link>
-          </Button>
-
-          <Button asChild variant="success" className="justify-start">
+        <div className="flex w-full flex-col gap-2">
+          <Button asChild variant="success" className="w-fit justify-start">
             <Link href="/api/cron" target="_blank">
               <PackageIcon className="h-4 w-4" />
-              Update stale products
+              Run main cron job
             </Link>
           </Button>
         </div>

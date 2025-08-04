@@ -28,7 +28,27 @@ export default function FavoritesPage() {
   if (!user) {
     return (
       <Layout>
-        <FavoritesLoginPrompt />
+        <div className="container mx-auto max-w-2xl px-4 py-6">
+          <Card className="text-center">
+            <CardHeader>
+              <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                <LogInIcon className="h-8 w-8" />
+              </div>
+              <CardTitle>Sign in to view your favorites</CardTitle>
+              <CardDescription>
+                Create an account or sign in to save your favorite products and track their prices over time.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/products">Browse Products</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </Layout>
     )
   }
@@ -115,7 +135,7 @@ function FavoritesGrid({ user }: { user: User }) {
 
       {/* End of list indicator */}
       {!hasMore && favorites.length > 0 && (
-        <div className="py-8 text-center">
+        <div className="border-t py-4 text-center">
           <p className="text-muted-foreground text-sm">Showing all {favorites.length} favorites</p>
         </div>
       )}
@@ -126,15 +146,17 @@ function FavoritesGrid({ user }: { user: User }) {
 function FavoritesGridSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      {/* Stats Bar Skeleton */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Skeleton className="h-6 w-24" />
           <Skeleton className="h-6 w-32" />
         </div>
         <Skeleton className="h-9 w-20" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {/* Products Grid Skeleton */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="space-y-3">
             <Skeleton className="aspect-square w-full" />
@@ -148,54 +170,18 @@ function FavoritesGridSkeleton() {
   )
 }
 
-function FavoritesLoginPrompt() {
-  return (
-    <div className="container mx-auto max-w-2xl px-4 py-6">
-      <Card className="text-center">
-        <CardHeader>
-          <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <LogInIcon className="h-8 w-8" />
-          </div>
-          <CardTitle>Sign in to view your favorites</CardTitle>
-          <CardDescription>
-            Create an account or sign in to save your favorite products and track their prices over time.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button asChild>
-            <Link href="/login">Sign In</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/products">Browse Products</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
 function FavoritesPageSkeleton() {
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-6">
+    <div className="container mx-auto mb-8 max-w-7xl px-4 py-6">
       <div className="mb-6">
-        <Skeleton className="mb-4 h-4 w-32" />
         <div className="mb-2 flex items-center gap-2">
-          <Skeleton className="h-6 w-6" />
           <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-6 w-6" />
         </div>
         <Skeleton className="h-4 w-96" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="space-y-3">
-            <Skeleton className="aspect-square w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-6 w-full" />
-          </div>
-        ))}
-      </div>
+      <FavoritesGridSkeleton />
     </div>
   )
 }
