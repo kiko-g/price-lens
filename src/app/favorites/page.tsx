@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import type { User } from "@supabase/supabase-js"
 import { useUser } from "@/hooks/useUser"
 import { useFavoritesInfiniteScroll } from "@/hooks/useFavorites"
 
@@ -41,15 +42,19 @@ export default function FavoritesPage() {
         </div>
         <p className="text-muted-foreground mt-1 mb-6">Products you've saved for easy access and price tracking</p>
 
-        <FavoritesGrid />
+        <FavoritesGrid user={user} />
       </div>
     </Layout>
   )
 }
 
-function FavoritesGrid() {
+function FavoritesGrid({ user }: { user: User }) {
   const limit = 24
-  const { favorites, total, isLoading, hasMore, refresh } = useFavoritesInfiniteScroll(limit)
+  const { favorites, total, isLoading, hasMore, refresh } = useFavoritesInfiniteScroll(user, limit)
+
+  console.debug(favorites)
+
+  return null
 
   if (isLoading && favorites.length === 0) {
     return <FavoritesGridSkeleton />

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { toast } from "sonner"
 import { useUser } from "@/hooks/useUser"
 import type { UserFavorite, StoreProduct } from "@/types"
+import type { User } from "@supabase/supabase-js"
 
 interface FavoriteWithProduct extends UserFavorite {
   store_products: StoreProduct
@@ -256,24 +257,36 @@ export function useFavoriteStatus(storeProductId: number | null) {
   }
 }
 
-export function useFavoritesInfiniteScroll(limit: number = 20) {
-  const { user } = useUser()
+export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20) {
   const [accumulatedFavorites, setAccumulatedFavorites] = useState<FavoriteWithProduct[]>([])
-  const [page, setPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [total, setTotal] = useState(0)
-  const loadingRef = useRef(false)
 
+  // Early return with empty state if no user
+  const hasValidUser = Boolean(user?.id)
+
+  const loadingRef = useRef(false)
+  const limitRef = useRef(limit)
+
+  useEffect(() => {
+    limitRef.current = limit
+  }, [limit])
+
+  // Stable fetch function
   const fetchFavorites = useCallback(
     async (pageNum: number = 1, reset: boolean = false) => {
-      if (!user) return
+      if (!hasValidUser) return
 
+      const currentLimit = limitRef.current
       setIsLoading(true)
+      loadingRef.current = true
+
       try {
         const searchParams = new URLSearchParams({
           page: pageNum.toString(),
-          limit: limit.toString(),
+          limit: currentLimit.toString(),
         })
 
         const response = await fetch(`/api/favorites?${searchParams}`)
@@ -286,50 +299,55 @@ export function useFavoritesInfiniteScroll(limit: number = 20) {
 
           setTotal(result.pagination.total)
           setHasMore(result.pagination.hasNextPage)
-          loadingRef.current = false
+          setCurrentPage(pageNum)
         }
       } catch (error) {
         console.error("Error fetching favorites:", error)
-        loadingRef.current = false
       } finally {
         setIsLoading(false)
+        loadingRef.current = false
       }
     },
-    [user, limit],
+    [hasValidUser], // Only recreate if user validity changes
   )
 
+  // Only run effects if user is valid
   useEffect(() => {
-    if (user) {
+    if (hasValidUser) {
       fetchFavorites(1, true)
+    } else {
+      // Reset state when no user
+      setAccumulatedFavorites([])
+      setCurrentPage(1)
+      setHasMore(true)
+      setTotal(0)
+      setIsLoading(false)
+      loadingRef.current = false
     }
-  }, [fetchFavorites, user])
+  }, [hasValidUser, fetchFavorites])
+
+  // Scroll handler - only attach if user is valid
+  const handleScroll = useCallback(() => {
+    if (!hasValidUser || loadingRef.current || !hasMore || isLoading) return
+
+    const scrolledToBottom =
+      window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 100
+
+    if (scrolledToBottom) {
+      fetchFavorites(currentPage + 1, false)
+    }
+  }, [hasValidUser, hasMore, isLoading, currentPage, fetchFavorites])
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (loadingRef.current || !hasMore || isLoading) return
-
-      const scrolledToBottom =
-        window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 100
-
-      if (scrolledToBottom) {
-        loadingRef.current = true
-        setPage((prev) => prev + 1)
-      }
-    }
+    if (!hasValidUser) return // Don't even attach scroll listener
 
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [hasMore, isLoading])
-
-  useEffect(() => {
-    if (page > 1) {
-      fetchFavorites(page, false)
-    }
-  }, [page, fetchFavorites])
+  }, [hasValidUser, handleScroll])
 
   const addFavorite = useCallback(
     async (storeProductId: number) => {
-      if (!user) {
+      if (!hasValidUser) {
         toast.error("Please log in to add favorites")
         return false
       }
@@ -345,8 +363,6 @@ export function useFavoritesInfiniteScroll(limit: number = 20) {
 
         if (response.ok) {
           toast.success("Added to favorites")
-          // Reset and refetch from the beginning
-          setPage(1)
           await fetchFavorites(1, true)
           return true
         } else {
@@ -360,12 +376,12 @@ export function useFavoritesInfiniteScroll(limit: number = 20) {
         return false
       }
     },
-    [user, fetchFavorites],
+    [hasValidUser, fetchFavorites],
   )
 
   const removeFavorite = useCallback(
     async (storeProductId: number) => {
-      if (!user) return false
+      if (!hasValidUser) return false
 
       try {
         const response = await fetch("/api/favorites", {
@@ -378,9 +394,9 @@ export function useFavoritesInfiniteScroll(limit: number = 20) {
 
         if (response.ok) {
           toast.success("Removed from favorites")
-          // Reset and refetch from the beginning
-          setPage(1)
-          await fetchFavorites(1, true)
+          // Optimistic update
+          setAccumulatedFavorites((prev) => prev.filter((fav) => fav.store_product_id !== storeProductId))
+          setTotal((prev) => Math.max(0, prev - 1))
           return true
         } else {
           const error = await response.json()
@@ -393,31 +409,49 @@ export function useFavoritesInfiniteScroll(limit: number = 20) {
         return false
       }
     },
-    [user, fetchFavorites],
+    [hasValidUser],
   )
 
   const toggleFavorite = useCallback(
     async (storeProductId: number, isFavorited: boolean) => {
+      if (!hasValidUser) return false
+
       if (isFavorited) {
         return await removeFavorite(storeProductId)
       } else {
         return await addFavorite(storeProductId)
       }
     },
-    [addFavorite, removeFavorite],
+    [hasValidUser, addFavorite, removeFavorite],
   )
 
   const isFavorited = useCallback(
     (storeProductId: number) => {
+      if (!hasValidUser) return false
       return accumulatedFavorites.some((fav) => fav.store_product_id === storeProductId)
     },
-    [accumulatedFavorites],
+    [hasValidUser, accumulatedFavorites],
   )
 
   const refresh = useCallback(() => {
-    setPage(1)
+    if (!hasValidUser) return
     fetchFavorites(1, true)
-  }, [fetchFavorites])
+  }, [hasValidUser, fetchFavorites])
+
+  // Return early state if no user - prevents unnecessary work
+  if (!hasValidUser) {
+    return {
+      favorites: [],
+      total: 0,
+      isLoading: false,
+      hasMore: false,
+      addFavorite,
+      removeFavorite,
+      toggleFavorite,
+      isFavorited,
+      refresh,
+    }
+  }
 
   return {
     favorites: accumulatedFavorites,
