@@ -52,10 +52,6 @@ function FavoritesGrid({ user }: { user: User }) {
   const limit = 24
   const { favorites, total, isLoading, hasMore, refresh } = useFavoritesInfiniteScroll(user, limit)
 
-  console.debug(favorites)
-
-  return null
-
   if (isLoading && favorites.length === 0) {
     return <FavoritesGridSkeleton />
   }
