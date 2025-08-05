@@ -81,7 +81,23 @@ export function useProducts({ offset = 0, limit = 36, q = "", origin = 0 }: GetP
 
 export function useStoreProducts(params: GetAllQuery) {
   return useQuery({
-    queryKey: ["storeProducts", params],
+    queryKey: [
+      "storeProducts",
+      params.page,
+      params.limit,
+      params.tracked,
+      params.query,
+      params.sort,
+      params.searchType,
+      params.nonNulls,
+      params.categories,
+      params.category,
+      params.category2,
+      params.category3,
+      params.originId,
+      params.userId,
+      params.options?.onlyDiscounted,
+    ],
     queryFn: () => getStoreProducts(params),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,

@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server"
 export async function GET(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams
-    const queryParam = params.get("q") ?? ""
+    const queryParam = params.get("q") || params.get("query") || ""
     const pageParam = params.get("page") ?? "1"
     const limitParam = params.get("limit") ?? "20"
     const searchTypeParam = params.get("searchType") ?? "any"
@@ -34,7 +34,6 @@ export async function GET(req: NextRequest) {
     const onlyDiscounted = onlyDiscountedParam === "true"
     const tracked = trackedParam ? true : false
 
-    // Get current user for favorites
     const supabase = createClient()
     const {
       data: { user },

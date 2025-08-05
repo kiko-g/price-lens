@@ -1,14 +1,14 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { ProductWithListings, StoreProduct } from "@/types"
+import { useState } from "react"
+import { StoreProduct } from "@/types"
 
-import { ProductCard } from "@/components/model/ProductCard"
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
+import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
+import { useInfiniteStoreProducts } from "@/hooks/useInfiniteStoreProducts"
 
 import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useStoreProducts } from "@/hooks/useProducts"
 
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,77 +19,35 @@ import { Label } from "@/components/ui/label"
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 
 export function StoreProductsTracked() {
-  const limit = 30
-  const [page, setPage] = useState(1)
-  const [query, setQuery] = useState("")
-  const [debouncedQuery, setDebouncedQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
-  const [accumulated, setAccumulated] = useState<StoreProduct[]>([])
-  const [hasMore, setHasMore] = useState(true)
   const [originId, setOriginId] = useState<number>(0)
 
-  const loadingRef = useRef(false)
-
-  const { data: storeProducts, isLoading } = useStoreProducts({
-    page,
-    limit,
-    ...(debouncedQuery && { query: debouncedQuery }),
-    originId,
-    tracked: true,
+  const { query, debouncedQuery, isSearching, setIsSearching, handleQueryChange, clearSearch } = useSearchWithDebounce({
+    delay: 300,
+    minLength: 3,
   })
 
-  useEffect(() => {
-    setAccumulated([])
-    setPage(1)
-    setQuery("")
-    setDebouncedQuery("")
-  }, [originId])
+  const {
+    products: accumulated,
+    isLoading,
+    page,
+    scrollToTop,
+  } = useInfiniteStoreProducts({
+    limit: 30,
+    tracked: true,
+    query: debouncedQuery,
+    originId,
+  })
 
-  useEffect(() => {
-    if (!storeProducts) return
+  // Clear search when changing origin
+  const handleOriginChange = (value: string) => {
+    clearSearch()
+    setOriginId(Number(value))
+  }
 
-    setAccumulated((prev) => {
-      const isFirstPageOrSearch = page === 1 || debouncedQuery !== ""
-      return isFirstPageOrSearch ? storeProducts : [...prev, ...storeProducts]
-    })
-
-    setHasMore(storeProducts.length === limit)
-    loadingRef.current = false
-  }, [storeProducts, page, debouncedQuery])
-
-  useEffect(() => {
-    if (query.length === 0 || query.length < 3) {
-      setDebouncedQuery("")
-      setIsSearching(false)
-      return
-    }
-
-    setIsSearching(true)
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query)
-      setPage(1)
-      setIsSearching(false)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [query])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (loadingRef.current || !hasMore || isLoading) return
-
-      const scrolledToBottom =
-        window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 100
-
-      if (scrolledToBottom) {
-        loadingRef.current = true
-        setPage((prev) => prev + 1)
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [hasMore, isLoading])
+  // Handle search completion - turn off searching when results arrive
+  if (isSearching && !isLoading && debouncedQuery) {
+    setIsSearching(false)
+  }
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -116,10 +74,7 @@ export function StoreProductsTracked() {
               placeholder="Search products..."
               className="pl-8"
               value={query}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.target.value
-                if (typeof value === "string") setQuery(value)
-              }}
+              onChange={handleQueryChange}
             />
           </div>
 
@@ -135,7 +90,7 @@ export function StoreProductsTracked() {
             {/* TODO: */}
             <div className="flex flex-col gap-2 border-t pt-2">
               <h3 className="text-foreground text-sm font-medium">Store Origin</h3>
-              <RadioGroup value={originId.toString()} onValueChange={(value) => setOriginId(Number(value))}>
+              <RadioGroup value={originId.toString()} onValueChange={handleOriginChange}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="0" id="all-stores" />
                   <Label
@@ -188,7 +143,7 @@ export function StoreProductsTracked() {
           {isLoading && page === 1 ? (
             <div className="flex w-full flex-col gap-y-16">
               <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5">
-                {Array.from({ length: limit }).map((_, index) => (
+                {Array.from({ length: 30 }).map((_, index) => (
                   <ProductCardSkeleton key={`product-skeleton-${index}`} />
                 ))}
               </div>
@@ -203,7 +158,7 @@ export function StoreProductsTracked() {
 
               {isLoading && (
                 <div className="my-5 grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                  {Array.from({ length: limit }).map((_, index) => (
+                  {Array.from({ length: 30 }).map((_, index) => (
                     <ProductCardSkeleton key={`product-skeleton-${index}`} />
                   ))}
                 </div>
@@ -213,12 +168,7 @@ export function StoreProductsTracked() {
                 <p className="text-muted-foreground text-center text-sm">
                   Showing <strong className="text-foreground">{accumulated.length}</strong> products in total
                 </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                >
+                <Button size="sm" variant="outline" className="cursor-pointer" onClick={scrollToTop}>
                   Back to top <ArrowUpIcon className="size-4" />
                 </Button>
               </div>
