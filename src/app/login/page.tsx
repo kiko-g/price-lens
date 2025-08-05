@@ -17,7 +17,7 @@ export default function LoginPage() {
         height={16}
       />
 
-      <div className="flex w-full max-w-lg flex-col items-center justify-center">
+      <div className="flex w-full max-w-lg flex-col items-center justify-center px-8 lg:px-4">
         <h1 className="text-foreground mb-2 flex items-center text-2xl font-semibold">
           <span>Login to</span>
           <div className="ml-2 flex items-center">

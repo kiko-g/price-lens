@@ -53,7 +53,7 @@ export function NavigationMenu() {
         </SheetHeader>
 
         <ScrollArea className="mt-4 w-full flex-1">
-          <div className="flex w-full flex-1 flex-col items-start gap-2">
+          <div className="flex w-full max-w-80 flex-1 flex-col items-start gap-2">
             {navigation.map((item) => (
               <Entry key={item.href} item={item} isActive={pathname === item.href} onClose={handleClose} />
             ))}
