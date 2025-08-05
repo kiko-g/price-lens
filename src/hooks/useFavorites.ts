@@ -310,7 +310,7 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
       const currentLimit = limitRef.current
       loadingRef.current = true
 
-      if (pageNum === 1) setState((prev) => ({ ...prev, isLoading: true }))
+      setState((prev) => ({ ...prev, isLoading: true }))
 
       try {
         const searchParams = new URLSearchParams({

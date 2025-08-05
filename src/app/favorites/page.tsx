@@ -15,9 +15,9 @@ import { StoreProductCard } from "@/components/model/StoreProductCard"
 import { HeartIcon, LogInIcon, RefreshCcwIcon, Loader2Icon } from "lucide-react"
 
 export default function FavoritesPage() {
-  const { user, isLoading } = useUser()
+  const { user, isLoading: isLoadingUser } = useUser()
 
-  if (isLoading) {
+  if (isLoadingUser) {
     return (
       <Layout>
         <FavoritesPageSkeleton />
@@ -43,9 +43,16 @@ export default function FavoritesPage() {
               <Button asChild>
                 <Link href="/login">Sign In</Link>
               </Button>
-              <Button variant="outline" asChild>
-                <Link href="/products">Browse Products</Link>
-              </Button>
+
+              <div className="flex items-center gap-2">
+                <Button variant="default" asChild>
+                  <Link href="/tracked">Browse Tracked Products</Link>
+                </Button>
+
+                <Button variant="outline" asChild>
+                  <Link href="/supermarket">Browse Supermarket Products</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
