@@ -289,6 +289,10 @@
     @apply bg-secondary text-white;
   }
 
+  button {
+    @apply transition-all duration-150 active:scale-[0.97];
+  }
+
   pre,
   code,
   .font-mono {
