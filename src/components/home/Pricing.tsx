@@ -61,13 +61,13 @@ export function PricingSection() {
             </CardContent>
             <CardFooter className="p-6 pt-0">
               <Button asChild className="w-full" variant="outline">
-                <Link href="/signup">Get Started</Link>
+                <Link href="/login">Get Started</Link>
               </Button>
             </CardFooter>
           </Card>
 
           {/* Plus Plan */}
-          <Card className="bg-primary/5 dark:bg-secondary/5 relative flex flex-col overflow-hidden">
+          <Card className="dark:bg-primary/20 bg-primary/10 text-foreground relative flex flex-col overflow-hidden dark:text-white">
             <BorderBeam duration={5} size={200} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
 
             {!isComingSoon && (

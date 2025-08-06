@@ -6,12 +6,19 @@ import { ArrowLeftIcon } from "lucide-react"
 
 export default function NotFound() {
   return (
-    <Layout>
-      <HeroGridPattern variant="grid" className="mask-[linear-gradient(to_top_left,rgba(255,255,255,0.4))]" />
+    <div className="flex w-full flex-grow flex-col items-center justify-center">
+      <HeroGridPattern
+        variant="grid"
+        className="mask-[linear-gradient(to_top_left,rgba(255,255,255,0.4))]"
+        width={16}
+        height={16}
+      />
 
-      <div className="flex w-full flex-col items-center justify-center gap-3">
+      <div className="flex w-full flex-col items-center justify-center gap-3 px-4">
         <h1 className="animate-bounce text-4xl font-bold tracking-tighter sm:text-5xl">404</h1>
-        <p className="text-muted-foreground">Looks like you've ventured into the unknown digital realm.</p>
+        <p className="text-muted-foreground max-w-sm text-center">
+          Looks like you've ventured into the unknown digital realm.
+        </p>
 
         <Button asChild>
           <Link href="/" prefetch={false}>
@@ -20,6 +27,6 @@ export default function NotFound() {
           </Link>
         </Button>
       </div>
-    </Layout>
+    </div>
   )
 }
