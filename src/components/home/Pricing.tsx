@@ -67,7 +67,7 @@ export function PricingSection() {
           </Card>
 
           {/* Plus Plan */}
-          <Card className="dark:bg-primary/20 bg-primary/10 text-foreground relative flex flex-col overflow-hidden dark:text-white">
+          <Card className="dark:bg-primary/20 bg-primary-950 relative flex flex-col overflow-hidden text-white dark:text-white">
             <BorderBeam duration={5} size={200} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
 
             {!isComingSoon && (

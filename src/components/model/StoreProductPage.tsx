@@ -40,6 +40,7 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   const { user } = useUser()
@@ -113,6 +114,7 @@ export function StoreProductPageById({ id }: { id: string }) {
 }
 
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
+  const router = useRouter()
   const productId = sp.id!.toString()
   const { data: storeProduct, isLoading } = useStoreProduct(productId)
   const updateStoreProduct = useUpdateStoreProduct()
@@ -131,11 +133,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   return (
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
       <div className="flex w-min">
-        <Button variant="ghost" className="mb-2" asChild size="sm">
-          <Link href="javascript:history.back()">
-            <Undo2Icon className="h-4 w-4" />
-            Back to supermarket products
-          </Link>
+        <Button variant="outline" className="mb-2" size="sm" onClick={() => router.back()}>
+          <Undo2Icon className="h-4 w-4" />
+          Back to supermarket products
         </Button>
       </div>
 
@@ -155,20 +155,19 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               <p className="text-muted-foreground">No image available</p>
             </div>
           )}
-
-          {/* Top Left */}
-          <div className="absolute top-2 left-2 z-50 flex items-center gap-2">
-            {sp.category || sp.category_2 || sp.category_3 ? (
-              <Badge variant="secondary" size="2xs" roundedness="sm" className="w-fit">
-                {sp.category} {sp.category_2 && ` > ${sp.category_2}`} {sp.category_3 && ` > ${sp.category_3}`}
-              </Badge>
-            ) : null}
-          </div>
         </div>
 
         {/* Product Details */}
         <div className="flex flex-col gap-2">
           <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              {sp.category || sp.category_2 || sp.category_3 ? (
+                <Badge variant="boring" size="2xs" roundedness="sm" className="w-fit">
+                  {sp.category} {sp.category_2 && ` > ${sp.category_2}`} {sp.category_3 && ` > ${sp.category_3}`}
+                </Badge>
+              ) : null}
+            </div>
+
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant="blue">{sp.brand}</Badge>
 
@@ -327,7 +326,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
 export function StoreProductPageSkeleton() {
   return (
-    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
+    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-2">
       <div className="mb-4 flex w-min">
         <Skeleton className="h-10 w-40" />
       </div>
