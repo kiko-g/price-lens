@@ -593,18 +593,24 @@ WHERE category = '${category1}'
 
                     <div className="grid gap-2">
                       <Label htmlFor="category3">3) Inner Category</Label>
-                      <Select value={category3} onValueChange={handleCategory3Change} disabled={!category2}>
+                      <Select
+                        value={category3}
+                        onValueChange={handleCategory3Change}
+                        disabled={!category2 || category3Options.filter((item) => Boolean(item)).length === 0}
+                      >
                         <SelectTrigger>
                           <SelectValue
                             placeholder={category2 ? "Selecione o item" : "Selecione a subcategoria primeiro"}
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {category3Options.map((item) => (
-                            <SelectItem key={item} value={item}>
-                              {item}
-                            </SelectItem>
-                          ))}
+                          {category3Options
+                            .filter((item) => Boolean(item))
+                            .map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -612,10 +618,15 @@ WHERE category = '${category1}'
                     {/* Display current selections */}
                     {(category1 || category2 || category3) && (
                       <div className="bg-muted mt-4 rounded-md p-3">
-                        <div className="text-sm">
-                          <code className="tracking-tight text-wrap">
-                            {[category1, category2, category3].filter(Boolean).join(" > ")}
-                          </code>
+                        <div className="text-xs">
+                          {([category1, category2, category3].filter(Boolean) as string[]).map((cat, idx, arr) => (
+                            <span key={cat}>
+                              <code className="text-secondary font-semibold tracking-tight text-wrap">{cat}</code>
+                              {idx < arr.length - 1 && (
+                                <span className="text-muted-foreground mx-1 font-normal">{" > "}</span>
+                              )}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     )}
