@@ -63,14 +63,20 @@ export function resolveSupermarketChain(originId: number | null) {
         name: "Pingo Doce",
         badge: <SupermarketBadge supermarketChain="Pingo Doce" />,
         logo: (
-          <Image src={PingoDoceLogo} alt="Pingo Doce" width={600} height={200} className="h-5 w-auto md:h-5 md:w-min" />
+          <Image
+            src={PingoDoceLogo}
+            alt="Pingo Doce"
+            width={1500}
+            height={500}
+            className="h-5 w-auto md:h-5 md:w-min"
+          />
         ),
         logoSmall: (
           <Image
             src={PingoDoceLogo}
             alt="Pingo Doce"
-            width={600}
-            height={200}
+            width={1500}
+            height={500}
             className="h-3.5 w-auto md:h-3.5 md:w-min"
           />
         ),

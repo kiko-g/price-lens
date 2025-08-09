@@ -246,7 +246,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
           <Badge
             size="xs"
             variant="light"
-            className="border-muted max-w-24 border opacity-100 transition-opacity duration-300 group-hover:opacity-100"
+            className="border-muted w-fit max-w-20 border opacity-100 transition-opacity duration-300 group-hover:opacity-100"
           >
             {supermarketChain ? supermarketChain.logoSmall : null}
           </Badge>
