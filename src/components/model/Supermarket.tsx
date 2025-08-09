@@ -34,8 +34,8 @@ export function resolveSupermarketChain(originId: number | null) {
           <Image
             src={ContinenteLogo}
             alt="Continente"
-            width={300}
-            height={300}
+            width={600}
+            height={200}
             className="h-5 w-auto md:h-5 md:w-min"
           />
         ),
@@ -43,8 +43,8 @@ export function resolveSupermarketChain(originId: number | null) {
           <Image
             src={ContinenteLogo}
             alt="Continente"
-            width={300}
-            height={300}
+            width={600}
+            height={200}
             className="h-3.5 w-auto md:h-3.5 md:w-min"
           />
         ),
@@ -53,9 +53,9 @@ export function resolveSupermarketChain(originId: number | null) {
       return {
         name: "Auchan",
         badge: <SupermarketBadge supermarketChain="Auchan" />,
-        logo: <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-5 w-auto md:h-5 md:w-min" />,
+        logo: <Image src={AuchanLogo} alt="Auchan" width={600} height={200} className="h-5 w-auto md:h-5 md:w-min" />,
         logoSmall: (
-          <Image src={AuchanLogo} alt="Auchan" width={300} height={300} className="h-4 w-full md:h-4 md:w-min" />
+          <Image src={AuchanLogo} alt="Auchan" width={600} height={200} className="h-4 w-full md:h-4 md:w-min" />
         ),
       }
     case SupermarketChain.PingoDoce:
@@ -63,14 +63,14 @@ export function resolveSupermarketChain(originId: number | null) {
         name: "Pingo Doce",
         badge: <SupermarketBadge supermarketChain="Pingo Doce" />,
         logo: (
-          <Image src={PingoDoceLogo} alt="Pingo Doce" width={300} height={300} className="h-5 w-auto md:h-5 md:w-min" />
+          <Image src={PingoDoceLogo} alt="Pingo Doce" width={600} height={200} className="h-5 w-auto md:h-5 md:w-min" />
         ),
         logoSmall: (
           <Image
             src={PingoDoceLogo}
             alt="Pingo Doce"
-            width={300}
-            height={300}
+            width={600}
+            height={200}
             className="h-3.5 w-auto md:h-3.5 md:w-min"
           />
         ),
