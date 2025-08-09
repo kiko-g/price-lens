@@ -67,6 +67,7 @@ import {
   SquareLibraryIcon,
   StoreIcon,
   XIcon,
+  HomeIcon,
 } from "lucide-react"
 
 type Props = {
@@ -124,8 +125,6 @@ export function StoreProductsGrid(props: Props) {
       selected: relevant ? defaultCategorySet.has(name) : false,
     }))
   })
-
-  console.debug(storeProducts)
 
   const { profile } = useUser()
   const storeProductCategories = useStoreProductCategories()
@@ -442,8 +441,12 @@ WHERE category = '${category1}'
           </ul>
         </div>
 
-        <div className="mt-2 flex w-full items-center justify-center gap-2">
-          <Button variant="outline">Return home</Button>
+        <div className="mt-2 flex w-full items-center justify-center gap-3">
+          <Button variant="outline" onClick={() => (window.location.href = "/")}>
+            <HomeIcon className="h-4 w-4" />
+            Return home
+          </Button>
+
           <Button
             variant="default"
             onClick={() => {
@@ -451,8 +454,8 @@ WHERE category = '${category1}'
               location.reload()
             }}
           >
-            <span>Clear search</span>
-            <DeleteIcon />
+            <RefreshCcwIcon className="h-4 w-4" />
+            Clear search
           </Button>
         </div>
       </Wrapper>
