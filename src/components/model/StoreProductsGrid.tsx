@@ -68,7 +68,9 @@ import {
   StoreIcon,
   XIcon,
   HomeIcon,
+  BadgePercentIcon,
 } from "lucide-react"
+import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 
 type Props = {
   page?: number
@@ -513,11 +515,18 @@ WHERE category = '${category1}'
 
               <DropdownMenuContent className="w-48" align="end">
                 <DropdownMenuItem asChild>
+                  <ScrapeUrlDialog />
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
                   <Button variant="dropdown-item" onClick={() => setOnlyDiscounted(!onlyDiscounted)}>
                     Only discounted
-                    {onlyDiscounted ? <CheckIcon className="h-4 w-4" /> : <CircleIcon className="h-4 w-4" />}
+                    <BadgePercentIcon
+                      className={cn("h-4 w-4", onlyDiscounted ? "text-green-500" : "text-muted-foreground")}
+                    />
                   </Button>
                 </DropdownMenuItem>
+
                 <DropdownMenuItem variant="default" asChild>
                   <Button variant="dropdown-item" onClick={clearSearch}>
                     Clear search

@@ -152,6 +152,12 @@ export const productQueries = {
 }
 
 export const storeProductQueries = {
+  async getByUrl(url: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("store_products").select("*").eq("url", url).maybeSingle()
+    return { data, error }
+  },
+
   async getAll({
     page = 1,
     limit = 36,
@@ -408,6 +414,7 @@ export const storeProductQueries = {
 
     const productToUpsert = {
       ...sp,
+      priority: sp.priority || 1,
       created_at: sp.created_at || existingProduct?.created_at || sp.updated_at,
     }
 
@@ -752,5 +759,11 @@ export const storeProductQueries = {
         limit,
       },
     }
+  },
+
+  async addProductFromObject(sp: StoreProduct) {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("store_products").insert([sp]).select().single()
+    return { data, error }
   },
 }
