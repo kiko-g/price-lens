@@ -219,7 +219,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute bottom-2 left-2 flex flex-col items-end gap-0 md:gap-0.5">
+        <div className="absolute bottom-2 left-2 z-50 flex flex-col items-end gap-0 md:gap-0.5">
           <Button
             variant="outline"
             size="icon-sm"

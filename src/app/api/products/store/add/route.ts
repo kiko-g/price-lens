@@ -18,10 +18,15 @@ export async function POST(req: NextRequest) {
     else if (origin.includes("pingodoce")) originId = 3
     else return NextResponse.json({ error: "Unknown store origin" }, { status: 400 })
 
-    // sp.url already exists
+    // sp.url and sp.name already exists
     const { data: existing, error: existingError } = await storeProductQueries.getByUrl(url)
-    if (!existingError && existing) {
-      return NextResponse.json(existing)
+    if (!existingError && existing && existing.name) {
+      return NextResponse.json({
+        message: "Product already exists",
+        url,
+        product: existing,
+        originId,
+      })
     }
 
     const scraper = getScraper(originId)
