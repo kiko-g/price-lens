@@ -31,9 +31,5 @@ export default async function Supermarket({ searchParams }: Props) {
   const relevant = params.relevant !== "false"
   const originId = params.origin || null
 
-  return (
-    <Layout>
-      <StoreProductsGrid page={page} q={q} t={searchType} sort={sortBy} relevant={relevant} originId={originId} />
-    </Layout>
-  )
+  return <StoreProductsGrid page={page} q={q} t={searchType} sort={sortBy} relevant={relevant} originId={originId} />
 }

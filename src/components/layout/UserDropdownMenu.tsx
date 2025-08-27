@@ -102,7 +102,8 @@ export function UserDropdownMenu() {
           </div>
           Preferences
         </DropdownMenuLabel>
-        <DropdownMenuItem asChild>
+
+        <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
           <Button
             variant="dropdown-item"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

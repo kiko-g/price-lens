@@ -392,80 +392,14 @@ WHERE category = '${category1}'
     )
   }
 
-  if (storeProducts.length === 0 && status === FrontendStatus.Loaded) {
-    return (
-      <Wrapper>
-        <CircleOffIcon className="h-8 w-8" />
-        <div className="flex flex-col items-start justify-start">
-          <p>No products found matching your search.</p>
-          <p>Your search parameters:</p>
-
-          <ul className="flex max-w-md list-disc flex-col pl-4 text-sm">
-            {query !== "" && (
-              <li>
-                <strong>Query:</strong> "{query}"
-              </li>
-            )}
-            <li>
-              <strong>Search type:</strong> {searchType}
-            </li>
-            <li>
-              <strong>Page:</strong> {page}
-            </li>
-            <li>
-              <strong>Sort by:</strong> {sortBy}
-            </li>
-            {originId !== null && (
-              <li>
-                <strong>Store:</strong> {resolveSupermarketChain(parseInt(originId))?.name}
-              </li>
-            )}
-            {allCategoriesFilled ? (
-              <li>
-                <strong>Categories:</strong>
-                <ul className="mt-1 flex list-disc flex-col gap-0 pl-4 text-sm">
-                  <li>[1] {category1}</li>
-                  <li>[2] {category2}</li>
-                  <li>[3] {category3}</li>
-                </ul>
-              </li>
-            ) : (
-              <li>
-                <strong>Main categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
-                <span className="text-muted-foreground">
-                  {categories
-                    .filter((cat) => cat.selected)
-                    .map((cat) => cat.name)
-                    .join(", ") || "None"}
-                </span>
-              </li>
-            )}
-          </ul>
-        </div>
-
-        <div className="mt-2 flex w-full items-center justify-center gap-3">
-          <Button variant="outline" onClick={() => (window.location.href = "/")}>
-            <HomeIcon className="h-4 w-4" />
-            Return home
-          </Button>
-
-          <Button
-            variant="default"
-            onClick={() => {
-              updateParams(null)
-              location.reload()
-            }}
-          >
-            <RefreshCcwIcon className="h-4 w-4" />
-            Clear search
-          </Button>
-        </div>
-      </Wrapper>
-    )
+  const dtls = {
+    amount: page * limit - limit + 1,
+    max: Math.min(page * limit, pagedCount),
+    total: pagedCount,
   }
 
   return (
-    <div className="flex w-full flex-col gap-0">
+    <div className="flex w-full flex-1 flex-col gap-0">
       <nav
         className={cn(
           "bg-opacity-95 dark:bg-opacity-95 sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950",
@@ -490,7 +424,7 @@ WHERE category = '${category1}'
                 }}
               />
               <Select value={searchType} onValueChange={(value) => setSearchType(value as SearchType)}>
-                <SelectTrigger className="text-muted-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition hover:bg-black/5 dark:hover:bg-white/5">
+                <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
                   <SelectValue placeholder="Search by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -521,9 +455,7 @@ WHERE category = '${category1}'
                 <DropdownMenuItem asChild>
                   <Button variant="dropdown-item" onClick={() => setOnlyDiscounted(!onlyDiscounted)}>
                     Only discounted
-                    <BadgePercentIcon
-                      className={cn("h-4 w-4", onlyDiscounted ? "text-green-500" : "text-muted-foreground")}
-                    />
+                    <BadgePercentIcon className={cn("h-4 w-4", onlyDiscounted ? "text-green-500" : "opacity-20")} />
                   </Button>
                 </DropdownMenuItem>
 
@@ -633,7 +565,7 @@ WHERE category = '${category1}'
                         <div className="text-xs">
                           {([category1, category2, category3].filter(Boolean) as string[]).map((cat, idx, arr) => (
                             <span key={cat}>
-                              <code className="text-secondary font-semibold tracking-tight text-wrap">{cat}</code>
+                              <code className="text-primary font-semibold tracking-tight text-wrap">{cat}</code>
                               {idx < arr.length - 1 && (
                                 <span className="text-muted-foreground mx-1 font-normal">{" > "}</span>
                               )}
@@ -815,26 +747,27 @@ WHERE category = '${category1}'
               </Button>
             </div>
 
-            <Button variant="marketing" disabled={isLoading} onClick={handleSubmit} className="w-auto ring-0">
+            <Button variant="primary" disabled={isLoading} onClick={handleSubmit} className="w-auto ring-0">
               Search
-              <RadarIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
         <div className="text-muted-foreground mt-2 flex w-full flex-col items-end justify-end text-xs lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
-          <span className="order-2 leading-3 lg:order-1">
-            Showing <span className="text-foreground font-semibold">{page * limit - limit + 1}</span> to{" "}
-            <span className="text-foreground font-semibold">{Math.min(page * limit, pagedCount)}</span> of{" "}
-            <span className="text-foreground font-semibold">{pagedCount}</span> results
-          </span>
+          {status === FrontendStatus.Loaded && dtls.max > 0 && (
+            <span className="order-2 leading-3 lg:order-1">
+              Showing <span className="text-foreground font-semibold">{dtls.amount}</span> to{" "}
+              <span className="text-foreground font-semibold">{dtls.max}</span> of{" "}
+              <span className="text-foreground font-semibold">{dtls.total}</span> results
+            </span>
+          )}
 
           <span className="order-1 flex flex-col items-end justify-end gap-1 lg:order-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
             {category1 && category2 && category3 ? (
               <Button
                 size="xs"
                 variant="glass"
-                className="gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
+                className="dark:hover:bg-destructive/50 bg-primary/20 dark:bg-primary/20 cursor-pointer gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
                 onClick={() => {
                   setCategory1("")
                   setCategory2("")
@@ -848,27 +781,101 @@ WHERE category = '${category1}'
                 </span>
               </Button>
             ) : null}
-            <span>
-              Page <span className="text-foreground font-semibold">{page}</span> of{" "}
-              <span className="text-foreground font-semibold">{paginationTotal}</span>
-            </span>
+            {dtls.max > 0 && (
+              <span>
+                Page <span className="text-foreground font-semibold">{page}</span> of{" "}
+                <span className="text-foreground font-semibold">{paginationTotal}</span>
+              </span>
+            )}
           </span>
         </div>
       </nav>
 
-      <div className="grid w-full grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-7">
-        {storeProducts.map((product, productIdx) => (
-          <StoreProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
-        ))}
-      </div>
+      {status === FrontendStatus.Loaded && storeProducts && storeProducts.length > 0 ? (
+        <div className="grid h-full w-full flex-1 grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-7">
+          {storeProducts.map((product, productIdx) => (
+            <StoreProductCard key={`product-${productIdx}`} sp={product} onUpdate={() => updateProduct(product)} />
+          ))}
+        </div>
+      ) : (
+        <Wrapper>
+          <CircleOffIcon className="h-8 w-8" />
+          <div className="flex flex-col items-start justify-start">
+            <p>No products found matching your search.</p>
+            <p>Your search parameters:</p>
+
+            <ul className="flex max-w-md list-disc flex-col pl-4 text-sm">
+              {query !== "" && (
+                <li>
+                  <strong>Query:</strong> "{query}"
+                </li>
+              )}
+              <li>
+                <strong>Search type:</strong> {searchType}
+              </li>
+              <li>
+                <strong>Page:</strong> {page}
+              </li>
+              <li>
+                <strong>Sort by:</strong> {sortBy}
+              </li>
+              {originId !== null && (
+                <li>
+                  <strong>Store:</strong> {resolveSupermarketChain(parseInt(originId))?.name}
+                </li>
+              )}
+              {allCategoriesFilled ? (
+                <li>
+                  <strong>Categories:</strong>
+                  <ul className="mt-1 flex list-disc flex-col gap-0 pl-4 text-sm">
+                    <li>[1] {category1}</li>
+                    <li>[2] {category2}</li>
+                    <li>[3] {category3}</li>
+                  </ul>
+                </li>
+              ) : (
+                <li>
+                  <strong>Main categories ({categories.filter((cat) => cat.selected).length})</strong>:{" "}
+                  <span className="text-muted-foreground">
+                    {categories
+                      .filter((cat) => cat.selected)
+                      .map((cat) => cat.name)
+                      .join(", ") || "None"}
+                  </span>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          <div className="mt-2 flex w-full items-center justify-center gap-3">
+            <Button variant="outline" onClick={() => (window.location.href = "/")}>
+              <HomeIcon className="h-4 w-4" />
+              Return home
+            </Button>
+
+            <Button
+              variant="default"
+              onClick={() => {
+                updateParams(null)
+                location.reload()
+              }}
+            >
+              <RefreshCcwIcon className="h-4 w-4" />
+              Clear search
+            </Button>
+          </div>
+        </Wrapper>
+      )}
 
       <div className="flex items-center justify-between p-4">
         <div className="text-muted-foreground flex w-full flex-col text-sm">
-          <span>
-            Showing <span className="text-foreground font-semibold">{page * limit - limit + 1}</span> to{" "}
-            <span className="text-foreground font-semibold">{Math.min(page * limit, pagedCount)}</span> of{" "}
-            <span className="text-foreground font-semibold">{pagedCount}</span> results
-          </span>
+          {status === FrontendStatus.Loaded && dtls.max > 0 && (
+            <span>
+              Showing <span className="text-foreground font-semibold">{dtls.amount}</span> to{" "}
+              <span className="text-foreground font-semibold">{dtls.max}</span> of{" "}
+              <span className="text-foreground font-semibold">{dtls.total}</span> results
+            </span>
+          )}
         </div>
 
         <div className="isolate flex flex-1 -space-x-px">
@@ -882,7 +889,10 @@ WHERE category = '${category1}'
           </Button>
 
           <Select value={page.toString()} onValueChange={handlePageChange}>
-            <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
+            <SelectTrigger
+              className="w-auto justify-center rounded-none font-medium lg:w-full"
+              disabled={dtls.max === 0}
+            >
               <SelectValue placeholder={page} />
             </SelectTrigger>
             <SelectContent>
@@ -900,7 +910,7 @@ WHERE category = '${category1}'
             variant="outline"
             className="rounded-l-none focus:z-10"
             onClick={handleNextPage}
-            disabled={isLoading || page === paginationTotal}
+            disabled={isLoading || page === paginationTotal || dtls.max === 0}
           >
             Next
           </Button>
