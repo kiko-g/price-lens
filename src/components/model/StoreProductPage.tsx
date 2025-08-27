@@ -35,7 +35,7 @@ import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
-import { useStoreProduct, useUpdateStoreProduct } from "@/hooks/useProducts"
+import { useStoreProductById, useUpdateStoreProduct } from "@/hooks/useProducts"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
@@ -88,7 +88,7 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
 }
 
 export function StoreProductPageById({ id }: { id: string }) {
-  const { data: storeProduct, isLoading, isError } = useStoreProduct(id)
+  const { data: storeProduct, isLoading, isError } = useStoreProductById(id)
 
   if (isLoading) {
     return <StoreProductPageSkeleton />
@@ -116,7 +116,7 @@ export function StoreProductPageById({ id }: { id: string }) {
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
   const productId = sp.id!.toString()
-  const { data: storeProduct, isLoading } = useStoreProduct(productId)
+  const { data: storeProduct, isLoading } = useStoreProductById(productId)
   const updateStoreProduct = useUpdateStoreProduct()
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 

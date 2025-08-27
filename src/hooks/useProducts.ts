@@ -105,7 +105,7 @@ export function useStoreProducts(params: GetAllQuery) {
   })
 }
 
-export function useStoreProduct(id: string) {
+export function useStoreProductById(id: string) {
   return useQuery({
     queryKey: ["storeProduct", id],
     queryFn: () => getStoreProduct(id),

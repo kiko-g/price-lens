@@ -12,6 +12,7 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { BadgeEuroIcon, ShoppingBasketIcon, TrendingUp } from "lucide-react"
+import { useStoreProductById } from "@/hooks/useProducts"
 
 export function Hero() {
   return (
@@ -48,7 +49,7 @@ export function Hero() {
       </div>
 
       <div className="my-8 w-full max-w-full flex-1 self-start overflow-hidden lg:my-0 lg:w-auto lg:max-w-md">
-        <MockChartA className="border-border w-full bg-linear-to-br shadow-none" />
+        <StaticMockChart className="border-border w-full bg-linear-to-br shadow-none" />
       </div>
     </div>
   )
@@ -103,7 +104,11 @@ function Brands({ className }: { className?: string }) {
   )
 }
 
-function MockChartA({ className }: { className?: string }) {
+function StaticMockChart({ className }: { className?: string }) {
+  const { data: cereaisFitnessChocolate, isLoading } = useStoreProductById("18728")
+  if (isLoading) return <p>Loading...</p>
+  if (!cereaisFitnessChocolate) return <p>No data</p>
+
   const chartDataA = [
     { month: "January", price: 4.99, priceRecommended: 5.99, discount: 17, pricePerUnit: 9.99 },
     { month: "February", price: 5.49, priceRecommended: 5.99, discount: 8, pricePerUnit: 10.98 },
@@ -234,5 +239,19 @@ function MockChartA({ className }: { className?: string }) {
 
       <BorderBeam duration={5} size={150} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
     </Card>
+  )
+}
+
+function HandpickedShowcaseCharts({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex flex-col gap-4", className)}>
+      <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-bold">Handpicked Showcase Charts</h2>
+        <p className="text-muted-foreground text-sm">
+          These are some of the charts that we think are interesting and worth showing.
+        </p>
+      </div>
+      <div className="flex flex-col gap-4"></div>
+    </div>
   )
 }
