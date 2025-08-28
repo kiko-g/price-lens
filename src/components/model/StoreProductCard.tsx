@@ -219,26 +219,28 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute bottom-2 left-2 z-50 flex flex-col items-end gap-0 md:gap-0.5">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className={cn(
-              "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
-              favoriteLoading && "disabled:opacity-50",
-            )}
-            onClick={handleToggleFavorite}
-            disabled={favoriteLoading || !user}
-            title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Log in to add favorites"}
-          >
-            <HeartIcon
+        {user ? (
+          <div className="absolute bottom-2 left-2 z-10 flex flex-col items-end gap-0 md:gap-0.5">
+            <Button
+              variant="outline"
+              size="icon-sm"
               className={cn(
-                "h-4 w-4",
-                isFavorited ? "fill-destructive stroke-destructive" : "stroke-foreground fill-none",
+                "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
+                favoriteLoading && "disabled:opacity-50",
               )}
-            />
-          </Button>
-        </div>
+              onClick={handleToggleFavorite}
+              disabled={favoriteLoading || !user}
+              title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Log in to add favorites"}
+            >
+              <HeartIcon
+                className={cn(
+                  "h-4 w-4",
+                  isFavorited ? "fill-destructive stroke-destructive" : "stroke-foreground fill-none",
+                )}
+              />
+            </Button>
+          </div>
+        ) : null}
 
         <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0 md:gap-0.5">
           <PriorityBadge priority={priority} />
