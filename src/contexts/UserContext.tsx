@@ -48,72 +48,31 @@ const UserContext = createContext<UserState | undefined>(undefined)
 export function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(userReducer, initialState)
   const supabase = useMemo(() => createClient(), [])
-  const initialized = useRef(false)
 
   useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-
-    const fetchUserAndProfile = async () => {
-      try {
-        dispatch({ type: "SET_LOADING", payload: true })
-        dispatch({ type: "SET_ERROR", payload: null })
-
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser()
-
-        if (userError) {
-          dispatch({ type: "SET_ERROR", payload: userError.message })
-          dispatch({ type: "RESET" })
-          return
-        }
-
-        dispatch({ type: "SET_USER", payload: user })
-
-        if (user) {
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single()
-
-          if (profileError) {
-            dispatch({ type: "SET_ERROR", payload: profileError.message })
-          } else {
-            dispatch({ type: "SET_PROFILE", payload: profileData })
-          }
-        }
-      } catch (error) {
-        dispatch({ type: "SET_ERROR", payload: error instanceof Error ? error.message : "Unknown error" })
-      } finally {
-        dispatch({ type: "SET_LOADING", payload: false })
-      }
-    }
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        dispatch({ type: "SET_USER", payload: session.user })
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const user = session?.user
 
+      if (user) {
+        dispatch({ type: "SET_USER", payload: user })
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", session.user.id)
+          .eq("id", user.id)
           .single()
-
-        if (!profileError) {
+        if (profileError) {
+          dispatch({ type: "SET_ERROR", payload: profileError.message })
+          dispatch({ type: "SET_PROFILE", payload: null })
+        } else {
           dispatch({ type: "SET_PROFILE", payload: profileData })
         }
-        dispatch({ type: "SET_LOADING", payload: false })
-      } else if (event === "SIGNED_OUT") {
+      } else {
         dispatch({ type: "RESET" })
       }
+      dispatch({ type: "SET_LOADING", payload: false })
     })
-
-    fetchUserAndProfile()
 
     return () => {
       subscription.unsubscribe()

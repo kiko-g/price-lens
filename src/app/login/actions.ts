@@ -48,7 +48,7 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
-  const origin = (await headers()).get("origin")
+  let origin = (await headers()).get("origin")
 
   if (!origin) {
     return redirect("/login?error=origin-missing")
@@ -72,5 +72,5 @@ export async function signInWithGoogle() {
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
-  redirect("/")
+  revalidatePath("/", "layout")
 }

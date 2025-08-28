@@ -2,9 +2,9 @@
 
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
-import { signOut } from "@/app/login/actions"
+import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -26,6 +26,7 @@ import { LogOut, MoonIcon, SunIcon, UserIcon, HeartIcon } from "lucide-react"
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
   const { resolvedTheme: theme, setTheme } = useTheme()
+  const router = useRouter()
 
   if (isLoading) {
     return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
@@ -51,6 +52,12 @@ export function UserDropdownMenu() {
 
   const userBadgeText = getUserBadgeText()
   const userInitial = user.email ? user.email.charAt(0).toUpperCase() : "U"
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/")
+  }
 
   return (
     <DropdownMenu>
@@ -132,14 +139,12 @@ export function UserDropdownMenu() {
 
         <DropdownMenuSeparator />
 
-        <form action={signOut}>
-          <DropdownMenuItem variant="destructive" asChild>
-            <Button variant="dropdown-item" type="submit" className="w-full">
-              <LogOut className="h-4 w-4" />
-              <span className="w-full text-left">Sign Out</span>
-            </Button>
-          </DropdownMenuItem>
-        </form>
+        <DropdownMenuItem variant="destructive" asChild>
+          <Button variant="dropdown-item" onClick={handleSignOut} className="w-full">
+            <LogOut className="h-4 w-4" />
+            <span className="w-full text-left">Sign Out</span>
+          </Button>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
