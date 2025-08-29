@@ -133,23 +133,33 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
     }
 
     const $ = cheerio.load(html)
-    const jsonSchema = $('script[type="application/ld+json"]').text()
-    if (!jsonSchema || !isValidJson(jsonSchema)) {
+    const jsonSchemaRaw = $('script[type="application/ld+json"]').text().trim()
+    if (!jsonSchemaRaw) {
       console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
       return {}
     }
 
-    const jsonAddOn = $('input[name="gtmOnLoad"]').attr("value")
-    if (!jsonAddOn || !isValidJson(jsonAddOn)) {
+    const jsonAddOnRaw = $('input[name="gtmOnLoad"]').attr("value")
+    if (!jsonAddOnRaw) {
       console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
       return {}
+    }
+
+    const clean = (s: string) => s.trim().replace(/^'|'$/g, "")
+    const parseConcat = (s: string) => {
+      s = clean(s)
+      try {
+        return JSON.parse(s)
+      } catch {
+        return JSON.parse("[" + s.replace(/}\s*{/g, "},{") + "]")
+      }
     }
 
     let addOn: ScrapedAddOnAuchan
     let schema: ScrapedSchemaAuchan | null = null
     try {
-      addOn = JSON.parse(jsonAddOn)
-      schema = JSON.parse(jsonSchema)
+      addOn = JSON.parse(clean(jsonAddOnRaw))
+      schema = parseConcat(jsonSchemaRaw)
     } catch (jsonError) {
       console.warn(`Error parsing product detail JSON for URL: ${url}`, jsonError)
       return {}
@@ -159,19 +169,25 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
     const pricePerMajorUnit = pricePerMajorUnitStr ? priceToNumber(pricePerMajorUnitStr) : null
     const majorUnit = pricePerMajorUnitStr.split("/")[pricePerMajorUnitStr.split("/").length - 1]
     const item = addOn.ecommerce.items[0]
-    const imageSrc = $(".auc-carousel__thumbnail-image").first().attr("src")
-    const imageUrl = imageSrc ? resizeImgSrc(imageSrc, 500, 500) : null
+
+    const imageSrcMain = schema?.image?.[0]
+    const imageUrlMain = imageSrcMain ? resizeImgSrc(imageSrcMain, 500, 500) : null
+    const imageSrcFallback = $(".auc-carousel__thumbnail-image").first().attr("src")
+    const imageUrlFallback = imageSrcFallback ? resizeImgSrc(imageSrcFallback, 500, 500) : null
+    const imageUrlAppendix = `?sw=500&sh=500&sm=fit&bgcolor=FFFFFF`
+    let imageUrl = imageUrlMain || imageUrlFallback || null
+    if (!imageUrl?.includes("?")) imageUrl += imageUrlAppendix
 
     const rawProduct = {
       url,
       name: formatProductName(schema?.name),
       brand: formatProductName(schema?.brand?.name),
       pack: $(".attribute-values.auc-pdp-regular").first().text().trim() || null,
-      price: addOn.ecommerce.value || null,
+      price: schema?.offers?.price || null,
       price_recommended: priceToNumber(item.price) || null,
       price_per_major_unit: pricePerMajorUnitStr || null,
       major_unit: majorUnit || null,
-      image: imageUrl || schema?.image?.[0] || null,
+      image: imageUrl,
       category: item.item_category || null,
       category_2: item.item_category2 || null,
       category_3: item.item_category3 || null,

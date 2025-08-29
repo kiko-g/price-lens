@@ -47,7 +47,7 @@ export function ScrapeUrlDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="hover:bg-accent px-2" variant="dropdown-item">
+        <Button className="hover:bg-accent cursor-pointer px-2" variant="dropdown-item">
           Add product from URL
           <Link2Icon className="h-4 w-4" />
         </Button>

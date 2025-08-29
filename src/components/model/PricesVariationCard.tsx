@@ -1,5 +1,6 @@
 import { cn, discountValueToPercentage } from "@/lib/utils"
 import { PriceChange } from "./PriceChange"
+import { ChevronRightIcon } from "lucide-react"
 
 type Props = {
   className?: string
@@ -45,17 +46,23 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
   return (
     <div className={cn("flex flex-1 flex-col items-center gap-1", className)}>
       <button
-        className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
+        className={cn(
+          "group flex w-full cursor-pointer items-center justify-between gap-2",
+          isPriceActive ? "opacity-100" : "opacity-50",
+        )}
         onClick={actions.onPriceChange}
       >
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
+          <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <ChevronRightIcon className="animate-bounce-x size-4" />
+          </div>
           <span
             className={cn(
               "border-chart-1 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isPriceActive ? "bg-chart-1" : "bg-chart-1/20",
             )}
-          ></span>
-          <span className={cn("whitespace-nowrap", isPriceActive ? "opacity-100" : "opacity-40")}>Price</span>
+          />
+          <span className="whitespace-nowrap">Price</span>
         </div>
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{price}€</span>
@@ -64,19 +71,24 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
       </button>
 
       <button
-        className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
+        className={cn(
+          "group flex w-full items-center justify-between gap-2",
+          "group flex w-full cursor-pointer items-center justify-between gap-2",
+          isPricePerMajorUnitActive ? "opacity-100" : "opacity-50",
+        )}
         onClick={actions.onPricePerMajorUnitChange}
       >
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
+          <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <ChevronRightIcon className="animate-bounce-x size-4" />
+          </div>
           <span
             className={cn(
               "border-chart-3 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isPricePerMajorUnitActive ? "bg-chart-3" : "bg-chart-3/20",
             )}
-          ></span>
-          <span className={cn("whitespace-nowrap", isPricePerMajorUnitActive ? "opacity-100" : "opacity-40")}>
-            Price per Major Unit
-          </span>
+          />
+          <span className="whitespace-nowrap">Price per Major Unit</span>
         </div>
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{pricePerMajorUnit ?? "0"}€</span>
@@ -85,19 +97,23 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
       </button>
 
       <button
-        className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
+        className={cn(
+          "group flex w-full cursor-pointer items-center justify-between gap-2",
+          isPriceRecommendedActive ? "opacity-100" : "opacity-50",
+        )}
         onClick={actions.onPriceRecommendedChange}
       >
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
+          <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <ChevronRightIcon className="animate-bounce-x size-4" />
+          </div>
           <span
             className={cn(
               "border-chart-2 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isPriceRecommendedActive ? "bg-chart-2" : "bg-chart-2/20",
             )}
-          ></span>
-          <span className={cn("whitespace-nowrap", isPriceRecommendedActive ? "opacity-100" : "opacity-40")}>
-            Price Recommended
-          </span>
+          />
+          <span className="whitespace-nowrap">Price Recommended</span>
         </div>
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{priceRecommended ?? "0"}€</span>
@@ -106,17 +122,23 @@ export function PricesVariationCard({ className, data, actions, state }: Props) 
       </button>
 
       <button
-        className={cn("flex w-full items-center justify-between gap-2 hover:opacity-80")}
+        className={cn(
+          "group flex w-full cursor-pointer items-center justify-between gap-2",
+          isDiscountActive ? "opacity-100" : "opacity-50",
+        )}
         onClick={actions.onDiscountChange}
       >
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
+          <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <ChevronRightIcon className="animate-bounce-x size-4" />
+          </div>
           <span
             className={cn(
               "border-chart-4 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
               isDiscountActive ? "bg-chart-4" : "bg-chart-4/20",
             )}
-          ></span>
-          <span className={cn("whitespace-nowrap", isDiscountActive ? "opacity-100" : "opacity-40")}>Discount</span>
+          />
+          <span className="whitespace-nowrap">Discount</span>
         </div>
         <div className="flex items-center justify-end gap-1">
           <span className="mr-1">{discount ? discountValueToPercentage(discount) : "0%"}</span>

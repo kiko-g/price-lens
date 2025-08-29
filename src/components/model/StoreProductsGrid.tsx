@@ -454,8 +454,8 @@ WHERE category = '${category1}'
 
                 <DropdownMenuItem asChild>
                   <Button variant="dropdown-item" onClick={() => setOnlyDiscounted(!onlyDiscounted)}>
-                    Only discounted
-                    <BadgePercentIcon className={cn("h-4 w-4", onlyDiscounted ? "text-green-500" : "opacity-20")} />
+                    <span className={cn(onlyDiscounted ? "text-foreground" : "opacity-30")}>Only discounted</span>
+                    <BadgePercentIcon className={cn("h-4 w-4", onlyDiscounted ? "text-green-500" : "opacity-30")} />
                   </Button>
                 </DropdownMenuItem>
 

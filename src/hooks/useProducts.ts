@@ -2,7 +2,7 @@ import axios from "axios"
 import type { GetAllQuery } from "@/types/extra"
 import type { ProductWithListings, StoreProduct } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 type GetProductsParams = {
   offset?: number
@@ -47,7 +47,9 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   const id = storeProduct.id
   if (!id) throw new Error("Cannot update a store product without an ID")
 
-  const response = await axios.post(`/api/products/store/${id}`, { storeProduct })
+  console.debug("Updating product:", storeProduct)
+
+  const response = await axios.post(`/api/products/store`, { storeProduct })
   if (response.status !== 200) {
     throw new Error("Failed to update store product")
   }
@@ -127,18 +129,23 @@ export function useRelatedStoreProducts(id: string, limit: number = 8) {
 
 export function useUpdateStoreProduct() {
   const queryClient = useQueryClient()
-  const router = useRouter()
   return useMutation({
     mutationFn: scrapeAndUpdateStoreProduct,
     onSuccess: (data) => {
       const id = data.id?.toString()
+      console.debug(data)
+      toast.success("Product updated", {
+        description: `Product ${id} has been updated successfully.`,
+      })
       if (id) {
         queryClient.invalidateQueries({ queryKey: ["storeProduct", id] })
       }
-      router.refresh()
+      // window.location.reload()
     },
-    onError: () => {
-      // Consider adding a user-facing error message here
+    onError: (error) => {
+      toast.error("Failed to update product", {
+        description: error.message,
+      })
     },
   })
 }

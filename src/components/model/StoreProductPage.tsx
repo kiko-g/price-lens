@@ -42,6 +42,18 @@ import { useUser } from "@/hooks/useUser"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
+function resolveImageUrlForPage(image: string, size = 800) {
+  const url = new URL(image)
+  const p = url.searchParams
+  const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
+  fieldsToDelete.forEach((k) => p.delete(k))
+  p.set("sw", String(size))
+  p.set("sh", String(size))
+  p.set("sm", "fit")
+  p.set("fit", "crop")
+  return url.toString()
+}
+
 function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   const { user } = useUser()
   const { toggleFavorite, isLoading } = useFavoriteToggle()
@@ -141,13 +153,13 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* Product Image */}
-        <div className="bg-muted relative aspect-square overflow-hidden rounded-lg border">
+        <div className="relative aspect-square overflow-hidden rounded-lg border bg-white">
           {sp.image ? (
             <Image
-              src={sp.image || "/placeholder.svg"}
+              src={resolveImageUrlForPage(sp.image, 800)}
               alt={sp.name}
               fill
-              className="object-cover"
+              className="object-contain object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           ) : (
@@ -169,7 +181,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge variant="blue">{sp.brand}</Badge>
+              <Badge variant="blue">{sp.brand ? sp.brand : "No brand"}</Badge>
 
               {sp.priority && sp.priority >= 3 ? (
                 <TooltipProvider delayDuration={200}>

@@ -47,14 +47,14 @@ type Props = {
   onUpdate?: () => Promise<boolean> | undefined
 }
 
-function resolveImageUrl(image: string, size = 400) {
+function resolveImageUrlForCard(image: string, size = 400) {
   const url = new URL(image)
   const p = url.searchParams
   const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
   fieldsToDelete.forEach((k) => p.delete(k))
   p.set("sw", String(size))
   p.set("sh", String(size))
-  p.set("fit", "crop")
+  p.set("sm", "fit")
   return url.toString()
 }
 
@@ -133,12 +133,12 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
             <>
               {!imageLoaded && <div className="aspect-square w-full animate-pulse bg-zinc-100 dark:bg-zinc-800" />}
               <Image
-                src={resolveImageUrl(sp.image, 300)}
+                src={resolveImageUrlForCard(sp.image, 300)}
                 alt={sp.name || "Product Image"}
                 width={500}
                 height={500}
                 className={cn(
-                  "aspect-square h-full w-full object-cover object-center transition duration-300 hover:scale-105",
+                  "aspect-square h-full w-full bg-white object-contain object-center transition duration-300 hover:scale-105",
                   !imageLoaded && "hidden",
                 )}
                 placeholder="blur"
@@ -302,7 +302,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
             {hasDiscount ? (
               <div className="flex flex-col">
                 <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
-                <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price}€</span>
+                <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
               </div>
             ) : null}
 

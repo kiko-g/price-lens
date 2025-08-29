@@ -180,7 +180,7 @@ export function Products() {
         <div className={cn("flex w-full flex-col lg:w-4/5")}>
           {isLoading && page === 1 ? (
             <div className="flex w-full flex-col gap-y-16">
-              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-6 xl:gap-4">
                 {Array.from({ length: limit }).map((_, index) => (
                   <ProductCardSkeleton key={`product-skeleton-${index}`} />
                 ))}
@@ -188,7 +188,7 @@ export function Products() {
             </div>
           ) : accumulatedProducts.length > 0 ? (
             <>
-              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-6 2xl:gap-4">
+              <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 lg:gap-4 xl:grid-cols-6 xl:gap-4">
                 {accumulatedProducts.map((product, productIdx) => (
                   <ProductCard key={`product-${productIdx}`} product={product} />
                 ))}
