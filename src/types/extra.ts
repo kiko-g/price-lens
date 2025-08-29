@@ -120,6 +120,7 @@ export type GetAllQuery = {
   category3?: string | null
   originId?: number | null
   userId?: string | null
+  orderByPriority?: boolean
   options?: {
     onlyDiscounted: boolean
   }

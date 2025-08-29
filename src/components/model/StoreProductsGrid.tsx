@@ -5,9 +5,9 @@ import { FrontendStatus, searchTypes, type SearchType, type SortByType } from "@
 import axios from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useUser } from "@/hooks/useUser"
 import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
+import { useUser } from "@/hooks/useUser"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { Wrapper } from "@/components/SectionWrapper"
@@ -55,22 +56,20 @@ import {
   ArrowUpAZ,
   ArrowUpAZIcon,
   ArrowUpWideNarrowIcon,
+  BadgePercentIcon,
   CheckIcon,
   ChevronsUpDownIcon,
-  CircleIcon,
   CircleOffIcon,
   DeleteIcon,
   EllipsisVerticalIcon,
+  HomeIcon,
+  CrownIcon,
   RefreshCcwIcon,
-  RadarIcon,
   SearchIcon,
   SquareLibraryIcon,
   StoreIcon,
   XIcon,
-  HomeIcon,
-  BadgePercentIcon,
 } from "lucide-react"
-import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 
 type Props = {
   page?: number
@@ -101,6 +100,7 @@ export function StoreProductsGrid(props: Props) {
   const [paginationTotal, setPaginationTotal] = useState(50)
   const [pagedCount, setPagedCount] = useState(0)
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
+  const [orderByPriority, setOrderByPriority] = useState(true)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [category1, setCategory1] = useState<string>("")
   const [category2, setCategory2] = useState<string>("")
@@ -233,6 +233,7 @@ WHERE category = '${category1}'
           limit,
           searchType,
           sort: sortBy,
+          orderByPriority,
           onlyDiscounted,
           ...(originId !== null ? { originId: originId.toString() } : {}),
           ...(query === ""
@@ -281,24 +282,6 @@ WHERE category = '${category1}'
     }
   }
 
-  async function updateProductsInPage() {
-    setStatus(FrontendStatus.Loading)
-
-    try {
-      for (const sp of storeProducts) {
-        await axios.post(`/api/products/store`, {
-          storeProduct: sp,
-        })
-        await new Promise((resolve) => setTimeout(resolve, 50))
-      }
-      await fetchProducts()
-    } catch (err) {
-      console.warn("Failed to update products:", err)
-    } finally {
-      setStatus(FrontendStatus.Loaded)
-    }
-  }
-
   function handleSubmit() {
     setPage(1)
     if (page === 1) fetchProducts()
@@ -334,7 +317,7 @@ WHERE category = '${category1}'
 
   useEffect(() => {
     fetchProducts()
-  }, [page, sortBy, onlyDiscounted, originId])
+  }, [page, sortBy, onlyDiscounted, originId, orderByPriority])
 
   useEffect(() => {
     const allCategoriesFilled = category1 && category2 && category3
@@ -448,15 +431,10 @@ WHERE category = '${category1}'
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="w-48" align="end">
-                <DropdownMenuItem asChild>
-                  <ScrapeUrlDialog />
-                </DropdownMenuItem>
+                <DropdownMenuLabel>Tooling</DropdownMenuLabel>
 
                 <DropdownMenuItem asChild>
-                  <Button variant="dropdown-item" onClick={() => setOnlyDiscounted(!onlyDiscounted)}>
-                    <span className={cn(onlyDiscounted ? "text-foreground" : "opacity-30")}>Only discounted</span>
-                    <BadgePercentIcon className={cn("h-4 w-4", onlyDiscounted ? "text-green-500" : "opacity-30")} />
-                  </Button>
+                  <ScrapeUrlDialog />
                 </DropdownMenuItem>
 
                 <DropdownMenuItem variant="default" asChild>
@@ -465,18 +443,6 @@ WHERE category = '${category1}'
                     <DeleteIcon />
                   </Button>
                 </DropdownMenuItem>
-
-                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="warning" asChild>
-                      <Button variant="dropdown-item" onClick={updateProductsInPage} disabled={isLoading}>
-                        Update products in page
-                        <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
-                      </Button>
-                    </DropdownMenuItem>
-                  </>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -653,7 +619,7 @@ WHERE category = '${category1}'
                 <SelectTrigger className="min-w-[120px] font-medium">
                   <SelectValue placeholder="Store" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent align="start" className="w-[180px]">
                   <SelectGroup>
                     <SelectLabel>Store</SelectLabel>
                     <SelectItem value="0" className="flex items-center">
@@ -687,26 +653,59 @@ WHERE category = '${category1}'
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[180px]">
                   <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+
                   <DropdownMenuItem onClick={() => setSortBy("a-z")}>
                     <ArrowDownAZ className="h-4 w-4" />
                     Name A-Z
+                    {sortBy === "a-z" && <CheckIcon className="ml-auto h-4 w-4" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("z-a")}>
                     <ArrowUpAZ className="h-4 w-4" />
                     Name Z-A
+                    {sortBy === "z-a" && <CheckIcon className="ml-auto h-4 w-4" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("price-high-low")}>
                     <ArrowUpWideNarrowIcon className="h-4 w-4" />
                     Price: High to Low
+                    {sortBy === "price-high-low" && <CheckIcon className="ml-auto h-4 w-4" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("price-low-high")}>
                     <ArrowDownWideNarrowIcon className="h-4 w-4" />
                     Price: Low to High
+                    {sortBy === "price-low-high" && <CheckIcon className="ml-auto h-4 w-4" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy("only-nulls")}>
                     <CircleOffIcon className="h-4 w-4" />
                     Invalid products
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Options</DropdownMenuLabel>
+
+                  <DropdownMenuItem onClick={() => setOnlyDiscounted(!onlyDiscounted)}>
+                    <BadgePercentIcon className="h-4 w-4" />
+                    Only discounted
+                    <span
+                      className={cn(
+                        "ml-auto h-auto w-6 rounded text-center text-xs font-medium",
+                        onlyDiscounted ? "bg-green-500 text-white" : "bg-destructive text-destructive-foreground",
+                      )}
+                    >
+                      {onlyDiscounted ? "On" : "Off"}
+                    </span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={() => setOrderByPriority(!orderByPriority)}>
+                    <CrownIcon className="h-4 w-4" />
+                    Order by product priority
+                    <span
+                      className={cn(
+                        "ml-auto h-auto w-6 rounded text-center text-xs font-medium",
+                        orderByPriority ? "bg-green-500 text-white" : "bg-destructive text-destructive-foreground",
+                      )}
+                    >
+                      {orderByPriority ? "On" : "Off"}
+                    </span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

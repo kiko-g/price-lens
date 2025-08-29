@@ -172,6 +172,7 @@ export const storeProductQueries = {
     category3 = null,
     originId = null,
     userId = null,
+    orderByPriority = false,
     options = {
       onlyDiscounted: false,
     },
@@ -243,9 +244,9 @@ export const storeProductQueries = {
       dbQuery = dbQuery.in("category", categories) // FIXME: using main category, consider more
     }
 
-    if (options.onlyDiscounted) {
-      dbQuery = dbQuery.gt("discount", 0)
-    }
+    if (options.onlyDiscounted) dbQuery = dbQuery.gt("discount", 0)
+
+    if (orderByPriority) dbQuery = dbQuery.order("priority", { ascending: false })
 
     if (sort) {
       switch (sort) {

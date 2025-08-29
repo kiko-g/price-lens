@@ -21,6 +21,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -322,6 +323,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="w-48" align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Button variant="dropdown-item" asChild>
                     <Link
@@ -366,8 +368,10 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                 {process.env.NODE_ENV === "development" && (
                   <>
                     <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
+                    <DropdownMenuLabel>Admin tools</DropdownMenuLabel>
+
                     {onUpdate && (
-                      <DropdownMenuItem variant="warning" asChild>
+                      <DropdownMenuItem asChild variant="caution">
                         <Button
                           variant="dropdown-item"
                           onClick={async () => {
@@ -382,7 +386,8 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                         </Button>
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem variant="warning" asChild>
+
+                    <DropdownMenuItem asChild variant="caution">
                       <Button
                         variant="dropdown-item"
                         onClick={async () => {
@@ -421,7 +426,8 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                         <MicroscopeIcon />
                       </Button>
                     </DropdownMenuItem>
-                    <DropdownMenuItem variant="warning" asChild>
+
+                    <DropdownMenuItem asChild variant="caution">
                       <Button
                         variant="dropdown-item"
                         onClick={async () => {
