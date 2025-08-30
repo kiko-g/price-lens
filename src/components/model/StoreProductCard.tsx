@@ -88,7 +88,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
   const [priority, setPriority] = useState(sp?.priority ?? null)
   const [isFavorited, setIsFavorited] = useState(sp?.is_favorited ?? false)
 
-  const { user } = useUser()
+  const { user, profile } = useUser()
   const { toggleFavorite, isLoading } = useFavoriteToggle()
 
   const favoriteLoading = isLoading(sp?.id ?? 0)
@@ -365,7 +365,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                   </DropdownMenuItem>
                 ) : null}
 
-                {process.env.NODE_ENV === "development" && (
+                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
                   <>
                     <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
                     <DropdownMenuLabel>Admin tools</DropdownMenuLabel>
