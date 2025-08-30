@@ -3,13 +3,14 @@ import { useState, useEffect, useCallback } from "react"
 interface UseSearchWithDebounceOptions {
   delay?: number
   minLength?: number
+  initialValue?: string
 }
 
 export function useSearchWithDebounce(options: UseSearchWithDebounceOptions = {}) {
-  const { delay = 300, minLength = 3 } = options
+  const { delay = 300, minLength = 3, initialValue = "" } = options
 
-  const [query, setQuery] = useState("")
-  const [debouncedQuery, setDebouncedQuery] = useState("")
+  const [query, setQuery] = useState(initialValue)
+  const [debouncedQuery, setDebouncedQuery] = useState(initialValue)
   const [isSearching, setIsSearching] = useState(false)
 
   const handleQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

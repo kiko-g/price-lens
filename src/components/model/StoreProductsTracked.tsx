@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useTransition, useCallback } from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { StoreProduct } from "@/types"
+import type { TrackedProductsResult } from "@/app/tracked/actions"
 
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
 import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
-import { useInfiniteStoreProducts } from "@/hooks/useInfiniteStoreProducts"
 
-import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon } from "lucide-react"
+import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
@@ -18,36 +19,188 @@ import { Label } from "@/components/ui/label"
 
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 
-export function StoreProductsTracked() {
-  const [originId, setOriginId] = useState<number>(0)
+interface StoreProductsTrackedProps {
+  initialData: TrackedProductsResult
+  initialQuery: string
+  initialOriginId: number
+  initialPage: number
+}
 
-  const { query, debouncedQuery, isSearching, setIsSearching, handleQueryChange, clearSearch } = useSearchWithDebounce({
+async function fetchProducts({
+  page,
+  query,
+  originId,
+}: {
+  page: number
+  query: string
+  originId: number
+}): Promise<TrackedProductsResult> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: "30",
+    tracked: "true",
+    ...(query && { query }),
+    ...(originId !== 0 && { originId: originId.toString() }),
+  })
+
+  const response = await fetch(`/api/products/store?${params}`)
+  if (!response.ok) {
+    throw new Error("Failed to fetch products")
+  }
+
+  const data = await response.json()
+
+  return {
+    products: data.data || [],
+    pagination: {
+      page: data.pagination?.page || page,
+      limit: data.pagination?.limit || 30,
+      totalCount: data.pagination?.pagedCount || 0,
+      totalPages: data.pagination?.totalPages || 0,
+      hasMore: page < (data.pagination?.totalPages || 0),
+    },
+  }
+}
+
+export function StoreProductsTracked({
+  initialData,
+  initialQuery,
+  initialOriginId,
+  initialPage,
+}: StoreProductsTrackedProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+
+  // State for products and pagination
+  const [products, setProducts] = useState<StoreProduct[]>(initialData.products)
+  const [pagination, setPagination] = useState(initialData.pagination)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  // State for filters
+  const [originId, setOriginId] = useState(initialOriginId)
+
+  // Search state with debouncing
+  const { query, debouncedQuery, isSearching, setIsSearching, handleQueryChange } = useSearchWithDebounce({
     delay: 300,
     minLength: 3,
+    initialValue: initialQuery,
   })
 
-  const {
-    products: accumulated,
-    isLoading,
-    page,
-    scrollToTop,
-  } = useInfiniteStoreProducts({
-    limit: 30,
-    tracked: true,
-    query: debouncedQuery,
-    originId,
-  })
+  // Update URL with new search params
+  const updateSearchParams = useCallback(
+    (updates: { q?: string; origin?: number; page?: number }) => {
+      const params = new URLSearchParams(searchParams.toString())
 
-  // Clear search when changing origin
+      if (updates.q !== undefined) {
+        if (updates.q) params.set("q", updates.q)
+        else params.delete("q")
+      }
+
+      if (updates.origin !== undefined) {
+        if (updates.origin !== 0) params.set("origin", updates.origin.toString())
+        else params.delete("origin")
+      }
+
+      if (updates.page !== undefined) {
+        if (updates.page > 1) params.set("page", updates.page.toString())
+        else params.delete("page")
+      }
+
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [pathname, router, searchParams],
+  )
+
+  // Handle origin change
   const handleOriginChange = (value: string) => {
-    clearSearch()
-    setOriginId(Number(value))
+    const newOriginId = Number(value)
+    setOriginId(newOriginId)
+
+    // Reset to page 1 when changing origin
+    startTransition(() => {
+      updateSearchParams({ origin: newOriginId, page: 1 })
+    })
   }
 
-  // Handle search completion - turn off searching when results arrive
-  if (isSearching && !isLoading && debouncedQuery) {
-    setIsSearching(false)
+  // Load more products
+  const loadMore = async () => {
+    if (!pagination.hasMore || isLoadingMore) return
+
+    setIsLoadingMore(true)
+    const nextPage = pagination.page + 1
+
+    try {
+      const result = await fetchProducts({
+        page: nextPage,
+        query: debouncedQuery,
+        originId,
+      })
+
+      setProducts((prev) => [...prev, ...result.products])
+      setPagination(result.pagination)
+
+      // Update URL to reflect new page
+      updateSearchParams({ page: nextPage })
+    } catch (error) {
+      console.error("Failed to load more products:", error)
+    } finally {
+      setIsLoadingMore(false)
+    }
   }
+
+  // Prefetch next page on hover for better perceived performance
+  const prefetchNextPage = () => {
+    if (!pagination.hasMore || isLoadingMore) return
+
+    const nextPage = pagination.page + 1
+    // Prefetch the data but don't await or update state
+    fetchProducts({
+      page: nextPage,
+      query: debouncedQuery,
+      originId,
+    }).catch(() => {
+      // Silently fail prefetch
+    })
+  }
+
+  // Fetch products when filters change
+  useEffect(() => {
+    if (debouncedQuery === initialQuery && originId === initialOriginId && pagination.page === initialPage) {
+      return // Skip if nothing changed
+    }
+
+    const fetchData = async () => {
+      setIsSearching(true)
+
+      try {
+        const result = await fetchProducts({
+          page: 1, // Reset to page 1 on filter change
+          query: debouncedQuery,
+          originId,
+        })
+
+        startTransition(() => {
+          setProducts(result.products)
+          setPagination(result.pagination)
+          updateSearchParams({ q: debouncedQuery, origin: originId, page: 1 })
+        })
+      } catch (error) {
+        console.error("Failed to fetch products:", error)
+      } finally {
+        setIsSearching(false)
+      }
+    }
+
+    fetchData()
+  }, [debouncedQuery, originId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const isLoading = isPending || isSearching
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -78,16 +231,16 @@ export function StoreProductsTracked() {
             />
           </div>
 
-          <div className="mt-1.5 flex flex-col gap-2">
+          <div className="mt-2 flex flex-col gap-2">
             {isLoading ? (
               <Skeleton className="h-4 w-full rounded-md" />
             ) : (
               <p className="text-muted-foreground text-xs">
-                <strong className="text-foreground">{accumulated.length}</strong> products found matching your search
+                <strong className="text-foreground">{pagination.totalCount}</strong> products found
+                {debouncedQuery && ` matching "${debouncedQuery}"`}
               </p>
             )}
 
-            {/* TODO: */}
             <div className="flex flex-col gap-2 border-t pt-2">
               <h3 className="text-foreground text-sm font-medium">Store Origin</h3>
               <RadioGroup value={originId.toString()} onValueChange={handleOriginChange}>
@@ -140,7 +293,7 @@ export function StoreProductsTracked() {
 
         {/* Right side - scrollable */}
         <div className={cn("flex w-full flex-col lg:w-4/5")}>
-          {isLoading && page === 1 ? (
+          {isLoading && products.length === 0 ? (
             <div className="flex w-full flex-col gap-y-16">
               <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5 xl:grid-cols-6">
                 {Array.from({ length: 30 }).map((_, index) => (
@@ -148,33 +301,59 @@ export function StoreProductsTracked() {
                 ))}
               </div>
             </div>
-          ) : accumulated.length > 0 ? (
+          ) : products.length > 0 ? (
             <>
               <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5 xl:grid-cols-6">
-                {accumulated.map((sp, spIdx) => (
-                  <StoreProductCard key={`product-${spIdx}`} sp={sp} />
+                {products.map((sp, spIdx) => (
+                  <StoreProductCard key={`${sp.id}-${spIdx}`} sp={sp} />
                 ))}
               </div>
 
-              {isLoading && (
-                <div className="my-5 grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                  {Array.from({ length: 30 }).map((_, index) => (
-                    <ProductCardSkeleton key={`product-skeleton-${index}`} />
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-8 flex flex-col items-start gap-2 border-t pt-4 md:flex-row md:items-center md:justify-between">
+              <div className="mt-8 flex flex-col items-center gap-4 border-t pt-4">
                 <p className="text-muted-foreground text-center text-sm">
-                  Showing <strong className="text-foreground">{accumulated.length}</strong> products in total
+                  Showing <strong className="text-foreground">{products.length}</strong> of{" "}
+                  <strong className="text-foreground">{pagination.totalCount}</strong> products
                 </p>
-                <Button size="sm" variant="outline" className="cursor-pointer" onClick={scrollToTop}>
-                  Back to top <ArrowUpIcon className="size-4" />
-                </Button>
+
+                <div className="flex gap-2">
+                  {pagination.hasMore && (
+                    <Button
+                      onClick={loadMore}
+                      onMouseEnter={prefetchNextPage}
+                      disabled={isLoadingMore}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2Icon className="mr-2 size-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCwIcon className="mr-2 size-4" />
+                          Load More
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {products.length > 30 && (
+                    <Button size="sm" variant="outline" onClick={scrollToTop}>
+                      Back to top <ArrowUpIcon className="ml-2 size-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </>
           ) : (
-            <p>No products found matching your search.</p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <ShoppingBasketIcon className="text-muted-foreground mb-4 size-12" />
+              <p className="text-lg font-medium">No products found</p>
+              <p className="text-muted-foreground text-sm">
+                {debouncedQuery ? `No products matching "${debouncedQuery}"` : "No tracked products available"}
+              </p>
+            </div>
           )}
         </div>
       </section>
