@@ -1563,6 +1563,9 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
         case "1W":
           startDate.setUTCDate(endDate.getUTCDate() - 7)
           break
+        case "2W":
+          startDate.setUTCDate(endDate.getUTCDate() - 14)
+          break
         case "1M":
           startDate.setUTCMonth(endDate.getUTCMonth() - 1)
           break
@@ -1649,6 +1652,7 @@ function formatDateForChart(dateString: string, range: DateRange = "1M"): string
       })
 
     case "1W":
+    case "2W":
     case "1M":
     default:
       return date.toLocaleString(undefined, {

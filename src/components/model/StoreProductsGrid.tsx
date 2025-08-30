@@ -38,6 +38,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -410,11 +411,13 @@ WHERE category = '${category1}'
                 <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
                   <SelectValue placeholder="Search by" />
                 </SelectTrigger>
-                <SelectContent>
+
+                <SelectContent align="start" className="w-[180px]">
                   <SelectGroup>
                     <SelectLabel>Search by</SelectLabel>
+                    <SelectSeparator />
                     {searchTypes.map((type) => (
-                      <SelectItem key={type} value={type} className="capitalize">
+                      <SelectItem key={type} value={type} className="flex items-center gap-2 capitalize">
                         {type}
                       </SelectItem>
                     ))}

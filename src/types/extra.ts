@@ -91,13 +91,14 @@ export const getSortByType = (sortBy: string) => {
 
 export type SortByType = (typeof sortByTypes)[number]
 
-export const RANGES = ["1W", "1M", "3M", "6M", "1Y", "5Y", "Max"] as const
+export const RANGES = ["1W", "2W", "1M", "3M", "6M", "1Y", "5Y", "Max"] as const
 export type DateRange = (typeof RANGES)[number]
 
 export const daysAmountInRange: {
   [key in DateRange]: number
 } = {
   "1W": 7,
+  "2W": 14,
   "1M": 30,
   "3M": 90,
   "6M": 180,

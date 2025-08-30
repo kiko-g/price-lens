@@ -62,13 +62,22 @@ export function ScrapeUrlDialog() {
         </DialogHeader>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="product-page-url">Product page source URL</Label>
+          <Label htmlFor="product-page-url" className="mb-1">
+            Product page source URL
+          </Label>
 
           <div className="flex items-center gap-2">
-            <Input id="product-page-url" value={url} onChange={(e) => setUrl(e.target.value)} className="col-span-3" />
-            <Button onClick={handleScrape} variant="primary">
+            <Input
+              id="product-page-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="col-span-3"
+              placeholder="https://www.continente.pt/produto/leite-949202.html"
+            />
+
+            <Button onClick={handleScrape} variant="primary" disabled={!url}>
               <LoaderPinwheelIcon className="h-4 w-4" />
-              Scrape
+              Request
             </Button>
           </div>
         </div>
@@ -101,7 +110,7 @@ export function ScrapeUrlDialog() {
             </div>
           </>
         ) : (
-          <div className="bg-muted rounded-md p-4 text-center">Your result will appear here</div>
+          <div className="bg-muted rounded-md border px-4 py-8 text-center text-sm">Your result will appear here</div>
         )}
       </DialogContent>
     </Dialog>
