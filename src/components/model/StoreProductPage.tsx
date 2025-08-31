@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { SkeletonStatusError, SkeletonStatusLoaded } from "@/components/ui/combo/Loading"
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Drawer,
@@ -35,7 +35,7 @@ import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
-import { useStoreProductById, useUpdateStoreProduct } from "@/hooks/useProducts"
+import { useUpdateStoreProduct } from "@/hooks/useProducts"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
@@ -99,41 +99,10 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   )
 }
 
-export function StoreProductPageById({ id }: { id: string }) {
-  const { data: storeProduct, isLoading, isError } = useStoreProductById(id)
-
-  if (isLoading) {
-    return <StoreProductPageSkeleton />
-  }
-
-  if (isError) {
-    return (
-      <SkeletonStatusError>
-        <p>Error loading store product {id}</p>
-      </SkeletonStatusError>
-    )
-  }
-
-  if (!storeProduct) {
-    return (
-      <SkeletonStatusLoaded>
-        <p>Supermarket product {id} not found</p>
-      </SkeletonStatusLoaded>
-    )
-  }
-
-  return <StoreProductPage sp={storeProduct} />
-}
-
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
-  const productId = sp.id!.toString()
-  const { data: storeProduct, isLoading } = useStoreProductById(productId)
   const updateStoreProduct = useUpdateStoreProduct()
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
-
-  if (isLoading) return <p>Loading...</p>
-  if (!storeProduct) return <p>No product found.</p>
 
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)
 
@@ -308,7 +277,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                   <Button
                     variant="dropdown-item"
                     className="hover:bg-accent flex items-center justify-start gap-2"
-                    onClick={() => updateStoreProduct.mutate(storeProduct)}
+                    onClick={() => updateStoreProduct.mutate(sp)}
                     disabled={updateStoreProduct.isPending}
                   >
                     {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon className="h-4 w-4" />}

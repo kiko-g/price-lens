@@ -50,9 +50,7 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   console.debug("Updating product:", storeProduct)
 
   const response = await axios.post(`/api/products/store`, { storeProduct })
-  if (response.status !== 200) {
-    throw new Error("Failed to update store product")
-  }
+  if (response.status !== 200) throw new Error("Failed to update store product")
   return response.data as StoreProduct
 }
 
@@ -137,10 +135,7 @@ export function useUpdateStoreProduct() {
       toast.success("Product updated", {
         description: `Product ${id} has been updated successfully.`,
       })
-      if (id) {
-        queryClient.invalidateQueries({ queryKey: ["storeProduct", id] })
-      }
-      // window.location.reload()
+      if (id) queryClient.invalidateQueries({ queryKey: ["storeProduct", id] })
     },
     onError: (error) => {
       toast.error("Failed to update product", {
