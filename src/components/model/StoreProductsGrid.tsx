@@ -4,6 +4,7 @@ import { type StoreProduct } from "@/types"
 import { FrontendStatus, searchTypes, type SearchType, type SortByType } from "@/types/extra"
 import axios from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
@@ -91,6 +92,7 @@ export function StoreProductsGrid(props: Props) {
     originId: initOriginId = null,
   } = props
 
+  const router = useRouter()
   const limit = 36
   const [page, setPage] = useState(initPage)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
@@ -850,7 +852,7 @@ WHERE category = '${category1}'
           </div>
 
           <div className="mt-2 flex w-full items-center justify-center gap-3">
-            <Button variant="outline" onClick={() => (window.location.href = "/")}>
+            <Button variant="outline" onClick={() => router.push("/")}>
               <HomeIcon className="h-4 w-4" />
               Return home
             </Button>
