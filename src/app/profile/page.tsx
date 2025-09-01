@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation"
 
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
-import { SessionMonitor } from "@/components/SessionMonitor"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -39,11 +38,6 @@ export default function ProfilePage() {
 
       <div className="container mx-auto max-w-6xl space-y-6 p-6">
         <HeaderActions />
-
-        {/* Session Monitor for Development */}
-        <SessionMonitor />
-
-        {/* Content */}
         {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
       </div>
     </div>
