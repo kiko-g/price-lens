@@ -8,18 +8,7 @@ export function FavoritesLink({ onClick }: { onClick?: () => void }) {
   const { user, isLoading: isUserLoading } = useUser()
   const { count, isLoading: isFavoritesLoading } = useFavoritesCount(user?.id ?? "")
 
-  if (isUserLoading || isFavoritesLoading) {
-    return (
-      <Button variant="outline" size="icon" className="relative" asChild disabled>
-        <Link href="/favorites">
-          <HeartIcon className="h-4 w-4 animate-pulse" />
-          <span className="sr-only">Favorites</span>
-        </Link>
-      </Button>
-    )
-  }
-
-  if (!user) return null
+  if (isUserLoading || isFavoritesLoading || !user) return null
 
   return (
     <Button variant="outline" size="icon" className="relative" asChild>
