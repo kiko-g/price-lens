@@ -15,6 +15,8 @@ import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { BadgeEuroIcon, ShoppingBasketIcon, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 import { ceil, floor } from "lodash"
 import { useMemo } from "react"
+import { useState, useEffect } from "react"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
 export function Hero() {
   return (
@@ -51,7 +53,7 @@ export function Hero() {
       </div>
 
       <div className="my-8 w-full max-w-full flex-1 self-start overflow-hidden lg:my-0 lg:w-auto lg:max-w-md">
-        <HandpickedShowcaseChart storeProductId="18728" className="border-border w-full bg-linear-to-br shadow-none" />
+        <ProductShowcaseCarousel className="border-border w-full bg-linear-to-br shadow-none" />
       </div>
     </div>
   )
@@ -243,16 +245,10 @@ function StaticMockChart({ className }: { className?: string }) {
 function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId: string; className?: string }) {
   const { data: productData, isLoading } = useStoreProductWithPricesById(storeProductId)
 
-  if (isLoading || !productData) return <StaticMockChart className={cn("relative", className)} />
-
-  const { storeProduct, prices } = productData
-  const chartData = buildChartData(prices, "1M")
-
-  // Calculate price evolution statistics
   const priceStats = useMemo(() => {
-    if (prices.length < 2) return null
+    if (!productData?.prices || productData.prices.length < 2) return null
 
-    const sortedPrices = [...prices].sort(
+    const sortedPrices = [...productData.prices].sort(
       (a, b) => new Date(a.valid_from || "").getTime() - new Date(b.valid_from || "").getTime(),
     )
 
@@ -261,9 +257,9 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
     const priceChange = lastPrice - firstPrice
     const priceChangePercent = firstPrice > 0 ? (priceChange / firstPrice) * 100 : 0
 
-    const avgPrice = prices.reduce((sum, p) => sum + (p.price || 0), 0) / prices.length
-    const maxPrice = Math.max(...prices.map((p) => p.price || 0))
-    const minPrice = Math.min(...prices.map((p) => p.price || 0))
+    const avgPrice = productData.prices.reduce((sum, p) => sum + (p.price || 0), 0) / productData.prices.length
+    const maxPrice = Math.max(...productData.prices.map((p) => p.price || 0))
+    const minPrice = Math.min(...productData.prices.map((p) => p.price || 0))
 
     return {
       priceChange,
@@ -275,7 +271,12 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
       isDecrease: priceChange < 0,
       isStable: priceChange === 0,
     }
-  }, [prices])
+  }, [productData?.prices])
+
+  if (isLoading || !productData) return <StaticMockChart className={cn("relative animate-pulse", className)} />
+
+  const { storeProduct, prices } = productData
+  const chartData = buildChartData(prices, "1M")
 
   const chartConfig = {
     price: {
@@ -315,7 +316,7 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
             <h2 className="text-xl font-bold">{storeProduct.name}</h2>
             <p className="text-muted-foreground text-sm">
               More details on this product{" "}
-              <Link href={`/supermarket/${storeProduct.id}`} className="underline">
+              <Link href={`/supermarket/${storeProductId}`} className="underline">
                 available here
                 <ScanBarcodeIcon className="ml-1 inline-flex h-4 w-4" />
               </Link>
@@ -325,8 +326,17 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
       </CardHeader>
 
       <CardContent className="p-2 sm:p-6">
-        <ChartContainer config={chartConfig} className="pb-4">
-          <LineChart data={chartData}>
+        <ChartContainer config={chartConfig}>
+          <LineChart
+            data={chartData}
+            accessibilityLayer
+            margin={{
+              left: 4,
+              right: -20,
+              top: 12,
+              bottom: 30,
+            }}
+          >
             <CartesianGrid strokeDasharray="4 4" />
             <XAxis
               dataKey="date"
@@ -344,9 +354,8 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
               tickLine={false}
               axisLine={false}
               width={40}
-              domain={[0, 15]}
+              domain={[0, priceStats?.maxPrice ? priceStats.maxPrice * 1.1 : 15]}
               tickFormatter={(value) => `€${value.toFixed(1)}`}
-              label={{ value: "Price (€)", angle: -90, position: "insideLeft", offset: -1 }}
             />
             <YAxis
               dataKey="discount"
@@ -357,7 +366,6 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
               width={40}
               domain={[0, 100]}
               tickFormatter={(value) => `${value}%`}
-              label={{ value: "Discount (%)", angle: 90, position: "insideRight", offset: -1 }}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
@@ -420,5 +428,58 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
         </CardFooter>
       )}
     </Card>
+  )
+}
+
+function ProductShowcaseCarousel({ className }: { className?: string }) {
+  const productIds = ["16258", "3807", "18728"]
+  const [api, setApi] = useState<any>(null)
+  const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    if (!api) return
+
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap())
+    }
+
+    api.on("select", onSelect)
+    onSelect()
+
+    return () => {
+      api.off("select", onSelect)
+    }
+  }, [api])
+
+  useEffect(() => {
+    if (!api) return
+
+    const interval = setInterval(() => {
+      api.scrollNext()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [api])
+
+  return (
+    <>
+      <Carousel
+        className={cn("relative rounded-lg border", className)}
+        setApi={setApi}
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+      >
+        <CarouselContent className="-ml-0 border-0">
+          {productIds.map((productId, index) => (
+            <CarouselItem key={productId} className="border-0 pl-0">
+              <HandpickedShowcaseChart storeProductId={productId} className="border-0" />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <BorderBeam duration={5} size={150} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
+      </Carousel>
+    </>
   )
 }
