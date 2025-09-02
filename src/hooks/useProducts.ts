@@ -3,6 +3,7 @@ import type { GetAllQuery } from "@/types/extra"
 import type { ProductWithListings, StoreProduct } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { usePrices } from "./usePrices"
 
 type GetProductsParams = {
   offset?: number
@@ -113,6 +114,24 @@ export function useStoreProductById(id: string) {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   })
+}
+
+export function useStoreProductWithPricesById(id: string) {
+  const storeProductQuery = useStoreProductById(id)
+  const pricesQuery = usePrices(id)
+
+  return {
+    data:
+      storeProductQuery.data && pricesQuery.data
+        ? {
+            storeProduct: storeProductQuery.data,
+            prices: pricesQuery.data,
+          }
+        : undefined,
+    isLoading: storeProductQuery.isLoading || pricesQuery.isLoading,
+    error: storeProductQuery.error || pricesQuery.error,
+    isError: storeProductQuery.isError || pricesQuery.isError,
+  }
 }
 
 export function useRelatedStoreProducts(id: string, limit: number = 8) {

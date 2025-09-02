@@ -1505,9 +1505,8 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
 
   // Filter out prices without valid_from and sort them by valid_from
   const validPrices = prices.filter((p) => p.valid_from !== null)
-  if (validPrices.length === 0) {
-    return []
-  }
+  if (validPrices.length === 0) return []
+
   validPrices.sort((a, b) => a.valid_from!.localeCompare(b.valid_from!))
 
   // Preprocess prices into objects with UTC Date instances
@@ -1567,19 +1566,19 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
           startDate.setUTCDate(endDate.getUTCDate() - 14)
           break
         case "1M":
-          startDate.setUTCMonth(endDate.getUTCMonth() - 1)
+          startDate.setUTCDate(endDate.getUTCDate() - 30)
           break
         case "3M":
-          startDate.setUTCMonth(endDate.getUTCMonth() - 3)
+          startDate.setUTCDate(endDate.getUTCDate() - 90)
           break
         case "6M":
-          startDate.setUTCMonth(endDate.getUTCMonth() - 6)
+          startDate.setUTCDate(endDate.getUTCDate() - 180)
           break
         case "1Y":
-          startDate.setUTCFullYear(endDate.getUTCFullYear() - 1)
+          startDate.setUTCDate(endDate.getUTCDate() - 365)
           break
         case "5Y":
-          startDate.setUTCFullYear(endDate.getUTCFullYear() - 5)
+          startDate.setUTCDate(endDate.getUTCDate() - 365 * 5)
           break
         default:
           throw new Error(`Unsupported range: ${range}`)

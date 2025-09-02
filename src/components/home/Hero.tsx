@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { cn } from "@/lib/utils"
+import { cn, buildChartData } from "@/lib/utils"
+import { useStoreProductWithPricesById } from "@/hooks/useProducts"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
 import { Button } from "@/components/ui/button"
@@ -11,8 +12,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { BorderBeam } from "@/components/magicui/border-beam"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
-import { BadgeEuroIcon, ShoppingBasketIcon, TrendingUp } from "lucide-react"
-import { useStoreProductById } from "@/hooks/useProducts"
+import { BadgeEuroIcon, ShoppingBasketIcon, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
+import { ceil, floor } from "lodash"
+import { useMemo } from "react"
 
 export function Hero() {
   return (
@@ -49,7 +51,7 @@ export function Hero() {
       </div>
 
       <div className="my-8 w-full max-w-full flex-1 self-start overflow-hidden lg:my-0 lg:w-auto lg:max-w-md">
-        <StaticMockChart className="border-border w-full bg-linear-to-br shadow-none" />
+        <HandpickedShowcaseChart storeProductId="18728" className="border-border w-full bg-linear-to-br shadow-none" />
       </div>
     </div>
   )
@@ -105,10 +107,6 @@ function Brands({ className }: { className?: string }) {
 }
 
 function StaticMockChart({ className }: { className?: string }) {
-  const { data: cereaisFitnessChocolate, isLoading } = useStoreProductById("18728")
-  if (isLoading) return <p>Loading...</p>
-  if (!cereaisFitnessChocolate) return <p>No data</p>
-
   const chartDataA = [
     { month: "January", price: 4.99, priceRecommended: 5.99, discount: 17, pricePerUnit: 9.99 },
     { month: "February", price: 5.49, priceRecommended: 5.99, discount: 8, pricePerUnit: 10.98 },
@@ -242,16 +240,185 @@ function StaticMockChart({ className }: { className?: string }) {
   )
 }
 
-function HandpickedShowcaseCharts({ className }: { className?: string }) {
+function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId: string; className?: string }) {
+  const { data: productData, isLoading } = useStoreProductWithPricesById(storeProductId)
+
+  if (isLoading || !productData) return <StaticMockChart className={cn("relative", className)} />
+
+  const { storeProduct, prices } = productData
+  const chartData = buildChartData(prices, "1M")
+
+  // Calculate price evolution statistics
+  const priceStats = useMemo(() => {
+    if (prices.length < 2) return null
+
+    const sortedPrices = [...prices].sort(
+      (a, b) => new Date(a.valid_from || "").getTime() - new Date(b.valid_from || "").getTime(),
+    )
+
+    const firstPrice = sortedPrices[0].price || 0
+    const lastPrice = sortedPrices[sortedPrices.length - 1].price || 0
+    const priceChange = lastPrice - firstPrice
+    const priceChangePercent = firstPrice > 0 ? (priceChange / firstPrice) * 100 : 0
+
+    const avgPrice = prices.reduce((sum, p) => sum + (p.price || 0), 0) / prices.length
+    const maxPrice = Math.max(...prices.map((p) => p.price || 0))
+    const minPrice = Math.min(...prices.map((p) => p.price || 0))
+
+    return {
+      priceChange,
+      priceChangePercent,
+      avgPrice,
+      maxPrice,
+      minPrice,
+      isIncrease: priceChange > 0,
+      isDecrease: priceChange < 0,
+      isStable: priceChange === 0,
+    }
+  }, [prices])
+
+  const chartConfig = {
+    price: {
+      label: "Price",
+      color: "var(--chart-1)",
+    },
+    "price-recommended": {
+      label: "Price Recommended",
+      color: "var(--chart-2)",
+    },
+    "price-per-major-unit": {
+      label: "Price Per Major Unit",
+      color: "var(--chart-3)",
+    },
+    discount: {
+      label: "Discount",
+      color: "var(--chart-4)",
+    },
+  } satisfies ChartConfig
+
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      <div className="flex flex-col gap-4">
-        <h2 className="text-2xl font-bold">Handpicked Showcase Charts</h2>
-        <p className="text-muted-foreground text-sm">
-          These are some of the charts that we think are interesting and worth showing.
-        </p>
-      </div>
-      <div className="flex flex-col gap-4"></div>
-    </div>
+    <Card className={cn("relative", className)}>
+      <CardHeader className="flex flex-col gap-4">
+        <div className="flex items-start justify-start gap-4">
+          {storeProduct.image ? (
+            <img
+              src={storeProduct.image}
+              alt={storeProduct.name || "Product"}
+              className="h-16 w-16 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="bg-muted flex size-24 items-center justify-center rounded-lg">
+              <ImageIcon className="text-muted-foreground h-8 w-8" />
+            </div>
+          )}
+          <div>
+            <h2 className="text-xl font-bold">{storeProduct.name}</h2>
+            <p className="text-muted-foreground text-sm">
+              More details on this product{" "}
+              <Link href={`/supermarket/${storeProduct.id}`} className="underline">
+                available here
+                <ScanBarcodeIcon className="ml-1 inline-flex h-4 w-4" />
+              </Link>
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-2 sm:p-6">
+        <ChartContainer config={chartConfig} className="pb-4">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="4 4" />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              interval="preserveEnd"
+              tick={{ fontSize: 10 }}
+              tickFormatter={(value) => value.slice(0, 10)}
+            />
+            <YAxis
+              dataKey="price"
+              yAxisId="price"
+              orientation="left"
+              tickLine={false}
+              axisLine={false}
+              width={40}
+              domain={[0, 15]}
+              tickFormatter={(value) => `€${value.toFixed(1)}`}
+              label={{ value: "Price (€)", angle: -90, position: "insideLeft", offset: -1 }}
+            />
+            <YAxis
+              dataKey="discount"
+              yAxisId="discount"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              width={40}
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+              label={{ value: "Discount (%)", angle: 90, position: "insideRight", offset: -1 }}
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
+            <Line
+              yAxisId="price"
+              dataKey="price-recommended"
+              type="linear"
+              stroke="var(--chart-2)"
+              strokeWidth={2}
+              strokeDasharray="6 6"
+              dot={false}
+            />
+            <Line
+              yAxisId="price"
+              dataKey="price-per-major-unit"
+              type="linear"
+              stroke="var(--chart-3)"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              yAxisId="discount"
+              dataKey="discount"
+              type="linear"
+              stroke="var(--chart-4)"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+            />
+          </LineChart>
+        </ChartContainer>
+      </CardContent>
+
+      {priceStats && (
+        <CardFooter className="pt-0">
+          <div className="flex w-full items-start gap-2 text-sm">
+            <div className="grid gap-2">
+              <div className="flex items-center gap-2 leading-none font-medium">
+                {priceStats.isIncrease ? (
+                  <>
+                    Trending up by {priceStats.priceChangePercent.toFixed(1)}% this month{" "}
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                  </>
+                ) : priceStats.isDecrease ? (
+                  <>
+                    Trending down by {Math.abs(priceStats.priceChangePercent).toFixed(1)}% this month{" "}
+                    <TrendingUp className="h-4 w-4 rotate-180 text-red-500" />
+                  </>
+                ) : (
+                  <>
+                    Price is relatively stable this month <TrendingUp className="h-4 w-4 text-blue-500" />
+                  </>
+                )}
+              </div>
+              <div className="text-muted-foreground flex items-center gap-2 leading-none">
+                Showing price points for the last month
+              </div>
+            </div>
+          </div>
+        </CardFooter>
+      )}
+    </Card>
   )
 }
