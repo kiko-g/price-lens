@@ -1,15 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createClientBrowser } from "@/lib/supabase/client"
-import type { UserFavorite } from "@/types"
+import type { PaginationParams, PaginatedQueryResult } from "./user"
 
 export const favoriteQueries = {
-  /**
-   * Add a product to user's favorites
-   */
   async addFavorite(userId: string, storeProductId: number, isServer = true) {
     const supabase = isServer ? createClient() : createClientBrowser()
 
-    // Check if already favorited
     const { data: existing } = await supabase
       .from("user_favorites")
       .select("id")
@@ -24,13 +20,9 @@ export const favoriteQueries = {
       }
     }
 
-    // Add to favorites
     const { data, error } = await supabase
       .from("user_favorites")
-      .insert({
-        user_id: userId,
-        store_product_id: storeProductId,
-      })
+      .insert({ user_id: userId, store_product_id: storeProductId })
       .select()
       .single()
 
@@ -66,7 +58,6 @@ export const favoriteQueries = {
       .single()
 
     if (error && error.code !== "PGRST116") {
-      // Not found error
       return { data: false, error }
     }
 
@@ -93,6 +84,65 @@ export const favoriteQueries = {
       .order("created_at", { ascending: false })
 
     return { data, error }
+  },
+
+  /**
+   * Get paginated favorites for a user
+   */
+  async getUserFavoritesPaginated(
+    userId: string,
+    pagination: PaginationParams = { page: 1, limit: 20 },
+    isServer = true,
+  ): Promise<PaginatedQueryResult<any>> {
+    const supabase = isServer ? createClient() : createClientBrowser()
+    const { page = 1, limit = 20 } = pagination
+    const offset = (page - 1) * limit
+
+    const { data, error, count } = await supabase
+      .from("user_favorites")
+      .select(
+        `
+        id,
+        created_at,
+        store_product_id,
+        store_products (*)
+      `,
+        { count: "exact" },
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) {
+      return {
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+        error: { message: error.message, code: "DATABASE_ERROR" },
+      }
+    }
+
+    const totalCount = count || 0
+    const totalPages = Math.ceil(totalCount / limit)
+
+    return {
+      data: data || [],
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      error: null,
+    }
   },
 
   /**

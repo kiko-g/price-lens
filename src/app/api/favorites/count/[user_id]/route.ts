@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
 import { favoriteQueries } from "@/lib/db/queries/favorites"
+import { userQueries } from "@/lib/db/queries/user"
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ user_id: string }> }) {
   try {
     const { user_id } = await params
-    const supabase = createClient()
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { data: user, error: authError } = await userQueries.getCurrentUser()
+    if (authError || !user) {
+      return NextResponse.json({ count: 0, error: authError?.message || "Unauthorized" }, { status: 401 })
+    }
 
-    if (authError || !user) return NextResponse.json({ count: 0, error: "Unauthorized" }, { status: 401 })
-
-    if (user.id !== user_id) return NextResponse.json({ count: 0, error: "Forbidden" }, { status: 403 })
+    const { data: hasPermission, error: permissionError } = await userQueries.checkUserPermission(user.id, user_id)
+    if (permissionError || !hasPermission) {
+      return NextResponse.json({ count: 0, error: permissionError?.message || "Forbidden" }, { status: 403 })
+    }
 
     const { count, error } = await favoriteQueries.getFavoritesCount(user_id, true)
 

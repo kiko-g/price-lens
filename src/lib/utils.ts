@@ -11,7 +11,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const basketProducts: BasketProduct[] = [
-  // Meat & Poultry
+  /** Meat & Poultry */
   {
     name_en: "Turkey Beefs",
     name_pt: "Bifes de Peru",
@@ -55,7 +55,7 @@ export const basketProducts: BasketProduct[] = [
     image: productsImages.sausages6,
   },
 
-  // Seafood
+  /** Seafood */
   { name_en: "Mackerel", name_pt: "Cavala", quantity: "1 kg", category: "seafood", image: productsImages.veal3 },
   { name_en: "Hake", name_pt: "Pescada", quantity: "1 kg", category: "seafood", image: productsImages.veal3 },
   { name_en: "Salmon", name_pt: "Salmão", quantity: "1 kg", category: "seafood", image: productsImages.veal3 },
@@ -97,7 +97,7 @@ export const basketProducts: BasketProduct[] = [
     image: productsImages.veal3,
   },
 
-  // Vegetables
+  /** Vegetables */
   { name_en: "Onion", name_pt: "Cebola", quantity: "1 kg", category: "vegetables", image: productsImages.veal3 },
   { name_en: "Potato", name_pt: "Batata", quantity: "1 kg", category: "vegetables", image: productsImages.veal3 },
   { name_en: "Carrot", name_pt: "Cenoura", quantity: "1 kg", category: "vegetables", image: productsImages.veal3 },
@@ -134,7 +134,7 @@ export const basketProducts: BasketProduct[] = [
     image: productsImages.veal3,
   },
 
-  // Fruits
+  /** Fruits */
   { name_en: "Banana", name_pt: "Banana", quantity: "1 kg", category: "fruits", image: productsImages.veal3 },
   { name_en: "Apple", name_pt: "Maçã", quantity: "1 kg", category: "fruits", image: productsImages.veal3 },
   { name_en: "Orange", name_pt: "Laranja", quantity: "1 kg", category: "fruits", image: productsImages.veal3 },
@@ -154,7 +154,7 @@ export const basketProducts: BasketProduct[] = [
   },
   { name_en: "Oranges", name_pt: "Laranjas", quantity: "1 kg", category: "fruits", image: productsImages.veal3 },
 
-  // Dairy & Eggs
+  /** Dairy & Eggs */
   { name_en: "Milk", name_pt: "Leite", quantity: "1 L", category: "dairy", image: productsImages.veal3 },
   { name_en: "Cheese", name_pt: "Queijo", quantity: "500 g", category: "dairy", image: productsImages.veal3 },
   { name_en: "Butter", name_pt: "Manteiga", quantity: "250 g", category: "dairy", image: productsImages.veal3 },
@@ -201,7 +201,7 @@ export const basketProducts: BasketProduct[] = [
     image: productsImages.veal3,
   },
 
-  // Grains & Pasta
+  /** Grains & Pasta */
   { name_en: "Rice", name_pt: "Arroz", quantity: "1 kg", category: "grocery", image: productsImages.veal3 },
   { name_en: "Spaghetti", name_pt: "Esparguete", quantity: "1 kg", category: "grocery", image: productsImages.veal3 },
   {
@@ -233,7 +233,7 @@ export const basketProducts: BasketProduct[] = [
     image: productsImages.veal3,
   },
 
-  // Other
+  /** Other */
   { name_en: "Sugar", name_pt: "Açúcar", quantity: "1 kg", category: "other", image: productsImages.veal3 },
   {
     name_en: "Tomato Pulp",
@@ -281,7 +281,7 @@ export const basketProducts: BasketProduct[] = [
 ]
 
 export const existingCategories = [
-  // Continente
+  /** Continente */
   "Mercearia",
   "Congelados",
   "Bebidas e Garrafeira",
@@ -302,7 +302,7 @@ export const existingCategories = [
   "Marcas",
   "Presentes",
   "Outros",
-  // Auchan
+  /** Auchan */
   "Alimentação",
   "Animais",
   "Automóvel e Bricolage",
@@ -316,7 +316,7 @@ export const existingCategories = [
   "Produtos Frescos",
   "Saúde e Bem Estar",
   "Tecnologia e Eletrodomésticos",
-  // Pingo Doce
+  /** Pingo Doce */
   "Alternativas Alimentares",
   "Animais",
   "As Nossas Marcas",
@@ -340,20 +340,20 @@ export const existingCategories = [
   "Amaciadores e Máscaras de Cabelo",
 ]
 export const defaultCategories = [
-  // Continente
+  /** Continente */
   "Mercearia",
   "Congelados",
   // "Bebidas e Garrafeira",
   // "Frescos",
   "Bio, Eco e Saudável",
   "Laticínios e Ovos",
-  // Auchan
+  /** Auchan */
   "Alimentação",
   // "Beleza e Higiene",
   "Biológicos e Alternativas",
   "Produtos Frescos",
   // "Saúde e Bem Estar",
-  // Pingo Doce
+  /** Pingo Doce */
   "Frutas E Vegetais",
   "Leite Natas E Ovos",
   "Bebidas",
@@ -1497,6 +1497,7 @@ export function now() {
 }
 
 export function buildChartData(prices: Price[], range: DateRange = "1M"): ProductChartEntry[] {
+  // FIXME:
   // Helper to parse date strings into UTC dates at midnight
   const parseUTCDate = (dateStr: string): Date => {
     const date = new Date(dateStr)
@@ -1636,6 +1637,8 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
 
   return entries
 }
+
+// FIXME: review
 function formatDateForChart(dateString: string, range: DateRange = "1M"): string {
   const date = new Date(dateString)
 

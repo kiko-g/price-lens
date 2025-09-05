@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { favoriteQueries } from "@/lib/db/queries/favorites"
+import { userQueries } from "@/lib/db/queries/user"
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,39 +10,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid store_product_id" }, { status: 400 })
     }
 
-    const supabase = createClient()
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { data: user, error: authError } = await userQueries.getCurrentUser()
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: authError?.message || "Unauthorized" }, { status: 401 })
     }
 
-    const { data: existing } = await supabase
-      .from("user_favorites")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("store_product_id", store_product_id)
-      .single()
-
-    if (existing) {
-      return NextResponse.json({ error: "Product already favorited" }, { status: 409 })
-    }
-
-    const { data, error } = await supabase
-      .from("user_favorites")
-      .insert({
-        user_id: user.id,
-        store_product_id: store_product_id,
-      })
-      .select()
-      .single()
+    const { data, error } = await favoriteQueries.addFavorite(user.id, store_product_id)
 
     if (error) {
-      console.error("Error adding favorite:", error)
-      return NextResponse.json({ error: "Failed to add favorite" }, { status: 500 })
+      const status = error.code === "ALREADY_FAVORITED" ? 409 : 500
+      return NextResponse.json({ error: error.message }, { status })
     }
 
     return NextResponse.json(data)
@@ -59,23 +37,12 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Invalid store_product_id" }, { status: 400 })
     }
 
-    const supabase = createClient()
-
-    // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { data: user, error: authError } = await userQueries.getCurrentUser()
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: authError?.message || "Unauthorized" }, { status: 401 })
     }
 
-    // Remove from favorites
-    const { error } = await supabase
-      .from("user_favorites")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("store_product_id", store_product_id)
+    const { error } = await favoriteQueries.removeFavorite(user.id, store_product_id)
 
     if (error) {
       console.error("Error removing favorite:", error)
@@ -91,58 +58,20 @@ export async function DELETE(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
-
-    // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { data: user, error: authError } = await userQueries.getCurrentUser()
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: authError?.message || "Unauthorized" }, { status: 401 })
     }
 
-    // Get pagination parameters
-    const searchParams = req.nextUrl.searchParams
-    const page = parseInt(searchParams.get("page") || "1", 10)
-    const limit = parseInt(searchParams.get("limit") || "20", 10)
-    const offset = (page - 1) * limit
+    const pagination = userQueries.createPaginationParams(req.nextUrl.searchParams)
+    const result = await favoriteQueries.getUserFavoritesPaginated(user.id, pagination)
 
-    // Get user's favorites with store product details and pagination
-    const { data, error, count } = await supabase
-      .from("user_favorites")
-      .select(
-        `
-        id,
-        created_at,
-        store_product_id,
-        store_products (*)
-      `,
-        { count: "exact" },
-      )
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1)
-
-    if (error) {
-      console.error("Error fetching favorites:", error)
-      return NextResponse.json({ error: "Failed to fetch favorites" }, { status: 500 })
+    if (result.error) {
+      console.error("Error fetching favorites:", result.error)
+      return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
-    const totalCount = count || 0
-    const totalPages = Math.ceil(totalCount / limit)
-
-    return NextResponse.json({
-      data,
-      pagination: {
-        page,
-        limit,
-        total: totalCount,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    })
+    return NextResponse.json(result)
   } catch (error) {
     console.error("Error in favorites GET route:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
