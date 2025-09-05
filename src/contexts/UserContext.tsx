@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useReducer, useEffect, useRef, useMemo, ReactNode } from "react"
+import { createContext, useContext, useReducer, useEffect, useMemo, ReactNode } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 import { Profile } from "@/types"

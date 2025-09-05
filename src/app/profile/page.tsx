@@ -38,8 +38,6 @@ export default function ProfilePage() {
 
       <div className="container mx-auto max-w-6xl space-y-6 p-6">
         <HeaderActions />
-
-        {/* Content */}
         {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
       </div>
     </div>

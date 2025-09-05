@@ -1,8 +1,9 @@
 import axios from "axios"
 import type { GetAllQuery } from "@/types/extra"
-import type { ProductWithListings, StoreProduct } from "@/types"
+import type { ProductWithListings, StoreProduct, Price } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { usePrices } from "./usePrices"
 
 type GetProductsParams = {
   offset?: number
@@ -115,6 +116,24 @@ export function useStoreProductById(id: string) {
   })
 }
 
+export function useStoreProductWithPricesById(id: string) {
+  const storeProductQuery = useStoreProductById(id)
+  const pricesQuery = usePrices(id)
+
+  return {
+    data:
+      storeProductQuery.data && pricesQuery.data
+        ? {
+            storeProduct: storeProductQuery.data,
+            prices: pricesQuery.data,
+          }
+        : undefined,
+    isLoading: storeProductQuery.isLoading || pricesQuery.isLoading,
+    error: storeProductQuery.error || pricesQuery.error,
+    isError: storeProductQuery.isError || pricesQuery.isError,
+  }
+}
+
 export function useRelatedStoreProducts(id: string, limit: number = 8) {
   return useQuery({
     queryKey: ["relatedStoreProducts", id, limit],
@@ -149,6 +168,50 @@ export function useStoreProductCategories() {
   return useQuery({
     queryKey: ["storeProductCategories"],
     queryFn: () => getStoreProductCategories(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  })
+}
+
+export function useAllProductsWithPrices(productIds: string[]) {
+  return useQuery({
+    queryKey: ["allProductsWithPrices", productIds],
+    queryFn: async () => {
+      const results: Record<string, { storeProduct: StoreProduct; prices: Price[] }> = {}
+
+      // Load all products and prices in parallel
+      const promises = productIds.map(async (id) => {
+        try {
+          const [storeProductResponse, pricesResponse] = await Promise.all([
+            axios.get(`/api/products/store/${id}`),
+            axios.get(`/api/prices/${id}`),
+          ])
+
+          return {
+            id,
+            storeProduct: storeProductResponse.data as StoreProduct,
+            prices: pricesResponse.data as Price[],
+          }
+        } catch (error) {
+          console.error(`Failed to load product ${id}:`, error)
+          return null
+        }
+      })
+
+      const resultsArray = await Promise.all(promises)
+
+      resultsArray.forEach((result) => {
+        if (result) {
+          results[result.id] = {
+            storeProduct: result.storeProduct,
+            prices: result.prices,
+          }
+        }
+      })
+
+      return results
+    },
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

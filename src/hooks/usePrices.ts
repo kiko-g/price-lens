@@ -2,7 +2,7 @@ import axios from "axios"
 import type { Price } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 
-async function fetchPrices(storeProductId: string) {
+export async function fetchPrices(storeProductId: string) {
   const response = await axios.get(`/api/prices/${storeProductId}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch prices")
