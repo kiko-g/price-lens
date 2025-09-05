@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { cn, buildChartData } from "@/lib/utils"
-import { useStoreProductWithPricesById } from "@/hooks/useProducts"
+import { useStoreProductWithPricesById, useAllProductsWithPrices } from "@/hooks/useProducts"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import type { StoreProduct, Price } from "@/types"
 
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -242,9 +243,15 @@ function StaticMockChart({ className }: { className?: string }) {
   )
 }
 
-function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId: string; className?: string }) {
-  const { data: productData, isLoading } = useStoreProductWithPricesById(storeProductId)
-
+function HandpickedShowcaseChart({
+  storeProductId,
+  className,
+  productData,
+}: {
+  storeProductId: string
+  className?: string
+  productData?: { storeProduct: StoreProduct; prices: Price[] }
+}) {
   const priceStats = useMemo(() => {
     if (!productData?.prices || productData.prices.length < 2) return null
 
@@ -273,7 +280,7 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
     }
   }, [productData?.prices])
 
-  if (isLoading || !productData) return <StaticMockChart className={cn("relative animate-pulse", className)} />
+  if (!productData) return <StaticMockChart className={cn("relative animate-pulse", className)} />
 
   const { storeProduct, prices } = productData
   const chartData = buildChartData(prices, "1M")
@@ -331,10 +338,10 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
             data={chartData}
             accessibilityLayer
             margin={{
-              left: 4,
-              right: -20,
-              top: 12,
-              bottom: 30,
+              left: -10,
+              right: 0,
+              top: 0,
+              bottom: 0,
             }}
           >
             <CartesianGrid strokeDasharray="4 4" />
@@ -432,9 +439,12 @@ function HandpickedShowcaseChart({ storeProductId, className }: { storeProductId
 }
 
 function ProductShowcaseCarousel({ className }: { className?: string }) {
+  const interval = 8000
   const productIds = ["16258", "3807", "18728"]
   const [api, setApi] = useState<any>(null)
   const [current, setCurrent] = useState(0)
+
+  const { data: allProductsData, isLoading } = useAllProductsWithPrices(productIds)
 
   useEffect(() => {
     if (!api) return
@@ -454,12 +464,30 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
   useEffect(() => {
     if (!api) return
 
-    const interval = setInterval(() => {
-      api.scrollNext()
-    }, 5000)
-
-    return () => clearInterval(interval)
+    const intervalId = setInterval(() => api.scrollNext(), interval)
+    return () => clearInterval(intervalId)
   }, [api])
+
+  if (isLoading || !allProductsData) {
+    return (
+      <div className={cn("relative rounded-lg border", className)}>
+        <div className="animate-pulse">
+          <StaticMockChart className="border-0" />
+        </div>
+      </div>
+    )
+  }
+
+  const loadedProducts = Object.keys(allProductsData)
+  if (loadedProducts.length === 0) {
+    return (
+      <div className={cn("relative rounded-lg border", className)}>
+        <div className="p-6 text-center">
+          <p className="text-muted-foreground">Unable to load product data</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -474,7 +502,11 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
         <CarouselContent className="-ml-0 border-0">
           {productIds.map((productId, index) => (
             <CarouselItem key={productId} className="border-0 pl-0">
-              <HandpickedShowcaseChart storeProductId={productId} className="border-0" />
+              <HandpickedShowcaseChart
+                storeProductId={productId}
+                className="border-0"
+                productData={allProductsData[productId]}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
