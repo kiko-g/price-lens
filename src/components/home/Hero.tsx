@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { cn, buildChartData } from "@/lib/utils"
 import { useStoreProductWithPricesById, useAllProductsWithPrices } from "@/hooks/useProducts"
+import { productsWithPrices } from "@/lib/data/products"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import type { StoreProduct, Price } from "@/types"
 
@@ -18,6 +20,7 @@ import { ceil, floor } from "lodash"
 import { useMemo } from "react"
 import { useState, useEffect } from "react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export function Hero() {
   return (
@@ -109,140 +112,6 @@ function Brands({ className }: { className?: string }) {
   )
 }
 
-function StaticMockChart({ className }: { className?: string }) {
-  const chartDataA = [
-    { month: "January", price: 4.99, priceRecommended: 5.99, discount: 17, pricePerUnit: 9.99 },
-    { month: "February", price: 5.49, priceRecommended: 5.99, discount: 8, pricePerUnit: 10.98 },
-    { month: "March", price: 5.99, priceRecommended: 6.49, discount: 8, pricePerUnit: 11.98 },
-    { month: "April", price: 5.49, priceRecommended: 6.49, discount: 15, pricePerUnit: 10.98 },
-    { month: "May", price: 4.99, priceRecommended: 6.49, discount: 23, pricePerUnit: 9.99 },
-    { month: "June", price: 5.99, priceRecommended: 6.99, discount: 14, pricePerUnit: 11.98 },
-    { month: "July", price: 6.49, priceRecommended: 6.99, discount: 7, pricePerUnit: 12.98 },
-    { month: "August", price: 5.99, priceRecommended: 6.99, discount: 14, pricePerUnit: 11.98 },
-    { month: "September", price: 5.49, priceRecommended: 6.49, discount: 15, pricePerUnit: 10.98 },
-    { month: "October", price: 4.99, priceRecommended: 6.49, discount: 23, pricePerUnit: 9.99 },
-    { month: "November", price: 5.99, priceRecommended: 6.99, discount: 14, pricePerUnit: 11.98 },
-    { month: "December", price: 6.49, priceRecommended: 6.99, discount: 7, pricePerUnit: 16.0 },
-  ]
-
-  const chartConfigA = {
-    price: {
-      label: "Price",
-      color: "var(--chart-1)",
-    },
-    priceRecommended: {
-      label: "Price without discount",
-      color: "var(--chart-2)",
-    },
-    pricePerUnit: {
-      label: "Price per major unit",
-      color: "var(--chart-3)",
-    },
-    discount: {
-      label: "Discount %",
-      color: "var(--chart-4)",
-    },
-  } satisfies ChartConfig
-
-  return (
-    <Card className={cn("relative", className)}>
-      <CardHeader>
-        <CardTitle>Price Evolution</CardTitle>
-        <CardDescription>January - December 2024</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfigA}>
-          <LineChart
-            accessibilityLayer
-            data={chartDataA}
-            margin={{
-              left: 0,
-              right: 0,
-              top: 8,
-              bottom: 8,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <YAxis
-              yAxisId="price"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              domain={[0, 8]}
-              tickFormatter={(value) => `€${value}`}
-              width={40}
-            />
-            <YAxis
-              yAxisId="discount"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
-              width={40}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line
-              yAxisId="price"
-              dataKey="price"
-              type="linear"
-              stroke="var(--color-price)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              yAxisId="price"
-              dataKey="priceRecommended"
-              type="linear"
-              stroke="var(--color-priceRecommended)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              yAxisId="price"
-              dataKey="pricePerUnit"
-              type="linear"
-              stroke="var(--color-pricePerUnit)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              yAxisId="discount"
-              dataKey="discount"
-              type="linear"
-              stroke="var(--color-discount)"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 leading-none font-medium">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4 text-green-500" />
-            </div>
-            <div className="text-muted-foreground flex items-center gap-2 leading-none">
-              Showing price points for the last 6 months
-            </div>
-          </div>
-        </div>
-      </CardFooter>
-
-      <BorderBeam duration={5} size={150} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
-    </Card>
-  )
-}
-
 function HandpickedShowcaseChart({
   storeProductId,
   className,
@@ -252,6 +121,12 @@ function HandpickedShowcaseChart({
   className?: string
   productData?: { storeProduct: StoreProduct; prices: Price[] }
 }) {
+  const [imageLoaded, setImageLoaded] = useState(false)
+
+  useEffect(() => {
+    setImageLoaded(false)
+  }, [storeProductId])
+
   const priceStats = useMemo(() => {
     if (!productData?.prices || productData.prices.length < 2) return null
 
@@ -268,19 +143,47 @@ function HandpickedShowcaseChart({
     const maxPrice = Math.max(...productData.prices.map((p) => p.price || 0))
     const minPrice = Math.min(...productData.prices.map((p) => p.price || 0))
 
+    const allPriceValues = productData.prices
+      .flatMap((p) => [p.price || 0, p.price_recommended || 0, p.price_per_major_unit || 0])
+      .filter((value) => value > 0)
+
+    const outstandingMinPriceValue = allPriceValues.length > 0 ? Math.min(...allPriceValues) : 0
+    const outstandingMaxPriceValue = allPriceValues.length > 0 ? Math.max(...allPriceValues) : 0
+
     return {
       priceChange,
       priceChangePercent,
       avgPrice,
       maxPrice,
       minPrice,
+      outstandingMinPriceValue,
+      outstandingMaxPriceValue,
       isIncrease: priceChange > 0,
       isDecrease: priceChange < 0,
       isStable: priceChange === 0,
     }
   }, [productData?.prices])
 
-  if (!productData) return <StaticMockChart className={cn("relative animate-pulse", className)} />
+  if (!productData) {
+    return (
+      <Card className={cn("relative", className)}>
+        <CardHeader>
+          <CardTitle>Loading...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex h-32 items-center justify-center">
+            <div className="text-muted-foreground animate-pulse">Loading product data...</div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  console.debug(
+    productData.storeProduct.name,
+    priceStats?.outstandingMaxPriceValue ?? 0,
+    priceStats?.outstandingMinPriceValue ?? 0,
+  )
 
   const { storeProduct, prices } = productData
   const chartData = buildChartData(prices, "1M")
@@ -309,11 +212,25 @@ function HandpickedShowcaseChart({
       <CardHeader className="flex flex-col gap-4">
         <div className="flex items-start justify-start gap-4">
           {storeProduct.image ? (
-            <img
-              src={storeProduct.image}
-              alt={storeProduct.name || "Product"}
-              className="h-16 w-16 rounded-lg object-cover"
-            />
+            <div className="relative size-20 shrink-0">
+              <Image
+                src={storeProduct.image}
+                alt={storeProduct.name || "Product"}
+                className={cn(
+                  "h-full w-full rounded-lg object-cover transition-opacity duration-200",
+                  imageLoaded ? "opacity-100" : "opacity-0",
+                )}
+                width={96}
+                height={96}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(false)}
+              />
+              {!imageLoaded && (
+                <div className="bg-muted absolute inset-0 flex items-center justify-center rounded-lg">
+                  <ImageIcon className="text-muted-foreground h-8 w-8" />
+                </div>
+              )}
+            </div>
           ) : (
             <div className="bg-muted flex size-24 items-center justify-center rounded-lg">
               <ImageIcon className="text-muted-foreground h-8 w-8" />
@@ -338,7 +255,7 @@ function HandpickedShowcaseChart({
             data={chartData}
             accessibilityLayer
             margin={{
-              left: -10,
+              left: 0,
               right: 0,
               top: 0,
               bottom: 0,
@@ -361,7 +278,7 @@ function HandpickedShowcaseChart({
               tickLine={false}
               axisLine={false}
               width={40}
-              domain={[0, priceStats?.maxPrice ? priceStats.maxPrice * 1.1 : 15]}
+              domain={[0, priceStats?.outstandingMaxPriceValue ? priceStats.outstandingMaxPriceValue * 1.05 : 15]}
               tickFormatter={(value) => `€${value.toFixed(1)}`}
             />
             <YAxis
@@ -375,13 +292,13 @@ function HandpickedShowcaseChart({
               tickFormatter={(value) => `${value}%`}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
+            <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={3} dot={false} />
             <Line
               yAxisId="price"
               dataKey="price-recommended"
               type="linear"
               stroke="var(--chart-2)"
-              strokeWidth={2}
+              strokeWidth={3}
               strokeDasharray="6 6"
               dot={false}
             />
@@ -391,6 +308,7 @@ function HandpickedShowcaseChart({
               type="linear"
               stroke="var(--chart-3)"
               strokeWidth={2}
+              strokeDasharray="6 6"
               dot={false}
             />
             <Line
@@ -440,11 +358,13 @@ function HandpickedShowcaseChart({
 
 function ProductShowcaseCarousel({ className }: { className?: string }) {
   const interval = 8000
-  const productIds = ["16258", "3807", "18728"]
+  const productIds = ["2558", "16258", "3807", "18728"]
   const [api, setApi] = useState<any>(null)
   const [current, setCurrent] = useState(0)
 
   const { data: allProductsData, isLoading } = useAllProductsWithPrices(productIds)
+
+  const displayData = allProductsData || productsWithPrices
 
   useEffect(() => {
     if (!api) return
@@ -468,17 +388,7 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
     return () => clearInterval(intervalId)
   }, [api])
 
-  if (isLoading || !allProductsData) {
-    return (
-      <div className={cn("relative rounded-lg border", className)}>
-        <div className="animate-pulse">
-          <StaticMockChart className="border-0" />
-        </div>
-      </div>
-    )
-  }
-
-  const loadedProducts = Object.keys(allProductsData)
+  const loadedProducts = Object.keys(displayData)
   if (loadedProducts.length === 0) {
     return (
       <div className={cn("relative rounded-lg border", className)}>
@@ -490,9 +400,9 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
   }
 
   return (
-    <>
+    <div className="flex flex-col">
       <Carousel
-        className={cn("relative rounded-lg border", className)}
+        className={cn("relative overflow-hidden rounded-lg border", className)}
         setApi={setApi}
         opts={{
           align: "start",
@@ -505,13 +415,36 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
               <HandpickedShowcaseChart
                 storeProductId={productId}
                 className="border-0"
-                productData={allProductsData[productId]}
+                productData={displayData[productId as keyof typeof displayData]}
               />
             </CarouselItem>
           ))}
         </CarouselContent>
         <BorderBeam duration={5} size={150} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
       </Carousel>
-    </>
+
+      <div className="mt-2 flex items-center justify-between gap-4">
+        <Button variant="ghost" size="sm" onClick={() => api?.scrollPrev()} className="h-8 w-8 p-0">
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        <div className="flex flex-1 justify-center gap-2">
+          {productIds.map((_, index) => (
+            <button
+              key={index}
+              className={cn(
+                "h-2 w-2 rounded-full transition-all duration-200",
+                current === index ? "bg-foreground" : "bg-muted-foreground/30",
+              )}
+              onClick={() => api?.scrollTo(index)}
+            />
+          ))}
+        </div>
+
+        <Button variant="ghost" size="sm" onClick={() => api?.scrollNext()} className="h-8 w-8 p-0">
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   )
 }
