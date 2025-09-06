@@ -65,8 +65,8 @@
   --border: var(--base-200);
   --input: var(--base-300);
   --ring: var(--primary-500);
-  --chart-1: var(--primary-500);
-  --chart-2: var(--secondary-600);
+  --chart-1: oklch(0.5325 0.1679 262.29);
+  --chart-2: oklch(0.5823 0.219 20.15);
   --chart-3: oklch(0.8016 0.1705 73.27);
   --chart-4: oklch(0.7495 0.1664 156.1);
   --chart-5: oklch(0.5439 0.238 311);
