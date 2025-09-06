@@ -8,10 +8,10 @@ import { TrendingUpIcon, MicroscopeIcon, ShoppingBasketIcon } from "lucide-react
 
 export function InflationBasketConcept() {
   return (
-    <section className="border-foreground/20 bg-foreground/5 dark:bg-foreground/5 w-full border-t py-12 md:py-16 lg:py-24">
+    <section className="w-full py-12 md:py-16 lg:py-24">
       <div className="mx-auto w-full px-5 md:px-16">
         <div className="flex flex-col items-center justify-center space-y-4 text-center md:items-center">
-          <Badge variant="secondary">
+          <Badge variant="primary">
             <TrendingUpIcon className="h-4 w-4" />
             <span className="font-medium tracking-tighter md:tracking-normal">
               Inflation depends on a selected basket of products
@@ -30,14 +30,14 @@ export function InflationBasketConcept() {
           </div>
 
           <div className="flex flex-col gap-4 lg:flex-row">
-            <Button size="lg" variant="marketing" asChild className="w-full md:w-auto">
+            <Button size="lg" variant="default" asChild className="w-full md:w-auto">
               <Link href="/products">
                 Relevant products
                 <MicroscopeIcon className="h-4 w-4" />
               </Link>
             </Button>
 
-            <Button size="lg" variant="marketing-white" asChild className="w-full md:w-auto">
+            <Button size="lg" variant="outline" asChild className="w-full md:w-auto">
               <Link href="/supermarket">
                 Supermarket listings
                 <ShoppingBasketIcon className="h-4 w-4" />

@@ -45,7 +45,7 @@ export function PricingSection() {
               <CardTitle className="text-2xl font-bold">Free</CardTitle>
               <CardDescription>Relevant price tracking for everyone</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">$0</span>
+                <span className="text-4xl font-bold">€0</span>
                 <span className="text-muted-foreground ml-1">/month</span>
               </div>
             </CardHeader>
@@ -67,7 +67,7 @@ export function PricingSection() {
           </Card>
 
           {/* Plus Plan */}
-          <Card className="dark:bg-primary/20 bg-primary-950 relative flex flex-col overflow-hidden text-white dark:text-white">
+          <Card className="dark:from-primary/10 dark:via-primary/10 dark:to-secondary/10 from-secondary-950 via-primary-950 to-primary-950 relative flex flex-col overflow-hidden bg-gradient-to-br text-white dark:bg-gradient-to-br dark:text-white">
             <BorderBeam duration={5} size={200} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
 
             {!isComingSoon && (
@@ -80,7 +80,7 @@ export function PricingSection() {
               <CardTitle className="text-2xl font-bold">Plus</CardTitle>
               <CardDescription>Advanced tracking for savvy shoppers and inflation doomers</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">$4.99</span>
+                <span className="text-4xl font-bold">€5</span>
                 <span className="text-muted-foreground ml-1">/month</span>
               </div>
             </CardHeader>
@@ -95,7 +95,7 @@ export function PricingSection() {
               </ul>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <Button disabled={isComingSoon} className="w-full" variant="gradient-primary">
+              <Button disabled={isComingSoon} className="w-full" variant="white">
                 {isComingSoon ? "Coming soon" : "Get Plus"}
               </Button>
             </CardFooter>

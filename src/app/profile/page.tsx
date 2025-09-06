@@ -198,7 +198,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
               <h2 className="text-center text-2xl font-bold md:text-left">Upgrade to Plus</h2>
               <div className="mt-2 flex flex-col items-center justify-center text-right md:mt-0 md:flex-row md:items-end md:justify-center md:text-right">
                 <div className="text-xl font-bold md:text-3xl">
-                  $5
+                  €5
                   <span className="text-muted-foreground text-base font-semibold">/month</span>
                 </div>
               </div>

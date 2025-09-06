@@ -8,10 +8,11 @@ import { productsWithPrices } from "@/lib/data/products"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import type { StoreProduct, Price } from "@/types"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { BorderBeam } from "@/components/magicui/border-beam"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
@@ -209,8 +210,8 @@ function HandpickedShowcaseChart({
 
   return (
     <Card className={cn("relative", className)}>
-      <CardHeader className="flex flex-col gap-4">
-        <div className="flex items-start justify-start gap-4">
+      <CardHeader className="flex flex-col gap-3">
+        <div className="flex items-start justify-start gap-2">
           {storeProduct.image ? (
             <div className="relative size-20 shrink-0">
               <Image
@@ -236,20 +237,40 @@ function HandpickedShowcaseChart({
               <ImageIcon className="text-muted-foreground h-8 w-8" />
             </div>
           )}
-          <div>
-            <h2 className="text-xl font-bold">{storeProduct.name}</h2>
+
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-lg leading-5 font-semibold tracking-tighter">{storeProduct.name}</h2>
             <p className="text-muted-foreground text-sm">
               More details on this product{" "}
-              <Link href={`/supermarket/${storeProductId}`} className="underline">
+              <Link href={`/supermarket/${storeProductId}`} className="hover:text-foreground underline">
                 available here
-                <ScanBarcodeIcon className="ml-1 inline-flex h-4 w-4" />
+                <ScanBarcodeIcon className="ml-1 inline-flex size-3" />
               </Link>
             </p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {storeProduct.brand && (
+                <Badge variant="blue" size="xs" roundedness="sm">
+                  {storeProduct.brand}
+                </Badge>
+              )}
+
+              {storeProduct.pack && (
+                <Badge
+                  size="xs"
+                  variant="boring"
+                  roundedness="sm"
+                  className="line-clamp-1 max-w-24 text-left tracking-tight"
+                >
+                  {storeProduct.pack}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="p-2 sm:p-6">
+      <CardContent className="p-2 pt-0 sm:p-4 sm:pt-2">
         <ChartContainer config={chartConfig}>
           <LineChart
             data={chartData}
@@ -392,7 +413,7 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
   if (loadedProducts.length === 0) {
     return (
       <div className={cn("relative rounded-lg border", className)}>
-        <div className="p-6 text-center">
+        <div className="p-4 text-center">
           <p className="text-muted-foreground">Unable to load product data</p>
         </div>
       </div>

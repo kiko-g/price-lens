@@ -587,6 +587,7 @@ export function InflationTrends() {
         </div>
       </section>
 
+      {/* Period Comparisons */}
       <section className="border-border w-full px-4 py-12 md:py-16 lg:py-24">
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -597,7 +598,6 @@ export function InflationTrends() {
           </p>
         </div>
 
-        {/* Period Comparisons */}
         <div className="mx-auto mt-5 flex w-full max-w-6xl flex-col gap-6 px-0 md:px-16">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-4">
@@ -716,6 +716,21 @@ export function InflationTrends() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* What can we do */}
+      <section className="bg-secondary/5 w-full px-4 py-12 md:py-16 lg:py-24">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            {" "}
+            What can we do?{" "}
+          </h2>
+          <p className="text-muted-foreground mx-auto max-w-4xl text-center md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
+            As consumers we can at the very least be weary of price fluctuations and be more careful and conservative
+            with our budgeting. Price Lens is a project designed to help users understand prices beyond what shelves
+            tell us, make informed decisions, save money and be more aware of the money environment that we live in.
+          </p>
         </div>
       </section>
     </>

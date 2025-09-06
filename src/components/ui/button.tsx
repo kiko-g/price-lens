@@ -11,6 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: `bg-zinc-800 text-white shadow hover:bg-zinc-800/90 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
         inverted: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-700`,
+        white: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
 
         primary: `bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-primary-foreground`,
         secondary: `bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90 dark:bg-secondary dark:hover:bg-secondary/90 dark:text-secondary-foreground`,
