@@ -241,7 +241,7 @@ function HandpickedShowcaseChart({
           <div className="flex flex-col gap-0.5">
             <h2 className="text-lg leading-5 font-semibold tracking-tighter">{storeProduct.name}</h2>
             <p className="text-muted-foreground text-sm">
-              More details on this product{" "}
+              More details{" "}
               <Link href={`/supermarket/${storeProductId}`} className="hover:text-foreground underline">
                 available here
                 <ScanBarcodeIcon className="ml-1 inline-flex size-3" />
@@ -430,12 +430,12 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
           loop: true,
         }}
       >
-        <CarouselContent className="-ml-0 border-0">
+        <CarouselContent className="-ml-0 border-0 shadow-none">
           {productIds.map((productId, index) => (
-            <CarouselItem key={productId} className="border-0 pl-0">
+            <CarouselItem key={productId} className="border-0 pl-0 shadow-none">
               <HandpickedShowcaseChart
                 storeProductId={productId}
-                className="border-0"
+                className="border-0 shadow-none"
                 productData={displayData[productId as keyof typeof displayData]}
               />
             </CarouselItem>

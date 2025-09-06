@@ -20,7 +20,7 @@ export function Header() {
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
-          <span className="text-2xs/4 inline-flex items-center rounded-full bg-linear-to-br from-lime-500/70 to-teal-600/70 px-1 font-bold tracking-tighter text-white capitalize md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold dark:from-lime-500 dark:to-teal-600">
+          <span className="text-2xs/4 inline-flex items-center rounded-full bg-linear-to-br from-orange-500/70 to-rose-600/70 px-1 font-bold tracking-tighter text-white capitalize md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold dark:from-purple-400 dark:to-indigo-500">
             Early Access
           </span>
 

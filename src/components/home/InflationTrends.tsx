@@ -234,7 +234,7 @@ export function InflationTrends() {
 
   return (
     <>
-      <section className="border-primary/30 bg-primary/5 w-full border-y px-4 py-12 md:py-16 lg:py-24">
+      <section className="bg-primary/5 w-full px-4 py-12 md:py-16 lg:py-24">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 md:px-16">
           <div className="flex flex-col items-center justify-center gap-3">
             <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
