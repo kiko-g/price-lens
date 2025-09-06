@@ -4,16 +4,17 @@ import { navigation } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 import { LogoLink } from "@/components/layout/LogoLink"
 import { FavoritesLink } from "@/components/layout/FavoritesLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
-
 import { Button } from "@/components/ui/button"
 
 export function Header() {
   const pathname = usePathname()
+  const isMobile = useMediaQuery("(max-width: 768px)")
 
   return (
     <header className="bg-opacity-95 dark:bg-opacity-95 sticky top-0 z-50 mx-auto h-[54px] w-full border-b bg-zinc-50 backdrop-blur backdrop-filter xl:px-4 dark:bg-zinc-950">
@@ -42,7 +43,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
-          <FavoritesLink />
+          {!isMobile && <FavoritesLink />}
           <UserDropdownMenu />
           <NavigationMenu />
         </div>

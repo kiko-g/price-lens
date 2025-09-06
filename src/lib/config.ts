@@ -80,6 +80,12 @@ export const navigation = [
     shown: true,
   },
   {
+    icon: HeartIcon,
+    label: "Favorites",
+    href: "/favorites",
+    shown: true,
+  },
+  {
     icon: WorkflowIcon,
     label: "Admin",
     href: "/admin",
