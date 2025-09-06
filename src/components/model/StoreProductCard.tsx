@@ -9,6 +9,7 @@ import { toast } from "sonner"
 
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
@@ -28,6 +29,14 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 
 import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
 import {
@@ -288,7 +297,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
             </Tooltip>
           </TooltipProvider>
 
-          <span className="text-primary-500 dark:text-primary-400 mt-1.5 w-full text-sm leading-4 font-semibold">
+          <span className="mt-1.5 w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-500">
             {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
           </span>
 
@@ -599,22 +608,43 @@ function DrawerSheet({
   description?: string
 }) {
   const [open, setOpen] = useState(false)
+  const isDesktop = useMediaQuery("(min-width: 768px)")
+
+  if (isDesktop) {
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild className="top-4">
+          <Button size="icon-sm">
+            <ChartSplineIcon />
+          </Button>
+        </SheetTrigger>
+        <SheetContent className="overflow-x-hidden overflow-y-scroll">
+          <SheetHeader>
+            <SheetTitle className="text-left">{title}</SheetTitle>
+            {description ? <SheetDescription>{description}</SheetDescription> : null}
+          </SheetHeader>
+
+          <div className="pt-2 pb-4">{children}</div>
+        </SheetContent>
+      </Sheet>
+    )
+  }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild className="top-4">
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild className="top-4">
         <Button size="icon-sm">
           <ChartSplineIcon />
         </Button>
-      </SheetTrigger>
-      <SheetContent className="overflow-x-hidden overflow-y-scroll">
-        <SheetHeader>
-          <SheetTitle className="text-left">{title}</SheetTitle>
-          {description ? <SheetDescription>{description}</SheetDescription> : null}
-        </SheetHeader>
+      </DrawerTrigger>
+      <DrawerContent className="overflow-x-hidden overflow-y-scroll">
+        <DrawerHeader>
+          <DrawerTitle className="text-left">{title}</DrawerTitle>
+          {description ? <DrawerDescription>{description}</DrawerDescription> : null}
+        </DrawerHeader>
 
-        <div className="pt-2 pb-4">{children}</div>
-      </SheetContent>
-    </Sheet>
+        <div className="px-4 pt-2 pb-4">{children}</div>
+      </DrawerContent>
+    </Drawer>
   )
 }

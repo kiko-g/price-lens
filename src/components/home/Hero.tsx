@@ -180,12 +180,6 @@ function HandpickedShowcaseChart({
     )
   }
 
-  console.debug(
-    productData.storeProduct.name,
-    priceStats?.outstandingMaxPriceValue ?? 0,
-    priceStats?.outstandingMinPriceValue ?? 0,
-  )
-
   const { storeProduct, prices } = productData
   const chartData = buildChartData(prices, "1M")
 
