@@ -24,13 +24,13 @@ export default async function TrackedPage({ searchParams }: TrackedPageProps) {
   const params = await searchParams
   const page = params.page ? parseInt(params.page, 10) : 1
   const query = params.q || ""
-  const originId = params.origin ? parseInt(params.origin, 10) : 0
+  const origin = params.origin ? parseInt(params.origin, 10) : 0
 
   const initialData = await getTrackedProducts({
     page,
     limit: 30,
     query,
-    originId,
+    origin,
   })
 
   return (
@@ -39,7 +39,7 @@ export default async function TrackedPage({ searchParams }: TrackedPageProps) {
         <StoreProductsTracked
           initialData={initialData}
           initialQuery={query}
-          initialOriginId={originId}
+          initialOriginId={origin}
           initialPage={page}
         />
       </div>

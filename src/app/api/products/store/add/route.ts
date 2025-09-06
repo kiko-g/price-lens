@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { origin } = new URL(url)
-    let originId
-    if (origin.includes("continente")) originId = 1
-    else if (origin.includes("auchan")) originId = 2
-    else if (origin.includes("pingodoce")) originId = 3
+    let originInt
+    if (origin.includes("continente")) originInt = 1
+    else if (origin.includes("auchan")) originInt = 2
+    else if (origin.includes("pingodoce")) originInt = 3
     else return NextResponse.json({ error: "Unknown store origin" }, { status: 400 })
 
     // sp.url and sp.name already exists
@@ -25,17 +25,17 @@ export async function POST(req: NextRequest) {
         message: "Product already exists",
         url,
         product: existing,
-        originId,
+        origin: originInt,
       })
     }
 
-    const scraper = getScraper(originId)
+    const scraper = getScraper(originInt)
     const scrapedProduct = (await scraper.productPage(url)) as StoreProduct
     const { data: product, error: productError } = await storeProductQueries.createOrUpdateProduct(scrapedProduct)
 
     if (productError) {
       return NextResponse.json(
-        { error: "Failed to add product", details: productError, scrapedProduct, originId, url },
+        { error: "Failed to add product", details: productError, scrapedProduct, origin: originInt, url },
         { status: 400 },
       )
     }
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       url,
       product,
       scrapedProduct,
-      originId,
+      origin: originInt,
     })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })

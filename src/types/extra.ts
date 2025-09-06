@@ -119,7 +119,7 @@ export type GetAllQuery = {
   category?: string | null
   category2?: string | null
   category3?: string | null
-  originId?: number | null
+  origin?: number | null
   userId?: string | null
   orderByPriority?: boolean
   options?: {

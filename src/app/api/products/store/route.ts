@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     const category3Param = params.get("category_3") ?? ""
     const onlyDiscountedParam = params.get("onlyDiscounted") ?? "false"
     const orderByPriorityParam = params.get("orderByPriority") ?? "false"
-    const originIdParam = params.get("originId") ?? null
+    const originParam = params.get("origin") ?? null
     const trackedParam = params.get("tracked") ?? null
 
     const query = queryParam
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const category = categoryParam || null
     const category2 = category2Param || null
     const category3 = category3Param || null
-    const originId = originIdParam ? parseInt(originIdParam, 10) : null
+    const origin = originParam ? parseInt(originParam, 10) : null
     const onlyDiscounted = onlyDiscountedParam === "true"
     const orderByPriority = orderByPriorityParam === "true"
     const tracked = trackedParam ? true : false
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       category,
       category2,
       category3,
-      originId,
+      origin,
       userId: user?.id || null,
       tracked,
       orderByPriority,

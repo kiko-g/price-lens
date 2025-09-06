@@ -316,8 +316,8 @@ const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) =
   }
 }
 
-export const getScraper = (originId: number) => {
-  switch (originId) {
+export const getScraper = (origin: number) => {
+  switch (origin) {
     case 1:
       return Scrapers.continente
     case 2:
@@ -325,7 +325,7 @@ export const getScraper = (originId: number) => {
     case 3:
       return Scrapers.pingoDoce
     default:
-      throw new Error(`Unknown originId: ${originId}`)
+      throw new Error(`Unknown origin id: ${origin}`)
   }
 }
 
@@ -418,12 +418,12 @@ export function isValidProduct(product: any): product is StoreProduct {
   return typeof product === "object" && product !== null && typeof product.url === "string"
 }
 
-export const scrapeAndReplaceProduct = async (url: string | null, originId: number | null, prevSp?: StoreProduct) => {
+export const scrapeAndReplaceProduct = async (url: string | null, origin: number | null, prevSp?: StoreProduct) => {
   if (!url) return NextResponse.json({ error: "URL is required" }, { status: 400 })
 
-  if (!originId) return NextResponse.json({ error: "Origin ID is required" }, { status: 400 })
+  if (!origin) return NextResponse.json({ error: "Origin ID is required" }, { status: 400 })
 
-  const product = await getScraper(originId).productPage(url, prevSp)
+  const product = await getScraper(origin).productPage(url, prevSp)
 
   if (!product || Object.keys(product).length === 0) {
     await storeProductQueries.upsertBlank({ url })

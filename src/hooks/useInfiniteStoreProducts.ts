@@ -7,11 +7,11 @@ interface UseInfiniteStoreProductsOptions {
   limit?: number
   tracked?: boolean
   query?: string
-  originId?: number
+  origin?: number
 }
 
 export function useInfiniteStoreProducts(options: UseInfiniteStoreProductsOptions = {}) {
-  const { limit = 30, tracked = true, query = "", originId = 0 } = options
+  const { limit = 30, tracked = true, query = "", origin = 0 } = options
 
   const [page, setPage] = useState(1)
   const [accumulated, setAccumulated] = useState<StoreProduct[]>([])
@@ -23,20 +23,20 @@ export function useInfiniteStoreProducts(options: UseInfiniteStoreProductsOption
       page,
       limit,
       query,
-      originId,
+      origin,
       tracked,
     }),
-    [page, limit, query, originId, tracked],
+    [page, limit, query, origin, tracked],
   )
 
   const { data: storeProducts, isLoading } = useStoreProducts(storeProductsParams)
 
-  // Reset pagination when query or originId changes
+  // Reset pagination when query or origin id changes
   useEffect(() => {
     setAccumulated([])
     setPage(1)
     loadingRef.current = false
-  }, [query, originId])
+  }, [query, origin])
 
   // Handle new data from API
   useEffect(() => {

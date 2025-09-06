@@ -29,18 +29,18 @@ interface StoreProductsTrackedProps {
 async function fetchProducts({
   page,
   query,
-  originId,
+  origin,
 }: {
   page: number
   query: string
-  originId: number
+  origin: number
 }): Promise<TrackedProductsResult> {
   const params = new URLSearchParams({
     page: page.toString(),
     limit: "30",
     tracked: "true",
     ...(query && { query }),
-    ...(originId !== 0 && { originId: originId.toString() }),
+    ...(origin !== 0 && { origin: origin.toString() }),
   })
 
   const response = await fetch(`/api/products/store?${params}`)
@@ -79,7 +79,7 @@ export function StoreProductsTracked({
   const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   // State for filters
-  const [originId, setOriginId] = useState(initialOriginId)
+  const [origin, setOrigin] = useState(initialOriginId)
 
   // Search state with debouncing
   const { query, debouncedQuery, isSearching, setIsSearching, handleQueryChange } = useSearchWithDebounce({
@@ -116,7 +116,7 @@ export function StoreProductsTracked({
   // Handle origin change
   const handleOriginChange = (value: string) => {
     const newOriginId = Number(value)
-    setOriginId(newOriginId)
+    setOrigin(newOriginId)
 
     // Reset to page 1 when changing origin
     startTransition(() => {
@@ -135,7 +135,7 @@ export function StoreProductsTracked({
       const result = await fetchProducts({
         page: nextPage,
         query: debouncedQuery,
-        originId,
+        origin: origin,
       })
 
       setProducts((prev) => [...prev, ...result.products])
@@ -159,7 +159,7 @@ export function StoreProductsTracked({
     fetchProducts({
       page: nextPage,
       query: debouncedQuery,
-      originId,
+      origin: origin,
     }).catch(() => {
       // Silently fail prefetch
     })
@@ -167,7 +167,7 @@ export function StoreProductsTracked({
 
   // Fetch products when filters change
   useEffect(() => {
-    if (debouncedQuery === initialQuery && originId === initialOriginId && pagination.page === initialPage) {
+    if (debouncedQuery === initialQuery && origin === initialOriginId && pagination.page === initialPage) {
       return // Skip if nothing changed
     }
 
@@ -178,13 +178,13 @@ export function StoreProductsTracked({
         const result = await fetchProducts({
           page: 1, // Reset to page 1 on filter change
           query: debouncedQuery,
-          originId,
+          origin: origin,
         })
 
         startTransition(() => {
           setProducts(result.products)
           setPagination(result.pagination)
-          updateSearchParams({ q: debouncedQuery, origin: originId, page: 1 })
+          updateSearchParams({ q: debouncedQuery, origin: origin, page: 1 })
         })
       } catch (error) {
         console.error("Failed to fetch products:", error)
@@ -194,7 +194,7 @@ export function StoreProductsTracked({
     }
 
     fetchData()
-  }, [debouncedQuery, originId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, origin]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -243,7 +243,7 @@ export function StoreProductsTracked({
 
             <div className="flex flex-col gap-2 border-t pt-2">
               <h3 className="text-foreground text-sm font-medium">Store Origin</h3>
-              <RadioGroup value={originId.toString()} onValueChange={handleOriginChange}>
+              <RadioGroup value={origin.toString()} onValueChange={handleOriginChange}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="0" id="all-stores" />
                   <Label

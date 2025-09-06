@@ -43,7 +43,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
   const {
     url: onlineUrl,
     price,
-    origin_id: originId,
+    origin_id: origin,
     major_unit: majorUnit,
     price_recommended: priceRecommended,
     price_per_major_unit: pricePerMajorUnit,
@@ -102,7 +102,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
         <div className={cn("mt-2 flex items-center justify-start gap-2")}>
           <Button variant="outline" size="sm" asChild className="gap-0.5 [&_svg]:size-3">
             <Link href={onlineUrl} target="_blank">
-              {resolveSupermarketChain(originId)?.logoSmall}
+              {resolveSupermarketChain(origin)?.logoSmall}
               <ExternalLinkIcon />
             </Link>
           </Button>

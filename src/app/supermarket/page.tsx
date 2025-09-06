@@ -29,7 +29,7 @@ export default async function Supermarket({ searchParams }: Props) {
   const sortBy = getSortByType(params.s ?? "a-z")
   const q = params.q ?? ""
   const relevant = params.relevant === "true"
-  const originId = params.origin || null
+  const origin = params.origin || null
 
-  return <StoreProductsGrid page={page} q={q} t={searchType} sort={sortBy} relevant={relevant} originId={originId} />
+  return <StoreProductsGrid page={page} q={q} t={searchType} sort={sortBy} relevant={relevant} origin={origin} />
 }

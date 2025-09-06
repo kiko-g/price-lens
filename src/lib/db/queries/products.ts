@@ -170,7 +170,7 @@ export const storeProductQueries = {
     category = null,
     category2 = null,
     category3 = null,
-    originId = null,
+    origin = null,
     userId = null,
     orderByPriority = false,
     options = {
@@ -211,7 +211,7 @@ export const storeProductQueries = {
       return result
     }
 
-    if (originId !== null && originId !== 0) dbQuery = dbQuery.eq("origin_id", originId)
+    if (origin !== null && origin !== 0) dbQuery = dbQuery.eq("origin_id", origin)
 
     if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 
@@ -638,7 +638,7 @@ export const storeProductQueries = {
     }
   },
 
-  async getAllEmptyByOriginId(originId: number) {
+  async getAllEmptyByOriginId(origin: number) {
     const supabase = createClient()
     const pageSize = 1000 // Large page size to minimize requests but avoid timeouts
     let allProducts: StoreProduct[] = []
@@ -650,7 +650,7 @@ export const storeProductQueries = {
         .from("store_products")
         .select("*", { count: "exact" })
         .is("name", null)
-        .eq("origin_id", originId)
+        .eq("origin_id", origin)
         .range(page * pageSize, (page + 1) * pageSize - 1)
 
       if (error) {

@@ -79,7 +79,7 @@ type Props = {
   t?: SearchType
   sort?: SortByType
   relevant?: boolean
-  originId?: string | null
+  origin?: string | null
 }
 
 export function StoreProductsGrid(props: Props) {
@@ -89,7 +89,7 @@ export function StoreProductsGrid(props: Props) {
     t: initSearchType = "any",
     sort: initSortBy = "a-z",
     relevant = false,
-    originId: initOriginId = null,
+    origin: initOriginId = null,
   } = props
 
   const router = useRouter()
@@ -97,7 +97,7 @@ export function StoreProductsGrid(props: Props) {
   const [page, setPage] = useState(initPage)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
-  const [originId, setOriginId] = useState<string | null>(initOriginId)
+  const [origin, setOrigin] = useState<string | null>(initOriginId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
   const [paginationTotal, setPaginationTotal] = useState(50)
@@ -238,7 +238,7 @@ WHERE category = '${category1}'
           sort: sortBy,
           orderByPriority,
           onlyDiscounted,
-          ...(originId !== null ? { originId: originId.toString() } : {}),
+          ...(origin !== null ? { origin: origin.toString() } : {}),
           ...(query === ""
             ? category1 && category2 && category3
               ? {
@@ -320,7 +320,7 @@ WHERE category = '${category1}'
 
   useEffect(() => {
     fetchProducts()
-  }, [page, sortBy, onlyDiscounted, originId, orderByPriority])
+  }, [page, sortBy, onlyDiscounted, origin, orderByPriority])
 
   useEffect(() => {
     const allCategoriesFilled = category1 && category2 && category3
@@ -333,8 +333,8 @@ WHERE category = '${category1}'
   }, [category1, category2, category3])
 
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), originId })
-  }, [page, query, searchType, sortBy, isRelevant, originId])
+    updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), origin })
+  }, [page, query, searchType, sortBy, isRelevant, origin])
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -620,7 +620,7 @@ WHERE category = '${category1}'
               </Popover>
 
               {/* Store Origin Filter */}
-              <Select value={originId ?? "0"} onValueChange={(value) => setOriginId(value === "0" ? null : value)}>
+              <Select value={origin ?? "0"} onValueChange={(value) => setOrigin(value === "0" ? null : value)}>
                 <SelectTrigger className="min-w-[120px] font-medium">
                   <SelectValue placeholder="Store" />
                 </SelectTrigger>
@@ -823,9 +823,9 @@ WHERE category = '${category1}'
               <li>
                 <strong>Sort by:</strong> {sortBy}
               </li>
-              {originId !== null && (
+              {origin !== null && (
                 <li>
-                  <strong>Store:</strong> {resolveSupermarketChain(parseInt(originId))?.name}
+                  <strong>Store:</strong> {resolveSupermarketChain(parseInt(origin))?.name}
                 </li>
               )}
               {allCategoriesFilled ? (

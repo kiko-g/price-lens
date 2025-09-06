@@ -95,7 +95,7 @@ export function useStoreProducts(params: GetAllQuery) {
       params.category,
       params.category2,
       params.category3,
-      params.originId,
+      params.origin,
       params.userId,
       params.options?.onlyDiscounted,
     ],
