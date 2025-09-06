@@ -59,105 +59,43 @@ export function PricesVariationCard({ className, data, actions, state, options =
   return (
     <div>
       <div className={cn("flex flex-1 flex-col items-center gap-1", className)}>
-        <button
-          className={cn(
-            "group flex w-full cursor-pointer items-center justify-between gap-2",
-            isPriceActive ? "opacity-100" : "opacity-50",
-          )}
+        <PriceAxisButton
+          isActive={isPriceActive}
           onClick={actions.onPriceChange}
-        >
-          <div className="relative flex items-center gap-2">
-            <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <ChevronRightIcon className="animate-bounce-x size-4" />
-            </div>
-            <span
-              className={cn(
-                "border-chart-1 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
-                isPriceActive ? "bg-chart-1" : "bg-chart-1/20",
-              )}
-            />
-            <span className="whitespace-nowrap">Price</span>
-          </div>
-          <div className="flex items-center justify-end gap-1">
-            <span className="mr-1">{price}€</span>
-            <PriceChange variation={priceVariation} />
-          </div>
-        </button>
+          chartColor="chart-1"
+          label="Price"
+          value={price}
+          variation={priceVariation}
+        />
 
-        <button
-          className={cn(
-            "group flex w-full cursor-pointer items-center justify-between gap-2",
-            isPriceRecommendedActive ? "opacity-100" : "opacity-50",
-          )}
+        <PriceAxisButton
+          isActive={isPriceRecommendedActive}
           onClick={actions.onPriceRecommendedChange}
-        >
-          <div className="relative flex items-center gap-2">
-            <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <ChevronRightIcon className="animate-bounce-x size-4" />
-            </div>
-            <span
-              className={cn(
-                "border-chart-2 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
-                isPriceRecommendedActive ? "bg-chart-2" : "bg-chart-2/20",
-              )}
-            />
-            <span className="whitespace-nowrap">Price with discount</span>
-          </div>
-          <div className="flex items-center justify-end gap-1">
-            <span className="mr-1">{priceRecommended ?? "0"}€</span>
-            <PriceChange variation={priceRecommendedVariation} />
-          </div>
-        </button>
+          chartColor="chart-2"
+          label="Price without discount"
+          value={priceRecommended ?? "0"}
+          variation={priceRecommendedVariation}
+        />
 
-        <button
-          className={cn(
-            "group flex w-full items-center justify-between gap-2",
-            isPricePerMajorUnitActive ? "opacity-100" : "opacity-50",
-          )}
+        <PriceAxisButton
+          isActive={isPricePerMajorUnitActive}
           onClick={actions.onPricePerMajorUnitChange}
-        >
-          <div className="relative flex items-center gap-2">
-            <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <ChevronRightIcon className="animate-bounce-x size-4" />
-            </div>
-            <span
-              className={cn(
-                "border-chart-3 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
-                isPricePerMajorUnitActive ? "bg-chart-3" : "bg-chart-3/20",
-              )}
-            />
-            <span className="whitespace-nowrap">Price per unit ({majorUnit})</span>
-          </div>
-          <div className="flex items-center justify-end gap-1">
-            <span className="mr-1">{pricePerMajorUnit ?? "0"}€</span>
-            <PriceChange variation={pricePerMajorUnitVariation} />
-          </div>
-        </button>
+          chartColor="chart-3"
+          label={`Price per unit (${majorUnit})`}
+          value={pricePerMajorUnit ?? "0"}
+          variation={pricePerMajorUnitVariation}
+        />
 
-        <button
-          className={cn(
-            "group flex w-full cursor-pointer items-center justify-between gap-2",
-            isDiscountActive ? "opacity-100" : "opacity-50",
-          )}
+        <PriceAxisButton
+          isActive={isDiscountActive}
           onClick={actions.onDiscountChange}
-        >
-          <div className="relative flex items-center gap-2">
-            <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <ChevronRightIcon className="animate-bounce-x size-4" />
-            </div>
-            <span
-              className={cn(
-                "border-chart-4 relative flex size-[17px] items-center justify-center rounded border-[1.5px]",
-                isDiscountActive ? "bg-chart-4" : "bg-chart-4/20",
-              )}
-            />
-            <span className="whitespace-nowrap">Discount</span>
-          </div>
-          <div className="flex items-center justify-end gap-1">
-            <span className="mr-1">{discount ? discountValueToPercentage(discount) : "0%"}</span>
-            <PriceChange invertColors variation={discountVariation} />
-          </div>
-        </button>
+          chartColor="chart-4"
+          label="Discount"
+          value={discount ? discountValueToPercentage(discount) : "0%"}
+          variation={discountVariation}
+          invertColors
+          showEuro={false}
+        />
       </div>
 
       {!options.hideExtraInfo && (
@@ -183,5 +121,57 @@ export function PricesVariationCard({ className, data, actions, state, options =
         </div>
       )}
     </div>
+  )
+}
+
+type PriceAxisButtonProps = {
+  isActive: boolean
+  onClick: () => void
+  chartColor: string
+  label: string
+  value: string | number
+  variation: number
+  invertColors?: boolean
+  showEuro?: boolean
+}
+
+function PriceAxisButton({
+  isActive,
+  onClick,
+  chartColor,
+  label,
+  value,
+  variation,
+  invertColors = false,
+  showEuro = true,
+}: PriceAxisButtonProps) {
+  return (
+    <button
+      className={cn(
+        "group flex w-full cursor-pointer items-center justify-between gap-3",
+        isActive ? "opacity-100" : "opacity-50",
+      )}
+      onClick={onClick}
+    >
+      <div className="relative flex items-center gap-2">
+        <div className="absolute top-1/2 -left-[20px] -translate-y-1/2 bg-transparent p-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <ChevronRightIcon className="animate-bounce-x size-4" />
+        </div>
+        <span
+          className={cn(
+            `border-${chartColor} relative flex size-[17px] items-center justify-center rounded border-[1.5px]`,
+            isActive ? `bg-${chartColor}` : `bg-${chartColor}/20`,
+          )}
+        />
+        <span className="whitespace-nowrap">{label}</span>
+      </div>
+      <div className="flex items-center justify-end gap-1">
+        <span className="mr-1">
+          {value}
+          {showEuro ? "€" : ""}
+        </span>
+        <PriceChange invertColors={invertColors} variation={variation} />
+      </div>
+    </button>
   )
 }

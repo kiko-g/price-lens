@@ -24,7 +24,7 @@ const chartConfig = {
     color: "var(--chart-1)",
   },
   "price-recommended": {
-    label: "Price with discount",
+    label: "Price without discount",
     color: "var(--chart-2)",
   },
   "price-per-major-unit": {

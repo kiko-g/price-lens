@@ -131,7 +131,7 @@ function StaticMockChart({ className }: { className?: string }) {
       color: "var(--chart-1)",
     },
     priceRecommended: {
-      label: "Price with discount",
+      label: "Price without discount",
       color: "var(--chart-2)",
     },
     pricePerUnit: {
@@ -291,7 +291,7 @@ function HandpickedShowcaseChart({
       color: "var(--chart-1)",
     },
     "price-recommended": {
-      label: "Price with discount",
+      label: "Price without discount",
       color: "var(--chart-2)",
     },
     "price-per-major-unit": {
