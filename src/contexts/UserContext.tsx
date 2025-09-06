@@ -49,8 +49,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(userReducer, initialState)
   const supabase = useMemo(() => createClient(), [])
 
-  console.debug(state)
-
   useEffect(() => {
     const {
       data: { subscription },

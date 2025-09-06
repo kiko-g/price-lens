@@ -13,6 +13,7 @@ import {
   NavigationOffIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
+  RadarIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -150,7 +151,14 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge variant="blue">{sp.brand ? sp.brand : "No brand"}</Badge>
+              {sp.brand && (
+                <Link href={`/supermarket?q=${encodeURIComponent(sp.brand)}`} target="_blank">
+                  <Badge variant="blue">
+                    <RadarIcon />
+                    {sp.brand}
+                  </Badge>
+                </Link>
+              )}
 
               {sp.priority && sp.priority >= 3 ? (
                 <TooltipProvider delayDuration={200}>
