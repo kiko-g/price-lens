@@ -2,17 +2,21 @@
 
 import axios from "axios"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { Price, StoreProduct, ProductChartEntry } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
-import { cn, buildChartData, getDaysBetweenDates } from "@/lib/utils"
-import { ImageIcon, Loader2Icon } from "lucide-react"
+import { cn, buildChartData, getDaysBetweenDates, imagePlaceholder } from "@/lib/utils"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { useActiveAxis } from "@/hooks/useActiveAxis"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { PricesVariationCard } from "./PricesVariationCard"
-import { useActiveAxis } from "@/hooks/useActiveAxis"
+import { PricesVariationCard } from "@/components/model/PricesVariationCard"
+
+import { HeartIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
 
 const chartConfig = {
   price: {
@@ -48,6 +52,7 @@ const defaultOptions: Props["options"] = {
 }
 
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
+  const isMobile = useMediaQuery("(max-width: 768px)")
   const [isLoading, setIsLoading] = useState(false)
   const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
@@ -63,21 +68,21 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           strokeDasharray: isSinglePoint ? "0 0" : "6 6",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
           activeDot: { r: 5 },
-          strokeWidth: 3,
+          strokeWidth: isMobile ? 2 : 3,
         }
       case "price-per-major-unit":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "4 4",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
           activeDot: { r: 5 },
-          strokeWidth: 3,
+          strokeWidth: isMobile ? 2 : 3,
         }
       case "discount":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "5 5",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
           activeDot: { r: 5 },
-          strokeWidth: 2,
+          strokeWidth: isMobile ? 2 : 2,
         }
       case "price":
       default:
@@ -85,7 +90,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           strokeDasharray: isSinglePoint ? "0 0" : "0 0",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
           activeDot: { r: 5 },
-          strokeWidth: 3.5,
+          strokeWidth: isMobile ? 2 : 3.5,
         }
     }
   }
@@ -218,10 +223,11 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
-      {options?.showPricesVariationCard || options?.showImage ? (
-        <header className="mb-6 flex items-start justify-between gap-4">
-          {options?.showPricesVariationCard ? (
+      {(options?.showPricesVariationCard || options?.showImage) && (
+        <header className="mb-2 flex items-start justify-between gap-3">
+          {options?.showPricesVariationCard && (
             <PricesVariationCard
+              state={{ activeAxis }}
               data={{
                 price: sp.price,
                 priceRecommended: sp.price_recommended,
@@ -232,9 +238,6 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                 priceRecommendedVariation,
                 pricePerMajorUnitVariation,
               }}
-              state={{
-                activeAxis,
-              }}
               actions={{
                 onPriceChange: () => handleAxisChange("price"),
                 onPriceRecommendedChange: () => handleAxisChange("price-recommended"),
@@ -243,27 +246,38 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
               }}
               className="max-w-xs text-xs font-medium md:text-sm"
             />
-          ) : null}
+          )}
 
-          {options?.showImage ? (
-            sp.image ? (
-              <Image
-                src={sp.image.replace(/&sm=fit/g, "")}
-                alt={sp.name}
-                width={100}
-                height={100}
-                className="h-20 w-20 rounded-md bg-white p-1 md:h-28 md:w-28"
-              />
-            ) : (
-              <div className="bg-muted flex h-24 w-24 items-center justify-center rounded-md">
-                <ImageIcon className="h-4 w-4" />
-              </div>
-            )
-          ) : null}
+          <div className="flex flex-col items-center gap-2">
+            {options?.showImage &&
+              (sp.image ? (
+                <div className="relative">
+                  <Link href={sp.url} target="_blank">
+                    <Image
+                      src={sp.image.replace(/&sm=fit/g, "")}
+                      alt={sp.name}
+                      width={400}
+                      height={400}
+                      className="aspect-square size-24 rounded-md bg-white p-1 md:size-32"
+                      placeholder="blur"
+                      blurDataURL={imagePlaceholder.productBlur}
+                      priority={true}
+                    />
+                    <Badge className="absolute right-1 bottom-1" size="sm" variant="boring">
+                      <ScanBarcodeIcon />
+                    </Badge>
+                  </Link>
+                </div>
+              ) : (
+                <div className="bg-muted flex aspect-square w-24 items-center justify-center rounded-md">
+                  <ImageIcon className="h-4 w-4" />
+                </div>
+              ))}
+          </div>
         </header>
-      ) : null}
+      )}
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mt-2 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-2 md:mb-4">
         {RANGES.map((range) => (
           <Button
             key={range}
@@ -277,6 +291,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         ))}
         {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
       </div>
+
       <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in")}>
         <LineChart
           accessibilityLayer

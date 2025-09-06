@@ -41,6 +41,7 @@ import {
   CircleIcon,
   MicroscopeIcon,
   HeartIcon,
+  ScanBarcodeIcon,
 } from "lucide-react"
 
 type Props = {
@@ -464,36 +465,20 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
             </DropdownMenu>
 
             <DrawerSheet title={sp.name}>
-              <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-center justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <Link href={sp.url} target="_blank">
-                    {resolveSupermarketChain(sp?.origin_id)?.logo}
-                  </Link>
-                  <Button asChild variant="ghost" size="icon-xs" roundedness="sm">
-                    <Link href={sp.url} target="_blank">
-                      <ExternalLinkIcon />
-                    </Link>
-                  </Button>
-                </div>
+              <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-start justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <PriorityBadge priority={sp.priority} size="xs" variant="default" className="text-xs font-semibold" />
 
-                <div className="flex items-center gap-2">
-                  <PriorityBadge
-                    priority={sp.priority}
-                    size="xs"
-                    variant="default"
-                    className="text-2xs font-semibold"
-                  />
-
-                  {sp.brand ? (
-                    <Badge variant="secondary" size="2xs" roundedness="sm">
+                  {sp.brand && (
+                    <Badge variant="blue" size="xs">
                       {sp.brand}
                     </Badge>
-                  ) : null}
+                  )}
 
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Badge variant="boring" size="2xs" roundedness="sm">
+                        <Badge variant="boring" size="xs">
                           {sp.category}
                         </Badge>
                       </TooltipTrigger>
@@ -506,25 +491,42 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
+
+                <div className="flex flex-col items-end justify-center gap-1">
+                  <Button variant="outline" size="sm" asChild className="gap-0.5 [&_svg]:size-3 md:[&_svg]:size-4">
+                    <Link href={sp.url} target="_blank">
+                      {resolveSupermarketChain(sp?.origin_id)?.logoSmall}
+                      <ExternalLinkIcon />
+                    </Link>
+                  </Button>
+                </div>
               </div>
 
               <Suspense fallback={<div>Loading...</div>}>
                 <ProductChart sp={sp} />
               </Suspense>
 
-              <div className="flex w-full justify-between gap-2 pt-2 text-sm">
-                <div className="flex w-full justify-end">
-                  <span className="text-muted-foreground text-xs">
-                    {sp.created_at || sp.updated_at
-                      ? `Last updated: ${formatTimestamptz(sp.updated_at)}`
-                      : "No update record"}
-                  </span>
+              <div className="-mt-4 flex w-full pt-2 text-sm">
+                <div className="flex w-full flex-col items-end justify-end gap-1">
+                  <div className="flex w-full justify-between">
+                    <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Created:</span>
+                    <span className="text-muted-foreground block text-right font-mono text-xs font-semibold">
+                      {sp.created_at ? formatTimestamptz(sp.created_at) : "No creation record"}
+                    </span>
+                  </div>
+
+                  <div className="flex w-full justify-between">
+                    <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Last updated:</span>
+                    <span className="text-muted-foreground block text-right font-mono text-xs font-semibold">
+                      {sp.created_at || sp.updated_at ? formatTimestamptz(sp.updated_at) : "No update record"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <Accordion type="single" collapsible className="mt-4 hidden w-full border-t md:flex">
+              <Accordion type="single" collapsible className="mt-2 w-full border-t">
                 <AccordionItem value="item-1" className="w-full border-0">
-                  <AccordionTrigger>Inspect store product data</AccordionTrigger>
+                  <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
                       <Code code={JSON.stringify(sp, null, 2)} language="json" />
