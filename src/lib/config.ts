@@ -59,16 +59,19 @@ export const navigation = [
     icon: HomeIcon,
     label: "Home",
     href: "/",
+    shown: true,
   },
   {
     icon: StoreIcon,
     label: "Supermarket",
     href: "/supermarket",
+    shown: true,
   },
   {
     icon: MicroscopeIcon,
     label: "Tracked",
     href: "/tracked",
+    shown: true,
   },
   {
     icon: HeartIcon,
