@@ -62,6 +62,12 @@ export const navigation = [
     shown: true,
   },
   {
+    icon: StoreIcon,
+    label: "Supermarket",
+    href: "/supermarket",
+    shown: true,
+  },
+  {
     icon: ShoppingBasketIcon,
     label: "Products",
     href: "/products",
@@ -71,12 +77,6 @@ export const navigation = [
     icon: MicroscopeIcon,
     label: "Tracked",
     href: "/tracked",
-    shown: true,
-  },
-  {
-    icon: StoreIcon,
-    label: "Supermarket",
-    href: "/supermarket",
     shown: true,
   },
   {

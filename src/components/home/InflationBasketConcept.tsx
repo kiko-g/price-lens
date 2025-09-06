@@ -31,7 +31,7 @@ export function InflationBasketConcept() {
 
           <div className="flex flex-col gap-4 lg:flex-row">
             <Button size="lg" variant="default" asChild className="w-full md:w-auto">
-              <Link href="/products">
+              <Link href="/tracked">
                 Relevant products
                 <MicroscopeIcon className="h-4 w-4" />
               </Link>

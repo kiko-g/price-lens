@@ -90,7 +90,7 @@ function FavoritesGrid({ user }: { user: User }) {
         <h3 className="mb-2 text-lg font-semibold">No favorites yet</h3>
         <p className="text-muted-foreground mb-4">Start adding products to your favorites to see them here</p>
         <Button asChild>
-          <Link href="/products">Browse Products</Link>
+          <Link href="/supermarket">Find Products</Link>
         </Button>
       </div>
     )

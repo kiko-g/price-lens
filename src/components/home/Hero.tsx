@@ -40,15 +40,15 @@ export function Hero() {
 
         <div className="animate-fade-in flex flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">
           <Button variant="primary" size="lg" className="w-full md:w-auto" asChild>
-            <Link href="/products">
-              Start Tracking
+            <Link href="/tracked">
+              Tracked Products
               <BadgeEuroIcon />
             </Link>
           </Button>
 
           <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
             <Link href="/supermarket">
-              Browse Supermarket
+              Explore Supermarket
               <ShoppingBasketIcon />
             </Link>
           </Button>
