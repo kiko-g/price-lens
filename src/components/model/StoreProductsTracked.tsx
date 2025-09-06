@@ -8,7 +8,7 @@ import type { TrackedProductsResult } from "@/app/tracked/actions"
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
 import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
 
-import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon } from "lucide-react"
+import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon, StoreIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 
@@ -241,53 +242,59 @@ export function StoreProductsTracked({
               </p>
             )}
 
-            <div className="flex flex-col gap-2 border-t pt-2">
-              <h3 className="text-foreground text-sm font-medium">Store Origin</h3>
-              <RadioGroup value={origin.toString()} onValueChange={handleOriginChange}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="0" id="all-stores" />
-                  <Label
-                    htmlFor="all-stores"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    All stores
-                  </Label>
-                </div>
+            <Accordion type="single" collapsible className="w-full border-t">
+              <AccordionItem value="store-origin" className="border-b">
+                <AccordionTrigger className="justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
+                  Store Origin
+                </AccordionTrigger>
+                <AccordionContent className="pb-2">
+                  <RadioGroup value={origin.toString()} onValueChange={handleOriginChange}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="0" id="all-stores" />
+                      <Label
+                        htmlFor="all-stores"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        All stores
+                      </Label>
+                    </div>
 
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="1" id="continente" />
-                  <Label
-                    htmlFor="continente"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <ContinenteSvg className="h-4 min-h-4 w-auto" />
-                    <span className="sr-only">Continente</span>
-                  </Label>
-                </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="1" id="continente" />
+                      <Label
+                        htmlFor="continente"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <ContinenteSvg className="h-4 min-h-4 w-auto" />
+                        <span className="sr-only">Continente</span>
+                      </Label>
+                    </div>
 
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="2" id="auchan" />
-                  <Label
-                    htmlFor="auchan"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <AuchanSvg className="h-4 min-h-4 w-auto" />
-                    <span className="sr-only">Auchan</span>
-                  </Label>
-                </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="2" id="auchan" />
+                      <Label
+                        htmlFor="auchan"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <AuchanSvg className="h-4 min-h-4 w-auto" />
+                        <span className="sr-only">Auchan</span>
+                      </Label>
+                    </div>
 
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="3" id="pingo-doce" />
-                  <Label
-                    htmlFor="pingo-doce"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                    <span className="sr-only">Pingo Doce</span>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="3" id="pingo-doce" />
+                      <Label
+                        htmlFor="pingo-doce"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PingoDoceSvg className="h-4 min-h-4 w-auto" />
+                        <span className="sr-only">Pingo Doce</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </aside>
 
