@@ -103,7 +103,6 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     p.set("sw", String(size))
     p.set("sh", String(size))
     p.set("sm", "fit")
-    console.debug(url.toString())
     return url.toString()
   }
 

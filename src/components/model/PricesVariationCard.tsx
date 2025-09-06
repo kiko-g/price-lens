@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { PriceChange } from "@/components/model/PriceChange"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 
-import { ChevronRightIcon, ExternalLinkIcon } from "lucide-react"
+import { ChevronRightIcon, ExternalLinkIcon, InfoIcon, ArrowRightIcon } from "lucide-react"
 
 type Props = {
   className?: string
@@ -39,8 +39,6 @@ const defaultOptions: Props["options"] = {
 export function PricesVariationCard({ className, data, actions, state, options = defaultOptions }: Props) {
   const { storeProduct, discountVariation, priceVariation, priceRecommendedVariation, pricePerMajorUnitVariation } =
     data
-
-  console.debug(options)
 
   const {
     url: onlineUrl,
@@ -163,11 +161,23 @@ export function PricesVariationCard({ className, data, actions, state, options =
       </div>
 
       {!options.hideExtraInfo && (
-        <div className={cn("mt-2 flex items-center justify-start gap-1")}>
+        <div className={cn("mt-2 flex items-center justify-start gap-2")}>
           <Button variant="outline" size="sm" asChild className="gap-0.5 [&_svg]:size-3">
             <Link href={onlineUrl} target="_blank">
               {resolveSupermarketChain(originId)?.logoSmall}
               <ExternalLinkIcon />
+            </Link>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="group text-xs transition-transform duration-300 [&_svg]:size-3"
+          >
+            <Link href={`/supermarket/${storeProduct.id}`}>
+              See product
+              <ArrowRightIcon className="group-hover:animate-bounce-x" />
             </Link>
           </Button>
         </div>
