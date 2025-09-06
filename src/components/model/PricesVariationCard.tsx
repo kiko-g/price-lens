@@ -158,10 +158,13 @@ function PriceAxisButton({
           <ChevronRightIcon className="animate-bounce-x size-4" />
         </div>
         <span
-          className={cn(
-            `border-${chartColor} relative flex size-[17px] items-center justify-center rounded border-[1.5px]`,
-            isActive ? `bg-${chartColor}` : `bg-${chartColor}/20`,
-          )}
+          className="relative flex size-[17px] items-center justify-center rounded border-[1.5px]"
+          style={{
+            borderColor: `var(--${chartColor})`,
+            backgroundColor: isActive
+              ? `var(--${chartColor})`
+              : `color-mix(in srgb, var(--${chartColor}) 20%, transparent)`,
+          }}
         />
         <span className="whitespace-nowrap">{label}</span>
       </div>
