@@ -37,7 +37,7 @@ const badgeVariants = cva(
         "outline-warning":
           "border-yellow-600 bg-yellow-600/5 text-yellow-600 dark:border-yellow-800 dark:text-yellow-50 dark:bg-yellow-600/10 [&_span.bubble]:bg-yellow-500 dark:[&_span.bubble]:bg-yellow-800",
         "price-per-unit":
-          "border-transparent bg-yellow-400 text-zinc-800 hover:bg-yellow-400/80 dark:border-transparent dark:bg-yellow-500 dark:text-zinc-700 dark:hover:bg-yellow-500/80 [&_span.bubble]:bg-yellow-400 dark:[&_span.bubble]:bg-yellow-500",
+          "border-transparent bg-amber-500 text-white hover:bg-amber-500/80 dark:border-transparent dark:bg-amber-600 dark:text-white dark:hover:bg-amber-600/80 [&_span.bubble]:bg-amber-600 dark:[&_span.bubble]:bg-amber-600",
         unit: "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
         blue: "border-transparent bg-blue-600 text-zinc-50 hover:bg-blue-600/80 dark:border-transparent dark:bg-blue-800 dark:text-zinc-50 dark:hover:bg-blue-800/80 [&_span.bubble]:bg-blue-600 dark:[&_span.bubble]:bg-blue-800",
         white:

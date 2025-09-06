@@ -130,12 +130,12 @@ function StaticMockChart({ className }: { className?: string }) {
       label: "Price",
       color: "var(--chart-1)",
     },
-    pricePerUnit: {
-      label: "Price Per Unit",
+    priceRecommended: {
+      label: "Price with discount",
       color: "var(--chart-2)",
     },
-    priceRecommended: {
-      label: "Price Recommended",
+    pricePerUnit: {
+      label: "Price per major unit",
       color: "var(--chart-3)",
     },
     discount: {
@@ -291,15 +291,15 @@ function HandpickedShowcaseChart({
       color: "var(--chart-1)",
     },
     "price-recommended": {
-      label: "Price Recommended",
+      label: "Price with discount",
       color: "var(--chart-2)",
     },
     "price-per-major-unit": {
-      label: "Price Per Major Unit",
+      label: "Price per major unit",
       color: "var(--chart-3)",
     },
     discount: {
-      label: "Discount",
+      label: "Discount %",
       color: "var(--chart-4)",
     },
   } satisfies ChartConfig

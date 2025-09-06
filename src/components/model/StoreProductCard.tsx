@@ -192,7 +192,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
         </div>
 
         <div className="absolute top-2 right-2 flex flex-col gap-0.5">
-          {sp.pack ? (
+          {sp.pack && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger>
@@ -200,7 +200,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                     variant="unit"
                     size="2xs"
                     roundedness="sm"
-                    className="line-clamp-3 w-fit max-w-20 text-left tracking-tighter md:line-clamp-1 md:max-w-28"
+                    className="line-clamp-3 w-fit max-w-20 text-left tracking-tighter md:line-clamp-1 md:max-w-20"
                   >
                     {sp.pack}
                   </Badge>
@@ -218,7 +218,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          ) : null}
+          )}
         </div>
 
         {user ? (
@@ -466,8 +466,8 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
 
             <DrawerSheet title={sp.name}>
               <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-start justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <PriorityBadge priority={sp.priority} size="xs" variant="default" className="text-xs font-semibold" />
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <PriorityBadge priority={sp.priority} size="sm" variant="default" className="text-xs font-semibold" />
 
                   {sp.brand && (
                     <Badge variant="blue" size="xs">
@@ -490,15 +490,33 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                </div>
 
-                <div className="flex flex-col items-end justify-center gap-1">
-                  <Button variant="outline" size="sm" asChild className="gap-0.5 [&_svg]:size-3 md:[&_svg]:size-4">
-                    <Link href={sp.url} target="_blank">
-                      {resolveSupermarketChain(sp?.origin_id)?.logoSmall}
-                      <ExternalLinkIcon />
-                    </Link>
-                  </Button>
+                  {sp.pack && (
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Badge
+                            variant="default"
+                            size="xs"
+                            className="line-clamp-1 w-fit max-w-36 text-left tracking-tight"
+                          >
+                            {sp.pack}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          align="start"
+                          sideOffset={6}
+                          alignOffset={-6}
+                          size="xs"
+                          variant="glass"
+                          className="max-w-60"
+                        >
+                          {sp.pack}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               </div>
 
@@ -510,14 +528,14 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                 <div className="flex w-full flex-col items-end justify-end gap-1">
                   <div className="flex w-full justify-between">
                     <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Created:</span>
-                    <span className="text-muted-foreground block text-right font-mono text-xs font-semibold">
+                    <span className="text-foreground block text-right font-mono text-xs tracking-tight">
                       {sp.created_at ? formatTimestamptz(sp.created_at) : "No creation record"}
                     </span>
                   </div>
 
                   <div className="flex w-full justify-between">
                     <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Last updated:</span>
-                    <span className="text-muted-foreground block text-right font-mono text-xs font-semibold">
+                    <span className="text-foreground block text-right font-mono text-xs tracking-tight">
                       {sp.created_at || sp.updated_at ? formatTimestamptz(sp.updated_at) : "No update record"}
                     </span>
                   </div>

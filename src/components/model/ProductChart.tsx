@@ -16,23 +16,23 @@ import { Button } from "@/components/ui/button"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "@/components/model/PricesVariationCard"
 
-import { HeartIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
+import { ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
 
 const chartConfig = {
   price: {
     label: "Price",
     color: "var(--chart-1)",
   },
-  "price-per-major-unit": {
-    label: "Price Per Major Unit",
-    color: "var(--chart-3)",
-  },
   "price-recommended": {
-    label: "Price Recommended",
+    label: "Price with discount",
     color: "var(--chart-2)",
   },
+  "price-per-major-unit": {
+    label: "Price per major unit",
+    color: "var(--chart-3)",
+  },
   discount: {
-    label: "Discount",
+    label: "Discount %",
     color: "var(--chart-4)",
   },
 } satisfies ChartConfig
@@ -93,6 +93,18 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           strokeWidth: isMobile ? 2 : 3.5,
         }
     }
+  }
+
+  function resolveImageUrlForDrawer(image: string, size = 400) {
+    const url = new URL(image)
+    const p = url.searchParams
+    const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
+    fieldsToDelete.forEach((k) => p.delete(k))
+    p.set("sw", String(size))
+    p.set("sh", String(size))
+    p.set("sm", "fit")
+    console.debug(url.toString())
+    return url.toString()
   }
 
   const { floor, ceiling } = useMemo(() => {
@@ -229,14 +241,14 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             <PricesVariationCard
               state={{ activeAxis }}
               data={{
-                price: sp.price,
-                priceRecommended: sp.price_recommended,
-                pricePerMajorUnit: sp.price_per_major_unit,
-                discount: sp.discount,
                 discountVariation,
                 priceVariation,
                 priceRecommendedVariation,
                 pricePerMajorUnitVariation,
+                storeProduct: sp,
+              }}
+              options={{
+                hideExtraInfo: !options?.showImage,
               }}
               actions={{
                 onPriceChange: () => handleAxisChange("price"),
@@ -254,12 +266,12 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                 <div className="relative">
                   <Link href={sp.url} target="_blank">
                     <Image
-                      src={sp.image.replace(/&sm=fit/g, "")}
+                      src={resolveImageUrlForDrawer(sp.image, 400)}
                       alt={sp.name}
                       width={400}
                       height={400}
-                      className="aspect-square size-24 rounded-md bg-white p-1 md:size-32"
-                      placeholder="blur"
+                      className="aspect-square size-24 rounded-md bg-white object-contain p-1 md:size-32"
+                      placeholder="empty"
                       blurDataURL={imagePlaceholder.productBlur}
                       priority={true}
                     />
