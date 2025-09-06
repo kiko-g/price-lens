@@ -1,14 +1,15 @@
 "use client"
 
-import { navigation } from "@/lib/config"
-import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { navigation } from "@/lib/config"
+import { usePathname } from "next/navigation"
 
-import { LogoLink } from "@/components/layout/LogoLink"
 import { FavoritesLink } from "@/components/layout/FavoritesLink"
+import { LogoLink } from "@/components/layout/LogoLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
+import { SearchDialog } from "@/components/layout/SearchDialog"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { Button } from "@/components/ui/button"
 
@@ -43,6 +44,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
+          {!isMobile && <SearchDialog />}
           {!isMobile && <FavoritesLink />}
           <UserDropdownMenu />
           <NavigationMenu />
