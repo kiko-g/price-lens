@@ -200,7 +200,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
           ) : null}
         </div>
 
-        <div className="absolute top-2 right-2 flex flex-col gap-0.5">
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-0">
           {sp.pack && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -228,6 +228,8 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
               </Tooltip>
             </TooltipProvider>
           )}
+
+          <PriorityBadge priority={priority} />
         </div>
 
         {user ? (
@@ -254,8 +256,6 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
         ) : null}
 
         <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0 md:gap-0.5">
-          <PriorityBadge priority={priority} />
-
           <Badge
             size="xs"
             variant="light"
