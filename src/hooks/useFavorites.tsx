@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { useUser } from "@/hooks/useUser"
 import type { UserFavorite, StoreProduct } from "@/types"
 import type { User } from "@supabase/supabase-js"
+import { HeartIcon, TriangleIcon } from "lucide-react"
 
 interface FavoriteWithProduct extends UserFavorite {
   store_products: StoreProduct
@@ -110,7 +111,12 @@ export function useFavorites(page: number = 1, limit: number = 20) {
         })
 
         if (response.ok) {
-          toast.success("Added to favorites")
+          toast.success(
+            <div className="flex items-center gap-2">
+              Added to favorites
+              <HeartIcon className="size-3 fill-green-500 stroke-green-500" />
+            </div>,
+          )
           await fetchFavorites()
           return true
         } else {
@@ -141,7 +147,12 @@ export function useFavorites(page: number = 1, limit: number = 20) {
         })
 
         if (response.ok) {
-          toast.success("Removed from favorites")
+          toast.success(
+            <div className="flex items-center gap-2">
+              Removed from favorites
+              <HeartIcon className="size-3 fill-red-500 stroke-red-500" />
+            </div>,
+          )
           await fetchFavorites()
           return true
         } else {
@@ -261,7 +272,19 @@ export function useFavoriteStatus(storeProductId: number | null) {
       if (response.ok) {
         const newStatus = !isFavorited
         setIsFavorited(newStatus)
-        toast.success(newStatus ? "Added to favorites" : "Removed from favorites")
+        toast.success(
+          newStatus ? (
+            <div className="flex items-center gap-2">
+              Added to favorites
+              <TriangleIcon className="size-3 fill-green-500 stroke-green-500" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              Removed from favorites
+              <TriangleIcon className="size-3 rotate-180 fill-red-500 stroke-red-500" />
+            </div>
+          ),
+        )
         return true
       } else {
         const error = await response.json()
@@ -389,7 +412,12 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
         })
 
         if (response.ok) {
-          toast.success("Added to favorites")
+          toast.success(
+            <div className="flex items-center gap-2">
+              <HeartIcon className="h-4 w-4 text-red-500" />
+              Added to favorites
+            </div>,
+          )
           await fetchFavorites(1, true)
           return true
         } else {

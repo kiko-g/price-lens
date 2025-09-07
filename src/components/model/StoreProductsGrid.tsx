@@ -647,15 +647,18 @@ WHERE category = '${category1}'
               {/* Sort Filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-auto justify-start lg:w-[120px]">
+                  <Button variant="outline" className="relative w-auto justify-start lg:w-[120px]">
                     {sortBy === "a-z" && <ArrowDownAZIcon className="h-4 w-4" />}
                     {sortBy === "z-a" && <ArrowUpAZIcon className="h-4 w-4" />}
                     {sortBy === "price-low-high" && <ArrowUpWideNarrowIcon className="h-4 w-4" />}
                     {sortBy === "price-high-low" && <ArrowDownWideNarrowIcon className="h-4 w-4" />}
                     {sortBy === "only-nulls" && <CircleOffIcon className="h-4 w-4" />}
                     <span className="hidden lg:block">Sort by</span>
+
+                    <span className="bg-destructive absolute -top-[3px] -right-[3px] size-[10px] rounded-full" />
                   </Button>
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent align="end" className="w-[180px]">
                   <DropdownMenuLabel>Sort by</DropdownMenuLabel>
 
