@@ -136,7 +136,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
       title: "Found a bug?",
       description: <p className="text-muted-foreground text-sm">UI glitches or formatting issues? Report them here!</p>,
       icon: <BugIcon className="h-4 w-4" />,
-      link: "https://github.com/kikogoncalves/pricelens/issues",
+      link: "https://github.com/kiko-g/pricelens/issues",
     },
     {
       title: "Feature request?",
@@ -146,7 +146,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
         </p>
       ),
       icon: <PlusIcon className="h-4 w-4" />,
-      link: "https://github.com/kikogoncalves/pricelens/issues",
+      link: "https://github.com/kiko-g/pricelens/issues",
     },
   ]
 
@@ -225,7 +225,9 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
             </div>
           </TabsContent>
 
-          <TabsContent value="customization" className="mb-8"></TabsContent>
+          <TabsContent value="customization" className="mb-8">
+            <div className="bg-muted max-w-lg rounded-md border p-4 text-center">Coming soon</div>
+          </TabsContent>
 
           <TabsContent value="contact-us" className="mb-8">
             <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between">

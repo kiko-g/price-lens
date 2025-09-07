@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useReducer, useEffect, useMemo, ReactNode } from "react"
+import { createContext, useContext, useReducer, useEffect, useRef, ReactNode } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 import { Profile } from "@/types"
@@ -47,38 +47,95 @@ const UserContext = createContext<UserState | undefined>(undefined)
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(userReducer, initialState)
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = createClient()
+  const profileFetchingRef = useRef(false)
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const user = session?.user
-      console.debug("user", user)
+    let mounted = true
 
-      if (user) {
-        dispatch({ type: "SET_USER", payload: user })
+    const fetchProfile = async (userId: string) => {
+      if (profileFetchingRef.current) return
+
+      profileFetchingRef.current = true
+
+      try {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", userId)
           .single()
+
+        if (!mounted) return
+
         if (profileError) {
           dispatch({ type: "SET_ERROR", payload: profileError.message })
           dispatch({ type: "SET_PROFILE", payload: null })
         } else {
           dispatch({ type: "SET_PROFILE", payload: profileData })
+          dispatch({ type: "SET_ERROR", payload: null })
         }
+      } catch (error) {
+        if (!mounted) return
+        dispatch({ type: "SET_ERROR", payload: "Failed to fetch profile" })
+      } finally {
+        profileFetchingRef.current = false
+      }
+    }
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+
+      console.debug("Auth state change:", event, session?.user?.id)
+
+      const user = session?.user || null
+      dispatch({ type: "SET_USER", payload: user })
+
+      if (user) {
+        await fetchProfile(user.id)
       } else {
         dispatch({ type: "RESET" })
+        profileFetchingRef.current = false
       }
+
       dispatch({ type: "SET_LOADING", payload: false })
     })
 
     return () => {
+      mounted = false
       subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
+
+  // Separate effect for initial session (runs only once)
+  useEffect(() => {
+    let mounted = true
+
+    const getInitialSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+
+        if (!mounted) return
+
+        // The onAuthStateChange will handle the session, we just trigger it
+        // by calling getSession() to ensure we get the current state
+      } catch (error) {
+        if (!mounted) return
+        console.error("Error getting initial session:", error)
+        dispatch({ type: "SET_ERROR", payload: "Failed to initialize session" })
+        dispatch({ type: "SET_LOADING", payload: false })
+      }
+    }
+
+    getInitialSession()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   return <UserContext.Provider value={state}>{children}</UserContext.Provider>
 }
