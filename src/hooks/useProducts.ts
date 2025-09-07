@@ -44,6 +44,14 @@ async function getRelatedStoreProducts(id: string, limit: number = 8) {
   return response.data as StoreProduct[]
 }
 
+async function getIdenticalCrossStoreProducts(id: string, limit: number = 8) {
+  const response = await axios.get(`/api/products/store/${id}/cross-store?limit=${limit}`)
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch identical store products")
+  }
+  return response.data as StoreProduct[]
+}
+
 async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   const id = storeProduct.id
   if (!id) throw new Error("Cannot update a store product without an ID")
@@ -138,6 +146,16 @@ export function useRelatedStoreProducts(id: string, limit: number = 8) {
   return useQuery({
     queryKey: ["relatedStoreProducts", id, limit],
     queryFn: () => getRelatedStoreProducts(id, limit),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  })
+}
+
+export function useIdenticalStoreProducts(id: string, limit: number = 8) {
+  return useQuery({
+    queryKey: ["identicalStoreProducts", id, limit],
+    queryFn: () => getIdenticalCrossStoreProducts(id, limit),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

@@ -767,4 +767,188 @@ export const storeProductQueries = {
     const { data, error } = await supabase.from("store_products").insert([sp]).select().single()
     return { data, error }
   },
+
+  async getSameProductDifferentStores(id: string, limit: number = 10) {
+    const supabase = createClient()
+    const { data: currentProduct, error } = await supabase.from("store_products").select("*").eq("id", id).single()
+
+    if (error) {
+      console.error("Error fetching store product:", error)
+      return {
+        data: null,
+        error: error,
+      }
+    }
+
+    if (!currentProduct) {
+      return {
+        data: null,
+        error: "Product not found",
+      }
+    }
+
+    // Helper function to normalize product names for comparison
+    const normalizeProductName = (name: string | null): string => {
+      if (!name) return ""
+      return name
+        .toLowerCase()
+        .replace(/\s+/g, " ") // normalize whitespace
+        .replace(/[^\w\s]/g, "") // remove special characters
+        .trim()
+    }
+
+    // Helper function to extract key words from product name
+    const extractKeyWords = (name: string | null): string[] => {
+      if (!name) return []
+      const normalized = normalizeProductName(name)
+      // Remove common filler words and keep meaningful terms
+      const stopWords = new Set([
+        "de",
+        "da",
+        "do",
+        "com",
+        "sem",
+        "para",
+        "por",
+        "em",
+        "na",
+        "no",
+        "e",
+        "o",
+        "a",
+        "os",
+        "as",
+      ])
+      return normalized
+        .split(" ")
+        .filter((word) => word.length > 2 && !stopWords.has(word))
+        .slice(0, 5) // Take only first 5 meaningful words
+    }
+
+    // Helper function to calculate text similarity score
+    const calculateSimilarity = (text1: string | null, text2: string | null): number => {
+      if (!text1 || !text2) return 0
+      const words1 = new Set(extractKeyWords(text1))
+      const words2 = new Set(extractKeyWords(text2))
+
+      if (words1.size === 0 && words2.size === 0) return 0
+      if (words1.size === 0 || words2.size === 0) return 0
+
+      const intersection = new Set([...words1].filter((x) => words2.has(x)))
+      const union = new Set([...words1, ...words2])
+
+      return intersection.size / union.size // Jaccard similarity
+    }
+
+    // Helper function to calculate price similarity
+    const calculatePriceSimilarity = (price1: number | null, price2: number | null): number => {
+      if (!price1 || !price2) return 0
+      const ratio = Math.min(price1, price2) / Math.max(price1, price2)
+      return ratio
+    }
+
+    // Get all products from different stores with same brand
+    const sameBrandQuery = supabase
+      .from("store_products")
+      .select("*")
+      .neq("origin_id", currentProduct.origin_id) // Different stores only
+      .neq("id", id) // Exclude current product
+
+    if (currentProduct.brand) {
+      sameBrandQuery.eq("brand", currentProduct.brand)
+    }
+
+    const { data: sameBrandProducts, error: brandError } = await sameBrandQuery.limit(limit * 3) // Get more to filter
+
+    if (brandError) {
+      console.error("Error fetching same brand products:", brandError)
+      return {
+        data: null,
+        error: brandError,
+      }
+    }
+
+    // Skip category-based matching as categories are inconsistent across stores
+
+    // Get products with similar names using text search from different stores
+    let similarNameProducts: StoreProduct[] = []
+    if (currentProduct.name) {
+      const keyWords = extractKeyWords(currentProduct.name)
+      if (keyWords.length > 0) {
+        const searchTerm = keyWords.slice(0, 3).join(" & ") // Use top 3 key words
+        const { data, error: nameError } = await supabase
+          .from("store_products")
+          .select("*")
+          .textSearch("name", searchTerm)
+          .neq("origin_id", currentProduct.origin_id)
+          .neq("id", id)
+          .limit(limit * 2)
+
+        if (!nameError && data) {
+          similarNameProducts = data
+        }
+      }
+    }
+
+    // Combine all results and calculate similarity scores
+    const allCandidates = [...(sameBrandProducts || []), ...(similarNameProducts || [])]
+
+    // Remove duplicates by id
+    const uniqueCandidates = Array.from(new Map(allCandidates.map((item) => [item.id, item])).values())
+
+    // Score each candidate
+    const scoredCandidates = uniqueCandidates.map((candidate) => {
+      let score = 0
+      let factors: string[] = []
+
+      // Brand match (highest weight)
+      if (
+        currentProduct.brand &&
+        candidate.brand &&
+        currentProduct.brand.toLowerCase() === candidate.brand.toLowerCase()
+      ) {
+        score += 50 // Increased from 40 since categories are unreliable
+        factors.push("exact_brand")
+      }
+
+      // Name similarity (increased weight since it's more reliable than categories)
+      const nameSimilarity = calculateSimilarity(currentProduct.name, candidate.name)
+      if (nameSimilarity > 0.3) {
+        score += nameSimilarity * 40 // Increased from 30
+        factors.push(`name_sim_${(nameSimilarity * 100).toFixed(0)}%`)
+      }
+
+      // Price similarity (increased weight to compensate for removed category matching)
+      if (currentProduct.price && candidate.price) {
+        const priceSimilarity = calculatePriceSimilarity(currentProduct.price, candidate.price)
+        if (priceSimilarity > 0.5) {
+          score += priceSimilarity * 15 // Increased from 10
+          factors.push(`price_sim_${(priceSimilarity * 100).toFixed(0)}%`)
+        }
+      }
+
+      // Pack similarity (increased weight)
+      if (currentProduct.pack && candidate.pack && currentProduct.pack.toLowerCase() === candidate.pack.toLowerCase()) {
+        score += 10 // Increased from 5
+        factors.push("same_pack")
+      }
+
+      return {
+        ...candidate,
+        similarity_score: score,
+        similarity_factors: factors,
+      }
+    })
+
+    // Filter candidates with minimum score and sort by score
+    const filteredCandidates = scoredCandidates
+      .filter((candidate) => candidate.similarity_score > 20) // Minimum threshold
+      .sort((a, b) => b.similarity_score - a.similarity_score)
+      .slice(0, limit)
+
+    return {
+      data: filteredCandidates,
+      error: null,
+    }
+  },
 }

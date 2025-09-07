@@ -86,6 +86,11 @@ export interface StoreProduct {
   is_favorited?: boolean
 }
 
+export interface StoreProductWithSimilarity extends StoreProduct {
+  similarity_score: number
+  similarity_factors: string[]
+}
+
 export interface Price {
   id?: number
   store_product_id: number | null
