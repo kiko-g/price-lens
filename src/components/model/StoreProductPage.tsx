@@ -42,6 +42,8 @@ import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { IdenticalStoreProducts } from "./IdenticalStoreProducts"
+import { Separator } from "../ui/separator"
 
 function resolveImageUrlForPage(image: string, size = 800) {
   const url = new URL(image)
@@ -100,6 +102,60 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   )
 }
 
+function StoreProductPageSkeleton() {
+  return (
+    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-2">
+      <div className="mb-4 flex w-min">
+        <Skeleton className="h-10 w-40" />
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        {/* Product Image */}
+        <div className="relative aspect-square overflow-hidden rounded-lg border">
+          <Skeleton className="h-full w-full" />
+        </div>
+
+        {/* Product Details */}
+        <div className="flex flex-col gap-4">
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+
+            <Skeleton className="mb-2 h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-24" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-32" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-36" />
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-9" />
+          </div>
+
+          <div className="flex-1">
+            <Skeleton className="h-[300px] w-full" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <Skeleton className="h-[200px] w-full" />
+      </div>
+    </div>
+  )
+}
+
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
   const updateStoreProduct = useUpdateStoreProduct()
@@ -107,6 +163,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)
 
+  const storeProductId = sp.id?.toString() || ""
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isNormalPrice =
@@ -308,61 +365,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         </div>
       </div>
 
-      <RelatedStoreProducts id={sp.id?.toString() || ""} />
-    </div>
-  )
-}
-
-export function StoreProductPageSkeleton() {
-  return (
-    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-2">
-      <div className="mb-4 flex w-min">
-        <Skeleton className="h-10 w-40" />
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-2">
-        {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden rounded-lg border">
-          <Skeleton className="h-full w-full" />
-        </div>
-
-        {/* Product Details */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-20" />
-            </div>
-
-            <Skeleton className="mb-2 h-8 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-24" />
-            <Skeleton className="h-8 w-24" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-6 w-32" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-9 w-36" />
-            <Skeleton className="h-9 w-24" />
-            <Skeleton className="h-9 w-9" />
-          </div>
-
-          <div className="flex-1">
-            <Skeleton className="h-[300px] w-full" />
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <Skeleton className="h-[200px] w-full" />
-      </div>
+      <Separator className="my-6" />
+      <IdenticalStoreProducts id={storeProductId} />
+      <Separator className="my-8" />
+      <RelatedStoreProducts id={storeProductId} />
     </div>
   )
 }
