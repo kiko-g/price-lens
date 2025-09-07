@@ -269,7 +269,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                       alt={sp.name}
                       width={400}
                       height={400}
-                      className="aspect-square size-24 rounded-md bg-white object-contain p-1 md:size-32"
+                      className="aspect-square size-24 rounded-md border bg-white object-contain p-1 md:size-32"
                       placeholder="empty"
                       blurDataURL={imagePlaceholder.productBlur}
                       priority={true}
@@ -335,7 +335,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             ticks={Array.from({ length: 5 }, (_, i) => floor / 2 + ((ceiling - floor / 2) * i) / 4).map(
               (tick, index) => tick + index * 0.0001,
             )}
-            tickFormatter={(value) => `€${value.toFixed(1)}`}
+            tickFormatter={(value) => `€${value.toFixed(0)}`}
             tick={(props) => <CustomTick {...props} yAxisId="price" />}
           />
           <YAxis

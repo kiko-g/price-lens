@@ -40,6 +40,10 @@ const popularProducts = [
     value: "gold nutrition",
   },
   {
+    label: "Salmão",
+    value: "salmao",
+  },
+  {
     label: "Chocolate",
     value: "chocolate",
   },
