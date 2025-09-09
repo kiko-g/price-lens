@@ -58,7 +58,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-        <SheetPrimitive.Close className="border-border bg-accent absolute top-4 right-4 rounded-md border p-1.5 transition-opacity hover:opacity-100 disabled:pointer-events-none">
+        <SheetPrimitive.Close className="border-border bg-accent hover:bg-destructive/20 hover:border-destructive/40 absolute top-5 right-5 cursor-pointer rounded-md border p-1.5 transition-all duration-150 hover:opacity-100 disabled:pointer-events-none">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>

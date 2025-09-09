@@ -45,7 +45,6 @@ export function Header() {
 
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && <SearchDialog />}
-          {!isMobile && <FavoritesLink />}
           <UserDropdownMenu />
           <NavigationMenu />
         </div>
