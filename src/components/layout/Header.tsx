@@ -44,7 +44,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
-          {!isMobile && <SearchDialog />}
+          {!isMobile && <SearchDialog className="hidden md:block" />}
           <UserDropdownMenu />
           <NavigationMenu />
         </div>

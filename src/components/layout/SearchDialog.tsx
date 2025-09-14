@@ -9,6 +9,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Button } from "@/components/ui/button"
 
 import { SearchIcon, PackageIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const popularProducts = [
   {
@@ -61,7 +62,7 @@ const popularProducts = [
   },
 ]
 
-export function SearchDialog({ forceRefresh = true }: { forceRefresh?: boolean }) {
+export function SearchDialog({ className, forceRefresh = true }: { className?: string; forceRefresh?: boolean }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const router = useRouter()
@@ -88,15 +89,15 @@ export function SearchDialog({ forceRefresh = true }: { forceRefresh?: boolean }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="relative bg-transparent">
+        <Button variant="outline" size="icon" className={cn("relative bg-transparent", className)}>
           <SearchIcon className="h-4 w-4" />
-          <span className="sr-only">Search products</span>
+          <span className="not-sr-only md:sr-only">Search products</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-sm rounded-lg p-4 md:max-w-xl md:p-6">
         <DialogHeader>
-          <DialogTitle>Search Products</DialogTitle>
+          <DialogTitle className="text-left">Search Products</DialogTitle>
         </DialogHeader>
         <Command className="border shadow-none">
           <CommandInput

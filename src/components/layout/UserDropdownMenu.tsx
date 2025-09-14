@@ -28,20 +28,9 @@ export function UserDropdownMenu() {
   const { resolvedTheme: theme, setTheme } = useTheme()
   const router = useRouter()
 
-  if (isLoading) {
-    return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
-  }
+  if (isLoading) return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
 
-  if (!user) {
-    return (
-      <Button asChild size="icon" variant="outline" className="md:ml-0">
-        <Link href="/login">
-          <UserIcon className="h-4 w-4" />
-          <span className="sr-only">Login</span>
-        </Link>
-      </Button>
-    )
-  }
+  if (!user) return null
 
   function getUserBadgeText() {
     if (profile?.role === "admin") return "Admin"

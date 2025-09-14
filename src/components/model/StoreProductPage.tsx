@@ -296,9 +296,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div className="flex items-center gap-2">
             {sp.price_per_major_unit && sp.major_unit ? (
               <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
-                {sp.price_per_major_unit}€{sp.major_unit}
+                {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
               </Badge>
             ) : null}
+
             {sp.discount ? (
               <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
                 -{discountValueToPercentage(sp.discount)}

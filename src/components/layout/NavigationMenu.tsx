@@ -26,6 +26,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { LogoLink } from "@/components/layout/LogoLink"
+import { GoogleIcon } from "@/components/icons/GoogleIcon"
+import { SearchDialog } from "@/components/layout/SearchDialog"
 
 export function NavigationMenu() {
   const pathname = usePathname()
@@ -60,15 +62,19 @@ export function NavigationMenu() {
           </div>
         </ScrollArea>
 
-        <SheetFooter className="mb-2">
+        <SheetFooter className="mb-2 flex flex-col gap-3">
+          <div>
+            <SearchDialog className="w-full" />
+          </div>
+
           <div className="flex items-center gap-2">
             {isLoading ? (
               <Skeleton className="h-10 w-full" />
             ) : !user ? (
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/login" onClick={handleClose}>
-                  <LogInIcon className="h-4 w-4" />
-                  Login
+                  <GoogleIcon />
+                  Sign in
                 </Link>
               </Button>
             ) : (
