@@ -469,12 +469,12 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        <div className="flex flex-1 justify-center gap-2">
+        <div className="flex flex-1 justify-center gap-2.5">
           {productIds.map((_, index) => (
             <button
               key={index}
               className={cn(
-                "h-2 w-2 rounded-full transition-all duration-200",
+                "size-2.5 rounded-full transition-all duration-200",
                 current === index ? "bg-foreground" : "bg-muted-foreground/30",
               )}
               onClick={() => {
