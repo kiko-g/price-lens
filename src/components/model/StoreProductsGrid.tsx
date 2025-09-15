@@ -43,6 +43,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
@@ -64,6 +73,7 @@ import {
   CircleOffIcon,
   DeleteIcon,
   EllipsisVerticalIcon,
+  FilterIcon,
   HomeIcon,
   CrownIcon,
   RefreshCcwIcon,
@@ -108,6 +118,7 @@ export function StoreProductsGrid(props: Props) {
   const [category1, setCategory1] = useState<string>("")
   const [category2, setCategory2] = useState<string>("")
   const [category3, setCategory3] = useState<string>("")
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const [status, setStatus] = useState(FrontendStatus.Loading)
   const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([])
@@ -193,9 +204,6 @@ WHERE category = '${category1}'
     setCategory3(value)
     setCategoryDialogOpen(false)
   }
-
-  const [showNav, setShowNav] = useState(true)
-  const lastScrollY = useRef(0)
 
   const selectedCount = categories.filter((cat) => cat.selected).length
 
@@ -287,6 +295,7 @@ WHERE category = '${category1}'
 
   function handleSubmit() {
     setPage(1)
+    setMobileFiltersOpen(false)
     if (page === 1) fetchProducts()
   }
 
@@ -308,16 +317,6 @@ WHERE category = '${category1}'
     page !== 1 ? setPage(1) : fetchProducts()
   }
 
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY
-
-    if (currentScrollY < 50) setShowNav(true)
-    else if (currentScrollY > lastScrollY.current) setShowNav(false)
-    else if (currentScrollY < lastScrollY.current) setShowNav(true)
-
-    lastScrollY.current = currentScrollY
-  }
-
   useEffect(() => {
     fetchProducts()
   }, [page, sortBy, onlyDiscounted, origin, orderByPriority])
@@ -336,12 +335,268 @@ WHERE category = '${category1}'
     updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), origin })
   }, [page, query, searchType, sortBy, isRelevant, origin])
 
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [])
+  const MobileFiltersContent = () => (
+    <div className="mt-2 flex flex-col gap-6 border-t px-4 pt-2 pb-16">
+      {/* Categories Dialog */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Hierarchical Categories</Label>
+        <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full justify-start">
+              <SquareLibraryIcon className="h-4 w-4" />
+              Select Categories
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-sm lg:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-left">Select Categories</DialogTitle>
+              <DialogDescription>
+                Choose filters in a cascading manner. Each selection unlocks the next level.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="category1">1) Main Category</Label>
+                <Select value={category1} onValueChange={handleCategory1Change}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria principal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {category1Options.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="category2">2) Subcategory</Label>
+                <Select value={category2} onValueChange={handleCategory2Change} disabled={!category1}>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={category1 ? "Selecione a subcategoria" : "Selecione a categoria principal primeiro"}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {category2Options.map((subcategory) => (
+                      <SelectItem key={subcategory} value={subcategory}>
+                        {subcategory}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="category3">3) Inner Category</Label>
+                <Select
+                  value={category3}
+                  onValueChange={handleCategory3Change}
+                  disabled={!category2 || category3Options.filter((item) => Boolean(item)).length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={category2 ? "Selecione o item" : "Selecione a subcategoria primeiro"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {category3Options
+                      .filter((item) => Boolean(item))
+                      .map((item) => (
+                        <SelectItem key={item} value={item}>
+                          {item}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Display current selections */}
+              {(category1 || category2 || category3) && (
+                <div className="bg-muted mt-4 rounded-md p-3">
+                  <div className="text-xs">
+                    {([category1, category2, category3].filter(Boolean) as string[]).map((cat, idx, arr) => (
+                      <span key={cat}>
+                        <code className="text-primary font-semibold tracking-tight text-wrap">{cat}</code>
+                        {idx < arr.length - 1 && (
+                          <span className="text-muted-foreground mx-1 font-normal">{" > "}</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* General Categories */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">General Categories ({selectedCount} selected)</Label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={selectDefaultCategories}
+            className="from-primary/50 to-secondary/50 flex rounded-md bg-linear-to-r px-2 py-1 text-xs text-white hover:opacity-80"
+          >
+            Select relevant
+          </button>
+          <button
+            onClick={selectAllCategories}
+            className="bg-muted text-foreground flex rounded-md px-2 py-1 text-xs hover:opacity-80"
+          >
+            Select all
+          </button>
+          <button
+            onClick={clearCategories}
+            className="bg-muted text-foreground flex rounded-md px-2 py-1 text-xs hover:opacity-80"
+          >
+            Clear
+          </button>
+        </div>
+        <ScrollArea className="h-48 w-full max-w-[70%] rounded-md border">
+          {categories.map((category) => (
+            <button
+              key={category.name}
+              className="hover:bg-accent flex w-full cursor-pointer items-center justify-between px-2 py-1.5 text-left text-sm transition duration-100"
+              onClick={() => toggleCategory(category.name)}
+            >
+              <span className={cn("w-full flex-1", category.selected ? "font-medium" : "text-muted-foreground")}>
+                {category.name}
+              </span>
+              <div
+                className={cn(
+                  "border-foreground flex h-4 w-4 items-center justify-center rounded-sm border transition-all",
+                  category.selected ? "bg-foreground text-background" : "opacity-50",
+                )}
+              >
+                {category.selected && <CheckIcon className="h-3 w-3" />}
+              </div>
+            </button>
+          ))}
+        </ScrollArea>
+      </div>
+
+      {/* Store Filter */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Store</Label>
+        <Select value={origin ?? "0"} onValueChange={(value) => setOrigin(value === "0" ? null : value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Store" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="0" className="flex items-center">
+                <StoreIcon className="mr-2 inline-flex size-4" />
+                All stores
+              </SelectItem>
+              <SelectItem value="1" className="flex items-center gap-2">
+                <ContinenteSvg className="inline-flex h-4 min-h-4 w-auto" />
+              </SelectItem>
+              <SelectItem value="2" className="flex items-center gap-2">
+                <AuchanSvg className="inline-flex h-4 min-h-4 w-auto" />
+              </SelectItem>
+              <SelectItem value="3" className="flex items-center gap-2">
+                <PingoDoceSvg className="inline-flex h-4 min-h-4 w-auto" />
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Sort Options */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Sort By</Label>
+        <div className="grid grid-cols-1 gap-2">
+          <Button
+            variant={sortBy === "a-z" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("a-z")}
+          >
+            <ArrowDownAZ className="h-4 w-4" />
+            Name A-Z
+          </Button>
+          <Button
+            variant={sortBy === "z-a" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("z-a")}
+          >
+            <ArrowUpAZ className="h-4 w-4" />
+            Name Z-A
+          </Button>
+          <Button
+            variant={sortBy === "price-high-low" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("price-high-low")}
+          >
+            <ArrowUpWideNarrowIcon className="h-4 w-4" />
+            Price: High to Low
+          </Button>
+          <Button
+            variant={sortBy === "price-low-high" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("price-low-high")}
+          >
+            <ArrowDownWideNarrowIcon className="h-4 w-4" />
+            Price: Low to High
+          </Button>
+          <Button
+            variant={sortBy === "only-nulls" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("only-nulls")}
+          >
+            <CircleOffIcon className="h-4 w-4" />
+            Invalid products
+          </Button>
+        </div>
+      </div>
+
+      {/* Filter Options */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Filter Options</Label>
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            className="w-full justify-between"
+            onClick={() => setOnlyDiscounted(!onlyDiscounted)}
+          >
+            <div className="flex items-center gap-2">
+              <BadgePercentIcon className="h-4 w-4" />
+              Only discounted
+            </div>
+            <span
+              className={cn(
+                "h-auto w-12 rounded px-2 py-1 text-center text-xs font-medium",
+                onlyDiscounted ? "bg-emerald-600 text-white" : "bg-destructive text-white",
+              )}
+            >
+              {onlyDiscounted ? "On" : "Off"}
+            </span>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full justify-between"
+            onClick={() => setOrderByPriority(!orderByPriority)}
+          >
+            <div className="flex items-center gap-2">
+              <CrownIcon className="h-4 w-4" />
+              Order by priority
+            </div>
+            <span
+              className={cn(
+                "h-auto w-12 rounded px-2 py-1 text-center text-xs font-medium",
+                orderByPriority ? "bg-emerald-600 text-white" : "bg-destructive text-white",
+              )}
+            >
+              {orderByPriority ? "On" : "Off"}
+            </span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 
   if (status === FrontendStatus.Error) {
     return (
@@ -386,12 +641,8 @@ WHERE category = '${category1}'
 
   return (
     <div className="flex w-full flex-1 flex-col gap-0">
-      <nav
-        className={cn(
-          "bg-opacity-95 dark:bg-opacity-95 sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white px-4 py-3 backdrop-blur backdrop-filter transition-all duration-300 dark:bg-zinc-950",
-          showNav ? "translate-y-0" : "top-0 -translate-y-full",
-        )}
-      >
+      {/* Desktop Navigation */}
+      <nav className="sticky top-[54px] z-50 mx-auto hidden w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:flex dark:bg-zinc-950/95">
         <div className="flex w-full flex-col items-end justify-between gap-2 md:gap-6 lg:flex-row lg:items-center">
           <div className="flex w-full max-w-lg flex-1 gap-2">
             <div className="relative w-full">
@@ -461,11 +712,11 @@ WHERE category = '${category1}'
                     <SquareLibraryIcon className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-sm lg:max-w-2xl">
+                <DialogContent className="max-w-sm rounded-lg lg:max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Select Categories</DialogTitle>
-                    <DialogDescription>
-                      Choose categories in a cascading manner. Each selection unlocks the next level.
+                    <DialogTitle className="text-left">Select Categories</DialogTitle>
+                    <DialogDescription className="text-left">
+                      Choose product categories in a cascading manner. Each selection unlocks the next level.
                     </DialogDescription>
                   </DialogHeader>
 
@@ -800,6 +1051,123 @@ WHERE category = '${category1}'
         </div>
       </nav>
 
+      {/* Mobile Navigation */}
+      <nav className="sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
+        <div className="flex w-full items-center gap-2">
+          <div className="relative flex-1">
+            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pr-16 pl-8 text-base"
+              value={query}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === "Enter") handleSubmit()
+              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value
+                if (typeof value === "string") setQuery(value)
+              }}
+            />
+            <Select value={searchType} onValueChange={(value) => setSearchType(value as SearchType)}>
+              <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
+                <SelectValue placeholder="Search by" />
+              </SelectTrigger>
+              <SelectContent align="start" className="w-[180px]">
+                <SelectGroup>
+                  <SelectLabel>Search by</SelectLabel>
+                  <SelectSeparator />
+                  {searchTypes.map((type) => (
+                    <SelectItem key={type} value={type} className="flex items-center gap-2 capitalize">
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button variant="primary" disabled={isLoading} onClick={handleSubmit} className="px-4">
+            Search
+          </Button>
+        </div>
+
+        {/* Mobile Status Bar */}
+        <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs">
+          {status === FrontendStatus.Loaded && dtls.max > 0 && (
+            <span>
+              Showing{" "}
+              <span className="text-foreground font-semibold">
+                {dtls.amount}-{dtls.max}
+              </span>{" "}
+              of <span className="text-foreground font-semibold">{dtls.total}</span>
+            </span>
+          )}
+
+          <div className="flex items-center gap-2">
+            {category1 && category2 && category3 && (
+              <Button
+                size="xs"
+                variant="glass"
+                className="dark:hover:bg-destructive/50 bg-primary/20 dark:bg-primary/20 cursor-pointer gap-1 px-1 font-medium [&_svg]:size-3"
+                onClick={() => {
+                  setCategory1("")
+                  setCategory2("")
+                  setCategory3("")
+                  fetchProducts()
+                }}
+              >
+                <XIcon />
+                <span className="max-w-[120px] truncate">
+                  {[category1, category2, category3].filter(Boolean).join(" > ")}
+                </span>
+              </Button>
+            )}
+            {dtls.max > 0 && (
+              <span>
+                Page <span className="text-foreground font-semibold">{page}</span> of{" "}
+                <span className="text-foreground font-semibold">{paginationTotal}</span>
+              </span>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Floating Filter Button */}
+      <Drawer open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+        <DrawerTrigger asChild>
+          <Button
+            size="lg"
+            className="fixed right-6 bottom-6 z-40 h-14 w-14 rounded-full shadow-lg lg:hidden"
+            variant="default"
+          >
+            <FilterIcon className="h-6 w-6" />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="h-[85vh] lg:hidden">
+          <DrawerHeader>
+            <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
+            <DrawerDescription className="text-left">
+              Customize your search with filters and sorting options
+            </DrawerDescription>
+          </DrawerHeader>
+          <ScrollArea className="h-full pb-20">
+            <MobileFiltersContent />
+          </ScrollArea>
+          <div className="absolute right-0 bottom-0 left-0 border-t bg-white p-4 dark:bg-zinc-950">
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setMobileFiltersOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSubmit}>
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Products Grid */}
       {status === FrontendStatus.Loaded && storeProducts && storeProducts.length > 0 ? (
         <div className="grid h-full w-full flex-1 grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-7">
           {storeProducts.map((product, productIdx) => (
@@ -876,6 +1244,7 @@ WHERE category = '${category1}'
         </Wrapper>
       )}
 
+      {/* Bottom Pagination */}
       <div className="flex items-center justify-between p-4">
         <div className="text-muted-foreground flex w-full flex-col text-sm">
           {status === FrontendStatus.Loaded && dtls.max > 0 && (

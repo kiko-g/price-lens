@@ -115,7 +115,7 @@ function Entry({ item, isActive, onClose }: { item: NavigationItem; isActive: bo
 
   return (
     <Link title={item.label} href={item.href} className="w-full" onClick={onClose}>
-      <Button variant={isActive ? "default" : "ghost"} className="w-full justify-start pr-4">
+      <Button variant={isActive ? "default" : "outline"} className="w-full justify-start pr-4">
         {item.icon && <item.icon className="size-4" />}
         <span>{item.label}</span>
       </Button>
