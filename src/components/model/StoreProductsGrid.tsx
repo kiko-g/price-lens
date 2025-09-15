@@ -816,7 +816,10 @@ WHERE category = '${category1}'
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0" align="start">
                   <Command>
-                    <CommandInput placeholder="Search category..." className="border-0 focus:ring-0" />
+                    <CommandInput
+                      placeholder="Search category..."
+                      className="border-0 text-base focus:ring-0 md:text-sm"
+                    />
                     <CommandList>
                       <CommandEmpty>No categories found.</CommandEmpty>
                       <CommandGroup>
