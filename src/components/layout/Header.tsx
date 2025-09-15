@@ -12,6 +12,7 @@ import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { SearchDialog } from "@/components/layout/SearchDialog"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { Button } from "@/components/ui/button"
+import { SearchIcon } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -44,7 +45,13 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
-          {!isMobile && <SearchDialog className="hidden md:block" />}
+          {!isMobile && (
+            <SearchDialog>
+              <Button variant="outline" size="icon" className="relative bg-transparent">
+                <SearchIcon className="h-4 w-4" />
+              </Button>
+            </SearchDialog>
+          )}
           <UserDropdownMenu />
           <NavigationMenu />
         </div>

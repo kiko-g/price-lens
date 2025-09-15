@@ -476,7 +476,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
             <DrawerSheet title={sp.name}>
               <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-start justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <PriorityBadge priority={sp.priority} size="sm" variant="default" className="text-xs font-semibold" />
+                  <PriorityBadge priority={sp.priority} size="xs" variant="compact" className="text-xs font-semibold" />
 
                   {sp.brand && (
                     <Badge variant="blue" size="xs">

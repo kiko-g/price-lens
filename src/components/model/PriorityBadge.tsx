@@ -18,48 +18,48 @@ export function PriorityBadge({ priority, size = "2xs", variant = "compact", cla
         return {
           label: "Unset",
           tooltip: "Unset",
-          className: `bg-neutral-500 dark:text-neutral-50`,
+          className: `bg-neutral-500 dark:text-neutral-50 border-neutral-500 dark:border-neutral-100`,
         }
       case 0:
         return {
           label: "0/5",
           tooltip: "Useless",
-          className: `bg-gray-800 dark:text-white`,
+          className: `bg-gray-800 dark:text-white border-gray-800 dark:border-white`,
         }
       case 1:
         return {
           label: "1/5",
           tooltip: "Minor",
-          className: `bg-rose-600 dark:text-white`,
+          className: `bg-rose-600 dark:text-white border-rose-600 dark:border-white`,
         }
       case 2:
         return {
           label: "2/5",
           tooltip: "Low",
-          className: `bg-orange-600 dark:text-white`,
+          className: `bg-orange-600 dark:text-white border-orange-600 dark:border-white`,
         }
       case 3:
         return {
           label: "3/5",
           tooltip: "Medium",
-          className: `bg-amber-600 dark:text-white`,
+          className: `bg-amber-600 dark:text-white border-amber-600 dark:border-white`,
         }
       case 4:
         return {
           label: "4/5",
           tooltip: "Important",
-          className: `bg-sky-600 dark:text-white`,
+          className: `bg-sky-600 dark:text-white border-sky-600 dark:border-white`,
         }
       case 5:
         return {
           label: "5/5",
           tooltip: "Essential",
-          className: `bg-teal-600 dark:text-white`,
+          className: `bg-teal-600 dark:text-white border-teal-600 dark:border-white`,
         }
       default:
         return {
           label: "Unknown",
-          className: `bg-gray-800 dark:text-white`,
+          className: `bg-gray-800 dark:text-white border-gray-800 dark:border-white`,
         }
     }
   }
@@ -74,7 +74,7 @@ export function PriorityBadge({ priority, size = "2xs", variant = "compact", cla
             size={size}
             variant="outline"
             className={cn(
-              "gap-0.5 border-0 text-white opacity-100 transition-all duration-300 group-hover:opacity-50",
+              "gap-0.5 text-white opacity-100 transition-all duration-300 group-hover:opacity-50",
               config.className,
               className,
             )}

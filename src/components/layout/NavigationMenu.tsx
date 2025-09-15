@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import type { NavigationItem } from "@/types"
 import { GithubIcon } from "@/components/icons"
-import { LogInIcon, MenuIcon } from "lucide-react"
+import { LogInIcon, MenuIcon, SearchIcon } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
 import { navigation, siteConfig } from "@/lib/config"
@@ -31,11 +31,15 @@ import { SearchDialog } from "@/components/layout/SearchDialog"
 
 export function NavigationMenu() {
   const pathname = usePathname()
+
   const { user, isLoading } = useUser()
   const profileImage = user?.user_metadata.avatar_url
+
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleClose = () => setIsOpen(false)
+  function handleClose() {
+    setIsOpen(false)
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -63,9 +67,12 @@ export function NavigationMenu() {
         </ScrollArea>
 
         <SheetFooter className="mb-2 flex flex-col gap-3">
-          <div>
-            <SearchDialog className="w-full" />
-          </div>
+          <SearchDialog>
+            <Button variant="outline" className="w-full">
+              <SearchIcon className="h-4 w-4" />
+              <span>Search products</span>
+            </Button>
+          </SearchDialog>
 
           <div className="flex items-center gap-2">
             {isLoading ? (

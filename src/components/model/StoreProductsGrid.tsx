@@ -399,7 +399,7 @@ WHERE category = '${category1}'
               <Input
                 type="text"
                 placeholder="Search products..."
-                className="pl-8"
+                className="pl-8 text-base md:text-sm"
                 value={query}
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Enter") handleSubmit()
@@ -763,9 +763,11 @@ WHERE category = '${category1}'
         <div className="text-muted-foreground mt-2 flex w-full flex-col items-end justify-end text-xs lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
           {status === FrontendStatus.Loaded && dtls.max > 0 && (
             <span className="order-2 leading-3 lg:order-1">
-              Showing <span className="text-foreground font-semibold">{dtls.amount}</span> to{" "}
-              <span className="text-foreground font-semibold">{dtls.max}</span> of{" "}
-              <span className="text-foreground font-semibold">{dtls.total}</span> results
+              Showing{" "}
+              <span className="text-foreground font-semibold">
+                {dtls.amount}-{dtls.max}
+              </span>{" "}
+              of <span className="text-foreground font-semibold">{dtls.total}</span> results
             </span>
           )}
 

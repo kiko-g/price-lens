@@ -62,7 +62,12 @@ const popularProducts = [
   },
 ]
 
-export function SearchDialog({ className, forceRefresh = true }: { className?: string; forceRefresh?: boolean }) {
+type Props = {
+  forceRefresh?: boolean
+  children?: React.ReactNode
+}
+
+export function SearchDialog({ children, forceRefresh = true }: Props) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const router = useRouter()
@@ -89,10 +94,14 @@ export function SearchDialog({ className, forceRefresh = true }: { className?: s
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className={cn("relative bg-transparent", className)}>
-          <SearchIcon className="h-4 w-4" />
-          <span className="not-sr-only md:sr-only">Search products</span>
-        </Button>
+        {children ? (
+          children
+        ) : (
+          <Button variant="outline" size="icon" className="relative bg-transparent">
+            <SearchIcon className="h-4 w-4" />
+            <span className="sr-only">Search products</span>
+          </Button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="max-w-sm rounded-lg p-4 md:max-w-xl md:p-6">

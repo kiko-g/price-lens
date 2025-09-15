@@ -100,7 +100,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
 
       {!options.hideExtraInfo && (
         <div className={cn("mt-2 flex items-center justify-start gap-2")}>
-          <Button variant="outline" size="sm" asChild className="gap-0.5 [&_svg]:size-3">
+          <Button variant="outline" size="sm" asChild className="max-w-24 gap-0.5 [&_svg]:size-3">
             <Link href={onlineUrl} target="_blank">
               {resolveSupermarketChain(origin)?.logoSmall}
               <ExternalLinkIcon />
