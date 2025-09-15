@@ -25,7 +25,7 @@ interface ShareButtonProps {
 export function ShareButton({ url, title, description = "", variant = "outline", size = "sm" }: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
 
-  const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "")
+  const shareUrl = typeof window !== "undefined" ? window.location.href : url
 
   const handleShare = async () => {
     if (navigator.share) {
