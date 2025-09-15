@@ -3,6 +3,7 @@ import type { GetAllQuery } from "@/types/extra"
 import type { ProductWithListings, StoreProduct, Price } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useMemo } from "react"
 import { usePrices } from "./usePrices"
 
 type GetProductsParams = {
@@ -193,13 +194,21 @@ export function useStoreProductCategories() {
 }
 
 export function useAllProductsWithPrices(productIds: string[]) {
+  // Stabilize the productIds array to prevent unnecessary refetches
+  // Sort and stringify to create a stable cache key
+  const stableProductIds = useMemo(() => {
+    return [...productIds].sort()
+  }, [productIds])
+
+  const stableQueryKey = useMemo(() => {
+    return ["allProductsWithPrices", stableProductIds.join(",")]
+  }, [stableProductIds])
+
   return useQuery({
-    queryKey: ["allProductsWithPrices", productIds],
+    queryKey: stableQueryKey,
     queryFn: async () => {
       const results: Record<string, { storeProduct: StoreProduct; prices: Price[] }> = {}
-
-      // Load all products and prices in parallel
-      const promises = productIds.map(async (id) => {
+      const promises = stableProductIds.map(async (id) => {
         try {
           const [storeProductResponse, pricesResponse] = await Promise.all([
             axios.get(`/api/products/store/${id}`),
