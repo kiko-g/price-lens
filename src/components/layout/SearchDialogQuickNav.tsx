@@ -16,14 +16,20 @@ export function SearchDialogQuickNav() {
       <SearchDialog>
         <Button
           variant="default"
-          size="icon-lg"
+          size="icon-xl"
           roundedness="circular"
           className="relative border-transparent"
           onMouseEnter={() => setIsExpanded(true)}
           onMouseLeave={() => setIsExpanded(false)}
         >
-          <SearchIcon className="size-4" />
-          <BorderBeam duration={2} size={60} colorFrom="var(--color-secondary)" colorTo="var(--color-secondary)" />
+          <SearchIcon />
+          <BorderBeam
+            duration={2}
+            size={60}
+            colorFrom="var(--color-secondary)"
+            colorTo="var(--color-secondary)"
+            borderWidth={3}
+          />
         </Button>
       </SearchDialog>
     </div>

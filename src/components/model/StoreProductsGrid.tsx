@@ -82,6 +82,7 @@ import {
   StoreIcon,
   XIcon,
 } from "lucide-react"
+import { BorderBeam } from "../magicui/border-beam"
 
 type Props = {
   page?: number
@@ -336,9 +337,127 @@ WHERE category = '${category1}'
   }, [page, query, searchType, sortBy, isRelevant, origin])
 
   const MobileFiltersContent = () => (
-    <div className="mt-2 flex flex-col gap-6 border-t px-4 pt-2 pb-16">
-      {/* Categories Dialog */}
+    <div className="mt-2 flex flex-col gap-6 border-t px-4 pt-2 pb-8">
+      {/* Store Filter */}
       <div className="space-y-3">
+        <Label className="text-base font-semibold">Store</Label>
+        <Select value={origin ?? "0"} onValueChange={(value) => setOrigin(value === "0" ? null : value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Store" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="0" className="flex items-center">
+                <StoreIcon className="mr-2 inline-flex size-4" />
+                All stores
+              </SelectItem>
+              <SelectItem value="1" className="flex items-center gap-2">
+                <ContinenteSvg className="inline-flex h-4 min-h-4 w-auto" />
+              </SelectItem>
+              <SelectItem value="2" className="flex items-center gap-2">
+                <AuchanSvg className="inline-flex h-4 min-h-4 w-auto" />
+              </SelectItem>
+              <SelectItem value="3" className="flex items-center gap-2">
+                <PingoDoceSvg className="inline-flex h-4 min-h-4 w-auto" />
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Sort Options */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Sort By</Label>
+        <div className="grid grid-cols-1 gap-2">
+          <Button
+            variant={sortBy === "a-z" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("a-z")}
+          >
+            <ArrowDownAZ className="h-4 w-4" />
+            Name A-Z
+          </Button>
+          <Button
+            variant={sortBy === "z-a" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("z-a")}
+          >
+            <ArrowUpAZ className="h-4 w-4" />
+            Name Z-A
+          </Button>
+          <Button
+            variant={sortBy === "price-high-low" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("price-high-low")}
+          >
+            <ArrowUpWideNarrowIcon className="h-4 w-4" />
+            Price: High to Low
+          </Button>
+          <Button
+            variant={sortBy === "price-low-high" ? "default" : "outline"}
+            className="justify-start"
+            onClick={() => setSortBy("price-low-high")}
+          >
+            <ArrowDownWideNarrowIcon className="h-4 w-4" />
+            Price: Low to High
+          </Button>
+          <Button
+            variant={sortBy === "only-nulls" ? "default" : "outline"}
+            className="hidden justify-start" // FIXME: HIDDEN
+            onClick={() => setSortBy("only-nulls")}
+          >
+            <CircleOffIcon className="h-4 w-4" />
+            Invalid products
+          </Button>
+        </div>
+      </div>
+
+      {/* Filter Options */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Filter Options</Label>
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            className="w-full justify-between"
+            onClick={() => setOnlyDiscounted(!onlyDiscounted)}
+          >
+            <div className="flex items-center gap-2">
+              <BadgePercentIcon className="h-4 w-4" />
+              Only discounted
+            </div>
+            <span
+              className={cn(
+                "h-auto w-12 rounded px-2 py-1 text-center text-xs font-medium",
+                onlyDiscounted ? "bg-emerald-600 text-white" : "bg-destructive text-white",
+              )}
+            >
+              {onlyDiscounted ? "On" : "Off"}
+            </span>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full justify-between"
+            onClick={() => setOrderByPriority(!orderByPriority)}
+          >
+            <div className="flex items-center gap-2">
+              <CrownIcon className="h-4 w-4" />
+              Order by priority
+            </div>
+            <span
+              className={cn(
+                "h-auto w-12 rounded px-2 py-1 text-center text-xs font-medium",
+                orderByPriority ? "bg-emerald-600 text-white" : "bg-destructive text-white",
+              )}
+            >
+              {orderByPriority ? "On" : "Off"}
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Categories Dialog FIXME: HIDDEN */}
+      <div className="hidden space-y-3">
         <Label className="text-base font-semibold">Hierarchical Categories</Label>
         <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
           <DialogTrigger asChild>
@@ -432,8 +551,8 @@ WHERE category = '${category1}'
         </Dialog>
       </div>
 
-      {/* General Categories */}
-      <div className="space-y-3">
+      {/* General Categories FIXME: HIDDEN */}
+      <div className="hidden space-y-3">
         <Label className="text-base font-semibold">General Categories ({selectedCount} selected)</Label>
         <div className="flex flex-wrap gap-2">
           <button
@@ -476,124 +595,6 @@ WHERE category = '${category1}'
             </button>
           ))}
         </ScrollArea>
-      </div>
-
-      {/* Store Filter */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Store</Label>
-        <Select value={origin ?? "0"} onValueChange={(value) => setOrigin(value === "0" ? null : value)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Store" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="0" className="flex items-center">
-                <StoreIcon className="mr-2 inline-flex size-4" />
-                All stores
-              </SelectItem>
-              <SelectItem value="1" className="flex items-center gap-2">
-                <ContinenteSvg className="inline-flex h-4 min-h-4 w-auto" />
-              </SelectItem>
-              <SelectItem value="2" className="flex items-center gap-2">
-                <AuchanSvg className="inline-flex h-4 min-h-4 w-auto" />
-              </SelectItem>
-              <SelectItem value="3" className="flex items-center gap-2">
-                <PingoDoceSvg className="inline-flex h-4 min-h-4 w-auto" />
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Sort Options */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Sort By</Label>
-        <div className="grid grid-cols-1 gap-2">
-          <Button
-            variant={sortBy === "a-z" ? "default" : "outline"}
-            className="justify-start"
-            onClick={() => setSortBy("a-z")}
-          >
-            <ArrowDownAZ className="h-4 w-4" />
-            Name A-Z
-          </Button>
-          <Button
-            variant={sortBy === "z-a" ? "default" : "outline"}
-            className="justify-start"
-            onClick={() => setSortBy("z-a")}
-          >
-            <ArrowUpAZ className="h-4 w-4" />
-            Name Z-A
-          </Button>
-          <Button
-            variant={sortBy === "price-high-low" ? "default" : "outline"}
-            className="justify-start"
-            onClick={() => setSortBy("price-high-low")}
-          >
-            <ArrowUpWideNarrowIcon className="h-4 w-4" />
-            Price: High to Low
-          </Button>
-          <Button
-            variant={sortBy === "price-low-high" ? "default" : "outline"}
-            className="justify-start"
-            onClick={() => setSortBy("price-low-high")}
-          >
-            <ArrowDownWideNarrowIcon className="h-4 w-4" />
-            Price: Low to High
-          </Button>
-          <Button
-            variant={sortBy === "only-nulls" ? "default" : "outline"}
-            className="justify-start"
-            onClick={() => setSortBy("only-nulls")}
-          >
-            <CircleOffIcon className="h-4 w-4" />
-            Invalid products
-          </Button>
-        </div>
-      </div>
-
-      {/* Filter Options */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Filter Options</Label>
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full justify-between"
-            onClick={() => setOnlyDiscounted(!onlyDiscounted)}
-          >
-            <div className="flex items-center gap-2">
-              <BadgePercentIcon className="h-4 w-4" />
-              Only discounted
-            </div>
-            <span
-              className={cn(
-                "h-auto w-12 rounded px-2 py-1 text-center text-xs font-medium",
-                onlyDiscounted ? "bg-emerald-600 text-white" : "bg-destructive text-white",
-              )}
-            >
-              {onlyDiscounted ? "On" : "Off"}
-            </span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-full justify-between"
-            onClick={() => setOrderByPriority(!orderByPriority)}
-          >
-            <div className="flex items-center gap-2">
-              <CrownIcon className="h-4 w-4" />
-              Order by priority
-            </div>
-            <span
-              className={cn(
-                "h-auto w-12 rounded px-2 py-1 text-center text-xs font-medium",
-                orderByPriority ? "bg-emerald-600 text-white" : "bg-destructive text-white",
-              )}
-            >
-              {orderByPriority ? "On" : "Off"}
-            </span>
-          </Button>
-        </div>
       </div>
     </div>
   )
@@ -1137,11 +1138,18 @@ WHERE category = '${category1}'
       <Drawer open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <DrawerTrigger asChild>
           <Button
-            size="lg"
+            size="icon-xl"
             className="fixed right-6 bottom-6 z-40 h-14 w-14 rounded-full shadow-lg lg:hidden"
             variant="default"
           >
-            <FilterIcon className="h-6 w-6" />
+            <FilterIcon />
+            <BorderBeam
+              duration={2}
+              size={60}
+              colorFrom="var(--color-secondary)"
+              colorTo="var(--color-secondary)"
+              borderWidth={3}
+            />
           </Button>
         </DrawerTrigger>
         <DrawerContent className="h-[85vh] lg:hidden">

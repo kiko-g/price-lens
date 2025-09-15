@@ -435,7 +435,13 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <BorderBeam duration={5} size={150} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
+        <BorderBeam
+          duration={5}
+          size={150}
+          colorFrom="var(--color-primary)"
+          colorTo="var(--color-secondary)"
+          borderWidth={3}
+        />
       </Carousel>
 
       <div className="mt-2 flex items-center justify-between gap-4">
