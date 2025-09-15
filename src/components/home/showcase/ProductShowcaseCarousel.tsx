@@ -16,32 +16,27 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 
 import { ChevronLeft, ChevronRight, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 
+const CAROUSEL_INTERVAL = 8000
+const PRODUCT_IDS = ["2558", "16258", "3807", "18728"]
+
 export function ProductShowcaseCarousel({ className }: { className?: string }) {
-  const interval = 8000
-  const productIds = ["2558", "16258", "3807", "18728"]
   const [api, setApi] = useState<any>(null)
   const [current, setCurrent] = useState(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const { data: allProductsData, isLoading } = useAllProductsWithPrices(productIds)
+  const { data: allProductsData, isLoading } = useAllProductsWithPrices(PRODUCT_IDS)
 
-  const displayData = allProductsData || productsWithPrices
+  const displayData = useMemo(() => allProductsData || productsWithPrices, [allProductsData])
 
   const resetAutoScroll = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-    }
-    if (api) {
-      intervalRef.current = setInterval(() => api.scrollNext(), interval)
-    }
-  }, [api, interval])
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (api) intervalRef.current = setInterval(() => api.scrollNext(), CAROUSEL_INTERVAL)
+  }, [api])
 
   useEffect(() => {
     if (!api) return
 
-    const onSelect = () => {
-      setCurrent(api.selectedScrollSnap())
-    }
+    const onSelect = () => setCurrent(api.selectedScrollSnap())
 
     api.on("select", onSelect)
     onSelect()
@@ -54,13 +49,30 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
   useEffect(() => {
     resetAutoScroll()
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [resetAutoScroll])
 
-  const loadedProducts = Object.keys(displayData)
+  const loadedProducts = useMemo(() => Object.keys(displayData), [displayData])
+
+  const handlePrevClick = useCallback(() => {
+    api?.scrollPrev()
+    resetAutoScroll()
+  }, [api, resetAutoScroll])
+
+  const handleNextClick = useCallback(() => {
+    api?.scrollNext()
+    resetAutoScroll()
+  }, [api, resetAutoScroll])
+
+  const handleDotClick = useCallback(
+    (index: number) => {
+      api?.scrollTo(index)
+      resetAutoScroll()
+    },
+    [api, resetAutoScroll],
+  )
+
   if (loadedProducts.length === 0) {
     return (
       <div className={cn("relative rounded-lg border", className)}>
@@ -82,7 +94,7 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
         }}
       >
         <CarouselContent className="-ml-0 border-0 shadow-none">
-          {productIds.map((productId, index) => (
+          {PRODUCT_IDS.map((productId, index) => (
             <CarouselItem key={productId} className="border-0 pl-0 shadow-none">
               <HandpickedShowcaseChart
                 storeProductId={productId}
@@ -102,41 +114,17 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
       </Carousel>
 
       <div className="mt-2 flex items-center justify-between gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            api?.scrollPrev()
-            resetAutoScroll()
-          }}
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="ghost" size="sm" onClick={handlePrevClick} className="h-8 w-8 p-0">
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
         <div className="flex flex-1 justify-center gap-2.5">
-          {productIds.map((_, index) => (
-            <CarouselDot
-              key={index}
-              active={current === index}
-              ringOffset={6}
-              onClick={() => {
-                api?.scrollTo(index)
-                resetAutoScroll()
-              }}
-            />
+          {PRODUCT_IDS.map((_, index) => (
+            <CarouselDot key={index} active={current === index} ringOffset={6} onClick={() => handleDotClick(index)} />
           ))}
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            api?.scrollNext()
-            resetAutoScroll()
-          }}
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="ghost" size="sm" onClick={handleNextClick} className="h-8 w-8 p-0">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
@@ -417,7 +405,6 @@ interface CarouselDotProps {
 }
 
 const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick }: CarouselDotProps) {
-  const interval = 8000 // Match carousel interval
   const dotRadius = 1.25 // 2.5px / 2 (size-2.5)
   const ringRadius = dotRadius + ringOffset + 2 // Add more space
   const strokeWidth = 2 // Make stroke thicker
@@ -463,7 +450,7 @@ const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick 
             cy={center}
             className="text-foreground opacity-80"
             style={{
-              animation: `carousel-progress ${interval}ms linear infinite`,
+              animation: `carousel-progress ${CAROUSEL_INTERVAL}ms linear infinite`,
             }}
           />
         </svg>

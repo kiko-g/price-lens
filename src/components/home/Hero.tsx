@@ -9,7 +9,6 @@ import { ProductShowcaseCarousel } from "@/components/home/showcase/ProductShowc
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 
 export function Hero() {
-  console.debug("render!")
   return (
     <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">
       <div className="flex w-full flex-1 flex-col gap-4 pt-12 pb-4 md:gap-4 lg:pt-0 lg:pb-0">
