@@ -71,7 +71,7 @@ export function ScrapeUrlDialog() {
               id="product-page-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="col-span-3"
+              className="col-span-3 text-base md:text-sm"
               placeholder="https://www.continente.pt/produto/leite-949202.html"
             />
 

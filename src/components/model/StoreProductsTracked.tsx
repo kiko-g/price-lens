@@ -226,7 +226,7 @@ export function StoreProductsTracked({
             <Input
               type="text"
               placeholder="Search products..."
-              className="pl-8"
+              className="pl-8 text-base md:text-sm"
               value={query}
               onChange={handleQueryChange}
             />

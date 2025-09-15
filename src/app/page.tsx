@@ -8,6 +8,7 @@ import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { InflationBasketConcept } from "@/components/home/InflationBasketConcept"
 import { InflationTrends } from "@/components/home/InflationTrends"
 import { PricingSection } from "@/components/home/Pricing"
+import { SearchDialogQuickNav } from "@/components/layout/SearchDialogQuickNav"
 
 export const metadata: Metadata = {
   ...defaultMetadata,
@@ -34,10 +35,10 @@ export default async function Home({ searchParams }: Props) {
 
       <main className="flex w-full flex-col items-center justify-center">
         <Hero />
-
         <PricingSection />
         <InflationTrends />
         <InflationBasketConcept />
+        <SearchDialogQuickNav />
       </main>
     </Layout>
   )

@@ -104,7 +104,7 @@ export function SearchDialog({ children, forceRefresh = true }: Props) {
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-sm rounded-lg p-4 md:max-w-xl md:p-6">
+      <DialogContent className="max-w-sm rounded-lg border-transparent p-3 md:max-w-xl md:p-6">
         <DialogHeader>
           <DialogTitle className="text-left">Search Products</DialogTitle>
         </DialogHeader>
