@@ -213,8 +213,9 @@ export function StoreProductsTracked({
             <h2 className="text-lg font-bold">Tracked products</h2>
           </div>
 
-          <p className="text-muted-foreground mb-4 text-xs">
-            Products often found in trustworthy inflation baskets, forever valuable for most people
+          <p className="mb-4 text-sm">
+            Products listed here have a <strong>priority of at least 3</strong>. Any favorited product by any user will
+            be assigned a priority of 4 right away. Priority affects how often the prices are updated.
           </p>
 
           <div className="relative w-full">

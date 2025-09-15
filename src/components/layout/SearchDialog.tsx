@@ -106,15 +106,15 @@ export function SearchDialog({ children, forceRefresh = true }: Props) {
 
       <DialogContent className="max-w-sm rounded-lg border-transparent p-3 md:max-w-xl md:p-6">
         <DialogHeader>
-          <DialogTitle className="text-left">Search Products</DialogTitle>
+          <DialogTitle className="text-left">Find a supermarket product</DialogTitle>
         </DialogHeader>
         <Command className="border shadow-none">
           <CommandInput
-            placeholder="Search for products..."
+            placeholder="What product are you looking for?"
             value={query}
             onValueChange={setQuery}
             onKeyDown={handleKeyDown}
-            className="border-0 shadow-none ring-0"
+            className="border-0 text-base shadow-none ring-0 md:text-sm"
           />
           <CommandList>
             <CommandEmpty>No products found.</CommandEmpty>

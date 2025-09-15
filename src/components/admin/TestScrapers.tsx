@@ -60,7 +60,12 @@ export function TestScrapers() {
           </CardHeader>
           <CardContent>
             <div className="flex w-full items-center gap-2">
-              <Input placeholder={scraper.url} defaultValue={scraper.url} className="w-full" id={`url-${index}`} />
+              <Input
+                placeholder={scraper.url}
+                defaultValue={scraper.url}
+                className="w-full text-base md:text-sm"
+                id={`url-${index}`}
+              />
               <Button
                 onClick={() => {
                   const input = document.getElementById(`url-${index}`) as HTMLInputElement
