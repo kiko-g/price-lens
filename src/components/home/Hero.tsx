@@ -371,6 +371,80 @@ function HandpickedShowcaseChart({
   )
 }
 
+interface CarouselDotProps {
+  active: boolean
+  ringOffset?: number // Distance from dot edge to ring (in pixels)
+  onClick: () => void
+}
+
+function CarouselDot({ active, ringOffset = 2, onClick }: CarouselDotProps) {
+  const interval = 8000 // Match carousel interval
+  const dotRadius = 1.25 // 2.5px / 2 (size-2.5)
+  const ringRadius = dotRadius + ringOffset + 2 // Add more space
+  const strokeWidth = 2 // Make stroke thicker
+  const normalizedRadius = ringRadius
+  const circumference = normalizedRadius * 2 * Math.PI
+
+  // Calculate SVG size to accommodate the ring with offset
+  const svgSize = (ringRadius + strokeWidth) * 2
+  const center = svgSize / 2
+
+  return (
+    <button
+      className="relative flex items-center justify-center"
+      onClick={onClick}
+      style={{ width: svgSize, height: svgSize }}
+    >
+      {/* Background dot */}
+      <div
+        className={cn(
+          "size-2.5 rounded-full transition-all duration-200",
+          active ? "bg-foreground" : "bg-muted-foreground/30",
+        )}
+      />
+
+      {/* Ring around active dot */}
+      {active && (
+        <svg
+          className="absolute inset-0 -rotate-90"
+          width={svgSize}
+          height={svgSize}
+          viewBox={`0 0 ${svgSize} ${svgSize}`}
+        >
+          {/* Actual ring with CSS animation */}
+          <circle
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference}
+            strokeLinecap="round"
+            fill="transparent"
+            r={normalizedRadius}
+            cx={center}
+            cy={center}
+            className="text-foreground opacity-80"
+            style={{
+              animation: `carousel-progress ${interval}ms linear infinite`,
+            }}
+          />
+        </svg>
+      )}
+
+      {/* CSS keyframes */}
+      <style jsx>{`
+        @keyframes carousel-progress {
+          from {
+            stroke-dashoffset: ${circumference};
+          }
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
+    </button>
+  )
+}
+
 function ProductShowcaseCarousel({ className }: { className?: string }) {
   const interval = 8000
   const productIds = ["2558", "16258", "3807", "18728"]
@@ -471,12 +545,10 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
 
         <div className="flex flex-1 justify-center gap-2.5">
           {productIds.map((_, index) => (
-            <button
+            <CarouselDot
               key={index}
-              className={cn(
-                "size-2.5 rounded-full transition-all duration-200",
-                current === index ? "bg-foreground" : "bg-muted-foreground/30",
-              )}
+              active={current === index}
+              ringOffset={6}
               onClick={() => {
                 api?.scrollTo(index)
                 resetAutoScroll()
