@@ -67,8 +67,14 @@ export function PricingSection() {
           </Card>
 
           {/* Plus Plan */}
-          <Card className="dark:from-secondary/10 dark:to-primary/10 from-primary/20 to-secondary/20 relative flex flex-col overflow-hidden bg-gradient-to-br dark:bg-gradient-to-br">
-            <BorderBeam duration={5} size={200} colorFrom="var(--color-primary)" colorTo="var(--color-secondary)" />
+          <Card className="dark:from-secondary-900 dark:to-secondary-950 from-primary-50 to-primary-100 relative flex flex-col overflow-hidden bg-gradient-to-br dark:bg-gradient-to-br">
+            <BorderBeam
+              duration={5}
+              size={200}
+              borderWidth={2}
+              colorFrom="var(--color-secondary-300)"
+              colorTo="var(--color-secondary-400)"
+            />
 
             {!isComingSoon && (
               <span className="from-primary/70 to-secondary/70 absolute top-0 right-0 rounded-bl-xl bg-linear-to-r px-3 py-1 text-xs font-medium text-white">

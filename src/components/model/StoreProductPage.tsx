@@ -129,10 +129,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         <div className="relative aspect-square w-full max-w-full overflow-hidden rounded-lg border bg-white">
           {sp.image ? (
             <Image
+              fill
               src={resolveImageUrlForPage(sp.image, 800)}
               alt={sp.name}
-              fill
-              className="object-contain object-center"
+              className="max-h-full max-w-full object-contain object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           ) : (
@@ -213,7 +213,13 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </TooltipProvider>
               )}
 
-              <Button variant="outline" size="sm" roundedness="2xl" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                roundedness="2xl"
+                asChild
+                className="dark:bg-white dark:hover:bg-white/90"
+              >
                 <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                   {supermarketChain?.logo}
                 </Link>

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { cn, buildChartData } from "@/lib/utils"
 import { useStoreProductWithPricesById, useAllProductsWithPrices } from "@/hooks/useProducts"
 import { productsWithPrices } from "@/lib/data/products"
@@ -19,7 +20,6 @@ import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { BadgeEuroIcon, ShoppingBasketIcon, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 import { ceil, floor } from "lodash"
 import { useMemo } from "react"
-import { useState, useEffect } from "react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -376,10 +376,20 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
   const productIds = ["2558", "16258", "3807", "18728"]
   const [api, setApi] = useState<any>(null)
   const [current, setCurrent] = useState(0)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const { data: allProductsData, isLoading } = useAllProductsWithPrices(productIds)
 
   const displayData = allProductsData || productsWithPrices
+
+  const resetAutoScroll = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+    if (api) {
+      intervalRef.current = setInterval(() => api.scrollNext(), interval)
+    }
+  }, [api, interval])
 
   useEffect(() => {
     if (!api) return
@@ -397,11 +407,13 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
   }, [api])
 
   useEffect(() => {
-    if (!api) return
-
-    const intervalId = setInterval(() => api.scrollNext(), interval)
-    return () => clearInterval(intervalId)
-  }, [api])
+    resetAutoScroll()
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [resetAutoScroll])
 
   const loadedProducts = Object.keys(displayData)
   if (loadedProducts.length === 0) {
@@ -445,7 +457,15 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
       </Carousel>
 
       <div className="mt-2 flex items-center justify-between gap-4">
-        <Button variant="ghost" size="sm" onClick={() => api?.scrollPrev()} className="h-8 w-8 p-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            api?.scrollPrev()
+            resetAutoScroll()
+          }}
+          className="h-8 w-8 p-0"
+        >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
@@ -457,12 +477,23 @@ function ProductShowcaseCarousel({ className }: { className?: string }) {
                 "h-2 w-2 rounded-full transition-all duration-200",
                 current === index ? "bg-foreground" : "bg-muted-foreground/30",
               )}
-              onClick={() => api?.scrollTo(index)}
+              onClick={() => {
+                api?.scrollTo(index)
+                resetAutoScroll()
+              }}
             />
           ))}
         </div>
 
-        <Button variant="ghost" size="sm" onClick={() => api?.scrollNext()} className="h-8 w-8 p-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            api?.scrollNext()
+            resetAutoScroll()
+          }}
+          className="h-8 w-8 p-0"
+        >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
