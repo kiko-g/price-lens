@@ -8,7 +8,7 @@ export function LogoLink() {
       <span className="flex items-center justify-center rounded-full">
         <img src="/price-lens.svg" alt="Price Lens" className="logo-animation size-5" />
       </span>
-      <span className="inline-block font-bold tracking-tight">Price Lens</span>
+      <span className="inline-block font-bold tracking-tight">PriceLens</span>
     </Link>
   )
 }

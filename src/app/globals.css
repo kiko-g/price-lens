@@ -204,6 +204,7 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-spin: spin 1s linear infinite;
   --animate-bounce-x: bounce-x 750ms infinite;
+  --animate-blob: blob 7s infinite;
 
   @keyframes fade-in {
     0% {
@@ -273,6 +274,15 @@
     50% {
       transform: translateX(0);
       animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  @keyframes blob {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
     }
   }
 }

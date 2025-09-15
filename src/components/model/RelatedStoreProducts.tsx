@@ -6,7 +6,7 @@ import { useRelatedStoreProducts } from "@/hooks/useProducts"
 import { Button } from "@/components/ui/button"
 import { StoreProductCard } from "@/components/model/StoreProductCard"
 
-import { ArrowLeftIcon, ArrowRightIcon, Loader2Icon } from "lucide-react"
+import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon, Loader2Icon } from "lucide-react"
 
 interface Props {
   id: string
@@ -52,7 +52,10 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-medium">Related Products</h3>
+        <h3 className="flex items-center gap-2 text-xl font-medium">
+          <ChartScatterIcon className="h-4 w-4" />
+          Related Products
+        </h3>
         {!isLoading && products && products.length > 0 && (
           <div className="flex gap-2">
             <Button

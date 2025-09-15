@@ -65,7 +65,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     switch (axis) {
       case "price-recommended":
         return {
-          strokeDasharray: isSinglePoint ? "0 0" : "6 6",
+          strokeDasharray: isSinglePoint ? "0 0" : "8 8",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
           activeDot: { r: 5 },
           strokeWidth: isMobile ? 2 : 3,
@@ -90,7 +90,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           strokeDasharray: isSinglePoint ? "0 0" : "0 0",
           dot: isSinglePoint ? { r: 2 } : { r: 0 },
           activeDot: { r: 5 },
-          strokeWidth: isMobile ? 2 : 3.5,
+          strokeWidth: isMobile ? 2 : 4,
         }
     }
   }

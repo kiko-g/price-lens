@@ -18,37 +18,37 @@ export function PriorityBadge({ priority, size = "2xs", variant = "compact", cla
         return {
           label: "Unset",
           tooltip: "Unset",
-          className: `bg-neutral-500 dark:text-neutral-50 border-neutral-500 dark:border-neutral-100`,
+          className: `bg-neutral-500 dark:text-neutral-50 border-neutral-500`,
         }
       case 0:
         return {
           label: "0/5",
           tooltip: "Useless",
-          className: `bg-gray-800 dark:text-white border-gray-800 dark:border-white`,
+          className: `bg-gray-800 dark:text-white border-gray-800`,
         }
       case 1:
         return {
           label: "1/5",
           tooltip: "Minor",
-          className: `bg-rose-600 dark:text-white border-rose-600 dark:border-white`,
+          className: `bg-rose-600 dark:text-white border-rose-600`,
         }
       case 2:
         return {
           label: "2/5",
           tooltip: "Low",
-          className: `bg-orange-600 dark:text-white border-orange-600 dark:border-white`,
+          className: `bg-orange-600 dark:text-white border-orange-600`,
         }
       case 3:
         return {
           label: "3/5",
           tooltip: "Medium",
-          className: `bg-amber-600 dark:text-white border-amber-600 dark:border-white`,
+          className: `bg-amber-600 dark:text-white border-amber-600`,
         }
       case 4:
         return {
           label: "4/5",
           tooltip: "Important",
-          className: `bg-sky-600 dark:text-white border-sky-600 dark:border-white`,
+          className: `bg-sky-600 dark:text-white border-sky-600`,
         }
       case 5:
         return {

@@ -18,7 +18,7 @@ export function SearchDialogQuickNav() {
           variant="default"
           size="icon-lg"
           roundedness="circular"
-          className="bg-background hover:bg-accent relative border-transparent shadow-lg"
+          className="relative border-transparent"
           onMouseEnter={() => setIsExpanded(true)}
           onMouseLeave={() => setIsExpanded(false)}
         >

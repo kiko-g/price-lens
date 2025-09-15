@@ -23,7 +23,7 @@ export function Header() {
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
-          <span className="text-2xs/4 inline-flex items-center rounded-full bg-linear-to-br from-orange-500/70 to-rose-600/70 px-1 font-bold tracking-tighter text-white capitalize md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold dark:from-purple-400 dark:to-indigo-500">
+          <span className="text-2xs/4 inline-flex items-center rounded-full bg-linear-to-br from-orange-500/70 to-rose-600/70 px-1 py-1 text-center leading-tight font-bold tracking-tighter text-white capitalize md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold dark:from-purple-400 dark:to-indigo-500">
             Early Access
           </span>
 
@@ -47,7 +47,7 @@ export function Header() {
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && (
             <SearchDialog>
-              <Button variant="outline" size="icon" className="relative bg-transparent">
+              <Button variant="outline" size="icon" className="relative hidden bg-transparent md:inline-flex">
                 <SearchIcon className="h-4 w-4" />
               </Button>
             </SearchDialog>

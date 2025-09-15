@@ -696,7 +696,7 @@ WHERE category = '${category1}'
                     <span
                       className={cn(
                         "ml-auto h-auto w-6 rounded text-center text-xs font-medium",
-                        onlyDiscounted ? "bg-green-500 text-white" : "bg-destructive text-destructive-foreground",
+                        onlyDiscounted ? "bg-emerald-600 text-white" : "bg-destructive text-white",
                       )}
                     >
                       {onlyDiscounted ? "On" : "Off"}
@@ -709,7 +709,7 @@ WHERE category = '${category1}'
                     <span
                       className={cn(
                         "ml-auto h-auto w-6 rounded text-center text-xs font-medium",
-                        orderByPriority ? "bg-green-500 text-white" : "bg-destructive text-destructive-foreground",
+                        orderByPriority ? "bg-emerald-600 text-white" : "bg-destructive text-white",
                       )}
                     >
                       {orderByPriority ? "On" : "Off"}

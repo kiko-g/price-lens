@@ -6,7 +6,7 @@ import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 import { Button } from "@/components/ui/button"
 import { StoreProductCard } from "@/components/model/StoreProductCard"
 
-import { ArrowLeftIcon, ArrowRightIcon, Loader2Icon } from "lucide-react"
+import { ArrowLeftIcon, ArrowRightIcon, BrainCogIcon, Loader2Icon } from "lucide-react"
 
 interface Props {
   id: string
@@ -14,7 +14,7 @@ interface Props {
   title?: string
 }
 
-export function IdenticalStoreProducts({ id, limit = 5 }: Props) {
+export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
   const { data: products, isLoading, error } = useIdenticalStoreProducts(id, limit) // identical cross store
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", skipSnaps: false })
   const [canScrollPrev, setCanScrollPrev] = useState(false)
@@ -52,7 +52,10 @@ export function IdenticalStoreProducts({ id, limit = 5 }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-medium">Identical Products in other stores</h3>
+        <h3 className="flex items-center gap-2 text-xl font-medium">
+          <BrainCogIcon className="h-4 w-4" />
+          Identical Products in other stores
+        </h3>
         {!isLoading && products && products.length > 0 && (
           <div className="flex gap-2">
             <Button
