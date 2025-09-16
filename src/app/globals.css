@@ -316,6 +316,10 @@
     @apply transition-all duration-150 active:scale-[0.97];
   }
 
+  code {
+    @apply bg-muted rounded-md text-secondary px-1 py-0.5;
+  }
+
   pre,
   code,
   .font-mono {

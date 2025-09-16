@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Mail, Share2, Twitter } from "lucide-react"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
 import { XTwitterIcon } from "@/components/icons"
+import { CheckIcon, CopyIcon, MailIcon, Share2Icon, TwitterIcon } from "lucide-react"
 
 interface ShareButtonProps {
   url: string
@@ -26,6 +28,8 @@ export function ShareButton({ url, title, description = "", variant = "outline",
   const [copied, setCopied] = useState(false)
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : url
+
+  console.debug(shareUrl)
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -50,10 +54,11 @@ export function ShareButton({ url, title, description = "", variant = "outline",
       .writeText(shareUrl)
       .then(() => {
         setCopied(true)
-        toast.success("Link copied to clipboard", {
-          description: "You can now paste it anywhere",
-          icon: <Check className="h-4 w-4" />,
-        })
+        toast.success(
+          <div>
+            Link copied to clipboard: <code>{shareUrl}</code>
+          </div>,
+        )
 
         setTimeout(() => setCopied(false), 2000)
       })
@@ -96,7 +101,7 @@ export function ShareButton({ url, title, description = "", variant = "outline",
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant={variant} size={size} onClick={handleShare}>
-              <Share2 className="h-4 w-4" />
+              <Share2Icon className="h-4 w-4" />
               Share
             </Button>
           </TooltipTrigger>
@@ -108,22 +113,22 @@ export function ShareButton({ url, title, description = "", variant = "outline",
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant={variant} size={size}>
-              <Share2 className="h-4 w-4" />
+              <Share2Icon className="h-4 w-4" />
               Share
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={copyToClipboard}>
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
               Copy link
             </DropdownMenuItem>
             <DropdownMenuItem onClick={shareViaEmail}>
-              <Mail className="h-4 w-4" />
+              <MailIcon className="h-4 w-4" />
               Email
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={shareOnTwitter}>
-              <Twitter className="h-4 w-4 stroke-blue-500" />
+              <TwitterIcon className="h-4 w-4 stroke-blue-500" />
               Twitter
             </DropdownMenuItem>
             <DropdownMenuItem onClick={shareOnWhatsApp}>
