@@ -87,8 +87,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
 
-      console.debug("Auth state change:", event, session?.user?.id)
-
       const user = session?.user || null
       dispatch({ type: "SET_USER", payload: user })
 

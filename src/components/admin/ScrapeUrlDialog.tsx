@@ -31,7 +31,7 @@ export function ScrapeUrlDialog() {
       })
 
       const data = await response.json()
-      console.debug(data)
+      console.info(data)
       if (!response.ok) {
         throw new Error(data.error || "Failed to scrape URL")
       }

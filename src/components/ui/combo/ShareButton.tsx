@@ -29,8 +29,6 @@ export function ShareButton({ url, title, description = "", variant = "outline",
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : url
 
-  console.debug(shareUrl)
-
   const handleShare = async () => {
     if (navigator.share) {
       try {

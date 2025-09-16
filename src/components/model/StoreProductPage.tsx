@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useState } from "react"
 import type { StoreProduct } from "@/types"
 import { discountValueToPercentage } from "@/lib/utils"
+import { toast } from "sonner"
 import {
   Undo2Icon,
   HeartIcon,
@@ -14,13 +15,22 @@ import {
   EllipsisVerticalIcon,
   RefreshCcwIcon,
   RadarIcon,
+  MicroscopeIcon,
+  CircleIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
@@ -36,7 +46,7 @@ import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
-import { useUpdateStoreProduct } from "@/hooks/useProducts"
+import { useUpdateStoreProduct, useUpdateStoreProductPriority } from "@/hooks/useProducts"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
@@ -104,7 +114,9 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
 
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
+  const { user, profile } = useUser()
   const updateStoreProduct = useUpdateStoreProduct()
+  const updatePriority = useUpdateStoreProductPriority()
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)
@@ -302,6 +314,62 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     Update from source store
                   </Button>
                 </DropdownMenuItem>
+
+                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
+                  <>
+                    <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
+                    <DropdownMenuLabel>Admin tools</DropdownMenuLabel>
+
+                    <DropdownMenuItem asChild variant="caution">
+                      <Button
+                        variant="dropdown-item"
+                        onClick={async () => {
+                          if (!sp.id) {
+                            toast.error("Invalid product", {
+                              description: "Product ID is missing",
+                            })
+                            return
+                          }
+
+                          const priorityStr = window.prompt("Enter priority (0-5):", "5")
+                          const priorityNum = priorityStr ? parseInt(priorityStr) : null
+                          if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
+                            toast.error("Invalid priority", {
+                              description: "Priority must be a number between 0 and 5",
+                            })
+                            return
+                          }
+
+                          updatePriority.mutate({ storeProductId: sp.id, priority: priorityNum })
+                        }}
+                        disabled={updatePriority.isPending}
+                      >
+                        Set priority
+                        <MicroscopeIcon />
+                      </Button>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild variant="caution">
+                      <Button
+                        variant="dropdown-item"
+                        onClick={async () => {
+                          if (!sp.id) {
+                            toast.error("Invalid product", {
+                              description: "Product ID is missing",
+                            })
+                            return
+                          }
+
+                          updatePriority.mutate({ storeProductId: sp.id, priority: null })
+                        }}
+                        disabled={updatePriority.isPending}
+                      >
+                        Clear priority
+                        <CircleIcon />
+                      </Button>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

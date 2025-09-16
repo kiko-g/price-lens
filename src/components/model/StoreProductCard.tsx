@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { useUpdateStoreProductPriority } from "@/hooks/useProducts"
 
 import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
@@ -69,34 +70,13 @@ function resolveImageUrlForCard(image: string, size = 400) {
   return url.toString()
 }
 
-async function handleUpdatePriority(storeProductId: number, priority: number | null) {
-  try {
-    const response = await fetch(`/api/products/store/${storeProductId}/priority`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ priority }),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || "Failed to update priority")
-    }
-
-    const result = await response.json()
-    return result
-  } catch (error) {
-    console.error("Error updating priority:", error)
-    throw error
-  }
-}
-
 export function StoreProductCard({ sp, onUpdate }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)
   const [isFavorited, setIsFavorited] = useState(sp?.is_favorited ?? false)
+
+  const updatePriority = useUpdateStoreProductPriority()
 
   const { user, profile } = useUser()
   const { toggleFavorite, isLoading } = useFavoriteToggle()
@@ -408,29 +388,25 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                             return
                           }
 
-                          try {
-                            const priority = window.prompt("Enter priority (0-5):", "5")
-                            const priorityNum = priority ? parseInt(priority) : null
-                            if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
-                              toast.error("Invalid priority", {
-                                description: "Priority must be a number between 0 and 5",
-                              })
-                              return
-                            }
-                            setStatus(FrontendStatus.Loading)
-                            await handleUpdatePriority(sp.id, priorityNum)
-                            setPriority(priorityNum)
-                            setStatus(FrontendStatus.Loaded)
-                            toast.success("Priority updated", {
-                              description: `Product priority set to ${priorityNum}`,
+                          const priorityStr = window.prompt("Enter priority (0-5):", "5")
+                          const priorityNum = priorityStr ? parseInt(priorityStr) : null
+                          if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
+                            toast.error("Invalid priority", {
+                              description: "Priority must be a number between 0 and 5",
                             })
-                          } catch (error) {
-                            setStatus(FrontendStatus.Error)
-                            toast.error("Failed to update priority", {
-                              description: error instanceof Error ? error.message : "Unknown error occurred",
-                            })
+                            return
                           }
+
+                          updatePriority.mutate(
+                            { storeProductId: sp.id, priority: priorityNum },
+                            {
+                              onSuccess: () => {
+                                setPriority(priorityNum)
+                              },
+                            },
+                          )
                         }}
+                        disabled={updatePriority.isPending}
                       >
                         Set priority
                         <MicroscopeIcon />
@@ -448,21 +424,16 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                             return
                           }
 
-                          try {
-                            setStatus(FrontendStatus.Loading)
-                            await handleUpdatePriority(sp.id, null)
-                            setPriority(null)
-                            setStatus(FrontendStatus.Loaded)
-                            toast.success("Priority cleared", {
-                              description: "Product priority set to default",
-                            })
-                          } catch (error) {
-                            setStatus(FrontendStatus.Error)
-                            toast.error("Failed to clear priority", {
-                              description: error instanceof Error ? error.message : "Unknown error occurred",
-                            })
-                          }
+                          updatePriority.mutate(
+                            { storeProductId: sp.id, priority: null },
+                            {
+                              onSuccess: () => {
+                                setPriority(null)
+                              },
+                            },
+                          )
                         }}
+                        disabled={updatePriority.isPending}
                       >
                         Clear priority
                         <CircleIcon />

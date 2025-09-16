@@ -117,7 +117,7 @@ function PriceRow({ price }: { price: Price }) {
     const data = await axios.get(`/api/prices/sanitize/${price.store_product_id}`)
     if (data.status === 200) {
       const { deleted, merged } = data.data
-      console.debug("Sanitized prices", { deleted, merged })
+      console.info("Sanitized prices", { deleted, merged })
     }
     setIsSanitizing(false)
   }

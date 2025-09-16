@@ -57,7 +57,7 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   const id = storeProduct.id
   if (!id) throw new Error("Cannot update a store product without an ID")
 
-  console.debug("Updating product:", storeProduct)
+  console.info("Updating product:", storeProduct)
 
   const response = await axios.post(`/api/products/store`, { storeProduct })
   if (response.status !== 200) throw new Error("Failed to update store product")
@@ -169,7 +169,7 @@ export function useUpdateStoreProduct() {
     mutationFn: scrapeAndUpdateStoreProduct,
     onSuccess: (data) => {
       const id = data.id?.toString()
-      console.debug(data)
+      console.info(data)
       toast.success("Product updated", {
         description: `Product ${id} has been updated successfully.`,
       })
@@ -190,6 +190,36 @@ export function useStoreProductCategories() {
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+  })
+}
+
+async function updateStoreProductPriority(storeProductId: number, priority: number | null) {
+  const response = await axios.put(`/api/products/store/${storeProductId}/priority`, { priority })
+  if (response.status !== 200) {
+    throw new Error(response.data?.error || "Failed to update priority")
+  }
+  return response.data
+}
+
+export function useUpdateStoreProductPriority() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ storeProductId, priority }: { storeProductId: number; priority: number | null }) =>
+      updateStoreProductPriority(storeProductId, priority),
+    onSuccess: (data, variables) => {
+      const { storeProductId, priority } = variables
+      toast.success("Priority updated", {
+        description: `Product priority set to ${priority === null ? "none" : priority}`,
+      })
+      // Invalidate relevant queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["storeProduct", storeProductId.toString()] })
+      queryClient.invalidateQueries({ queryKey: ["storeProducts"] })
+    },
+    onError: (error) => {
+      toast.error("Failed to update priority", {
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+      })
+    },
   })
 }
 
