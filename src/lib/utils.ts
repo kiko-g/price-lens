@@ -1,10 +1,9 @@
-import { twMerge } from "tailwind-merge"
-import { clsx, type ClassValue } from "clsx"
-
+import { ChartConfig } from "@/components/ui/chart"
 import { productsImages } from "@/images/products"
-
-import type { DateRange } from "@/types/extra"
 import type { BasketProduct, Price, ProductChartEntry, StoreProduct } from "@/types"
+import type { DateRange } from "@/types/extra"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -1675,3 +1674,22 @@ export function elapsedMsToTimeStr(elapsedMs: number) {
   const seconds = Math.floor((elapsedMs % 60000) / 1000)
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
 }
+
+export const chartConfig = {
+  price: {
+    label: "Price",
+    color: "var(--chart-1)",
+  },
+  "price-recommended": {
+    label: "Price without discount",
+    color: "var(--chart-2)",
+  },
+  "price-per-major-unit": {
+    label: "Price per major unit",
+    color: "var(--chart-3)",
+  },
+  discount: {
+    label: "Discount %",
+    color: "var(--chart-4)",
+  },
+} satisfies ChartConfig
