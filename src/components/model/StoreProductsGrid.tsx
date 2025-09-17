@@ -91,6 +91,16 @@ type Props = {
   sort?: SortByType
   relevant?: boolean
   origin?: string | null
+  initialData?: {
+    products: StoreProduct[]
+    pagination: {
+      page: number
+      limit: number
+      totalCount: number
+      totalPages: number
+      hasMore: boolean
+    }
+  }
 }
 
 export function StoreProductsGrid(props: Props) {
@@ -101,6 +111,7 @@ export function StoreProductsGrid(props: Props) {
     sort: initSortBy = "a-z",
     relevant = false,
     origin: initOriginId = null,
+    initialData,
   } = props
 
   const router = useRouter()
@@ -111,8 +122,8 @@ export function StoreProductsGrid(props: Props) {
   const [origin, setOrigin] = useState<string | null>(initOriginId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
-  const [paginationTotal, setPaginationTotal] = useState(50)
-  const [pagedCount, setPagedCount] = useState(0)
+  const [paginationTotal, setPaginationTotal] = useState(initialData?.pagination.totalPages || 50)
+  const [pagedCount, setPagedCount] = useState(initialData?.pagination.totalCount || 0)
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
   const [orderByPriority, setOrderByPriority] = useState(true)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
@@ -121,8 +132,8 @@ export function StoreProductsGrid(props: Props) {
   const [category3, setCategory3] = useState<string>("")
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-  const [status, setStatus] = useState(FrontendStatus.Loading)
-  const [storeProducts, setStoreProducts] = useState<StoreProduct[]>([])
+  const [status, setStatus] = useState(initialData ? FrontendStatus.Loaded : FrontendStatus.Loading)
+  const [storeProducts, setStoreProducts] = useState<StoreProduct[]>(initialData?.products || [])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
     const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
     const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
@@ -319,8 +330,19 @@ WHERE category = '${category1}'
   }
 
   useEffect(() => {
+    // Skip initial fetch if we have initialData and params haven't changed
+    if (
+      initialData &&
+      page === initPage &&
+      sortBy === initSortBy &&
+      !onlyDiscounted &&
+      origin === initOriginId &&
+      orderByPriority === true
+    ) {
+      return
+    }
     fetchProducts()
-  }, [page, sortBy, onlyDiscounted, origin, orderByPriority])
+  }, [page, sortBy, onlyDiscounted, origin, orderByPriority, initialData, initPage, initSortBy, initOriginId])
 
   useEffect(() => {
     const allCategoriesFilled = category1 && category2 && category3
