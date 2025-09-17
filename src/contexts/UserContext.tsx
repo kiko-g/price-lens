@@ -49,6 +49,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(userReducer, initialState)
   const supabase = createClient()
   const profileFetchingRef = useRef(false)
+  console.debug(state)
 
   useEffect(() => {
     let mounted = true
