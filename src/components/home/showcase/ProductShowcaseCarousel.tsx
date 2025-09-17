@@ -107,8 +107,8 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
         <BorderBeam
           duration={5}
           size={150}
-          colorFrom="var(--color-primary)"
-          colorTo="var(--color-secondary)"
+          colorFrom="var(--color-primary-300)"
+          colorTo="var(--color-primary-500)"
           borderWidth={3}
         />
       </Carousel>

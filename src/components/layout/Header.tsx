@@ -6,12 +6,14 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { navigation } from "@/lib/config"
 import { usePathname } from "next/navigation"
 
-import { FavoritesLink } from "@/components/layout/FavoritesLink"
+import { Button } from "@/components/ui/button"
+
 import { LogoLink } from "@/components/layout/LogoLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { SearchDialog } from "@/components/layout/SearchDialog"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
-import { Button } from "@/components/ui/button"
+import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
+
 import { SearchIcon } from "lucide-react"
 
 export function Header() {
@@ -23,9 +25,7 @@ export function Header() {
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />
-          <span className="text-2xs/4 inline-flex items-center rounded-full bg-linear-to-br from-orange-500/70 to-rose-600/70 px-1 py-1 text-center leading-tight font-bold tracking-tighter text-white capitalize md:px-1.5 md:py-0.5 md:text-xs/4 md:font-semibold dark:from-purple-400 dark:to-indigo-500">
-            Early Access
-          </span>
+          <EarlyAccessBadge />
 
           <nav className="ml-3 hidden items-center gap-1.5 md:flex">
             {navigation

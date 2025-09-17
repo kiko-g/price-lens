@@ -32,6 +32,16 @@ const nextConfig: NextConfig = {
         hostname: "www.pingodoce.pt",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.googleusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
   // webpack: (config) => {

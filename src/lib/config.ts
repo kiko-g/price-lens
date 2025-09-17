@@ -10,11 +10,9 @@ import {
   MicroscopeIcon,
 } from "lucide-react"
 
-const titleOrName = "Price Lens"
-
 export const siteConfig = {
-  name: titleOrName,
-  title: titleOrName,
+  name: "Price Lens",
+  title: "PriceLens",
   author: "Francisco Goncalves",
   url: "https://price-lens.vercel.app",
   ogImage: "https://price-lens.vercel.app/og.jpg",

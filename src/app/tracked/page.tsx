@@ -5,7 +5,7 @@ import { StoreProductsTracked } from "@/components/model/StoreProductsTracked"
 import { getTrackedProducts } from "./actions"
 
 export const metadata: Metadata = {
-  title: "Tracked Products - Price Lens",
+  title: "Tracked Products",
   description:
     "Track prices of essential products across Portuguese supermarkets. Get real insights into price changes and inflation trends.",
 }

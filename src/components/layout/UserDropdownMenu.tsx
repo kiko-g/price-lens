@@ -4,8 +4,8 @@ import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
+import { createClient } from "@/lib/supabase/client"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -21,7 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { GithubIcon } from "@/components/icons"
-import { LogOut, MoonIcon, SunIcon, UserIcon, HeartIcon } from "lucide-react"
+import { HeartIcon, LogOut, MoonIcon, ScanFaceIcon, SunIcon, UserIcon } from "lucide-react"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
@@ -30,7 +30,12 @@ export function UserDropdownMenu() {
 
   if (isLoading) return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
 
-  if (!user) return null
+  if (!user)
+    return (
+      <Button variant="outline" className="relative size-[34px]" onClick={() => router.push("/login")}>
+        <ScanFaceIcon />
+      </Button>
+    )
 
   function getUserBadgeText() {
     if (profile?.role === "admin") return "Admin"

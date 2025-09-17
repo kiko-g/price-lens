@@ -17,7 +17,7 @@ import { Footer } from "@/components/layout/Footer"
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
-    template: `${siteConfig.name} - %s`,
+    template: `${siteConfig.name} | %s`,
   },
   metadataBase: new URL(siteConfig.url),
   description: siteConfig.description,
