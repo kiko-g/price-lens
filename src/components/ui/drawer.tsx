@@ -2,25 +2,67 @@
 
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
-
 import { cn } from "@/lib/utils"
 
-const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
-)
+function setBodyLocked(locked: boolean) {
+  const root = document.documentElement
+  const body = document.body
+  body.classList.toggle("drawer-open", locked)
+
+  // Contain overscroll + disable smooth scroll while open
+  if (locked) {
+    root.classList.add("drawer-no-overscroll")
+    // prevent scroll-jumps when closing if site uses smooth scroll
+    root.style.scrollBehavior = "auto"
+  } else {
+    root.classList.remove("drawer-no-overscroll")
+    root.style.scrollBehavior = ""
+  }
+}
+
+const Drawer = ({
+  shouldScaleBackground = true,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      setBodyLocked(next)
+      onOpenChange?.(next)
+    },
+    [onOpenChange],
+  )
+
+  React.useEffect(() => {
+    return () => setBodyLocked(false) // cleanup on unmount
+  }, [])
+
+  return (
+    <DrawerPrimitive.Root
+      // modal is important to block outside interaction/scroll
+      modal
+      shouldScaleBackground={shouldScaleBackground}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  )
+}
 Drawer.displayName = "Drawer"
 
 const DrawerTrigger = DrawerPrimitive.Trigger
-
 const DrawerPortal = DrawerPrimitive.Portal
-
 const DrawerClose = DrawerPrimitive.Close
 
 const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Overlay ref={ref} className={cn("fixed inset-0 z-50 bg-black/80", className)} {...props} />
+  <DrawerPrimitive.Overlay
+    ref={ref}
+    // pointer/touch blocked here so the page underneath never scrolls
+    className={cn("pointer-events-auto fixed inset-0 z-50 touch-none bg-black/80", className)}
+    {...props}
+  />
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
@@ -32,8 +74,9 @@ const DrawerContent = React.forwardRef<
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
+      // "transform-gpu will-change" keep animation smooth, touch-pan-y/overscroll-contain prevent scroll chaining/P2R.
       className={cn(
-        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border",
+        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto transform-gpu touch-pan-y flex-col overscroll-contain rounded-t-[10px] border will-change-transform",
         className,
       )}
       {...props}
