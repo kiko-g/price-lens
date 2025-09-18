@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation"
 
 import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { useUser } from "@/hooks/useUser"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -43,7 +42,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import {
   Drawer,
   DrawerContent,
@@ -117,20 +115,22 @@ export function StoreProductsGrid(props: Props) {
   const router = useRouter()
   const limit = 36
   const [page, setPage] = useState(initPage)
-  const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
   const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
   const [origin, setOrigin] = useState<string | null>(initOriginId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
-  const [paginationTotal, setPaginationTotal] = useState(initialData?.pagination.totalPages || 50)
-  const [pagedCount, setPagedCount] = useState(initialData?.pagination.totalCount || 0)
+
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
   const [orderByPriority, setOrderByPriority] = useState(true)
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
+  const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
+  const [pagedCount, setPagedCount] = useState(initialData?.pagination.totalCount || 0)
+  const [paginationTotal, setPaginationTotal] = useState(initialData?.pagination.totalPages || 50)
+
   const [category1, setCategory1] = useState<string>("")
   const [category2, setCategory2] = useState<string>("")
   const [category3, setCategory3] = useState<string>("")
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const [status, setStatus] = useState(initialData ? FrontendStatus.Loaded : FrontendStatus.Loading)
   const [storeProducts, setStoreProducts] = useState<StoreProduct[]>(initialData?.products || [])
@@ -154,7 +154,6 @@ export function StoreProductsGrid(props: Props) {
     }))
   })
 
-  const { profile } = useUser()
   const storeProductCategories = useStoreProductCategories()
   const tuples = storeProductCategories?.data?.tuples || []
 
