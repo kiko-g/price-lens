@@ -109,8 +109,8 @@ export interface PricePoint {
   price_recommended: number
   price_per_major_unit: number
   discount: number
-  frequencyPercentage: string
-  averageDurationDays: string
+  frequencyRatio: number
+  averageDurationDays: number
   totalDuration: number
   occurrences: number
 }

@@ -102,8 +102,8 @@ export const priceQueries = {
     const pricePoints = Array.from(uniqueMap.values())
       .map((pricePoint) => ({
         ...pricePoint,
-        frequencyPercentage: ((pricePoint.totalDuration / totalDuration) * 100).toFixed(2),
-        averageDurationDays: (pricePoint.totalDuration / (1000 * 60 * 60 * 24) / pricePoint.occurrences).toFixed(1),
+        frequencyRatio: pricePoint.totalDuration / totalDuration,
+        averageDurationDays: pricePoint.totalDuration / (1000 * 60 * 60 * 24) / pricePoint.occurrences,
       }))
       .sort((a, b) => b.totalDuration - a.totalDuration)
 

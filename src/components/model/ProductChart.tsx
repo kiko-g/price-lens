@@ -36,6 +36,7 @@ const defaultOptions: Props["options"] = {
 }
 
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
+  console.debug("render!")
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
@@ -44,11 +45,9 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const id = sp.id?.toString() || ""
   const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
 
-  // Extract data from query result
   const prices = data?.prices || []
   const analytics = data?.analytics || null
 
-  // Handle error state
   if (error) {
     return (
       <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
@@ -113,7 +112,6 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const { floor, ceiling } = useMemo(() => {
     if (!analytics) return { floor: 0, ceiling: 0 }
 
-    // For chart display, we still need to filter by active axis
     const allPrices = prices
       .flatMap((p) => [
         activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
@@ -130,13 +128,11 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     }
   }, [prices, activeAxis, analytics])
 
-  // Get computed variations from backend
   const priceVariation = analytics?.variations.price || 0
   const priceRecommendedVariation = analytics?.variations.priceRecommended || 0
   const pricePerMajorUnitVariation = analytics?.variations.pricePerMajorUnit || 0
   const discountVariation = analytics?.variations.discount || 0
 
-  // Get computed date range from backend
   const minDate = analytics?.dateRange.minDate || null
   const maxDate = analytics?.dateRange.maxDate || null
   const daysBetweenDates = analytics?.dateRange.daysBetween || 0
@@ -155,69 +151,6 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
-      {!isLoading ? (
-        pricePoints !== null &&
-        pricePoints.length > 0 && (
-          <Accordion type="single" collapsible className="mb-4 w-full overflow-hidden">
-            <AccordionItem value="price-history" className="overflow-hidden rounded-lg border">
-              <AccordionTrigger className="flex items-center justify-start gap-2 px-3 py-2 text-sm font-medium hover:underline">
-                <BinocularsIcon className="h-4 w-4" />
-                {sp.price === mostCommon?.price ? (
-                  <span>
-                    Current price is <span className="text-green-500">the most common price</span>
-                  </span>
-                ) : (
-                  <span>
-                    Current price is <span className="text-destructive font-bold">not</span> the most common price
-                  </span>
-                )}
-              </AccordionTrigger>
-
-              <AccordionContent className="px-0 pb-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-accent border-t">
-                      <TableHead>Price</TableHead>
-                      <TableHead>Per Unit</TableHead>
-                      <TableHead>Frequency</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pricePoints.map((point: PricePoint, index) => (
-                      <TableRow key={index} className="hover:bg-muted/25">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{point.price.toFixed(2)}€</span>
-                            {point.discount > 0 && (
-                              <Badge variant="destructive" size="xs" className="text-2xs">
-                                -{Math.round(point.discount * 100)}%
-                              </Badge>
-                            )}
-                            {index === 0 && (
-                              <Badge variant="secondary" size="xs">
-                                Most Common
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {point.price_per_major_unit.toFixed(2)}€
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">{point.frequencyPercentage}%</div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        )
-      ) : (
-        <Skeleton className="mb-4 h-[38px] w-full" />
-      )}
-
       {(options?.showPricesVariationCard || options?.showImage) && (
         <header className="mb-2 flex items-start justify-between gap-3">
           {options?.showPricesVariationCard && (
@@ -272,7 +205,68 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         </header>
       )}
 
-      <div className="mt-2 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-2 md:mb-4">
+      {!isLoading ? (
+        pricePoints !== null &&
+        pricePoints.length > 0 && (
+          <Accordion type="single" collapsible className="mb-2 w-min overflow-hidden">
+            <AccordionItem value="price-history" className="overflow-hidden rounded-lg border">
+              <AccordionTrigger className="flex items-center justify-between gap-2 px-3 py-2 text-sm font-medium hover:underline">
+                <span className="flex items-center gap-2 pr-3 whitespace-nowrap">
+                  <BinocularsIcon className="h-4 w-4" />
+                  {sp.price === mostCommon?.price ? (
+                    <span>
+                      Current price is <span className="text-green-500">the most common price</span>
+                    </span>
+                  ) : (
+                    <span>
+                      Current price is <span className="text-destructive font-bold">not</span> the most common price
+                    </span>
+                  )}
+                </span>
+              </AccordionTrigger>
+
+              <AccordionContent className="px-0 pb-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-accent border-t">
+                      <TableHead>Price</TableHead>
+                      <TableHead className="text-center">Per Unit</TableHead>
+                      <TableHead className="text-center">Frequency</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pricePoints.map((point: PricePoint, index) => (
+                      <TableRow key={index} className="hover:bg-muted/25">
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{point.price.toFixed(2)}€</span>
+                            {point.discount > 0 && (
+                              <Badge variant="destructive" size="xs" className="text-2xs">
+                                -{Math.round(point.discount * 100)}%
+                              </Badge>
+                            )}
+                            {index === 0 && (
+                              <Badge variant="secondary" size="2xs">
+                                Most Common
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">{point.price_per_major_unit.toFixed(2)}€</TableCell>
+                        <TableCell className="text-center">{Math.round(point.frequencyRatio * 100)}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )
+      ) : (
+        <Skeleton className="mb-4 h-[38px] w-full" />
+      )}
+
+      <div className="mt-0 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-0 md:mb-4">
         {RANGES.map((range) => (
           <Button
             key={range}
