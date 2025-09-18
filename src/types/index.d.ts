@@ -104,6 +104,40 @@ export interface Price {
   updated_at: string | null
 }
 
+export interface PricePoint {
+  price: number
+  price_recommended: number
+  price_per_major_unit: number
+  discount: number
+  frequencyRatio: number
+  averageDurationDays: number
+  totalDuration: number
+  occurrences: number
+}
+
+export interface PriceAnalytics {
+  pricePoints: PricePoint[] | null
+  mostCommon: PricePoint | null
+  floor: number
+  ceiling: number
+  variations: {
+    price: number
+    priceRecommended: number
+    pricePerMajorUnit: number
+    discount: number
+  }
+  dateRange: {
+    minDate: string | null
+    maxDate: string | null
+    daysBetween: number
+  }
+}
+
+export interface PricesWithAnalytics {
+  prices: Price[]
+  analytics: PriceAnalytics
+}
+
 export interface UserFavorite {
   id: number
   user_id: string

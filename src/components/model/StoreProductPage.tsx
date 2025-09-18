@@ -374,7 +374,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </DropdownMenu>
           </div>
 
-          <div className="mt-4 flex-1">
+          <div className="flex-1">
             <ProductChart
               sp={sp}
               options={{

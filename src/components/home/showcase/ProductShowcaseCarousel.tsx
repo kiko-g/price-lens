@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { memo, useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { cn, buildChartData } from "@/lib/utils"
+import { cn, buildChartData, chartConfig } from "@/lib/utils"
 import { useAllProductsWithPrices } from "@/hooks/useProducts"
 import { productsWithPrices } from "@/lib/data/products"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
@@ -188,29 +188,6 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
     if (!productData?.prices) return []
     return buildChartData(productData.prices, "1M")
   }, [productData?.prices])
-
-  const chartConfig = useMemo(
-    () =>
-      ({
-        price: {
-          label: "Price",
-          color: "var(--chart-1)",
-        },
-        "price-recommended": {
-          label: "Price without discount",
-          color: "var(--chart-2)",
-        },
-        "price-per-major-unit": {
-          label: "Price per major unit",
-          color: "var(--chart-3)",
-        },
-        discount: {
-          label: "Discount %",
-          color: "var(--chart-4)",
-        },
-      }) satisfies ChartConfig,
-    [],
-  )
 
   if (!productData) {
     return (

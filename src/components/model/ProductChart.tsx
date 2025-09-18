@@ -1,41 +1,25 @@
 "use client"
 
-import axios from "axios"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { Price, StoreProduct, ProductChartEntry } from "@/types"
+import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
-import { cn, buildChartData, getDaysBetweenDates, imagePlaceholder } from "@/lib/utils"
+import { cn, buildChartData, imagePlaceholder, chartConfig } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
+import { usePricesWithAnalytics } from "@/hooks/usePrices"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "@/components/model/PricesVariationCard"
 
-import { ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
-
-const chartConfig = {
-  price: {
-    label: "Price",
-    color: "var(--chart-1)",
-  },
-  "price-recommended": {
-    label: "Price without discount",
-    color: "var(--chart-2)",
-  },
-  "price-per-major-unit": {
-    label: "Price per major unit",
-    color: "var(--chart-3)",
-  },
-  discount: {
-    label: "Discount %",
-    color: "var(--chart-4)",
-  },
-} satisfies ChartConfig
+import { BinocularsIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
 
 type Props = {
   sp: StoreProduct
@@ -52,12 +36,26 @@ const defaultOptions: Props["options"] = {
 }
 
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
+  console.debug("render!")
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const [isLoading, setIsLoading] = useState(false)
-  const [prices, setPrices] = useState<Price[]>([])
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
   const [activeAxis, updateActiveAxis] = useActiveAxis()
+
+  const id = sp.id?.toString() || ""
+  const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
+
+  const prices = data?.prices || []
+  const analytics = data?.analytics || null
+
+  if (error) {
+    return (
+      <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
+        <p className="text-destructive">Failed to load price data</p>
+        <p className="text-muted-foreground mt-1 text-sm">Please try refreshing the page</p>
+      </div>
+    )
+  }
 
   function getLineChartConfig(axis: string, chartDataLength: number) {
     const isSinglePoint = chartDataLength === 1
@@ -106,7 +104,14 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     return url.toString()
   }
 
+  // Get computed analytics from backend
+  const pricePoints = analytics?.pricePoints || null
+  const mostCommon = analytics?.mostCommon || null
+
+  // Get computed floor/ceiling from backend (filtered by activeAxis on client for chart display)
   const { floor, ceiling } = useMemo(() => {
+    if (!analytics) return { floor: 0, ceiling: 0 }
+
     const allPrices = prices
       .flatMap((p) => [
         activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
@@ -115,115 +120,27 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
       ])
       .filter((price) => price !== -Infinity && price !== null)
 
-    if (allPrices.length === 0) return { floor: 0, ceiling: 0 }
+    if (allPrices.length === 0) return { floor: analytics.floor, ceiling: analytics.ceiling }
 
     return {
       floor: Math.floor(Math.min(...allPrices)),
       ceiling: Math.ceil(Math.max(...allPrices)),
     }
-  }, [prices, activeAxis])
+  }, [prices, activeAxis, analytics])
 
-  const priceVariation = useMemo(() => {
-    const lastTwoPrices = prices.slice(-2)
-    if (lastTwoPrices.length < 2) return 0
+  const priceVariation = analytics?.variations.price || 0
+  const priceRecommendedVariation = analytics?.variations.priceRecommended || 0
+  const pricePerMajorUnitVariation = analytics?.variations.pricePerMajorUnit || 0
+  const discountVariation = analytics?.variations.discount || 0
 
-    const currentPrice = lastTwoPrices[1].price ?? 0
-    const previousPrice = lastTwoPrices[0].price ?? 0
-
-    return (currentPrice - previousPrice) / previousPrice
-  }, [prices])
-
-  const priceRecommendedVariation = useMemo(() => {
-    const lastTwoPrices = prices.slice(-2)
-    if (lastTwoPrices.length < 2) return 0
-
-    const currentPrice = lastTwoPrices[1].price_recommended ?? 0
-    const previousPrice = lastTwoPrices[0].price_recommended ?? 0
-
-    return (currentPrice - previousPrice) / previousPrice
-  }, [prices])
-
-  const pricePerMajorUnitVariation = useMemo(() => {
-    const lastTwoPrices = prices.slice(-2)
-    if (lastTwoPrices.length < 2) return 0
-
-    const currentPrice = lastTwoPrices[1].price_per_major_unit ?? 0
-    const previousPrice = lastTwoPrices[0].price_per_major_unit ?? 0
-
-    return (currentPrice - previousPrice) / previousPrice
-  }, [prices])
-
-  const discountVariation = useMemo(() => {
-    const lastTwoPrices = prices.slice(-2)
-    if (lastTwoPrices.length < 2) return 0
-
-    const currentDiscount = lastTwoPrices[1].discount ?? 0
-    const previousDiscount = lastTwoPrices[0].discount ?? 0
-
-    return currentDiscount - previousDiscount
-  }, [prices])
-
-  const minDate = useMemo(() => {
-    if (prices.length === 0) return null
-
-    return prices.reduce<string | null>((min, price) => {
-      const validFrom = price.valid_from ?? null
-      const updatedAt = price.updated_at ?? null
-
-      if (validFrom === null && updatedAt === null) return min
-      if (min === null) return validFrom !== null ? validFrom : updatedAt
-      if (validFrom !== null && validFrom < min) return validFrom
-      if (updatedAt !== null && updatedAt < min) return updatedAt
-
-      return min
-    }, null)
-  }, [prices])
-
-  const maxDate = useMemo(() => {
-    if (prices.length === 0) return null
-
-    return prices.reduce<string | null>((max, price) => {
-      const validTo = price.valid_to ?? null
-      const updatedAt = price.updated_at ?? null
-
-      if (validTo === null && updatedAt === null) return max
-      if (max === null) return validTo !== null ? validTo : updatedAt
-      if (validTo !== null && validTo > max) return validTo
-
-      return max
-    }, null)
-  }, [prices])
-
-  const daysBetweenDates = useMemo(() => {
-    if (!minDate || !maxDate) return 0
-
-    const minDateObj = new Date(minDate)
-    const maxDateObj = new Date(maxDate)
-
-    return getDaysBetweenDates(minDateObj, maxDateObj)
-  }, [minDate, maxDate])
-
-  async function fetchPrices() {
-    if (!sp.id) return
-
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 400))
-    const response = await axios.get(`/api/prices/${sp.id}`)
-    if (response.status === 200) {
-      const data = response.data
-      if (data && data.length > 0) setPrices(data)
-    }
-    setIsLoading(false)
-  }
+  const minDate = analytics?.dateRange.minDate || null
+  const maxDate = analytics?.dateRange.maxDate || null
+  const daysBetweenDates = analytics?.dateRange.daysBetween || 0
 
   function handleAxisChange(axis: string) {
     const newAxis = activeAxis.includes(axis) ? activeAxis.filter((a) => a !== axis) : [...activeAxis, axis]
     updateActiveAxis(newAxis)
   }
-
-  useEffect(() => {
-    fetchPrices()
-  }, [])
 
   useEffect(() => {
     if (!prices || prices.length === 0) return
@@ -288,7 +205,68 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         </header>
       )}
 
-      <div className="mt-2 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-2 md:mb-4">
+      {!isLoading ? (
+        pricePoints !== null &&
+        pricePoints.length > 0 && (
+          <Accordion type="single" collapsible className="mb-2 w-min overflow-hidden">
+            <AccordionItem value="price-history" className="overflow-hidden rounded-lg border">
+              <AccordionTrigger className="flex items-center justify-between gap-2 px-3 py-2 text-sm font-medium hover:underline">
+                <span className="flex items-center gap-2 pr-3 whitespace-nowrap">
+                  <BinocularsIcon className="h-4 w-4" />
+                  {sp.price === mostCommon?.price ? (
+                    <span>
+                      Current price is <span className="text-green-500">the most common price</span>
+                    </span>
+                  ) : (
+                    <span>
+                      Current price is <span className="text-destructive font-bold">not</span> the most common price
+                    </span>
+                  )}
+                </span>
+              </AccordionTrigger>
+
+              <AccordionContent className="px-0 pb-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-accent border-t">
+                      <TableHead>Price</TableHead>
+                      <TableHead className="text-center">Per Unit</TableHead>
+                      <TableHead className="text-center">Frequency</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pricePoints.map((point: PricePoint, index) => (
+                      <TableRow key={index} className="hover:bg-muted/25">
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{point.price.toFixed(2)}€</span>
+                            {point.discount > 0 && (
+                              <Badge variant="destructive" size="xs" className="text-2xs">
+                                -{Math.round(point.discount * 100)}%
+                              </Badge>
+                            )}
+                            {index === 0 && (
+                              <Badge variant="secondary" size="2xs">
+                                Most Common
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">{point.price_per_major_unit.toFixed(2)}€</TableCell>
+                        <TableCell className="text-center">{Math.round(point.frequencyRatio * 100)}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )
+      ) : (
+        <Skeleton className="mb-4 h-[38px] w-full" />
+      )}
+
+      <div className="mt-0 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-0 md:mb-4">
         {RANGES.map((range) => (
           <Button
             key={range}
