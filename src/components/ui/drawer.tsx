@@ -9,10 +9,8 @@ function setBodyLocked(locked: boolean) {
   const body = document.body
   body.classList.toggle("drawer-open", locked)
 
-  // Contain overscroll + disable smooth scroll while open
   if (locked) {
     root.classList.add("drawer-no-overscroll")
-    // prevent scroll-jumps when closing if site uses smooth scroll
     root.style.scrollBehavior = "auto"
   } else {
     root.classList.remove("drawer-no-overscroll")

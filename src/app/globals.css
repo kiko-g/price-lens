@@ -348,6 +348,16 @@
     @apply scroll-smooth text-red-500;
   }
 
+  body.drawer-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  html.drawer-no-overscroll,
+  body.drawer-open {
+    overscroll-behavior: none;
+  }
+
   @keyframes rotate {
     from {
       transform: rotateY(-90deg);

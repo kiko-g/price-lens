@@ -1,7 +1,7 @@
 import { arePricePointsEqual } from "@/lib/pricing"
 import { createClient } from "@/lib/supabase/server"
 import { now } from "@/lib/utils"
-import type { Price, PricesWithAnalytics, PriceAnalytics } from "@/types"
+import type { Price, PricesWithAnalytics, PriceAnalytics, PricePoint } from "@/types"
 
 export const priceQueries = {
   async getPrices() {
@@ -100,12 +100,12 @@ export const priceQueries = {
     })
 
     const pricePoints = Array.from(uniqueMap.values())
-      .map((pricePoint) => ({
+      .map((pricePoint: PricePoint) => ({
         ...pricePoint,
         frequencyRatio: pricePoint.totalDuration / totalDuration,
         averageDurationDays: pricePoint.totalDuration / (1000 * 60 * 60 * 24) / pricePoint.occurrences,
       }))
-      .sort((a, b) => b.totalDuration - a.totalDuration)
+      .sort((a, b) => b.price - a.price)
 
     const mostCommon = pricePoints.length > 0 ? pricePoints[0] : null
 
