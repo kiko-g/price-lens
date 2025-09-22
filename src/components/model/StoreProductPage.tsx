@@ -21,7 +21,6 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ShareButton } from "@/components/ui/combo/ShareButton"
 import {
   DropdownMenu,
@@ -159,7 +158,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.category || sp.category_2 || sp.category_3 ? (
-                <Badge variant="boring" size="2xs" roundedness="sm" className="w-fit">
+                <Badge variant="boring" size="2xs" roundedness="sm" className="w-fit max-w-80">
                   {sp.category} {sp.category_2 && ` > ${sp.category_2}`} {sp.category_3 && ` > ${sp.category_3}`}
                 </Badge>
               ) : null}
@@ -239,7 +238,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             <h1 className="line-clamp-3 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
-            {sp.pack && <p className="text-muted-foreground">{sp.pack}</p>}
+            {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -251,7 +250,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             ) : null}
 
             {isNormalPrice ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
+              <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
             ) : null}
 
             {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
