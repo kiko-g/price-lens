@@ -305,7 +305,7 @@
   }
 
   *::selection {
-    @apply bg-primary/70 dark:bg-secondary/50 text-white dark:text-white;
+    @apply bg-black/80 dark:bg-white/80 text-white dark:text-black;
   }
 
   pre *::selection {
