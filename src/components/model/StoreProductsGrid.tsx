@@ -132,7 +132,7 @@ export function StoreProductsGrid(props: Props) {
   const [category2, setCategory2] = useState<string>("")
   const [category3, setCategory3] = useState<string>("")
 
-  const [status, setStatus] = useState(initialData ? FrontendStatus.Loaded : FrontendStatus.Loading)
+  const [status, setStatus] = useState(FrontendStatus.Loaded)
   const [storeProducts, setStoreProducts] = useState<StoreProduct[]>(initialData?.products || [])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
     const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
@@ -153,6 +153,14 @@ export function StoreProductsGrid(props: Props) {
       selected: relevant ? defaultCategorySet.has(name) : false,
     }))
   })
+
+  const ssrSkipFetch =
+    initialData &&
+    page === initPage &&
+    sortBy === initSortBy &&
+    !onlyDiscounted &&
+    origin === initOriginId &&
+    orderByPriority === true
 
   const storeProductCategories = useStoreProductCategories()
   const tuples = storeProductCategories?.data?.tuples || []
@@ -218,7 +226,7 @@ WHERE category = '${category1}'
 
   const selectedCount = categories.filter((cat) => cat.selected).length
 
-  // Check if currently selected categories exactly match default categories
+  // check if currently selected categories exactly match default categories
   const selectedCategoryNames = categories.filter((cat) => cat.selected).map((cat) => cat.name)
   const isRelevant =
     selectedCategoryNames.length === defaultCategories.length &&
@@ -329,29 +337,36 @@ WHERE category = '${category1}'
   }
 
   useEffect(() => {
-    // Skip initial fetch if we have initialData and params haven't changed
-    if (
-      initialData &&
-      page === initPage &&
-      sortBy === initSortBy &&
-      !onlyDiscounted &&
-      origin === initOriginId &&
-      orderByPriority === true
-    ) {
+    if (ssrSkipFetch) {
+      // skip initial fetch if we have initialData and params have not changed
       return
     }
-    fetchProducts()
-  }, [page, sortBy, onlyDiscounted, origin, orderByPriority, initialData, initPage, initSortBy, initOriginId])
 
-  useEffect(() => {
     const allCategoriesFilled = category1 && category2 && category3
     const allCategoriesEmpty = !category1 && !category2 && !category3
     if (allCategoriesFilled || allCategoriesEmpty) {
       setPage(1)
       fetchProducts()
+
+      if (allCategoriesFilled) {
+        navigator.clipboard.writeText(categoriesPriorityQuery)
+      }
+      return
     }
-    if (allCategoriesFilled) navigator.clipboard.writeText(categoriesPriorityQuery)
-  }, [category1, category2, category3])
+
+    fetchProducts()
+  }, [
+    page,
+    sortBy,
+    onlyDiscounted,
+    origin,
+    orderByPriority,
+    category1,
+    category2,
+    category3,
+    categoriesPriorityQuery,
+    ssrSkipFetch,
+  ])
 
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), origin })
