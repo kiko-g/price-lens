@@ -293,7 +293,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
       {!isLoading ? (
         pricePoints !== null &&
         pricePoints.length > 0 && (
-          <div className="mb-2 overflow-hidden">
+          <div className="overflow-hidden">
             <div className="bg-accent flex items-center gap-2 rounded-lg border-0 px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap">
               <BinocularsIcon className="h-4 w-4" />
               {sp.price === mostCommon?.price ? (

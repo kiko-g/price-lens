@@ -504,7 +504,8 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                 <ProductChart sp={sp} className="max-w-xl" />
               </Suspense>
 
-              <div className="-mt-4 flex w-full pt-2 text-sm">
+              {/* Drawer Footer */}
+              <div className="mt-1 flex w-full pt-2 text-sm">
                 <div className="flex w-full flex-col items-end justify-end gap-1">
                   <div className="flex w-full justify-between">
                     <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Created:</span>
@@ -522,7 +523,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
                 </div>
               </div>
 
-              <Accordion type="single" collapsible className="mt-2 w-full border-t">
+              <Accordion type="single" collapsible className="mt-2 hidden w-full border-t md:flex">
                 <AccordionItem value="item-1" className="w-full border-0">
                   <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
                   <AccordionContent>

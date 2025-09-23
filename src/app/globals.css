@@ -305,7 +305,7 @@
   }
 
   *::selection {
-    @apply bg-black/80 dark:bg-white/80 text-white dark:text-black;
+    @apply bg-black/80 text-white dark:bg-white/80 dark:text-black;
   }
 
   pre *::selection {
@@ -379,5 +379,11 @@
 
   .logo-animation {
     animation: rotate 0.5s backwards;
+  }
+
+  @media (max-width: 768px) {
+    [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
+      height: 0;
+    }
   }
 }
