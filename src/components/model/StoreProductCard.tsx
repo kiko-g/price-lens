@@ -615,7 +615,7 @@ function DrawerSheet({
           {description ? <DrawerDescription>{description}</DrawerDescription> : null}
         </DrawerHeader>
 
-        <div className="px-4 pt-2 pb-4">{children}</div>
+        <div className="max-h-[80vh] px-4 pt-2 pb-4">{children}</div>
       </DrawerContent>
     </Drawer>
   )

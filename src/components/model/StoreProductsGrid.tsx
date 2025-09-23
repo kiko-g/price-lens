@@ -3,13 +3,14 @@
 import { type StoreProduct } from "@/types"
 import { FrontendStatus, searchTypes, type SearchType, type SortByType } from "@/types/extra"
 import axios from "axios"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
+import { BorderBeam } from "@/components/magicui/border-beam"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import {
@@ -80,7 +81,6 @@ import {
   StoreIcon,
   XIcon,
 } from "lucide-react"
-import { BorderBeam } from "../magicui/border-beam"
 
 type Props = {
   page?: number

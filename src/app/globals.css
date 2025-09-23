@@ -381,7 +381,7 @@
     animation: rotate 0.5s backwards;
   }
 
-  /* [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
+  [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
     height: 0 !important;
-  } */
+  }
 }
