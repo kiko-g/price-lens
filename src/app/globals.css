@@ -116,9 +116,9 @@
 }
 
 @theme inline {
-  --text-2xs: 0.625rem;
+  --text-2xs: 0.65rem;
   --text-2xs--line-height: 0.75rem;
-  --text-3xs: 0.5rem;
+  --text-3xs: 0.525rem;
   --text-3xs--line-height: 0.625rem;
 
   --color-base-50: var(--base-50);
@@ -381,9 +381,7 @@
     animation: rotate 0.5s backwards;
   }
 
-  @media (max-width: 768px) {
-    [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
-      height: 0;
-    }
-  }
+  /* [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
+    height: 0 !important;
+  } */
 }

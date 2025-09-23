@@ -292,86 +292,83 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         </ChartContainer>
       </div>
 
-      {!isLoading ? (
-        pricePoints !== null &&
-        pricePoints.length > 0 && (
-          <div className="overflow-hidden">
-            <div className="bg-accent flex items-center gap-2 rounded-lg border-0 px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap">
-              <BinocularsIcon className="h-4 w-4" />
-              {sp.price === mostCommon?.price ? (
-                <span>
-                  Current price is <span className="font-bold text-green-600">the most common price</span>
-                </span>
-              ) : (
-                <span>
-                  Current price is <span className="text-destructive font-bold">not</span> the most common price
-                </span>
-              )}
-            </div>
-
-            <Table className="mt-1 rounded-lg">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="h-7 text-xs">
-                    <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
-                    Price
-                  </TableHead>
-                  <TableHead className="h-7 text-center text-xs">
-                    <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
-                    Original
-                  </TableHead>
-                  <TableHead className="h-7 text-center text-xs">
-                    <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
-                    Per Unit
-                  </TableHead>
-                  <TableHead className="h-7 text-center text-xs">
-                    <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
-                    Freq (%)
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {pricePoints
-                  .sort((a, b) => b.price - a.price)
-                  .map((point: PricePoint, index) => (
-                    <TableRow key={index} className="hover:bg-transparent">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono text-xs font-semibold">{point.price.toFixed(2)}€</span>
-
-                          {point.discount !== null && point.discount > 0.0 && (
-                            <Badge variant="destructive" size="xs" className="text-2xs font-mono">
-                              -{(point.discount * 100).toFixed(1)}%
-                            </Badge>
-                          )}
-                          {index === 0 && (
-                            <Badge variant="secondary" size="2xs">
-                              Most Common
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-
-                      <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium">
-                        {point.price_recommended.toFixed(2)}€
-                      </TableCell>
-
-                      <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium">
-                        {point.price_per_major_unit.toFixed(2)}€
-                      </TableCell>
-
-                      <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium">
-                        {(point.frequencyRatio * 100).toFixed(2)}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+      {!isLoading && pricePoints !== null && pricePoints.length > 0 && (
+        <div className="overflow-hidden">
+          <div className="bg-accent flex items-center gap-2 rounded-lg border-0 px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap">
+            <BinocularsIcon className="h-4 w-4" />
+            {sp.price === mostCommon?.price ? (
+              <span>
+                Current price is <span className="font-bold text-green-600">the most common price</span>
+              </span>
+            ) : (
+              <span>
+                Current price is <span className="text-destructive font-bold">not</span> the most common price
+              </span>
+            )}
           </div>
-        )
-      ) : (
-        <Skeleton className="mb-4 h-[38px] w-full" />
+
+          <Table className="mt-1 rounded-lg">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="h-7 text-xs">
+                  <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
+                  Price
+                </TableHead>
+                <TableHead className="h-7 text-center text-xs">
+                  <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
+                  Original
+                </TableHead>
+                <TableHead className="h-7 text-center text-xs">
+                  <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
+                  Per Unit
+                </TableHead>
+                <TableHead className="h-7 text-center text-xs">
+                  <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
+                  Freq (%)
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {pricePoints
+                .sort((a, b) => b.price - a.price)
+                .map((point: PricePoint, index) => (
+                  <TableRow key={index} className="hover:bg-transparent">
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-semibold tracking-tighter">
+                          {point.price.toFixed(2)}€
+                        </span>
+
+                        {point.discount !== null && point.discount > 0.0 && (
+                          <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
+                            -{(point.discount * 100).toFixed(0)}%
+                          </Badge>
+                        )}
+                        {point.price === mostCommon?.price && (
+                          <Badge variant="secondary" size="2xs">
+                            Most Common
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                      {point.price_recommended.toFixed(2)}€
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                      {point.price_per_major_unit.toFixed(2)}€
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                      {(point.frequencyRatio * 100).toFixed(2)}%
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   )
