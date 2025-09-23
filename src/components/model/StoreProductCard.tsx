@@ -501,7 +501,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
               </div>
 
               <Suspense fallback={<div>Loading...</div>}>
-                <ProductChart sp={sp} />
+                <ProductChart sp={sp} className="max-w-xl" />
               </Suspense>
 
               <div className="-mt-4 flex w-full pt-2 text-sm">

@@ -105,7 +105,7 @@ export const priceQueries = {
         frequencyRatio: pricePoint.totalDuration / totalDuration,
         averageDurationDays: pricePoint.totalDuration / (1000 * 60 * 60 * 24) / pricePoint.occurrences,
       }))
-      .sort((a, b) => b.price - a.price)
+      .sort((a, b) => b.frequencyRatio - a.frequencyRatio)
 
     const mostCommon = pricePoints.length > 0 ? pricePoints[0] : null
 

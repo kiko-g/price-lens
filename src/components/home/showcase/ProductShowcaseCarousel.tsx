@@ -16,7 +16,7 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 
 import { ChevronLeft, ChevronRight, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 
-const CAROUSEL_INTERVAL = 8000
+const CAROUSEL_INTERVAL = 4000
 const PRODUCT_IDS = ["2558", "16258", "3807", "18728"]
 
 export function ProductShowcaseCarousel({ className }: { className?: string }) {
