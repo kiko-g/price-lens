@@ -219,76 +219,78 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
       </div>
 
-      <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in max-w-[32rem]")}>
-        <LineChart
-          accessibilityLayer
-          data={chartData}
-          margin={{
-            left: 4,
-            right: -20,
-            top: 12,
-            bottom: 30,
-          }}
-        >
-          <CartesianGrid strokeDasharray="4 4" />
-          <XAxis
-            dataKey="date"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={10}
-            interval="preserveEnd"
-            tick={{ fontSize: 10 }}
-            tickFormatter={(value) => value.slice(0, 10)}
-          />
-          <YAxis
-            dataKey="price"
-            yAxisId="price"
-            orientation="left"
-            tickLine={false}
-            axisLine={false}
-            width={40}
-            domain={[floor * 0.5, ceiling * 1.05]}
-            ticks={Array.from({ length: 5 }, (_, i) => floor / 2 + ((ceiling - floor / 2) * i) / 4).map(
-              (tick, index) => tick + index * 0.0001,
-            )}
-            tickFormatter={(value) => `€${value.toFixed(0)}`}
-            tick={(props) => <CustomTick {...props} yAxisId="price" />}
-          />
-          <YAxis
-            dataKey="discount"
-            yAxisId="discount"
-            orientation="right"
-            tickLine={false}
-            axisLine={false}
-            width={40}
-            domain={[0, 100]}
-            ticks={[0, 25, 50, 75, 100]}
-            tickFormatter={(value) => `${value}%`}
-            tick={(props) => <CustomTick {...props} yAxisId="discount" />}
-          />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-          {chartData.length > 0 &&
-            Object.entries(chartConfig)
-              .filter(([key]) => activeAxis.includes(key))
-              .map(([key, config], index) => {
-                const { dot, strokeDasharray, strokeWidth, activeDot } = getLineChartConfig(key, chartData.length)
-                return (
-                  <Line
-                    key={key}
-                    yAxisId={key.includes("price") ? "price" : "discount"}
-                    dataKey={key}
-                    type="linear"
-                    stroke={config.color}
-                    strokeOpacity={1}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={strokeDasharray}
-                    dot={dot}
-                    activeDot={activeDot}
-                  />
-                )
-              })}
-        </LineChart>
-      </ChartContainer>
+      <div className="max-w-[32rem] md:max-w-full">
+        <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in")}>
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 4,
+              right: -20,
+              top: 12,
+              bottom: 30,
+            }}
+          >
+            <CartesianGrid strokeDasharray="4 4" />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              interval="preserveEnd"
+              tick={{ fontSize: 10 }}
+              tickFormatter={(value) => value.slice(0, 10)}
+            />
+            <YAxis
+              dataKey="price"
+              yAxisId="price"
+              orientation="left"
+              tickLine={false}
+              axisLine={false}
+              width={40}
+              domain={[floor * 0.5, ceiling * 1.05]}
+              ticks={Array.from({ length: 5 }, (_, i) => floor / 2 + ((ceiling - floor / 2) * i) / 4).map(
+                (tick, index) => tick + index * 0.0001,
+              )}
+              tickFormatter={(value) => `€${value.toFixed(0)}`}
+              tick={(props) => <CustomTick {...props} yAxisId="price" />}
+            />
+            <YAxis
+              dataKey="discount"
+              yAxisId="discount"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              width={40}
+              domain={[0, 100]}
+              ticks={[0, 25, 50, 75, 100]}
+              tickFormatter={(value) => `${value}%`}
+              tick={(props) => <CustomTick {...props} yAxisId="discount" />}
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            {chartData.length > 0 &&
+              Object.entries(chartConfig)
+                .filter(([key]) => activeAxis.includes(key))
+                .map(([key, config], index) => {
+                  const { dot, strokeDasharray, strokeWidth, activeDot } = getLineChartConfig(key, chartData.length)
+                  return (
+                    <Line
+                      key={key}
+                      yAxisId={key.includes("price") ? "price" : "discount"}
+                      dataKey={key}
+                      type="linear"
+                      stroke={config.color}
+                      strokeOpacity={1}
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={strokeDasharray}
+                      dot={dot}
+                      activeDot={activeDot}
+                    />
+                  )
+                })}
+          </LineChart>
+        </ChartContainer>
+      </div>
 
       {!isLoading ? (
         pricePoints !== null &&
