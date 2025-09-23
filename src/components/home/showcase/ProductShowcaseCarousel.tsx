@@ -17,7 +17,15 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 import { ChevronLeft, ChevronRight, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 
 const CAROUSEL_INTERVAL = 4000
-const PRODUCT_IDS = ["2558", "16258", "3807", "18728"]
+const PRODUCT_IDS = [
+  "18543", // buondi (continente)
+  "4893", // m&ms (continente)
+  "3519", // ben and jerry  (continente)
+  "2558", // leite uht meio gordo mimosa (continente)
+  "16258", // monster white (continente)
+  "3807", // atum lata (continente)
+  "18728", // cereais fitness (continente)
+]
 
 export function ProductShowcaseCarousel({ className }: { className?: string }) {
   const [api, setApi] = useState<any>(null)
