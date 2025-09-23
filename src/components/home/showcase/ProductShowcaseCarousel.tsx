@@ -128,7 +128,7 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
 
         <div className="flex flex-1 justify-center gap-2.5">
           {PRODUCT_IDS.map((_, index) => (
-            <CarouselDot key={index} active={current === index} ringOffset={6} onClick={() => handleDotClick(index)} />
+            <CarouselDot key={index} active={current === index} ringOffset={2} onClick={() => handleDotClick(index)} />
           ))}
         </div>
 
@@ -390,15 +390,18 @@ interface CarouselDotProps {
 }
 
 const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick }: CarouselDotProps) {
-  const dotRadius = 1.25 // 2.5px / 2 (size-2.5)
-  const ringRadius = dotRadius + ringOffset + 2 // Add more space
-  const strokeWidth = 2 // Make stroke thicker
-  const normalizedRadius = ringRadius
-  const circumference = normalizedRadius * 2 * Math.PI
+  // Use precise pixel values to avoid sub-pixel rendering issues
+  const dotRadius = 5 // 10px diameter (size-2.5 = 10px)
+  const strokeWidth = 2
+  const ringRadius = dotRadius + ringOffset + 3 // Ensure adequate spacing
 
-  // Calculate SVG size to accommodate the ring with offset
-  const svgSize = (ringRadius + strokeWidth) * 2
+  // Ensure all calculations result in whole pixel values
+  const svgSize = Math.ceil((ringRadius + strokeWidth / 2) * 2)
   const center = svgSize / 2
+
+  // Use the ring radius directly for the circle, accounting for stroke width
+  const circleRadius = ringRadius
+  const circumference = circleRadius * 2 * Math.PI
 
   return (
     <button
@@ -421,6 +424,10 @@ const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick 
           width={svgSize}
           height={svgSize}
           viewBox={`0 0 ${svgSize} ${svgSize}`}
+          style={{
+            // Optimize rendering for crisp circles
+            shapeRendering: "geometricPrecision",
+          }}
         >
           {/* Actual ring with CSS animation */}
           <circle
@@ -430,12 +437,14 @@ const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick 
             strokeDashoffset={circumference}
             strokeLinecap="round"
             fill="transparent"
-            r={normalizedRadius}
+            r={circleRadius}
             cx={center}
             cy={center}
             className="text-foreground opacity-80"
             style={{
               animation: `carousel-progress ${CAROUSEL_INTERVAL}ms linear infinite`,
+              // Ensure pixel-perfect rendering
+              vectorEffect: "non-scaling-stroke",
             }}
           />
         </svg>
