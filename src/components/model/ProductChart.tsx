@@ -219,7 +219,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
       </div>
 
-      <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in")}>
+      <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in max-w-[32rem]")}>
         <LineChart
           accessibilityLayer
           data={chartData}
@@ -316,9 +316,9 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <span className="font-mono font-semibold">{point.price.toFixed(2)}€</span>
-                          {point.discount > 0 && (
+                          {point.discount !== null && point.discount > 0.0 && (
                             <Badge variant="destructive" size="xs" className="text-2xs font-mono">
-                              -{Math.round(point.discount * 100)}%
+                              -{(point.discount * 100).toFixed(1)}%
                             </Badge>
                           )}
                           {index === 0 && (

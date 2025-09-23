@@ -501,7 +501,7 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
               </div>
 
               <Suspense fallback={<div>Loading...</div>}>
-                <ProductChart sp={sp} className="max-w-xl" />
+                <ProductChart sp={sp} />
               </Suspense>
 
               {/* Drawer Footer */}

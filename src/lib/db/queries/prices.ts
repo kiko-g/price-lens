@@ -141,6 +141,7 @@ export const priceQueries = {
         variations.pricePerMajorUnit =
           (current.price_per_major_unit - previous.price_per_major_unit) / previous.price_per_major_unit
       }
+      console.debug(previous.discount, current.discount)
       if (previous.discount !== null && current.discount !== null) {
         variations.discount = current.discount - previous.discount
       }
