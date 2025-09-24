@@ -179,7 +179,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             {options?.showImage &&
               (sp.image ? (
                 <div className="relative">
-                  <Link href={sp.url} target="_blank">
+                  <Link href={`/supermarket/${sp.id}`} target="_blank">
                     <Image
                       src={resolveImageUrlForDrawer(sp.image, 400)}
                       alt={sp.name}
@@ -248,7 +248,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
               tickLine={false}
               axisLine={false}
               width={40}
-              domain={[floor * 0.5, ceiling * 1.05]}
+              domain={[floor * 0.75, ceiling * 1.05]}
               ticks={Array.from({ length: 5 }, (_, i) => floor / 2 + ((ceiling - floor / 2) * i) / 4).map(
                 (tick, index) => tick + index * 0.0001,
               )}
