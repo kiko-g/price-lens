@@ -4,6 +4,8 @@ import { deleteAccount, signOut } from "@/app/login/actions"
 import { useUser } from "@/hooks/useUser"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
 
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
@@ -74,6 +76,23 @@ function HeaderActions() {
 }
 
 function ProfileContent({ user, profile }: { user: any; profile: any }) {
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  async function handleDeleteAccount() {
+    if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      await deleteAccount()
+    } catch (error) {
+      console.error("Error deleting account:", error)
+      toast.error("Failed to delete account. Please try again.")
+      setIsDeleting(false)
+    }
+  }
+
   function getVerifiedIcon() {
     const provider = user?.app_metadata?.provider
 
@@ -198,9 +217,9 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
             Sign out
           </Button>
 
-          <Button variant="destructive" className="w-full text-sm" onClick={() => deleteAccount()}>
+          <Button variant="destructive" className="w-full text-sm" onClick={handleDeleteAccount} disabled={isDeleting}>
             <TrashIcon className="h-4 w-4" />
-            Delete account
+            {isDeleting ? "Deleting..." : "Delete account"}
           </Button>
         </div>
       </div>

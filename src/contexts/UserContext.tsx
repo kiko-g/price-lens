@@ -98,8 +98,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         if (profileError) {
           console.error("[UserProvider] Profile fetch error:", profileError.message)
-          dispatch({ type: "SET_ERROR", payload: profileError.message })
-          dispatch({ type: "SET_PROFILE", payload: null })
+
+          // If profile doesn't exist (user was deleted), this is not really an error
+          if (profileError.code === "PGRST116") {
+            console.info("[UserProvider] Profile not found (user may have been deleted), treating as normal")
+            dispatch({ type: "SET_PROFILE", payload: null })
+            dispatch({ type: "SET_ERROR", payload: null })
+          } else {
+            dispatch({ type: "SET_ERROR", payload: profileError.message })
+            dispatch({ type: "SET_PROFILE", payload: null })
+          }
         } else {
           console.info("[UserProvider] Profile fetch successful")
           dispatch({ type: "SET_PROFILE", payload: profileData })
