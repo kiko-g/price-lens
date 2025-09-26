@@ -74,3 +74,7 @@ export async function signOut() {
   await supabase.auth.signOut()
   revalidatePath("/", "layout")
 }
+
+export async function deleteAccount() {
+  // TODO: Implement account deletion
+}

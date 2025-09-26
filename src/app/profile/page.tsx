@@ -1,6 +1,6 @@
 "use client"
 
-import { signOut } from "@/app/login/actions"
+import { deleteAccount, signOut } from "@/app/login/actions"
 import { useUser } from "@/hooks/useUser"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -16,7 +16,17 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
-import { ArrowLeftIcon, BellIcon, BugIcon, ChartNetworkIcon, MailIcon, PlusIcon, ShoppingBagIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  BellIcon,
+  BugIcon,
+  ChartNetworkIcon,
+  LogOutIcon,
+  MailIcon,
+  PlusIcon,
+  ShoppingBagIcon,
+  TrashIcon,
+} from "lucide-react"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -58,9 +68,6 @@ function HeaderActions() {
 
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <Button variant="outline" onClick={() => signOut()}>
-          Sign out
-        </Button>
       </div>
     </div>
   )
@@ -179,9 +186,23 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
           )}
         </div>
 
-        <p className="text-2xs text-muted-foreground mx-auto mt-2 border-t pt-2 text-center">
-          Member since {accountCreatedAt}
-        </p>
+        <div className="w-full">
+          <p className="text-2xs text-muted-foreground mx-auto mt-2 border-t pt-2 text-center">
+            Member since {accountCreatedAt}
+          </p>
+        </div>
+
+        <div className="mt-3 flex w-full flex-col gap-2">
+          <Button variant="outline" className="w-full text-sm" onClick={() => signOut()}>
+            <LogOutIcon className="h-4 w-4" />
+            Sign out
+          </Button>
+
+          <Button variant="destructive" className="w-full text-sm" onClick={() => deleteAccount()}>
+            <TrashIcon className="h-4 w-4" />
+            Delete account
+          </Button>
+        </div>
       </div>
 
       {/* Tabs Column */}
@@ -189,8 +210,8 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
         <Tabs defaultValue="account">
           <TabsList>
             <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="contact-us">Contact us</TabsTrigger>
             <TabsTrigger value="customization">Customization</TabsTrigger>
-            <TabsTrigger value="contact-us">Contact Us</TabsTrigger>
           </TabsList>
 
           <TabsContent value="account" className="mb-8">

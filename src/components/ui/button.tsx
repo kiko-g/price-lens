@@ -16,16 +16,17 @@ const buttonVariants = cva(
         primary: `bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-primary-foreground`,
         secondary: `bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90 dark:bg-secondary dark:hover:bg-secondary/90 dark:text-secondary-foreground`,
 
-        destructive: `bg-rose-600 text-white shadow-sm hover:bg-rose-600/90 dark:bg-rose-700 dark:hover:bg-rose-700/90 dark:text-white`,
+        destructive: `bg-destructive text-white shadow-sm hover:bg-destructive/90 dark:bg-destructive dark:hover:bg-destructive/90 dark:text-white`,
         orange: `bg-orange-600 text-white shadow-sm hover:bg-orange-600/90 dark:bg-orange-700 dark:hover:bg-orange-700/90 dark:text-white`,
         success: `bg-emerald-600 text-white shadow-sm hover:bg-emerald-600/90 dark:bg-emerald-700 dark:hover:bg-emerald-700/90 dark:text-white`,
         outline: `border-input bg-transparent shadow-sm hover:bg-zinc-200/80 dark:bg-zinc-800/10 dark:hover:bg-zinc-800`,
+        "outline-destructive": `border-destructive/50 bg-destructive/10 shadow-sm hover:bg-destructive/10 dark:border-destructive dark:hover:bg-destructive/10 dark:text-white`,
 
         ghost: `hover:bg-zinc-200/80 dark:hover:bg-zinc-100/20`,
         "ghost-inverted": "bg-accent hover:bg-accent/80",
         "ghost-light": `hover:bg-zinc-200/80`,
         "ghost-dark": `hover:bg-zinc-100/20`,
-        "ghost-destructive": `text-rose-600 hover:bg-rose-600/10`,
+        "ghost-destructive": `text-destructive hover:bg-destructive/10`,
 
         glass: `bg-zinc-100 backdrop-blur text-zinc-900 hover:bg-zinc-500/20 dark:bg-zinc-900/80 dark:text-white dark:hover:bg-zinc-950/80`,
 
