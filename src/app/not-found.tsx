@@ -1,7 +1,10 @@
 import Link from "next/link"
-import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+
 import { Button } from "@/components/ui/button"
-import { ArrowLeftIcon, HomeIcon } from "lucide-react"
+import { BackButton } from "@/components/ui/combo/back-button"
+import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+
+import { HomeIcon } from "lucide-react"
 
 export default function NotFound() {
   return (
@@ -20,10 +23,7 @@ export default function NotFound() {
         </p>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => window.history.back()}>
-            <ArrowLeftIcon className="h-4 w-4" />
-            Go back
-          </Button>
+          <BackButton />
 
           <Button asChild>
             <Link href="/" prefetch={false}>
