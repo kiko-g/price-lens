@@ -67,7 +67,7 @@ export function PricingSection() {
           </Card>
 
           {/* Plus Plan */}
-          <Card className="dark:from-secondary-900 dark:to-secondary-950 from-primary-50 to-primary-100 relative flex flex-col overflow-hidden bg-gradient-to-br dark:bg-gradient-to-br">
+          <Card className="dark:from-secondary-900 dark:to-secondary-950 relative flex flex-col overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:bg-gradient-to-br">
             <BorderBeam
               duration={5}
               size={200}
@@ -77,7 +77,7 @@ export function PricingSection() {
             />
 
             {!isComingSoon && (
-              <span className="from-primary/70 to-secondary/70 absolute top-0 right-0 rounded-bl-xl bg-linear-to-r px-3 py-1 text-xs font-medium text-white">
+              <span className="from-secondary/70 to-secondary/70 absolute top-0 right-0 rounded-bl-xl bg-linear-to-r px-3 py-1 text-xs font-medium text-white">
                 Popular
               </span>
             )}
@@ -113,7 +113,7 @@ export function PricingSection() {
             All plans include the core functionality for price transparency and inflation awareness. Any questions?{" "}
             <Link
               href="mailto:kikojpgoncalves@gmail.com"
-              className="text-primary hover:text-primary/80 underline underline-offset-4"
+              className="text-secondary hover:text-secondary/80 underline underline-offset-4"
             >
               Contact us
             </Link>
