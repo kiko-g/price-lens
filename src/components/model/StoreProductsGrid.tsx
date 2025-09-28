@@ -54,6 +54,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
+import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { Wrapper } from "@/components/SectionWrapper"
@@ -725,16 +726,21 @@ WHERE category = '${category1}'
 
               <DropdownMenuContent className="w-48" align="end">
                 <DropdownMenuLabel>Tooling</DropdownMenuLabel>
-
                 <DropdownMenuItem asChild>
                   <ScrapeUrlDialog />
                 </DropdownMenuItem>
-
                 <DropdownMenuItem variant="default" asChild>
                   <Button variant="dropdown-item" onClick={clearSearch}>
                     Clear search
                     <DeleteIcon />
                   </Button>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuLabel>More</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <TrackingInformationDialog />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

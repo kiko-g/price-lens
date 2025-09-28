@@ -1,13 +1,21 @@
 "use client"
 
 import Image from "next/image"
+import { redirect } from "next/navigation"
 import { signInWithGoogle } from "./actions"
+import { useUser } from "@/hooks/useUser"
 
 import { Button } from "@/components/ui/button"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 
 export default function LoginPage() {
+  const { user } = useUser()
+
+  if (user) {
+    redirect("/profile")
+  }
+
   return (
     <div className="flex w-full flex-grow flex-col items-center justify-center">
       <HeroGridPattern
