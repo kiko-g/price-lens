@@ -296,6 +296,10 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 
+  *::selection {
+    @apply bg-secondary/80 text-white;
+  }
+
   * {
     @apply border-border outline-ring/50 scrollbar-thin scrollbar-thumb-zinc-300;
   }
@@ -304,9 +308,6 @@
     @apply bg-background text-foreground flex min-h-screen flex-col font-sans antialiased;
   }
 
-  *::selection {
-    @apply bg-black/80 text-white dark:bg-white/80 dark:text-black;
-  }
 
   pre *::selection {
     @apply bg-secondary text-white;
