@@ -120,6 +120,7 @@ export function StoreProductsGrid(props: Props) {
   const [origin, setOrigin] = useState<string | null>(initOriginId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
+  console.debug(page)
 
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
   const [orderByPriority, setOrderByPriority] = useState(true)
@@ -339,19 +340,18 @@ WHERE category = '${category1}'
 
   useEffect(() => {
     if (ssrSkipFetch) {
-      // skip initial fetch if we have initialData and params have not changed
       return
     }
 
     const allCategoriesFilled = category1 && category2 && category3
     const allCategoriesEmpty = !category1 && !category2 && !category3
     if (allCategoriesFilled || allCategoriesEmpty) {
-      setPage(1)
       fetchProducts()
 
       if (allCategoriesFilled) {
         navigator.clipboard.writeText(categoriesPriorityQuery)
       }
+
       return
     }
 
