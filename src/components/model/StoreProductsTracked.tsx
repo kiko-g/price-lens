@@ -313,7 +313,7 @@ export function StoreProductsTracked({
             <>
               <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5 xl:grid-cols-6">
                 {products.map((sp, spIdx) => (
-                  <StoreProductCard key={`${sp.id}-${spIdx}`} sp={sp} />
+                  <StoreProductCard key={`${sp.id}-${spIdx}`} sp={sp} imagePriority={spIdx < 12} />
                 ))}
               </div>
 

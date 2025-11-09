@@ -145,6 +145,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               alt={sp.name}
               className="max-h-full max-w-full object-contain object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
+              priority={true}
             />
           ) : (
             <div className="bg-muted flex h-full w-full items-center justify-center">

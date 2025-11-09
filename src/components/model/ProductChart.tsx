@@ -188,7 +188,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
                       className="aspect-square size-24 rounded-md border bg-white object-contain p-1 md:size-32"
                       placeholder="empty"
                       blurDataURL={imagePlaceholder.productBlur}
-                      priority={true}
+                      loading="lazy"
                     />
                     <Badge className="absolute right-1 bottom-1" size="sm" variant="boring">
                       <ScanBarcodeIcon />

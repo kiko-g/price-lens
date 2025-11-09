@@ -57,6 +57,7 @@ import {
 type Props = {
   sp: StoreProduct
   onUpdate?: () => Promise<boolean> | undefined
+  imagePriority?: boolean
 }
 
 function resolveImageUrlForCard(image: string, size = 400) {
@@ -70,7 +71,7 @@ function resolveImageUrlForCard(image: string, size = 400) {
   return url.toString()
 }
 
-export function StoreProductCard({ sp, onUpdate }: Props) {
+export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props) {
   const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)
@@ -121,23 +122,22 @@ export function StoreProductCard({ sp, onUpdate }: Props) {
       >
         <Link href={`/supermarket/${sp.id}`} className="h-full w-full">
           {sp.image ? (
-            <>
-              {!imageLoaded && <div className="aspect-square w-full animate-pulse bg-zinc-100 dark:bg-zinc-800" />}
+            <div className="relative aspect-square w-full">
+              {!imageLoaded && <div className="bg-background/10 absolute inset-0 z-10 animate-pulse" />}
               <Image
                 src={resolveImageUrlForCard(sp.image, 300)}
                 alt={sp.name || "Product Image"}
                 width={500}
                 height={500}
-                className={cn(
-                  "aspect-square h-full w-full bg-white object-contain object-center transition duration-300 hover:scale-105",
-                  !imageLoaded && "hidden",
-                )}
-                placeholder="blur"
-                blurDataURL={imagePlaceholder.productBlur}
-                priority={true}
+                className="aspect-square h-full w-full bg-white object-contain object-center transition duration-300 hover:scale-105"
+                {...(imagePriority && {
+                  placeholder: "blur" as const,
+                  blurDataURL: imagePlaceholder.productBlur,
+                })}
+                priority={imagePriority}
                 onLoad={() => setImageLoaded(true)}
               />
-            </>
+            </div>
           ) : (
             <div className="aspect-square w-full bg-zinc-100 dark:bg-zinc-800" />
           )}

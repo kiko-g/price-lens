@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   images: {
+    // Limit device sizes to reduce number of image transformations
+    // Default is [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
+    deviceSizes: [640, 828, 1200, 1920],
+    // Limit image sizes to reduce transformations further
+    // Default is [16, 32, 48, 64, 96, 128, 256, 384]
+    imageSizes: [96, 256, 384],
+    // Cache optimized images for 60 days to reduce repeated transformations
+    minimumCacheTTL: 60 * 60 * 24 * 60, // 60 days in seconds
     remotePatterns: [
       {
         protocol: "https",

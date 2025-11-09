@@ -119,13 +119,14 @@ function FavoritesGrid({ user }: { user: User }) {
 
       {/* Products Grid */}
       <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5 xl:grid-cols-6">
-        {favorites.map((favorite) => (
+        {favorites.map((favorite, idx) => (
           <StoreProductCard
             key={favorite.id}
             sp={{
               ...favorite.store_products,
               is_favorited: true, // Always true since this is the favorites page
             }}
+            imagePriority={idx < 12}
           />
         ))}
       </div>
