@@ -101,7 +101,7 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
           loop: true,
         }}
       >
-        <CarouselContent className="-ml-0 border-0 shadow-none">
+        <CarouselContent className="ml-0 border-0 shadow-none">
           {PRODUCT_IDS.map((productId, index) => (
             <CarouselItem key={productId} className="border-0 pl-0 shadow-none">
               <HandpickedShowcaseChart
@@ -219,7 +219,7 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
       <CardHeader className="flex flex-col gap-3">
         <div className="flex items-start justify-start gap-2">
           {storeProduct.image ? (
-            <div className="relative size-20 shrink-0">
+            <Link className="relative size-20 shrink-0 hover:opacity-80 border rounded-lg transition-all p-1 duration-200" href={`/supermarket/${storeProductId}`}>
               <Image
                 src={storeProduct.image}
                 alt={storeProduct.name || "Product"}
@@ -237,7 +237,7 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
                   <ImageIcon className="text-muted-foreground h-8 w-8" />
                 </div>
               )}
-            </div>
+            </Link>
           ) : (
             <div className="bg-muted flex size-24 items-center justify-center rounded-lg">
               <ImageIcon className="text-muted-foreground h-8 w-8" />
