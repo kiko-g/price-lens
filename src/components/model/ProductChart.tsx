@@ -47,6 +47,45 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const prices = data?.prices || []
   const analytics = data?.analytics || null
 
+  // Get computed analytics from backend
+  const pricePoints = analytics?.pricePoints || null
+  const mostCommon = analytics?.mostCommon || null
+
+  // Get computed floor/ceiling from backend (filtered by activeAxis on client for chart display)
+  const { floor, ceiling } = useMemo(() => {
+    if (!analytics) return { floor: 0, ceiling: 0 }
+
+    const allPrices = prices
+      .flatMap((p) => [
+        activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
+        activeAxis.includes("price-recommended") ? (p.price_recommended ?? -Infinity) : -Infinity,
+        activeAxis.includes("price-per-major-unit") ? (p.price_per_major_unit ?? -Infinity) : -Infinity,
+      ])
+      .filter((price) => price !== -Infinity && price !== null)
+
+    if (allPrices.length === 0) return { floor: analytics.floor, ceiling: analytics.ceiling }
+
+    return {
+      floor: Math.floor(Math.min(...allPrices)),
+      ceiling: Math.ceil(Math.max(...allPrices)),
+    }
+  }, [prices, activeAxis, analytics])
+
+  const priceVariation = analytics?.variations.price || 0
+  const priceRecommendedVariation = analytics?.variations.priceRecommended || 0
+  const pricePerMajorUnitVariation = analytics?.variations.pricePerMajorUnit || 0
+  const discountVariation = analytics?.variations.discount || 0
+
+  const daysBetweenDates = analytics?.dateRange.daysBetween || 0
+
+  useEffect(() => {
+    if (!prices || prices.length === 0) return
+
+    const pricePoints = buildChartData(prices, selectedRange)
+    setChartData(pricePoints)
+  }, [selectedRange, prices])
+
+  // Early return for error state - all hooks must be called before this
   if (error) {
     return (
       <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
@@ -103,50 +142,10 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     return url.toString()
   }
 
-  // Get computed analytics from backend
-  const pricePoints = analytics?.pricePoints || null
-  const mostCommon = analytics?.mostCommon || null
-
-  // Get computed floor/ceiling from backend (filtered by activeAxis on client for chart display)
-  const { floor, ceiling } = useMemo(() => {
-    if (!analytics) return { floor: 0, ceiling: 0 }
-
-    const allPrices = prices
-      .flatMap((p) => [
-        activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
-        activeAxis.includes("price-recommended") ? (p.price_recommended ?? -Infinity) : -Infinity,
-        activeAxis.includes("price-per-major-unit") ? (p.price_per_major_unit ?? -Infinity) : -Infinity,
-      ])
-      .filter((price) => price !== -Infinity && price !== null)
-
-    if (allPrices.length === 0) return { floor: analytics.floor, ceiling: analytics.ceiling }
-
-    return {
-      floor: Math.floor(Math.min(...allPrices)),
-      ceiling: Math.ceil(Math.max(...allPrices)),
-    }
-  }, [prices, activeAxis, analytics])
-
-  const priceVariation = analytics?.variations.price || 0
-  const priceRecommendedVariation = analytics?.variations.priceRecommended || 0
-  const pricePerMajorUnitVariation = analytics?.variations.pricePerMajorUnit || 0
-  const discountVariation = analytics?.variations.discount || 0
-
-  const minDate = analytics?.dateRange.minDate || null
-  const maxDate = analytics?.dateRange.maxDate || null
-  const daysBetweenDates = analytics?.dateRange.daysBetween || 0
-
   function handleAxisChange(axis: string) {
     const newAxis = activeAxis.includes(axis) ? activeAxis.filter((a) => a !== axis) : [...activeAxis, axis]
     updateActiveAxis(newAxis)
   }
-
-  useEffect(() => {
-    if (!prices || prices.length === 0) return
-
-    const pricePoints = buildChartData(prices, selectedRange)
-    setChartData(pricePoints)
-  }, [selectedRange, prices])
 
   return (
     <div className={cn("flex w-full flex-col", className)}>
