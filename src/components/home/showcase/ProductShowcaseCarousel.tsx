@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { BorderBeam } from "@/components/magicui/border-beam"
+import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { ChevronLeft, ChevronRight, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 

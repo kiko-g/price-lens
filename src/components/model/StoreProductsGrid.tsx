@@ -10,7 +10,7 @@ import { useStoreProductCategories } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
-import { BorderBeam } from "@/components/magicui/border-beam"
+import { BorderBeam } from "@/components/ui/magic/border-beam"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import {

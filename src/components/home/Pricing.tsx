@@ -3,7 +3,7 @@ import { CheckIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { BorderBeam } from "@/components/magicui/border-beam"
+import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 export function PricingSection() {
   const isComingSoon = true

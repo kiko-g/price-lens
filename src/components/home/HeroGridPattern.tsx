@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { GridPattern, GridPatternProps } from "@/components/magicui/grid-pattern"
+import { GridPattern, GridPatternProps } from "@/components/ui/magic/grid-pattern"
 
 export function HeroGridPattern(props: GridPatternProps) {
   return (

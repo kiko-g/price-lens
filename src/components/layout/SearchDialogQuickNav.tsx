@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { SearchDialog } from "@/components/layout/SearchDialog"
 
 import { SearchIcon, ShoppingCartIcon } from "lucide-react"
-import { BorderBeam } from "@/components/magicui/border-beam"
+import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 export function SearchDialogQuickNav() {
   const [isExpanded, setIsExpanded] = useState(false)
