@@ -9,9 +9,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:strict": "eslint . --max-warnings 0",
     "prettier": "prettier --write . --ignore-path .prettierignore",
-    "tsc": "tsc --noEmit"
+    "prettier:check": "prettier --check . --ignore-path .prettierignore",
+    "tsc": "tsc --noEmit",
+    "check": "pnpm tsc && pnpm lint && pnpm build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.79",
