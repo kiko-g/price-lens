@@ -219,7 +219,10 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
       <CardHeader className="flex flex-col gap-3">
         <div className="flex items-start justify-start gap-2">
           {storeProduct.image ? (
-            <Link className="relative size-20 shrink-0 hover:opacity-80 border rounded-lg transition-all p-1 duration-200" href={`/supermarket/${storeProductId}`}>
+            <Link
+              className="relative size-20 shrink-0 rounded-lg border p-1 transition-all duration-200 hover:opacity-80"
+              href={`/supermarket/${storeProductId}`}
+            >
               <Image
                 src={storeProduct.image}
                 alt={storeProduct.name || "Product"}

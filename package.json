@@ -14,7 +14,10 @@
     "prettier": "prettier --write . --ignore-path .prettierignore",
     "prettier:check": "prettier --check . --ignore-path .prettierignore",
     "tsc": "tsc --noEmit",
-    "check": "pnpm tsc && pnpm lint && pnpm build"
+    "check": "pnpm tsc && pnpm lint && pnpm build",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.79",
@@ -78,19 +81,23 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/react": "^16.3.0",
     "@types/lodash": "^4.17.17",
     "@types/node": "^24",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9",
     "eslint-config-next": "^16.0.7",
+    "jsdom": "^27.3.0",
     "postcss": "^8",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "supabase": "^2.23.4",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.11",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.15"
   }
 }

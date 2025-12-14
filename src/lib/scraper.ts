@@ -173,7 +173,9 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
           .filter((item) => item !== "" && item !== "Página inicial") ?? [])
 
     const firstImage = $(".ct-product-image").first()
-    const imageFromJsonLd = jsonLd?.image as string | undefined
+    // JSON-LD image can be a string or array of strings
+    const jsonLdImage = jsonLd?.image
+    const imageFromJsonLd = Array.isArray(jsonLdImage) ? jsonLdImage[0] : (jsonLdImage as string | undefined)
     const imageFromDom = firstImage.attr("data-src") || firstImage.attr("src") || null
     const image = imageFromJsonLd || imageFromDom
 
