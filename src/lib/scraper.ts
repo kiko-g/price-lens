@@ -1,5 +1,6 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
+import https from "https"
 import type { StoreProduct } from "@/types"
 import { NextResponse } from "next/server"
 
@@ -8,19 +9,86 @@ import { formatProductName, isValidJson, now, packageToUnit, priceToNumber, resi
 import { storeProductQueries } from "./db/queries/products"
 import { ScrapedAddOnAuchan, ScrapedSchemaAuchan } from "@/types/extra"
 
+/**
+ * Connection pooling agent - reuses TCP connections to reduce handshake overhead
+ * keepAlive: true - reuse sockets for multiple requests
+ * maxSockets: 50 - allow up to 50 concurrent connections per host
+ * timeout: 30000 - socket idle timeout (30s)
+ */
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 50,
+  timeout: 30000,
+})
+
+/**
+ * Realistic browser User-Agent to avoid bot detection
+ */
+const USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+/**
+ * Tracking parameters to strip from URLs (reduces URL length and avoids cache busting)
+ */
+const TRACKING_PARAMS = [
+  "_gl",
+  "_ga",
+  "_gid",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "fbclid",
+  "gclid",
+  "msclkid",
+  "mc_cid",
+  "mc_eid",
+]
+
+/**
+ * Strips tracking/analytics parameters from URLs
+ * This reduces URL length and can improve caching
+ */
+export const cleanUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url)
+    TRACKING_PARAMS.forEach((param) => urlObj.searchParams.delete(param))
+    return urlObj.toString()
+  } catch {
+    return url
+  }
+}
+
+/**
+ * Pre-configured axios instance with optimized settings:
+ * - Connection pooling via httpsAgent
+ * - Compression support (gzip, deflate, br)
+ * - Realistic headers
+ * - Automatic decompression
+ */
+const httpClient = axios.create({
+  httpsAgent,
+  timeout: 8000,
+  headers: {
+    "User-Agent": USER_AGENT,
+    "Accept-Encoding": "gzip, deflate, br",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "pt-PT,pt;q=0.9,en;q=0.8",
+    "Cache-Control": "no-cache",
+  },
+  decompress: true, // Automatically decompress responses
+})
+
 export const fetchHtml = async (url: string) => {
   if (!url) {
     console.warn("URL is required. Skipping product.")
     return {}
   }
 
+  const cleanedUrl = cleanUrl(url)
   try {
-    const response = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-      },
-      timeout: 5000,
-    })
+    const response = await httpClient.get(cleanedUrl)
 
     if (!response.data) {
       console.warn("Empty response received. Skipping product.")
@@ -29,7 +97,7 @@ export const fetchHtml = async (url: string) => {
 
     return response.data
   } catch (error) {
-    console.warn(`Failed to fetch HTML for URL ${url}:`, error)
+    console.warn(`Failed to fetch HTML for URL ${cleanedUrl}:`, error)
     if (axios.isAxiosError(error)) {
       if (error.code === "ECONNABORTED") {
         console.warn("Request timed out. Skipping product.")
@@ -41,8 +109,29 @@ export const fetchHtml = async (url: string) => {
   }
 }
 
+/**
+ * Extracts JSON-LD structured data from HTML (faster extraction method)
+ * JSON-LD contains pre-structured product data easier to parse
+ */
+const extractJsonLd = ($: cheerio.CheerioAPI): Record<string, unknown> | null => {
+  try {
+    const jsonLdScript = $('script[type="application/ld+json"]').first().text().trim()
+    if (!jsonLdScript) return null
+
+    const parsed = JSON.parse(jsonLdScript)
+    // Handle both single object and array of objects
+    if (Array.isArray(parsed)) {
+      return parsed.find((item) => item["@type"] === "Product") || null
+    }
+    return parsed["@type"] === "Product" ? parsed : null
+  } catch {
+    return null
+  }
+}
+
 const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
   const priority = prevSp?.priority ?? null
+  const cleanedUrl = cleanUrl(url)
 
   try {
     const html = await fetchHtml(url)
@@ -52,52 +141,77 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
     }
 
     const $ = cheerio.load(html)
+    const jsonLd = extractJsonLd($)
 
+    // Get data-product-detail-impression for rich GTM data (categories, etc.)
     const productDetailJson = $("#maincontent [data-product-detail-impression]").attr("data-product-detail-impression")
-    if (!productDetailJson || !isValidJson(productDetailJson)) {
-      console.warn(`Invalid or missing product detail JSON for URL: ${url}`)
+    let details: Record<string, unknown> | null = null
+    if (productDetailJson && isValidJson(productDetailJson)) {
+      try {
+        details = JSON.parse(productDetailJson)
+      } catch {
+        console.warn(`Error parsing product detail JSON for URL: ${url}. Continuing with other sources.`)
+      }
+    }
+
+    // If neither source is available, fail gracefully
+    if (!jsonLd && !details) {
+      console.warn(`Invalid or missing product data for URL: ${url}`)
       return {}
     }
 
     const root = ".product-images-container"
-    let details
-    try {
-      details = JSON.parse(productDetailJson)
-    } catch (jsonError) {
-      console.warn(`Error parsing product detail JSON for URL: ${url}`, jsonError)
-      return {}
-    }
+    const detailsItem = (details as Record<string, unknown> & { items?: Record<string, unknown>[] })?.items?.[0]
+    const breadcrumbs = detailsItem?.item_category
+      ? []
+      : ($(".breadcrumbs")
+          .map((i, el) => $(el).text().trim())
+          .get()
+          .at(0)
+          ?.split("\n")
+          ?.map((item) => item?.trim() ?? "")
+          .filter((item) => item !== "" && item !== "Página inicial") ?? [])
 
     const firstImage = $(".ct-product-image").first()
-    const breadcrumbs =
-      $(".breadcrumbs")
-        .map((i, el) => $(el).text().trim())
-        .get()
-        .at(0)
-        ?.split("\n")
-        ?.map((item) => item?.trim() ?? "")
-        .filter((item) => item !== "" && item !== "Página inicial") ?? []
+    const imageFromJsonLd = jsonLd?.image as string | undefined
+    const imageFromDom = firstImage.attr("data-src") || firstImage.attr("src") || null
+    const image = imageFromJsonLd || imageFromDom
 
+    // Build raw product with data fusion (JSON-LD + GTM details + DOM fallback)
     const rawProduct = {
-      url,
-      name: $(`${root} h1`).text().trim() || "Unknown Product",
-      brand: $(`${root} .ct-pdp--brand`).text().trim() || "",
+      url: cleanedUrl,
+      name:
+        (jsonLd?.name as string) ||
+        (detailsItem?.item_name as string) ||
+        $(`${root} h1`).text().trim() ||
+        "Unknown Product",
+      brand:
+        ((jsonLd?.brand as Record<string, unknown>)?.name as string) ||
+        (detailsItem?.item_brand as string) ||
+        $(`${root} .ct-pdp--brand`).text().trim() ||
+        "",
       pack: $(`${root} .ct-pdp--unit`).text().trim() || null,
-      price: details?.items?.[0]?.price || $(`${root} .ct-price-formatted`).parent().attr("content") || null,
+      price:
+        (jsonLd?.offers as Record<string, unknown>)?.price ||
+        detailsItem?.price ||
+        $(`${root} .ct-price-formatted`).parent().attr("content") ||
+        null,
       price_recommended:
-        details?.items?.[0]?.pre_discount_price || $(`${root} .pwc-discount-amount-pvpr`).text().trim() || null,
+        (detailsItem?.pre_discount_price as number) || $(`${root} .pwc-discount-amount-pvpr`).text().trim() || null,
       price_per_major_unit:
-        details?.items?.[0]?.price_per_major_unit || $(`${root} .ct-price-value`).text().trim() || null,
+        (detailsItem?.price_per_major_unit as number) || $(`${root} .ct-price-value`).text().trim() || null,
       major_unit: $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim() || null,
-      image: firstImage.attr("data-src") || firstImage.attr("src") || null,
-      category: breadcrumbs[0] || null,
-      category_2: breadcrumbs[1] || null,
-      category_3: breadcrumbs[2] || null,
+      image: image,
+      category: (detailsItem?.item_category as string) || breadcrumbs[0] || null,
+      category_2: (detailsItem?.item_category2 as string) || breadcrumbs[1] || null,
+      category_3: (detailsItem?.item_category3 as string) || breadcrumbs[2] || null,
     }
 
-    const price = rawProduct.price ? priceToNumber(rawProduct.price) : null
-    const priceRecommended = rawProduct.price_recommended ? priceToNumber(rawProduct.price_recommended) : price
-    const pricePerMajorUnit = rawProduct.price_per_major_unit ? priceToNumber(rawProduct.price_per_major_unit) : null
+    const price = rawProduct.price ? priceToNumber(String(rawProduct.price)) : null
+    const priceRecommended = rawProduct.price_recommended ? priceToNumber(String(rawProduct.price_recommended)) : price
+    const pricePerMajorUnit = rawProduct.price_per_major_unit
+      ? priceToNumber(String(rawProduct.price_per_major_unit))
+      : null
     const discount = priceRecommended ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
 
     const sp: Omit<StoreProduct, "id" | "product_id"> = {
@@ -117,7 +231,7 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
     return sp
   } catch (error) {
     // Fail gracefully instead of breaking the route
-    console.error(`Unexpected error in continenteProductPageScraper for URL: ${url}`, error)
+    console.warn(`Unexpected error in continenteProductPageScraper for URL: ${url}`, error)
     return {}
   }
 }
@@ -256,7 +370,7 @@ const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) =
         category_2Raw = pathParts[produtosIdx + 2] ?? null
         category_3Raw = pathParts[produtosIdx + 4] ? pathParts[produtosIdx + 3] : null
       }
-    } catch (e) {
+    } catch {
       console.warn("Failed to parse categories from URL:", url)
     }
 
@@ -414,8 +528,13 @@ export const processBatch = async (urls: string[]) => {
   return products
 }
 
-export function isValidProduct(product: any): product is StoreProduct {
-  return typeof product === "object" && product !== null && typeof product.url === "string"
+export function isValidProduct(product: unknown): product is StoreProduct {
+  return (
+    typeof product === "object" &&
+    product !== null &&
+    "url" in product &&
+    typeof (product as Record<string, unknown>).url === "string"
+  )
 }
 
 export const scrapeAndReplaceProduct = async (url: string | null, origin: number | null, prevSp?: StoreProduct) => {
