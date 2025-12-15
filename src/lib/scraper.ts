@@ -129,7 +129,12 @@ const extractJsonLd = ($: cheerio.CheerioAPI): Record<string, unknown> | null =>
   }
 }
 
-const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
+type ScrapedProduct = Omit<StoreProduct, "id" | "product_id">
+
+const continenteProductPageScraper = async (
+  url: string,
+  prevSp?: StoreProduct,
+): Promise<ScrapedProduct | Record<string, never>> => {
   const priority = prevSp?.priority ?? null
   const cleanedUrl = cleanUrl(url)
 
@@ -238,7 +243,10 @@ const continenteProductPageScraper = async (url: string, prevSp?: StoreProduct) 
   }
 }
 
-const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
+const auchanProductPageScraper = async (
+  url: string,
+  prevSp?: StoreProduct,
+): Promise<ScrapedProduct | Record<string, never>> => {
   const priority = prevSp?.priority ?? null
 
   try {
@@ -337,7 +345,10 @@ const auchanProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
   }
 }
 
-const pingoDoceProductPageScraper = async (url: string, prevSp?: StoreProduct) => {
+const pingoDoceProductPageScraper = async (
+  url: string,
+  prevSp?: StoreProduct,
+): Promise<ScrapedProduct | Record<string, never>> => {
   const priority = prevSp?.priority ?? null
 
   try {
