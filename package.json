@@ -46,6 +46,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
     "@tanstack/react-query": "^5.90.12",
+    "@upstash/qstash": "^2.8.4",
     "@vercel/analytics": "^1.6.1",
     "@vercel/kv": "^3.0.0",
     "ai": "^5.0.113",
