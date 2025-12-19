@@ -38,7 +38,7 @@ const defaultOptions: Props["options"] = {
 export function ProductChart({ sp, className, options = defaultOptions }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
-  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
+  const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
   const [activeAxis, updateActiveAxis] = useActiveAxis()
 
   const id = sp.id?.toString() || ""

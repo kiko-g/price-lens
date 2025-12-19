@@ -1471,6 +1471,7 @@ export function isValidJson(json: string) {
     JSON.parse(json)
     return true
   } catch (error) {
+    console.warn(error)
     return false
   }
 }
