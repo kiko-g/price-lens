@@ -2,7 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "$description": "Scheduler endpoint cron job triggered by Vercel every day at 6am.",
       "path": "/api/scrape/scheduler",
       "schedule": "0 6 * * *"
     }
