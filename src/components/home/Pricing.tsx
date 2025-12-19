@@ -67,7 +67,7 @@ export function PricingSection() {
           </Card>
 
           {/* Plus Plan */}
-          <Card className="dark:from-secondary-900 dark:to-secondary-950 relative flex flex-col overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:bg-gradient-to-br">
+          <Card className="dark:from-secondary-900 dark:to-secondary-950 relative flex flex-col overflow-hidden bg-linear-to-br from-slate-100 to-slate-200 dark:bg-linear-to-br">
             <BorderBeam
               duration={5}
               size={200}

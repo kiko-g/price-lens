@@ -13,8 +13,6 @@ import { usePricesWithAnalytics } from "@/hooks/usePrices"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "@/components/model/PricesVariationCard"
@@ -218,7 +216,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
         {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
       </div>
 
-      <div className="max-w-[32rem] md:max-w-full">
+      <div className="max-w-lg md:max-w-full">
         <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in")}>
           <LineChart
             accessibilityLayer
@@ -270,7 +268,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             {chartData.length > 0 &&
               Object.entries(chartConfig)
                 .filter(([key]) => activeAxis.includes(key))
-                .map(([key, config], index) => {
+                .map(([key, config]) => {
                   const { dot, strokeDasharray, strokeWidth, activeDot } = getLineChartConfig(key, chartData.length)
                   return (
                     <Line

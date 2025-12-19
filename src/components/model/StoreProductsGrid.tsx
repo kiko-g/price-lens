@@ -1242,7 +1242,7 @@ WHERE category = '${category1}'
             <ul className="flex max-w-md list-disc flex-col pl-4 text-sm">
               {query !== "" && (
                 <li>
-                  <strong>Query:</strong> "{query}"
+                  <strong>Query:</strong> &quot;{query}&quot;
                 </li>
               )}
               <li>

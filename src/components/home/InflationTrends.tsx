@@ -21,7 +21,7 @@ import {
   BuildingIcon,
   FuelIcon,
 } from "lucide-react"
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts"
 
 interface InflationData {
   year: number
@@ -79,7 +79,7 @@ export function InflationTrends() {
   ]
 
   const cumulativeInflation = inflationData.reduce(
-    (acc, item, idx) => {
+    (acc, item) => {
       const last = acc[acc.length - 1]
       const next = {
         year: item.year,
@@ -144,16 +144,18 @@ export function InflationTrends() {
     },
   ]
 
-  const getImpactColor = (impact: string) => {
+  type ImpactKind = "destructive" | "primary" | "outline" | "default"
+
+  const getImpactColor = (impact: string): ImpactKind => {
     switch (impact) {
       case "Critical":
-        return "destructive"
+        return "destructive" as const
       case "High":
-        return "primary"
+        return "primary" as const
       case "Structural":
-        return "outline"
+        return "outline" as const
       default:
-        return "default"
+        return "default" as const
     }
   }
 
@@ -390,7 +392,7 @@ export function InflationTrends() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <TrendingUpIcon className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
+                  <TrendingUpIcon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                   Inflation Convergence
                 </CardTitle>
                 <CardDescription className="text-sm">
@@ -399,68 +401,66 @@ export function InflationTrends() {
               </CardHeader>
               <CardContent className="p-2 sm:p-6">
                 <ChartContainer config={chartConfig} className="h-[250px] w-full sm:h-[300px] lg:h-[250px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={inflationData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
-                      <XAxis
-                        tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
-                        dataKey="year"
-                        interval="preserveStartEnd"
-                        tickMargin={8}
-                        className="text-xs sm:text-sm"
-                        domain={[1999, 2024]}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
-                        tickMargin={8}
-                        width={35}
-                        domain={[0, 8]}
-                        tickFormatter={(value) => `${value.toFixed(1)}%`}
-                        label={{
-                          value: "Rate (%)",
-                          angle: -90,
-                          position: "insideLeft",
-                          style: { textAnchor: "middle", fontSize: "12px" },
-                        }}
-                        className="text-xs sm:text-sm"
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Legend
-                        wrapperStyle={{
-                          paddingTop: "20px",
-                          fontSize: "12px",
-                        }}
-                        iconType="line"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="rateUSA"
-                        stroke="var(--chart-1)"
-                        strokeWidth={2}
-                        name="United States"
-                        dot={{ r: 2, strokeWidth: 1 }}
-                        activeDot={{ r: 4, strokeWidth: 2 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="ratePT"
-                        stroke="var(--chart-2)"
-                        strokeWidth={2}
-                        name="Portugal"
-                        dot={{ r: 2, strokeWidth: 1 }}
-                        activeDot={{ r: 4, strokeWidth: 2 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="rateEU"
-                        stroke="var(--chart-4)"
-                        strokeWidth={2}
-                        name="Eurozone"
-                        dot={{ r: 2, strokeWidth: 1 }}
-                        activeDot={{ r: 4, strokeWidth: 2 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <LineChart data={inflationData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
+                    <XAxis
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
+                      dataKey="year"
+                      interval="preserveStartEnd"
+                      tickMargin={8}
+                      className="text-xs sm:text-sm"
+                      domain={[1999, 2024]}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
+                      tickMargin={8}
+                      width={35}
+                      domain={[0, 8]}
+                      tickFormatter={(value) => `${value.toFixed(1)}%`}
+                      label={{
+                        value: "Rate (%)",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { textAnchor: "middle", fontSize: "12px" },
+                      }}
+                      className="text-xs sm:text-sm"
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Legend
+                      wrapperStyle={{
+                        paddingTop: "20px",
+                        fontSize: "12px",
+                      }}
+                      iconType="line"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="rateUSA"
+                      stroke="var(--chart-1)"
+                      strokeWidth={2}
+                      name="United States"
+                      dot={{ r: 2, strokeWidth: 1 }}
+                      activeDot={{ r: 4, strokeWidth: 2 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="ratePT"
+                      stroke="var(--chart-2)"
+                      strokeWidth={2}
+                      name="Portugal"
+                      dot={{ r: 2, strokeWidth: 1 }}
+                      activeDot={{ r: 4, strokeWidth: 2 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="rateEU"
+                      stroke="var(--chart-4)"
+                      strokeWidth={2}
+                      name="Eurozone"
+                      dot={{ r: 2, strokeWidth: 1 }}
+                      activeDot={{ r: 4, strokeWidth: 2 }}
+                    />
+                  </LineChart>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -469,7 +469,7 @@ export function InflationTrends() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <TrendingUpIcon className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
+                  <TrendingUpIcon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                   Cumulative Effect
                 </CardTitle>
                 <CardDescription className="text-sm">
@@ -479,60 +479,58 @@ export function InflationTrends() {
               </CardHeader>
               <CardContent className="p-2 sm:p-6">
                 <ChartContainer config={chartConfig} className="h-[250px] w-full sm:h-[300px] lg:h-[250px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={cumulativeInflation}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
-                      <XAxis
-                        tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
-                        dataKey="year"
-                        interval="preserveStartEnd"
-                        tickMargin={8}
-                        className="text-xs sm:text-sm"
-                        domain={[1999, 2024]}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
-                        tickMargin={8}
-                        width={35}
-                        domain={[100, 200]}
-                        label={{
-                          value: "Accumulated (%)",
-                          angle: -90,
-                          position: "insideLeft",
-                          style: { textAnchor: "middle", fontSize: "12px" },
-                        }}
-                        className="text-xs sm:text-sm"
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line
-                        type="monotone"
-                        dataKey="usa"
-                        stroke="var(--chart-1)"
-                        strokeWidth={2}
-                        name="United States"
-                        dot={{ r: 2, strokeWidth: 1 }}
-                        activeDot={{ r: 4, strokeWidth: 2 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="pt"
-                        stroke="var(--chart-2)"
-                        strokeWidth={2}
-                        name="Portugal"
-                        dot={{ r: 2, strokeWidth: 1 }}
-                        activeDot={{ r: 4, strokeWidth: 2 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="eu"
-                        stroke="var(--chart-4)"
-                        strokeWidth={2}
-                        name="Eurozone"
-                        dot={{ r: 2, strokeWidth: 1 }}
-                        activeDot={{ r: 4, strokeWidth: 2 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <LineChart data={cumulativeInflation}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
+                    <XAxis
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
+                      dataKey="year"
+                      interval="preserveStartEnd"
+                      tickMargin={8}
+                      className="text-xs sm:text-sm"
+                      domain={[1999, 2024]}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
+                      tickMargin={8}
+                      width={35}
+                      domain={[100, 200]}
+                      label={{
+                        value: "Accumulated (%)",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { textAnchor: "middle", fontSize: "12px" },
+                      }}
+                      className="text-xs sm:text-sm"
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line
+                      type="monotone"
+                      dataKey="usa"
+                      stroke="var(--chart-1)"
+                      strokeWidth={2}
+                      name="United States"
+                      dot={{ r: 2, strokeWidth: 1 }}
+                      activeDot={{ r: 4, strokeWidth: 2 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="pt"
+                      stroke="var(--chart-2)"
+                      strokeWidth={2}
+                      name="Portugal"
+                      dot={{ r: 2, strokeWidth: 1 }}
+                      activeDot={{ r: 4, strokeWidth: 2 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="eu"
+                      stroke="var(--chart-4)"
+                      strokeWidth={2}
+                      name="Eurozone"
+                      dot={{ r: 2, strokeWidth: 1 }}
+                      activeDot={{ r: 4, strokeWidth: 2 }}
+                    />
+                  </LineChart>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -546,8 +544,8 @@ export function InflationTrends() {
             Impact on Portugal 🇵🇹
           </h2>
           <p className="text-muted-foreground mx-auto max-w-4xl text-center text-sm md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
-            Global events have a significant impact on Portugal's inflation rate. Price Lens tries to raise awareness
-            and protect consumers from the impact of these events.
+            Global events have a significant impact on Portugal&apos;s inflation rate. Price Lens tries to raise
+            awareness and protect consumers from the impact of these events.
           </p>
         </div>
 
@@ -559,10 +557,10 @@ export function InflationTrends() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="flex items-center gap-2 text-base leading-tight sm:text-lg">
-                      <span className="flex-shrink-0">{factor.icon}</span>
-                      <span className="break-words">{factor.title}</span>
+                      <span className="shrink-0">{factor.icon}</span>
+                      <span className="wrap-break-word">{factor.title}</span>
                     </CardTitle>
-                    <Badge variant={getImpactColor(factor.impact) as any} className="flex-shrink-0 text-xs">
+                    <Badge variant={getImpactColor(factor.impact) as ImpactKind} className="shrink-0 text-xs">
                       {factor.impact}
                     </Badge>
                   </div>
@@ -574,7 +572,7 @@ export function InflationTrends() {
                     <ul className="space-y-1">
                       {factor.examples.map((example, i) => (
                         <li key={i} className="text-muted-foreground flex items-start gap-2 text-xs">
-                          <span className="text-primary mt-1 flex-shrink-0">•</span>
+                          <span className="text-primary mt-1 shrink-0">•</span>
                           <span className="leading-relaxed">{example}</span>
                         </li>
                       ))}

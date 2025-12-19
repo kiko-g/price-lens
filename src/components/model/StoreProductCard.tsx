@@ -47,11 +47,9 @@ import {
   RefreshCcwIcon,
   ChartSplineIcon,
   CloudAlertIcon,
-  ExternalLinkIcon,
   CircleIcon,
   MicroscopeIcon,
   HeartIcon,
-  ScanBarcodeIcon,
 } from "lucide-react"
 
 type Props = {

@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { MicroscopeIcon, PackageIcon } from "lucide-react"
+import { PackageIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin",

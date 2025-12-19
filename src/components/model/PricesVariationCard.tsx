@@ -2,12 +2,11 @@ import Link from "next/link"
 import { cn, discountValueToPercentage } from "@/lib/utils"
 import { type StoreProduct } from "@/types"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { PriceChange } from "@/components/model/PriceChange"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 
-import { ChevronRightIcon, ExternalLinkIcon, InfoIcon, ArrowRightIcon } from "lucide-react"
+import { ChevronRightIcon, ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
 
 type Props = {
   className?: string

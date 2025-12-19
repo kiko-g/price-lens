@@ -1,14 +1,5 @@
 import { Metadata } from "next"
-
-import {
-  HomeIcon,
-  ShoppingBasketIcon,
-  StoreIcon,
-  WorkflowIcon,
-  GaugeIcon,
-  HeartIcon,
-  MicroscopeIcon,
-} from "lucide-react"
+import { HomeIcon, StoreIcon, WorkflowIcon, GaugeIcon, HeartIcon, MicroscopeIcon } from "lucide-react"
 
 export const siteConfig = {
   name: "Price Lens",

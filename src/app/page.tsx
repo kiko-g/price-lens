@@ -14,18 +14,7 @@ export const metadata: Metadata = {
   ...defaultMetadata,
 }
 
-type SearchParams = {
-  q?: string
-  page?: string
-}
-
-type Props = {
-  searchParams: Promise<SearchParams>
-}
-
-export default async function Home({ searchParams }: Props) {
-  const params = await Promise.resolve(searchParams) // TODO: add search params
-
+export default async function Home() {
   return (
     <Layout>
       <HeroGridPattern

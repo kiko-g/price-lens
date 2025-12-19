@@ -8,7 +8,7 @@ import type { TrackedProductsResult } from "@/app/tracked/actions"
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
 import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
 
-import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon, StoreIcon } from "lucide-react"
+import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
