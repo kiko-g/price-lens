@@ -22,13 +22,12 @@ export const getBaseUrl = () => {
 // All tracked products (3+) are scraped daily - priority determines ORDER of processing
 // Lower priority products are scraped less frequently (cost savings)
 export const PRIORITY_STALENESS_HOURS: Record<number, number> = {
-  5: 24,  // Premium: daily, processed FIRST
-  4: 24,  // High: daily, processed second
-  3: 24,  // Medium: daily, processed last
-  2: 72,  // Low: every 3 days (not actively tracked)
-  1: 168, // Minimal: weekly (discovery/backfill)
+  5: 1 * 24, // Premium: daily, processed FIRST
+  4: 1 * 24, // High: daily, processed second
+  3: 1 * 24, // Medium: daily, processed last
+  2: 7 * 24, // Low: weekly (7 days)
+  1: 28 * 24, // Minimal: every 4 weeks (discovery/backfill)
 }
 
 // Batch size for fan-out (QStash has limits per request)
 export const BATCH_SIZE = 100
-

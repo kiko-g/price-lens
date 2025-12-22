@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type Scrapers = {
   name: string
@@ -26,9 +26,30 @@ export function TestScrapers() {
     },
   ])
 
+  const [aiResult, setAiResult] = useState<any>(null)
+  const [isAiLoading, setIsAiLoading] = useState(false)
+  const [selectedPriority, setSelectedPriority] = useState<string>("null")
+
+  const handleTestAi = async () => {
+    setIsAiLoading(true)
+    setAiResult(null)
+    try {
+      const url = `/api/scrape/ai-priority${selectedPriority === "null" ? "" : `?includePriority=${selectedPriority}`}`
+      const response = await fetch(url)
+      const result = await response.json()
+      setAiResult(result)
+    } catch (error) {
+      console.error("Error testing AI:", error)
+      setAiResult({ error: "Failed to fetch" })
+    } finally {
+      setIsAiLoading(false)
+    }
+  }
+
   const handleTest = async (index: number, url: string) => {
     const scraper = scrapers[index]
     try {
+      // TODO: Replace api route here
       const response = await fetch("/api/admin/scrapers/test", {
         method: "POST",
         headers: {
@@ -85,6 +106,41 @@ export function TestScrapers() {
           </CardContent>
         </Card>
       ))}
+
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>AI Priority Classifier</CardTitle>
+          <CardDescription>Test the AI priority classification for products (Batch of 50)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex w-full items-center gap-2">
+            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="null">Null (Unprioritized)</SelectItem>
+                <SelectItem value="0">Priority 0 (Niche)</SelectItem>
+                <SelectItem value="1">Priority 1 (Rare)</SelectItem>
+                <SelectItem value="2">Priority 2 (Occasional)</SelectItem>
+                <SelectItem value="3">Priority 3 (Moderate)</SelectItem>
+                <SelectItem value="4">Priority 4 (Frequent)</SelectItem>
+                <SelectItem value="5">Priority 5 (Essential)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleTestAi} disabled={isAiLoading}>
+              {isAiLoading ? "Processing..." : "Run AI Classification"}
+            </Button>
+          </div>
+          {aiResult && (
+            <div className="mt-4">
+              <pre className="overflow-auto rounded bg-gray-100 p-4 font-mono text-xs text-wrap">
+                {JSON.stringify(aiResult, null, 2)}
+              </pre>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

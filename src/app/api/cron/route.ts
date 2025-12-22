@@ -5,15 +5,14 @@ import { qstash, getBaseUrl } from "@/lib/qstash"
 export const maxDuration = 60
 
 /**
- * Manual trigger endpoint for product scraping.
+ * ADMIN / MANUAL TRIGGER
  *
- * Query params:
- * - priority: number (1-5) - Trigger scrape for all products of this priority
- * - ids: comma-separated product IDs - Trigger scrape for specific products
+ * This endpoint is NOT the automatic scheduler.
+ * It is a utility to manually force a scrape for:
+ * 1. A specific priority level (e.g., re-scrape all priority 5s now)
+ * 2. Specific product IDs (e.g., debugging a product)
  *
- * Examples:
- * - GET /api/cron?priority=5 - Scrape all priority 5 products
- * - GET /api/cron?ids=123,456,789 - Scrape specific products
+ * The main scheduler is located at /api/scrape/scheduler
  */
 export async function GET(req: NextRequest) {
   try {
