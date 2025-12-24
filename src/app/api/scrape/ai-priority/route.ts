@@ -111,7 +111,7 @@ ${promptList}
       success: 0,
       failed: 0,
       errors: [] as { id: number; error: unknown }[],
-      updated: [] as { id: number; name: string; oldPriority: number | null; newPriority: number }[],
+      updated: [] as { id: number; name: string; oldPriority: number | null; newPriority: number; changed: boolean }[],
     }
 
     // Create a map of batch products for quick lookup
@@ -126,22 +126,42 @@ ${promptList}
           return
         }
 
-        const { error: updateError } = await storeProductQueries.updatePriority(item.id, item.priority)
+        const productInfo = batchMap.get(item.id)
+        const oldPriority = productInfo?.oldPriority
+        const priorityChanged = oldPriority !== item.priority
 
-        if (updateError) {
-          results.failed++
-          results.errors.push({ id: item.id, error: updateError })
-        } else {
-          results.success++
-          const productInfo = batchMap.get(item.id)
-          if (productInfo) {
-            results.updated.push({
-              id: item.id,
-              name: productInfo.name || "Unknown",
-              oldPriority: productInfo.oldPriority,
-              newPriority: item.priority,
-            })
+        // Always update the timestamp to mark as "reviewed"
+        // Only update priority if it actually changed
+        if (priorityChanged) {
+          const { error: updateError } = await storeProductQueries.updatePriority(item.id, item.priority, {
+            updateTimestamp: true,
+          })
+
+          if (updateError) {
+            results.failed++
+            results.errors.push({ id: item.id, error: updateError })
+            return
           }
+        } else {
+          // Priority unchanged, just update timestamp
+          const { error: timestampError } = await storeProductQueries.updatePriorityTimestamp(item.id)
+
+          if (timestampError) {
+            results.failed++
+            results.errors.push({ id: item.id, error: timestampError })
+            return
+          }
+        }
+
+        results.success++
+        if (productInfo) {
+          results.updated.push({
+            id: item.id,
+            name: productInfo.name || "Unknown",
+            oldPriority: oldPriority,
+            newPriority: item.priority,
+            changed: priorityChanged,
+          })
         }
       }),
     )

@@ -17,7 +17,8 @@
     "check": "pnpm tsc && pnpm lint && pnpm build",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "supabase:generate:types": "npx supabase gen types typescript --project-id srpjxzydhsumqbrzpisa > src/types/supabase.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.86",

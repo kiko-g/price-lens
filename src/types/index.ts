@@ -80,6 +80,7 @@ export interface StoreProduct {
   category_2: string | null
   category_3: string | null
   priority: number | null
+  priority_updated_at: string | null
   product_id: number | null
   created_at: string
   updated_at: string

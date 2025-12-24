@@ -376,7 +376,7 @@ export const storeProductQueries = {
     )
   },
 
-  async updatePriority(id: number, priority: number | null) {
+  async updatePriority(id: number, priority: number | null, options?: { updateTimestamp?: boolean }) {
     const supabase = createClient()
 
     if (priority !== null && (priority < 0 || priority > 5 || !Number.isInteger(priority))) {
@@ -389,7 +389,14 @@ export const storeProductQueries = {
       }
     }
 
-    const { data, error } = await supabase.from("store_products").update({ priority }).eq("id", id).select().single()
+    const updateData: Record<string, any> = { priority }
+
+    // If updateTimestamp is true, also update priority_updated_at
+    if (options?.updateTimestamp) {
+      updateData.priority_updated_at = new Date().toISOString()
+    }
+
+    const { data, error } = await supabase.from("store_products").update(updateData).eq("id", id).select().single()
 
     if (error) {
       console.error("Error updating priority:", error)
@@ -403,6 +410,16 @@ export const storeProductQueries = {
       data: data,
       error: null,
     }
+  },
+
+  async updatePriorityTimestamp(id: number) {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("store_products")
+      .update({ priority_updated_at: new Date().toISOString() })
+      .eq("id", id)
+
+    return { error }
   },
 
   async createOrUpdateProduct(sp: StoreProduct) {
@@ -676,16 +693,44 @@ export const storeProductQueries = {
     return { data: allProducts, error: null }
   },
 
-  async getAllNullPriority({ offset = 0, limit = 100 }: { offset?: number; limit?: number }) {
+  async getAllNullPriority({
+    offset = 0,
+    limit = 100,
+    excludeRecentlyClassified = true,
+    recentThresholdDays = 30,
+  }: {
+    offset?: number
+    limit?: number
+    excludeRecentlyClassified?: boolean
+    recentThresholdDays?: number
+  }) {
     const supabase = createClient()
-    return supabase
-      .from("store_products")
-      .select("*")
-      .is("priority", null)
-      .range(offset, offset + limit - 1)
+    let query = supabase.from("store_products").select("*").is("priority", null)
+
+    // Exclude products that were recently classified but ended up with null priority
+    // This prevents re-evaluating products that the AI intentionally left at null
+    if (excludeRecentlyClassified) {
+      const thresholdDate = new Date(Date.now() - recentThresholdDays * 24 * 60 * 60 * 1000).toISOString()
+      query = query.or(`priority_updated_at.is.null,priority_updated_at.lt.${thresholdDate}`)
+    }
+
+    return query.range(offset, offset + limit - 1)
   },
 
-  async getAllByPriority(priority: number | null, { offset = 0, limit = 100 }: { offset?: number; limit?: number }) {
+  async getAllByPriority(
+    priority: number | null,
+    {
+      offset = 0,
+      limit = 100,
+      excludeRecentlyClassified = false,
+      recentThresholdDays = 30,
+    }: {
+      offset?: number
+      limit?: number
+      excludeRecentlyClassified?: boolean
+      recentThresholdDays?: number
+    },
+  ) {
     if (priority !== null && (priority < 0 || priority > 5 || !Number.isInteger(priority))) {
       return {
         data: null,
@@ -697,11 +742,15 @@ export const storeProductQueries = {
     }
 
     const supabase = createClient()
-    return supabase
-      .from("store_products")
-      .select("*")
-      .eq("priority", priority)
-      .range(offset, offset + limit - 1)
+    let query = supabase.from("store_products").select("*").eq("priority", priority)
+
+    // Optionally exclude products that were recently re-classified
+    if (excludeRecentlyClassified) {
+      const thresholdDate = new Date(Date.now() - recentThresholdDays * 24 * 60 * 60 * 1000).toISOString()
+      query = query.or(`priority_updated_at.is.null,priority_updated_at.lt.${thresholdDate}`)
+    }
+
+    return query.range(offset, offset + limit - 1)
   },
 
   async getUnsyncedHighPriority() {

@@ -133,7 +133,20 @@ export function TestScrapers() {
             </Button>
           </div>
           {aiResult && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-3">
+              {aiResult.results?.updated && (
+                <div className="border-border bg-muted rounded border p-3 text-sm">
+                  <p>
+                    <strong>Success:</strong> {aiResult.results.success} | <strong>Failed:</strong>{" "}
+                    {aiResult.results.failed}
+                  </p>
+                  <p>
+                    <strong>Changed:</strong> {aiResult.results.updated.filter((item: any) => item.changed).length} |{" "}
+                    <strong>Unchanged:</strong>{" "}
+                    {aiResult.results.updated.filter((item: any) => item.changed === false).length}
+                  </p>
+                </div>
+              )}
               <pre className="overflow-auto rounded bg-gray-100 p-4 font-mono text-xs text-wrap">
                 {JSON.stringify(aiResult, null, 2)}
               </pre>
