@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AsyncTimerLoader } from "../ui/combo/async-timer-loader"
+import { Badge } from "../ui/badge"
 
 type Scrapers = {
   name: string
@@ -28,7 +30,7 @@ export function TestScrapers() {
 
   const [aiResult, setAiResult] = useState<any>(null)
   const [isAiLoading, setIsAiLoading] = useState(false)
-  const [selectedPriority, setSelectedPriority] = useState<string>("null")
+  const [selectedPriority, setSelectedPriority] = useState<string>("0")
 
   const handleTestAi = async () => {
     setIsAiLoading(true)
@@ -73,6 +75,55 @@ export function TestScrapers() {
 
   return (
     <div className="flex w-full flex-col space-y-16 p-4 md:p-12">
+      <Card className="relative w-full">
+        <CardHeader>
+          <CardTitle>AI Priority Classifier</CardTitle>
+          <CardDescription>Test the AI priority classification for products (Batch of 50)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AsyncTimerLoader isLoading={isAiLoading} className="absolute top-4 right-4" />
+
+          <div className="flex w-full items-center gap-2">
+            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+              <SelectTrigger className="w-[200px]" defaultValue="0">
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="null">Null (Unprioritized)</SelectItem>
+                <SelectItem value="0">Priority 0 (Niche)</SelectItem>
+                <SelectItem value="1">Priority 1 (Rare)</SelectItem>
+                <SelectItem value="2">Priority 2 (Occasional)</SelectItem>
+                <SelectItem value="3">Priority 3 (Moderate)</SelectItem>
+                <SelectItem value="4">Priority 4 (Frequent)</SelectItem>
+                <SelectItem value="5">Priority 5 (Essential)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleTestAi} disabled={isAiLoading}>
+              {isAiLoading ? "Processing..." : "Run AI Classification"}
+            </Button>
+          </div>
+          {aiResult && (
+            <div className="mt-4 space-y-3">
+              {aiResult.results?.updated && (
+                <div className="border-border bg-accent flex items-center gap-2 rounded border p-3 text-sm">
+                  <Badge variant="outline-success">Success: {aiResult.results.success}</Badge>
+                  <Badge variant="outline-destructive">Failed: {aiResult.results.failed}</Badge>
+                  <Badge variant="outline" className="bg-background">
+                    Changed: {aiResult.results.updated.filter((item: any) => item.changed).length}
+                  </Badge>
+                  <Badge variant="outline" className="bg-background">
+                    Unchanged: {aiResult.results.updated.filter((item: any) => item.changed === false).length}
+                  </Badge>
+                </div>
+              )}
+              <pre className="bg-accent overflow-auto rounded border p-4 font-mono text-xs text-wrap">
+                {JSON.stringify(aiResult, null, 2)}
+              </pre>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {scrapers.map((scraper, index) => (
         <Card key={scraper.name} className="w-full">
           <CardHeader>
@@ -106,54 +157,6 @@ export function TestScrapers() {
           </CardContent>
         </Card>
       ))}
-
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>AI Priority Classifier</CardTitle>
-          <CardDescription>Test the AI priority classification for products (Batch of 50)</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex w-full items-center gap-2">
-            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="null">Null (Unprioritized)</SelectItem>
-                <SelectItem value="0">Priority 0 (Niche)</SelectItem>
-                <SelectItem value="1">Priority 1 (Rare)</SelectItem>
-                <SelectItem value="2">Priority 2 (Occasional)</SelectItem>
-                <SelectItem value="3">Priority 3 (Moderate)</SelectItem>
-                <SelectItem value="4">Priority 4 (Frequent)</SelectItem>
-                <SelectItem value="5">Priority 5 (Essential)</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleTestAi} disabled={isAiLoading}>
-              {isAiLoading ? "Processing..." : "Run AI Classification"}
-            </Button>
-          </div>
-          {aiResult && (
-            <div className="mt-4 space-y-3">
-              {aiResult.results?.updated && (
-                <div className="border-border bg-muted rounded border p-3 text-sm">
-                  <p>
-                    <strong>Success:</strong> {aiResult.results.success} | <strong>Failed:</strong>{" "}
-                    {aiResult.results.failed}
-                  </p>
-                  <p>
-                    <strong>Changed:</strong> {aiResult.results.updated.filter((item: any) => item.changed).length} |{" "}
-                    <strong>Unchanged:</strong>{" "}
-                    {aiResult.results.updated.filter((item: any) => item.changed === false).length}
-                  </p>
-                </div>
-              )}
-              <pre className="overflow-auto rounded bg-gray-100 p-4 font-mono text-xs text-wrap">
-                {JSON.stringify(aiResult, null, 2)}
-              </pre>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

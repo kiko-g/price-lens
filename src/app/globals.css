@@ -206,6 +206,18 @@
   --animate-bounce-x: bounce-x 750ms infinite;
   --animate-blob: blob 7s infinite;
 
+  @keyframes slither {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(50%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
   @keyframes fade-in {
     0% {
       opacity: 0;
@@ -383,5 +395,9 @@
 
   [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
     height: 0 !important;
+  }
+
+  .animate-slither {
+    animation: slither 2s infinite linear;
   }
 }

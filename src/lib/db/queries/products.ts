@@ -376,7 +376,14 @@ export const storeProductQueries = {
     )
   },
 
-  async updatePriority(id: number, priority: number | null, options?: { updateTimestamp?: boolean }) {
+  async updatePriority(
+    id: number,
+    priority: number | null,
+    options?: {
+      updateTimestamp?: boolean
+      source?: "ai" | "manual"
+    },
+  ) {
     const supabase = createClient()
 
     if (priority !== null && (priority < 0 || priority > 5 || !Number.isInteger(priority))) {
@@ -396,6 +403,14 @@ export const storeProductQueries = {
       updateData.priority_updated_at = new Date().toISOString()
     }
 
+    // Track source of priority change (defaults to 'manual' for backwards compatibility)
+    if (options?.source) {
+      updateData.priority_source = options.source
+    } else {
+      // If no source specified, assume manual (UI changes, etc.)
+      updateData.priority_source = "manual"
+    }
+
     const { data, error } = await supabase.from("store_products").update(updateData).eq("id", id).select().single()
 
     if (error) {
@@ -412,11 +427,14 @@ export const storeProductQueries = {
     }
   },
 
-  async updatePriorityTimestamp(id: number) {
+  async updatePriorityTimestamp(id: number, source: "ai" | "manual" = "ai") {
     const supabase = createClient()
     const { error } = await supabase
       .from("store_products")
-      .update({ priority_updated_at: new Date().toISOString() })
+      .update({
+        priority_updated_at: new Date().toISOString(),
+        priority_source: source,
+      })
       .eq("id", id)
 
     return { error }
@@ -698,14 +716,21 @@ export const storeProductQueries = {
     limit = 100,
     excludeRecentlyClassified = true,
     recentThresholdDays = 30,
+    excludeManual = true,
   }: {
     offset?: number
     limit?: number
     excludeRecentlyClassified?: boolean
     recentThresholdDays?: number
+    excludeManual?: boolean
   }) {
     const supabase = createClient()
     let query = supabase.from("store_products").select("*").is("priority", null)
+
+    // Exclude manually set priorities - they represent domain knowledge AI shouldn't override
+    if (excludeManual) {
+      query = query.or(`priority_source.is.null,priority_source.eq.ai`)
+    }
 
     // Exclude products that were recently classified but ended up with null priority
     // This prevents re-evaluating products that the AI intentionally left at null
@@ -724,11 +749,13 @@ export const storeProductQueries = {
       limit = 100,
       excludeRecentlyClassified = false,
       recentThresholdDays = 30,
+      excludeManual = false,
     }: {
       offset?: number
       limit?: number
       excludeRecentlyClassified?: boolean
       recentThresholdDays?: number
+      excludeManual?: boolean
     },
   ) {
     if (priority !== null && (priority < 0 || priority > 5 || !Number.isInteger(priority))) {
@@ -743,6 +770,11 @@ export const storeProductQueries = {
 
     const supabase = createClient()
     let query = supabase.from("store_products").select("*").eq("priority", priority)
+
+    // Exclude manually set priorities - they represent domain knowledge AI shouldn't override
+    if (excludeManual) {
+      query = query.or(`priority_source.is.null,priority_source.eq.ai`)
+    }
 
     // Optionally exclude products that were recently re-classified
     if (excludeRecentlyClassified) {
@@ -948,7 +980,7 @@ export const storeProductQueries = {
     // Score each candidate
     const scoredCandidates = uniqueCandidates.map((candidate) => {
       let score = 0
-      let factors: string[] = []
+      const factors: string[] = []
 
       // Brand match (highest weight)
       if (

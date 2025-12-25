@@ -38,13 +38,22 @@ export async function GET(req: Request) {
     // 1. Fetch unprioritized products (or specific priority for re-classification)
     let batch = []
     let error = null
+    let priority = null
 
     if (includePriority !== null) {
-      const priority = parseInt(includePriority, 10)
+      priority = parseInt(includePriority, 10)
       if (isNaN(priority) || priority < 0 || priority > 5) {
         return NextResponse.json({ error: "includePriority must be between 0 and 5" }, { status: 400 })
       }
-      const result = await storeProductQueries.getAllByPriority(priority, { offset, limit })
+
+      const result = await storeProductQueries.getAllByPriority(priority, {
+        offset,
+        limit,
+        excludeRecentlyClassified: false,
+        recentThresholdDays: 30,
+        excludeManual: true,
+      })
+
       batch = result.data || []
       error = result.error
     } else {
@@ -59,7 +68,11 @@ export async function GET(req: Request) {
     }
 
     if (!batch || batch.length === 0) {
-      return NextResponse.json({ message: "No unprioritized products found", count: 0 })
+      return NextResponse.json({
+        count: 0,
+        message:
+          includePriority === null ? "No unprioritized products found" : `No products with priority ${priority} found`,
+      })
     }
 
     // 2. Prepare prompt
@@ -135,6 +148,7 @@ ${promptList}
         if (priorityChanged) {
           const { error: updateError } = await storeProductQueries.updatePriority(item.id, item.priority, {
             updateTimestamp: true,
+            source: "ai",
           })
 
           if (updateError) {
@@ -143,8 +157,8 @@ ${promptList}
             return
           }
         } else {
-          // Priority unchanged, just update timestamp
-          const { error: timestampError } = await storeProductQueries.updatePriorityTimestamp(item.id)
+          // Priority unchanged, just update timestamp and mark as AI-reviewed
+          const { error: timestampError } = await storeProductQueries.updatePriorityTimestamp(item.id, "ai")
 
           if (timestampError) {
             results.failed++

@@ -8,7 +8,7 @@ const eslintConfig = [
       // Downgrade to warnings for gradual fixes
       "no-unused-vars": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "off", // TODO: FIXME:
       "prefer-const": "warn",
       "react/no-unescaped-entities": "warn",
 
