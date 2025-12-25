@@ -24,6 +24,7 @@ function rowToPromptText(sp: Partial<StoreProduct>) {
  *
  * Query params:
  * - includePriority: number (0-5) - Also fetch products with this priority for re-classification
+ * - batchSize: number (1-200) - Number of products to process in this batch (default: 50)
  *
  * Recommended usage: Schedule this to run every 10-15 minutes to process backlog.
  */
@@ -31,8 +32,9 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const includePriority = searchParams.get("includePriority")
+    const batchSizeParam = searchParams.get("batchSize")
 
-    const limit = 50 // Process 50 at a time
+    const limit = batchSizeParam ? Math.min(Math.max(parseInt(batchSizeParam, 10), 1), 200) : 50
     const offset = 0
 
     // 1. Fetch unprioritized products (or specific priority for re-classification)
@@ -101,7 +103,7 @@ ${promptList}
 
     // 3. Call LLM
     const { text } = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4.1-mini"),
       prompt: systemPrompt,
       temperature: 0.1, // Lower temperature for more consistent JSON
     })
