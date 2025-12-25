@@ -104,15 +104,15 @@ export function TestScrapers() {
           </div>
           {aiResult && (
             <div className="mt-4 space-y-3">
-              {aiResult.results?.updated && (
+              {aiResult.results && (
                 <div className="border-border bg-accent flex items-center gap-2 rounded border p-3 text-sm">
                   <Badge variant="outline-success">Success: {aiResult.results.success}</Badge>
                   <Badge variant="outline-destructive">Failed: {aiResult.results.failed}</Badge>
                   <Badge variant="outline" className="bg-background">
-                    Changed: {aiResult.results.updated.filter((item: any) => item.changed).length}
+                    Changed: {aiResult.results.changed.count}
                   </Badge>
                   <Badge variant="outline" className="bg-background">
-                    Unchanged: {aiResult.results.updated.filter((item: any) => item.changed === false).length}
+                    Unchanged: {aiResult.results.unchanged.count}
                   </Badge>
                 </div>
               )}

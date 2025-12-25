@@ -81,6 +81,7 @@ export interface StoreProduct {
   category_3: string | null
   priority: number | null
   priority_updated_at: string | null
+  priority_source: "ai" | "manual" | null
   product_id: number | null
   created_at: string
   updated_at: string

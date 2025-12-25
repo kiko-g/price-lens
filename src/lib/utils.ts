@@ -1423,6 +1423,8 @@ export const productUnavailable: Omit<StoreProduct, "id" | "product_id" | "creat
   category_3: "",
   origin_id: 1,
   priority: null,
+  priority_source: null,
+  priority_updated_at: null,
 }
 
 export function resizeImgSrc(src: string, width: number, height: number) {

@@ -136,6 +136,7 @@ const continenteProductPageScraper = async (
   prevSp?: StoreProduct,
 ): Promise<ScrapedProduct | Record<string, never>> => {
   const priority = prevSp?.priority ?? null
+  const prioritySource = prevSp?.priority_source ?? "ai"
   const cleanedUrl = cleanUrl(url)
 
   try {
@@ -233,6 +234,8 @@ const continenteProductPageScraper = async (
       origin_id: 1,
       created_at: "",
       priority,
+      priority_source: prioritySource,
+      priority_updated_at: now(),
     }
 
     return sp
@@ -248,6 +251,7 @@ const auchanProductPageScraper = async (
   prevSp?: StoreProduct,
 ): Promise<ScrapedProduct | Record<string, never>> => {
   const priority = prevSp?.priority ?? null
+  const prioritySource = prevSp?.priority_source ?? "ai"
 
   try {
     const html = await fetchHtml(url)
@@ -334,7 +338,9 @@ const auchanProductPageScraper = async (
       updated_at: now(),
       origin_id: 2,
       created_at: "",
-      priority,
+      priority: priority,
+      priority_source: prioritySource,
+      priority_updated_at: now(),
     }
 
     return sp
@@ -350,6 +356,7 @@ const pingoDoceProductPageScraper = async (
   prevSp?: StoreProduct,
 ): Promise<ScrapedProduct | Record<string, never>> => {
   const priority = prevSp?.priority ?? null
+  const prioritySource = prevSp?.priority_source ?? "ai"
 
   try {
     const html = await fetchHtml(url)
@@ -433,6 +440,8 @@ const pingoDoceProductPageScraper = async (
       origin_id: 3,
       created_at: "",
       priority,
+      priority_source: prioritySource,
+      priority_updated_at: now(),
     }
 
     return sp

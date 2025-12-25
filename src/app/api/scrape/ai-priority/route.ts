@@ -112,9 +112,9 @@ ${promptList}
       .trim()
 
     // 4. Parse and Update
-    let updates = []
+    let parsedItems = []
     try {
-      updates = JSON.parse(cleanedText)
+      parsedItems = JSON.parse(cleanedText)
     } catch (parseError) {
       console.error("Error parsing LLM output:", parseError, "\nRaw output:", cleanedText)
       return NextResponse.json({ error: "Failed to parse LLM response", raw: cleanedText }, { status: 500 })
@@ -124,7 +124,14 @@ ${promptList}
       success: 0,
       failed: 0,
       errors: [] as { id: number; error: unknown }[],
-      updated: [] as { id: number; name: string; oldPriority: number | null; newPriority: number; changed: boolean }[],
+      changed: {
+        count: 0,
+        list: [] as { id: number; name: string; oldPriority: number | null; newPriority: number }[],
+      },
+      unchanged: {
+        count: 0,
+        list: [] as { id: number; name: string; oldPriority: number | null; newPriority: number }[],
+      },
     }
 
     // Create a map of batch products for quick lookup
@@ -132,7 +139,7 @@ ${promptList}
 
     // Update in parallel
     await Promise.all(
-      updates.map(async (item: { id: number; priority: number }) => {
+      parsedItems.map(async (item: { id: number; priority: number }) => {
         // Validate priority
         if (typeof item.priority !== "number" || item.priority < 0 || item.priority > 5) {
           results.failed++
@@ -140,11 +147,18 @@ ${promptList}
         }
 
         const productInfo = batchMap.get(item.id)
-        const oldPriority = productInfo?.oldPriority
+
+        // Handle case where product isn't found in batch map
+        if (!productInfo) {
+          results.failed++
+          results.errors.push({ id: item.id, error: "Product ID not found in batch" })
+          return
+        }
+
+        const oldPriority = productInfo.oldPriority
         const priorityChanged = oldPriority !== item.priority
 
-        // Always update the timestamp to mark as "reviewed"
-        // Only update priority if it actually changed
+        // DB Operations
         if (priorityChanged) {
           const { error: updateError } = await storeProductQueries.updatePriority(item.id, item.priority, {
             updateTimestamp: true,
@@ -167,15 +181,22 @@ ${promptList}
           }
         }
 
+        // Success: Sort into specific result lists
         results.success++
-        if (productInfo) {
-          results.updated.push({
-            id: item.id,
-            name: productInfo.name || "Unknown",
-            oldPriority: oldPriority,
-            newPriority: item.priority,
-            changed: priorityChanged,
-          })
+
+        const resultEntry = {
+          id: item.id,
+          name: productInfo.name || "Unknown",
+          oldPriority: oldPriority ?? null,
+          newPriority: item.priority,
+        }
+
+        if (priorityChanged) {
+          results.changed.list.push(resultEntry)
+          results.changed.count++
+        } else {
+          results.unchanged.list.push(resultEntry)
+          results.unchanged.count++
         }
       }),
     )

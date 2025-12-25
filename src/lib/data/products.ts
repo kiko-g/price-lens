@@ -1,4 +1,8 @@
-export const productsWithPrices = {
+import { StoreProduct } from "@/types"
+import { Price } from "@/types"
+import { now } from "../utils"
+
+export const productsWithPrices: Record<string, { storeProduct: StoreProduct; prices: Price[] }> = {
   "2558": {
     storeProduct: {
       url: "https://www.continente.pt/produto/leite-uht-meio-gordo-mimosa-2210946.html",
@@ -22,6 +26,8 @@ export const productsWithPrices = {
       priority: 5,
       product_id: 52,
       is_favorited: false,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {
@@ -481,6 +487,8 @@ export const productsWithPrices = {
       priority: 5,
       product_id: 25,
       is_favorited: false,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {
@@ -832,6 +840,8 @@ export const productsWithPrices = {
       priority: 5,
       product_id: 56,
       is_favorited: true,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {
@@ -1135,6 +1145,8 @@ export const productsWithPrices = {
       priority: 5,
       product_id: 54,
       is_favorited: true,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {
@@ -1414,6 +1426,8 @@ export const productsWithPrices = {
       priority: 4,
       product_id: 18,
       is_favorited: true,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {
@@ -1909,6 +1923,8 @@ export const productsWithPrices = {
       priority: 5,
       product_id: 228,
       is_favorited: true,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {
@@ -2200,6 +2216,8 @@ export const productsWithPrices = {
       priority: 3,
       product_id: 38,
       is_favorited: true,
+      priority_source: "ai",
+      priority_updated_at: now(),
     },
     prices: [
       {

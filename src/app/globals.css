@@ -309,7 +309,11 @@
   }
 
   *::selection {
-    @apply bg-secondary/80 text-white;
+    @apply bg-black/80 text-white;
+  }
+
+  .dark *::selection {
+    @apply bg-white/80 text-black;
   }
 
   * {
