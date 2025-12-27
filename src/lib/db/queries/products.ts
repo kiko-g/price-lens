@@ -166,6 +166,7 @@ export const storeProductQueries = {
     nonNulls = true,
     sort = "a-z",
     tracked = false,
+    priority = null,
     categories = [],
     category = null,
     category2 = null,
@@ -181,7 +182,8 @@ export const storeProductQueries = {
     const offset = (page - 1) * limit
 
     let dbQuery = supabase.from("store_products").select("*", { count: "exact" })
-    if (tracked) dbQuery = dbQuery.in("priority", [3, 4, 5])
+    if (tracked) dbQuery = dbQuery.in("priority", [1, 2, 3, 4, 5])
+    if (priority && !isNaN(priority)) dbQuery = dbQuery.eq("priority", priority)
 
     if (sort && sort === "only-nulls") {
       dbQuery = dbQuery.is("name", null)
@@ -725,7 +727,7 @@ export const storeProductQueries = {
     excludeManual?: boolean
   }) {
     const supabase = createClient()
-    let query = supabase.from("store_products").select("*").is("priority", null)
+    let query = supabase.from("store_products").select("*", { count: "exact" }).is("priority", null)
 
     // Exclude manually set priorities - they represent domain knowledge AI shouldn't override
     if (excludeManual) {
@@ -765,11 +767,12 @@ export const storeProductQueries = {
           message: "Priority must be null or an integer between 0 and 5",
           status: 400,
         },
+        count: 0,
       }
     }
 
     const supabase = createClient()
-    let query = supabase.from("store_products").select("*").eq("priority", priority)
+    let query = supabase.from("store_products").select("*", { count: "exact" }).eq("priority", priority)
 
     // Exclude manually set priorities - they represent domain knowledge AI shouldn't override
     if (excludeManual) {

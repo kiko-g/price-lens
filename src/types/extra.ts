@@ -111,6 +111,7 @@ export type GetAllQuery = {
   page: number
   limit: number
   tracked?: boolean // priority 3, 4, 5 (or more if needed in the future)
+  priority?: number | null
   query?: string
   sort?: SortByType
   searchType?: SearchType

@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { PackageIcon } from "lucide-react"
+import { PackageIcon, CrownIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -17,6 +17,7 @@ export default async function Admin() {
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
         <AdminDashboardProductsLink />
         <AdminDashboardPricesLink />
+        <AdminPrioritiesLink />
         <TestScrapers />
         <AdminCoreActions />
       </div>
@@ -50,6 +51,25 @@ function AdminDashboardPricesLink() {
       <CardFooter>
         <Button asChild>
           <Link href="/admin/dashboard/prices">Access Dashboard for Prices</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function AdminPrioritiesLink() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CrownIcon className="h-5 w-5" />
+          Product Priorities
+        </CardTitle>
+      </CardHeader>
+      <CardContent>Manually assign priority levels (0-5) to products for better organization.</CardContent>
+      <CardFooter>
+        <Button asChild>
+          <Link href="/admin/priorities">Manage Priorities</Link>
         </Button>
       </CardFooter>
     </Card>
