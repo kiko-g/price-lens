@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react"
 import { useStoreProducts } from "@/hooks/useProducts"
 import { StoreProduct } from "@/types"
-import type { GetAllQuery } from "@/types/extra"
+import type { GetAllQuery } from "@/lib/db/queries/types"
 
 interface UseInfiniteStoreProductsOptions {
   limit?: number

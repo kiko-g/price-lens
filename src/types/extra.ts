@@ -106,24 +106,3 @@ export const daysAmountInRange: {
   "5Y": 1825,
   Max: 3650,
 }
-
-export type GetAllQuery = {
-  page: number
-  limit: number
-  tracked?: boolean // priority 3, 4, 5 (or more if needed in the future)
-  priority?: string // Comma-separated: "1,2,3" for numbers, "none" for null, "none,3,4" for mixed
-  query?: string
-  sort?: SortByType
-  searchType?: SearchType
-  nonNulls?: boolean
-  categories?: string[]
-  category?: string | null
-  category2?: string | null
-  category3?: string | null
-  origin?: string // Comma-separated: "1,2,3" for multiple origins
-  userId?: string | null
-  orderByPriority?: boolean
-  options?: {
-    onlyDiscounted: boolean
-  }
-}

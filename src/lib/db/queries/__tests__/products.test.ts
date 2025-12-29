@@ -273,7 +273,7 @@ describe("storeProductQueries", () => {
     it("should filter by specific priority", async () => {
       mockChain.range.mockResolvedValue({ data: [], error: null, count: 0 })
 
-      await storeProductQueries.getAll({ page: 1, limit: 10, priority: 5 })
+      await storeProductQueries.getAll({ page: 1, limit: 10, priority: "5" })
 
       expect(mockChain.eq).toHaveBeenCalledWith("priority", 5)
     })
@@ -281,7 +281,7 @@ describe("storeProductQueries", () => {
     it("should filter by origin", async () => {
       mockChain.range.mockResolvedValue({ data: [], error: null, count: 0 })
 
-      await storeProductQueries.getAll({ page: 1, limit: 10, origin: 1 })
+      await storeProductQueries.getAll({ page: 1, limit: 10, origin: "1" })
 
       expect(mockChain.eq).toHaveBeenCalledWith("origin_id", 1)
     })

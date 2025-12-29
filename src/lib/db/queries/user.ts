@@ -1,31 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createClientBrowser } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-
-export interface PaginationParams {
-  page?: number
-  limit?: number
-}
-
-export interface PaginationResult {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
-}
-
-export interface QueryResult<T> {
-  data: T | null
-  error: { message: string; code?: string } | null
-}
-
-export interface PaginatedQueryResult<T> {
-  data: T[]
-  pagination: PaginationResult
-  error: { message: string; code?: string } | null
-}
+import type { QueryResult } from "./types"
 
 export const userQueries = {
   /**

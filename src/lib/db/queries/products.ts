@@ -1,4 +1,4 @@
-import type { GetAllQuery } from "@/types/extra"
+import type { GetAllQuery } from "./types"
 import { createClient } from "@/lib/supabase/server"
 import type { Product, ProductWithListings, StoreProduct } from "@/types"
 import { PostgrestError } from "@supabase/supabase-js"

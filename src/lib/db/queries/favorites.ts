@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createClientBrowser } from "@/lib/supabase/client"
-import type { PaginationParams, PaginatedQueryResult } from "./user"
+import type { PaginationParams, PaginatedQueryResult } from "./types"
 
 export const favoriteQueries = {
   async addFavorite(userId: string, storeProductId: number, isServer = true) {
