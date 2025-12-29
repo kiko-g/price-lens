@@ -99,7 +99,6 @@ export default async function Supermarket({ searchParams }: Props) {
     query: q,
     searchType,
     sort: sortBy,
-    relevant,
     origin,
   })
 

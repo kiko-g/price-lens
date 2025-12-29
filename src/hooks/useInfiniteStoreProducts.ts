@@ -7,11 +7,11 @@ interface UseInfiniteStoreProductsOptions {
   limit?: number
   tracked?: boolean
   query?: string
-  origin?: number
+  origin?: string
 }
 
 export function useInfiniteStoreProducts(options: UseInfiniteStoreProductsOptions = {}) {
-  const { limit = 30, tracked = true, query = "", origin = 0 } = options
+  const { limit = 30, tracked = true, query = "", origin } = options
 
   const [page, setPage] = useState(1)
   const [accumulated, setAccumulated] = useState<StoreProduct[]>([])

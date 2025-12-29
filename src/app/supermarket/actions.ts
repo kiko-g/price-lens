@@ -20,7 +20,6 @@ export async function getSupermarketProducts({
   query = "",
   searchType = "any",
   sort = "a-z",
-  relevant = false,
   origin = null,
   categories = [],
   category = null,
@@ -34,7 +33,6 @@ export async function getSupermarketProducts({
   query?: string
   searchType?: SearchType
   sort?: SortByType
-  relevant?: boolean
   origin?: string | null
   categories?: string[]
   category?: string | null
@@ -48,8 +46,6 @@ export async function getSupermarketProducts({
     data: { user },
   } = await supabase.auth.getUser()
 
-  const originId = origin ? parseInt(origin, 10) : null
-
   const { data, error, count } = await storeProductQueries.getAll({
     page,
     limit,
@@ -60,7 +56,7 @@ export async function getSupermarketProducts({
     category,
     category2,
     category3,
-    origin: originId,
+    origin: origin ?? undefined,
     userId: user?.id || null,
     tracked: false,
     orderByPriority,

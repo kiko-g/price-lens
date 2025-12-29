@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createClientBrowser } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import type { QueryResult } from "./types"
+import type { QueryResult, PaginationParams, PaginationResult, PaginatedQueryResult } from "./types"
 
 export const userQueries = {
   /**
