@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     const orderByPriorityParam = params.get("orderByPriority") ?? "false"
     const originParam = params.get("origin") ?? null
     const trackedParam = params.get("tracked") ?? null
+    const priorityParam = params.get("priority") ?? undefined
 
     const query = queryParam
     const page = parseInt(pageParam, 10) || 1
@@ -31,7 +32,8 @@ export async function GET(req: NextRequest) {
     const category = categoryParam || null
     const category2 = category2Param || null
     const category3 = category3Param || null
-    const origin = originParam ? parseInt(originParam, 10) : null
+    // Origin can be comma-separated for multi-select: "1,2,3"
+    const origin = originParam || undefined
     const onlyDiscounted = onlyDiscountedParam === "true"
     const orderByPriority = orderByPriorityParam === "true"
     const tracked = trackedParam ? true : false
@@ -55,6 +57,7 @@ export async function GET(req: NextRequest) {
       userId: user?.id || null,
       tracked,
       orderByPriority,
+      priority: priorityParam,
       options: {
         onlyDiscounted,
       },

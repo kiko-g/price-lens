@@ -14,6 +14,7 @@ type SearchParams = {
   q?: string
   page?: string
   origin?: string
+  priority?: string
 }
 
 type TrackedPageProps = {
@@ -22,26 +23,22 @@ type TrackedPageProps = {
 
 export default async function TrackedPage({ searchParams }: TrackedPageProps) {
   const params = await searchParams
-  const page = params.page ? parseInt(params.page, 10) : 1
   const query = params.q || ""
-  const origin = params.origin ? parseInt(params.origin, 10) : 0
+  const origin = params.origin || undefined
+  const priority = params.priority || undefined
 
   const initialData = await getTrackedProducts({
-    page,
+    page: 1,
     limit: 30,
     query,
     origin,
+    priority,
   })
 
   return (
     <Layout>
       <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-        <StoreProductsTracked
-          initialData={initialData}
-          initialQuery={query}
-          initialOriginId={origin}
-          initialPage={page}
-        />
+        <StoreProductsTracked initialData={initialData} initialQuery={query} />
       </div>
     </Layout>
   )

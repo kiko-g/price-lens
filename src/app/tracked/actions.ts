@@ -17,12 +17,14 @@ export async function getTrackedProducts({
   page = 1,
   limit = 30,
   query = "",
-  origin = 0,
+  origin,
+  priority,
 }: {
   page?: number
   limit?: number
   query?: string
-  origin?: number
+  origin?: string
+  priority?: string
 }): Promise<TrackedProductsResult> {
   const supabase = createClient()
   const {
@@ -36,9 +38,10 @@ export async function getTrackedProducts({
     searchType: "any",
     sort: "a-z",
     tracked: true,
-    origin: origin !== 0 ? origin : null,
+    origin: origin || undefined,
     userId: user?.id || null,
     orderByPriority: true,
+    priority: priority || undefined,
   })
 
   if (error || !data) {

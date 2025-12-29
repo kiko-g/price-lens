@@ -111,7 +111,7 @@ export type GetAllQuery = {
   page: number
   limit: number
   tracked?: boolean // priority 3, 4, 5 (or more if needed in the future)
-  priority?: number | null
+  priority?: string // Comma-separated: "1,2,3" for numbers, "none" for null, "none,3,4" for mixed
   query?: string
   sort?: SortByType
   searchType?: SearchType
@@ -120,7 +120,7 @@ export type GetAllQuery = {
   category?: string | null
   category2?: string | null
   category3?: string | null
-  origin?: number | null
+  origin?: string // Comma-separated: "1,2,3" for multiple origins
   userId?: string | null
   orderByPriority?: boolean
   options?: {

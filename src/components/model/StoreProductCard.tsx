@@ -16,6 +16,7 @@ import { Code } from "@/components/Code"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { PriorityBadge } from "@/components/model/PriorityBadge"
+import { StoreProductCardSkeleton } from "@/components/model/StoreProductCardSkeleton"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -96,7 +97,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
   }
 
   if (status === FrontendStatus.Loading) {
-    return <ProductCardSkeleton />
+    return <StoreProductCardSkeleton />
   }
 
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)

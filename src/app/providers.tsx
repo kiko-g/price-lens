@@ -1,10 +1,35 @@
 "use client"
 
-import { createContext, useEffect, useRef } from "react"
+import { createContext, useEffect, useRef, useState } from "react"
 import { usePathname } from "next/navigation"
 import { ThemeProvider, useTheme } from "next-themes"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { UserProvider } from "@/contexts/UserContext"
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    },
+  })
+}
+
+let browserQueryClient: QueryClient | undefined = undefined
+
+function getQueryClient() {
+  if (typeof window === "undefined") {
+    // Server: always make a new query client
+    return makeQueryClient()
+  } else {
+    // Browser: make a new query client if we don't already have one
+    if (!browserQueryClient) browserQueryClient = makeQueryClient()
+    return browserQueryClient
+  }
+}
 
 function usePrevious<T>(value: T) {
   let ref = useRef<T>(value)
@@ -45,7 +70,7 @@ export const AppContext = createContext<{ previousPathname?: string }>({})
 export function Providers({ children }: { children: React.ReactNode }) {
   let pathname = usePathname()
   let previousPathname = usePrevious(pathname)
-  const queryClient = new QueryClient()
+  const queryClient = getQueryClient()
 
   return (
     <AppContext.Provider value={{ previousPathname }}>

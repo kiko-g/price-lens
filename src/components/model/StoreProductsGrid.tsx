@@ -55,7 +55,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"
-import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
+import { StoreProductCard } from "@/components/model/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/model/StoreProductCardSkeleton"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { Wrapper } from "@/components/SectionWrapper"
 
@@ -664,7 +665,7 @@ WHERE category = '${category1}'
         </div>
         <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
           {Array.from({ length: limit }).map((_, index) => (
-            <ProductCardSkeleton key={`product-skeleton-${index}`} />
+            <StoreProductCardSkeleton key={`product-skeleton-${index}`} />
           ))}
         </div>
       </div>

@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect, useTransition, useCallback } from "react"
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { StoreProduct } from "@/types"
-import type { TrackedProductsResult } from "@/app/tracked/actions"
+import type { TrackedProductsPage, PriorityFilterValue } from "@/hooks/useTrackedProducts"
+import { useTrackedProducts } from "@/hooks/useTrackedProducts"
+import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
 
 import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
-import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
 
 import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -14,194 +14,191 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
+import { PriorityBubble } from "./PriorityBubble"
 
 interface StoreProductsTrackedProps {
-  initialData: TrackedProductsResult
+  initialData: TrackedProductsPage
   initialQuery: string
-  initialOriginId: number
-  initialPage: number
 }
 
-async function fetchProducts({
-  page,
-  query,
-  origin,
-}: {
-  page: number
-  query: string
-  origin: number
-}): Promise<TrackedProductsResult> {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: "30",
-    tracked: "true",
-    ...(query && { query }),
-    ...(origin !== 0 && { origin: origin.toString() }),
-  })
-
-  const response = await fetch(`/api/products/store?${params}`)
-  if (!response.ok) {
-    throw new Error("Failed to fetch products")
-  }
-
-  const data = await response.json()
-
-  return {
-    products: data.data || [],
-    pagination: {
-      page: data.pagination?.page || page,
-      limit: data.pagination?.limit || 30,
-      totalCount: data.pagination?.pagedCount || 0,
-      totalPages: data.pagination?.totalPages || 0,
-      hasMore: page < (data.pagination?.totalPages || 0),
-    },
-  }
+// Parse array filters from URL
+const parseArrayParam = (param: string | null): number[] => {
+  if (!param) return []
+  return param
+    .split(",")
+    .map((v) => parseInt(v, 10))
+    .filter((v) => !isNaN(v))
 }
 
-export function StoreProductsTracked({
-  initialData,
-  initialQuery,
-  initialOriginId,
-  initialPage,
-}: StoreProductsTrackedProps) {
+const parsePriorityParam = (param: string | null): PriorityFilterValue[] => {
+  if (!param) return []
+  return param.split(",").map((v) => (v === "none" ? "none" : parseInt(v, 10)))
+}
+
+const serializeArray = (arr: (number | string)[]): string | null => {
+  if (arr.length === 0) return null
+  return arr.join(",")
+}
+
+export function StoreProductsTracked({ initialData, initialQuery }: StoreProductsTrackedProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
-  // State for products and pagination
-  const [products, setProducts] = useState<StoreProduct[]>(initialData.products)
-  const [pagination, setPagination] = useState(initialData.pagination)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  // Parse URL params
+  const urlFilters = useMemo(() => {
+    const originParam = searchParams.get("origin")
+    const priorityParam = searchParams.get("priority")
 
-  // State for filters
-  const [origin, setOrigin] = useState(initialOriginId)
+    return {
+      origin: parseArrayParam(originParam),
+      query: searchParams.get("q") || "",
+      priority: parsePriorityParam(priorityParam),
+    }
+  }, [searchParams])
 
-  // Search state with debouncing
-  const { query, debouncedQuery, isSearching, setIsSearching, handleQueryChange } = useSearchWithDebounce({
+  // Optimistic local state for instant UI feedback
+  const [optimisticOrigin, setOptimisticOrigin] = useState<number[]>(urlFilters.origin)
+  const [optimisticPriority, setOptimisticPriority] = useState(urlFilters.priority)
+
+  // Sync optimistic state when URL changes (back/forward navigation)
+  useEffect(() => {
+    setOptimisticOrigin(urlFilters.origin)
+  }, [urlFilters.origin])
+
+  useEffect(() => {
+    setOptimisticPriority(urlFilters.priority)
+  }, [urlFilters.priority])
+
+  // Use optimistic values for UI and queries
+  const filters = useMemo(
+    () => ({
+      origin: optimisticOrigin,
+      query: urlFilters.query,
+      priority: optimisticPriority,
+    }),
+    [optimisticOrigin, optimisticPriority, urlFilters.query],
+  )
+
+  // Search input with debouncing (needs local state for immediate feedback)
+  const {
+    query: inputQuery,
+    debouncedQuery,
+    isSearching,
+    handleQueryChange,
+  } = useSearchWithDebounce({
     delay: 300,
     minLength: 3,
     initialValue: initialQuery,
   })
 
+  // React Query hook for tracked products
+  const {
+    products,
+    pagination,
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    prefetchNextPage,
+  } = useTrackedProducts({
+    query: debouncedQuery,
+    origin: filters.origin,
+    priority: filters.priority,
+    initialData,
+  })
+
   // Update URL with new search params
   const updateSearchParams = useCallback(
-    (updates: { q?: string; origin?: number; page?: number }) => {
+    (updates: Record<string, string | number | null>) => {
       const params = new URLSearchParams(searchParams.toString())
 
-      if (updates.q !== undefined) {
-        if (updates.q) params.set("q", updates.q)
-        else params.delete("q")
-      }
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === "" || value === 0) {
+          params.delete(key)
+        } else {
+          params.set(key, value.toString())
+        }
+      })
 
-      if (updates.origin !== undefined) {
-        if (updates.origin !== 0) params.set("origin", updates.origin.toString())
-        else params.delete("origin")
-      }
+      // Reset page when filters change
+      params.delete("page")
 
-      if (updates.page !== undefined) {
-        if (updates.page > 1) params.set("page", updates.page.toString())
-        else params.delete("page")
-      }
-
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      // Replace encoded commas with actual commas for readability
+      const queryString = params.toString().replace(/%2C/g, ",")
+      router.push(`${pathname}?${queryString}`, { scroll: false })
     },
     [pathname, router, searchParams],
   )
 
-  // Handle origin change
-  const handleOriginChange = (value: string) => {
-    const newOriginId = Number(value)
-    setOrigin(newOriginId)
-
-    // Reset to page 1 when changing origin
-    startTransition(() => {
-      updateSearchParams({ origin: newOriginId, page: 1 })
-    })
-  }
-
-  // Load more products
-  const loadMore = async () => {
-    if (!pagination.hasMore || isLoadingMore) return
-
-    setIsLoadingMore(true)
-    const nextPage = pagination.page + 1
-
-    try {
-      const result = await fetchProducts({
-        page: nextPage,
-        query: debouncedQuery,
-        origin: origin,
-      })
-
-      setProducts((prev) => [...prev, ...result.products])
-      setPagination(result.pagination)
-
-      // Update URL to reflect new page
-      updateSearchParams({ page: nextPage })
-    } catch (error) {
-      console.error("Failed to load more products:", error)
-    } finally {
-      setIsLoadingMore(false)
-    }
-  }
-
-  // Prefetch next page on hover for better perceived performance
-  const prefetchNextPage = () => {
-    if (!pagination.hasMore || isLoadingMore) return
-
-    const nextPage = pagination.page + 1
-    // Prefetch the data but don't await or update state
-    fetchProducts({
-      page: nextPage,
-      query: debouncedQuery,
-      origin: origin,
-    }).catch(() => {
-      // Silently fail prefetch
-    })
-  }
-
-  // Fetch products when filters change
+  // Sync debounced query to URL
   useEffect(() => {
-    if (debouncedQuery === initialQuery && origin === initialOriginId && pagination.page === initialPage) {
-      return // Skip if nothing changed
+    if (debouncedQuery !== filters.query) {
+      updateSearchParams({ q: debouncedQuery || null })
     }
+  }, [debouncedQuery, filters.query, updateSearchParams])
 
-    const fetchData = async () => {
-      setIsSearching(true)
+  // Handle origin toggle - multi-select with optimistic update
+  const handleOriginToggle = (value: number) => {
+    console.debug("[handleOriginToggle] clicked:", value, "current:", optimisticOrigin)
+    const isSelected = optimisticOrigin.includes(value)
+    const updated = isSelected ? optimisticOrigin.filter((v) => v !== value) : [...optimisticOrigin, value]
+    console.debug("[handleOriginToggle] updated:", updated)
+    setOptimisticOrigin(updated)
+    startTransition(() => {
+      updateSearchParams({ origin: serializeArray(updated) })
+    })
+  }
 
-      try {
-        const result = await fetchProducts({
-          page: 1, // Reset to page 1 on filter change
-          query: debouncedQuery,
-          origin: origin,
-        })
+  const clearOriginFilters = () => {
+    setOptimisticOrigin([])
+    startTransition(() => {
+      updateSearchParams({ origin: null })
+    })
+  }
 
-        startTransition(() => {
-          setProducts(result.products)
-          setPagination(result.pagination)
-          updateSearchParams({ q: debouncedQuery, origin: origin, page: 1 })
-        })
-      } catch (error) {
-        console.error("Failed to fetch products:", error)
-      } finally {
-        setIsSearching(false)
-      }
+  const isOriginSelected = (value: number) => optimisticOrigin.includes(value)
+
+  // Handle priority toggle - optimistic update then sync URL
+  const handlePriorityToggle = (value: PriorityFilterValue) => {
+    const isSelected = optimisticPriority.includes(value)
+    const updated = isSelected ? optimisticPriority.filter((v) => v !== value) : [...optimisticPriority, value]
+    setOptimisticPriority(updated)
+    startTransition(() => {
+      updateSearchParams({ priority: serializeArray(updated) })
+    })
+  }
+
+  const clearPriorityFilters = () => {
+    setOptimisticPriority([])
+    startTransition(() => {
+      updateSearchParams({ priority: null })
+    })
+  }
+
+  const isPrioritySelected = (value: PriorityFilterValue) => optimisticPriority.includes(value)
+
+  // Load more handler
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
     }
-
-    fetchData()
-  }, [debouncedQuery, origin]) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const isLoading = isPending || isSearching
+  // Show loading when initially loading, searching, or refetching due to filter changes
+  const isRefetching = isFetching && !isFetchingNextPage
+  const showLoading = isLoading || isSearching || isRefetching
 
   return (
     <div className="flex w-full flex-col gap-y-16">
@@ -228,13 +225,13 @@ export function StoreProductsTracked({
               type="text"
               placeholder="Search products..."
               className="pl-8 text-base md:text-sm"
-              value={query}
+              value={inputQuery}
               onChange={handleQueryChange}
             />
           </div>
 
           <div className="mt-2 flex flex-col gap-2">
-            {isLoading ? (
+            {showLoading ? (
               <Skeleton className="h-4 w-full rounded-md" />
             ) : (
               <p className="text-muted-foreground text-xs">
@@ -243,56 +240,194 @@ export function StoreProductsTracked({
               </p>
             )}
 
-            <Accordion type="single" collapsible className="w-full border-t">
-              <AccordionItem value="store-origin" className="border-b">
-                <AccordionTrigger className="justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
+            <Accordion type="multiple" className="w-full border-t" defaultValue={["store-origin", "priority"]}>
+              <AccordionItem value="store-origin">
+                <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                   Store Origin
+                  {filters.origin.length > 0 && (
+                    <>
+                      <span className="text-muted-foreground text-xs">({filters.origin.length})</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          clearOriginFilters()
+                        }}
+                        className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                      >
+                        Clear
+                      </span>
+                    </>
+                  )}
                 </AccordionTrigger>
                 <AccordionContent className="pb-2">
-                  <RadioGroup value={origin.toString()} onValueChange={handleOriginChange}>
+                  <div className="flex flex-col gap-2">
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="0" id="all-stores" />
+                      <Checkbox
+                        id="origin-continente"
+                        checked={isOriginSelected(1)}
+                        onCheckedChange={() => handleOriginToggle(1)}
+                      />
                       <Label
-                        htmlFor="all-stores"
-                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                      >
-                        All stores
-                      </Label>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1" id="continente" />
-                      <Label
-                        htmlFor="continente"
+                        htmlFor="origin-continente"
                         className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                       >
                         <ContinenteSvg className="h-4 min-h-4 w-auto" />
-                        <span className="sr-only">Continente</span>
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="2" id="auchan" />
+                      <Checkbox
+                        id="origin-auchan"
+                        checked={isOriginSelected(2)}
+                        onCheckedChange={() => handleOriginToggle(2)}
+                      />
                       <Label
-                        htmlFor="auchan"
+                        htmlFor="origin-auchan"
                         className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                       >
                         <AuchanSvg className="h-4 min-h-4 w-auto" />
-                        <span className="sr-only">Auchan</span>
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="3" id="pingo-doce" />
+                      <Checkbox
+                        id="origin-pingo-doce"
+                        checked={isOriginSelected(3)}
+                        onCheckedChange={() => handleOriginToggle(3)}
+                      />
                       <Label
-                        htmlFor="pingo-doce"
+                        htmlFor="origin-pingo-doce"
                         className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                       >
                         <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                        <span className="sr-only">Pingo Doce</span>
                       </Label>
                     </div>
-                  </RadioGroup>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="priority">
+                <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                  Priority
+                  {filters.priority.length > 0 && (
+                    <>
+                      <span className="text-muted-foreground text-xs">({filters.priority.length})</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          clearPriorityFilters()
+                        }}
+                        className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                      >
+                        Clear
+                      </span>
+                    </>
+                  )}
+                </AccordionTrigger>
+                <AccordionContent className="pb-2">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-none"
+                        checked={isPrioritySelected("none")}
+                        onCheckedChange={() => handlePriorityToggle("none")}
+                      />
+                      <Label
+                        htmlFor="priority-none"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={null} useDescription />
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-0"
+                        checked={isPrioritySelected(0)}
+                        onCheckedChange={() => handlePriorityToggle(0)}
+                      />
+                      <Label
+                        htmlFor="priority-0"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={0} size="sm" useDescription />
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-1"
+                        checked={isPrioritySelected(1)}
+                        onCheckedChange={() => handlePriorityToggle(1)}
+                      />
+                      <Label
+                        htmlFor="priority-1"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={1} size="sm" useDescription />
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-2"
+                        checked={isPrioritySelected(2)}
+                        onCheckedChange={() => handlePriorityToggle(2)}
+                      />
+                      <Label
+                        htmlFor="priority-2"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={2} size="sm" useDescription />
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-3"
+                        checked={isPrioritySelected(3)}
+                        onCheckedChange={() => handlePriorityToggle(3)}
+                      />
+                      <Label
+                        htmlFor="priority-3"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={3} size="sm" useDescription />
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-4"
+                        checked={isPrioritySelected(4)}
+                        onCheckedChange={() => handlePriorityToggle(4)}
+                      />
+                      <Label
+                        htmlFor="priority-4"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={4} size="sm" useDescription />
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="priority-5"
+                        checked={isPrioritySelected(5)}
+                        onCheckedChange={() => handlePriorityToggle(5)}
+                      />
+                      <Label
+                        htmlFor="priority-5"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={5} size="sm" useDescription />
+                      </Label>
+                    </div>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -301,7 +436,7 @@ export function StoreProductsTracked({
 
         {/* Right side - scrollable */}
         <div className={cn("flex w-full flex-col lg:w-4/5")}>
-          {isLoading && products.length === 0 ? (
+          {showLoading ? (
             <div className="flex w-full flex-col gap-y-16">
               <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-5 xl:grid-cols-6">
                 {Array.from({ length: 30 }).map((_, index) => (
@@ -317,22 +452,22 @@ export function StoreProductsTracked({
                 ))}
               </div>
 
-              <div className="mt-8 flex flex-col items-center gap-4 border-t pt-4">
+              <div className="mt-8 flex flex-col items-center gap-4 pt-4">
                 <p className="text-muted-foreground text-center text-sm">
                   Showing <strong className="text-foreground">{products.length}</strong> of{" "}
                   <strong className="text-foreground">{pagination.totalCount}</strong> products
                 </p>
 
                 <div className="flex gap-2">
-                  {pagination.hasMore && (
+                  {hasNextPage && (
                     <Button
-                      onClick={loadMore}
+                      onClick={handleLoadMore}
                       onMouseEnter={prefetchNextPage}
-                      disabled={isLoadingMore}
+                      disabled={isFetchingNextPage}
                       variant="outline"
                       size="sm"
                     >
-                      {isLoadingMore ? (
+                      {isFetchingNextPage ? (
                         <>
                           <Loader2Icon className="mr-2 size-4 animate-spin" />
                           Loading...

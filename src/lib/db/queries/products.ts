@@ -166,12 +166,12 @@ export const storeProductQueries = {
     nonNulls = true,
     sort = "a-z",
     tracked = false,
-    priority = null,
+    priority,
     categories = [],
     category = null,
     category2 = null,
     category3 = null,
-    origin = null,
+    origin,
     userId = null,
     orderByPriority = false,
     options = {
@@ -182,8 +182,31 @@ export const storeProductQueries = {
     const offset = (page - 1) * limit
 
     let dbQuery = supabase.from("store_products").select("*", { count: "exact" })
-    if (tracked) dbQuery = dbQuery.in("priority", [1, 2, 3, 4, 5])
-    if (priority && !isNaN(priority)) dbQuery = dbQuery.eq("priority", priority)
+
+    // Priority filter: comma-separated values, "none" for null priorities
+    if (priority) {
+      const values = priority.split(",").map((v) => v.trim())
+      const hasNone = values.includes("none")
+      const numericValues = values
+        .filter((v) => v !== "none")
+        .map((v) => parseInt(v, 10))
+        .filter((v) => !isNaN(v))
+
+      if (hasNone && numericValues.length > 0) {
+        // Mixed: null OR specific numbers
+        const orConditions = [`priority.is.null`, `priority.in.(${numericValues.join(",")})`]
+        dbQuery = dbQuery.or(orConditions.join(","))
+      } else if (hasNone) {
+        // Only null priorities
+        dbQuery = dbQuery.is("priority", null)
+      } else if (numericValues.length > 0) {
+        // Only numeric priorities
+        dbQuery = dbQuery.in("priority", numericValues)
+      }
+    } else if (tracked) {
+      // Default tracked filter when no specific priority is set
+      dbQuery = dbQuery.in("priority", [1, 2, 3, 4, 5])
+    }
 
     if (sort && sort === "only-nulls") {
       dbQuery = dbQuery.is("name", null)
@@ -213,7 +236,18 @@ export const storeProductQueries = {
       return result
     }
 
-    if (origin !== null && origin !== 0) dbQuery = dbQuery.eq("origin_id", origin)
+    // Origin filter: comma-separated values like "1,2,3"
+    if (origin) {
+      const originValues = origin
+        .split(",")
+        .map((v) => parseInt(v.trim(), 10))
+        .filter((v) => !isNaN(v))
+      if (originValues.length === 1) {
+        dbQuery = dbQuery.eq("origin_id", originValues[0])
+      } else if (originValues.length > 1) {
+        dbQuery = dbQuery.in("origin_id", originValues)
+      }
+    }
 
     if (nonNulls) dbQuery = dbQuery.not("name", "eq", "").not("name", "is", null)
 
