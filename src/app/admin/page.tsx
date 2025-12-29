@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { PackageIcon, CrownIcon } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -15,17 +16,18 @@ export default async function Admin() {
   return (
     <Layout>
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
-        <AdminDashboardProductsLink />
-        <AdminDashboardPricesLink />
-        <AdminPrioritiesLink />
-        <TestScrapers />
-        <AdminCoreActions />
+        <SectionAdminDashboardProductsLink />
+        <SectionAdminDashboardPricesLink />
+        <SectionAdminPrioritiesLink />
+        <SectionPriorityJob />
+        <SectionTestScrapers />
+        <SectionAdminCoreActions />
       </div>
     </Layout>
   )
 }
 
-function AdminDashboardProductsLink() {
+function SectionAdminDashboardProductsLink() {
   return (
     <Card>
       <CardHeader>
@@ -41,7 +43,7 @@ function AdminDashboardProductsLink() {
   )
 }
 
-function AdminDashboardPricesLink() {
+function SectionAdminDashboardPricesLink() {
   return (
     <Card>
       <CardHeader>
@@ -57,7 +59,7 @@ function AdminDashboardPricesLink() {
   )
 }
 
-function AdminPrioritiesLink() {
+function SectionAdminPrioritiesLink() {
   return (
     <Card>
       <CardHeader>
@@ -76,7 +78,25 @@ function AdminPrioritiesLink() {
   )
 }
 
-function TestScrapers() {
+function SectionPriorityJob() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Priority Job</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="mb-4">Run the priority job to classify products into priorities.</p>
+      </CardContent>
+      <CardFooter>
+        <Button asChild>
+          <Link href="/admin/priorities/ai">Playground for AI Priority Classifier</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function SectionTestScrapers() {
   return (
     <Card>
       <CardHeader>
@@ -92,7 +112,7 @@ function TestScrapers() {
   )
 }
 
-function AdminCoreActions() {
+function SectionAdminCoreActions() {
   return (
     <Card>
       <CardHeader>
