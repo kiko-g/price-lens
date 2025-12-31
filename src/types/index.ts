@@ -1,4 +1,3 @@
-import { FrontendStatus } from "./extra"
 import { StaticImageData } from "next/image"
 
 export interface BasketProduct {
@@ -154,9 +153,4 @@ export type Profile = {
   plan: "free" | "plus"
   role: "user" | "admin"
   updated_at: string | null
-}
-
-// Frontend types extended from database types
-export interface ProductFrontend extends Product {
-  status: FrontendStatus
 }

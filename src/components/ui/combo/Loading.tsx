@@ -1,37 +1,38 @@
 import { cn } from "@/lib/utils"
-import { FrontendStatus } from "@/types/extra"
 import { CircleOffIcon, Loader2Icon } from "lucide-react"
+
+type StatusVariant = "loading" | "loaded" | "error"
 
 export function SkeletonStatusLoading({ children }: { children?: React.ReactNode }) {
   return (
-    <Wrapper status={FrontendStatus.Loading}>
+    <StatusWrapper variant="loading">
       <Loader2Icon className="h-6 w-6 animate-spin" />
       {children}
-    </Wrapper>
+    </StatusWrapper>
   )
 }
 
 export function SkeletonStatusError({ children }: { children?: React.ReactNode }) {
   return (
-    <Wrapper status={FrontendStatus.Error}>
+    <StatusWrapper variant="error">
       <CircleOffIcon className="h-6 w-6" />
       {children}
-    </Wrapper>
+    </StatusWrapper>
   )
 }
 
 export function SkeletonStatusLoaded({ children }: { children?: React.ReactNode }) {
-  return <Wrapper status={FrontendStatus.Loaded}>{children}</Wrapper>
+  return <StatusWrapper variant="loaded">{children}</StatusWrapper>
 }
 
-function Wrapper({ children, status = FrontendStatus.Loaded }: { children: React.ReactNode; status?: FrontendStatus }) {
+function StatusWrapper({ children, variant = "loaded" }: { children: React.ReactNode; variant?: StatusVariant }) {
   return (
     <div
       className={cn(
         "flex w-full flex-1 flex-col items-center justify-center gap-4 rounded-lg border p-4",
-        status === FrontendStatus.Loading && "border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10",
-        status === FrontendStatus.Loaded && "bg-zinc-100 dark:bg-zinc-900",
-        status === FrontendStatus.Error && "border-red-500/20 bg-red-500/5 dark:border-red-500/30 dark:bg-red-500/10",
+        variant === "loading" && "border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10",
+        variant === "loaded" && "bg-zinc-100 dark:bg-zinc-900",
+        variant === "error" && "border-red-500/20 bg-red-500/5 dark:border-red-500/30 dark:bg-red-500/10",
       )}
     >
       {children}

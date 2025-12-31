@@ -120,7 +120,6 @@ export function StoreProductsGrid(props: Props) {
   const [origin, setOrigin] = useState<string | null>(initOriginId)
   const [searchType, setSearchType] = useState<SearchType>(initSearchType)
   const [query, setQuery] = useState(initQuery)
-  console.debug(page)
 
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
   const [orderByPriority, setOrderByPriority] = useState(true)
@@ -1055,16 +1054,16 @@ WHERE category = '${category1}'
 
           <span className="order-1 flex flex-col items-end justify-end gap-1 lg:order-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
             {category1 && category2 && category3 ? (
-                <Button
-                  size="xs"
-                  variant="glass"
-                  className="dark:hover:bg-destructive/50 bg-primary/20 dark:bg-primary/20 cursor-pointer gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
-                  onClick={() => {
-                    setCategory1("")
-                    setCategory2("")
-                    setCategory3("")
-                  }}
-                >
+              <Button
+                size="xs"
+                variant="glass"
+                className="dark:hover:bg-destructive/50 bg-primary/20 dark:bg-primary/20 cursor-pointer gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
+                onClick={() => {
+                  setCategory1("")
+                  setCategory2("")
+                  setCategory3("")
+                }}
+              >
                 <XIcon />
                 <span className="max-w-[300px] truncate text-end text-wrap lg:max-w-full">
                   {[category1, category2, category3].filter(Boolean).join(" > ")}

@@ -4,7 +4,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { Suspense, useState } from "react"
 import { type StoreProduct } from "@/types"
-import { FrontendStatus } from "@/types/extra"
 import { toast } from "sonner"
 
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
@@ -71,7 +70,8 @@ function resolveImageUrlForCard(image: string, size = 400) {
 }
 
 export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props) {
-  const [status, setStatus] = useState<FrontendStatus>(FrontendStatus.Loaded)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [priority, setPriority] = useState(sp?.priority ?? null)
   const [isFavorited, setIsFavorited] = useState(sp?.is_favorited ?? false)
@@ -96,7 +96,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
     return null
   }
 
-  if (status === FrontendStatus.Loading) {
+  if (isUpdating) {
     return <StoreProductCardSkeleton />
   }
 
@@ -155,7 +155,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
             </Badge>
           ) : null}
 
-          {status === "error" ? (
+          {hasError ? (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger>
@@ -342,9 +342,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
                     <Button
                       variant="dropdown-item"
                       onClick={async () => {
-                        setStatus(FrontendStatus.Loading)
                         await handleToggleFavorite()
-                        setStatus(FrontendStatus.Loaded)
                       }}
                       disabled={favoriteLoading}
                     >
@@ -364,10 +362,11 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
                         <Button
                           variant="dropdown-item"
                           onClick={async () => {
-                            setStatus(FrontendStatus.Loading)
+                            setIsUpdating(true)
+                            setHasError(false)
                             const success = await onUpdate()
-                            if (success) setStatus(FrontendStatus.Loaded)
-                            else setStatus(FrontendStatus.Error)
+                            setIsUpdating(false)
+                            if (!success) setHasError(true)
                           }}
                         >
                           Update

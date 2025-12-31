@@ -1,9 +1,3 @@
-export enum FrontendStatus {
-  Loading = "loading",
-  Loaded = "loaded",
-  Error = "error",
-}
-
 export enum SupermarketChain {
   Continente = 1,
   Auchan = 2,
