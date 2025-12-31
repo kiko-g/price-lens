@@ -130,6 +130,7 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
+          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           product_id: number | null
           updated_at: string | null
@@ -152,6 +153,7 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
+          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           product_id?: number | null
           updated_at?: string | null
@@ -174,6 +176,7 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
+          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           product_id?: number | null
           updated_at?: string | null
@@ -264,6 +267,7 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
+          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           product_id: number | null
           updated_at: string | null
@@ -282,6 +286,7 @@ export type Database = {
     }
     Enums: {
       plan_tier: "free" | "plus"
+      priority_source_type: "ai" | "manual"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -403,6 +408,7 @@ export const Constants = {
   public: {
     Enums: {
       plan_tier: ["free", "plus"],
+      priority_source_type: ["ai", "manual"],
       user_role: ["user", "admin"],
     },
   },
