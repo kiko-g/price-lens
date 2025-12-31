@@ -31,4 +31,3 @@ export async function updateProductPriority(productId: number, priority: number)
     data,
   }
 }
-

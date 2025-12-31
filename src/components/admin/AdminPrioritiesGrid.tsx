@@ -152,4 +152,3 @@ export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPrio
     </div>
   )
 }
-

@@ -9,11 +9,26 @@ const createChainMock = () => {
 
   // All chainable methods return the chain itself
   const chainableMethods = [
-    'select', 'insert', 'update', 'delete', 'upsert',
-    'eq', 'neq', 'in', 'is', 'not', 'or', 'ilike', 'textSearch',
-    'gt', 'lt', 'range', 'order', 'limit'
+    "select",
+    "insert",
+    "update",
+    "delete",
+    "upsert",
+    "eq",
+    "neq",
+    "in",
+    "is",
+    "not",
+    "or",
+    "ilike",
+    "textSearch",
+    "gt",
+    "lt",
+    "range",
+    "order",
+    "limit",
   ]
-  chainableMethods.forEach(method => {
+  chainableMethods.forEach((method) => {
     chain[method] = vi.fn().mockImplementation(() => chain)
   })
 
@@ -22,7 +37,7 @@ const createChainMock = () => {
   chain.maybeSingle = vi.fn()
 
   // Make the chain thenable (awaitable) - this is key for queries that end without .single()
-  chain.then = function(resolve: any) {
+  chain.then = function (resolve: any) {
     return resolve(this._result)
   }
 
@@ -652,11 +667,7 @@ describe("storeProductQueries", () => {
 
       await storeProductQueries.createOrUpdateProduct(mockProduct)
 
-      expect(mockChain.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({ priority: 1 }),
-        expect.any(Object),
-      )
+      expect(mockChain.upsert).toHaveBeenCalledWith(expect.objectContaining({ priority: 1 }), expect.any(Object))
     })
   })
 })
-

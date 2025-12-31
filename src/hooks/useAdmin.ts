@@ -182,8 +182,7 @@ export function useScrapeProductUrl() {
 
 export function useTestScraper() {
   return useMutation({
-    mutationFn: ({ scraperName, url }: { scraperName: string; url: string }) =>
-      testScraper(scraperName, url),
+    mutationFn: ({ scraperName, url }: { scraperName: string; url: string }) => testScraper(scraperName, url),
     onError: (error) => {
       toast.error("Failed to test scraper", {
         description: error instanceof Error ? error.message : "Unknown error",
@@ -212,4 +211,3 @@ export function useAiPriorityClassification() {
     },
   })
 }
-

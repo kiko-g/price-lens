@@ -237,5 +237,3 @@ describe("userQueries", () => {
     })
   })
 })
-
-

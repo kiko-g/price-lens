@@ -355,7 +355,7 @@ WHERE category = '${category1}'
 
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), origin })
-  }, [page, query, searchType, sortBy, isRelevant, origin])
+  }, [page, query, searchType, sortBy, isRelevant, origin, updateParams])
 
   const MobileFiltersContent = () => (
     <div className="mt-2 flex flex-col gap-6 border-t px-4 pt-2 pb-8">

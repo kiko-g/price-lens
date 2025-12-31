@@ -2,13 +2,7 @@ import { cn } from "@/lib/utils"
 
 type StatusVariant = "loading" | "loaded" | "error"
 
-export function Wrapper({
-  children,
-  variant = "loaded",
-}: {
-  children: React.ReactNode
-  variant?: StatusVariant
-}) {
+export function Wrapper({ children, variant = "loaded" }: { children: React.ReactNode; variant?: StatusVariant }) {
   return (
     <div className="m-4 flex flex-1 flex-col items-center justify-center">
       <div

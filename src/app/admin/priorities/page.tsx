@@ -65,4 +65,3 @@ export default async function AdminPrioritiesPage({ searchParams }: Props) {
     />
   )
 }
-

@@ -38,11 +38,7 @@ async function handler(req: NextRequest) {
 
     // Fetch existing product for comparison
     const supabase = createClient()
-    const { data: existingProduct } = await supabase
-      .from("store_products")
-      .select("*")
-      .eq("id", productId)
-      .single()
+    const { data: existingProduct } = await supabase.from("store_products").select("*").eq("id", productId).single()
 
     // Scrape the product
     const response = await scrapeAndReplaceProduct(url, originId, existingProduct as StoreProduct | undefined)
@@ -50,10 +46,7 @@ async function handler(req: NextRequest) {
 
     if (response.status !== 200) {
       console.warn(`[Worker] Scrape failed for ${name}: ${json.error}`)
-      return NextResponse.json(
-        { success: false, error: json.error, productId, url },
-        { status: response.status },
-      )
+      return NextResponse.json({ success: false, error: json.error, productId, url }, { status: response.status })
     }
 
     // Update price point
@@ -83,7 +76,4 @@ async function handler(req: NextRequest) {
 
 // Wrap with QStash signature verification in production
 // This ensures only QStash can call this endpoint
-export const POST = process.env.NODE_ENV === "production"
-  ? verifySignatureAppRouter(handler)
-  : handler
-
+export const POST = process.env.NODE_ENV === "production" ? verifySignatureAppRouter(handler) : handler

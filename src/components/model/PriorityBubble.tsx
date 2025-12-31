@@ -45,4 +45,3 @@ export function PriorityBubble({ priority, size = "sm", useDescription = false, 
     </span>
   )
 }
-

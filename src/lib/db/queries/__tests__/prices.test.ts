@@ -6,8 +6,8 @@ const createChainMock = () => {
   const chain: any = {}
 
   // All chainable methods return the chain itself
-  const chainableMethods = ['select', 'insert', 'update', 'delete', 'eq', 'order', 'range']
-  chainableMethods.forEach(method => {
+  const chainableMethods = ["select", "insert", "update", "delete", "eq", "order", "range"]
+  chainableMethods.forEach((method) => {
     chain[method] = vi.fn().mockImplementation(() => chain)
   })
 
@@ -377,4 +377,3 @@ describe("priceQueries", () => {
     })
   })
 })
-

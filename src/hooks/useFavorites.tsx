@@ -137,9 +137,15 @@ export function useFavorites(page: number = 1, limit: number = 20) {
   const toggleFavorite = useCallback(
     async (storeProductId: number, isFavorited: boolean) => {
       if (isFavorited) {
-        return removeMutation.mutateAsync(storeProductId).then(() => true).catch(() => false)
+        return removeMutation
+          .mutateAsync(storeProductId)
+          .then(() => true)
+          .catch(() => false)
       } else {
-        return addMutation.mutateAsync(storeProductId).then(() => true).catch(() => false)
+        return addMutation
+          .mutateAsync(storeProductId)
+          .then(() => true)
+          .catch(() => false)
       }
     },
     [addMutation, removeMutation],
@@ -175,8 +181,16 @@ export function useFavorites(page: number = 1, limit: number = 20) {
       hasPreviousPage: false,
     },
     isLoading: query.isLoading,
-    addFavorite: (id: number) => addMutation.mutateAsync(id).then(() => true).catch(() => false),
-    removeFavorite: (id: number) => removeMutation.mutateAsync(id).then(() => true).catch(() => false),
+    addFavorite: (id: number) =>
+      addMutation
+        .mutateAsync(id)
+        .then(() => true)
+        .catch(() => false),
+    removeFavorite: (id: number) =>
+      removeMutation
+        .mutateAsync(id)
+        .then(() => true)
+        .catch(() => false),
     toggleFavorite,
     isFavorited,
     refresh: () => query.refetch(),
@@ -340,8 +354,16 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
     total,
     isLoading: infiniteQuery.isLoading,
     hasMore: infiniteQuery.hasNextPage ?? false,
-    addFavorite: (id: number) => addMutation.mutateAsync(id).then(() => true).catch(() => false),
-    removeFavorite: (id: number) => removeMutation.mutateAsync(id).then(() => true).catch(() => false),
+    addFavorite: (id: number) =>
+      addMutation
+        .mutateAsync(id)
+        .then(() => true)
+        .catch(() => false),
+    removeFavorite: (id: number) =>
+      removeMutation
+        .mutateAsync(id)
+        .then(() => true)
+        .catch(() => false),
     toggleFavorite,
     isFavorited,
     refresh: () => infiniteQuery.refetch(),
