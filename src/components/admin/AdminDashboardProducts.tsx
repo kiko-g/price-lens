@@ -1,9 +1,8 @@
 "use client"
 
-import axios from "axios"
 import { cn } from "@/lib/utils"
-import { Product } from "@/types"
-import { useState, useEffect } from "react"
+import type { Product } from "@/types"
+import { useAdminProducts, useDeleteProduct } from "@/hooks/useAdmin"
 
 import { Button } from "@/components/ui/button"
 
@@ -11,27 +10,7 @@ import { Loader2, CircleX, TrashIcon } from "lucide-react"
 import { InsertPriceModal } from "./InsertPriceModal"
 
 export function AdminDashboardProducts() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [products, setProducts] = useState<any>(null)
-
-  async function fetchProducts() {
-    setIsLoading(true)
-
-    try {
-      const response = await axios.get("/api/products/shallow")
-      if (response.status === 200) {
-        setProducts(response.data.data)
-      }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  const { data: products, isLoading, error } = useAdminProducts()
 
   if (isLoading) {
     return (
@@ -42,13 +21,11 @@ export function AdminDashboardProducts() {
     )
   }
 
-  if (!products)
+  if (error || !products)
     return (
       <StatusWrapper>
         <CircleX className="h-4 w-4" />
-        <span className="text-sm">
-          Error fetching <pre></pre>
-        </span>
+        <span className="text-sm">Error fetching products</span>
       </StatusWrapper>
     )
 
@@ -98,32 +75,20 @@ export function AdminDashboardProducts() {
   )
 }
 
-function ProductRow({ product: initialProduct }: { product: Product }) {
-  const [product, setProduct] = useState(initialProduct)
-  const [isUpdating, setIsUpdating] = useState(false)
-
-  async function handleDeleteProduct(id?: number) {
-    if (!id || typeof id !== "number") return
-
-    setIsUpdating(true)
-    const response = await axios.delete("/api/products/shallow/delete", { data: { id } })
-    if (response.status === 200) {
-      setProduct(response.data.data)
-    }
-    setIsUpdating(false)
-  }
+function ProductRow({ product }: { product: Product }) {
+  const deleteMutation = useDeleteProduct()
 
   if (!product) return null
 
   return (
-    <tr key={product.id} className={cn(isUpdating ? "animate-pulse" : "")}>
+    <tr key={product.id} className={cn(deleteMutation.isPending ? "animate-pulse" : "")}>
       <Cell>{product.id}</Cell>
       <Cell>
         <Button
           variant="ghost-destructive"
           size="icon-xs"
-          onClick={() => handleDeleteProduct(product.id)}
-          disabled={isUpdating}
+          onClick={() => product.id && deleteMutation.mutate(product.id)}
+          disabled={deleteMutation.isPending}
         >
           <TrashIcon />
         </Button>

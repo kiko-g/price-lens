@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -8,28 +8,48 @@ import { AsyncTimerLoader } from "@/components/ui/combo/async-timer-loader"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { useAiPriorityClassification } from "@/hooks/useAdmin"
+import { Code } from "../ui/combo/code"
+
+type CumulativeResults = {
+  totalProcessed: number
+  totalSuccess: number
+  totalFailed: number
+  totalChanged: number
+  totalUnchanged: number
+  batches: number
+}
 
 export function AiPriorityClassifier() {
   const [aiResult, setAiResult] = useState<any>(null)
-  const [isAiLoading, setIsAiLoading] = useState(false)
   const [selectedPriority, setSelectedPriority] = useState<string>("0")
   const [batchSize, setBatchSize] = useState<string>("100")
   const [continuousMode, setContinuousMode] = useState(false)
-  const [cumulativeResults, setCumulativeResults] = useState<{
-    totalProcessed: number
-    totalSuccess: number
-    totalFailed: number
-    totalChanged: number
-    totalUnchanged: number
-    batches: number
-  } | null>(null)
+  const [isRunning, setIsRunning] = useState(false)
+  const [cumulativeResults, setCumulativeResults] = useState<CumulativeResults | null>(null)
+
+  const classificationMutation = useAiPriorityClassification()
+
+  const runSingleBatch = useCallback(async () => {
+    const params = {
+      includePriority: selectedPriority === "null" ? undefined : selectedPriority,
+      batchSize: parseInt(batchSize),
+    }
+
+    return new Promise<any>((resolve, reject) => {
+      classificationMutation.mutate(params, {
+        onSuccess: (data) => resolve(data),
+        onError: (error) => reject(error),
+      })
+    })
+  }, [classificationMutation, selectedPriority, batchSize])
 
   const handleTestAi = async () => {
-    setIsAiLoading(true)
+    setIsRunning(true)
     setAiResult(null)
     setCumulativeResults(null)
 
-    const cumulative = {
+    const cumulative: CumulativeResults = {
       totalProcessed: 0,
       totalSuccess: 0,
       totalFailed: 0,
@@ -42,24 +62,14 @@ export function AiPriorityClassifier() {
       let shouldContinue = true
 
       while (shouldContinue) {
-        const priorityParam = selectedPriority === "null" ? "" : `includePriority=${selectedPriority}`
-        const batchSizeParam = `batchSize=${batchSize}`
-        const params = [priorityParam, batchSizeParam].filter(Boolean).join("&")
-        const url = `/api/scrape/ai-priority?${params}`
-
-        const response = await fetch(url)
-        const result = await response.json()
-
-        // Update latest result
+        const result = await runSingleBatch()
         setAiResult(result)
 
-        // If no products found, stop
         if (result.count === 0 || !result.results) {
           shouldContinue = false
           break
         }
 
-        // Accumulate results
         cumulative.totalProcessed += result.results.success + result.results.failed
         cumulative.totalSuccess += result.results.success || 0
         cumulative.totalFailed += result.results.failed || 0
@@ -69,12 +79,10 @@ export function AiPriorityClassifier() {
 
         setCumulativeResults({ ...cumulative })
 
-        // If not in continuous mode or got an error, stop
         if (!continuousMode || result.error) {
           shouldContinue = false
         }
 
-        // Small delay between batches to avoid overwhelming the API
         if (shouldContinue) {
           await new Promise((resolve) => setTimeout(resolve, 500))
         }
@@ -83,7 +91,7 @@ export function AiPriorityClassifier() {
       console.error("Error testing AI:", error)
       setAiResult({ error: "Failed to fetch" })
     } finally {
-      setIsAiLoading(false)
+      setIsRunning(false)
     }
   }
 
@@ -95,7 +103,7 @@ export function AiPriorityClassifier() {
           <CardDescription>Test the AI priority classification for products (Batch of 50)</CardDescription>
         </CardHeader>
         <CardContent>
-          <AsyncTimerLoader isLoading={isAiLoading} className="absolute top-4 right-4" />
+          <AsyncTimerLoader isLoading={isRunning} className="absolute top-4 right-4" />
 
           <div className="flex w-full flex-col gap-4">
             <div className="flex w-full items-center justify-between gap-3">
@@ -139,8 +147,8 @@ export function AiPriorityClassifier() {
                 </div>
               </div>
 
-              <Button onClick={handleTestAi} disabled={isAiLoading}>
-                {isAiLoading ? "Processing..." : "Run AI Classification"}
+              <Button onClick={handleTestAi} disabled={isRunning}>
+                {isRunning ? "Processing..." : "Run AI Classification"}
               </Button>
             </div>
 
@@ -183,9 +191,7 @@ export function AiPriorityClassifier() {
                   </Badge>
                 </div>
               )}
-              <pre className="bg-accent overflow-auto rounded border p-4 font-mono text-xs text-wrap">
-                {JSON.stringify(aiResult, null, 2)}
-              </pre>
+              <Code>{JSON.stringify(aiResult, null, 2)}</Code>
             </div>
           )}
         </CardContent>

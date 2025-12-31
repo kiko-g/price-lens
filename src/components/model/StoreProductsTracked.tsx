@@ -211,8 +211,8 @@ export function StoreProductsTracked({ initialData, initialQuery }: StoreProduct
           </div>
 
           <p className="mb-4 text-sm">
-            Products listed here have a <strong>priority of at least 3</strong>. Any favorited product by any user will
-            be assigned a priority of 4 right away. Priority affects how often the prices are updated.
+            Priority affects how often the prices are updated. Any favorited product by any user will be assigned a
+            priority of 4 right away.
           </p>
 
           <div className="relative w-full">
@@ -452,29 +452,28 @@ export function StoreProductsTracked({ initialData, initialQuery }: StoreProduct
                 ))}
               </div>
 
-              <div className="mt-8 flex flex-col items-center gap-4 pt-4">
+              <footer className="mt-8 flex items-center justify-between gap-4 border-t pt-4">
                 <p className="text-muted-foreground text-center text-sm">
                   Showing <strong className="text-foreground">{products.length}</strong> of{" "}
                   <strong className="text-foreground">{pagination.totalCount}</strong> products
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex items-center gap-3">
                   {hasNextPage && (
                     <Button
                       onClick={handleLoadMore}
                       onMouseEnter={prefetchNextPage}
                       disabled={isFetchingNextPage}
                       variant="outline"
-                      size="sm"
                     >
                       {isFetchingNextPage ? (
                         <>
-                          <Loader2Icon className="mr-2 size-4 animate-spin" />
+                          <Loader2Icon className="size-4 animate-spin" />
                           Loading...
                         </>
                       ) : (
                         <>
-                          <RefreshCwIcon className="mr-2 size-4" />
+                          <RefreshCwIcon className="size-4" />
                           Load More
                         </>
                       )}
@@ -482,12 +481,12 @@ export function StoreProductsTracked({ initialData, initialQuery }: StoreProduct
                   )}
 
                   {products.length > 30 && (
-                    <Button size="sm" variant="outline" onClick={scrollToTop}>
-                      Back to top <ArrowUpIcon className="ml-2 size-4" />
+                    <Button variant="outline" onClick={scrollToTop} className="py-2">
+                      <ArrowUpIcon />
                     </Button>
                   )}
                 </div>
-              </div>
+              </footer>
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">

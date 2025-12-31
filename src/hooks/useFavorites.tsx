@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useCallback } from "react"
 import { toast } from "sonner"
 import { useUser } from "@/hooks/useUser"
 import type { UserFavorite, StoreProduct } from "@/types"
 import type { User } from "@supabase/supabase-js"
 import { HeartIcon, TriangleIcon } from "lucide-react"
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query"
+import axios from "axios"
 
 interface FavoriteWithProduct extends UserFavorite {
   store_products: StoreProduct
@@ -23,234 +25,215 @@ interface PaginatedFavoritesResponse {
   }
 }
 
+// =============================================================================
+// API FUNCTIONS
+// =============================================================================
+
+async function fetchFavoritesCount(userId: string) {
+  const response = await axios.get(`/api/favorites/count/${userId}`)
+  if (response.status !== 200) throw new Error("Failed to fetch favorites count")
+  return response.data as { count: number }
+}
+
+async function fetchFavorites(page: number, limit: number) {
+  const searchParams = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  })
+  const response = await axios.get(`/api/favorites?${searchParams}`)
+  if (response.status !== 200) throw new Error("Failed to fetch favorites")
+  return response.data as PaginatedFavoritesResponse
+}
+
+async function checkFavoriteStatus(storeProductId: number) {
+  const response = await axios.get(`/api/favorites/check/${storeProductId}`)
+  if (response.status !== 200) throw new Error("Failed to check favorite status")
+  return response.data as { is_favorited: boolean }
+}
+
+async function addFavorite(storeProductId: number) {
+  const response = await axios.post("/api/favorites", { store_product_id: storeProductId })
+  if (response.status !== 200 && response.status !== 201) {
+    throw new Error(response.data?.error || "Failed to add to favorites")
+  }
+  return response.data
+}
+
+async function removeFavorite(storeProductId: number) {
+  const response = await axios.delete("/api/favorites", {
+    data: { store_product_id: storeProductId },
+  })
+  if (response.status !== 200) {
+    throw new Error(response.data?.error || "Failed to remove from favorites")
+  }
+  return response.data
+}
+
+// =============================================================================
+// QUERY HOOKS
+// =============================================================================
+
 export function useFavoritesCount(userId: string) {
-  const [count, setCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
+  const query = useQuery({
+    queryKey: ["favoritesCount", userId],
+    queryFn: () => fetchFavoritesCount(userId),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 2,
+  })
 
-  const fetchFavoritesCount = useCallback(async () => {
-    if (!userId) return
-
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/favorites/count/${userId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setCount(data.count)
-      }
-    } catch (error) {
-      console.error("Error fetching favorites count:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [userId])
-
-  useEffect(() => {
-    fetchFavoritesCount()
-  }, [fetchFavoritesCount])
-
-  return { count, isLoading }
+  return {
+    count: query.data?.count ?? 0,
+    isLoading: query.isLoading,
+  }
 }
 
 export function useFavorites(page: number = 1, limit: number = 20) {
   const { user } = useUser()
-  const [favorites, setFavorites] = useState<FavoriteWithProduct[]>([])
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
+  const queryClient = useQueryClient()
+
+  const query = useQuery({
+    queryKey: ["favorites", page, limit],
+    queryFn: () => fetchFavorites(page, limit),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
   })
-  const [isLoading, setIsLoading] = useState(false)
 
-  const fetchFavorites = useCallback(
-    async (pageNum: number = page, limitNum: number = limit) => {
-      if (!user) return
-
-      setIsLoading(true)
-      try {
-        const searchParams = new URLSearchParams({
-          page: pageNum.toString(),
-          limit: limitNum.toString(),
-        })
-
-        const response = await fetch(`/api/favorites?${searchParams}`)
-        if (response.ok) {
-          const result: PaginatedFavoritesResponse = await response.json()
-          setFavorites(result.data)
-          setPagination(result.pagination)
-        }
-      } catch (error) {
-        console.error("Error fetching favorites:", error)
-      } finally {
-        setIsLoading(false)
-      }
+  const addMutation = useMutation({
+    mutationFn: addFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          Added to favorites
+          <HeartIcon className="size-3 fill-green-500 stroke-green-500" />
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favorites"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
-    [user, page, limit],
-  )
-
-  useEffect(() => {
-    fetchFavorites()
-  }, [fetchFavorites])
-
-  const addFavorite = useCallback(
-    async (storeProductId: number) => {
-      if (!user) {
-        toast.error("Please log in to add favorites")
-        return false
-      }
-
-      try {
-        const response = await fetch("/api/favorites", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ store_product_id: storeProductId }),
-        })
-
-        if (response.ok) {
-          toast.success(
-            <div className="flex items-center gap-2">
-              Added to favorites
-              <HeartIcon className="size-3 fill-green-500 stroke-green-500" />
-            </div>,
-          )
-          await fetchFavorites()
-          return true
-        } else {
-          const error = await response.json()
-          toast.error(error.error || "Failed to add to favorites")
-          return false
-        }
-      } catch (error) {
-        console.error("Error adding favorite:", error)
-        toast.error("Failed to add to favorites")
-        return false
-      }
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to add to favorites")
     },
-    [user, fetchFavorites],
-  )
+  })
 
-  const removeFavorite = useCallback(
-    async (storeProductId: number) => {
-      if (!user) return false
-
-      try {
-        const response = await fetch("/api/favorites", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ store_product_id: storeProductId }),
-        })
-
-        if (response.ok) {
-          toast.success(
-            <div className="flex items-center gap-2">
-              Removed from favorites
-              <HeartIcon className="size-3 fill-red-500 stroke-red-500" />
-            </div>,
-          )
-          await fetchFavorites()
-          return true
-        } else {
-          const error = await response.json()
-          toast.error(error.error || "Failed to remove from favorites")
-          return false
-        }
-      } catch (error) {
-        console.error("Error removing favorite:", error)
-        toast.error("Failed to remove from favorites")
-        return false
-      }
+  const removeMutation = useMutation({
+    mutationFn: removeFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          Removed from favorites
+          <HeartIcon className="size-3 fill-red-500 stroke-red-500" />
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favorites"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
-    [user, fetchFavorites],
-  )
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to remove from favorites")
+    },
+  })
 
   const toggleFavorite = useCallback(
     async (storeProductId: number, isFavorited: boolean) => {
       if (isFavorited) {
-        return await removeFavorite(storeProductId)
+        return removeMutation.mutateAsync(storeProductId).then(() => true).catch(() => false)
       } else {
-        return await addFavorite(storeProductId)
+        return addMutation.mutateAsync(storeProductId).then(() => true).catch(() => false)
       }
     },
-    [addFavorite, removeFavorite],
+    [addMutation, removeMutation],
   )
 
   const isFavorited = useCallback(
     (storeProductId: number) => {
-      return favorites.some((fav) => fav.store_product_id === storeProductId)
+      return query.data?.data.some((fav) => fav.store_product_id === storeProductId) ?? false
     },
-    [favorites],
+    [query.data],
   )
 
   const goToNextPage = useCallback(() => {
-    if (pagination.hasNextPage) {
-      fetchFavorites(pagination.page + 1, pagination.limit)
+    if (query.data?.pagination.hasNextPage) {
+      queryClient.invalidateQueries({ queryKey: ["favorites", page + 1, limit] })
     }
-  }, [pagination, fetchFavorites])
+  }, [query.data, page, limit, queryClient])
 
   const goToPreviousPage = useCallback(() => {
-    if (pagination.hasPreviousPage) {
-      fetchFavorites(pagination.page - 1, pagination.limit)
+    if (query.data?.pagination.hasPreviousPage) {
+      queryClient.invalidateQueries({ queryKey: ["favorites", page - 1, limit] })
     }
-  }, [pagination, fetchFavorites])
-
-  const goToPage = useCallback(
-    (pageNum: number) => {
-      if (pageNum >= 1 && pageNum <= pagination.totalPages) {
-        fetchFavorites(pageNum, pagination.limit)
-      }
-    },
-    [pagination, fetchFavorites],
-  )
+  }, [query.data, page, limit, queryClient])
 
   return {
-    favorites,
-    pagination,
-    isLoading,
-    addFavorite,
-    removeFavorite,
+    favorites: query.data?.data ?? [],
+    pagination: query.data?.pagination ?? {
+      page: 1,
+      limit: 20,
+      total: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+    isLoading: query.isLoading,
+    addFavorite: (id: number) => addMutation.mutateAsync(id).then(() => true).catch(() => false),
+    removeFavorite: (id: number) => removeMutation.mutateAsync(id).then(() => true).catch(() => false),
     toggleFavorite,
     isFavorited,
-    refresh: fetchFavorites,
+    refresh: () => query.refetch(),
     goToNextPage,
     goToPreviousPage,
-    goToPage,
+    goToPage: (pageNum: number) => {
+      queryClient.invalidateQueries({ queryKey: ["favorites", pageNum, limit] })
+    },
   }
 }
 
 export function useFavoriteStatus(storeProductId: number | null) {
   const { user } = useUser()
-  const [isFavorited, setIsFavorited] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
-  const checkFavoriteStatus = useCallback(async () => {
-    if (!user || !storeProductId) {
-      setIsFavorited(false)
-      return
-    }
+  const query = useQuery({
+    queryKey: ["favoriteStatus", storeProductId],
+    queryFn: () => checkFavoriteStatus(storeProductId!),
+    enabled: !!user && !!storeProductId,
+    staleTime: 1000 * 60 * 2,
+  })
 
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/favorites/check/${storeProductId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setIsFavorited(data.is_favorited)
-      }
-    } catch (error) {
-      console.error("Error checking favorite status:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [user, storeProductId])
+  const addMutation = useMutation({
+    mutationFn: addFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          Added to favorites
+          <TriangleIcon className="size-3 fill-green-500 stroke-green-500" />
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus", storeProductId] })
+      queryClient.invalidateQueries({ queryKey: ["favorites"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to update favorites")
+    },
+  })
 
-  useEffect(() => {
-    checkFavoriteStatus()
-  }, [checkFavoriteStatus])
+  const removeMutation = useMutation({
+    mutationFn: removeFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          Removed from favorites
+          <TriangleIcon className="size-3 rotate-180 fill-red-500 stroke-red-500" />
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus", storeProductId] })
+      queryClient.invalidateQueries({ queryKey: ["favorites"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to update favorites")
+    },
+  })
 
   const toggleFavorite = useCallback(async () => {
     if (!user || !storeProductId) {
@@ -258,266 +241,111 @@ export function useFavoriteStatus(storeProductId: number | null) {
       return false
     }
 
-    setIsLoading(true)
+    const currentStatus = query.data?.is_favorited ?? false
     try {
-      const method = isFavorited ? "DELETE" : "POST"
-      const response = await fetch("/api/favorites", {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ store_product_id: storeProductId }),
-      })
-
-      if (response.ok) {
-        const newStatus = !isFavorited
-        setIsFavorited(newStatus)
-        toast.success(
-          newStatus ? (
-            <div className="flex items-center gap-2">
-              Added to favorites
-              <TriangleIcon className="size-3 fill-green-500 stroke-green-500" />
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              Removed from favorites
-              <TriangleIcon className="size-3 rotate-180 fill-red-500 stroke-red-500" />
-            </div>
-          ),
-        )
-        return true
+      if (currentStatus) {
+        await removeMutation.mutateAsync(storeProductId)
       } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to update favorites")
-        return false
+        await addMutation.mutateAsync(storeProductId)
       }
-    } catch (error) {
-      console.error("Error toggling favorite:", error)
-      toast.error("Failed to update favorites")
+      return true
+    } catch {
       return false
-    } finally {
-      setIsLoading(false)
     }
-  }, [user, storeProductId, isFavorited])
+  }, [user, storeProductId, query.data, addMutation, removeMutation])
 
   return {
-    isFavorited,
-    isLoading,
+    isFavorited: query.data?.is_favorited ?? false,
+    isLoading: query.isLoading || addMutation.isPending || removeMutation.isPending,
     toggleFavorite,
-    refresh: checkFavoriteStatus,
+    refresh: () => query.refetch(),
   }
 }
 
 export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20) {
-  const [state, setState] = useState({
-    favorites: [] as FavoriteWithProduct[],
-    currentPage: 1,
-    isLoading: false,
-    hasMore: true,
-    total: 0,
+  const queryClient = useQueryClient()
+  const hasValidUser = Boolean(user?.id)
+
+  const infiniteQuery = useInfiniteQuery({
+    queryKey: ["favoritesInfinite", limit],
+    queryFn: ({ pageParam }) => fetchFavorites(pageParam, limit),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.pagination.hasNextPage ? lastPage.pagination.page + 1 : undefined),
+    enabled: hasValidUser,
+    staleTime: 1000 * 60 * 2,
   })
 
-  const hasValidUser = Boolean(user?.id)
-  const loadingRef = useRef(false)
-  const limitRef = useRef(limit)
-  const initializedRef = useRef(false)
+  const favorites = infiniteQuery.data?.pages.flatMap((page) => page.data) ?? []
+  const total = infiniteQuery.data?.pages[0]?.pagination.total ?? 0
 
-  useEffect(() => {
-    limitRef.current = limit
-  }, [limit])
-
-  const fetchFavorites = useCallback(
-    async (pageNum: number = 1, reset: boolean = false) => {
-      if (!hasValidUser) return
-
-      const currentLimit = limitRef.current
-      loadingRef.current = true
-
-      setState((prev) => ({ ...prev, isLoading: true }))
-
-      try {
-        const searchParams = new URLSearchParams({
-          page: pageNum.toString(),
-          limit: currentLimit.toString(),
-        })
-
-        const response = await fetch(`/api/favorites?${searchParams}`)
-        if (response.ok) {
-          const result: PaginatedFavoritesResponse = await response.json()
-
-          setState((prev) => ({
-            favorites: reset || pageNum === 1 ? result.data : [...prev.favorites, ...result.data],
-            total: result.pagination.total,
-            hasMore: result.pagination.hasNextPage,
-            currentPage: pageNum,
-            isLoading: false,
-          }))
-        }
-      } catch (error) {
-        console.error("Error fetching favorites:", error)
-        setState((prev) => ({ ...prev, isLoading: false }))
-      } finally {
-        loadingRef.current = false
-      }
+  const addMutation = useMutation({
+    mutationFn: addFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          <HeartIcon className="h-4 w-4 text-red-500" />
+          Added to favorites
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
-    [hasValidUser],
-  )
-
-  useEffect(() => {
-    if (hasValidUser && !initializedRef.current) {
-      initializedRef.current = true
-      fetchFavorites(1, true)
-    } else if (!hasValidUser) {
-      setState({
-        favorites: [],
-        currentPage: 1,
-        hasMore: true,
-        total: 0,
-        isLoading: false,
-      })
-      initializedRef.current = false
-    }
-  }, [hasValidUser, fetchFavorites])
-
-  const handleScroll = useCallback(() => {
-    if (!hasValidUser || loadingRef.current || !state.hasMore || state.isLoading) return
-
-    const scrolledToBottom =
-      window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 100
-
-    if (scrolledToBottom) fetchFavorites(state.currentPage + 1, false)
-  }, [hasValidUser, state.hasMore, state.isLoading, state.currentPage, fetchFavorites])
-
-  useEffect(() => {
-    if (!hasValidUser) return
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [hasValidUser, handleScroll])
-
-  const addFavorite = useCallback(
-    async (storeProductId: number) => {
-      if (!hasValidUser) {
-        toast.error("Please log in to add favorites")
-        return false
-      }
-
-      try {
-        const response = await fetch("/api/favorites", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ store_product_id: storeProductId }),
-        })
-
-        if (response.ok) {
-          toast.success(
-            <div className="flex items-center gap-2">
-              <HeartIcon className="h-4 w-4 text-red-500" />
-              Added to favorites
-            </div>,
-          )
-          await fetchFavorites(1, true)
-          return true
-        } else {
-          const error = await response.json()
-          toast.error(error.error || "Failed to add to favorites")
-          return false
-        }
-      } catch (error) {
-        console.error("Error adding favorite:", error)
-        toast.error("Failed to add to favorites")
-        return false
-      }
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to add to favorites")
     },
-    [hasValidUser, fetchFavorites],
-  )
+  })
 
-  const removeFavorite = useCallback(
-    async (storeProductId: number) => {
-      if (!hasValidUser) return false
-
-      try {
-        const response = await fetch("/api/favorites", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ store_product_id: storeProductId }),
-        })
-
-        if (response.ok) {
-          toast.success("Removed from favorites")
-          setState((prev) => ({
-            ...prev,
-            favorites: prev.favorites.filter((fav) => fav.store_product_id !== storeProductId),
-            total: Math.max(0, prev.total - 1),
-          }))
-          return true
-        } else {
-          const error = await response.json()
-          toast.error(error.error || "Failed to remove from favorites")
-          return false
-        }
-      } catch (error) {
-        console.error("Error removing favorite:", error)
-        toast.error("Failed to remove from favorites")
-        return false
-      }
+  const removeMutation = useMutation({
+    mutationFn: removeFavorite,
+    onSuccess: () => {
+      toast.success("Removed from favorites")
+      queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
-    [hasValidUser],
-  )
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to remove from favorites")
+    },
+  })
 
   const toggleFavorite = useCallback(
     async (storeProductId: number, isFavorited: boolean) => {
       if (!hasValidUser) return false
 
-      if (isFavorited) {
-        return await removeFavorite(storeProductId)
-      } else {
-        return await addFavorite(storeProductId)
+      try {
+        if (isFavorited) {
+          await removeMutation.mutateAsync(storeProductId)
+        } else {
+          await addMutation.mutateAsync(storeProductId)
+        }
+        return true
+      } catch {
+        return false
       }
     },
-    [hasValidUser, addFavorite, removeFavorite],
+    [hasValidUser, addMutation, removeMutation],
   )
 
   const isFavorited = useCallback(
     (storeProductId: number) => {
       if (!hasValidUser) return false
-      return state.favorites.some((fav) => fav.store_product_id === storeProductId)
+      return favorites.some((fav) => fav.store_product_id === storeProductId)
     },
-    [hasValidUser, state.favorites],
+    [hasValidUser, favorites],
   )
 
-  const refresh = useCallback(() => {
-    if (!hasValidUser) return
-    fetchFavorites(1, true)
-  }, [hasValidUser, fetchFavorites])
-
-  if (!hasValidUser) {
-    return {
-      favorites: [],
-      total: 0,
-      isLoading: false,
-      hasMore: false,
-      addFavorite,
-      removeFavorite,
-      toggleFavorite,
-      isFavorited,
-      refresh,
-    }
-  }
-
   return {
-    favorites: state.favorites,
-    total: state.total,
-    isLoading: state.isLoading,
-    hasMore: state.hasMore,
-    addFavorite,
-    removeFavorite,
+    favorites,
+    total,
+    isLoading: infiniteQuery.isLoading,
+    hasMore: infiniteQuery.hasNextPage ?? false,
+    addFavorite: (id: number) => addMutation.mutateAsync(id).then(() => true).catch(() => false),
+    removeFavorite: (id: number) => removeMutation.mutateAsync(id).then(() => true).catch(() => false),
     toggleFavorite,
     isFavorited,
-    refresh,
+    refresh: () => infiniteQuery.refetch(),
+    fetchNextPage: infiniteQuery.fetchNextPage,
+    isFetchingNextPage: infiniteQuery.isFetchingNextPage,
   }
 }

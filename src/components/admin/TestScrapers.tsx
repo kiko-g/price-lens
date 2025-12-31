@@ -4,6 +4,10 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Code } from "@/components/ui/combo/code"
+
+import { useTestScraper } from "@/hooks/useAdmin"
+import { Loader2 } from "lucide-react"
 
 type Scrapers = {
   name: string
@@ -25,29 +29,29 @@ export function TestScrapers() {
     },
   ])
 
-  const handleTest = async (index: number, url: string) => {
+  const testMutation = useTestScraper()
+
+  const handleTest = (index: number, url: string) => {
     const scraper = scrapers[index]
-    try {
-      // TODO: Replace api route here
-      const response = await fetch("/api/admin/scrapers/test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    testMutation.mutate(
+      { scraperName: scraper.name, url },
+      {
+        onSuccess: (result) => {
+          const updatedScrapers = [...scrapers]
+          updatedScrapers[index] = { ...scraper, result }
+          setScrapers(updatedScrapers)
         },
-        body: JSON.stringify({ scraperName: scraper.name, url }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-      const updatedScrapers = [...scrapers]
-      updatedScrapers[index] = { ...scraper, result }
-      setScrapers(updatedScrapers)
-    } catch (error) {
-      console.error(`Error testing ${scraper.name}:`, error)
-    }
+        onError: (error) => {
+          console.error(`Error testing ${scraper.name}:`, error)
+          const updatedScrapers = [...scrapers]
+          updatedScrapers[index] = {
+            ...scraper,
+            result: { error: error instanceof Error ? error.message : "Unknown error" },
+          }
+          setScrapers(updatedScrapers)
+        },
+      },
+    )
   }
 
   return (
@@ -71,15 +75,15 @@ export function TestScrapers() {
                   const input = document.getElementById(`url-${index}`) as HTMLInputElement
                   handleTest(index, input.value)
                 }}
+                disabled={testMutation.isPending}
               >
+                {testMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Test
               </Button>
             </div>
             {scraper.result && (
               <div className="mt-4">
-                <pre className="overflow-auto rounded bg-gray-100 p-4 font-mono text-xs text-wrap">
-                  {JSON.stringify(scraper.result, null, 2)}
-                </pre>
+                <Code>{JSON.stringify(scraper.result, null, 2)}</Code>
               </div>
             )}
           </CardContent>

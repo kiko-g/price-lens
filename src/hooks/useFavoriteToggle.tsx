@@ -1,13 +1,81 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useCallback } from "react"
 import { toast } from "sonner"
 import { useUser } from "@/hooks/useUser"
 import { TriangleIcon, BanIcon } from "lucide-react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import axios from "axios"
+
+async function addFavorite(storeProductId: number) {
+  const response = await axios.post("/api/favorites", { store_product_id: storeProductId })
+  if (response.status !== 200 && response.status !== 201) {
+    throw new Error(response.data?.error || "Failed to add to favorites")
+  }
+  return response.data
+}
+
+async function removeFavorite(storeProductId: number) {
+  const response = await axios.delete("/api/favorites", {
+    data: { store_product_id: storeProductId },
+  })
+  if (response.status !== 200) {
+    throw new Error(response.data?.error || "Failed to remove from favorites")
+  }
+  return response.data
+}
 
 export function useFavoriteToggle() {
   const { user } = useUser()
-  const [loadingStates, setLoadingStates] = useState<Set<number>>(new Set())
+  const queryClient = useQueryClient()
+
+  const addMutation = useMutation({
+    mutationFn: addFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          Added to favorites
+          <TriangleIcon className="size-3 fill-green-500 stroke-green-500" />
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favorites"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
+    },
+    onError: (error) => {
+      toast.error(
+        <div className="flex items-center gap-2">
+          {error instanceof Error ? error.message : "Failed to update favorites"}
+          <BanIcon className="size-3 rotate-180 stroke-red-500" />
+        </div>,
+      )
+    },
+  })
+
+  const removeMutation = useMutation({
+    mutationFn: removeFavorite,
+    onSuccess: () => {
+      toast.success(
+        <div className="flex items-center gap-2">
+          Removed from favorites
+          <TriangleIcon className="size-3 rotate-180 fill-red-500 stroke-red-500" />
+        </div>,
+      )
+      queryClient.invalidateQueries({ queryKey: ["favorites"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
+      queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
+      queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
+    },
+    onError: (error) => {
+      toast.error(
+        <div className="flex items-center gap-2">
+          {error instanceof Error ? error.message : "Failed to update favorites"}
+          <BanIcon className="size-3 rotate-180 stroke-red-500" />
+        </div>,
+      )
+    },
+  })
 
   const toggleFavorite = useCallback(
     async (storeProductId: number, currentState: boolean) => {
@@ -21,71 +89,28 @@ export function useFavoriteToggle() {
         return { success: false, newState: currentState }
       }
 
-      // Add to loading states
-      setLoadingStates((prev) => new Set(prev).add(storeProductId))
-
       try {
-        const method = currentState ? "DELETE" : "POST"
-        const response = await fetch("/api/favorites", {
-          method,
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ store_product_id: storeProductId }),
-        })
-
-        if (response.ok) {
-          const newState = !currentState
-          toast.success(
-            newState ? (
-              <div className="flex items-center gap-2">
-                Added to favorites
-                <TriangleIcon className="size-3 fill-green-500 stroke-green-500" />
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                Removed from favorites
-                <TriangleIcon className="size-3 rotate-180 fill-red-500 stroke-red-500" />
-              </div>
-            ),
-          )
-          return { success: true, newState }
+        if (currentState) {
+          await removeMutation.mutateAsync(storeProductId)
         } else {
-          const error = await response.json()
-          toast.error(
-            <div className="flex items-center gap-2">
-              {error.error || "Failed to update favorites"}
-              <BanIcon className="size-3 rotate-180 stroke-red-500" />
-            </div>,
-          )
-          return { success: false, newState: currentState }
+          await addMutation.mutateAsync(storeProductId)
         }
-      } catch (error) {
-        console.error("Error toggling favorite:", error)
-        toast.error(
-          <div className="flex items-center gap-2">
-            Failed to update favorites
-            <BanIcon className="size-3 rotate-180 stroke-red-500" />
-          </div>,
-        )
+        return { success: true, newState: !currentState }
+      } catch {
         return { success: false, newState: currentState }
-      } finally {
-        // Remove from loading states
-        setLoadingStates((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(storeProductId)
-          return newSet
-        })
       }
     },
-    [user],
+    [user, addMutation, removeMutation],
   )
 
   const isLoading = useCallback(
     (storeProductId: number) => {
-      return loadingStates.has(storeProductId)
+      return (
+        (addMutation.isPending && addMutation.variables === storeProductId) ||
+        (removeMutation.isPending && removeMutation.variables === storeProductId)
+      )
     },
-    [loadingStates],
+    [addMutation, removeMutation],
   )
 
   return {

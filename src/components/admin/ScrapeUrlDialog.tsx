@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Link2Icon, LoaderPinwheelIcon, TrashIcon } from "lucide-react"
+import { Link2Icon, LoaderPinwheelIcon, TrashIcon, Loader2, Code } from "lucide-react"
+import { useScrapeProductUrl } from "@/hooks/useAdmin"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,29 +20,20 @@ import { Label } from "@/components/ui/label"
 export function ScrapeUrlDialog() {
   const [url, setUrl] = useState("")
   const [scrapedData, setScrapedData] = useState<any>(null)
+  const scrapeMutation = useScrapeProductUrl()
 
-  const handleScrape = async () => {
-    try {
-      const response = await fetch("/api/products/store/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      })
-
-      const data = await response.json()
-      console.info(data)
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to scrape URL")
-      }
-
-      setScrapedData(data)
-    } catch (error) {
-      setScrapedData({
-        error: error instanceof Error ? error.message : "Unknown error",
-      })
-    }
+  const handleScrape = () => {
+    scrapeMutation.mutate(url, {
+      onSuccess: (data) => {
+        console.info(data)
+        setScrapedData(data)
+      },
+      onError: (error) => {
+        setScrapedData({
+          error: error instanceof Error ? error.message : "Unknown error",
+        })
+      },
+    })
   }
 
   return (
@@ -75,8 +67,12 @@ export function ScrapeUrlDialog() {
               placeholder="https://www.continente.pt/produto/leite-949202.html"
             />
 
-            <Button onClick={handleScrape} variant="primary" disabled={!url}>
-              <LoaderPinwheelIcon className="h-4 w-4" />
+            <Button onClick={handleScrape} variant="primary" disabled={!url || scrapeMutation.isPending}>
+              {scrapeMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LoaderPinwheelIcon className="h-4 w-4" />
+              )}
               Request
             </Button>
           </div>
@@ -84,10 +80,7 @@ export function ScrapeUrlDialog() {
 
         {scrapedData ? (
           <>
-            <pre className="bg-muted max-h-96 overflow-x-auto rounded-md p-4 text-xs leading-3.5 text-wrap break-all">
-              {JSON.stringify(scrapedData, null, 2)}
-            </pre>
-
+            <Code>{JSON.stringify(scrapedData, null, 2)}</Code>
             <div className="flex w-full justify-end gap-2">
               <Button variant="outline" onClick={() => setScrapedData(null)} className="w-full">
                 <TrashIcon className="h-4 w-4" />

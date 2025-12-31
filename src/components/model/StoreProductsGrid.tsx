@@ -1,12 +1,11 @@
 "use client"
 
 import { type StoreProduct } from "@/types"
-import { FrontendStatus, searchTypes, type SearchType, type SortByType } from "@/types/extra"
-import axios from "axios"
+import { searchTypes, type SearchType, type SortByType } from "@/types/extra"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { useStoreProductCategories } from "@/hooks/useProducts"
+import { useStoreProductCategories, useStoreProductsGrid, useUpdateStoreProduct } from "@/hooks/useProducts"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
@@ -128,15 +127,11 @@ export function StoreProductsGrid(props: Props) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [categorySelectorOpen, setCategorySelectorOpen] = useState(false)
-  const [pagedCount, setPagedCount] = useState(initialData?.pagination.totalCount || 0)
-  const [paginationTotal, setPaginationTotal] = useState(initialData?.pagination.totalPages || 50)
 
   const [category1, setCategory1] = useState<string>("")
   const [category2, setCategory2] = useState<string>("")
   const [category3, setCategory3] = useState<string>("")
 
-  const [status, setStatus] = useState(FrontendStatus.Loaded)
-  const [storeProducts, setStoreProducts] = useState<StoreProduct[]>(initialData?.products || [])
   const [categories, setCategories] = useState<Array<{ name: string; selected: boolean }>>(() => {
     const defaultCategorySet = defaultCategories.length > 0 ? new Set(defaultCategories) : new Set()
     const uniqueCategories = Array.from(new Set([...existingCategories, ...defaultCategories]))
@@ -157,13 +152,73 @@ export function StoreProductsGrid(props: Props) {
     }))
   })
 
-  const ssrSkipFetch =
-    initialData &&
-    page === initPage &&
-    sortBy === initSortBy &&
-    !onlyDiscounted &&
-    origin === initOriginId &&
-    orderByPriority === true
+  // Build query params for the React Query hook
+  const queryParams = useMemo(() => {
+    const selectedCategories = categories.filter((cat) => cat.selected).map((cat) => cat.name)
+    const allCategoriesFilled = category1 && category2 && category3
+
+    return {
+      page,
+      limit,
+      q: query || undefined,
+      searchType,
+      sort: sortBy,
+      orderByPriority,
+      onlyDiscounted,
+      origin: origin ?? undefined,
+      ...(query === ""
+        ? allCategoriesFilled
+          ? {
+              category: category1,
+              category_2: category2,
+              category_3: category3,
+            }
+          : {
+              categories: selectedCategories.length > 0 ? selectedCategories.join(";") : undefined,
+            }
+        : {}),
+    }
+  }, [
+    page,
+    limit,
+    query,
+    searchType,
+    sortBy,
+    orderByPriority,
+    onlyDiscounted,
+    origin,
+    category1,
+    category2,
+    category3,
+    categories,
+  ])
+
+  // Use React Query for fetching products
+  const {
+    data: productsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useStoreProductsGrid(queryParams, {
+    initialData: initialData
+      ? {
+          data: initialData.products,
+          pagination: {
+            page: initialData.pagination.page,
+            limit: initialData.pagination.limit,
+            pagedCount: initialData.pagination.totalCount,
+            totalPages: initialData.pagination.totalPages,
+          },
+        }
+      : undefined,
+  })
+
+  const storeProducts = productsData?.data ?? []
+  const pagedCount = productsData?.pagination.pagedCount ?? 0
+  const paginationTotal = productsData?.pagination.totalPages ?? 50
+
+  // Mutation for updating products
+  const updateMutation = useUpdateStoreProduct()
 
   const storeProductCategories = useStoreProductCategories()
   const tuples = storeProductCategories?.data?.tuples || []
@@ -254,71 +309,14 @@ WHERE category = '${category1}'
 
   const updateParams = useUpdateSearchParams()
 
-  const isLoading = status === FrontendStatus.Loading
-
-  async function fetchProducts() {
-    setStatus(FrontendStatus.Loading)
-    try {
-      const { data } = await axios.get("/api/products/store", {
-        params: {
-          ...(query && { q: query }),
-          page,
-          limit,
-          searchType,
-          sort: sortBy,
-          orderByPriority,
-          onlyDiscounted,
-          ...(origin !== null ? { origin: origin.toString() } : {}),
-          ...(query === ""
-            ? category1 && category2 && category3
-              ? {
-                  category: category1,
-                  category_2: category2,
-                  category_3: category3,
-                }
-              : {
-                  categories: categories
-                    .filter((cat) => cat.selected)
-                    .map((cat) => cat.name)
-                    .join(";"),
-                }
-            : {}),
-        },
-      })
-      setStoreProducts(data.data || [])
-      setPagedCount(data.pagination.pagedCount || 0)
-      setPaginationTotal(data.pagination.totalPages || 50)
-    } catch (err) {
-      setPage(1)
-      setStatus(FrontendStatus.Error)
-      console.error("Failed to fetch products:", err)
-    } finally {
-      setStatus(FrontendStatus.Loaded)
-    }
-  }
-
-  async function updateProduct(sp: StoreProduct): Promise<boolean> {
-    if (!sp || !sp.url) return false
-
-    const response = await axios.post(`/api/products/store`, {
-      storeProduct: sp,
-    })
-    const data = response.data
-    const newProduct = data.data
-
-    if (response.status === 200 && newProduct) {
-      setStoreProducts((currentProducts) => currentProducts.map((p) => (p.url === sp.url ? newProduct : p)))
-      return true
-    } else {
-      console.error("Failed to update product:", data)
-      return false
-    }
+  function handleUpdateProduct(sp: StoreProduct) {
+    updateMutation.mutate(sp)
   }
 
   function handleSubmit() {
     setPage(1)
     setMobileFiltersOpen(false)
-    if (page === 1) fetchProducts()
+    if (page === 1) refetch()
   }
 
   function handleNextPage() {
@@ -336,39 +334,20 @@ WHERE category = '${category1}'
   function clearSearch() {
     setQuery("")
     setSearchType("any")
-    page !== 1 ? setPage(1) : fetchProducts()
+    if (page !== 1) {
+      setPage(1)
+    } else {
+      refetch()
+    }
   }
 
+  // Copy category query to clipboard when all categories are selected
   useEffect(() => {
-    if (ssrSkipFetch) {
-      return
-    }
-
     const allCategoriesFilled = category1 && category2 && category3
-    const allCategoriesEmpty = !category1 && !category2 && !category3
-    if (allCategoriesFilled || allCategoriesEmpty) {
-      fetchProducts()
-
-      if (allCategoriesFilled) {
-        navigator.clipboard.writeText(categoriesPriorityQuery)
-      }
-
-      return
+    if (allCategoriesFilled) {
+      navigator.clipboard.writeText(categoriesPriorityQuery)
     }
-
-    fetchProducts()
-  }, [
-    page,
-    sortBy,
-    onlyDiscounted,
-    origin,
-    orderByPriority,
-    category1,
-    category2,
-    category3,
-    categoriesPriorityQuery,
-    ssrSkipFetch,
-  ])
+  }, [category1, category2, category3, categoriesPriorityQuery])
 
   useEffect(() => {
     updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), origin })
@@ -637,9 +616,9 @@ WHERE category = '${category1}'
     </div>
   )
 
-  if (status === FrontendStatus.Error) {
+  if (isError) {
     return (
-      <Wrapper status={FrontendStatus.Error}>
+      <Wrapper>
         <CircleOffIcon className="h-6 w-6" />
         <p>Error fetching products. Please try again.</p>
         <Button
@@ -1059,7 +1038,7 @@ WHERE category = '${category1}'
         </div>
 
         <div className="text-muted-foreground mt-2 flex w-full flex-col items-end justify-end text-xs lg:mt-1 lg:flex-row lg:items-center lg:justify-between">
-          {status === FrontendStatus.Loaded && dtls.max > 0 && (
+          {!isLoading && dtls.max > 0 && (
             <span className="order-2 leading-3 lg:order-1">
               Showing{" "}
               <span className="text-foreground font-semibold">
@@ -1071,17 +1050,16 @@ WHERE category = '${category1}'
 
           <span className="order-1 flex flex-col items-end justify-end gap-1 lg:order-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
             {category1 && category2 && category3 ? (
-              <Button
-                size="xs"
-                variant="glass"
-                className="dark:hover:bg-destructive/50 bg-primary/20 dark:bg-primary/20 cursor-pointer gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
-                onClick={() => {
-                  setCategory1("")
-                  setCategory2("")
-                  setCategory3("")
-                  fetchProducts()
-                }}
-              >
+                <Button
+                  size="xs"
+                  variant="glass"
+                  className="dark:hover:bg-destructive/50 bg-primary/20 dark:bg-primary/20 cursor-pointer gap-1 px-1 font-medium lg:gap-0.5 [&_svg]:size-3"
+                  onClick={() => {
+                    setCategory1("")
+                    setCategory2("")
+                    setCategory3("")
+                  }}
+                >
                 <XIcon />
                 <span className="max-w-[300px] truncate text-end text-wrap lg:max-w-full">
                   {[category1, category2, category3].filter(Boolean).join(" > ")}
@@ -1141,7 +1119,7 @@ WHERE category = '${category1}'
 
         {/* Mobile Status Bar */}
         <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs">
-          {status === FrontendStatus.Loaded && dtls.max > 0 && (
+          {!isLoading && dtls.max > 0 && (
             <span>
               Showing{" "}
               <span className="text-foreground font-semibold">
@@ -1161,7 +1139,6 @@ WHERE category = '${category1}'
                   setCategory1("")
                   setCategory2("")
                   setCategory3("")
-                  fetchProducts()
                 }}
               >
                 <XIcon />
@@ -1222,13 +1199,13 @@ WHERE category = '${category1}'
       </Drawer>
 
       {/* Products Grid */}
-      {status === FrontendStatus.Loaded && storeProducts && storeProducts.length > 0 ? (
+      {!isLoading && storeProducts && storeProducts.length > 0 ? (
         <div className="grid h-full w-full flex-1 grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
           {storeProducts.map((product, productIdx) => (
             <StoreProductCard
               key={`product-${productIdx}`}
               sp={product}
-              onUpdate={() => updateProduct(product)}
+              onUpdate={() => handleUpdateProduct(product)}
               imagePriority={productIdx < 12}
             />
           ))}
@@ -1306,7 +1283,7 @@ WHERE category = '${category1}'
       {/* Bottom Pagination */}
       <div className="flex items-center justify-between p-4">
         <div className="text-muted-foreground flex w-full flex-col text-sm">
-          {status === FrontendStatus.Loaded && dtls.max > 0 && (
+          {!isLoading && dtls.max > 0 && (
             <span>
               Showing <span className="text-foreground font-semibold">{dtls.amount}</span> to{" "}
               <span className="text-foreground font-semibold">{dtls.max}</span> of{" "}

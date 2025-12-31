@@ -1,39 +1,19 @@
 "use client"
 
-import axios from "axios"
 import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import { Price } from "@/types"
-import { useState, useEffect } from "react"
+import type { Price } from "@/types"
 import { InsertPriceModal } from "./InsertPriceModal"
+import { useAdminPrices, useSanitizePrices } from "@/hooks/useAdmin"
 
 import { Button } from "@/components/ui/button"
 
 import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon, SparklesIcon, RefreshCcwIcon } from "lucide-react"
+import { useState } from "react"
 
 export function AdminDashboardPrices() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [prices, setPrices] = useState<any>(null)
+  const { data: prices, isLoading, error, refetch } = useAdminPrices()
 
   const uniqueStoreProductIds = Array.from(new Set(prices?.map((price: Price) => price.store_product_id)))
-
-  async function fetchPrices() {
-    setIsLoading(true)
-
-    try {
-      const data = await axios.get("/api/prices")
-      if (data.status === 200) {
-        setPrices(data.data)
-      }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchPrices()
-  }, [])
 
   if (isLoading) {
     return (
@@ -44,7 +24,7 @@ export function AdminDashboardPrices() {
     )
   }
 
-  if (!prices)
+  if (error || !prices)
     return (
       <StatusWrapper>
         <CircleX className="h-4 w-4" />
@@ -63,7 +43,7 @@ export function AdminDashboardPrices() {
           </p>
         </div>
         <div className="mt-4 flex items-center gap-2 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Button variant="outline" size="icon" onClick={() => fetchPrices()}>
+          <Button variant="outline" size="icon" onClick={() => refetch()}>
             <RefreshCcwIcon />
           </Button>
           <InsertPriceModal />
@@ -94,6 +74,7 @@ export function AdminDashboardPrices() {
                     if (a.store_product_id && b.store_product_id) return a.store_product_id - b.store_product_id
                     if (a.valid_from && b.valid_from)
                       return new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
+                    return 0
                   })
                   .map((price: Price) => (
                     <PriceRow key={price.id} price={price} />
@@ -108,19 +89,8 @@ export function AdminDashboardPrices() {
 }
 
 function PriceRow({ price }: { price: Price }) {
-  const [isEditing, setIsEditing] = useState(false) // TODO: add edit price modal
   const [isCopying, setIsCopying] = useState(false)
-  const [isSanitizing, setIsSanitizing] = useState(false)
-
-  async function handleSanitize() {
-    setIsSanitizing(true)
-    const data = await axios.get(`/api/prices/sanitize/${price.store_product_id}`)
-    if (data.status === 200) {
-      const { deleted, merged } = data.data
-      console.info("Sanitized prices", { deleted, merged })
-    }
-    setIsSanitizing(false)
-  }
+  const sanitizeMutation = useSanitizePrices()
 
   return (
     <tr key={price.id} className="hover:bg-muted/50 transition-colors duration-200">
@@ -135,7 +105,7 @@ function PriceRow({ price }: { price: Price }) {
       <Cell>{price.valid_to ? formatTimestamptz(price.valid_to) : "N/A"}</Cell>
 
       <Cell>
-        <Button variant="ghost" size="icon-xs" onClick={() => setIsEditing(true)}>
+        <Button variant="ghost" size="icon-xs" onClick={() => {}}>
           <PencilIcon />
         </Button>
 
@@ -154,8 +124,13 @@ function PriceRow({ price }: { price: Price }) {
           {isCopying ? <CheckIcon className="h-4 w-4 text-green-500" /> : <CopyIcon />}
         </Button>
 
-        <Button variant="ghost" size="icon-xs" onClick={handleSanitize} disabled={isSanitizing}>
-          {isSanitizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <SparklesIcon />}
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={() => price.store_product_id && sanitizeMutation.mutate(price.store_product_id)}
+          disabled={sanitizeMutation.isPending}
+        >
+          {sanitizeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <SparklesIcon />}
         </Button>
       </Cell>
     </tr>

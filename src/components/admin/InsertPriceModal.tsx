@@ -1,4 +1,7 @@
+"use client"
+
 import { useState } from "react"
+import { useInsertPrice } from "@/hooks/useAdmin"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -12,23 +15,20 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Loader2 } from "lucide-react"
 
 export function InsertPriceModal() {
   const [open, setOpen] = useState(false)
   const [json, setJson] = useState("")
+  const insertMutation = useInsertPrice()
 
-  const handleSubmit = async () => {
-    const response = await fetch("/api/prices", {
-      method: "PUT",
-      body: json,
+  const handleSubmit = () => {
+    insertMutation.mutate(json, {
+      onSuccess: () => {
+        setOpen(false)
+        setJson("")
+      },
     })
-
-    if (response.ok) {
-      setOpen(false)
-      setJson("")
-    } else {
-      console.error("Failed to insert price")
-    }
   }
 
   return (
@@ -54,7 +54,8 @@ export function InsertPriceModal() {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={handleSubmit}>
+          <Button type="submit" onClick={handleSubmit} disabled={insertMutation.isPending}>
+            {insertMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save changes
           </Button>
         </DialogFooter>
