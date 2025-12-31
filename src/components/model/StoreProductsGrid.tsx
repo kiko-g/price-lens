@@ -309,8 +309,13 @@ WHERE category = '${category1}'
 
   const updateParams = useUpdateSearchParams()
 
-  function handleUpdateProduct(sp: StoreProduct) {
-    updateMutation.mutate(sp)
+  async function handleUpdateProduct(sp: StoreProduct): Promise<boolean> {
+    try {
+      await updateMutation.mutateAsync(sp)
+      return true
+    } catch {
+      return false
+    }
   }
 
   function handleSubmit() {
