@@ -151,15 +151,7 @@ export default async function Supermarket({ searchParams }: Props) {
         </div>
       </noscript>
       <Layout>
-        <StoreProductsGrid
-          page={page}
-          q={q}
-          t={searchType}
-          sort={sortBy}
-          relevant={relevant}
-          origin={origin}
-          initialData={initialData}
-        />
+        <StoreProductsGrid relevant={relevant} initialData={initialData} />
       </Layout>
     </>
   )

@@ -2,11 +2,10 @@
 
 import { type StoreProduct } from "@/types"
 import { searchTypes, type SearchType, type SortByType } from "@/types/extra"
-import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { useStoreProductCategories, useStoreProductsGrid, useUpdateStoreProduct } from "@/hooks/useProducts"
-import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
 
 import { BorderBeam } from "@/components/ui/magic/border-beam"
@@ -84,12 +83,7 @@ import {
 } from "lucide-react"
 
 type Props = {
-  page?: number
-  q?: string
-  t?: SearchType
-  sort?: SortByType
   relevant?: boolean
-  origin?: string | null
   initialData?: {
     products: StoreProduct[]
     pagination: {
@@ -103,23 +97,87 @@ type Props = {
 }
 
 export function StoreProductsGrid(props: Props) {
-  const {
-    page: initPage = 1,
-    q: initQuery = "",
-    t: initSearchType = "any",
-    sort: initSortBy = "a-z",
-    relevant = false,
-    origin: initOriginId = null,
-    initialData,
-  } = props
+  const { relevant = false, initialData } = props
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const limit = 36
-  const [page, setPage] = useState(initPage)
-  const [sortBy, setSortBy] = useState<SortByType>(initSortBy)
-  const [origin, setOrigin] = useState<string | null>(initOriginId)
-  const [searchType, setSearchType] = useState<SearchType>(initSearchType)
-  const [query, setQuery] = useState(initQuery)
+
+  // Read URL params as source of truth
+  const page = parseInt(searchParams.get("page") ?? "1", 10)
+  const sortBy = (searchParams.get("sort") ?? "a-z") as SortByType
+  const origin = searchParams.get("origin")
+  const searchType = (searchParams.get("t") ?? "any") as SearchType
+  const query = searchParams.get("q") ?? ""
+
+  // Helper to update URL params
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | number | null | undefined>) => {
+      const params = new URLSearchParams(searchParams.toString())
+      const noQuery = updates.q === "" || (updates.q === undefined && !params.get("q"))
+
+      for (const [key, value] of Object.entries(updates)) {
+        const isBlank = value === undefined || value === null
+        const isQueryEmpty = key === "q" && value === ""
+        const isSearchTypeName = noQuery && key === "t" && value === "any"
+        const isRelevantFalse = key === "relevant" && value === "false"
+        const isPageOne = key === "page" && value === 1
+        const isSortDefault = key === "sort" && value === "a-z"
+        const isOriginNull = key === "origin" && value === null
+
+        if (
+          isBlank ||
+          isQueryEmpty ||
+          isSearchTypeName ||
+          isRelevantFalse ||
+          isPageOne ||
+          isSortDefault ||
+          isOriginNull
+        ) {
+          params.delete(key)
+        } else {
+          params.set(key, String(value))
+        }
+      }
+
+      const queryString = params.toString()
+      router.push(queryString ? `?${queryString}` : window.location.pathname, { scroll: false })
+    },
+    [searchParams, router],
+  )
+
+  // Setters that update URL directly
+  const setPage = useCallback(
+    (newPage: number | ((prev: number) => number)) => {
+      const nextPage = typeof newPage === "function" ? newPage(page) : newPage
+      updateSearchParams({ page: nextPage })
+    },
+    [page, updateSearchParams],
+  )
+
+  const setSortBy = useCallback(
+    (newSort: SortByType) => {
+      updateSearchParams({ sort: newSort })
+    },
+    [updateSearchParams],
+  )
+
+  const setOrigin = useCallback(
+    (newOrigin: string | null) => {
+      updateSearchParams({ origin: newOrigin })
+    },
+    [updateSearchParams],
+  )
+
+  const setSearchType = useCallback(
+    (newType: SearchType) => {
+      updateSearchParams({ t: newType })
+    },
+    [updateSearchParams],
+  )
+
+  // Local state for query input (only synced on submit)
+  const [queryInput, setQueryInput] = useState(query)
 
   const [onlyDiscounted, setOnlyDiscounted] = useState(false)
   const [orderByPriority, setOrderByPriority] = useState(true)
@@ -197,7 +255,6 @@ export function StoreProductsGrid(props: Props) {
     data: productsData,
     isLoading,
     isError,
-    refetch,
   } = useStoreProductsGrid(queryParams, {
     initialData: initialData
       ? {
@@ -283,13 +340,6 @@ WHERE category = '${category1}'
 
   const selectedCount = categories.filter((cat) => cat.selected).length
 
-  // check if currently selected categories exactly match default categories
-  const selectedCategoryNames = categories.filter((cat) => cat.selected).map((cat) => cat.name)
-  const isRelevant =
-    selectedCategoryNames.length === defaultCategories.length &&
-    selectedCategoryNames.every((name) => defaultCategories.includes(name)) &&
-    defaultCategories.every((name) => selectedCategoryNames.includes(name))
-
   const toggleCategory = (categoryName: string) => {
     setCategories((prev) => prev.map((cat) => (cat.name === categoryName ? { ...cat, selected: !cat.selected } : cat)))
   }
@@ -306,8 +356,6 @@ WHERE category = '${category1}'
     setCategories((prev) => prev.map((cat) => ({ ...cat, selected: defaultCategories.includes(cat.name) })))
   }
 
-  const updateParams = useUpdateSearchParams()
-
   async function handleUpdateProduct(sp: StoreProduct): Promise<boolean> {
     try {
       await updateMutation.mutateAsync(sp)
@@ -318,9 +366,8 @@ WHERE category = '${category1}'
   }
 
   function handleSubmit() {
-    setPage(1)
     setMobileFiltersOpen(false)
-    if (page === 1) refetch()
+    updateSearchParams({ q: queryInput, page: 1 })
   }
 
   function handleNextPage() {
@@ -336,13 +383,12 @@ WHERE category = '${category1}'
   }
 
   function clearSearch() {
-    setQuery("")
-    setSearchType("any")
-    if (page !== 1) {
-      setPage(1)
-    } else {
-      refetch()
-    }
+    setQueryInput("")
+    updateSearchParams({ q: "", t: "any", page: 1 })
+  }
+
+  function clearAllParams() {
+    router.push(window.location.pathname)
   }
 
   // Copy category query to clipboard when all categories are selected
@@ -353,9 +399,10 @@ WHERE category = '${category1}'
     }
   }, [category1, category2, category3, categoriesPriorityQuery])
 
+  // Sync query input when URL query changes (e.g., browser back/forward)
   useEffect(() => {
-    updateParams({ page, q: query, t: searchType, sort: sortBy, relevant: isRelevant.toString(), origin })
-  }, [page, query, searchType, sortBy, isRelevant, origin, updateParams])
+    setQueryInput(query)
+  }, [query])
 
   const MobileFiltersContent = () => (
     <div className="mt-2 flex flex-col gap-6 border-t px-4 pt-2 pb-8">
@@ -673,13 +720,13 @@ WHERE category = '${category1}'
                 type="text"
                 placeholder="Search products..."
                 className="pl-8 text-base md:text-sm"
-                value={query}
+                value={queryInput}
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Enter") handleSubmit()
                 }}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value
-                  if (typeof value === "string") setQuery(value)
+                  if (typeof value === "string") setQueryInput(value)
                 }}
               />
               <Select value={searchType} onValueChange={(value) => setSearchType(value as SearchType)}>
@@ -1089,13 +1136,13 @@ WHERE category = '${category1}'
               type="text"
               placeholder="Search products..."
               className="pr-16 pl-8 text-base"
-              value={query}
+              value={queryInput}
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                 if (e.key === "Enter") handleSubmit()
               }}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 const value = e.target.value
-                if (typeof value === "string") setQuery(value)
+                if (typeof value === "string") setQueryInput(value)
               }}
             />
             <Select value={searchType} onValueChange={(value) => setSearchType(value as SearchType)}>
@@ -1273,8 +1320,7 @@ WHERE category = '${category1}'
             <Button
               variant="default"
               onClick={() => {
-                updateParams(null)
-                location.reload()
+                clearAllParams()
               }}
             >
               <RefreshCcwIcon className="h-4 w-4" />
