@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Link2Icon, LoaderPinwheelIcon, TrashIcon, Loader2, Code } from "lucide-react"
+import { Link2Icon, LoaderPinwheelIcon, TrashIcon, Loader2 } from "lucide-react"
 import { useScrapeProductUrl } from "@/hooks/useAdmin"
+import type { StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,11 +17,24 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Code } from "@/components/ui/combo/code"
+
+type ScrapeResult = { product: StoreProduct } | { error: string }
 
 export function ScrapeUrlDialog() {
+  const [open, setOpen] = useState(false)
   const [url, setUrl] = useState("")
-  const [scrapedData, setScrapedData] = useState<any>(null)
+  const [scrapedData, setScrapedData] = useState<ScrapeResult | null>(null)
   const scrapeMutation = useScrapeProductUrl()
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen) {
+      setUrl("")
+      setScrapedData(null)
+    }
+  }
 
   const handleScrape = () => {
     scrapeMutation.mutate(url, {
@@ -37,7 +51,7 @@ export function ScrapeUrlDialog() {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="hover:bg-accent cursor-pointer px-2" variant="dropdown-item">
           Add product from URL
@@ -79,21 +93,19 @@ export function ScrapeUrlDialog() {
         </div>
 
         {scrapedData ? (
-          <>
-            <Code>{JSON.stringify(scrapedData, null, 2)}</Code>
+          <div className="flex flex-col gap-3">
+            <ScrollArea className="max-h-[300px] rounded-md border">
+              <Code className="text-xs">{JSON.stringify(scrapedData, null, 2)}</Code>
+            </ScrollArea>
+
             <div className="flex w-full justify-end gap-2">
               <Button variant="outline" onClick={() => setScrapedData(null)} className="w-full">
                 <TrashIcon className="h-4 w-4" />
                 Clear
               </Button>
 
-              {scrapedData?.product?.url && (
-                <Button
-                  variant="default"
-                  onClick={() => window.open(scrapedData.product.url, "_blank")}
-                  className="w-full"
-                  asChild
-                >
+              {"product" in scrapedData && (
+                <Button variant="default" className="w-full" asChild>
                   <Link href={`/supermarket/${scrapedData.product.id}`} target="_blank">
                     <Link2Icon className="h-4 w-4" />
                     Visit product page
@@ -101,7 +113,7 @@ export function ScrapeUrlDialog() {
                 </Button>
               )}
             </div>
-          </>
+          </div>
         ) : (
           <div className="bg-muted rounded-md border px-4 py-8 text-center text-sm">Your result will appear here</div>
         )}

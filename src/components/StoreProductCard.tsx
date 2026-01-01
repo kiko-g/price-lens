@@ -237,8 +237,8 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
         <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0 md:gap-0.5">
           <Badge
             size="xs"
-            variant="light"
-            className="border-muted w-fit max-w-20 border opacity-100 transition-opacity duration-300 group-hover:opacity-100"
+            variant="outline-white"
+            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-100"
           >
             {supermarketChain ? supermarketChain.logoSmall : null}
           </Badge>

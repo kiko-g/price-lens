@@ -22,6 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -33,6 +40,7 @@ import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/PriorityBubble"
+import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 
 import {
   ArrowDownAZ,
@@ -45,6 +53,7 @@ import {
   FilterIcon,
   HomeIcon,
   Loader2Icon,
+  MoreHorizontalIcon,
   PackageIcon,
   RefreshCcwIcon,
   SearchIcon,
@@ -211,7 +220,7 @@ const serializeArray = (arr: number[]): string | null => {
 // Main Component
 // ============================================================================
 
-export function StoreProductsShowcase({ limit = 36, children }: StoreProductsShowcaseProps) {
+export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
   const { urlState, updateUrl } = useUrlState()
 
@@ -352,11 +361,32 @@ export function StoreProductsShowcase({ limit = 36, children }: StoreProductsSho
   return (
     <div className="flex h-full w-full flex-col lg:flex-row">
       {/* Desktop Sidebar */}
-      <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-72 lg:min-w-72">
-        <div className="mb-2 flex items-center gap-2">
-          <PackageIcon className="size-5" />
-          <h2 className="text-lg font-bold">Products</h2>
+      <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:min-w-80">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <PackageIcon className="size-5" />
+            <h2 className="text-lg font-bold">Products</h2>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm">
+                <MoreHorizontalIcon className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="w-48" align="start">
+              <DropdownMenuLabel>Tooling</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <ScrapeUrlDialog />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+
+        <p className="text-muted-foreground mb-4 text-sm">
+          Priority affects how often the prices are updated. Favorited products are assigned a priority of 4.
+        </p>
 
         <div className="flex items-center gap-2">
           {/* Search Input */}
@@ -717,7 +747,7 @@ export function StoreProductsShowcase({ limit = 36, children }: StoreProductsSho
               onPageChange={handlePageChange}
             />
 
-            {/* Use children here to render the footer */}
+            {/* Use children here to render the footer (or content below the products grid) */}
             {children}
           </>
         ) : (

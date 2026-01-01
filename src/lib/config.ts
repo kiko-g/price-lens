@@ -68,13 +68,13 @@ export const navigation = [
     icon: StoreIcon,
     label: "Supermarket",
     href: "/supermarket",
-    shown: true,
+    shown: false,
   },
   {
     icon: MicroscopeIcon,
     label: "Tracked",
     href: "/tracked",
-    shown: true,
+    shown: false,
   },
   {
     icon: HeartIcon,

@@ -27,7 +27,7 @@ export default function StoreProductsPage() {
     <main className="h-[calc(100vh-54px)] overflow-hidden">
       <HideFooter />
       <Suspense fallback={<LoadingFallback />}>
-        <StoreProductsShowcase>
+        <StoreProductsShowcase limit={40}>
           <Footer className="px-0 sm:px-0 lg:px-0" />
         </StoreProductsShowcase>
       </Suspense>

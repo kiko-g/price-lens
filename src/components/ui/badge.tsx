@@ -30,6 +30,7 @@ const badgeVariants = cva(
         dark: "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80",
         outline:
           "border-zinc-300 text-zinc-950 dark:border-zinc-300 dark:text-zinc-200 [&_span.bubble]:bg-zinc-300 dark:[&_span.bubble]:bg-zinc-800",
+        "outline-white": "border-base-400 border bg-white text-zinc-900 [&_span.bubble]:bg-white dark:border-base-300",
         "outline-success":
           "border-emerald-600 bg-emerald-600/5 text-emerald-600 dark:border-emerald-800 dark:text-emerald-50 dark:bg-emerald-600/10 [&_span.bubble]:bg-emerald-500 dark:[&_span.bubble]:bg-emerald-600",
         "outline-destructive":
