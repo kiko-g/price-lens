@@ -116,16 +116,16 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
     }
   }
 
-  // Category filter (hierarchical)
+  // Category filter (hierarchical - supports partial selection)
   const category1 = params.get("category")
   const category2 = params.get("category_2")
   const category3 = params.get("category_3")
-  if (category1 && category2 && category3) {
+  if (category1 || category2 || category3) {
     queryParams.categories = {
       hierarchy: {
-        category1,
-        category2,
-        category3,
+        category1: category1 || undefined,
+        category2: category2 || undefined,
+        category3: category3 || undefined,
       },
     }
   } else {

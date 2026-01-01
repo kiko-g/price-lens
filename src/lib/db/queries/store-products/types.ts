@@ -45,13 +45,13 @@ export interface CategoryFilter {
   categories?: string[]
 
   /**
-   * Hierarchical category filter (all three must be set to be effective)
-   * Uses exact matching on each level
+   * Hierarchical category filter
+   * Uses exact matching on each level. Each level is optional.
    */
   hierarchy?: {
-    category1: string
-    category2: string
-    category3: string
+    category1?: string
+    category2?: string
+    category3?: string
   }
 }
 

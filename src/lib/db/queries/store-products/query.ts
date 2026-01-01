@@ -177,15 +177,22 @@ function applyCategoryFilter(
 ) {
   if (!params.categories) return query
 
-  // Hierarchical categories take precedence
+  // Hierarchical categories - apply each level if provided
   if (params.categories.hierarchy) {
     const { category1, category2, category3 } = params.categories.hierarchy
-    if (category1 && category2 && category3) {
-      return query
-        .eq("category", category1)
-        .eq("category_2", category2)
-        .eq("category_3", category3)
+    let filteredQuery = query
+
+    if (category1) {
+      filteredQuery = filteredQuery.eq("category", category1)
     }
+    if (category2) {
+      filteredQuery = filteredQuery.eq("category_2", category2)
+    }
+    if (category3) {
+      filteredQuery = filteredQuery.eq("category_3", category3)
+    }
+
+    return filteredQuery
   }
 
   // Flat categories (OR logic)

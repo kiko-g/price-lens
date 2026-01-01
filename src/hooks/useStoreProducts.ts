@@ -25,14 +25,12 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
     searchParams.searchType = params.search.searchIn
   }
 
-  // Categories (hierarchy takes precedence)
+  // Categories (hierarchy takes precedence - supports partial selection)
   if (params.categories?.hierarchy) {
     const { category1, category2, category3 } = params.categories.hierarchy
-    if (category1 && category2 && category3) {
-      searchParams.category = category1
-      searchParams.category_2 = category2
-      searchParams.category_3 = category3
-    }
+    if (category1) searchParams.category = category1
+    if (category2) searchParams.category_2 = category2
+    if (category3) searchParams.category_3 = category3
   } else if (params.categories?.categories?.length) {
     searchParams.categories = params.categories.categories.join(";")
   }
