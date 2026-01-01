@@ -11,7 +11,7 @@ import { useUser } from "@/hooks/useUser"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useUpdateStoreProductPriority } from "@/hooks/useProducts"
 
-import { Code } from "@/components/Code"
+import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { PriorityBadge } from "@/components/model/PriorityBadge"
@@ -526,7 +526,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
                   <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
-                      <Code code={JSON.stringify(sp, null, 2)} language="json" />
+                      <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
                     </div>
                   </AccordionContent>
                 </AccordionItem>

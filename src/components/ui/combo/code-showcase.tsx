@@ -6,7 +6,7 @@ import { GeistMono } from "geist/font/mono"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { coldarkDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { CheckIcon, ClipboardIcon, DownloadIcon } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button } from "../button"
 
 type Props = {
   className?: string
@@ -16,7 +16,7 @@ type Props = {
   allowDownload?: boolean
 }
 
-export function Code({ className, code, language, options, allowDownload = true }: Props) {
+export function CodeShowcase({ className, code, language, options, allowDownload = true }: Props) {
   const canCopy = useMemo(() => code !== "", [code])
   const canDownload = useMemo(() => allowDownload && code !== "", [allowDownload, code])
 

@@ -41,7 +41,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-import { Code } from "@/components/Code"
+import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { ProductChart } from "@/components/model/ProductChart"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
 import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
@@ -297,7 +297,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       </DrawerHeader>
 
                       <div className="max-w-md px-4">
-                        <Code code={JSON.stringify(sp, null, 2)} language="json" />
+                        <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
                       </div>
                     </DrawerContent>
                   </Drawer>
