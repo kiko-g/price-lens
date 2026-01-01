@@ -22,7 +22,7 @@ function LoadingFallback() {
 
 export default function StoreProductsPage() {
   return (
-    <main className="min-h-screen">
+    <main className="h-[calc(100vh-54px)] overflow-hidden">
       <Suspense fallback={<LoadingFallback />}>
         <StoreProductsShowcase />
       </Suspense>

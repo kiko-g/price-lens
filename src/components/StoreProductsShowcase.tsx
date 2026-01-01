@@ -21,56 +21,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
+import { PriorityBubble } from "@/components/PriorityBubble"
 
 import {
   ArrowDownAZ,
-  ArrowDownAZIcon,
   ArrowDownWideNarrowIcon,
   ArrowUpAZ,
-  ArrowUpAZIcon,
   ArrowUpWideNarrowIcon,
   BadgePercentIcon,
-  CheckIcon,
   CircleOffIcon,
   CrownIcon,
   FilterIcon,
   HomeIcon,
-  MicroscopeIcon,
+  Loader2Icon,
+  PackageIcon,
   RefreshCcwIcon,
   SearchIcon,
 } from "lucide-react"
-
-// ============================================================================
-// Priority Configuration (same as PriorityBadge)
-// ============================================================================
-
-const PRIORITY_CONFIG = {
-  0: { label: "Useless", shortLabel: "0", color: "bg-gray-800", textColor: "text-white" },
-  1: { label: "Minor", shortLabel: "1", color: "bg-rose-600", textColor: "text-white" },
-  2: { label: "Low", shortLabel: "2", color: "bg-orange-600", textColor: "text-white" },
-  3: { label: "Medium", shortLabel: "3", color: "bg-amber-600", textColor: "text-white" },
-  4: { label: "Important", shortLabel: "4", color: "bg-sky-600", textColor: "text-white" },
-  5: { label: "Essential", shortLabel: "5", color: "bg-emerald-700", textColor: "text-white" },
-} as const
-
-type PriorityLevel = keyof typeof PRIORITY_CONFIG
 
 // ============================================================================
 // Types
@@ -211,26 +189,58 @@ function buildQueryParams(
 }
 
 // ============================================================================
+// Parse helper functions
+// ============================================================================
+
+const parseArrayParam = (param: string | null): number[] => {
+  if (!param) return []
+  return param
+    .split(",")
+    .map((v) => parseInt(v, 10))
+    .filter((v) => !isNaN(v))
+}
+
+const serializeArray = (arr: number[]): string | null => {
+  if (arr.length === 0) return null
+  return arr.join(",")
+}
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
 export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps) {
+  const router = useRouter()
   const { urlState, updateUrl } = useUrlState()
 
-  // Local input state (only synced on submit)
+  // Local input state (for search)
   const [queryInput, setQueryInput] = useState(urlState.query)
+  const [isSearching, setIsSearching] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
+  // Parse origin and priority from URL
+  const selectedOrigins = useMemo(() => parseArrayParam(urlState.origin), [urlState.origin])
+  const selectedPriorities = useMemo(() => parseArrayParam(urlState.priority), [urlState.priority])
 
   // Build query params from URL state
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
 
   // Fetch products
-  const { data: products, pagination, isLoading, isError, refetch } = useStoreProducts(queryParams)
+  const { data: products, pagination, isLoading, isFetching, isError, refetch } = useStoreProducts(queryParams)
 
   // Sync local query input when URL changes
   useEffect(() => {
     setQueryInput(urlState.query)
   }, [urlState.query])
+
+  // Track searching state
+  useEffect(() => {
+    if (isFetching) {
+      setIsSearching(true)
+    } else {
+      setIsSearching(false)
+    }
+  }, [isFetching])
 
   // ============================================================================
   // Handlers
@@ -243,14 +253,12 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
 
   const handlePageChange = (newPage: number) => {
     updateUrl({ page: newPage })
+    // Scroll to top of grid on page change
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleSortChange = (newSort: SortByType) => {
-    updateUrl({ sort: newSort })
-  }
-
-  const handleOriginChange = (newOrigin: string | null) => {
-    updateUrl({ origin: newOrigin, page: 1 })
+    updateUrl({ sort: newSort, page: 1 })
   }
 
   const handleSearchTypeChange = (newType: SearchType) => {
@@ -258,34 +266,29 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
   }
 
   const handleTogglePriorityOrder = () => {
-    updateUrl({ priority_order: !urlState.orderByPriority })
+    updateUrl({ priority_order: !urlState.orderByPriority, page: 1 })
   }
 
   const handleToggleDiscounted = () => {
-    updateUrl({ discounted: !urlState.onlyDiscounted })
+    updateUrl({ discounted: !urlState.onlyDiscounted, page: 1 })
   }
 
-  // Parse current priority selection
-  const selectedPriorities = useMemo(() => {
-    if (!urlState.priority) return new Set<number>()
-    return new Set(
-      urlState.priority
-        .split(",")
-        .map((v) => parseInt(v.trim(), 10))
-        .filter((v) => !isNaN(v) && v >= 0 && v <= 5),
-    )
-  }, [urlState.priority])
+  // Origin multi-select handlers
+  const handleOriginToggle = (originId: number) => {
+    const isSelected = selectedOrigins.includes(originId)
+    const updated = isSelected ? selectedOrigins.filter((v) => v !== originId) : [...selectedOrigins, originId]
+    updateUrl({ origin: serializeArray(updated), page: 1 })
+  }
 
+  const handleClearOrigins = () => {
+    updateUrl({ origin: null, page: 1 })
+  }
+
+  // Priority multi-select handlers
   const handlePriorityToggle = (level: number) => {
-    const newSelected = new Set(selectedPriorities)
-    if (newSelected.has(level)) {
-      newSelected.delete(level)
-    } else {
-      newSelected.add(level)
-    }
-
-    const priorityString = Array.from(newSelected).sort().join(",")
-    updateUrl({ priority: priorityString, page: 1 })
+    const isSelected = selectedPriorities.includes(level)
+    const updated = isSelected ? selectedPriorities.filter((v) => v !== level) : [...selectedPriorities, level]
+    updateUrl({ priority: serializeArray(updated), page: 1 })
   }
 
   const handleClearPriority = () => {
@@ -294,12 +297,10 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
 
   // Category handlers
   const handleCategoryChange = (category: string) => {
-    // When category changes, clear child categories
     updateUrl({ cat: category, cat2: "", cat3: "", page: 1 })
   }
 
   const handleCategory2Change = (category2: string) => {
-    // When category2 changes, clear category3
     updateUrl({ cat2: category2, cat3: "", page: 1 })
   }
 
@@ -316,8 +317,6 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
     router.push(window.location.pathname)
   }
 
-  const router = useRouter()
-
   // ============================================================================
   // Computed Values
   // ============================================================================
@@ -328,6 +327,8 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
 
   const showingFrom = totalCount > 0 ? (currentPage - 1) * limit + 1 : 0
   const showingTo = Math.min(currentPage * limit, totalCount)
+
+  const showLoading = isLoading || isSearching
 
   // ============================================================================
   // Render
@@ -347,159 +348,31 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
   }
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-0">
-      {/* Desktop Navigation */}
-      <DesktopNav
-        urlState={urlState}
-        queryInput={queryInput}
-        setQueryInput={setQueryInput}
-        onSearch={handleSearch}
-        onSortChange={handleSortChange}
-        onOriginChange={handleOriginChange}
-        onSearchTypeChange={handleSearchTypeChange}
-        onTogglePriorityOrder={handleTogglePriorityOrder}
-        onToggleDiscounted={handleToggleDiscounted}
-        onPageChange={handlePageChange}
-        onClearFilters={handleClearFilters}
-        selectedPriorities={selectedPriorities}
-        onPriorityToggle={handlePriorityToggle}
-        onClearPriority={handleClearPriority}
-        onCategoryChange={handleCategoryChange}
-        onCategory2Change={handleCategory2Change}
-        onCategory3Change={handleCategory3Change}
-        onClearCategories={handleClearCategories}
-        isLoading={isLoading}
-        totalPages={totalPages}
-        showingFrom={showingFrom}
-        showingTo={showingTo}
-        totalCount={totalCount}
-      />
-
-      {/* Mobile Navigation */}
-      <MobileNav
-        urlState={urlState}
-        queryInput={queryInput}
-        setQueryInput={setQueryInput}
-        onSearch={handleSearch}
-        onSearchTypeChange={handleSearchTypeChange}
-        isLoading={isLoading}
-        showingFrom={showingFrom}
-        showingTo={showingTo}
-        totalCount={totalCount}
-        currentPage={currentPage}
-        totalPages={totalPages}
-      />
-
-      {/* Mobile Filters Drawer */}
-      <MobileFiltersDrawer
-        open={mobileFiltersOpen}
-        onOpenChange={setMobileFiltersOpen}
-        urlState={urlState}
-        onSortChange={handleSortChange}
-        onOriginChange={handleOriginChange}
-        onTogglePriorityOrder={handleTogglePriorityOrder}
-        onToggleDiscounted={handleToggleDiscounted}
-        onApply={handleSearch}
-      />
-
-      {/* Products Grid */}
-      {isLoading ? (
-        <LoadingGrid limit={limit} />
-      ) : products.length > 0 ? (
-        <div className="grid h-full w-full flex-1 grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
-          {products.map((product, idx) => (
-            <StoreProductCard key={product.id} sp={product} imagePriority={idx < 12} />
-          ))}
+    <div className="flex h-full w-full flex-col lg:flex-row">
+      {/* Desktop Sidebar */}
+      <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-72 lg:min-w-72">
+        <div className="mb-2 flex items-center gap-2">
+          <PackageIcon className="size-5" />
+          <h2 className="text-lg font-bold">Products</h2>
         </div>
-      ) : (
-        <EmptyState query={urlState.query} onClearFilters={handleClearFilters} />
-      )}
 
-      {/* Bottom Pagination */}
-      {!isLoading && totalCount > 0 && (
-        <BottomPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          showingFrom={showingFrom}
-          showingTo={showingTo}
-          totalCount={totalCount}
-          onPageChange={handlePageChange}
-        />
-      )}
-    </div>
-  )
-}
-
-// ============================================================================
-// Sub-Components
-// ============================================================================
-
-interface DesktopNavProps {
-  urlState: ReturnType<typeof useUrlState>["urlState"]
-  queryInput: string
-  setQueryInput: (value: string) => void
-  onSearch: () => void
-  onSortChange: (sort: SortByType) => void
-  onOriginChange: (origin: string | null) => void
-  onSearchTypeChange: (type: SearchType) => void
-  onTogglePriorityOrder: () => void
-  onToggleDiscounted: () => void
-  onPageChange: (page: number) => void
-  onClearFilters: () => void
-  selectedPriorities: Set<number>
-  onPriorityToggle: (level: number) => void
-  onClearPriority: () => void
-  onCategoryChange: (category: string) => void
-  onCategory2Change: (category2: string) => void
-  onCategory3Change: (category3: string) => void
-  onClearCategories: () => void
-  isLoading: boolean
-  totalPages: number
-  showingFrom: number
-  showingTo: number
-  totalCount: number
-}
-
-function DesktopNav({
-  urlState,
-  queryInput,
-  setQueryInput,
-  onSearch,
-  onSortChange,
-  onOriginChange,
-  onSearchTypeChange,
-  onTogglePriorityOrder,
-  onToggleDiscounted,
-  onPageChange,
-  selectedPriorities,
-  onPriorityToggle,
-  onClearPriority,
-  onCategoryChange,
-  onCategory2Change,
-  onCategory3Change,
-  onClearCategories,
-  isLoading,
-  totalPages,
-  showingFrom,
-  showingTo,
-  totalCount,
-}: DesktopNavProps) {
-  return (
-    <nav className="sticky top-[54px] z-50 mx-auto hidden w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:flex dark:bg-zinc-950/95">
-      <div className="flex w-full flex-col items-end justify-between gap-2 md:gap-6 lg:flex-row lg:items-center">
-        {/* Search Input */}
-        <div className="flex w-full max-w-lg flex-1 gap-2">
+        <div className="flex items-center gap-2">
+          {/* Search Input */}
           <div className="relative w-full">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+            {isSearching ? (
+              <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
+            ) : (
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+            )}
             <Input
               type="text"
               placeholder="Search products..."
-              className="pl-8 text-base md:text-sm"
+              className="pr-16 pl-8 text-base md:text-sm"
               value={queryInput}
-              onKeyDown={(e) => e.key === "Enter" && onSearch()}
               onChange={(e) => setQueryInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            <Select value={urlState.searchType} onValueChange={(v) => onSearchTypeChange(v as SearchType)}>
+            <Select value={urlState.searchType} onValueChange={(v) => handleSearchTypeChange(v as SearchType)}>
               <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
                 <SelectValue placeholder="Search by" />
               </SelectTrigger>
@@ -516,76 +389,343 @@ function DesktopNav({
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        {/* Filters & Pagination */}
-        <div className="flex w-full flex-wrap gap-2 md:w-auto">
-          <div className="flex flex-1 gap-2">
-            {/* Store Filter */}
-            <StoreSelect value={urlState.origin} onChange={onOriginChange} />
-
-            {/* Category Filter */}
-            <CategoryCascadeFilter
-              category={urlState.category}
-              category2={urlState.category2}
-              category3={urlState.category3}
-              onCategoryChange={onCategoryChange}
-              onCategory2Change={onCategory2Change}
-              onCategory3Change={onCategory3Change}
-              onClear={onClearCategories}
-            />
-
-            {/* Priority Filter */}
-            <PriorityFilterDropdown
-              selectedPriorities={selectedPriorities}
-              onPriorityToggle={onPriorityToggle}
-              onClearPriority={onClearPriority}
-            />
-
-            {/* Sort Menu */}
-            <SortMenu
-              sortBy={urlState.sortBy}
-              orderByPriority={urlState.orderByPriority}
-              onlyDiscounted={urlState.onlyDiscounted}
-              onSortChange={onSortChange}
-              onTogglePriorityOrder={onTogglePriorityOrder}
-              onToggleDiscounted={onToggleDiscounted}
-            />
-          </div>
-
-          {/* Pagination */}
-          <PaginationControls
-            currentPage={urlState.page}
-            totalPages={totalPages}
-            isLoading={isLoading}
-            onPageChange={onPageChange}
-          />
-
-          <Button variant="primary" disabled={isLoading} onClick={onSearch} className="w-auto ring-0">
-            Search
+          {/* Search Button */}
+          <Button variant="primary" disabled={isLoading} onClick={handleSearch} className="h-full w-min px-2">
+            {isSearching ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SearchIcon className="h-4 w-4" />}
           </Button>
         </div>
-      </div>
 
-      {/* Status Bar */}
-      {totalCount > 0 && (
-        <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs">
-          <span>
-            Showing{" "}
-            <span className="text-foreground font-semibold">
-              {showingFrom}-{showingTo}
-            </span>{" "}
-            of <span className="text-foreground font-semibold">{totalCount}</span> results
-          </span>
-          <span>
-            Page <span className="text-foreground font-semibold">{urlState.page}</span> of{" "}
-            <span className="text-foreground font-semibold">{totalPages}</span>
-          </span>
+        {/* Product Count */}
+        <div className="mt-2 flex flex-col gap-2">
+          {showLoading ? (
+            <Skeleton className="h-4 w-full rounded-md" />
+          ) : (
+            <p className="text-muted-foreground text-xs">
+              <strong className="text-foreground">{totalCount}</strong> products found
+              {urlState.query && ` matching "${urlState.query}"`}
+            </p>
+          )}
+
+          {/* Filters Accordion */}
+          <Accordion
+            type="multiple"
+            className="w-full border-t"
+            defaultValue={["store-origin", "priority", "categories", "sort", "options"]}
+          >
+            {/* Store Origin Filter */}
+            <AccordionItem value="store-origin">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Store Origin
+                {selectedOrigins.length > 0 && (
+                  <>
+                    <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClearOrigins()
+                      }}
+                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </span>
+                  </>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="origin-continente"
+                      checked={selectedOrigins.includes(1)}
+                      onCheckedChange={() => handleOriginToggle(1)}
+                    />
+                    <Label
+                      htmlFor="origin-continente"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <ContinenteSvg className="h-4 min-h-4 w-auto" />
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="origin-auchan"
+                      checked={selectedOrigins.includes(2)}
+                      onCheckedChange={() => handleOriginToggle(2)}
+                    />
+                    <Label
+                      htmlFor="origin-auchan"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <AuchanSvg className="h-4 min-h-4 w-auto" />
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="origin-pingo-doce"
+                      checked={selectedOrigins.includes(3)}
+                      onCheckedChange={() => handleOriginToggle(3)}
+                    />
+                    <Label
+                      htmlFor="origin-pingo-doce"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <PingoDoceSvg className="h-4 min-h-4 w-auto" />
+                    </Label>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Priority Filter */}
+            <AccordionItem value="priority">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Priority
+                {selectedPriorities.length > 0 && (
+                  <>
+                    <span className="text-muted-foreground text-xs">({selectedPriorities.length})</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClearPriority()
+                      }}
+                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </span>
+                  </>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  {[0, 1, 2, 3, 4, 5].map((level) => (
+                    <div key={level} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`priority-${level}`}
+                        checked={selectedPriorities.includes(level)}
+                        onCheckedChange={() => handlePriorityToggle(level)}
+                      />
+                      <Label
+                        htmlFor={`priority-${level}`}
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={level} size="sm" useDescription />
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Categories Filter */}
+            <AccordionItem value="categories">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Categories
+                {(urlState.category || urlState.category2 || urlState.category3) && (
+                  <>
+                    <span className="text-muted-foreground text-xs">
+                      ({[urlState.category, urlState.category2, urlState.category3].filter(Boolean).length})
+                    </span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClearCategories()
+                      }}
+                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </span>
+                  </>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <CategoryCascadeFilter
+                  category={urlState.category}
+                  category2={urlState.category2}
+                  category3={urlState.category3}
+                  onCategoryChange={handleCategoryChange}
+                  onCategory2Change={handleCategory2Change}
+                  onCategory3Change={handleCategory3Change}
+                />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Sort Options */}
+            <AccordionItem value="sort">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Sort By
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-1">
+                  <SortOption
+                    label="Name A-Z"
+                    value="a-z"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowDownAZ className="h-4 w-4" />}
+                  />
+                  <SortOption
+                    label="Name Z-A"
+                    value="z-a"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowUpAZ className="h-4 w-4" />}
+                  />
+                  <SortOption
+                    label="Price: High to Low"
+                    value="price-high-low"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
+                  />
+                  <SortOption
+                    label="Price: Low to High"
+                    value="price-low-high"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Filter Options */}
+            <AccordionItem value="options">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Options
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-discounted"
+                      checked={urlState.onlyDiscounted}
+                      onCheckedChange={handleToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="order-by-priority"
+                      checked={urlState.orderByPriority}
+                      onCheckedChange={handleTogglePriorityOrder}
+                    />
+                    <Label
+                      htmlFor="order-by-priority"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CrownIcon className="h-4 w-4" />
+                      Order by priority
+                    </Label>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
-      )}
-    </nav>
+      </aside>
+
+      {/* Mobile Navigation */}
+      <MobileNav
+        urlState={urlState}
+        queryInput={queryInput}
+        setQueryInput={setQueryInput}
+        onSearch={handleSearch}
+        onSearchTypeChange={handleSearchTypeChange}
+        isLoading={isLoading}
+        isSearching={isSearching}
+        showingFrom={showingFrom}
+        showingTo={showingTo}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
+
+      {/* Mobile Filters Drawer */}
+      <MobileFiltersDrawer
+        open={mobileFiltersOpen}
+        onOpenChange={setMobileFiltersOpen}
+        urlState={urlState}
+        selectedOrigins={selectedOrigins}
+        selectedPriorities={selectedPriorities}
+        onOriginToggle={handleOriginToggle}
+        onClearOrigins={handleClearOrigins}
+        onPriorityToggle={handlePriorityToggle}
+        onClearPriority={handleClearPriority}
+        onCategoryChange={handleCategoryChange}
+        onCategory2Change={handleCategory2Change}
+        onCategory3Change={handleCategory3Change}
+        onClearCategories={handleClearCategories}
+        onSortChange={handleSortChange}
+        onTogglePriorityOrder={handleTogglePriorityOrder}
+        onToggleDiscounted={handleToggleDiscounted}
+        onApply={handleSearch}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex h-full w-full flex-1 flex-col overflow-y-auto p-4">
+        {/* Products Grid */}
+        {showLoading ? (
+          <LoadingGrid limit={limit} />
+        ) : products.length > 0 ? (
+          <>
+            {/* Status Bar - Desktop */}
+            <div className="text-muted-foreground mb-4 hidden items-center justify-between text-xs lg:flex">
+              <span>
+                Showing{" "}
+                <span className="text-foreground font-semibold">
+                  {showingFrom}-{showingTo}
+                </span>{" "}
+                of <span className="text-foreground font-semibold">{totalCount}</span> results
+              </span>
+              <span>
+                Page <span className="text-foreground font-semibold">{currentPage}</span> of{" "}
+                <span className="text-foreground font-semibold">{totalPages}</span>
+              </span>
+            </div>
+
+            <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+              {products.map((product, idx) => (
+                <StoreProductCard key={product.id} sp={product} imagePriority={idx < 12} />
+              ))}
+            </div>
+
+            {/* Bottom Pagination */}
+            <BottomPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              showingFrom={showingFrom}
+              showingTo={showingTo}
+              totalCount={totalCount}
+              onPageChange={handlePageChange}
+            />
+          </>
+        ) : (
+          <EmptyState query={urlState.query} onClearFilters={handleClearFilters} />
+        )}
+      </div>
+    </div>
   )
 }
+
+// ============================================================================
+// Sub-Components
+// ============================================================================
 
 interface MobileNavProps {
   urlState: ReturnType<typeof useUrlState>["urlState"]
@@ -594,6 +734,7 @@ interface MobileNavProps {
   onSearch: () => void
   onSearchTypeChange: (type: SearchType) => void
   isLoading: boolean
+  isSearching: boolean
   showingFrom: number
   showingTo: number
   totalCount: number
@@ -607,7 +748,7 @@ function MobileNav({
   setQueryInput,
   onSearch,
   onSearchTypeChange,
-  isLoading,
+  isSearching,
   showingFrom,
   showingTo,
   totalCount,
@@ -618,7 +759,11 @@ function MobileNav({
     <nav className="sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
       <div className="flex w-full items-center gap-2">
         <div className="relative flex-1">
-          <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+          {isSearching ? (
+            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
+          ) : (
+            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+          )}
           <Input
             type="text"
             placeholder="Search products..."
@@ -644,7 +789,7 @@ function MobileNav({
             </SelectContent>
           </Select>
         </div>
-        <Button variant="primary" disabled={isLoading} onClick={onSearch} className="px-4">
+        <Button variant="primary" disabled={isSearching} onClick={onSearch} className="px-4">
           Search
         </Button>
       </div>
@@ -673,8 +818,17 @@ interface MobileFiltersDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   urlState: ReturnType<typeof useUrlState>["urlState"]
+  selectedOrigins: number[]
+  selectedPriorities: number[]
+  onOriginToggle: (origin: number) => void
+  onClearOrigins: () => void
+  onPriorityToggle: (level: number) => void
+  onClearPriority: () => void
+  onCategoryChange: (category: string) => void
+  onCategory2Change: (category2: string) => void
+  onCategory3Change: (category3: string) => void
+  onClearCategories: () => void
   onSortChange: (sort: SortByType) => void
-  onOriginChange: (origin: string | null) => void
   onTogglePriorityOrder: () => void
   onToggleDiscounted: () => void
   onApply: () => void
@@ -684,8 +838,17 @@ function MobileFiltersDrawer({
   open,
   onOpenChange,
   urlState,
+  selectedOrigins,
+  selectedPriorities,
+  onOriginToggle,
+  onClearOrigins,
+  onPriorityToggle,
+  onClearPriority,
+  onCategoryChange,
+  onCategory2Change,
+  onCategory3Change,
+  onClearCategories,
   onSortChange,
-  onOriginChange,
   onTogglePriorityOrder,
   onToggleDiscounted,
   onApply,
@@ -714,11 +877,107 @@ function MobileFiltersDrawer({
           <DrawerHeader>
             <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
           </DrawerHeader>
-          <div className="mt-2 flex flex-col gap-6 border-t px-4 pt-2 pb-24">
-            {/* Store Filter */}
+          <div className="mt-2 flex flex-col gap-6 overflow-y-auto border-t px-4 pt-2 pb-24">
+            {/* Store Origin Filter */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Store</Label>
-              <StoreSelect value={urlState.origin} onChange={onOriginChange} fullWidth />
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Store Origin</Label>
+                {selectedOrigins.length > 0 && (
+                  <button onClick={onClearOrigins} className="text-muted-foreground text-xs hover:underline">
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="mobile-origin-continente"
+                    checked={selectedOrigins.includes(1)}
+                    onCheckedChange={() => onOriginToggle(1)}
+                  />
+                  <Label
+                    htmlFor="mobile-origin-continente"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <ContinenteSvg className="h-4 min-h-4 w-auto" />
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="mobile-origin-auchan"
+                    checked={selectedOrigins.includes(2)}
+                    onCheckedChange={() => onOriginToggle(2)}
+                  />
+                  <Label
+                    htmlFor="mobile-origin-auchan"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <AuchanSvg className="h-4 min-h-4 w-auto" />
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="mobile-origin-pingo-doce"
+                    checked={selectedOrigins.includes(3)}
+                    onCheckedChange={() => onOriginToggle(3)}
+                  />
+                  <Label
+                    htmlFor="mobile-origin-pingo-doce"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <PingoDoceSvg className="h-4 min-h-4 w-auto" />
+                  </Label>
+                </div>
+              </div>
+            </div>
+
+            {/* Priority Filter */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Priority</Label>
+                {selectedPriorities.length > 0 && (
+                  <button onClick={onClearPriority} className="text-muted-foreground text-xs hover:underline">
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                {[0, 1, 2, 3, 4, 5].map((level) => (
+                  <div key={level} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`mobile-priority-${level}`}
+                      checked={selectedPriorities.includes(level)}
+                      onCheckedChange={() => onPriorityToggle(level)}
+                    />
+                    <Label
+                      htmlFor={`mobile-priority-${level}`}
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <PriorityBubble priority={level} size="sm" useDescription />
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Categories Filter */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Categories</Label>
+                {(urlState.category || urlState.category2 || urlState.category3) && (
+                  <button onClick={onClearCategories} className="text-muted-foreground text-xs hover:underline">
+                    Clear
+                  </button>
+                )}
+              </div>
+              <CategoryCascadeFilter
+                category={urlState.category}
+                category2={urlState.category2}
+                category3={urlState.category3}
+                onCategoryChange={onCategoryChange}
+                onCategory2Change={onCategory2Change}
+                onCategory3Change={onCategory3Change}
+              />
             </div>
 
             {/* Sort Options */}
@@ -758,20 +1017,37 @@ function MobileFiltersDrawer({
 
             {/* Filter Options */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Filter Options</Label>
-              <div className="space-y-2">
-                <ToggleButton
-                  label="Only discounted"
-                  icon={<BadgePercentIcon className="h-4 w-4" />}
-                  active={urlState.onlyDiscounted}
-                  onClick={onToggleDiscounted}
-                />
-                <ToggleButton
-                  label="Order by priority"
-                  icon={<CrownIcon className="h-4 w-4" />}
-                  active={urlState.orderByPriority}
-                  onClick={onTogglePriorityOrder}
-                />
+              <Label className="text-base font-semibold">Options</Label>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="mobile-only-discounted"
+                    checked={urlState.onlyDiscounted}
+                    onCheckedChange={onToggleDiscounted}
+                  />
+                  <Label
+                    htmlFor="mobile-only-discounted"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <BadgePercentIcon className="h-4 w-4" />
+                    Only discounted
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="mobile-order-by-priority"
+                    checked={urlState.orderByPriority}
+                    onCheckedChange={onTogglePriorityOrder}
+                  />
+                  <Label
+                    htmlFor="mobile-order-by-priority"
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <CrownIcon className="h-4 w-4" />
+                    Order by priority
+                  </Label>
+                </div>
               </div>
             </div>
           </div>
@@ -794,43 +1070,6 @@ function MobileFiltersDrawer({
 }
 
 // ============================================================================
-// Shared UI Components
-// ============================================================================
-
-function StoreSelect({
-  value,
-  onChange,
-  fullWidth,
-}: {
-  value: string | null
-  onChange: (v: string | null) => void
-  fullWidth?: boolean
-}) {
-  return (
-    <Select value={value ?? "0"} onValueChange={(v) => onChange(v === "0" ? null : v)}>
-      <SelectTrigger className={cn("font-medium", fullWidth && "w-full")}>
-        <SelectValue placeholder="Store" />
-      </SelectTrigger>
-      <SelectContent align="start" className="w-[180px]">
-        <SelectGroup>
-          <SelectLabel>Store</SelectLabel>
-          <SelectItem value="0">All stores</SelectItem>
-          <SelectItem value="1">
-            <ContinenteSvg className="inline-flex h-4 min-h-4 w-auto" />
-          </SelectItem>
-          <SelectItem value="2">
-            <AuchanSvg className="inline-flex h-4 min-h-4 w-auto" />
-          </SelectItem>
-          <SelectItem value="3">
-            <PingoDoceSvg className="inline-flex h-4 min-h-4 w-auto" />
-          </SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  )
-}
-
-// ============================================================================
 // Category Cascade Filter
 // ============================================================================
 
@@ -841,7 +1080,6 @@ interface CategoryCascadeFilterProps {
   onCategoryChange: (category: string) => void
   onCategory2Change: (category2: string) => void
   onCategory3Change: (category3: string) => void
-  onClear: () => void
 }
 
 function useCategoryOptions(category?: string, category2?: string) {
@@ -895,269 +1133,136 @@ function CategoryCascadeFilter({
   onCategoryChange,
   onCategory2Change,
   onCategory3Change,
-  onClear,
 }: CategoryCascadeFilterProps) {
   const { level1Options, level2Options, level3Options } = useCategoryOptions(
     category || undefined,
     category2 || undefined,
   )
 
-  const hasActiveFilter = category || category2 || category3
-  const activeCount = [category, category2, category3].filter(Boolean).length
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="relative flex items-center justify-start gap-2 font-medium">
-          <FilterIcon className="h-4 w-4" />
-          <span>Categories</span>
-          {activeCount > 0 && (
-            <span className="bg-primary text-primary-foreground text-2xs flex h-4 w-4 shrink-0 items-center justify-center rounded-full leading-none">
-              {activeCount}
-            </span>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[360px]">
-        <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+    <div className="flex flex-col gap-3">
+      {/* Level 1: Category */}
+      <div>
+        <Label className="text-muted-foreground mb-1 block text-xs">Category</Label>
+        <Select value={category || "_all"} onValueChange={(v) => onCategoryChange(v === "_all" ? "" : v)}>
+          <SelectTrigger className="h-8 w-full text-sm">
+            <SelectValue placeholder="All categories" />
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px]">
+            <SelectItem value="_all">All categories</SelectItem>
+            <SelectSeparator />
+            {level1Options.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Level 1: Category */}
-        <div className="p-2">
-          <Label className="text-muted-foreground mb-1 block text-xs">Category</Label>
-          <Select value={category || "_all"} onValueChange={(v) => onCategoryChange(v === "_all" ? "" : v)}>
-            <SelectTrigger className="h-8 w-full text-sm">
-              <SelectValue placeholder="All categories" />
-            </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
-              <SelectItem value="_all">All categories</SelectItem>
-              <SelectSeparator />
-              {level1Options.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Level 2: Subcategory */}
+      <div>
+        <Label className="text-muted-foreground mb-1 block text-xs">Subcategory</Label>
+        <Select
+          value={category2 || "_all"}
+          onValueChange={(v) => onCategory2Change(v === "_all" ? "" : v)}
+          disabled={!category}
+        >
+          <SelectTrigger className="h-8 w-full text-sm">
+            <SelectValue placeholder={category ? "All subcategories" : "Select category first"} />
+          </SelectTrigger>
+          <SelectContent className="max-h-[200px]">
+            <SelectItem value="_all">All subcategories</SelectItem>
+            {level2Options.length > 0 && <SelectSeparator />}
+            {level2Options.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Level 2: Subcategory */}
-        <div className="p-2 pt-0">
-          <Label className="text-muted-foreground mb-1 block text-xs">Subcategory</Label>
-          <Select
-            value={category2 || "_all"}
-            onValueChange={(v) => onCategory2Change(v === "_all" ? "" : v)}
-            disabled={!category}
-          >
-            <SelectTrigger className="h-8 w-full text-sm">
-              <SelectValue placeholder={category ? "All subcategories" : "Select category first"} />
-            </SelectTrigger>
-            <SelectContent className="max-h-[200px]">
-              <SelectItem value="_all">All subcategories</SelectItem>
-              {level2Options.length > 0 && <SelectSeparator />}
-              {level2Options.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Level 3: Sub-subcategory */}
-        <div className="p-2 pt-0">
-          <Label className="text-muted-foreground mb-1 block text-xs">Sub-subcategory</Label>
-          <Select
-            value={category3 || "_all"}
-            onValueChange={(v) => onCategory3Change(v === "_all" ? "" : v)}
-            disabled={!category2}
-          >
-            <SelectTrigger className="h-8 w-full text-sm">
-              <SelectValue placeholder={category2 ? "All sub-subcategories" : "Select subcategory first"} />
-            </SelectTrigger>
-            <SelectContent className="max-h-[200px]">
-              <SelectItem value="_all">All sub-subcategories</SelectItem>
-              {level3Options.length > 0 && <SelectSeparator />}
-              {level3Options.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {hasActiveFilter && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onClear} className="text-muted-foreground">
-              <CircleOffIcon className="h-4 w-4" />
-              Clear all categories
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      {/* Level 3: Sub-subcategory */}
+      <div>
+        <Label className="text-muted-foreground mb-1 block text-xs">Sub-subcategory</Label>
+        <Select
+          value={category3 || "_all"}
+          onValueChange={(v) => onCategory3Change(v === "_all" ? "" : v)}
+          disabled={!category2}
+        >
+          <SelectTrigger className="h-8 w-full text-sm">
+            <SelectValue placeholder={category2 ? "All sub-subcategories" : "Select subcategory first"} />
+          </SelectTrigger>
+          <SelectContent className="max-h-[200px]">
+            <SelectItem value="_all">All sub-subcategories</SelectItem>
+            {level3Options.length > 0 && <SelectSeparator />}
+            {level3Options.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
   )
 }
 
-interface PriorityFilterDropdownProps {
-  selectedPriorities: Set<number>
-  onPriorityToggle: (level: number) => void
-  onClearPriority: () => void
-  fullWidth?: boolean
-}
+// ============================================================================
+// Shared UI Components
+// ============================================================================
 
-function PriorityFilterDropdown({
-  selectedPriorities,
-  onPriorityToggle,
-  onClearPriority,
-  fullWidth,
-}: PriorityFilterDropdownProps) {
-  const hasSelection = selectedPriorities.size > 0
-
+function SortOption({
+  label,
+  value,
+  current,
+  onChange,
+  icon,
+}: {
+  label: string
+  value: SortByType
+  current: SortByType
+  onChange: (v: SortByType) => void
+  icon: React.ReactNode
+}) {
+  const isSelected = current === value
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className={cn("relative justify-start font-medium", fullWidth && "w-full")}>
-          <MicroscopeIcon className="h-4 w-4" />
-          <span>Priority</span>
-          {hasSelection && (
-            <span className="bg-primary text-primary-foreground text-2xs rounded-full px-1.5 py-0.5">
-              {selectedPriorities.size}
-            </span>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[200px]">
-        <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {([0, 1, 2, 3, 4, 5] as PriorityLevel[]).map((level) => {
-          const config = PRIORITY_CONFIG[level]
-          const isSelected = selectedPriorities.has(level)
-          return (
-            <DropdownMenuItem
-              key={level}
-              onClick={(e) => {
-                e.preventDefault()
-                onPriorityToggle(level)
-              }}
-              className="cursor-pointer"
-            >
-              <span
-                className={cn(
-                  "flex h-5 w-5 items-center justify-center rounded text-xs font-bold",
-                  config.color,
-                  config.textColor,
-                )}
-              >
-                {level}
-              </span>
-              <span className="flex-1">{config.label}</span>
-              {isSelected && <CheckIcon className="h-4 w-4" />}
-            </DropdownMenuItem>
-          )
-        })}
-        {hasSelection && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onClearPriority} className="text-muted-foreground">
-              <CircleOffIcon className="h-4 w-4" />
-              Clear filter
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-interface SortMenuProps {
-  sortBy: SortByType
-  orderByPriority: boolean
-  onlyDiscounted: boolean
-  onSortChange: (sort: SortByType) => void
-  onTogglePriorityOrder: () => void
-  onToggleDiscounted: () => void
-}
-
-function SortMenu({
-  sortBy,
-  orderByPriority,
-  onlyDiscounted,
-  onSortChange,
-  onTogglePriorityOrder,
-  onToggleDiscounted,
-}: SortMenuProps) {
-  const getSortIcon = () => {
-    switch (sortBy) {
-      case "a-z":
-        return <ArrowDownAZIcon className="h-4 w-4" />
-      case "z-a":
-        return <ArrowUpAZIcon className="h-4 w-4" />
-      case "price-low-high":
-        return <ArrowUpWideNarrowIcon className="h-4 w-4" />
-      case "price-high-low":
-        return <ArrowDownWideNarrowIcon className="h-4 w-4" />
-      default:
-        return <ArrowDownAZIcon className="h-4 w-4" />
-    }
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="relative w-auto justify-start lg:w-[120px]">
-          {getSortIcon()}
-          <span className="hidden lg:block">Sort by</span>
-          {(orderByPriority || onlyDiscounted) && (
-            <span className="bg-destructive absolute -top-[3px] -right-[3px] size-[10px] rounded-full" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[180px]">
-        <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => onSortChange("a-z")}>
-          <ArrowDownAZ className="h-4 w-4" /> Name A-Z
-          {sortBy === "a-z" && <CheckIcon className="ml-auto h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onSortChange("z-a")}>
-          <ArrowUpAZ className="h-4 w-4" /> Name Z-A
-          {sortBy === "z-a" && <CheckIcon className="ml-auto h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onSortChange("price-high-low")}>
-          <ArrowUpWideNarrowIcon className="h-4 w-4" /> Price: High to Low
-          {sortBy === "price-high-low" && <CheckIcon className="ml-auto h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onSortChange("price-low-high")}>
-          <ArrowDownWideNarrowIcon className="h-4 w-4" /> Price: Low to High
-          {sortBy === "price-low-high" && <CheckIcon className="ml-auto h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel>Options</DropdownMenuLabel>
-        <DropdownMenuItem onClick={onToggleDiscounted}>
-          <BadgePercentIcon className="h-4 w-4" /> Only discounted
-          <ToggleBadge active={onlyDiscounted} />
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onTogglePriorityOrder}>
-          <CrownIcon className="h-4 w-4" /> Order by priority
-          <ToggleBadge active={orderByPriority} />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-function ToggleBadge({ active }: { active: boolean }) {
-  return (
-    <span
+    <button
+      onClick={() => onChange(value)}
       className={cn(
-        "ml-auto h-auto w-6 rounded text-center text-xs font-medium",
-        active ? "bg-emerald-600 text-white" : "bg-destructive text-white",
+        "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+        isSelected ? "bg-foreground text-background" : "hover:bg-muted",
       )}
     >
-      {active ? "On" : "Off"}
-    </span>
+      {icon}
+      {label}
+    </button>
+  )
+}
+
+function SortButton({
+  label,
+  value,
+  current,
+  onChange,
+  icon,
+}: {
+  label: string
+  value: SortByType
+  current: SortByType
+  onChange: (v: SortByType) => void
+  icon: React.ReactNode
+}) {
+  return (
+    <Button
+      variant={current === value ? "default" : "outline"}
+      className="justify-start"
+      onClick={() => onChange(value)}
+    >
+      {icon}
+      {label}
+    </Button>
   )
 }
 
@@ -1203,62 +1308,15 @@ function PaginationControls({ currentPage, totalPages, isLoading, onPageChange }
   )
 }
 
-function SortButton({
-  label,
-  value,
-  current,
-  onChange,
-  icon,
-}: {
-  label: string
-  value: SortByType
-  current: SortByType
-  onChange: (v: SortByType) => void
-  icon: React.ReactNode
-}) {
-  return (
-    <Button
-      variant={current === value ? "default" : "outline"}
-      className="justify-start"
-      onClick={() => onChange(value)}
-    >
-      {icon}
-      {label}
-    </Button>
-  )
-}
-
-function ToggleButton({
-  label,
-  icon,
-  active,
-  onClick,
-}: {
-  label: string
-  icon: React.ReactNode
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <Button variant="outline" className="w-full justify-between" onClick={onClick}>
-      <div className="flex items-center gap-2">
-        {icon}
-        {label}
-      </div>
-      <ToggleBadge active={active} />
-    </Button>
-  )
-}
-
 function LoadingGrid({ limit }: { limit: number }) {
   return (
-    <div className="flex w-full flex-col gap-3 p-4">
+    <div className="flex w-full flex-col gap-3">
       <Skeleton className="border-border h-10 w-full border" />
       <div className="flex w-full items-center justify-between">
         <Skeleton className="h-3 w-48 rounded" />
         <Skeleton className="h-3 w-24 rounded" />
       </div>
-      <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
+      <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {Array.from({ length: limit }).map((_, i) => (
           <StoreProductCardSkeleton key={i} />
         ))}
@@ -1307,7 +1365,7 @@ function BottomPagination({
   onPageChange: (page: number) => void
 }) {
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="mt-8 flex items-center justify-between border-t pt-4">
       <div className="text-muted-foreground flex w-full flex-col text-sm">
         <span>
           Showing <span className="text-foreground font-semibold">{showingFrom}</span> to{" "}
