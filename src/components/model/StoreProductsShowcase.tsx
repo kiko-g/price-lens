@@ -808,7 +808,7 @@ function StoreSelect({
 }) {
   return (
     <Select value={value ?? "0"} onValueChange={(v) => onChange(v === "0" ? null : v)}>
-      <SelectTrigger className={cn("min-w-[120px] font-medium", fullWidth && "w-full")}>
+      <SelectTrigger className={cn("font-medium", fullWidth && "w-full")}>
         <SelectValue placeholder="Store" />
       </SelectTrigger>
       <SelectContent align="start" className="w-[180px]">
@@ -908,17 +908,17 @@ function CategoryCascadeFilter({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="relative min-w-[120px] justify-start font-medium">
+        <Button variant="outline" className="relative flex items-center justify-start gap-2 font-medium">
           <FilterIcon className="h-4 w-4" />
           <span>Categories</span>
           {activeCount > 0 && (
-            <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs">
+            <span className="bg-primary text-primary-foreground text-2xs flex h-4 w-4 shrink-0 items-center justify-center rounded-full leading-none">
               {activeCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[280px]">
+      <DropdownMenuContent align="start" className="w-[360px]">
         <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
@@ -929,7 +929,7 @@ function CategoryCascadeFilter({
             <SelectTrigger className="h-8 w-full text-sm">
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
-            <SelectContent className="max-h-[200px]">
+            <SelectContent className="max-h-[300px]">
               <SelectItem value="_all">All categories</SelectItem>
               <SelectSeparator />
               {level1Options.map((cat) => (
@@ -1019,14 +1019,11 @@ function PriorityFilterDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn("relative min-w-[120px] justify-start font-medium", fullWidth && "w-full")}
-        >
+        <Button variant="outline" className={cn("relative justify-start font-medium", fullWidth && "w-full")}>
           <MicroscopeIcon className="h-4 w-4" />
           <span>Priority</span>
           {hasSelection && (
-            <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs">
+            <span className="bg-primary text-primary-foreground text-2xs rounded-full px-1.5 py-0.5">
               {selectedPriorities.size}
             </span>
           )}
