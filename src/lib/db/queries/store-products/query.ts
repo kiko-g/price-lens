@@ -1,19 +1,15 @@
 import { createClient } from "@/lib/supabase/server"
-import type {
-  StoreProductsQueryParams,
-  StoreProductsQueryResult,
-  StoreProductWithMeta,
-  PaginationMeta,
-} from "./types"
+import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
+
+// Type alias for the Supabase query builder after calling .select()
+type StoreProductsQuery = ReturnType<ReturnType<ReturnType<typeof createClient>["from"]>["select"]>
 
 /**
  * Main query function for fetching store products
  * Handles all filtering, sorting, pagination, and user-specific augmentation
  */
-export async function queryStoreProducts(
-  params: StoreProductsQueryParams = {},
-): Promise<StoreProductsQueryResult> {
+export async function queryStoreProducts(params: StoreProductsQueryParams = {}): Promise<StoreProductsQueryResult> {
   const supabase = createClient()
 
   // Apply defaults
@@ -120,10 +116,10 @@ export async function queryStoreProducts(
 // ============================================================================
 
 function applyPriorityFilter(
-  query: ReturnType<ReturnType<typeof createClient>["from"]>["select"],
+  query: StoreProductsQuery,
   params: StoreProductsQueryParams,
   flags: typeof DEFAULT_FLAGS,
-) {
+): StoreProductsQuery {
   // If specific priority values are provided, use them
   if (params.priority?.values && params.priority.values.length > 0) {
     const values = params.priority.values
@@ -151,10 +147,7 @@ function applyPriorityFilter(
   return query
 }
 
-function applyOriginFilter(
-  query: ReturnType<ReturnType<typeof createClient>["from"]>["select"],
-  params: StoreProductsQueryParams,
-) {
+function applyOriginFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
   if (!params.origin?.originIds) return query
 
   const ids = params.origin.originIds
@@ -171,10 +164,7 @@ function applyOriginFilter(
   return query
 }
 
-function applyCategoryFilter(
-  query: ReturnType<ReturnType<typeof createClient>["from"]>["select"],
-  params: StoreProductsQueryParams,
-) {
+function applyCategoryFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
   if (!params.categories) return query
 
   // Hierarchical categories - apply each level if provided
@@ -203,10 +193,7 @@ function applyCategoryFilter(
   return query
 }
 
-function applySearchFilter(
-  query: ReturnType<ReturnType<typeof createClient>["from"]>["select"],
-  params: StoreProductsQueryParams,
-) {
+function applySearchFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
   if (!params.search?.query) return query
 
   const searchQuery = params.search.query
@@ -248,10 +235,7 @@ function applySearchFilter(
   }
 }
 
-function applySorting(
-  query: ReturnType<ReturnType<typeof createClient>["from"]>["select"],
-  sortBy: string,
-) {
+function applySorting(query: StoreProductsQuery, sortBy: string): StoreProductsQuery {
   switch (sortBy) {
     case "a-z":
       return query.order("name", { ascending: true })
@@ -310,4 +294,3 @@ function createEmptyPagination(pagination: { page: number; limit: number }): Pag
     hasPreviousPage: pagination.page > 1,
   }
 }
-
