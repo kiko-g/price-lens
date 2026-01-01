@@ -45,11 +45,4 @@ export type {
 } from "./types"
 
 // Constants and utilities
-export {
-  SupermarketChain,
-  DEFAULT_PAGINATION,
-  DEFAULT_SORT,
-  DEFAULT_FLAGS,
-  generateQueryKey,
-} from "./types"
-
+export { SupermarketChain, DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS, generateQueryKey } from "./types"

@@ -169,4 +169,3 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
 
   return queryParams
 }
-

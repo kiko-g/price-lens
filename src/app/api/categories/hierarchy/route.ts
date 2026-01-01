@@ -90,4 +90,3 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ error: "Invalid request" }, { status: 400 })
 }
-
