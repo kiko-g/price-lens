@@ -12,7 +12,7 @@ import { Providers } from "./providers"
 import { Analytics } from "@/components/layout/Analytics"
 import { Toaster } from "@/components/ui/sonner"
 import { Header } from "@/components/layout/Header"
-import { Footer } from "@/components/layout/Footer"
+import { ControlledFooter } from "@/components/layout/ControlledFooter"
 
 export const metadata: Metadata = {
   title: {
@@ -104,7 +104,7 @@ export default function RootLayout({
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex flex-1 flex-col">{children}</main>
-            <Footer />
+            <ControlledFooter />
           </div>
           <Toaster />
         </Providers>

@@ -2,14 +2,20 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { cn } from "@/lib/utils"
+import { siteConfig } from "@/lib/config"
 
 import { Button } from "@/components/ui/button"
 import { InstagramIcon, LinkedinIcon, XTwitterIcon } from "@/components/icons"
-import { siteConfig } from "@/lib/config"
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   return (
-    <footer className="mx-auto flex w-full items-center justify-between border-t bg-zinc-900 px-4 py-4 pt-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-8 lg:pt-8 dark:bg-inherit">
+    <footer
+      className={cn(
+        "mx-auto flex w-full items-center justify-between border-t bg-zinc-900 px-4 py-4 pt-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-8 lg:pt-8 dark:bg-inherit",
+        className,
+      )}
+    >
       <div className="flex flex-col items-start justify-start gap-0">
         <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
           Built by{" "}

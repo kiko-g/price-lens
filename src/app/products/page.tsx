@@ -1,6 +1,8 @@
 import { Suspense } from "react"
 import { StoreProductsShowcase } from "@/components/StoreProductsShowcase"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Footer } from "@/components/layout/Footer"
+import { HideFooter } from "@/contexts/FooterContext"
 
 export const metadata = {
   title: "Products | Price Lens",
@@ -23,8 +25,11 @@ function LoadingFallback() {
 export default function StoreProductsPage() {
   return (
     <main className="h-[calc(100vh-54px)] overflow-hidden">
+      <HideFooter />
       <Suspense fallback={<LoadingFallback />}>
-        <StoreProductsShowcase />
+        <StoreProductsShowcase>
+          <Footer className="px-0 sm:px-0 lg:px-0" />
+        </StoreProductsShowcase>
       </Suspense>
     </main>
   )

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { ThemeProvider, useTheme } from "next-themes"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { UserProvider } from "@/contexts/UserContext"
+import { FooterProvider } from "@/contexts/FooterContext"
 
 function makeQueryClient() {
   return new QueryClient({
@@ -77,8 +78,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" disableTransitionOnChange>
           <UserProvider>
-            <ThemeWatcher />
-            {children}
+            <FooterProvider>
+              <ThemeWatcher />
+              {children}
+            </FooterProvider>
           </UserProvider>
         </ThemeProvider>
       </QueryClientProvider>

@@ -57,6 +57,8 @@ import {
 interface StoreProductsShowcaseProps {
   /** Default page limit */
   limit?: number
+  /** Children to render at the bottom (e.g., Footer) */
+  children?: React.ReactNode
 }
 
 // ============================================================================
@@ -209,7 +211,7 @@ const serializeArray = (arr: number[]): string | null => {
 // Main Component
 // ============================================================================
 
-export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps) {
+export function StoreProductsShowcase({ limit = 36, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
   const { urlState, updateUrl } = useUrlState()
 
@@ -714,6 +716,9 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
               totalCount={totalCount}
               onPageChange={handlePageChange}
             />
+
+            {/* Use children here to render the footer */}
+            {children}
           </>
         ) : (
           <EmptyState query={urlState.query} onClearFilters={handleClearFilters} />
@@ -1365,7 +1370,7 @@ function BottomPagination({
   onPageChange: (page: number) => void
 }) {
   return (
-    <div className="mt-8 flex items-center justify-between border-t pt-4">
+    <div className="mt-8 flex items-center justify-between border-t py-4">
       <div className="text-muted-foreground flex w-full flex-col text-sm">
         <span>
           Showing <span className="text-foreground font-semibold">{showingFrom}</span> to{" "}
