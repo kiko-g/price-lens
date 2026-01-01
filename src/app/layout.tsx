@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
 
 import { Providers } from "./providers"
-import { Analytics } from "@/components/Analytics"
+import { Analytics } from "@/components/layout/Analytics"
 import { Toaster } from "@/components/ui/sonner"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
