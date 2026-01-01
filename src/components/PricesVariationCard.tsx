@@ -3,8 +3,8 @@ import { cn, discountValueToPercentage } from "@/lib/utils"
 import { type StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"
-import { PriceChange } from "@/components/model/PriceChange"
-import { resolveSupermarketChain } from "@/components/model/Supermarket"
+import { PriceChange } from "@/components/PriceChange"
+import { resolveSupermarketChain } from "@/components/Supermarket"
 
 import { ChevronRightIcon, ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
 

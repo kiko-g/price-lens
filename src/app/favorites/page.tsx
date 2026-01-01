@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Layout } from "@/components/layout"
 
-import { StoreProductCard } from "@/components/model/StoreProductCard"
+import { StoreProductCard } from "@/components/StoreProductCard"
 import { HeartIcon, LogInIcon, RefreshCcwIcon, Loader2Icon } from "lucide-react"
 
 export default function FavoritesPage() {
@@ -67,7 +67,7 @@ export default function FavoritesPage() {
           <h1 className="text-3xl font-bold">My Favorites</h1>
           <HeartIcon className="fill-destructive stroke-destructive h-6 w-6" />
         </div>
-        <p className="text-muted-foreground mt-1 mb-6">Products you've saved for easy access and price tracking</p>
+        <p className="text-muted-foreground mt-1 mb-6">Products you&apos;ve saved for easy access and price tracking</p>
 
         <FavoritesGrid user={user} />
       </div>

@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { PricesVariationCard } from "@/components/model/PricesVariationCard"
+import { PricesVariationCard } from "@/components/PricesVariationCard"
 
 import { BinocularsIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
 

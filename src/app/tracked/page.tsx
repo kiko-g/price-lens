@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { Layout } from "@/components/layout"
-import { StoreProductsTracked } from "@/components/model/StoreProductsTracked"
+import { StoreProductsTracked } from "@/components/StoreProductsTracked"
 import { getTrackedProducts } from "./actions"
 
 export const metadata: Metadata = {

@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { StoreProductsShowcase } from "@/components/model/StoreProductsShowcase"
+import { StoreProductsShowcase } from "@/components/StoreProductsShowcase"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export const metadata = {

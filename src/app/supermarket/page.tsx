@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { getSearchType, getSortByType, SortByType, type SearchType } from "@/types/extra"
 
 import { Layout } from "@/components/layout"
-import { StoreProductsGrid } from "@/components/model/StoreProductsGrid"
+import { StoreProductsGrid } from "@/components/StoreProductsGrid"
 import { getSupermarketProducts, type SupermarketProductsResult } from "./actions"
 import { siteConfig } from "@/lib/config"
 

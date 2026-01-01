@@ -6,7 +6,7 @@ import type { TrackedProductsPage, PriorityFilterValue } from "@/hooks/useTracke
 import { useTrackedProducts } from "@/hooks/useTrackedProducts"
 import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce"
 
-import { ProductCardSkeleton, StoreProductCard } from "@/components/model/StoreProductCard"
+import { ProductCardSkeleton, StoreProductCard } from "@/components/StoreProductCard"
 
 import { ArrowUpIcon, Loader2Icon, SearchIcon, ShoppingBasketIcon, RefreshCwIcon } from "lucide-react"
 import { cn } from "@/lib/utils"

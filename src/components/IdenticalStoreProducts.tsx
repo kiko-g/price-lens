@@ -4,7 +4,7 @@ import useEmblaCarousel from "embla-carousel-react"
 import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
 import { Button } from "@/components/ui/button"
-import { StoreProductCard } from "@/components/model/StoreProductCard"
+import { StoreProductCard } from "@/components/StoreProductCard"
 
 import { ArrowLeftIcon, ArrowRightIcon, BrainCogIcon, Loader2Icon } from "lucide-react"
 

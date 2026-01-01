@@ -42,9 +42,9 @@ import {
 } from "@/components/ui/drawer"
 
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
-import { ProductChart } from "@/components/model/ProductChart"
-import { resolveSupermarketChain } from "@/components/model/Supermarket"
-import { RelatedStoreProducts } from "@/components/model/RelatedStoreProducts"
+import { ProductChart } from "@/components/ProductChart"
+import { resolveSupermarketChain } from "@/components/Supermarket"
+import { RelatedStoreProducts } from "@/components/RelatedStoreProducts"
 import { useUpdateStoreProduct, useUpdateStoreProductPriority } from "@/hooks/useProducts"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
@@ -52,7 +52,7 @@ import { useUser } from "@/hooks/useUser"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { IdenticalStoreProducts } from "./IdenticalStoreProducts"
-import { Separator } from "../ui/separator"
+import { Separator } from "./ui/separator"
 
 function resolveImageUrlForPage(image: string, size = 800) {
   const url = new URL(image)

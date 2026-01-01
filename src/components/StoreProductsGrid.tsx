@@ -53,9 +53,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"
-import { StoreProductCard } from "@/components/model/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/model/StoreProductCardSkeleton"
-import { resolveSupermarketChain } from "@/components/model/Supermarket"
+import { StoreProductCard } from "@/components/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
+import { resolveSupermarketChain } from "@/components/Supermarket"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"

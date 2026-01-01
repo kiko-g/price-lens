@@ -34,8 +34,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
-import { StoreProductCard } from "@/components/model/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/model/StoreProductCardSkeleton"
+import { StoreProductCard } from "@/components/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 

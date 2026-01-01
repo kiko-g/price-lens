@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { Layout } from "@/components/layout"
-import { StoreProductPage } from "@/components/model/StoreProductPage"
+import { StoreProductPage } from "@/components/StoreProductPage"
 import { storeProductQueries } from "@/lib/db/queries/products"
 import { createClient } from "@/lib/supabase/server"
 
