@@ -21,7 +21,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ShareButton } from "@/components/ui/combo/ShareButton"
+import { ShareButton } from "@/components/ui/combo/share-button"
 import {
   DropdownMenu,
   DropdownMenuContent,

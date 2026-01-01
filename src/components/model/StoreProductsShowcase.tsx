@@ -36,7 +36,7 @@ import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/model/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/model/StoreProductCardSkeleton"
-import { Wrapper } from "@/components/SectionWrapper"
+import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
 import {
@@ -335,14 +335,14 @@ export function StoreProductsShowcase({ limit = 36 }: StoreProductsShowcaseProps
 
   if (isError) {
     return (
-      <Wrapper>
+      <SectionWrapper>
         <CircleOffIcon className="h-6 w-6" />
         <p>Error fetching products. Please try again.</p>
         <Button variant="default" onClick={() => refetch()}>
           <span>Try again</span>
           <RefreshCcwIcon />
         </Button>
-      </Wrapper>
+      </SectionWrapper>
     )
   }
 
@@ -1271,7 +1271,7 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
   const router = useRouter()
 
   return (
-    <Wrapper>
+    <SectionWrapper>
       <CircleOffIcon className="h-8 w-8" />
       <div className="flex flex-col items-start justify-start">
         <p>No products found matching your search.</p>
@@ -1287,7 +1287,7 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
           Clear filters
         </Button>
       </div>
-    </Wrapper>
+    </SectionWrapper>
   )
 }
 

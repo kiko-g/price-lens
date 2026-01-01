@@ -56,7 +56,7 @@ import { TrackingInformationDialog } from "@/components/admin/TrackingInformatio
 import { StoreProductCard } from "@/components/model/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/model/StoreProductCardSkeleton"
 import { resolveSupermarketChain } from "@/components/model/Supermarket"
-import { Wrapper } from "@/components/SectionWrapper"
+import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import {
@@ -669,7 +669,7 @@ WHERE category = '${category1}'
 
   if (isError) {
     return (
-      <Wrapper>
+      <SectionWrapper>
         <CircleOffIcon className="h-6 w-6" />
         <p>Error fetching products. Please try again.</p>
         <Button
@@ -681,7 +681,7 @@ WHERE category = '${category1}'
           <span>Try again</span>
           <RefreshCcwIcon />
         </Button>
-      </Wrapper>
+      </SectionWrapper>
     )
   }
 
@@ -1262,7 +1262,7 @@ WHERE category = '${category1}'
           ))}
         </div>
       ) : (
-        <Wrapper>
+        <SectionWrapper>
           <CircleOffIcon className="h-8 w-8" />
           <div className="flex flex-col items-start justify-start">
             <p>No products found matching your search.</p>
@@ -1327,7 +1327,7 @@ WHERE category = '${category1}'
               Clear search
             </Button>
           </div>
-        </Wrapper>
+        </SectionWrapper>
       )}
 
       {/* Bottom Pagination */}
