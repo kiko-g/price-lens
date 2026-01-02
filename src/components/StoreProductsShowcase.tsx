@@ -339,7 +339,10 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   const showingFrom = totalCount > 0 ? (currentPage - 1) * limit + 1 : 0
   const showingTo = Math.min(currentPage * limit, totalCount)
 
-  const showLoading = isLoading || isSearching
+  // Show full skeleton grid only on initial load (no products yet)
+  // Show overlay when we have products but are fetching new ones
+  const showSkeletons = isLoading && products.length === 0
+  const showOverlay = isFetching && products.length > 0
 
   // ============================================================================
   // Render
@@ -430,12 +433,17 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
         {/* Product Count */}
         <div className="mt-2 flex flex-col gap-2">
-          {showLoading ? (
+          {showSkeletons ? (
             <Skeleton className="h-4 w-full rounded-md" />
           ) : (
             <p className="text-muted-foreground text-xs">
               <strong className="text-foreground">{totalCount}</strong> products found
               {urlState.query && ` matching "${urlState.query}"`}
+              {showOverlay && (
+                <span className="text-muted-foreground ml-2 inline-flex items-center gap-1">
+                  <Loader2Icon className="h-3 w-3 animate-spin" />
+                </span>
+              )}
             </p>
           )}
 
@@ -712,7 +720,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       {/* Main Content Area */}
       <div className="flex h-full w-full flex-1 flex-col overflow-y-auto p-4">
         {/* Products Grid */}
-        {showLoading ? (
+        {showSkeletons ? (
           <LoadingGrid limit={limit} />
         ) : products.length > 0 ? (
           <>
@@ -731,10 +739,28 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </span>
             </div>
 
-            <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-              {products.map((product, idx) => (
-                <StoreProductCard key={product.id} sp={product} imagePriority={idx < 12} />
-              ))}
+            {/* Products grid with loading overlay */}
+            <div className="relative">
+              {/* Loading overlay */}
+              {showOverlay && (
+                <div className="bg-background/60 absolute inset-0 z-10 flex items-start justify-center pt-24 backdrop-blur-[2px]">
+                  <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                    <span className="text-sm font-medium">Loading...</span>
+                  </div>
+                </div>
+              )}
+
+              <div
+                className={cn(
+                  "grid w-full grid-cols-2 gap-x-3 gap-y-10 transition-opacity duration-200 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6",
+                  showOverlay && "pointer-events-none",
+                )}
+              >
+                {products.map((product, idx) => (
+                  <StoreProductCard key={product.id} sp={product} imagePriority={idx < 12} />
+                ))}
+              </div>
             </div>
 
             {/* Bottom Pagination */}
@@ -791,7 +817,7 @@ function MobileNav({
   totalPages,
 }: MobileNavProps) {
   return (
-    <nav className="sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
+    <nav className="sticky top-0 z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:top-[54px] lg:hidden dark:bg-zinc-950/95">
       <div className="flex w-full items-center gap-2">
         <div className="relative flex-1">
           {isSearching ? (
@@ -1345,8 +1371,7 @@ function PaginationControls({ currentPage, totalPages, isLoading, onPageChange }
 
 function LoadingGrid({ limit }: { limit: number }) {
   return (
-    <div className="flex w-full flex-col gap-3">
-      <Skeleton className="border-border h-10 w-full border" />
+    <div className="flex w-full flex-col gap-4">
       <div className="flex w-full items-center justify-between">
         <Skeleton className="h-3 w-48 rounded" />
         <Skeleton className="h-3 w-24 rounded" />

@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import { useQuery, useQueryClient, useMutation, keepPreviousData } from "@tanstack/react-query"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -161,6 +161,7 @@ export function useStoreProducts(params: StoreProductsQueryParams = {}, options:
     refetchOnWindowFocus,
     refetchOnReconnect: false,
     initialData,
+    placeholderData: keepPreviousData,
   })
 
   // Extract convenient values from the result

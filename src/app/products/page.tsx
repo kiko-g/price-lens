@@ -14,7 +14,7 @@ function LoadingFallback() {
     <div className="flex w-full flex-col gap-3 p-4">
       <Skeleton className="h-12 w-full" />
       <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-        {Array.from({ length: 12 }).map((_, i) => (
+        {Array.from({ length: 40 }).map((_, i) => (
           <Skeleton key={i} className="aspect-square w-full rounded-lg" />
         ))}
       </div>
@@ -28,7 +28,7 @@ export default function StoreProductsPage() {
       <HideFooter />
       <Suspense fallback={<LoadingFallback />}>
         <StoreProductsShowcase limit={40}>
-          <Footer className="px-0 sm:px-0 lg:px-0" />
+          <Footer className="px-0 pt-4 pb-0 sm:px-0 sm:pt-4 sm:pb-0 lg:px-0 lg:pt-4 lg:pb-0" />
         </StoreProductsShowcase>
       </Suspense>
     </main>
