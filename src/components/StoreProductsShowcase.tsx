@@ -54,6 +54,7 @@ import {
   HomeIcon,
   Loader2Icon,
   MoreHorizontalIcon,
+  MoveHorizontalIcon,
   PackageIcon,
   RefreshCcwIcon,
   SearchIcon,
@@ -228,6 +229,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   const [queryInput, setQueryInput] = useState(urlState.query)
   const [isSearching, setIsSearching] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [asidePosition, setAsidePosition] = useState<"left" | "right">("left")
 
   // Parse origin and priority from URL
   const selectedOrigins = useMemo(() => parseArrayParam(urlState.origin), [urlState.origin])
@@ -364,27 +366,43 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   return (
     <div className="flex h-full w-full flex-col lg:flex-row">
       {/* Desktop Sidebar */}
-      <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:min-w-80">
+      <aside
+        className={cn(
+          "hidden h-full flex-col overflow-y-auto p-4 transition-all lg:flex lg:w-80 lg:min-w-80",
+          asidePosition === "left" ? "order-1 border-r lg:order-1" : "",
+          asidePosition === "right" ? "order-1 border-l lg:order-2" : "",
+        )}
+      >
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <PackageIcon className="size-5" />
             <h2 className="text-lg font-bold">Products</h2>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <MoreHorizontalIcon className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setAsidePosition((prev) => (prev === "left" ? "right" : "left"))}
+            >
+              <MoveHorizontalIcon />
+            </Button>
 
-            <DropdownMenuContent className="w-48" align="start">
-              <DropdownMenuLabel>Tooling</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <ScrapeUrlDialog />
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon-sm">
+                  <MoreHorizontalIcon className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-48" align="start">
+                <DropdownMenuLabel>Tooling</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <ScrapeUrlDialog />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <p className="text-muted-foreground mb-4 text-sm">
@@ -680,45 +698,14 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         </div>
       </aside>
 
-      {/* Mobile Navigation */}
-      <MobileNav
-        urlState={urlState}
-        queryInput={queryInput}
-        setQueryInput={setQueryInput}
-        onSearch={handleSearch}
-        onSearchTypeChange={handleSearchTypeChange}
-        isLoading={isLoading}
-        isSearching={isSearching}
-        showingFrom={showingFrom}
-        showingTo={showingTo}
-        totalCount={totalCount}
-        currentPage={currentPage}
-        totalPages={totalPages}
-      />
-
-      {/* Mobile Filters Drawer */}
-      <MobileFiltersDrawer
-        open={mobileFiltersOpen}
-        onOpenChange={setMobileFiltersOpen}
-        urlState={urlState}
-        selectedOrigins={selectedOrigins}
-        selectedPriorities={selectedPriorities}
-        onOriginToggle={handleOriginToggle}
-        onClearOrigins={handleClearOrigins}
-        onPriorityToggle={handlePriorityToggle}
-        onClearPriority={handleClearPriority}
-        onCategoryChange={handleCategoryChange}
-        onCategory2Change={handleCategory2Change}
-        onCategory3Change={handleCategory3Change}
-        onClearCategories={handleClearCategories}
-        onSortChange={handleSortChange}
-        onTogglePriorityOrder={handleTogglePriorityOrder}
-        onToggleDiscounted={handleToggleDiscounted}
-        onApply={handleSearch}
-      />
-
       {/* Main Content Area */}
-      <div className="flex h-full w-full flex-1 flex-col overflow-y-auto p-4">
+      <div
+        className={cn(
+          "flex h-full w-full flex-1 flex-col overflow-y-auto p-4 transition-all",
+          asidePosition === "left" ? "order-2 lg:order-2" : "",
+          asidePosition === "right" ? "order-1 lg:order-1" : "",
+        )}
+      >
         {/* Products Grid */}
         {showSkeletons ? (
           <LoadingGrid limit={limit} />
@@ -780,6 +767,43 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           <EmptyState query={urlState.query} onClearFilters={handleClearFilters} />
         )}
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileNav
+        urlState={urlState}
+        queryInput={queryInput}
+        setQueryInput={setQueryInput}
+        onSearch={handleSearch}
+        onSearchTypeChange={handleSearchTypeChange}
+        isLoading={isLoading}
+        isSearching={isSearching}
+        showingFrom={showingFrom}
+        showingTo={showingTo}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
+
+      {/* Mobile Filters Drawer */}
+      <MobileFiltersDrawer
+        open={mobileFiltersOpen}
+        onOpenChange={setMobileFiltersOpen}
+        urlState={urlState}
+        selectedOrigins={selectedOrigins}
+        selectedPriorities={selectedPriorities}
+        onOriginToggle={handleOriginToggle}
+        onClearOrigins={handleClearOrigins}
+        onPriorityToggle={handlePriorityToggle}
+        onClearPriority={handleClearPriority}
+        onCategoryChange={handleCategoryChange}
+        onCategory2Change={handleCategory2Change}
+        onCategory3Change={handleCategory3Change}
+        onClearCategories={handleClearCategories}
+        onSortChange={handleSortChange}
+        onTogglePriorityOrder={handleTogglePriorityOrder}
+        onToggleDiscounted={handleToggleDiscounted}
+        onApply={handleSearch}
+      />
     </div>
   )
 }
