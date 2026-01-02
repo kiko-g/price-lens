@@ -50,7 +50,7 @@ export default function FavoritesPage() {
                 </Button>
 
                 <Button variant="outline" asChild>
-                  <Link href="/supermarket">Browse Supermarket Products</Link>
+                  <Link href="/products">Browse Supermarket Products</Link>
                 </Button>
               </div>
             </CardContent>
@@ -90,7 +90,7 @@ function FavoritesGrid({ user }: { user: User }) {
         <h3 className="mb-2 text-lg font-semibold">No favorites yet</h3>
         <p className="text-muted-foreground mb-4">Start adding products to your favorites to see them here</p>
         <Button asChild>
-          <Link href="/supermarket">Find Products</Link>
+          <Link href="/products">Find Products</Link>
         </Button>
       </div>
     )

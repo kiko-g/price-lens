@@ -5,6 +5,7 @@ import { Layout } from "@/components/layout"
 import { StoreProductsGrid } from "@/components/StoreProductsGrid"
 import { getSupermarketProducts, type SupermarketProductsResult } from "./actions"
 import { siteConfig } from "@/lib/config"
+import { generateProductSlug } from "@/lib/utils"
 
 type SearchParams = {
   q?: string
@@ -120,10 +121,10 @@ export default async function Supermarket({ searchParams }: Props) {
         price: product.price,
         priceCurrency: "EUR",
         availability: "https://schema.org/InStock",
-        url: `${siteConfig.url}/supermarket/${product.id}`,
+        url: `${siteConfig.url}/products/${product.id}-${generateProductSlug(product)}`,
       },
       brand: product.brand,
-      url: `${siteConfig.url}/supermarket/${product.id}`,
+      url: `${siteConfig.url}/products/${product.id}-${generateProductSlug(product)}`,
     })),
   }
 

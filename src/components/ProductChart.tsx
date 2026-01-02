@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
-import { cn, buildChartData, imagePlaceholder, chartConfig } from "@/lib/utils"
+import { cn, buildChartData, imagePlaceholder, chartConfig, generateProductPath } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
 import { usePricesWithAnalytics } from "@/hooks/usePrices"
@@ -176,7 +176,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
             {options?.showImage &&
               (sp.image ? (
                 <div className="relative">
-                  <Link href={`/supermarket/${sp.id}`} target="_blank">
+                  <Link href={generateProductPath(sp)} target="_blank">
                     <Image
                       src={resolveImageUrlForDrawer(sp.image, 400)}
                       alt={sp.name}

@@ -106,7 +106,7 @@ export function ScrapeUrlDialog() {
 
               {"product" in scrapedData && (
                 <Button variant="default" className="w-full" asChild>
-                  <Link href={`/supermarket/${scrapedData.product.id}`} target="_blank">
+                  <Link href={`/products/${scrapedData.product.id}`} target="_blank">
                     <Link2Icon className="h-4 w-4" />
                     Visit product page
                   </Link>

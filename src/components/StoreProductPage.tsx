@@ -167,7 +167,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.brand && (
-                <Link href={`/supermarket?q=${encodeURIComponent(sp.brand)}`} target="_blank">
+                <Link href={`/products?q=${encodeURIComponent(sp.brand)}`} target="_blank">
                   <Badge variant="blue">
                     <RadarIcon />
                     {sp.brand}

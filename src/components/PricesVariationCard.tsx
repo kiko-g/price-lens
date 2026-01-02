@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { cn, discountValueToPercentage } from "@/lib/utils"
+import { cn, discountValueToPercentage, generateProductPath } from "@/lib/utils"
 import { type StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"
@@ -117,7 +117,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
             asChild
             className="group text-xs transition-transform duration-300 [&_svg]:size-3"
           >
-            <Link href={`/supermarket/${storeProduct.id}`}>
+            <Link href={generateProductPath(storeProduct)}>
               See product
               <ArrowRightIcon className="group-hover:animate-bounce-x" />
             </Link>

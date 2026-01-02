@@ -39,7 +39,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-import { cn, discountValueToPercentage, formatTimestamptz, imagePlaceholder } from "@/lib/utils"
+import { cn, discountValueToPercentage, formatTimestamptz, generateProductPath, imagePlaceholder } from "@/lib/utils"
 import {
   ArrowUpRightIcon,
   CopyIcon,
@@ -119,7 +119,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
           sp.image ? "border-border" : "border-transparent",
         )}
       >
-        <Link href={`/supermarket/${sp.id}`} className="h-full w-full">
+        <Link href={generateProductPath(sp)} className="h-full w-full">
           {sp.image ? (
             <div className="relative aspect-square w-full">
               {!imageLoaded && <div className="bg-background/10 absolute inset-0 z-10 animate-pulse" />}
@@ -281,7 +281,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
           </span>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
-            <Link href={`/supermarket/${sp.id}`} target="_blank" className="hover:underline">
+            <Link href={generateProductPath(sp)} target="_blank" className="hover:underline">
               {sp.name || "Untitled"}
             </Link>
           </h2>

@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { memo, useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { cn, buildChartData, chartConfig } from "@/lib/utils"
+import { cn, buildChartData, chartConfig, generateProductPath } from "@/lib/utils"
 import { useAllProductsWithPrices } from "@/hooks/useProducts"
 import { productsWithPrices } from "@/lib/data/products"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
@@ -221,7 +221,7 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
           {storeProduct.image ? (
             <Link
               className="relative size-20 shrink-0 rounded-lg border p-1 transition-all duration-200 hover:opacity-80"
-              href={`/supermarket/${storeProductId}`}
+              href={generateProductPath(storeProduct)}
             >
               <Image
                 src={storeProduct.image}
@@ -251,7 +251,7 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
             <h2 className="text-lg leading-5 font-semibold tracking-tighter">{storeProduct.name}</h2>
             <p className="text-muted-foreground text-sm">
               More details{" "}
-              <Link href={`/supermarket/${storeProductId}`} className="hover:text-foreground underline">
+              <Link href={generateProductPath(storeProduct)} className="hover:text-foreground underline">
                 available here
                 <ScanBarcodeIcon className="ml-1 inline-flex size-3" />
               </Link>

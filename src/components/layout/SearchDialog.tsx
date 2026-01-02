@@ -76,7 +76,7 @@ export function SearchDialog({ children, forceRefresh = true }: Props) {
     if (searchQuery.trim()) {
       setOpen(false)
       setQuery("")
-      window.location.href = `/supermarket?q=${encodeURIComponent(searchQuery.trim())}`
+      window.location.href = `/products?q=${encodeURIComponent(searchQuery.trim())}`
     }
   }
 
