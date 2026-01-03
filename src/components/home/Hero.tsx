@@ -32,7 +32,7 @@ export function Hero() {
           </Button>
 
           <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
-            <Link href="/tracked">
+            <Link href="/products?priority=3,4,5">
               Tracked Products
               <BadgeEuroIcon />
             </Link>

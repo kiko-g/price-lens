@@ -46,7 +46,7 @@ export default function FavoritesPage() {
 
               <div className="flex items-center gap-2">
                 <Button variant="default" asChild>
-                  <Link href="/tracked">Browse Tracked Products</Link>
+                  <Link href="/products?priority=3,4,5">Browse Tracked Products</Link>
                 </Button>
 
                 <Button variant="outline" asChild>
