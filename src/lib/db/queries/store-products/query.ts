@@ -2,12 +2,6 @@ import { createClient } from "@/lib/supabase/server"
 import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
 
-// Type alias for the Supabase query builder after calling .select()
-type StoreProductsQuery = ReturnType<ReturnType<ReturnType<typeof createClient>["from"]>["select"]>
-
-// Type for update query builder
-type StoreProductsUpdateQuery = ReturnType<ReturnType<ReturnType<typeof createClient>["from"]>["update"]>
-
 /**
  * Main query function for fetching store products
  * Handles all filtering, sorting, pagination, and user-specific augmentation
@@ -121,11 +115,11 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
 // Filter Helper Functions
 // ============================================================================
 
-function applyPriorityFilter(
-  query: StoreProductsQuery,
+function applyPriorityFilter<Q extends { [key: string]: any }>(
+  query: Q,
   params: StoreProductsQueryParams,
   flags: typeof DEFAULT_FLAGS,
-): StoreProductsQuery {
+): Q {
   // If specific priority values are provided, use them
   if (params.priority?.values && params.priority.values.length > 0) {
     const values = params.priority.values
@@ -153,7 +147,7 @@ function applyPriorityFilter(
   return query
 }
 
-function applyOriginFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
+function applyOriginFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.origin?.originIds) return query
 
   const ids = params.origin.originIds
@@ -170,7 +164,7 @@ function applyOriginFilter(query: StoreProductsQuery, params: StoreProductsQuery
   return query
 }
 
-function applySourceFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
+function applySourceFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.source?.values || params.source.values.length === 0) return query
 
   const values = params.source.values
@@ -180,7 +174,7 @@ function applySourceFilter(query: StoreProductsQuery, params: StoreProductsQuery
   return query.in("priority_source", values)
 }
 
-function applyCategoryFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
+function applyCategoryFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.categories) return query
 
   // Hierarchical categories - apply each level if provided
@@ -209,7 +203,7 @@ function applyCategoryFilter(query: StoreProductsQuery, params: StoreProductsQue
   return query
 }
 
-function applySearchFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
+function applySearchFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.search?.query) return query
 
   const searchQuery = params.search.query
@@ -251,7 +245,7 @@ function applySearchFilter(query: StoreProductsQuery, params: StoreProductsQuery
   }
 }
 
-function applySorting(query: StoreProductsQuery, sortBy: string): StoreProductsQuery {
+function applySorting<Q extends { [key: string]: any }>(query: Q, sortBy: string): Q {
   switch (sortBy) {
     case "a-z":
       return query.order("name", { ascending: true })
@@ -380,11 +374,11 @@ export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Prom
     selectQuery = selectQuery.not("name", "eq", "").not("name", "is", null)
   }
 
-  selectQuery = applyPriorityFilter(selectQuery, params.filters, flags) as typeof selectQuery
-  selectQuery = applyOriginFilter(selectQuery, params.filters) as typeof selectQuery
-  selectQuery = applyCategoryFilter(selectQuery, params.filters) as typeof selectQuery
-  selectQuery = applySearchFilter(selectQuery, params.filters) as typeof selectQuery
-  selectQuery = applySourceFilter(selectQuery, params.filters) as typeof selectQuery
+  selectQuery = applyPriorityFilter(selectQuery, params.filters, flags)
+  selectQuery = applyOriginFilter(selectQuery, params.filters)
+  selectQuery = applyCategoryFilter(selectQuery, params.filters)
+  selectQuery = applySearchFilter(selectQuery, params.filters)
+  selectQuery = applySourceFilter(selectQuery, params.filters)
 
   if (flags.onlyDiscounted) {
     selectQuery = selectQuery.gt("discount", 0)
