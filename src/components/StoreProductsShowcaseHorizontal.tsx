@@ -72,12 +72,7 @@ const PRIORITY_CONFIG = {
 
 type PriorityLevel = keyof typeof PRIORITY_CONFIG
 
-// ============================================================================
-// Types
-// ============================================================================
-
 interface StoreProductsShowcaseProps {
-  /** Default page limit */
   limit?: number
 }
 

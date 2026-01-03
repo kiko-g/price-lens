@@ -5,6 +5,9 @@ import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
 // Type alias for the Supabase query builder after calling .select()
 type StoreProductsQuery = ReturnType<ReturnType<ReturnType<typeof createClient>["from"]>["select"]>
 
+// Type for update query builder
+type StoreProductsUpdateQuery = ReturnType<ReturnType<ReturnType<typeof createClient>["from"]>["update"]>
+
 /**
  * Main query function for fetching store products
  * Handles all filtering, sorting, pagination, and user-specific augmentation
@@ -306,4 +309,127 @@ function createEmptyPagination(pagination: { page: number; limit: number }): Pag
     hasNextPage: false,
     hasPreviousPage: pagination.page > 1,
   }
+}
+
+// ============================================================================
+// Bulk Update Functions
+// ============================================================================
+
+export interface BulkPriorityUpdateParams {
+  /** Filter params to select which products to update */
+  filters: StoreProductsQueryParams
+  /** New priority value (0-5) */
+  priority: number
+}
+
+export interface BulkPriorityUpdateResult {
+  /** Number of products updated */
+  updatedCount: number
+  /** Error if any */
+  error: { message: string; code?: string } | null
+}
+
+/**
+ * Get count of products matching the filter criteria (for preview)
+ */
+export async function getMatchingProductsCount(
+  params: StoreProductsQueryParams,
+): Promise<{ count: number; error: { message: string } | null }> {
+  const supabase = createClient()
+  const flags = { ...DEFAULT_FLAGS, ...params.flags }
+
+  // Build query with just count
+  let query = supabase.from("store_products").select("id", { count: "exact", head: true })
+
+  // Apply all filters (same as queryStoreProducts but without pagination/sorting)
+  if (flags.excludeEmptyNames) {
+    query = query.not("name", "eq", "").not("name", "is", null)
+  }
+
+  query = applyPriorityFilter(query, params, flags)
+  query = applyOriginFilter(query, params)
+  query = applyCategoryFilter(query, params)
+  query = applySearchFilter(query, params)
+  query = applySourceFilter(query, params)
+
+  if (flags.onlyDiscounted) {
+    query = query.gt("discount", 0)
+  }
+
+  const { count, error } = await query
+
+  if (error) {
+    return { count: 0, error: { message: error.message } }
+  }
+
+  return { count: count ?? 0, error: null }
+}
+
+/**
+ * Bulk update priority for all products matching the filter criteria
+ */
+export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Promise<BulkPriorityUpdateResult> {
+  const supabase = createClient()
+  const flags = { ...DEFAULT_FLAGS, ...params.filters.flags }
+
+  // First, get all matching product IDs
+  let selectQuery = supabase.from("store_products").select("id")
+
+  // Apply all filters
+  if (flags.excludeEmptyNames) {
+    selectQuery = selectQuery.not("name", "eq", "").not("name", "is", null)
+  }
+
+  selectQuery = applyPriorityFilter(selectQuery, params.filters, flags) as typeof selectQuery
+  selectQuery = applyOriginFilter(selectQuery, params.filters) as typeof selectQuery
+  selectQuery = applyCategoryFilter(selectQuery, params.filters) as typeof selectQuery
+  selectQuery = applySearchFilter(selectQuery, params.filters) as typeof selectQuery
+  selectQuery = applySourceFilter(selectQuery, params.filters) as typeof selectQuery
+
+  if (flags.onlyDiscounted) {
+    selectQuery = selectQuery.gt("discount", 0)
+  }
+
+  const { data: matchingProducts, error: selectError } = await selectQuery
+
+  if (selectError) {
+    return {
+      updatedCount: 0,
+      error: { message: selectError.message, code: selectError.code },
+    }
+  }
+
+  if (!matchingProducts || matchingProducts.length === 0) {
+    return { updatedCount: 0, error: null }
+  }
+
+  const productIds = matchingProducts.map((p) => p.id)
+
+  // Update in batches of 1000 to avoid query size limits
+  const batchSize = 1000
+  let totalUpdated = 0
+
+  for (let i = 0; i < productIds.length; i += batchSize) {
+    const batch = productIds.slice(i, i + batchSize)
+
+    const { error: updateError, count } = await supabase
+      .from("store_products")
+      .update({
+        priority: params.priority,
+        priority_source: "manual",
+        priority_updated_at: new Date().toISOString(),
+      })
+      .in("id", batch)
+
+    if (updateError) {
+      return {
+        updatedCount: totalUpdated,
+        error: { message: updateError.message, code: updateError.code },
+      }
+    }
+
+    totalUpdated += count ?? batch.length
+  }
+
+  return { updatedCount: totalUpdated, error: null }
 }

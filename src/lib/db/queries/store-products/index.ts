@@ -23,8 +23,9 @@
  * ```
  */
 
-// Query function
-export { queryStoreProducts } from "./query"
+// Query functions
+export { queryStoreProducts, getMatchingProductsCount, bulkUpdatePriority } from "./query"
+export type { BulkPriorityUpdateParams, BulkPriorityUpdateResult } from "./query"
 
 // Types
 export type {

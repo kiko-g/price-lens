@@ -41,6 +41,7 @@ import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/PriorityBubble"
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
+import { BulkPriorityDialog } from "@/components/admin/BulkPriorityDialog"
 
 import {
   ArrowDownAZ,
@@ -62,14 +63,8 @@ import {
 } from "lucide-react"
 import { PrioritySource } from "@/types"
 
-// ============================================================================
-// Types
-// ============================================================================
-
 interface StoreProductsShowcaseProps {
-  /** Default page limit */
   limit?: number
-  /** Children to render at the bottom (e.g., Footer) */
   children?: React.ReactNode
 }
 
@@ -376,9 +371,44 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   const showSkeletons = isLoading && products.length === 0
   const showOverlay = isFetching && products.length > 0
 
-  // ============================================================================
-  // Render
-  // ============================================================================
+  // Build filter params string for bulk priority API (dev only)
+  const bulkPriorityFilterParams = useMemo(() => {
+    const params = new URLSearchParams()
+    if (urlState.query) {
+      params.set("q", urlState.query)
+      params.set("searchType", urlState.searchType)
+    }
+    if (urlState.origin) params.set("origin", urlState.origin)
+    if (urlState.priority) params.set("priority", urlState.priority)
+    if (urlState.source) params.set("source", urlState.source)
+    if (urlState.category) params.set("category", urlState.category)
+    if (urlState.category2) params.set("category_2", urlState.category2)
+    if (urlState.category3) params.set("category_3", urlState.category3)
+    if (urlState.onlyDiscounted) params.set("onlyDiscounted", "true")
+    return params.toString()
+  }, [urlState])
+
+  // Build human-readable filter summary (dev only)
+  const filterSummary = useMemo(() => {
+    const parts: string[] = []
+    if (urlState.query) parts.push(`Search: "${urlState.query}"`)
+    if (selectedOrigins.length > 0) {
+      const names = selectedOrigins.map((id) => {
+        if (id === 1) return "Continente"
+        if (id === 2) return "Auchan"
+        if (id === 3) return "Pingo Doce"
+        return `Store ${id}`
+      })
+      parts.push(`Store: ${names.join(", ")}`)
+    }
+    if (selectedPriorities.length > 0) parts.push(`Priority: ${selectedPriorities.join(", ")}`)
+    if (selectedSources.length > 0) parts.push(`Source: ${selectedSources.join(", ")}`)
+    if (urlState.category) parts.push(`Category: ${urlState.category}`)
+    if (urlState.category2) parts.push(`Subcategory: ${urlState.category2}`)
+    if (urlState.category3) parts.push(`Sub-subcategory: ${urlState.category3}`)
+    if (urlState.onlyDiscounted) parts.push("Only discounted")
+    return parts.length > 0 ? parts.join(" • ") : "No filters applied (all products)"
+  }, [urlState, selectedOrigins, selectedPriorities, selectedSources])
 
   if (isError) {
     return (
@@ -415,6 +445,20 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               <DropdownMenuItem asChild>
                 <ScrapeUrlDialog />
               </DropdownMenuItem>
+
+              {/* Bulk Set Priority (dev only) */}
+              {process.env.NODE_ENV === "development" && (
+                <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                  <BulkPriorityDialog filterParams={bulkPriorityFilterParams} filterSummary={filterSummary}>
+                    <button className="flex w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sm">
+                      <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
+                        DEV
+                      </span>
+                      Bulk Set Priority
+                    </button>
+                  </BulkPriorityDialog>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
