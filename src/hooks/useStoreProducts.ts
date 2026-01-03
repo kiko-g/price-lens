@@ -46,6 +46,11 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
     searchParams.priority = params.priority.values.map((v) => (v === null ? "none" : String(v))).join(",")
   }
 
+  // Source (priority_source)
+  if (params.source?.values?.length) {
+    searchParams.source = params.source.values.join(",")
+  }
+
   // Sort
   if (params.sort?.sortBy) {
     searchParams.sort = params.sort.sortBy

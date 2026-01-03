@@ -1,6 +1,6 @@
 import type { GetAllQuery } from "./types"
 import { createClient } from "@/lib/supabase/server"
-import type { Product, ProductWithListings, StoreProduct } from "@/types"
+import type { PrioritySource, Product, ProductWithListings, StoreProduct } from "@/types"
 import { PostgrestError } from "@supabase/supabase-js"
 import { now } from "@/lib/utils"
 
@@ -417,7 +417,7 @@ export const storeProductQueries = {
     priority: number | null,
     options?: {
       updateTimestamp?: boolean
-      source?: "ai" | "manual"
+      source?: PrioritySource
     },
   ) {
     const supabase = createClient()
@@ -463,7 +463,7 @@ export const storeProductQueries = {
     }
   },
 
-  async updatePriorityTimestamp(id: number, source: "ai" | "manual" = "ai") {
+  async updatePriorityTimestamp(id: number, source: PrioritySource = "ai") {
     const supabase = createClient()
     const { error } = await supabase
       .from("store_products")

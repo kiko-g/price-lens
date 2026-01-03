@@ -62,6 +62,8 @@ export interface ProductWithListings extends Product {
   store_products: StoreProduct[]
 }
 
+export type PrioritySource = "ai" | "manual"
+
 export interface StoreProduct {
   id: number
   origin_id: number
@@ -80,7 +82,7 @@ export interface StoreProduct {
   category_3: string | null
   priority: number | null
   priority_updated_at: string | null
-  priority_source: "ai" | "manual" | null
+  priority_source: PrioritySource | null
   product_id: number | null
   created_at: string
   updated_at: string

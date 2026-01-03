@@ -48,6 +48,9 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
     query = query.gt("discount", 0)
   }
 
+  // 7. Source filter (priority_source)
+  query = applySourceFilter(query, params)
+
   // ============================================================================
   // Apply Sorting
   // ============================================================================
@@ -162,6 +165,16 @@ function applyOriginFilter(query: StoreProductsQuery, params: StoreProductsQuery
   }
 
   return query
+}
+
+function applySourceFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {
+  if (!params.source?.values || params.source.values.length === 0) return query
+
+  const values = params.source.values
+  if (values.length === 1) {
+    return query.eq("priority_source", values[0])
+  }
+  return query.in("priority_source", values)
 }
 
 function applyCategoryFilter(query: StoreProductsQuery, params: StoreProductsQueryParams): StoreProductsQuery {

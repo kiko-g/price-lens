@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { queryStoreProducts, type StoreProductsQueryParams, SupermarketChain } from "@/lib/db/queries/store-products"
 import type { SearchType, SortByType } from "@/types/extra"
+import { PrioritySource } from "@/types"
 
 /**
  * GET /api/store_products
@@ -13,6 +14,7 @@ import type { SearchType, SortByType } from "@/types/extra"
  * - searchType: "any" | "name" | "brand" | "url" | "category"
  * - origin: Comma-separated origin IDs (e.g., "1,2,3")
  * - priority: Comma-separated priorities (e.g., "1,2,3,none")
+ * - source: Comma-separated priority source values (e.g., "ai,manual")
  * - category, category_2, category_3: Hierarchical category filter
  * - categories: Semicolon-separated main categories (e.g., "Laticínios;Bebidas")
  * - sort: "a-z" | "z-a" | "price-low-high" | "price-high-low" | "only-nulls"
@@ -113,6 +115,19 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
     const validValues = priorityValues.filter((v): v is number | null => v !== undefined)
     if (validValues.length > 0) {
       queryParams.priority = { values: validValues }
+    }
+  }
+
+  // Source filter (priority_source)
+  const sourceParam = params.get("source")
+  if (sourceParam) {
+    const sourceValues = sourceParam
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v): v is PrioritySource => v === "ai" || v === "manual")
+
+    if (sourceValues.length > 0) {
+      queryParams.source = { values: sourceValues }
     }
   }
 

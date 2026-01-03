@@ -48,9 +48,11 @@ import {
   ArrowUpAZ,
   ArrowUpWideNarrowIcon,
   BadgePercentIcon,
+  BotIcon,
   CircleOffIcon,
   CrownIcon,
   FilterIcon,
+  HandIcon,
   HomeIcon,
   Loader2Icon,
   MoreHorizontalIcon,
@@ -58,6 +60,7 @@ import {
   RefreshCcwIcon,
   SearchIcon,
 } from "lucide-react"
+import { PrioritySource } from "@/types"
 
 // ============================================================================
 // Types
@@ -89,6 +92,7 @@ function useUrlState() {
       orderByPriority: searchParams.get("priority_order") === "true",
       onlyDiscounted: searchParams.get("discounted") === "true",
       priority: searchParams.get("priority") ?? "",
+      source: searchParams.get("source") ?? "",
       // Category hierarchy
       category: searchParams.get("cat") ?? "",
       category2: searchParams.get("cat2") ?? "",
@@ -114,6 +118,7 @@ function useUrlState() {
           (key === "priority_order" && value === false) ||
           (key === "discounted" && value === false) ||
           (key === "priority" && value === "") ||
+          (key === "source" && value === "") ||
           (key === "cat" && value === "") ||
           (key === "cat2" && value === "") ||
           (key === "cat3" && value === "")
@@ -185,6 +190,18 @@ function buildQueryParams(
     }
   }
 
+  // Source filter (priority_source)
+  if (urlState.source) {
+    const sourceValues = urlState.source
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v): v is PrioritySource => v === "ai" || v === "manual")
+
+    if (sourceValues.length > 0) {
+      params.source = { values: sourceValues }
+    }
+  }
+
   // Category hierarchy filter
   if (urlState.category || urlState.category2 || urlState.category3) {
     params.categories = {
@@ -229,9 +246,13 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   const [isSearching, setIsSearching] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-  // Parse origin and priority from URL
+  // Parse origin, priority, and source from URL
   const selectedOrigins = useMemo(() => parseArrayParam(urlState.origin), [urlState.origin])
   const selectedPriorities = useMemo(() => parseArrayParam(urlState.priority), [urlState.priority])
+  const selectedSources = useMemo(() => {
+    if (!urlState.source) return [] as PrioritySource[]
+    return urlState.source.split(",").filter((v): v is PrioritySource => v === "ai" || v === "manual")
+  }, [urlState.source])
 
   // Build query params from URL state
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
@@ -304,6 +325,17 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
   const handleClearPriority = () => {
     updateUrl({ priority: "", page: 1 })
+  }
+
+  // Source multi-select handlers
+  const handleSourceToggle = (source: PrioritySource) => {
+    const isSelected = selectedSources.includes(source)
+    const updated = isSelected ? selectedSources.filter((v) => v !== source) : [...selectedSources, source]
+    updateUrl({ source: updated.length > 0 ? updated.join(",") : null, page: 1 })
+  }
+
+  const handleClearSources = () => {
+    updateUrl({ source: null, page: 1 })
   }
 
   // Category handlers
@@ -563,6 +595,68 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
+            {/* Source Filter (Dev Only) */}
+            {process.env.NODE_ENV === "development" && (
+              <AccordionItem value="source">
+                <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                  <span className="flex items-center gap-1">
+                    Source
+                    <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
+                      DEV
+                    </span>
+                  </span>
+                  {selectedSources.length > 0 && (
+                    <>
+                      <span className="text-muted-foreground text-xs">({selectedSources.length})</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleClearSources()
+                        }}
+                        className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                      >
+                        Clear
+                      </span>
+                    </>
+                  )}
+                </AccordionTrigger>
+                <AccordionContent className="pb-3">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="source-ai"
+                        checked={selectedSources.includes("ai")}
+                        onCheckedChange={() => handleSourceToggle("ai")}
+                      />
+                      <Label
+                        htmlFor="source-ai"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <BotIcon className="h-4 w-4" />
+                        AI
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="source-manual"
+                        checked={selectedSources.includes("manual")}
+                        onCheckedChange={() => handleSourceToggle("manual")}
+                      />
+                      <Label
+                        htmlFor="source-manual"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <HandIcon className="h-4 w-4" />
+                        Manual
+                      </Label>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
             {/* Categories Filter */}
             <AccordionItem value="categories">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -703,10 +797,13 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         urlState={urlState}
         selectedOrigins={selectedOrigins}
         selectedPriorities={selectedPriorities}
+        selectedSources={selectedSources}
         onOriginToggle={handleOriginToggle}
         onClearOrigins={handleClearOrigins}
         onPriorityToggle={handlePriorityToggle}
         onClearPriority={handleClearPriority}
+        onSourceToggle={handleSourceToggle}
+        onClearSources={handleClearSources}
         onCategoryChange={handleCategoryChange}
         onCategory2Change={handleCategory2Change}
         onCategory3Change={handleCategory3Change}
@@ -881,10 +978,13 @@ interface MobileFiltersDrawerProps {
   urlState: ReturnType<typeof useUrlState>["urlState"]
   selectedOrigins: number[]
   selectedPriorities: number[]
+  selectedSources: PrioritySource[]
   onOriginToggle: (origin: number) => void
   onClearOrigins: () => void
   onPriorityToggle: (level: number) => void
   onClearPriority: () => void
+  onSourceToggle: (source: PrioritySource) => void
+  onClearSources: () => void
   onCategoryChange: (category: string) => void
   onCategory2Change: (category2: string) => void
   onCategory3Change: (category3: string) => void
@@ -901,10 +1001,13 @@ function MobileFiltersDrawer({
   urlState,
   selectedOrigins,
   selectedPriorities,
+  selectedSources,
   onOriginToggle,
   onClearOrigins,
   onPriorityToggle,
   onClearPriority,
+  onSourceToggle,
+  onClearSources,
   onCategoryChange,
   onCategory2Change,
   onCategory3Change,
@@ -1020,6 +1123,55 @@ function MobileFiltersDrawer({
                 ))}
               </div>
             </div>
+
+            {/* Source Filter (Dev Only) */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-1 text-base font-semibold">
+                    Source
+                    <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
+                      DEV
+                    </span>
+                  </Label>
+                  {selectedSources.length > 0 && (
+                    <button onClick={onClearSources} className="text-muted-foreground text-xs hover:underline">
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-source-ai"
+                      checked={selectedSources.includes("ai")}
+                      onCheckedChange={() => onSourceToggle("ai")}
+                    />
+                    <Label
+                      htmlFor="mobile-source-ai"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BotIcon className="h-4 w-4" />
+                      AI
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-source-manual"
+                      checked={selectedSources.includes("manual")}
+                      onCheckedChange={() => onSourceToggle("manual")}
+                    />
+                    <Label
+                      htmlFor="mobile-source-manual"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <HandIcon className="h-4 w-4" />
+                      Manual
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Categories Filter */}
             <div className="space-y-3">

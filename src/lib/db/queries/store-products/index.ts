@@ -33,6 +33,7 @@ export type {
   CategoryFilter,
   OriginFilter,
   PriorityFilter,
+  SourceFilter,
   SortOptions,
   PaginationOptions,
   FilterFlags,

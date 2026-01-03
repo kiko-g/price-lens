@@ -1,6 +1,6 @@
 import type { SearchType, SortByType } from "@/types/extra"
 import { SupermarketChain } from "@/types/extra"
-import type { StoreProduct } from "@/types"
+import type { StoreProduct, PrioritySource } from "@/types"
 
 /**
  * Store Products Query System
@@ -84,6 +84,19 @@ export interface PriorityFilter {
 }
 
 /**
+ * Source filter options
+ * Filter products by how their priority was set
+ */
+export interface SourceFilter {
+  /**
+   * Filter by priority source values
+   * - "ai": Priority set by AI classifier
+   * - "manual": Priority set manually
+   */
+  values: PrioritySource[]
+}
+
+/**
  * Sorting options
  */
 export interface SortOptions {
@@ -135,6 +148,9 @@ export interface StoreProductsQueryParams {
 
   /** Priority filter */
   priority?: PriorityFilter
+
+  /** Priority source filter (ai/manual) */
+  source?: SourceFilter
 
   /** Sorting options */
   sort?: SortOptions
@@ -241,6 +257,12 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
       .join(",")
   }
 
+  // Helper to normalize source values to a stable string
+  const getSourceKey = (): QueryKeyValue => {
+    if (!params.source?.values) return null
+    return [...params.source.values].sort().join(",")
+  }
+
   // Helper to normalize categories to a stable string
   const getCategoriesKey = (): QueryKeyValue => {
     if (!params.categories?.categories) return null
@@ -262,6 +284,8 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     getOriginKey(),
     // Priority
     getPriorityKey(),
+    // Source
+    getSourceKey(),
     // Sort
     params.sort?.sortBy ?? DEFAULT_SORT.sortBy,
     params.sort?.prioritizeByPriority ?? false,
