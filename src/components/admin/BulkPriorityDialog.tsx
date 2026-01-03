@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 
@@ -61,13 +61,17 @@ export function BulkPriorityDialog({ filterParams, filterSummary, children }: Bu
     },
   })
 
-  // Reset state when dialog closes
-  useEffect(() => {
-    if (!open) {
-      setSelectedPriority(null)
-      updateMutation.reset()
+  // Handle dialog open state change - reset state when closing
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen)
+    if (!newOpen) {
+      // Reset state when dialog closes (use setTimeout to avoid state update during render)
+      setTimeout(() => {
+        setSelectedPriority(null)
+        updateMutation.reset()
+      }, 150)
     }
-  }, [open, updateMutation])
+  }
 
   const handleApply = () => {
     if (selectedPriority === null) return
@@ -79,7 +83,7 @@ export function BulkPriorityDialog({ filterParams, filterSummary, children }: Bu
   const updatedCount = updateMutation.data?.updatedCount ?? 0
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-md lg:max-w-2xl">
         <DialogHeader>
