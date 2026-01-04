@@ -50,12 +50,15 @@ import {
   CircleIcon,
   MicroscopeIcon,
   HeartIcon,
+  CalendarPlusIcon,
 } from "lucide-react"
 
 type Props = {
   sp: StoreProduct
   onUpdate?: () => Promise<boolean> | undefined
   imagePriority?: boolean
+  /** When the product was added to favorites (only shown when favorited) */
+  favoritedAt?: string
 }
 
 function resolveImageUrlForCard(image: string, size = 400) {
@@ -69,7 +72,7 @@ function resolveImageUrlForCard(image: string, size = 400) {
   return url.toString()
 }
 
-export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props) {
+export function StoreProductCard({ sp, onUpdate, imagePriority = false, favoritedAt }: Props) {
   const [isUpdating, setIsUpdating] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -234,7 +237,25 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false }: Props)
           </div>
         ) : null}
 
-        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-0 md:gap-0.5">
+        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-1">
+          {favoritedAt && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge size="2xs" variant="tertiary" className="text-muted-foreground flex items-center gap-1">
+                    <CalendarPlusIcon className="h-3 w-3" />
+                    {getShortRelativeTime(new Date(favoritedAt))}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="left" align="end" size="xs" variant="glass">
+                  <span>Added to favorites</span>
+                  <br />
+                  <span className="text-muted-foreground">{new Date(favoritedAt).toLocaleDateString()}</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
           <Badge
             size="xs"
             variant="outline-white"
@@ -617,4 +638,26 @@ function DrawerSheet({
       </DrawerContent>
     </Drawer>
   )
+}
+
+/**
+ * Get a short version of relative time for compact displays
+ */
+function getShortRelativeTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffWeeks = Math.floor(diffDays / 7)
+  const diffMonths = Math.floor(diffDays / 30)
+  const diffYears = Math.floor(diffDays / 365)
+
+  if (diffDays === 0) return "today"
+  if (diffDays === 1) return "1d"
+  if (diffDays < 7) return `${diffDays}d`
+  if (diffWeeks === 1) return "1w"
+  if (diffWeeks < 4) return `${diffWeeks}w`
+  if (diffMonths === 1) return "1mo"
+  if (diffMonths < 12) return `${diffMonths}mo`
+  if (diffYears === 1) return "1y"
+  return `${diffYears}y`
 }

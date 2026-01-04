@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/select"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
-import { Layout } from "@/components/layout"
 import { StoreProductCard } from "@/components/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
@@ -51,6 +50,8 @@ import {
   SearchIcon,
   ClockIcon,
 } from "lucide-react"
+import { HideFooter } from "@/contexts/FooterContext"
+import { Footer } from "@/components/layout/Footer"
 
 // ============================================================================
 // URL State Management
@@ -159,15 +160,17 @@ export default function FavoritesPage() {
 
   if (isLoadingUser) {
     return (
-      <Layout>
+      <main className="h-[calc(100vh-54px)] overflow-hidden">
+        <HideFooter />
         <FavoritesPageSkeleton />
-      </Layout>
+      </main>
     )
   }
 
   if (!user) {
     return (
-      <Layout>
+      <main className="flex h-[calc(100vh-54px)] items-center justify-center overflow-hidden">
+        <HideFooter />
         <div className="container mx-auto max-w-2xl px-4 py-6">
           <Card className="text-center">
             <CardHeader>
@@ -189,14 +192,17 @@ export default function FavoritesPage() {
             </CardContent>
           </Card>
         </div>
-      </Layout>
+      </main>
     )
   }
 
   return (
-    <Layout>
-      <FavoritesShowcase />
-    </Layout>
+    <main className="h-[calc(100vh-54px)] overflow-hidden">
+      <HideFooter />
+      <FavoritesShowcase>
+        <Footer className="px-0 pt-4 pb-0 sm:px-0 sm:pt-4 sm:pb-0 lg:px-0 lg:pt-4 lg:pb-0" />
+      </FavoritesShowcase>
+    </main>
   )
 }
 
@@ -204,7 +210,7 @@ export default function FavoritesPage() {
 // Favorites Showcase Component
 // ============================================================================
 
-function FavoritesShowcase({ limit = 24 }: { limit?: number }) {
+function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?: React.ReactNode }) {
   const router = useRouter()
   const { urlState, updateUrl } = useUrlState()
 
@@ -582,7 +588,12 @@ function FavoritesShowcase({ limit = 24 }: { limit?: number }) {
                 )}
               >
                 {favorites.map((favorite, idx) => (
-                  <StoreProductCard key={favorite.id} sp={favorite.store_products} imagePriority={idx < 12} />
+                  <StoreProductCard
+                    key={favorite.id}
+                    sp={favorite.store_products}
+                    imagePriority={idx < 12}
+                    favoritedAt={favorite.created_at}
+                  />
                 ))}
               </div>
             </div>
@@ -596,6 +607,9 @@ function FavoritesShowcase({ limit = 24 }: { limit?: number }) {
               totalCount={totalCount}
               onPageChange={handlePageChange}
             />
+
+            {/* Footer passed as children */}
+            {children}
           </>
         ) : (
           <EmptyState query={urlState.query} onClearFilters={handleClearFilters} />
@@ -1065,15 +1079,11 @@ function BottomPagination({
 
 function FavoritesPageSkeleton() {
   return (
-    <div className="container mx-auto mb-8 max-w-7xl px-4 py-6">
-      <div className="mb-6">
-        <div className="mb-2 flex items-center gap-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-6 w-6" />
-        </div>
-        <Skeleton className="h-4 w-96" />
+    <div className="flex min-h-[60vh] w-full items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2Icon className="h-8 w-8 animate-spin" />
+        <span className="text-muted-foreground text-sm">Loading favorites...</span>
       </div>
-      <LoadingGrid limit={24} />
     </div>
   )
 }
