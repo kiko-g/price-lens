@@ -42,7 +42,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
   const id = sp.id?.toString() || ""
   const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
 
-  const prices = data?.prices || []
+  const prices = useMemo(() => data?.prices || [], [data?.prices])
   const analytics = data?.analytics || null
 
   // Get computed analytics from backend
