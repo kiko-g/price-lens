@@ -22,6 +22,8 @@ import { BinocularsIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-
 type Props = {
   sp: StoreProduct
   className?: string
+  defaultRange?: DateRange
+  onRangeChange?: (range: DateRange) => void
   options?: {
     showPricesVariationCard: boolean
     showImage: boolean
@@ -33,12 +35,11 @@ const defaultOptions: Props["options"] = {
   showImage: true,
 }
 
-export function ProductChart({ sp, className, options = defaultOptions }: Props) {
+export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange, options = defaultOptions }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
-  const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
+  const [selectedRange, setSelectedRange] = useState<DateRange>(defaultRange)
   const [activeAxis, updateActiveAxis] = useActiveAxis()
-
   const id = sp.id?.toString() || ""
   const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
 
@@ -145,6 +146,11 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
     updateActiveAxis(newAxis)
   }
 
+  function handleRangeChange(range: DateRange) {
+    setSelectedRange(range)
+    onRangeChange?.(range)
+  }
+
   return (
     <div className={cn("flex w-full flex-col", className)}>
       {(options?.showPricesVariationCard || options?.showImage) && (
@@ -206,7 +212,7 @@ export function ProductChart({ sp, className, options = defaultOptions }: Props)
           <Button
             key={range}
             variant={range === selectedRange ? "default" : "ghost"}
-            onClick={() => setSelectedRange(range)}
+            onClick={() => handleRangeChange(range)}
             disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
             className="disabled:text-muted-foreground px-2 text-xs lg:text-sm"
           >

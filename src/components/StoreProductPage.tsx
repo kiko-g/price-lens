@@ -50,7 +50,9 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
+import { RANGES, DateRange } from "@/types/extra"
 import { IdenticalStoreProducts } from "./IdenticalStoreProducts"
 import { Separator } from "./ui/separator"
 
@@ -111,12 +113,27 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   )
 }
 
+function parseRange(value: string | null): DateRange {
+  if (value && RANGES.includes(value as DateRange)) {
+    return value as DateRange
+  }
+  return "1M"
+}
+
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const updateParams = useUpdateSearchParams()
   const { user, profile } = useUser()
   const updateStoreProduct = useUpdateStoreProduct()
   const updatePriority = useUpdateStoreProductPriority()
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
+
+  const rangeFromUrl = parseRange(searchParams.get("range"))
+
+  const handleRangeChange = (range: DateRange) => {
+    updateParams({ range: range === "1M" ? null : range })
+  }
 
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)
   const storeProductId = sp.id?.toString() || ""
@@ -378,6 +395,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             <ProductChart
               className="max-w-xl"
               sp={sp}
+              defaultRange={rangeFromUrl}
+              onRangeChange={handleRangeChange}
               options={{
                 showPricesVariationCard: true,
                 showImage: false,

@@ -1549,17 +1549,7 @@ export function now() {
   return new Date().toISOString().replace("Z", "+00:00")
 }
 
-type BuildChartDataOptions = {
-  compact?: boolean // When true, only creates points when prices change (step-style). Default: true
-}
-
-export function buildChartData(
-  prices: Price[],
-  range: DateRange = "1M",
-  options: BuildChartDataOptions = {},
-): ProductChartEntry[] {
-  const { compact = true } = options
-
+export function buildChartData(prices: Price[], range: DateRange = "1M"): ProductChartEntry[] {
   const parseUTCDate = (dateStr: string): Date => {
     const date = new Date(dateStr)
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -1628,71 +1618,33 @@ export function buildChartData(
   const daysBetweenDates = getDaysBetweenDates(start, end)
   const entries: ProductChartEntry[] = []
 
-  if (compact) {
-    // OPTIMIZED: Only create points when prices change (step-style chart)
-    // Instead of one point per day, we add a point at the start and end of each price period
-    for (let i = 0; i < processedPrices.length; i++) {
-      const price = processedPrices[i]
-      const periodStart = price.validFrom
-      const periodEnd = price.validTo || todayUTC
+  // Create one data point for each day in the range
+  const current = new Date(start)
+  let priceIndex = 0
 
-      // Skip if this price period is entirely outside our range
-      if (periodEnd < start || periodStart > end) continue
+  while (current <= end) {
+    const dateStr = formatDateForChart(current.toISOString(), daysBetweenDates > 30 ? range : "1M")
 
-      // Clamp the period to our range
-      const clampedStart = periodStart < start ? start : periodStart
-      const clampedEnd = periodEnd > end ? end : periodEnd
+    // Find the applicable price for this date
+    while (priceIndex < processedPrices.length) {
+      const price = processedPrices[priceIndex]
+      if (current < price.validFrom) break
 
-      const priceEntry = {
-        price: price.price ?? 0,
-        "price-per-major-unit": price.price_per_major_unit ?? 0,
-        "price-recommended": price.price_recommended ?? 0,
-        discount: price.discount ? price.discount * 100 : 0,
-      }
-
-      // Add start point of this price period
-      entries.push({
-        date: formatDateForChart(clampedStart.toISOString(), daysBetweenDates > 30 ? range : "1M"),
-        ...priceEntry,
-      })
-
-      // Add end point of this price period (if different from start)
-      if (clampedEnd.getTime() !== clampedStart.getTime()) {
+      if (price.validTo !== null && current > price.validTo) {
+        priceIndex++
+      } else {
         entries.push({
-          date: formatDateForChart(clampedEnd.toISOString(), daysBetweenDates > 30 ? range : "1M"),
-          ...priceEntry,
+          date: dateStr,
+          price: price.price ?? 0,
+          "price-per-major-unit": price.price_per_major_unit ?? 0,
+          "price-recommended": price.price_recommended ?? 0,
+          discount: price.discount ? price.discount * 100 : 0,
         })
+        break
       }
     }
-  } else {
-    // DAILY MODE: Create one data point for each day in the range
-    const current = new Date(start)
-    let priceIndex = 0
 
-    while (current <= end) {
-      const dateStr = formatDateForChart(current.toISOString(), daysBetweenDates > 30 ? range : "1M")
-
-      // Find the applicable price for this date
-      while (priceIndex < processedPrices.length) {
-        const price = processedPrices[priceIndex]
-        if (current < price.validFrom) break
-
-        if (price.validTo !== null && current > price.validTo) {
-          priceIndex++
-        } else {
-          entries.push({
-            date: dateStr,
-            price: price.price ?? 0,
-            "price-per-major-unit": price.price_per_major_unit ?? 0,
-            "price-recommended": price.price_recommended ?? 0,
-            discount: price.discount ? price.discount * 100 : 0,
-          })
-          break
-        }
-      }
-
-      current.setUTCDate(current.getUTCDate() + 1)
-    }
+    current.setUTCDate(current.getUTCDate() + 1)
   }
 
   return entries
