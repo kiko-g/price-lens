@@ -16,6 +16,40 @@ export const priceQueries = {
     return data
   },
 
+  async getPricesPaginated(params: { page: number; limit: number }) {
+    const supabase = createClient()
+    const { page, limit } = params
+    const offset = (page - 1) * limit
+
+    const { data, error, count } = await supabase
+      .from("prices")
+      .select("*", { count: "exact" })
+      .order("store_product_id", { ascending: true })
+      .order("valid_from", { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) {
+      console.error("Error fetching paginated prices:", error)
+      return { data: null, pagination: null, error }
+    }
+
+    const totalCount = count ?? 0
+    const totalPages = Math.ceil(totalCount / limit)
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      error: null,
+    }
+  },
+
   async getPricePointsPerIndividualProduct(store_product_id: number) {
     const supabase = createClient()
 

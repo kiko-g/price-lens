@@ -3,14 +3,17 @@
 import { cn } from "@/lib/utils"
 import type { StoreProduct } from "@/types"
 import { useAdminStoreProducts } from "@/hooks/useAdmin"
+import { AdminPagination, useAdminPagination } from "./AdminPagination"
 
 import { Button } from "@/components/ui/button"
 
 import { Loader2, CircleX, RefreshCcwIcon, ExternalLinkIcon } from "lucide-react"
 import Link from "next/link"
+import { HideFooter } from "@/contexts/FooterContext"
 
 export function AdminDashboardStoreProducts() {
-  const { data, isLoading, error, refetch } = useAdminStoreProducts()
+  const pagination = useAdminPagination(50)
+  const { data, isLoading, error, refetch } = useAdminStoreProducts(pagination)
 
   if (isLoading) {
     return (
@@ -21,7 +24,7 @@ export function AdminDashboardStoreProducts() {
     )
   }
 
-  if (error || !data)
+  if (error || !data?.data)
     return (
       <StatusWrapper>
         <CircleX className="h-4 w-4" />
@@ -30,15 +33,16 @@ export function AdminDashboardStoreProducts() {
     )
 
   const products = data.data
-  const pagination = data.pagination
+  const paginationData = data.pagination
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    <div className="w-full p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8 lg:pb-24">
+      <HideFooter />
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-base font-semibold">Store Products</h1>
           <p className="text-muted-foreground mt-2 text-sm">
-            Showing {products?.length} of {pagination?.pagedCount} store products (page {pagination?.page})
+            All scraped store products with their current prices and priorities.
           </p>
         </div>
         <div className="mt-4 flex items-center gap-2 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -66,7 +70,7 @@ export function AdminDashboardStoreProducts() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {products?.map((product: StoreProduct) => (
+                {products.map((product: StoreProduct) => (
                   <StoreProductRow key={product.id} product={product} />
                 ))}
               </tbody>
@@ -74,6 +78,13 @@ export function AdminDashboardStoreProducts() {
           </div>
         </div>
       </div>
+
+      <AdminPagination
+        page={paginationData.page}
+        limit={paginationData.limit}
+        totalCount={paginationData.pagedCount}
+        totalPages={paginationData.totalPages}
+      />
     </div>
   )
 }
@@ -139,4 +150,3 @@ const Cell = ({ className, title, children }: { className?: string; title?: stri
     </td>
   )
 }
-

@@ -1,19 +1,20 @@
 "use client"
 
+import { useState } from "react"
 import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
 import type { Price } from "@/types"
 import { InsertPriceModal } from "./InsertPriceModal"
+import { AdminPagination, useAdminPagination } from "./AdminPagination"
 import { useAdminPrices, useSanitizePrices } from "@/hooks/useAdmin"
 
+import { HideFooter } from "@/contexts/FooterContext"
 import { Button } from "@/components/ui/button"
 
 import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon, SparklesIcon, RefreshCcwIcon } from "lucide-react"
-import { useState } from "react"
 
 export function AdminDashboardPrices() {
-  const { data: prices, isLoading, error, refetch } = useAdminPrices()
-
-  const uniqueStoreProductIds = Array.from(new Set(prices?.map((price: Price) => price.store_product_id)))
+  const pagination = useAdminPagination(50)
+  const { data, isLoading, error, refetch } = useAdminPrices(pagination)
 
   if (isLoading) {
     return (
@@ -24,7 +25,7 @@ export function AdminDashboardPrices() {
     )
   }
 
-  if (error || !prices)
+  if (error || !data?.data)
     return (
       <StatusWrapper>
         <CircleX className="h-4 w-4" />
@@ -32,14 +33,17 @@ export function AdminDashboardPrices() {
       </StatusWrapper>
     )
 
+  const prices = data.data
+  const paginationData = data.pagination
+
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    <div className="w-full p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8 lg:pb-24">
+      <HideFooter />
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-base font-semibold">Price Points</h1>
-          <p className="mt-2 text-sm">A table of placeholder stock market data that does not make any sense.</p>
-          <p className="text-muted-foreground mt-2 text-xs">
-            {uniqueStoreProductIds.length} unique supermarket product ids. Total: {prices?.length}
+          <p className="text-muted-foreground mt-2 text-sm">
+            All price entries in the database, sorted by store product ID and valid_from date.
           </p>
         </div>
         <div className="mt-4 flex items-center gap-2 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -69,21 +73,21 @@ export function AdminDashboardPrices() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {prices
-                  .sort((a: Price, b: Price) => {
-                    if (a.store_product_id && b.store_product_id) return a.store_product_id - b.store_product_id
-                    if (a.valid_from && b.valid_from)
-                      return new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
-                    return 0
-                  })
-                  .map((price: Price) => (
-                    <PriceRow key={price.id} price={price} />
-                  ))}
+                {prices.map((price: Price) => (
+                  <PriceRow key={price.id} price={price} />
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      <AdminPagination
+        page={paginationData.page}
+        limit={paginationData.limit}
+        totalCount={paginationData.totalCount}
+        totalPages={paginationData.totalPages}
+      />
     </div>
   )
 }

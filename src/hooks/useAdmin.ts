@@ -7,12 +7,25 @@ import { toast } from "sonner"
 // API FUNCTIONS (pure, no React)
 // =============================================================================
 
-async function fetchAllPrices() {
-  const response = await axios.get("/api/prices")
+type PaginationParams = { page: number; limit: number }
+type PricesPaginatedResponse = {
+  data: Price[]
+  pagination: {
+    page: number
+    limit: number
+    totalCount: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
+}
+
+async function fetchPricesPaginated(params: PaginationParams) {
+  const response = await axios.get(`/api/prices?page=${params.page}&limit=${params.limit}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch prices")
   }
-  return response.data as Price[]
+  return response.data as PricesPaginatedResponse
 }
 
 async function fetchShallowProducts() {
@@ -23,12 +36,24 @@ async function fetchShallowProducts() {
   return response.data.data as Product[]
 }
 
-async function fetchStoreProducts() {
-  const response = await axios.get("/api/store_products?limit=100")
+type StoreProductsPaginatedResponse = {
+  data: StoreProduct[]
+  pagination: {
+    page: number
+    limit: number
+    pagedCount: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
+}
+
+async function fetchStoreProductsPaginated(params: PaginationParams) {
+  const response = await axios.get(`/api/store_products?page=${params.page}&limit=${params.limit}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch store products")
   }
-  return response.data as { data: StoreProduct[]; pagination: { page: number; pagedCount: number } }
+  return response.data as StoreProductsPaginatedResponse
 }
 
 async function deleteShallowProduct(id: number) {
@@ -94,10 +119,10 @@ async function runAiPriorityClassification(params: AiPriorityParams) {
 // QUERY HOOKS (for fetching data)
 // =============================================================================
 
-export function useAdminPrices() {
+export function useAdminPrices(params: PaginationParams) {
   return useQuery({
-    queryKey: ["adminPrices"],
-    queryFn: fetchAllPrices,
+    queryKey: ["adminPrices", params.page, params.limit],
+    queryFn: () => fetchPricesPaginated(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: false,
   })
@@ -112,10 +137,10 @@ export function useAdminProducts() {
   })
 }
 
-export function useAdminStoreProducts() {
+export function useAdminStoreProducts(params: PaginationParams) {
   return useQuery({
-    queryKey: ["adminStoreProducts"],
-    queryFn: fetchStoreProducts,
+    queryKey: ["adminStoreProducts", params.page, params.limit],
+    queryFn: () => fetchStoreProductsPaginated(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: false,
   })

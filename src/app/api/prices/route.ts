@@ -1,10 +1,18 @@
 import { Price } from "@/types"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { priceQueries } from "@/lib/db/queries/prices"
 
-export async function GET() {
-  const prices = await priceQueries.getPrices()
-  return NextResponse.json(prices)
+export async function GET(req: NextRequest) {
+  const params = req.nextUrl.searchParams
+  const page = parseInt(params.get("page") ?? "1", 10)
+  const limit = parseInt(params.get("limit") ?? "50", 10)
+
+  const result = await priceQueries.getPricesPaginated({
+    page: isNaN(page) || page < 1 ? 1 : page,
+    limit: isNaN(limit) || limit < 1 ? 50 : Math.min(limit, 200),
+  })
+
+  return NextResponse.json(result)
 }
 
 export async function PUT(request: Request) {
