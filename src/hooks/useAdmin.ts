@@ -23,6 +23,14 @@ async function fetchShallowProducts() {
   return response.data.data as Product[]
 }
 
+async function fetchStoreProducts() {
+  const response = await axios.get("/api/store_products?limit=100")
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch store products")
+  }
+  return response.data as { data: StoreProduct[]; pagination: { page: number; pagedCount: number } }
+}
+
 async function deleteShallowProduct(id: number) {
   const response = await axios.delete("/api/products/shallow/delete", { data: { id } })
   if (response.status !== 200) {
@@ -99,6 +107,15 @@ export function useAdminProducts() {
   return useQuery({
     queryKey: ["adminProducts"],
     queryFn: fetchShallowProducts,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useAdminStoreProducts() {
+  return useQuery({
+    queryKey: ["adminStoreProducts"],
+    queryFn: fetchStoreProducts,
     staleTime: 1000 * 60 * 2, // 2 minutes
     refetchOnWindowFocus: false,
   })

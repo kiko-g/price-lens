@@ -5,7 +5,7 @@ import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { PackageIcon, CrownIcon } from "lucide-react"
+import { PackageIcon, CrownIcon, DatabaseIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -16,8 +16,7 @@ export default async function Admin() {
   return (
     <Layout>
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
-        <SectionAdminDashboardProductsLink />
-        <SectionAdminDashboardPricesLink />
+        <SectionDashboardHub />
         <SectionAdminPrioritiesLink />
         <SectionPriorityJob />
         <SectionTestScrapers />
@@ -27,32 +26,19 @@ export default async function Admin() {
   )
 }
 
-function SectionAdminDashboardProductsLink() {
+function SectionDashboardHub() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Products</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <DatabaseIcon className="h-5 w-5" />
+          Database Dashboard
+        </CardTitle>
       </CardHeader>
-      <CardContent>Access the admin dashboard to manage your account and settings.</CardContent>
+      <CardContent>Inspect database tables: prices, products, and store products.</CardContent>
       <CardFooter>
         <Button asChild>
-          <Link href="/admin/dashboard/products">Access Dashboard for Products</Link>
-        </Button>
-      </CardFooter>
-    </Card>
-  )
-}
-
-function SectionAdminDashboardPricesLink() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Prices</CardTitle>
-      </CardHeader>
-      <CardContent>Access the admin dashboard to manage your account and settings.</CardContent>
-      <CardFooter>
-        <Button asChild>
-          <Link href="/admin/dashboard/prices">Access Dashboard for Prices</Link>
+          <Link href="/admin/dashboard">Open Dashboard</Link>
         </Button>
       </CardFooter>
     </Card>
