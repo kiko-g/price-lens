@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
@@ -18,6 +18,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { PricesVariationCard } from "@/components/PricesVariationCard"
 
 import { BinocularsIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
+
+const CHART_TRANSITION_DURATION = 300 // ms for fade transition
 
 type Props = {
   sp: StoreProduct
@@ -39,7 +41,9 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>(defaultRange)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [activeAxis, updateActiveAxis] = useActiveAxis()
+  const pendingRangeRef = useRef<DateRange | null>(null)
   const id = sp.id?.toString() || ""
   const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
 
@@ -77,12 +81,45 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
 
   const daysBetweenDates = analytics?.dateRange.daysBetween || 0
 
+  // Build chart data with smooth transition
+  const updateChartData = useCallback(
+    (range: DateRange) => {
+      if (!prices || prices.length === 0) return
+      const pricePoints = buildChartData(prices, range)
+      setChartData(pricePoints)
+    },
+    [prices],
+  )
+
+  // Initial data load (no transition)
   useEffect(() => {
     if (!prices || prices.length === 0) return
+    updateChartData(selectedRange)
+  }, [prices]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const pricePoints = buildChartData(prices, selectedRange)
-    setChartData(pricePoints)
-  }, [selectedRange, prices])
+  // Handle range change with crossfade transition
+  useEffect(() => {
+    const pendingRange = pendingRangeRef.current
+    if (!pendingRange || !prices || prices.length === 0) return
+
+    // Start fade-out
+    setIsTransitioning(true)
+
+    const fadeOutTimer = setTimeout(() => {
+      // Update data while faded out
+      updateChartData(pendingRange)
+
+      // Start fade-in
+      const fadeInTimer = setTimeout(() => {
+        setIsTransitioning(false)
+        pendingRangeRef.current = null
+      }, 50)
+
+      return () => clearTimeout(fadeInTimer)
+    }, CHART_TRANSITION_DURATION)
+
+    return () => clearTimeout(fadeOutTimer)
+  }, [selectedRange, prices, updateChartData])
 
   // Early return for error state - all hooks must be called before this
   if (error) {
@@ -147,6 +184,10 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
   }
 
   function handleRangeChange(range: DateRange) {
+    if (range === selectedRange) return
+
+    // Store the pending range and trigger the transition effect
+    pendingRangeRef.current = range
     setSelectedRange(range)
     onRangeChange?.(range)
   }
@@ -223,7 +264,14 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
       </div>
 
       <div className="max-w-lg md:max-w-full">
-        <ChartContainer config={chartConfig} className={cn(isLoading ? "" : "animate-fade-in")}>
+        <ChartContainer
+          config={chartConfig}
+          className={cn(isLoading ? "" : "animate-fade-in")}
+          style={{
+            opacity: isTransitioning ? 0 : 1,
+            transition: `opacity ${CHART_TRANSITION_DURATION}ms ease-in-out`,
+          }}
+        >
           <LineChart
             accessibilityLayer
             data={chartData}
@@ -288,6 +336,7 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
                       strokeDasharray={strokeDasharray}
                       dot={dot}
                       activeDot={activeDot}
+                      isAnimationActive={false}
                     />
                   )
                 })}
