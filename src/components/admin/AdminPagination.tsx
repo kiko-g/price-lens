@@ -57,7 +57,7 @@ export function AdminPagination({ page, limit, totalCount, totalPages }: AdminPa
   const endItem = Math.min(page * limit, totalCount)
 
   return (
-    <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 left-0 z-50 border-t px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+    <div className="bg-background/95 supports-backdrop-filter:bg-background/80 fixed right-0 bottom-0 left-0 z-50 border-t px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="text-muted-foreground text-sm">
           Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of{" "}

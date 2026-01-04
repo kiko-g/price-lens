@@ -1,7 +1,7 @@
 import { arePricePointsEqual } from "@/lib/pricing"
 import { createClient } from "@/lib/supabase/server"
 import { now } from "@/lib/utils"
-import type { Price, PricesWithAnalytics, PriceAnalytics, PricePoint } from "@/types"
+import type { Price, PricesWithAnalytics, PricePoint } from "@/types"
 
 export const priceQueries = {
   async getPrices() {
@@ -153,7 +153,7 @@ export const priceQueries = {
 
     // Compute variations (percentage change between last two prices)
     const lastTwoPrices = data.slice(-2)
-    let variations = {
+    const variations = {
       price: 0,
       priceRecommended: 0,
       pricePerMajorUnit: 0,

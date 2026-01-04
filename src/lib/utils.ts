@@ -1549,21 +1549,27 @@ export function now() {
   return new Date().toISOString().replace("Z", "+00:00")
 }
 
-export function buildChartData(prices: Price[], range: DateRange = "1M"): ProductChartEntry[] {
-  // FIXME:
-  // Helper to parse date strings into UTC dates at midnight
+type BuildChartDataOptions = {
+  compact?: boolean // When true, only creates points when prices change (step-style). Default: true
+}
+
+export function buildChartData(
+  prices: Price[],
+  range: DateRange = "1M",
+  options: BuildChartDataOptions = {},
+): ProductChartEntry[] {
+  const { compact = true } = options
+
   const parseUTCDate = (dateStr: string): Date => {
     const date = new Date(dateStr)
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   }
 
-  // Filter out prices without valid_from and sort them by valid_from
   const validPrices = prices.filter((p) => p.valid_from !== null)
   if (validPrices.length === 0) return []
 
   validPrices.sort((a, b) => a.valid_from!.localeCompare(b.valid_from!))
 
-  // Preprocess prices into objects with UTC Date instances
   type ProcessedPrice = {
     validFrom: Date
     validTo: Date | null
@@ -1573,118 +1579,119 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
     discount: number | null
   }
 
-  const processedPrices: ProcessedPrice[] = validPrices.map((p) => {
-    const validFrom = parseUTCDate(p.valid_from!)
-    const validTo = p.valid_to ? parseUTCDate(p.valid_to) : null
-    return {
-      validFrom,
-      validTo,
-      price: p.price,
-      price_recommended: p.price_recommended,
-      price_per_major_unit: p.price_per_major_unit,
-      discount: p.discount,
-    }
-  })
+  const processedPrices: ProcessedPrice[] = validPrices.map((p) => ({
+    validFrom: parseUTCDate(p.valid_from!),
+    validTo: p.valid_to ? parseUTCDate(p.valid_to) : null,
+    price: p.price,
+    price_recommended: p.price_recommended,
+    price_per_major_unit: p.price_per_major_unit,
+    discount: p.discount,
+  }))
 
-  // Adjust validTo dates to avoid overlaps and gaps (using UTC)
+  // Adjust validTo dates to avoid overlaps
   for (let i = 0; i < processedPrices.length - 1; i++) {
     const current = processedPrices[i]
     const next = processedPrices[i + 1]
     const adjustedValidTo = new Date(next.validFrom)
-    adjustedValidTo.setUTCDate(adjustedValidTo.getUTCDate() - 1) // Previous day in UTC
-
+    adjustedValidTo.setUTCDate(adjustedValidTo.getUTCDate() - 1)
     if (current.validTo === null || current.validTo > adjustedValidTo) {
       current.validTo = adjustedValidTo
     }
   }
 
-  // Determine start and end dates based on the range (UTC)
-  const getStartEndDates = (range: DateRange): { start: Date; end: Date } => {
-    const now = new Date()
-    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+  const now = new Date()
+  const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
 
-    if (range === "Max") {
-      const earliest = processedPrices[0].validFrom
-      const latestPrice = processedPrices[processedPrices.length - 1]
-      const endDate = latestPrice.validTo || todayUTC
-      return { start: earliest, end: endDate }
-    } else {
-      const endDate = todayUTC
-      const startDate = new Date(endDate)
+  // Determine date range bounds
+  let start: Date
+  let end: Date
 
-      switch (range) {
-        case "1W":
-          startDate.setUTCDate(endDate.getUTCDate() - 7)
-          break
-        case "2W":
-          startDate.setUTCDate(endDate.getUTCDate() - 14)
-          break
-        case "1M":
-          startDate.setUTCDate(endDate.getUTCDate() - 30)
-          break
-        case "3M":
-          startDate.setUTCDate(endDate.getUTCDate() - 90)
-          break
-        case "6M":
-          startDate.setUTCDate(endDate.getUTCDate() - 180)
-          break
-        case "1Y":
-          startDate.setUTCDate(endDate.getUTCDate() - 365)
-          break
-        case "5Y":
-          startDate.setUTCDate(endDate.getUTCDate() - 365 * 5)
-          break
-        default:
-          throw new Error(`Unsupported range: ${range}`)
-      }
-      return { start: startDate, end: endDate }
+  if (range === "Max") {
+    start = processedPrices[0].validFrom
+    const latestPrice = processedPrices[processedPrices.length - 1]
+    end = latestPrice.validTo || todayUTC
+  } else {
+    end = todayUTC
+    start = new Date(end)
+    const daysMap: Record<string, number> = {
+      "1W": 7,
+      "2W": 14,
+      "1M": 30,
+      "3M": 90,
+      "6M": 180,
+      "1Y": 365,
+      "5Y": 365 * 5,
     }
+    start.setUTCDate(end.getUTCDate() - (daysMap[range] || 30))
   }
 
-  const { start, end } = getStartEndDates(range)
-
-  // Generate all UTC dates from start to end, inclusive at midnight UTC
-  const generateDateRange = (startDate: Date, endDate: Date): Date[] => {
-    const dates: Date[] = []
-    const current = new Date(startDate)
-    current.setUTCHours(0, 0, 0, 0)
-    const endUTC = new Date(endDate)
-    endUTC.setUTCHours(0, 0, 0, 0)
-
-    while (current <= endUTC) {
-      dates.push(new Date(current))
-      current.setUTCDate(current.getUTCDate() + 1)
-    }
-    return dates
-  }
-
-  const dates = generateDateRange(start, end)
   const daysBetweenDates = getDaysBetweenDates(start, end)
-
   const entries: ProductChartEntry[] = []
-  let currentPriceIndex = 0
 
-  for (const date of dates) {
-    const dateStr = formatDateForChart(date.toISOString(), daysBetweenDates > 30 ? range : "1M")
+  if (compact) {
+    // OPTIMIZED: Only create points when prices change (step-style chart)
+    // Instead of one point per day, we add a point at the start and end of each price period
+    for (let i = 0; i < processedPrices.length; i++) {
+      const price = processedPrices[i]
+      const periodStart = price.validFrom
+      const periodEnd = price.validTo || todayUTC
 
-    while (currentPriceIndex < processedPrices.length) {
-      const price = processedPrices[currentPriceIndex]
-      if (date < price.validFrom) {
-        break
+      // Skip if this price period is entirely outside our range
+      if (periodEnd < start || periodStart > end) continue
+
+      // Clamp the period to our range
+      const clampedStart = periodStart < start ? start : periodStart
+      const clampedEnd = periodEnd > end ? end : periodEnd
+
+      const priceEntry = {
+        price: price.price ?? 0,
+        "price-per-major-unit": price.price_per_major_unit ?? 0,
+        "price-recommended": price.price_recommended ?? 0,
+        discount: price.discount ? price.discount * 100 : 0,
       }
 
-      if (price.validTo !== null && date > price.validTo) {
-        currentPriceIndex++
-      } else {
+      // Add start point of this price period
+      entries.push({
+        date: formatDateForChart(clampedStart.toISOString(), daysBetweenDates > 30 ? range : "1M"),
+        ...priceEntry,
+      })
+
+      // Add end point of this price period (if different from start)
+      if (clampedEnd.getTime() !== clampedStart.getTime()) {
         entries.push({
-          date: dateStr,
-          price: price.price ?? 0,
-          "price-per-major-unit": price.price_per_major_unit ?? 0,
-          "price-recommended": price.price_recommended ?? 0,
-          discount: price.discount ? price.discount * 100 : 0,
+          date: formatDateForChart(clampedEnd.toISOString(), daysBetweenDates > 30 ? range : "1M"),
+          ...priceEntry,
         })
-        break
       }
+    }
+  } else {
+    // DAILY MODE: Create one data point for each day in the range
+    const current = new Date(start)
+    let priceIndex = 0
+
+    while (current <= end) {
+      const dateStr = formatDateForChart(current.toISOString(), daysBetweenDates > 30 ? range : "1M")
+
+      // Find the applicable price for this date
+      while (priceIndex < processedPrices.length) {
+        const price = processedPrices[priceIndex]
+        if (current < price.validFrom) break
+
+        if (price.validTo !== null && current > price.validTo) {
+          priceIndex++
+        } else {
+          entries.push({
+            date: dateStr,
+            price: price.price ?? 0,
+            "price-per-major-unit": price.price_per_major_unit ?? 0,
+            "price-recommended": price.price_recommended ?? 0,
+            discount: price.discount ? price.discount * 100 : 0,
+          })
+          break
+        }
+      }
+
+      current.setUTCDate(current.getUTCDate() + 1)
     }
   }
 
