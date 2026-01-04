@@ -138,18 +138,28 @@ export async function updatePricePoint(sp: StoreProduct) {
 
   const isInvalidPricePoint = !sp.price || !sp.price_recommended || !sp.price_per_major_unit
 
+  // Skip invalid price data entirely
+  if (isInvalidPricePoint) {
+    console.warn("Invalid price point, skipping:", { id: sp.id, price: sp.price })
+    return
+  }
+
   const existingPricePoint = await priceQueries.getLatestPricePoint(sp.id)
-  if (isInvalidPricePoint || (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint))) {
+
+  // Price unchanged - just update the timestamp to show it was checked
+  if (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint)) {
     console.info("Price point already exists and is up to date.", existingPricePoint)
     await priceQueries.updatePricePointUpdatedAt(existingPricePoint.id)
     return
   }
 
+  // Price changed - close old price point and insert new one
   if (existingPricePoint) {
     console.info("Price point already exists but is outdated.", existingPricePoint)
     await priceQueries.closeExistingPricePoint(existingPricePoint.id, newPricePoint)
     return
   }
 
+  // First price point for this product
   await priceQueries.insertNewPricePoint(newPricePoint)
 }

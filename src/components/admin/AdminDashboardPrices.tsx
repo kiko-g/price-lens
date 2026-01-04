@@ -5,12 +5,22 @@ import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
 import type { Price } from "@/types"
 import { InsertPriceModal } from "./InsertPriceModal"
 import { AdminPagination, useAdminPagination } from "./AdminPagination"
-import { useAdminPrices, useSanitizePrices } from "@/hooks/useAdmin"
+import { useAdminPrices, useSanitizePrices, useDuplicatePriceStats, useDeleteDuplicatePrices } from "@/hooks/useAdmin"
 
 import { HideFooter } from "@/contexts/FooterContext"
 import { Button } from "@/components/ui/button"
 
-import { Loader2, PencilIcon, CircleX, CopyIcon, CheckIcon, SparklesIcon, RefreshCcwIcon } from "lucide-react"
+import {
+  Loader2,
+  PencilIcon,
+  CircleX,
+  CopyIcon,
+  CheckIcon,
+  SparklesIcon,
+  RefreshCcwIcon,
+  Trash2Icon,
+  AlertTriangleIcon,
+} from "lucide-react"
 
 export function AdminDashboardPrices() {
   const pagination = useAdminPagination(50)
@@ -39,6 +49,9 @@ export function AdminDashboardPrices() {
   return (
     <div className="w-full p-4 pb-24 sm:p-6 sm:pb-24 lg:p-8 lg:pb-24">
       <HideFooter />
+
+      <DuplicateStatsCard />
+
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-base font-semibold">Price Points</h1>
@@ -138,6 +151,80 @@ function PriceRow({ price }: { price: Price }) {
         </Button>
       </Cell>
     </tr>
+  )
+}
+
+function DuplicateStatsCard() {
+  const { data: stats, isLoading, refetch } = useDuplicatePriceStats()
+  const deleteMutation = useDeleteDuplicatePrices()
+
+  if (isLoading) {
+    return (
+      <div className="bg-muted/30 mb-6 rounded-lg border p-4">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Analyzing duplicates...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!stats || stats.duplicateCount === 0) {
+    return (
+      <div className="mb-6 rounded-lg border border-green-500/20 bg-green-500/5 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckIcon className="h-5 w-5 text-green-500" />
+            <div>
+              <p className="text-sm font-medium">No duplicates found</p>
+              <p className="text-muted-foreground text-xs">
+                {stats?.totalPricePoints.toLocaleString() ?? 0} total price points, all unique
+              </p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => refetch()}>
+            <RefreshCcwIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mb-6 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <AlertTriangleIcon className="mt-0.5 h-5 w-5 text-amber-500" />
+          <div>
+            <p className="text-sm font-medium">
+              {stats.duplicateCount.toLocaleString()} duplicate price points detected
+            </p>
+            <p className="text-muted-foreground mt-1 text-xs">
+              Affecting {stats.affectedProductsCount} products • {stats.savingsPercentage}% of{" "}
+              {stats.totalPricePoints.toLocaleString()} total entries
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => refetch()}>
+            <RefreshCcwIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2Icon className="mr-2 h-4 w-4" />
+            )}
+            Clean Up
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 

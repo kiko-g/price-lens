@@ -115,6 +115,29 @@ async function runAiPriorityClassification(params: AiPriorityParams) {
   return response.data
 }
 
+type DuplicateStatsResponse = {
+  totalPricePoints: number
+  duplicateCount: number
+  affectedProductsCount: number
+  savingsPercentage: string
+}
+
+async function fetchDuplicatePriceStats() {
+  const response = await axios.get("/api/prices/delete/duplicate")
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch duplicate stats")
+  }
+  return response.data as DuplicateStatsResponse
+}
+
+async function deleteDuplicatePrices() {
+  const response = await axios.delete("/api/prices/delete/duplicate")
+  if (response.status !== 200) {
+    throw new Error("Failed to delete duplicate prices")
+  }
+  return response.data as { deleted: number; message: string }
+}
+
 // =============================================================================
 // QUERY HOOKS (for fetching data)
 // =============================================================================
@@ -248,6 +271,35 @@ export function useAiPriorityClassification() {
     },
     onError: (error) => {
       toast.error("AI classification failed", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      })
+    },
+  })
+}
+
+export function useDuplicatePriceStats() {
+  return useQuery({
+    queryKey: ["duplicatePriceStats"],
+    queryFn: fetchDuplicatePriceStats,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  })
+}
+
+export function useDeleteDuplicatePrices() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: deleteDuplicatePrices,
+    onSuccess: (data) => {
+      toast.success("Duplicates cleaned up", {
+        description: `Deleted ${data.deleted} duplicate price points`,
+      })
+      queryClient.invalidateQueries({ queryKey: ["duplicatePriceStats"] })
+      queryClient.invalidateQueries({ queryKey: ["adminPrices"] })
+    },
+    onError: (error) => {
+      toast.error("Failed to delete duplicates", {
         description: error instanceof Error ? error.message : "Unknown error",
       })
     },

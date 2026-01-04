@@ -230,14 +230,24 @@ export const priceQueries = {
   async getLatestPricePoint(store_product_id: number) {
     const supabase = createClient()
 
-    const { data, error } = await supabase.from("prices").select("*").eq("store_product_id", store_product_id)
+    const { data, error } = await supabase
+      .from("prices")
+      .select("*")
+      .eq("store_product_id", store_product_id)
+      .order("valid_from", { ascending: false })
+      .limit(1)
+      .single()
 
     if (error) {
+      if (error.code === "PGRST116") {
+        // No rows found - not an error, just no price history
+        return null
+      }
       console.error("Error fetching price entry:", error)
       return null
     }
 
-    return data[data.length - 1]
+    return data
   },
 
   async updatePricePointUpdatedAt(id: number) {
@@ -287,32 +297,35 @@ export const priceQueries = {
     return data
   },
 
-  async deletePricePoint(id: number) {
+  async deletePricePoint(id: number): Promise<{ success: boolean; error?: string }> {
     const supabase = createClient()
 
-    const { data, error } = await supabase.from("prices").delete().eq("id", id)
+    const { error } = await supabase.from("prices").delete().eq("id", id)
 
     if (error) {
       console.error("Error deleting price point:", error)
-      return null
+      return { success: false, error: error.message }
     }
 
-    return data
+    return { success: true }
   },
 
-  async deleteDuplicatePricePoints() {
+  async getDuplicatePricePointsStats() {
     const supabase = createClient()
 
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from("prices")
-      .select("*")
+      .select("*", { count: "exact" })
       .order("store_product_id", { ascending: true })
       .order("valid_from", { ascending: false })
 
-    if (error) {
+    if (error || !data) {
       console.error("Error fetching price points:", error)
       return null
     }
+
+    const duplicateIds: number[] = []
+    const affectedStoreProductIds = new Set<number>()
 
     for (let i = 0; i < data.length - 1; i++) {
       const p1 = data[i]
@@ -321,9 +334,37 @@ export const priceQueries = {
       if (p1.store_product_id !== p2.store_product_id) continue
 
       if (arePricePointsEqual(p1, p2)) {
-        await this.deletePricePoint(p1.id)
+        duplicateIds.push(p1.id)
+        if (p1.store_product_id) affectedStoreProductIds.add(p1.store_product_id)
       }
     }
+
+    return {
+      totalPricePoints: count ?? data.length,
+      duplicateCount: duplicateIds.length,
+      affectedProductsCount: affectedStoreProductIds.size,
+      duplicateIds,
+    }
+  },
+
+  async deleteDuplicatePricePoints() {
+    const stats = await this.getDuplicatePricePointsStats()
+
+    if (!stats) {
+      return { deleted: 0, error: "Failed to get duplicate stats" }
+    }
+
+    if (stats.duplicateIds.length === 0) {
+      return { deleted: 0, stats }
+    }
+
+    let deletedCount = 0
+    for (const id of stats.duplicateIds) {
+      const result = await this.deletePricePoint(id)
+      if (result.success) deletedCount++
+    }
+
+    return { deleted: deletedCount, stats }
   },
 
   async deleteAllPricePoints() {
