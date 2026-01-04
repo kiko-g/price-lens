@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { favoriteQueries } from "@/lib/db/queries/favorites"
+import { favoriteQueries, type FavoritesQueryParams, type FavoritesSortType } from "@/lib/db/queries/favorites"
 import { userQueries } from "@/lib/db/queries/user"
+import type { SearchType } from "@/types/extra"
+import { SupermarketChain } from "@/types/extra"
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,6 +58,20 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
+/**
+ * GET /api/favorites
+ *
+ * Fetches user's favorites with filtering, sorting, and pagination.
+ *
+ * Query Parameters:
+ * - q: Search query string
+ * - searchType: "any" | "name" | "brand" | "url" | "category"
+ * - origin: Comma-separated origin IDs (e.g., "1,2,3")
+ * - sort: "a-z" | "z-a" | "price-low-high" | "price-high-low" | "recently-added" | "oldest-first"
+ * - page: Page number (1-indexed)
+ * - limit: Items per page
+ * - onlyDiscounted: "true" to show only discounted products
+ */
 export async function GET(req: NextRequest) {
   try {
     const { data: user, error: authError } = await userQueries.getCurrentUser()
@@ -63,8 +79,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: authError?.message || "Unauthorized" }, { status: 401 })
     }
 
-    const pagination = userQueries.createPaginationParams(req.nextUrl.searchParams)
-    const result = await favoriteQueries.getUserFavoritesPaginated(user.id, pagination)
+    const params = req.nextUrl.searchParams
+    const queryParams = parseSearchParams(params)
+    const result = await favoriteQueries.getUserFavoritesFiltered(user.id, queryParams)
 
     if (result.error) {
       console.error("Error fetching favorites:", result.error)
@@ -76,4 +93,58 @@ export async function GET(req: NextRequest) {
     console.error("Error in favorites GET route:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
+}
+
+/**
+ * Parses URL search params into FavoritesQueryParams
+ */
+function parseSearchParams(params: URLSearchParams): FavoritesQueryParams {
+  const queryParams: FavoritesQueryParams = {}
+
+  // Search
+  const q = params.get("q")?.trim()
+  const searchType = params.get("searchType") as SearchType | null
+  if (q) {
+    queryParams.search = {
+      query: q,
+      searchIn: searchType ?? "any",
+    }
+  }
+
+  // Origin filter
+  const originParam = params.get("origin")
+  if (originParam) {
+    const originIds = originParam
+      .split(",")
+      .map((v) => parseInt(v.trim(), 10))
+      .filter((v) => !isNaN(v) && Object.values(SupermarketChain).includes(v)) as SupermarketChain[]
+
+    if (originIds.length > 0) {
+      queryParams.origin = {
+        originIds: originIds.length === 1 ? originIds[0] : originIds,
+      }
+    }
+  }
+
+  // Sort options
+  const sort = params.get("sort") as FavoritesSortType | null
+  if (sort) {
+    queryParams.sort = { sortBy: sort }
+  }
+
+  // Pagination
+  const page = parseInt(params.get("page") ?? "1", 10)
+  const limit = parseInt(params.get("limit") ?? "24", 10)
+  queryParams.pagination = {
+    page: isNaN(page) || page < 1 ? 1 : page,
+    limit: isNaN(limit) || limit < 1 ? 24 : Math.min(limit, 100),
+  }
+
+  // Flags
+  const onlyDiscounted = params.get("onlyDiscounted") === "true"
+  if (onlyDiscounted) {
+    queryParams.flags = { onlyDiscounted }
+  }
+
+  return queryParams
 }
