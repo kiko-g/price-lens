@@ -39,7 +39,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-import { cn, discountValueToPercentage, formatTimestamptz, generateProductPath, imagePlaceholder } from "@/lib/utils"
+import { cn, discountValueToPercentage, formatTimestamptz, generateProductPath } from "@/lib/utils"
+import { imagePlaceholder } from "@/lib/data/business"
 import {
   ArrowUpRightIcon,
   CopyIcon,
