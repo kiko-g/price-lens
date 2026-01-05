@@ -6,7 +6,8 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { useStoreProductCategories, useStoreProductsGrid, useUpdateStoreProduct } from "@/hooks/useProducts"
-import { cn, defaultCategories, existingCategories, getCenteredArray } from "@/lib/utils"
+import { cn, getCenteredArray } from "@/lib/utils"
+import { defaultCategories, existingCategories } from "@/lib/data/business"
 
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 import { Button } from "@/components/ui/button"
@@ -277,7 +278,7 @@ export function StoreProductsGrid(props: Props) {
   const updateMutation = useUpdateStoreProduct()
 
   const storeProductCategories = useStoreProductCategories()
-  const tuples = storeProductCategories?.data?.tuples || []
+  const tuples = useMemo(() => storeProductCategories?.data?.tuples || [], [storeProductCategories?.data?.tuples])
 
   const allCategoriesFilled = category1 && category2 && category3
 
