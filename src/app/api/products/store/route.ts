@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { type SearchType, type SortByType } from "@/types/extra"
 
-import { scrapeAndReplaceProduct } from "@/lib/scraper"
+import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { storeProductQueries } from "@/lib/db/queries/products"
 import { createClient } from "@/lib/supabase/server"
 

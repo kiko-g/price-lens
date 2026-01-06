@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
+import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/ui/combo/share-button"
 import {
@@ -124,7 +125,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const updateParams = useUpdateSearchParams()
-  const { user, profile } = useUser()
+  const { profile } = useUser()
   const updateStoreProduct = useUpdateStoreProduct()
   const updatePriority = useUpdateStoreProductPriority()
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
@@ -302,9 +303,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <DropdownMenuItem asChild>
                   <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
                     <DrawerTrigger asChild>
-                      <Button variant="dropdown-item" className="hover:bg-accent flex items-center justify-start gap-2">
-                        <InfoIcon className="-ml-1 h-4 w-4" />
+                      <Button variant="dropdown-item" className="hover:bg-accent flex items-center gap-2 px-2">
                         Store product details
+                        <InfoIcon className="-ml-1 h-4 w-4" />
                       </Button>
                     </DrawerTrigger>
                     <DrawerContent className="overflow-y-auto">
@@ -323,21 +324,23 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"
-                    className="hover:bg-accent flex items-center justify-start gap-2"
+                    className="hover:bg-accent flex items-center gap-2"
                     onClick={() => updateStoreProduct.mutate(sp)}
                     disabled={updateStoreProduct.isPending}
                   >
+                    Update from origin ({supermarketChain?.name})
                     {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon className="h-4 w-4" />}
-                    Update from source store
                   </Button>
                 </DropdownMenuItem>
 
                 {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
                   <>
                     <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
-                    <DropdownMenuLabel>Admin tools</DropdownMenuLabel>
+                    <DropdownMenuLabel className="flex items-center gap-2">
+                      Admin tools <DevBadge />
+                    </DropdownMenuLabel>
 
-                    <DropdownMenuItem asChild variant="caution">
+                    <DropdownMenuItem asChild>
                       <Button
                         variant="dropdown-item"
                         onClick={async () => {
@@ -366,7 +369,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       </Button>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem asChild variant="caution">
+                    <DropdownMenuItem asChild>
                       <Button
                         variant="dropdown-item"
                         onClick={async () => {

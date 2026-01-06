@@ -24,7 +24,7 @@ vi.mock("axios", async (importOriginal) => {
 })
 
 // Import the scraper module AFTER mocking
-import * as scraper from "../scraper"
+import * as scraper from "../scrapers"
 
 // ============================================================================
 // Test Fixtures
@@ -167,16 +167,16 @@ describe("Continente Scraper", () => {
     )
 
     expect(result).toBeDefined()
-    expect(result).not.toEqual({})
+    expect(result).not.toBeNull()
 
     // Check extracted values from real HTML fixture
-    expect(result.name).toBe("Gelado Framboesa e Pistácio Vegan")
-    expect(result.brand).toBe("Swee")
-    expect(result.price).toBe(6.79)
-    expect(result.origin_id).toBe(1)
-    expect(result.category).toBe("Congelados")
-    expect(result.category_2).toBe("Gelados")
-    expect(result.category_3).toBe("Gelados Americanos")
+    expect(result!.name).toBe("Gelado Framboesa e Pistácio Vegan")
+    expect(result!.brand).toBe("Swee")
+    expect(result!.price).toBe(6.79)
+    expect(result!.origin_id).toBe(1)
+    expect(result!.category).toBe("Congelados")
+    expect(result!.category_2).toBe("Gelados")
+    expect(result!.category_3).toBe("Gelados Americanos")
   })
 
   it("should handle product without discount (price equals recommended)", async () => {
@@ -186,7 +186,7 @@ describe("Continente Scraper", () => {
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
 
     // This product has no discount (price_recommended equals price)
-    expect(result.discount).toBe(0)
+    expect(result!.discount).toBe(0)
   })
 
   it("should clean URL tracking parameters", async () => {
@@ -197,16 +197,16 @@ describe("Continente Scraper", () => {
       "https://www.continente.pt/produto/test.html?_gl=abc123&_ga=xyz",
     )
 
-    expect(result.url).not.toContain("_gl")
-    expect(result.url).not.toContain("_ga")
+    expect(result!.url).not.toContain("_gl")
+    expect(result!.url).not.toContain("_ga")
   })
 
-  it("should return empty object on fetch failure", async () => {
+  it("should return null on fetch failure", async () => {
     mockAxiosGet.mockResolvedValue({ data: null })
 
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
 
-    expect(result).toEqual({})
+    expect(result).toBeNull()
   })
 
   it("should extract image URL", async () => {
@@ -215,11 +215,11 @@ describe("Continente Scraper", () => {
 
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
 
-    expect(result.image).toBeDefined()
-    expect(result.image).toContain("continente.pt")
+    expect(result!.image).toBeDefined()
+    expect(result!.image).toContain("continente.pt")
     // Should be resized to 500x500
-    expect(result.image).toContain("sw=500")
-    expect(result.image).toContain("sh=500")
+    expect(result!.image).toContain("sw=500")
+    expect(result!.image).toContain("sh=500")
   })
 
   it("should set updated_at timestamp", async () => {
@@ -230,9 +230,9 @@ describe("Continente Scraper", () => {
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
     const after = new Date().toISOString()
 
-    expect(result.updated_at).toBeDefined()
-    expect(result.updated_at >= before).toBe(true)
-    expect(result.updated_at <= after).toBe(true)
+    expect(result!.updated_at).toBeDefined()
+    expect(result!.updated_at >= before).toBe(true)
+    expect(result!.updated_at <= after).toBe(true)
   })
 })
 
@@ -250,17 +250,17 @@ describe("Auchan Scraper", () => {
     )
 
     expect(result).toBeDefined()
-    expect(result).not.toEqual({})
+    expect(result).not.toBeNull()
 
     // Real data from fixture: GELADO VEGAN SWEE FRAMBOESA PISTACIO 450 ML
     // formatProductName converts to title case
-    expect(result.name.toLowerCase()).toContain("gelado vegan swee framboesa pistacio")
-    expect(result.brand).toContain("Swee")
-    expect(result.price).toBe(4.99)
-    expect(result.origin_id).toBe(2)
-    expect(result.category).toBe("Alimentação")
-    expect(result.category_2).toBe("Congelados")
-    expect(result.category_3).toBe("Gelados")
+    expect(result!.name.toLowerCase()).toContain("gelado vegan swee framboesa pistacio")
+    expect(result!.brand).toContain("Swee")
+    expect(result!.price).toBe(4.99)
+    expect(result!.origin_id).toBe(2)
+    expect(result!.category).toBe("Alimentação")
+    expect(result!.category_2).toBe("Congelados")
+    expect(result!.category_3).toBe("Gelados")
   })
 
   it("should extract price per unit", async () => {
@@ -270,15 +270,15 @@ describe("Auchan Scraper", () => {
     const result = await scraper.Scrapers.auchan.productPage("https://www.auchan.pt/pt/alimentacao/test.html")
 
     // Verify price_per_major_unit field exists
-    expect(result).toHaveProperty("price_per_major_unit")
+    expect(result!).toHaveProperty("price_per_major_unit")
   })
 
-  it("should return empty object on missing JSON-LD", async () => {
+  it("should return null on missing JSON-LD", async () => {
     mockAxiosGet.mockResolvedValue({ data: "<html><body>No data</body></html>" })
 
     const result = await scraper.Scrapers.auchan.productPage("https://www.auchan.pt/pt/test.html")
 
-    expect(result).toEqual({})
+    expect(result).toBeNull()
   })
 })
 
@@ -296,13 +296,13 @@ describe("Pingo Doce Scraper", () => {
     )
 
     expect(result).toBeDefined()
-    expect(result).not.toEqual({})
+    expect(result).not.toBeNull()
 
     // Real data from fixture: Gelado Vegan Berries e Pistachio SWEE
-    expect(result.name).toBe("Gelado Vegan Berries e Pistachio")
-    expect(result.brand).toBe("Swee")
-    expect(result.price).toBe(4.99)
-    expect(result.origin_id).toBe(3)
+    expect(result!.name).toBe("Gelado Vegan Berries e Pistachio")
+    expect(result!.brand).toBe("Swee")
+    expect(result!.price).toBe(4.99)
+    expect(result!.origin_id).toBe(3)
   })
 
   it("should extract categories from URL", async () => {
@@ -313,8 +313,8 @@ describe("Pingo Doce Scraper", () => {
       "https://www.pingodoce.pt/produtos/congelados/gelados-e-sobremesas/gelados-americanos/gelado-vegan-985760",
     )
 
-    expect(result.category).toBe("Congelados")
-    expect(result.category_2).toBe("Gelados E Sobremesas")
+    expect(result!.category).toBe("Congelados")
+    expect(result!.category_2).toBe("Gelados E Sobremesas")
   })
 
   it("should extract price per major unit when available", async () => {
@@ -324,7 +324,7 @@ describe("Pingo Doce Scraper", () => {
     const result = await scraper.Scrapers.pingoDoce.productPage("https://www.pingodoce.pt/produtos/test")
 
     // This product has price per unit info
-    expect(result.price_per_major_unit).toBeDefined()
+    expect(result!.price_per_major_unit).toBeDefined()
   })
 
   it("should handle products without discount", async () => {
@@ -335,7 +335,7 @@ describe("Pingo Doce Scraper", () => {
 
     // This product may or may not have a discount - just verify the field exists
     expect(result).toHaveProperty("discount")
-    expect(typeof result.discount).toBe("number")
+    expect(typeof result!.discount).toBe("number")
   })
 })
 
@@ -346,17 +346,20 @@ describe("Pingo Doce Scraper", () => {
 describe("getScraper", () => {
   it("should return Continente scraper for origin 1", () => {
     const scraperObj = scraper.getScraper(1)
-    expect(scraperObj).toBe(scraper.Scrapers.continente)
+    expect(scraperObj.originId).toBe(1)
+    expect(scraperObj.name).toBe("Continente")
   })
 
   it("should return Auchan scraper for origin 2", () => {
     const scraperObj = scraper.getScraper(2)
-    expect(scraperObj).toBe(scraper.Scrapers.auchan)
+    expect(scraperObj.originId).toBe(2)
+    expect(scraperObj.name).toBe("Auchan")
   })
 
   it("should return Pingo Doce scraper for origin 3", () => {
     const scraperObj = scraper.getScraper(3)
-    expect(scraperObj).toBe(scraper.Scrapers.pingoDoce)
+    expect(scraperObj.originId).toBe(3)
+    expect(scraperObj.name).toBe("PingoDoce")
   })
 
   it("should throw for unknown origin", () => {
@@ -373,6 +376,7 @@ describe("Output Schema Consistency", () => {
     "url",
     "name",
     "brand",
+    "barcode",
     "pack",
     "price",
     "price_recommended",

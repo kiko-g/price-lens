@@ -9,6 +9,7 @@ import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } fro
 import { searchTypes, type SearchType, type SortByType } from "@/types/extra"
 import { cn, getCenteredArray } from "@/lib/utils"
 
+import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -451,9 +452,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
                   <BulkPriorityDialog filterParams={bulkPriorityFilterParams} filterSummary={filterSummary}>
                     <button className="flex w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sm">
-                      <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
-                        DEV
-                      </span>
+                      <DevBadge />
                       Bulk Set Priority
                     </button>
                   </BulkPriorityDialog>
@@ -645,9 +644,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                   <span className="flex items-center gap-1">
                     Source
-                    <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
-                      DEV
-                    </span>
+                    <DevBadge />
                   </span>
                   {selectedSources.length > 0 && (
                     <>
@@ -1174,9 +1171,7 @@ function MobileFiltersDrawer({
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-1 text-base font-semibold">
                     Source
-                    <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
-                      DEV
-                    </span>
+                    <DevBadge />
                   </Label>
                   {selectedSources.length > 0 && (
                     <button onClick={onClearSources} className="text-muted-foreground text-xs hover:underline">

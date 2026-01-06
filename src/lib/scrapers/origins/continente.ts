@@ -1,0 +1,156 @@
+import type * as cheerio from "cheerio"
+import { BaseProductScraper } from "../base"
+import { StoreOrigin, type RawProduct } from "../types"
+import { extractJsonLd, isValidJson, resizeImgSrc } from "../utils"
+
+interface ContinenteGtmItem {
+  item_name?: string
+  item_brand?: string
+  item_category?: string
+  item_category2?: string
+  item_category3?: string
+  price?: number
+  pre_discount_price?: number
+  price_per_major_unit?: number
+}
+
+interface ContinenteGtmData {
+  items?: ContinenteGtmItem[]
+}
+
+/**
+ * Scraper for Continente supermarket (origin_id: 1)
+ */
+export class ContinenteScraper extends BaseProductScraper {
+  readonly originId = StoreOrigin.Continente
+  readonly name = "Continente"
+
+  protected async extractRawProduct($: cheerio.CheerioAPI, url: string): Promise<RawProduct | null> {
+    const jsonLd = extractJsonLd($)
+    const gtmData = this.extractGtmData($)
+    const gtmItem = gtmData?.items?.[0]
+
+    if (!jsonLd && !gtmItem) {
+      return null
+    }
+
+    const root = ".product-images-container"
+    const breadcrumbs = this.extractBreadcrumbs($, gtmItem)
+    const image = this.extractImage($, jsonLd)
+
+    return {
+      url,
+      name: this.extractName($, jsonLd, gtmItem, root),
+      brand: this.extractBrand($, jsonLd, gtmItem, root),
+      barcode: this.extractBarcode($, jsonLd),
+      pack: this.getText($, `${root} .ct-pdp--unit`),
+      price: this.extractPrice(jsonLd, gtmItem, $, root),
+      priceRecommended: this.extractPriceRecommended($, gtmItem, root),
+      pricePerMajorUnit: this.extractPricePerUnit($, gtmItem, root),
+      majorUnit: this.extractMajorUnit($, root),
+      image: image ? resizeImgSrc(image, 500, 500) : null,
+      category: gtmItem?.item_category || breadcrumbs[0] || null,
+      category2: gtmItem?.item_category2 || breadcrumbs[1] || null,
+      category3: gtmItem?.item_category3 || breadcrumbs[2] || null,
+    }
+  }
+
+  private extractGtmData($: cheerio.CheerioAPI): ContinenteGtmData | null {
+    const json = this.getAttr($, "#maincontent [data-product-detail-impression]", "data-product-detail-impression")
+    if (!json || !isValidJson(json)) return null
+    try {
+      return JSON.parse(json) as ContinenteGtmData
+    } catch {
+      return null
+    }
+  }
+
+  private extractBreadcrumbs($: cheerio.CheerioAPI, gtmItem?: ContinenteGtmItem): string[] {
+    if (gtmItem?.item_category) return []
+
+    const text = $(".breadcrumbs").first().text().trim()
+    return text
+      .split("\n")
+      .map((item) => item.trim())
+      .filter((item) => item !== "" && item !== "Página inicial")
+  }
+
+  private extractImage($: cheerio.CheerioAPI, jsonLd: Record<string, unknown> | null): string | null {
+    const jsonLdImage = jsonLd?.image
+    const imageFromJsonLd = Array.isArray(jsonLdImage) ? jsonLdImage[0] : (jsonLdImage as string | undefined)
+    const firstImage = $(".ct-product-image").first()
+    const imageFromDom = firstImage.attr("data-src") || firstImage.attr("src") || null
+    return imageFromJsonLd || imageFromDom || null
+  }
+
+  private extractName(
+    $: cheerio.CheerioAPI,
+    jsonLd: Record<string, unknown> | null,
+    gtmItem?: ContinenteGtmItem,
+    root?: string,
+  ): string {
+    return (jsonLd?.name as string) || gtmItem?.item_name || this.getText($, `${root} h1`) || "Unknown Product"
+  }
+
+  private extractBrand(
+    $: cheerio.CheerioAPI,
+    jsonLd: Record<string, unknown> | null,
+    gtmItem?: ContinenteGtmItem,
+    root?: string,
+  ): string | null {
+    const jsonLdBrand = (jsonLd?.brand as Record<string, unknown>)?.name as string | undefined
+    return jsonLdBrand || gtmItem?.item_brand || this.getText($, `${root} .ct-pdp--brand`)
+  }
+
+  private extractBarcode($: cheerio.CheerioAPI, jsonLd: Record<string, unknown> | null): string | null {
+    // Try JSON-LD first (gtin, gtin13, gtin8, sku)
+    const gtin = (jsonLd?.gtin13 || jsonLd?.gtin || jsonLd?.gtin8 || jsonLd?.sku) as string | undefined
+    if (gtin) return gtin
+
+    // Try meta tags
+    const metaGtin = this.getAttr($, 'meta[property="product:gtin"]', "content")
+    if (metaGtin) return metaGtin
+
+    // Try data attributes
+    const dataEan = this.getAttr($, "[data-ean]", "data-ean")
+    if (dataEan) return dataEan
+
+    return null
+  }
+
+  private extractPrice(
+    jsonLd: Record<string, unknown> | null,
+    gtmItem?: ContinenteGtmItem,
+    $?: cheerio.CheerioAPI,
+    root?: string,
+  ): string | number | null {
+    const offers = jsonLd?.offers as Record<string, unknown> | undefined
+    if (offers?.price) return offers.price as string | number
+    if (gtmItem?.price) return gtmItem.price
+    if ($) return this.getAttr($, `${root} .ct-price-formatted`, "content")
+    return null
+  }
+
+  private extractPriceRecommended(
+    $: cheerio.CheerioAPI,
+    gtmItem?: ContinenteGtmItem,
+    root?: string,
+  ): string | number | null {
+    return gtmItem?.pre_discount_price || this.getText($, `${root} .pwc-discount-amount-pvpr`)
+  }
+
+  private extractPricePerUnit(
+    $: cheerio.CheerioAPI,
+    gtmItem?: ContinenteGtmItem,
+    root?: string,
+  ): string | number | null {
+    return gtmItem?.price_per_major_unit || this.getText($, `${root} .ct-price-value`)
+  }
+
+  private extractMajorUnit($: cheerio.CheerioAPI, root: string): string | null {
+    const text = $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim()
+    return text || null
+  }
+}
+
+export const continenteScraper = new ContinenteScraper()

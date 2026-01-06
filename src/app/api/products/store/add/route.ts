@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getScraper } from "@/lib/scraper"
+import { getScraper } from "@/lib/scrapers"
 import { storeProductQueries } from "@/lib/db/queries/products"
 import { StoreProduct } from "@/types"
 
@@ -30,8 +30,11 @@ export async function POST(req: NextRequest) {
     }
 
     const scraper = getScraper(originInt)
-    const scrapedProduct = (await scraper.productPage(url)) as StoreProduct
-    const { data: product, error: productError } = await storeProductQueries.createOrUpdateProduct(scrapedProduct)
+    const scrapedProduct = await scraper.scrape({ url })
+    if (!scrapedProduct) {
+      return NextResponse.json({ error: "Failed to scrape product", url, origin: originInt }, { status: 400 })
+    }
+    const { data: product, error: productError } = await storeProductQueries.createOrUpdateProduct(scrapedProduct as unknown as StoreProduct)
 
     if (productError) {
       return NextResponse.json(
