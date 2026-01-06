@@ -224,6 +224,7 @@ const continenteProductPageScraper = async (
 
     const sp: Omit<StoreProduct, "id" | "product_id"> = {
       ...rawProduct,
+      barcode: null, // TODO: Extract barcode from page if available
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
       price_recommended: priceRecommended || null,
@@ -329,6 +330,7 @@ const auchanProductPageScraper = async (
 
     const sp: Omit<StoreProduct, "id" | "product_id"> = {
       ...rawProduct,
+      barcode: null, // TODO: Extract barcode from page if available
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
       price_recommended: priceRecommended || null,
@@ -430,6 +432,7 @@ const pingoDoceProductPageScraper = async (
 
     const sp: Omit<StoreProduct, "id" | "product_id"> = {
       ...rawProduct,
+      barcode: null, // TODO: Extract barcode from page if available
       pack: rawProduct.pack ? packageToUnit(rawProduct.pack) : null,
       price: price || 0,
       price_recommended: priceRecommended || null,
@@ -446,7 +449,7 @@ const pingoDoceProductPageScraper = async (
 
     return sp
   } catch (error) {
-    // Fail grace fully instead of breaking the route
+    // Fail gracefully instead of breaking the route
     console.error(`Unexpected error in pingoDoceProductPageScraper for URL: ${url}`, error)
     return {}
   }

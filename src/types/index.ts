@@ -70,6 +70,7 @@ export interface StoreProduct {
   url: string
   name: string
   brand: string | null
+  barcode: string | null
   pack: string | null
   price: number
   price_recommended: number | null

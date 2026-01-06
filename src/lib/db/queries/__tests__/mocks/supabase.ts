@@ -86,6 +86,7 @@ export const createMockStoreProduct = (overrides = {}) => ({
   url: "https://example.com/product/1",
   name: "Test Product",
   brand: "Test Brand",
+  barcode: null as string | null,
   pack: "1kg",
   price: 9.99,
   price_recommended: 12.99,

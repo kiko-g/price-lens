@@ -114,6 +114,7 @@ export type Database = {
       }
       store_products: {
         Row: {
+          barcode: string | null
           brand: string | null
           category: string | null
           category_2: string | null
@@ -137,6 +138,7 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          barcode?: string | null
           brand?: string | null
           category?: string | null
           category_2?: string | null
@@ -160,6 +162,7 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          barcode?: string | null
           brand?: string | null
           category?: string | null
           category_2?: string | null
@@ -251,6 +254,7 @@ export type Database = {
       get_unsynced_high_priority_products: {
         Args: never
         Returns: {
+          barcode: string | null
           brand: string | null
           category: string | null
           category_2: string | null
