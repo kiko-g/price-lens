@@ -12,7 +12,7 @@ export function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "mx-auto flex w-full items-center justify-between border-t bg-zinc-900 px-4 py-4 pt-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-8 lg:pt-8 dark:bg-inherit",
+        "mx-auto flex w-full items-center justify-between border-t bg-zinc-50 px-4 py-4 pt-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-8 lg:pt-8 dark:bg-inherit",
         className,
       )}
     >
@@ -22,7 +22,7 @@ export function Footer({ className }: { className?: string }) {
           <Link
             target="_blank"
             href={siteConfig.links.github}
-            className="inline-flex items-center gap-2 font-medium text-white hover:underline hover:opacity-80"
+            className="inline-flex items-center gap-2 font-medium text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
           >
             Francisco Gonçalves
             <Image src="/profile.svg" alt="author" width={24} height={24} className="rounded-full" />
@@ -34,7 +34,7 @@ export function Footer({ className }: { className?: string }) {
           <Link
             target="_blank"
             href={siteConfig.links.repo}
-            className="inline-flex items-center gap-2 font-semibold text-white hover:underline hover:opacity-80"
+            className="inline-flex items-center gap-2 font-semibold text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
           >
             GitHub
           </Link>
@@ -55,7 +55,7 @@ export function Footer({ className }: { className?: string }) {
         <li>
           <Button variant="ghost-dark" size="icon" asChild>
             <Link href={siteConfig.links.instagram} target="_blank" rel="noopener noreferrer">
-              <InstagramIcon className="size-4 fill-white" />
+              <InstagramIcon className="size-4 fill-zinc-900 dark:fill-white" />
             </Link>
           </Button>
         </li>
@@ -63,7 +63,7 @@ export function Footer({ className }: { className?: string }) {
         <li>
           <Button variant="ghost-dark" size="icon" asChild>
             <Link href={siteConfig.links.twitter} target="_blank" rel="noopener noreferrer">
-              <XTwitterIcon className="size-4 fill-white" />
+              <XTwitterIcon className="size-4 fill-zinc-900 dark:fill-white" />
             </Link>
           </Button>
         </li>
@@ -71,7 +71,7 @@ export function Footer({ className }: { className?: string }) {
         <li>
           <Button variant="ghost-dark" size="icon" asChild>
             <Link href={siteConfig.links.linkedin} target="_blank" rel="noopener noreferrer">
-              <LinkedinIcon className="size-4 fill-white stroke-transparent text-white" />
+              <LinkedinIcon className="size-4 fill-zinc-900 stroke-transparent dark:fill-white dark:stroke-transparent" />
             </Link>
           </Button>
         </li>
