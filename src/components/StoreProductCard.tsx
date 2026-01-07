@@ -39,7 +39,13 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-import { cn, discountValueToPercentage, formatTimestamptz, generateProductPath } from "@/lib/utils"
+import {
+  cn,
+  discountValueToPercentage,
+  formatTimestamptz,
+  generateProductPath,
+  getShortRelativeTime,
+} from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/data/business"
 import {
   ArrowUpRightIcon,
@@ -238,12 +244,12 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
           </div>
         ) : null}
 
-        <div className="absolute right-2 bottom-2 flex flex-col items-end gap-1">
+        <div className="absolute right-2 bottom-2 flex flex-col items-end">
           {favoritedAt && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge size="2xs" variant="tertiary" className="text-muted-foreground flex items-center gap-1">
+                  <Badge size="2xs" variant="tertiary" className="gap-1">
                     <CalendarPlusIcon className="h-3 w-3" />
                     {getShortRelativeTime(new Date(favoritedAt))}
                   </Badge>
@@ -639,26 +645,4 @@ function DrawerSheet({
       </DrawerContent>
     </Drawer>
   )
-}
-
-/**
- * Get a short version of relative time for compact displays
- */
-function getShortRelativeTime(date: Date): string {
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const diffWeeks = Math.floor(diffDays / 7)
-  const diffMonths = Math.floor(diffDays / 30)
-  const diffYears = Math.floor(diffDays / 365)
-
-  if (diffDays === 0) return "today"
-  if (diffDays === 1) return "1d"
-  if (diffDays < 7) return `${diffDays}d`
-  if (diffWeeks === 1) return "1w"
-  if (diffWeeks < 4) return `${diffWeeks}w`
-  if (diffMonths === 1) return "1mo"
-  if (diffMonths < 12) return `${diffMonths}mo`
-  if (diffYears === 1) return "1y"
-  return `${diffYears}y`
 }

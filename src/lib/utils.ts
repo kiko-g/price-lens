@@ -287,3 +287,25 @@ export const chartConfig = {
     color: "var(--chart-4)",
   },
 } satisfies ChartConfig
+
+/**
+ * Get a short version of relative time for compact displays
+ */
+export function getShortRelativeTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffWeeks = Math.floor(diffDays / 7)
+  const diffMonths = Math.floor(diffDays / 30)
+  const diffYears = Math.floor(diffDays / 365)
+
+  if (diffDays === 0) return "today"
+  if (diffDays === 1) return "1d"
+  if (diffDays < 7) return `${diffDays}d`
+  if (diffWeeks === 1) return "1w"
+  if (diffWeeks < 4) return `${diffWeeks}w`
+  if (diffMonths === 1) return "1mo"
+  if (diffMonths < 12) return `${diffMonths}mo`
+  if (diffYears === 1) return "1y"
+  return `${diffYears}y`
+}
