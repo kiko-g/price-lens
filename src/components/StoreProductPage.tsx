@@ -1,11 +1,51 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
-import type { StoreProduct } from "@/types"
-import { discountValueToPercentage } from "@/lib/utils"
 import { toast } from "sonner"
+import { useRouter, useSearchParams } from "next/navigation"
+
+import { cn } from "@/lib/utils"
+import { discountValueToPercentage } from "@/lib/utils"
+import type { StoreProduct } from "@/types"
+import { RANGES, DateRange } from "@/types/extra"
+import { useUser } from "@/hooks/useUser"
+import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
+import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
+import { useUpdateStoreProduct, useUpdateStoreProductPriority } from "@/hooks/useProducts"
+
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { DevBadge } from "@/components/ui/combo/dev-badge"
+import { Barcode } from "@/components/ui/combo/barcode"
+import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/ui/combo/share-button"
+import { CodeShowcase } from "@/components/ui/combo/code-showcase"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
+import { ProductChart } from "@/components/ProductChart"
+import { resolveSupermarketChain } from "@/components/Supermarket"
+import { RelatedStoreProducts } from "@/components/RelatedStoreProducts"
+import { IdenticalStoreProducts } from "@/components/IdenticalStoreProducts"
+
 import {
   Undo2Icon,
   HeartIcon,
@@ -18,44 +58,6 @@ import {
   MicroscopeIcon,
   CircleIcon,
 } from "lucide-react"
-
-import { Badge } from "@/components/ui/badge"
-import { DevBadge } from "@/components/ui/combo/dev-badge"
-import { Button } from "@/components/ui/button"
-import { ShareButton } from "@/components/ui/combo/share-button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-
-import { CodeShowcase } from "@/components/ui/combo/code-showcase"
-import { ProductChart } from "@/components/ProductChart"
-import { resolveSupermarketChain } from "@/components/Supermarket"
-import { RelatedStoreProducts } from "@/components/RelatedStoreProducts"
-import { useUpdateStoreProduct, useUpdateStoreProductPriority } from "@/hooks/useProducts"
-import { LoadingIcon } from "@/components/icons/LoadingIcon"
-import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
-import { useUser } from "@/hooks/useUser"
-import { cn } from "@/lib/utils"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { RANGES, DateRange } from "@/types/extra"
-import { IdenticalStoreProducts } from "./IdenticalStoreProducts"
-import { Separator } from "./ui/separator"
 
 function resolveImageUrlForPage(image: string, size = 800) {
   const url = new URL(image)
@@ -154,22 +156,26 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       </div>
 
       <div className="grid w-full gap-8 md:grid-cols-2">
-        {/* Product Image */}
-        <div className="relative aspect-square w-full max-w-full overflow-hidden rounded-lg border bg-white">
-          {sp.image ? (
-            <Image
-              fill
-              src={resolveImageUrlForPage(sp.image, 800)}
-              alt={sp.name}
-              className="max-h-full max-w-full object-contain object-center"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority={true}
-            />
-          ) : (
-            <div className="bg-muted flex h-full w-full items-center justify-center">
-              <p className="text-muted-foreground">No image available</p>
-            </div>
-          )}
+        <div className="flex flex-col gap-4">
+          {/* Product Image */}
+          <div className="relative aspect-square w-full max-w-full overflow-hidden rounded-lg border bg-white">
+            {sp.image ? (
+              <Image
+                fill
+                src={resolveImageUrlForPage(sp.image, 800)}
+                alt={sp.name}
+                className="max-h-full max-w-full object-contain object-center"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={true}
+              />
+            ) : (
+              <div className="bg-muted flex h-full w-full items-center justify-center">
+                <p className="text-muted-foreground">No image available</p>
+              </div>
+            )}
+          </div>
+
+          <Barcode value={sp.barcode} height={30} showMissingValue />
         </div>
 
         {/* Product Details */}
