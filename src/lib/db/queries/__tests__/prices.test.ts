@@ -6,7 +6,7 @@ const createChainMock = () => {
   const chain: any = {}
 
   // All chainable methods return the chain itself
-  const chainableMethods = ["select", "insert", "update", "delete", "eq", "order", "range"]
+  const chainableMethods = ["select", "insert", "update", "delete", "eq", "order", "range", "limit"]
   chainableMethods.forEach((method) => {
     chain[method] = vi.fn().mockImplementation(() => chain)
   })
@@ -198,19 +198,19 @@ describe("priceQueries", () => {
 
   describe("getLatestPricePoint", () => {
     it("should return the latest price point", async () => {
-      const mockPrices = [
-        createMockPrice({ id: 1, created_at: "2024-01-01T00:00:00Z" }),
-        createMockPrice({ id: 2, created_at: "2024-01-02T00:00:00Z" }),
-      ]
-      mockChain.eq.mockResolvedValue({ data: mockPrices, error: null })
+      const mockPrice = createMockPrice({ id: 2, created_at: "2024-01-02T00:00:00Z" })
+      mockChain.single.mockResolvedValue({ data: mockPrice, error: null })
 
       const result = await priceQueries.getLatestPricePoint(1)
 
-      expect(result).toEqual(mockPrices[1])
+      expect(mockChain.eq).toHaveBeenCalledWith("store_product_id", 1)
+      expect(mockChain.order).toHaveBeenCalledWith("valid_from", { ascending: false })
+      expect(mockChain.limit).toHaveBeenCalledWith(1)
+      expect(result).toEqual(mockPrice)
     })
 
     it("should return null on error", async () => {
-      mockChain.eq.mockResolvedValue({ data: null, error: { message: "Query failed" } })
+      mockChain.single.mockResolvedValue({ data: null, error: { message: "Query failed" } })
 
       const result = await priceQueries.getLatestPricePoint(1)
 
@@ -294,15 +294,15 @@ describe("priceQueries", () => {
       expect(mockSupabase.from).toHaveBeenCalledWith("prices")
       expect(mockChain.delete).toHaveBeenCalled()
       expect(mockChain.eq).toHaveBeenCalledWith("id", 1)
-      expect(result).toEqual({})
+      expect(result).toEqual({ success: true })
     })
 
-    it("should return null on error", async () => {
+    it("should return error object on error", async () => {
       mockChain.eq.mockResolvedValue({ data: null, error: { message: "Delete failed" } })
 
       const result = await priceQueries.deletePricePoint(1)
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ success: false, error: "Delete failed" })
     })
   })
 
@@ -344,7 +344,7 @@ describe("priceQueries", () => {
       expect(mockChain.delete).not.toHaveBeenCalled()
     })
 
-    it("should return null on fetch error", async () => {
+    it("should return error object on fetch error", async () => {
       const orderChain: any = {}
       orderChain.order = vi.fn().mockImplementation(() => orderChain)
       orderChain.then = (resolve: any) => resolve({ data: null, error: { message: "Query failed" } })
@@ -352,7 +352,7 @@ describe("priceQueries", () => {
 
       const result = await priceQueries.deleteDuplicatePricePoints()
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ deleted: 0, error: "Failed to get duplicate stats" })
     })
   })
 

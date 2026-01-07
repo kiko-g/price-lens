@@ -290,7 +290,7 @@ describe("storeProductQueries", () => {
 
       await storeProductQueries.getAll({ page: 1, limit: 10, priority: "5" })
 
-      expect(mockChain.eq).toHaveBeenCalledWith("priority", 5)
+      expect(mockChain.in).toHaveBeenCalledWith("priority", [5])
     })
 
     it("should filter by origin", async () => {
