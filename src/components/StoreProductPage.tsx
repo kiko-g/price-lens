@@ -415,7 +415,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         </div>
       </div>
 
-      <Separator className="my-6" />
+      <Separator className="mt-4 mb-6" />
       <IdenticalStoreProducts id={storeProductId} limit={10} />
       <Separator className="my-8" />
       <RelatedStoreProducts id={storeProductId} limit={20} />
