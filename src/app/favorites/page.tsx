@@ -200,7 +200,7 @@ export default function FavoritesPage() {
     <main className="h-[calc(100vh-54px)] overflow-hidden">
       <HideFooter />
       <FavoritesShowcase>
-        <Footer className="px-0 pt-4 pb-0 sm:px-0 sm:pt-4 sm:pb-0 lg:px-0 lg:pt-4 lg:pb-0" />
+        <Footer className="bg-transparent px-0 pt-4 pb-0 sm:px-0 sm:pt-4 sm:pb-0 lg:px-0 lg:pt-4 lg:pb-0 dark:bg-transparent" />
       </FavoritesShowcase>
     </main>
   )
