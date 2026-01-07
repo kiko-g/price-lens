@@ -103,7 +103,13 @@ export class ContinenteScraper extends BaseProductScraper {
   }
 
   private extractBarcode($: cheerio.CheerioAPI, jsonLd: Record<string, unknown> | null): string | null {
-    // Try JSON-LD first (gtin, gtin13, gtin8, sku)
+    const nutritionalUrl = $("a.js-nutritional-tab-anchor").attr("data-url")
+    if (nutritionalUrl) {
+      const eanMatch = nutritionalUrl.match(/ean=(\d+)/)
+      if (eanMatch) return eanMatch[1]
+    }
+
+    // Try JSON-LD (gtin, gtin13, gtin8, sku)
     const gtin = (jsonLd?.gtin13 || jsonLd?.gtin || jsonLd?.gtin8 || jsonLd?.sku) as string | undefined
     if (gtin) return gtin
 
