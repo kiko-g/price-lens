@@ -7,7 +7,6 @@ import {
   createBulkScrapeJob,
   getActiveBulkScrapeJobs,
   updateBulkScrapeJob,
-  incrementBulkScrapeProgress,
   getBulkScrapeJob,
   type BulkScrapeJob,
 } from "@/lib/kv"
@@ -43,9 +42,7 @@ export async function GET(req: NextRequest) {
   const filters = parseFilters(searchParams)
   const supabase = createClient()
 
-  let query = supabase
-    .from("store_products")
-    .select("id", { count: "exact", head: true })
+  let query = supabase.from("store_products").select("id", { count: "exact", head: true })
 
   query = applyFilters(query, filters)
 
@@ -77,10 +74,7 @@ export async function POST(req: NextRequest) {
     const workerUrl = `${baseUrl}/api/scrape/worker`
 
     // Fetch matching products
-    let query = supabase
-      .from("store_products")
-      .select("id, url, name, origin_id, priority")
-      .not("url", "is", null)
+    let query = supabase.from("store_products").select("id, url, name, origin_id, priority").not("url", "is", null)
 
     query = applyFilters(query, filters)
 
@@ -174,10 +168,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error("Bulk scrape error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 })
   }
 }
 
@@ -296,7 +287,7 @@ export async function PATCH(req: NextRequest) {
           const response = await scrapeAndReplaceProduct(
             product.url,
             product.origin_id,
-            existingProduct as StoreProduct | undefined
+            existingProduct as StoreProduct | undefined,
           )
           const json = await response.json()
 
@@ -314,7 +305,7 @@ export async function PATCH(req: NextRequest) {
         } catch (err) {
           return { success: false, productId: product.id, error: String(err) }
         }
-      })
+      }),
     )
 
     // Count results
@@ -347,10 +338,7 @@ export async function PATCH(req: NextRequest) {
     })
   } catch (error) {
     console.error("Direct scrape error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 })
   }
 }
 
@@ -362,43 +350,47 @@ function parseFilters(searchParams: URLSearchParams): BulkScrapeFilters {
 
   return {
     origins: originsParam
-      ? originsParam.split(",").map((n) => parseInt(n, 10)).filter((n) => !isNaN(n))
+      ? originsParam
+          .split(",")
+          .map((n) => parseInt(n, 10))
+          .filter((n) => !isNaN(n))
       : [1, 2], // Default: Continente + Auchan (skip Pingo Doce)
     priorities: prioritiesParam
-      ? prioritiesParam.split(",").map((n) => parseInt(n, 10)).filter((n) => !isNaN(n))
+      ? prioritiesParam
+          .split(",")
+          .map((n) => parseInt(n, 10))
+          .filter((n) => !isNaN(n))
       : [],
     missingBarcode: searchParams.get("missingBarcode") !== "false",
     category: searchParams.get("category") || undefined,
   }
 }
 
-function applyFilters(
-  query: ReturnType<ReturnType<typeof createClient>["from"]>,
-  filters: BulkScrapeFilters
-) {
+function applyFilters<T extends { in: any; is: any; eq: any; not: any }>(query: T, filters: BulkScrapeFilters): T {
+  let q = query
+
   // Origin filter
   if (filters.origins.length > 0) {
-    query = query.in("origin_id", filters.origins)
+    q = q.in("origin_id", filters.origins)
   }
 
   // Priority filter
   if (filters.priorities.length > 0) {
-    query = query.in("priority", filters.priorities)
+    q = q.in("priority", filters.priorities)
   }
 
   // Missing barcode filter
   if (filters.missingBarcode) {
-    query = query.is("barcode", null)
+    q = q.is("barcode", null)
   }
 
   // Category filter
   if (filters.category) {
-    query = query.eq("category", filters.category)
+    q = q.eq("category", filters.category)
   }
 
   // Only products with valid names (not blank entries)
-  query = query.not("name", "is", null)
+  q = q.not("name", "is", null)
 
-  return query
+  return q
 }
-

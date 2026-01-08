@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 
@@ -85,11 +85,17 @@ export default function BulkScrapePage() {
   // Active job tracking
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
 
-  // Build filter params
-  const filterParams = new URLSearchParams()
-  if (selectedOrigins.length > 0) filterParams.set("origins", selectedOrigins.join(","))
-  if (selectedPriorities.length > 0) filterParams.set("priorities", selectedPriorities.join(","))
-  filterParams.set("missingBarcode", String(missingBarcode))
+  // Ref to track cancellation request (avoids stale closure in while loop)
+  const cancelRequestedRef = useRef(false)
+
+  // Memoize filter params string to prevent unnecessary query refetches
+  const filterParamsString = useMemo(() => {
+    const params = new URLSearchParams()
+    if (selectedOrigins.length > 0) params.set("origins", selectedOrigins.join(","))
+    if (selectedPriorities.length > 0) params.set("priorities", selectedPriorities.join(","))
+    params.set("missingBarcode", String(missingBarcode))
+    return params.toString()
+  }, [selectedOrigins, selectedPriorities, missingBarcode])
 
   // Fetch matching count
   const {
@@ -97,9 +103,9 @@ export default function BulkScrapePage() {
     isLoading: isLoadingCount,
     refetch: refetchCount,
   } = useQuery({
-    queryKey: ["bulk-scrape-count", filterParams.toString()],
+    queryKey: ["bulk-scrape-count", filterParamsString],
     queryFn: async () => {
-      const res = await axios.get(`/api/admin/bulk-scrape?${filterParams}`)
+      const res = await axios.get(`/api/admin/bulk-scrape?${filterParamsString}`)
       return res.data as { count: number }
     },
     staleTime: 30000,
@@ -112,7 +118,8 @@ export default function BulkScrapePage() {
       const res = await axios.get("/api/admin/bulk-scrape?action=jobs")
       return res.data as { jobs: BulkScrapeJob[] }
     },
-    refetchInterval: 5000,
+    staleTime: 60000, // Consider fresh for 60 seconds
+    // No polling - we manually refetch when starting/stopping jobs
   })
 
   // Fetch active job progress
@@ -168,6 +175,8 @@ export default function BulkScrapePage() {
   // Cancel job mutation
   const cancelJobMutation = useMutation({
     mutationFn: async (jobId: string) => {
+      // Set ref immediately so the while loop can check it
+      cancelRequestedRef.current = true
       await axios.delete(`/api/admin/bulk-scrape/${jobId}`)
     },
     onSuccess: () => {
@@ -202,6 +211,7 @@ export default function BulkScrapePage() {
   // Direct mode continuous processing
   const startDirectMode = useCallback(async () => {
     setIsDirectProcessing(true)
+    cancelRequestedRef.current = false // Reset cancel flag
     let currentJobId: string | null = null
 
     try {
@@ -212,7 +222,13 @@ export default function BulkScrapePage() {
 
       // Keep processing until complete
       while (true) {
-        // Check if we should stop
+        // Check local cancel flag first (immediate response)
+        if (cancelRequestedRef.current) {
+          console.info("[Direct Mode] Cancel requested, stopping...")
+          break
+        }
+
+        // Check if job was cancelled/completed on server
         const job = await axios.get(`/api/admin/bulk-scrape/${currentJobId}`)
         if (job.data.status === "cancelled" || job.data.status === "completed") {
           break
@@ -231,6 +247,7 @@ export default function BulkScrapePage() {
       console.error("Direct mode error:", error)
     } finally {
       setIsDirectProcessing(false)
+      cancelRequestedRef.current = false
       refetchJobs()
       queryClient.invalidateQueries({ queryKey: ["bulk-scrape-progress", currentJobId] })
     }
@@ -388,7 +405,7 @@ export default function BulkScrapePage() {
             <div className="flex items-center justify-between border-t pt-4">
               <div className="flex items-center gap-3">
                 <PackageIcon className="text-muted-foreground h-5 w-5" />
-                <div>
+                <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">Matching products:</span>
                   {isLoadingCount ? (
                     <Skeleton className="ml-2 inline-block h-6 w-16" />
