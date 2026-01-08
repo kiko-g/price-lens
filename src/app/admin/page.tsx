@@ -5,7 +5,7 @@ import { Layout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { PackageIcon, CrownIcon, DatabaseIcon } from "lucide-react"
+import { PackageIcon, CrownIcon, DatabaseIcon, RefreshCwIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -18,6 +18,7 @@ export default async function Admin() {
       <div className="grid h-fit w-full grid-cols-1 gap-4 p-4 md:grid-cols-3 md:gap-8 md:p-12">
         <SectionDashboardHub />
         <SectionAdminPrioritiesLink />
+        <SectionBulkScrape />
         <SectionPriorityJob />
         <SectionTestScrapers />
         <SectionAdminCoreActions />
@@ -58,6 +59,25 @@ function SectionAdminPrioritiesLink() {
       <CardFooter>
         <Button asChild>
           <Link href="/admin/priorities">Manage Priorities</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function SectionBulkScrape() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <RefreshCwIcon className="h-5 w-5" />
+          Bulk Re-Scrape
+        </CardTitle>
+      </CardHeader>
+      <CardContent>Re-scrape products to update data and discover missing barcodes.</CardContent>
+      <CardFooter>
+        <Button asChild>
+          <Link href="/admin/bulk-scrape">Open Bulk Scrape</Link>
         </Button>
       </CardFooter>
     </Card>
