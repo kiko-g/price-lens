@@ -57,7 +57,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
 
   return (
     <div>
-      <div className={cn("flex flex-1 flex-col items-center gap-1", className)}>
+      <div className={cn("flex flex-1 flex-col items-center gap-1 py-0.5", className)}>
         <PriceAxisButton
           isActive={isPriceActive}
           onClick={actions.onPriceChange}
@@ -98,7 +98,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
       </div>
 
       {!options.hideExtraInfo && (
-        <div className={cn("mt-2 flex items-center justify-start gap-2")}>
+        <div className={cn("mt-3 flex items-center justify-start gap-2")}>
           <Button
             variant="outline"
             size="sm"

@@ -15,6 +15,7 @@ import { usePricesWithAnalytics } from "@/hooks/usePrices"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Barcode } from "@/components/ui/combo/barcode"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "@/components/PricesVariationCard"
@@ -221,7 +222,7 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
             />
           )}
 
-          <div className="flex flex-1 flex-col items-end justify-center gap-2">
+          <div className="flex flex-1 flex-col items-end justify-center gap-3">
             {options?.showImage &&
               (sp.image ? (
                 <div className="relative">
@@ -246,11 +247,13 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
                   <ImageIcon className="h-4 w-4" />
                 </div>
               ))}
+
+            <Barcode value={sp.barcode} height={12} width={1.3} />
           </div>
         </header>
       )}
 
-      <div className="mt-2 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-2 md:mb-4">
+      <div className="mt-2 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-0 md:mb-4">
         {RANGES.map((range) => (
           <Button
             key={range}

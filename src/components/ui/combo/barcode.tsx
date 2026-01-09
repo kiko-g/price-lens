@@ -1,11 +1,14 @@
 "use client"
 
+import { cn } from "@/lib/utils"
+
 interface BarcodeProps {
   value: string | null
   width?: number
   height?: number
   displayValue?: boolean
   showMissingValue?: boolean
+  className?: string
 }
 
 export function Barcode({
@@ -14,6 +17,7 @@ export function Barcode({
   height = 60,
   displayValue = true,
   showMissingValue = false,
+  className,
 }: BarcodeProps) {
   if (showMissingValue && !value) {
     return (
@@ -56,7 +60,7 @@ export function Barcode({
   const barPattern = generateBars(value)
 
   return (
-    <div className="inline-flex flex-col items-center gap-1">
+    <div className={cn("inline-flex w-fit flex-col items-center gap-1", className)}>
       <svg
         viewBox={`0 0 ${barPattern.length * width} ${height}`}
         className="bg-white"
