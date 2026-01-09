@@ -5,7 +5,7 @@ import { searchTypes, type SearchType, type SortByType } from "@/types/extra"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import { useStoreProductCategories, useStoreProductsGrid, useUpdateStoreProduct } from "@/hooks/useProducts"
+import { useStoreProductCategories, useStoreProductsGrid } from "@/hooks/useProducts"
 import { cn, getCenteredArray } from "@/lib/utils"
 import { defaultCategories, existingCategories } from "@/lib/data/business"
 
@@ -274,9 +274,6 @@ export function StoreProductsGrid(props: Props) {
   const pagedCount = productsData?.pagination.pagedCount ?? 0
   const paginationTotal = productsData?.pagination.totalPages ?? 50
 
-  // Mutation for updating products
-  const updateMutation = useUpdateStoreProduct()
-
   const storeProductCategories = useStoreProductCategories()
   const tuples = useMemo(() => storeProductCategories?.data?.tuples || [], [storeProductCategories?.data?.tuples])
 
@@ -355,15 +352,6 @@ WHERE category = '${category1}'
 
   const selectDefaultCategories = () => {
     setCategories((prev) => prev.map((cat) => ({ ...cat, selected: defaultCategories.includes(cat.name) })))
-  }
-
-  async function handleUpdateProduct(sp: StoreProduct): Promise<boolean> {
-    try {
-      await updateMutation.mutateAsync(sp)
-      return true
-    } catch {
-      return false
-    }
   }
 
   function handleSubmit() {
@@ -1254,12 +1242,7 @@ WHERE category = '${category1}'
       {!isLoading && storeProducts && storeProducts.length > 0 ? (
         <div className="grid h-full w-full flex-1 grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
           {storeProducts.map((product, productIdx) => (
-            <StoreProductCard
-              key={`product-${productIdx}`}
-              sp={product}
-              onUpdate={() => handleUpdateProduct(product)}
-              imagePriority={productIdx < 12}
-            />
+            <StoreProductCard key={`product-${productIdx}`} sp={product} imagePriority={productIdx < 12} />
           ))}
         </div>
       ) : (

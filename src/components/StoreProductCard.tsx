@@ -4,12 +4,10 @@ import Link from "next/link"
 import Image from "next/image"
 import { Suspense, useState } from "react"
 import { type StoreProduct } from "@/types"
-import { toast } from "sonner"
 
-import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUser } from "@/hooks/useUser"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { useUpdateStoreProductPriority } from "@/hooks/useProducts"
+import { useStoreProductCard } from "@/hooks/useStoreProductCard"
 
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { ProductChart } from "@/components/ProductChart"
@@ -63,10 +61,8 @@ import {
 
 type Props = {
   sp: StoreProduct
-  onUpdate?: () => Promise<boolean> | undefined
   imagePriority?: boolean
-  /** When the product was added to favorites (only shown when favorited) */
-  favoritedAt?: string
+  favoritedAt?: string /** When the product was added to favorites (only shown when favorited) */
 }
 
 function resolveImageUrlForCard(image: string, size = 400) {
@@ -80,28 +76,23 @@ function resolveImageUrlForCard(image: string, size = 400) {
   return url.toString()
 }
 
-export function StoreProductCard({ sp, onUpdate, imagePriority = false, favoritedAt }: Props) {
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [hasError, setHasError] = useState(false)
+export function StoreProductCard({ sp, imagePriority = false, favoritedAt }: Props) {
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [priority, setPriority] = useState(sp?.priority ?? null)
-  const [isFavorited, setIsFavorited] = useState(sp?.is_favorited ?? false)
 
-  const updatePriority = useUpdateStoreProductPriority()
+  const {
+    priority,
+    isFavorited,
+    updateFromSource,
+    toggleFavorite,
+    promptAndSetPriority,
+    clearPriority,
+    isUpdating,
+    isPriorityPending,
+    isFavoritePending,
+    hasUpdateError,
+  } = useStoreProductCard(sp)
 
   const { user, profile } = useUser()
-  const { toggleFavorite, isLoading } = useFavoriteToggle()
-
-  const favoriteLoading = isLoading(sp?.id ?? 0)
-
-  const handleToggleFavorite = async () => {
-    if (!sp?.id) return
-
-    const result = await toggleFavorite(sp.id, isFavorited)
-    if (result.success) {
-      setIsFavorited(result.newState)
-    }
-  }
 
   if (!sp || !sp.url) {
     return null
@@ -166,7 +157,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
             </Badge>
           ) : null}
 
-          {hasError ? (
+          {hasUpdateError ? (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger>
@@ -229,10 +220,10 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
               size="icon-sm"
               className={cn(
                 "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
-                favoriteLoading && "disabled:opacity-50",
+                isFavoritePending && "disabled:opacity-50",
               )}
-              onClick={handleToggleFavorite}
-              disabled={favoriteLoading || !user}
+              onClick={toggleFavorite}
+              disabled={isFavoritePending || !user}
               title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Log in to add favorites"}
             >
               <HeartIcon
@@ -317,14 +308,6 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
         </div>
 
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
-          {sp.barcode ? (
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" size="xs" roundedness="sm" className="w-fit">
-                {sp.barcode}
-              </Badge>
-            </div>
-          ) : null}
-
           <div className="flex flex-wrap items-center justify-between gap-2">
             {hasDiscount ? (
               <div className="flex flex-col">
@@ -376,13 +359,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
 
                 {user ? (
                   <DropdownMenuItem variant="love" asChild>
-                    <Button
-                      variant="dropdown-item"
-                      onClick={async () => {
-                        await handleToggleFavorite()
-                      }}
-                      disabled={favoriteLoading}
-                    >
+                    <Button variant="dropdown-item" onClick={toggleFavorite} disabled={isFavoritePending}>
                       {isFavorited ? "Remove from favorites" : "Add to favorites"}
                       <HeartIcon />
                     </Button>
@@ -397,82 +374,22 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
                       <DevBadge />
                     </DropdownMenuLabel>
 
-                    {onUpdate && (
-                      <DropdownMenuItem asChild>
-                        <Button
-                          variant="dropdown-item"
-                          onClick={async () => {
-                            setIsUpdating(true)
-                            setHasError(false)
-                            const success = await onUpdate()
-                            setIsUpdating(false)
-                            if (!success) setHasError(true)
-                          }}
-                        >
-                          Update
-                          <RefreshCcwIcon />
-                        </Button>
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem asChild>
+                      <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
+                        Update from source
+                        <RefreshCcwIcon />
+                      </Button>
+                    </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
-                      <Button
-                        variant="dropdown-item"
-                        onClick={async () => {
-                          if (!sp.id) {
-                            toast.error("Invalid product", {
-                              description: "Product ID is missing",
-                            })
-                            return
-                          }
-
-                          const priorityStr = window.prompt("Enter priority (0-5):", "5")
-                          const priorityNum = priorityStr ? parseInt(priorityStr) : null
-                          if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
-                            toast.error("Invalid priority", {
-                              description: "Priority must be a number between 0 and 5",
-                            })
-                            return
-                          }
-
-                          updatePriority.mutate(
-                            { storeProductId: sp.id, priority: priorityNum },
-                            {
-                              onSuccess: () => {
-                                setPriority(priorityNum)
-                              },
-                            },
-                          )
-                        }}
-                        disabled={updatePriority.isPending}
-                      >
+                      <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
                         Set priority
                         <MicroscopeIcon />
                       </Button>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
-                      <Button
-                        variant="dropdown-item"
-                        onClick={async () => {
-                          if (!sp.id) {
-                            toast.error("Invalid product", {
-                              description: "Product ID is missing",
-                            })
-                            return
-                          }
-
-                          updatePriority.mutate(
-                            { storeProductId: sp.id, priority: null },
-                            {
-                              onSuccess: () => {
-                                setPriority(null)
-                              },
-                            },
-                          )
-                        }}
-                        disabled={updatePriority.isPending}
-                      >
+                      <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
                         Clear priority
                         <CircleIcon />
                       </Button>
