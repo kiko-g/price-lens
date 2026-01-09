@@ -15,12 +15,27 @@ const mockAxiosPost = vi.hoisted(() => vi.fn())
 const mockAxiosPut = vi.hoisted(() => vi.fn())
 const mockAxiosDelete = vi.hoisted(() => vi.fn())
 
+// Create a mock AxiosError class for testing
+class MockAxiosError extends Error {
+  isAxiosError = true
+  response?: { status: number; data?: unknown }
+
+  constructor(message: string, status?: number, data?: unknown) {
+    super(message)
+    this.name = "AxiosError"
+    if (status !== undefined) {
+      this.response = { status, data }
+    }
+  }
+}
+
 vi.mock("axios", () => ({
   default: {
     post: mockAxiosPost,
     put: mockAxiosPut,
     delete: mockAxiosDelete,
   },
+  AxiosError: MockAxiosError,
 }))
 
 const mockUser = vi.hoisted(() => ({ id: "user-123", email: "test@test.com" }))
@@ -366,8 +381,38 @@ describe("useStoreProductCard", () => {
       })
 
       expect(result.current.hasUpdateError).toBe(true)
+      expect(result.current.isProductUnavailable).toBe(false)
       expect(toast.error).toHaveBeenCalledWith("Failed to update product", {
         description: "Scrape failed",
+      })
+    })
+
+    it("should set isProductUnavailable when product returns 404", async () => {
+      const sp = createMockStoreProduct()
+
+      // Simulate a 404 response from axios using the mock AxiosError
+      const error = new MockAxiosError("Request failed with status code 404", 404, {
+        error: "Product not found (404)",
+        available: false,
+      })
+      mockAxiosPost.mockRejectedValueOnce(error)
+
+      const { result } = renderHook(() => useStoreProductCard(sp), {
+        wrapper: createWrapper(),
+      })
+
+      await act(async () => {
+        result.current.updateFromSource()
+      })
+
+      await waitFor(() => {
+        expect(result.current.isUpdating).toBe(false)
+      })
+
+      expect(result.current.hasUpdateError).toBe(true)
+      expect(result.current.isProductUnavailable).toBe(true)
+      expect(toast.error).toHaveBeenCalledWith("Product unavailable", {
+        description: "This product is no longer available at the store",
       })
     })
   })

@@ -896,7 +896,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 )}
               >
                 {products.map((product, idx) => (
-                  <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} />
+                  <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} showBarcode />
                 ))}
               </div>
             </div>

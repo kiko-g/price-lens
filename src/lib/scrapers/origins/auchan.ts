@@ -11,6 +11,17 @@ export class AuchanScraper extends BaseProductScraper {
   readonly originId = StoreOrigin.Auchan
   readonly name = "Auchan"
 
+  /**
+   * Detects Auchan's soft 404 page (HTTP 200 with "Não temos o que procura" content)
+   */
+  protected isSoftNotFound($: cheerio.CheerioAPI): boolean {
+    // Check for the "Oops" error page indicators
+    const hasNotFoundText = $("body").text().includes("Não temos o que procura")
+    const has404Image = $('img[alt*="404"]').length > 0
+    const hasTryAgainText = $("body").text().includes("Vamos tentar de novo")
+    return hasNotFoundText || has404Image || hasTryAgainText
+  }
+
   protected async extractRawProduct($: cheerio.CheerioAPI, url: string): Promise<RawProduct | null> {
     const schema = this.extractSchema($)
     const addOn = this.extractAddOn($)

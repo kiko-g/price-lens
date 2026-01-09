@@ -36,6 +36,13 @@ export abstract class BaseProductScraper implements StoreScraper {
       }
 
       const $ = parseHtml(fetchResult.html)
+
+      // Check for soft 404 (page returns 200 but shows "not found" content)
+      if (this.isSoftNotFound($)) {
+        console.warn(`[${this.name}] Product not found (soft 404): ${ctx.url}`)
+        return { type: "not_found", product: null }
+      }
+
       const rawProduct = await this.extractRawProduct($, cleanedUrl)
 
       if (!rawProduct) {
@@ -58,6 +65,14 @@ export abstract class BaseProductScraper implements StoreScraper {
    * Must be implemented by each store scraper
    */
   protected abstract extractRawProduct($: cheerio.CheerioAPI, url: string): Promise<RawProduct | null>
+
+  /**
+   * Detects "soft 404" pages - where HTTP status is 200 but content shows product not found
+   * Override in store-specific scrapers to detect their error pages
+   */
+  protected isSoftNotFound($: cheerio.CheerioAPI): boolean {
+    return false
+  }
 
   /**
    * Helper to safely extract text from an element

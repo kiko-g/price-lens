@@ -32,12 +32,14 @@ type Props = {
   options?: {
     showPricesVariationCard: boolean
     showImage: boolean
+    showBarcode: boolean
   }
 }
 
 const defaultOptions: Props["options"] = {
   showPricesVariationCard: true,
   showImage: true,
+  showBarcode: true,
 }
 
 export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange, options = defaultOptions }: Props) {
@@ -248,7 +250,7 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
                 </div>
               ))}
 
-            <Barcode value={sp.barcode} height={12} width={1.3} />
+            {options?.showBarcode && <Barcode value={sp.barcode} height={12} width={1.3} />}
           </div>
         </header>
       )}

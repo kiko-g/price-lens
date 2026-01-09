@@ -156,7 +156,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       </div>
 
       <div className="grid w-full gap-8 md:grid-cols-2">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center gap-4">
           {/* Product Image */}
           <div className="relative aspect-square w-full max-w-full overflow-hidden rounded-lg border bg-white">
             {sp.image ? (
@@ -175,7 +175,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             )}
           </div>
 
-          <Barcode value={sp.barcode} height={30} showMissingValue />
+          <Barcode value={sp.barcode} height={40} width={2} showMissingValue />
         </div>
 
         {/* Product Details */}
@@ -409,6 +409,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               options={{
                 showPricesVariationCard: true,
                 showImage: false,
+                showBarcode: false,
               }}
             />
           </div>

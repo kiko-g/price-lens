@@ -3,15 +3,29 @@
 import { useCallback, useMemo, useRef } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import type { StoreProduct } from "@/types"
 import { useUser } from "@/hooks/useUser"
 
+export class ProductUnavailableError extends Error {
+  constructor(message: string = "Product is no longer available") {
+    super(message)
+    this.name = "ProductUnavailableError"
+  }
+}
+
 async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   if (!storeProduct.id) throw new Error("Cannot update a store product without an ID")
-  const response = await axios.post(`/api/products/store`, { storeProduct })
-  if (response.status !== 200) throw new Error("Failed to update store product")
-  return response.data as StoreProduct
+  try {
+    const response = await axios.post(`/api/products/store`, { storeProduct })
+    if (response.status !== 200) throw new Error("Failed to update store product")
+    return response.data as StoreProduct
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      throw new ProductUnavailableError()
+    }
+    throw error
+  }
 }
 
 async function updateStoreProductPriority(storeProductId: number, priority: number | null) {
@@ -52,9 +66,16 @@ export function useStoreProductCard(sp: StoreProduct) {
       invalidateProductQueries(queryClient, sp.id)
     },
     onError: (error) => {
-      toast.error("Failed to update product", {
-        description: error instanceof Error ? error.message : "Unknown error",
-      })
+      if (error instanceof ProductUnavailableError) {
+        toast.error("Product unavailable", {
+          description: "This product is no longer available at the store",
+        })
+      } else {
+        toast.error("Failed to update product", {
+          description: error instanceof Error ? error.message : "Unknown error",
+        })
+      }
+      invalidateProductQueries(queryClient, sp.id)
     },
   })
 
@@ -187,6 +208,8 @@ export function useStoreProductCard(sp: StoreProduct) {
     updateMutation.mutate()
   }, [updateMutation])
 
+  const isProductUnavailable = updateMutation.isError && updateMutation.error instanceof ProductUnavailableError
+
   return {
     // Effective state (prop + optimistic)
     priority,
@@ -204,8 +227,9 @@ export function useStoreProductCard(sp: StoreProduct) {
     isPriorityPending: priorityMutation.isPending,
     isFavoritePending: addFavoriteMutation.isPending || removeFavoriteMutation.isPending,
 
-    // Error state
+    // Error states
     hasUpdateError: updateMutation.isError,
+    isProductUnavailable,
   }
 }
 

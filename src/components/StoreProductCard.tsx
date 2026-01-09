@@ -133,8 +133,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 width={500}
                 height={500}
                 className={cn(
-                  "aspect-square h-full w-full bg-white object-contain object-center transition duration-300 hover:scale-105",
-                  sp.available ? "opacity-100" : "opacity-50 grayscale",
+                  "aspect-square h-full w-full bg-white object-contain object-center transition duration-300",
+                  sp.available ? "opacity-100 hover:scale-105" : "opacity-50 grayscale",
                 )}
                 {...(imagePriority && {
                   placeholder: "blur" as const,
@@ -149,7 +149,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           )}
         </Link>
 
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
+        <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
             <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
               {sp.price_per_major_unit}€{sp.major_unit}
@@ -166,7 +166,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge variant="destructive">
+                  <Badge variant="warning" size="sm">
                     <CloudAlertIcon />
                   </Badge>
                 </TooltipTrigger>
@@ -504,11 +504,13 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <Barcode value={sp.barcode} height={10} width={1} className="bg-muted mt-2 rounded p-2" />
           </div>
         ) : (
-          <div className="mt-auto flex w-full flex-1 flex-wrap items-center justify-center gap-2">
-            <Badge variant="destructive" size="xs" roundedness="sm">
-              No barcode available
-            </Badge>
-          </div>
+          showBarcode && (
+            <div className="mt-auto flex w-full flex-1 flex-wrap items-center justify-center gap-2">
+              <Badge variant="destructive" size="xs" roundedness="sm">
+                No barcode available
+              </Badge>
+            </div>
+          )
         )}
       </div>
     </div>
