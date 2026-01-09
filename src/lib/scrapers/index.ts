@@ -155,13 +155,13 @@ export async function continenteCategoryPageScraper(url: string): Promise<string
     const paginatedUrl = getPaginatedUrl(url, start)
     console.log(`Fetching: ${paginatedUrl}`)
 
-    const html = await fetchHtml(paginatedUrl)
-    if (!html) {
+    const result = await fetchHtml(paginatedUrl)
+    if (!result.html) {
       hasMorePages = false
       continue
     }
 
-    const $ = cheerio.load(html)
+    const $ = cheerio.load(result.html)
     const newLinks = grabLinksInPage($)
 
     if (newLinks.length > 0) {

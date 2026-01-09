@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as fs from "fs"
 import * as path from "path"
 import { fileURLToPath } from "url"
+import type { ScrapedProduct } from "../scrapers/types"
 
 // ============================================================================
 // Mocks - Must be before imports (mock axios to intercept HTTP calls)
@@ -262,13 +263,14 @@ describe("Continente Scraper", () => {
     expect(result).not.toBeNull()
 
     // Check extracted values from real HTML fixture
-    expect(result!.name).toBe("Gelado Framboesa e Pistácio Vegan")
-    expect(result!.brand).toBe("Swee")
-    expect(result!.price).toBe(6.79)
-    expect(result!.origin_id).toBe(1)
-    expect(result!.category).toBe("Congelados")
-    expect(result!.category_2).toBe("Gelados")
-    expect(result!.category_3).toBe("Gelados Americanos")
+    const product = result as ScrapedProduct
+    expect(product.name).toBe("Gelado Framboesa e Pistácio Vegan")
+    expect(product.brand).toBe("Swee")
+    expect(product.price).toBe(6.79)
+    expect(product.origin_id).toBe(1)
+    expect(product.category).toBe("Congelados")
+    expect(product.category_2).toBe("Gelados")
+    expect(product.category_3).toBe("Gelados Americanos")
   })
 
   it("should handle product without discount (price equals recommended)", async () => {
@@ -276,9 +278,10 @@ describe("Continente Scraper", () => {
     mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
 
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
+    const product = result as ScrapedProduct
 
     // This product has no discount (price_recommended equals price)
-    expect(result!.discount).toBe(0)
+    expect(product.discount).toBe(0)
   })
 
   it("should clean URL tracking parameters", async () => {
@@ -288,9 +291,10 @@ describe("Continente Scraper", () => {
     const result = await scraper.Scrapers.continente.productPage(
       "https://www.continente.pt/produto/test.html?_gl=abc123&_ga=xyz",
     )
+    const product = result as ScrapedProduct
 
-    expect(result!.url).not.toContain("_gl")
-    expect(result!.url).not.toContain("_ga")
+    expect(product.url).not.toContain("_gl")
+    expect(product.url).not.toContain("_ga")
   })
 
   it("should return empty object on fetch failure (legacy compatibility)", async () => {
@@ -306,12 +310,13 @@ describe("Continente Scraper", () => {
     mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
 
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
+    const product = result as ScrapedProduct
 
-    expect(result!.image).toBeDefined()
-    expect(result!.image).toContain("continente.pt")
+    expect(product.image).toBeDefined()
+    expect(product.image).toContain("continente.pt")
     // Should be resized to 500x500
-    expect(result!.image).toContain("sw=500")
-    expect(result!.image).toContain("sh=500")
+    expect(product.image).toContain("sw=500")
+    expect(product.image).toContain("sh=500")
   })
 
   it("should set updated_at timestamp", async () => {
@@ -320,11 +325,12 @@ describe("Continente Scraper", () => {
 
     const before = new Date().toISOString()
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
+    const product = result as ScrapedProduct
     const after = new Date().toISOString()
 
-    expect(result!.updated_at).toBeDefined()
-    expect(result!.updated_at >= before).toBe(true)
-    expect(result!.updated_at <= after).toBe(true)
+    expect(product.updated_at).toBeDefined()
+    expect(product.updated_at >= before).toBe(true)
+    expect(product.updated_at <= after).toBe(true)
   })
 })
 
@@ -346,13 +352,14 @@ describe("Auchan Scraper", () => {
 
     // Real data from fixture: GELADO VEGAN SWEE FRAMBOESA PISTACIO 450 ML
     // formatProductName converts to title case
-    expect(result!.name.toLowerCase()).toContain("gelado vegan swee framboesa pistacio")
-    expect(result!.brand).toContain("Swee")
-    expect(result!.price).toBe(4.99)
-    expect(result!.origin_id).toBe(2)
-    expect(result!.category).toBe("Alimentação")
-    expect(result!.category_2).toBe("Congelados")
-    expect(result!.category_3).toBe("Gelados")
+    const product = result as ScrapedProduct
+    expect(product.name.toLowerCase()).toContain("gelado vegan swee framboesa pistacio")
+    expect(product.brand).toContain("Swee")
+    expect(product.price).toBe(4.99)
+    expect(product.origin_id).toBe(2)
+    expect(product.category).toBe("Alimentação")
+    expect(product.category_2).toBe("Congelados")
+    expect(product.category_3).toBe("Gelados")
   })
 
   it("should extract price per unit", async () => {
@@ -360,9 +367,10 @@ describe("Auchan Scraper", () => {
     mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
 
     const result = await scraper.Scrapers.auchan.productPage("https://www.auchan.pt/pt/alimentacao/test.html")
+    const product = result as ScrapedProduct
 
     // Verify price_per_major_unit field exists
-    expect(result!).toHaveProperty("price_per_major_unit")
+    expect(product).toHaveProperty("price_per_major_unit")
   })
 
   it("should return empty object on missing JSON-LD (legacy compatibility)", async () => {
@@ -391,10 +399,11 @@ describe("Pingo Doce Scraper", () => {
     expect(result).not.toBeNull()
 
     // Real data from fixture: Gelado Vegan Berries e Pistachio SWEE
-    expect(result!.name).toBe("Gelado Vegan Berries e Pistachio")
-    expect(result!.brand).toBe("Swee")
-    expect(result!.price).toBe(4.99)
-    expect(result!.origin_id).toBe(3)
+    const product = result as ScrapedProduct
+    expect(product.name).toBe("Gelado Vegan Berries e Pistachio")
+    expect(product.brand).toBe("Swee")
+    expect(product.price).toBe(4.99)
+    expect(product.origin_id).toBe(3)
   })
 
   it("should extract categories from URL", async () => {
@@ -404,9 +413,10 @@ describe("Pingo Doce Scraper", () => {
     const result = await scraper.Scrapers.pingoDoce.productPage(
       "https://www.pingodoce.pt/produtos/congelados/gelados-e-sobremesas/gelados-americanos/gelado-vegan-985760",
     )
+    const product = result as ScrapedProduct
 
-    expect(result!.category).toBe("Congelados")
-    expect(result!.category_2).toBe("Gelados E Sobremesas")
+    expect(product.category).toBe("Congelados")
+    expect(product.category_2).toBe("Gelados E Sobremesas")
   })
 
   it("should extract price per major unit when available", async () => {
@@ -414,9 +424,10 @@ describe("Pingo Doce Scraper", () => {
     mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
 
     const result = await scraper.Scrapers.pingoDoce.productPage("https://www.pingodoce.pt/produtos/test")
+    const product = result as ScrapedProduct
 
     // This product has price per unit info
-    expect(result!.price_per_major_unit).toBeDefined()
+    expect(product.price_per_major_unit).toBeDefined()
   })
 
   it("should handle products without discount", async () => {
@@ -424,10 +435,11 @@ describe("Pingo Doce Scraper", () => {
     mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
 
     const result = await scraper.Scrapers.pingoDoce.productPage("https://www.pingodoce.pt/produtos/test")
+    const product = result as ScrapedProduct
 
     // This product may or may not have a discount - just verify the field exists
-    expect(result).toHaveProperty("discount")
-    expect(typeof result!.discount).toBe("number")
+    expect(product).toHaveProperty("discount")
+    expect(typeof product.discount).toBe("number")
   })
 })
 

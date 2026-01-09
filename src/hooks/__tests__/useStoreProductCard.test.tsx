@@ -39,7 +39,9 @@ vi.mock("axios", () => ({
 }))
 
 const mockUser = vi.hoisted(() => ({ id: "user-123", email: "test@test.com" }))
-const mockUseUser = vi.hoisted(() => vi.fn(() => ({ user: mockUser, profile: null })))
+const mockUseUser = vi.hoisted(() =>
+  vi.fn(() => ({ user: mockUser as { id: string; email: string } | null, profile: null })),
+)
 
 vi.mock("@/hooks/useUser", () => ({
   useUser: mockUseUser,
