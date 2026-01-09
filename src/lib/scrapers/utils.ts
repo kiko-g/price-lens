@@ -2,7 +2,7 @@ import axios from "axios"
 import * as cheerio from "cheerio"
 import https from "https"
 import { formatProductName, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
-import type { RawProduct, ScrapedProduct, PriorityInfo } from "./types"
+import type { RawProduct, ScrapedProduct, PriorityInfo, FetchResult } from "./types"
 import { StoreOrigin } from "./types"
 
 /**
@@ -64,11 +64,12 @@ export function cleanUrl(url: string): string {
 
 /**
  * Fetches HTML from a URL with error handling
+ * Returns structured result with status to distinguish 404 from other errors
  */
-export async function fetchHtml(url: string): Promise<string | null> {
+export async function fetchHtml(url: string): Promise<FetchResult> {
   if (!url) {
     console.warn("URL is required. Skipping product.")
-    return null
+    return { html: null, status: "error" }
   }
 
   const cleanedUrl = cleanUrl(url)
@@ -76,15 +77,22 @@ export async function fetchHtml(url: string): Promise<string | null> {
     const response = await httpClient.get(cleanedUrl)
     if (!response.data || typeof response.data !== "string") {
       console.warn("Empty or invalid response received. Skipping product.")
-      return null
+      return { html: null, status: "error" }
     }
-    return response.data
+    return { html: response.data, status: "success" }
   } catch (error) {
-    console.warn(`Failed to fetch HTML for URL ${cleanedUrl}:`, error)
-    if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
-      console.warn("Request timed out. Skipping product.")
+    if (axios.isAxiosError(error)) {
+      // Check for 404 specifically - product doesn't exist
+      if (error.response?.status === 404) {
+        console.warn(`[404] Product not found at URL: ${cleanedUrl}`)
+        return { html: null, status: "not_found" }
+      }
+      if (error.code === "ECONNABORTED") {
+        console.warn("Request timed out. Skipping product.")
+      }
     }
-    return null
+    console.warn(`Failed to fetch HTML for URL ${cleanedUrl}:`, error)
+    return { html: null, status: "error" }
   }
 }
 
@@ -157,6 +165,7 @@ export function transformRawProduct(
     priority: priorityInfo.priority,
     priority_source: priorityInfo.prioritySource,
     priority_updated_at: priorityInfo.priorityUpdatedAt || now(),
+    available: true, // Successfully scraped = available
     created_at: "",
     updated_at: now(),
   }

@@ -1,5 +1,5 @@
 import type * as cheerio from "cheerio"
-import type { StoreScraper, ScraperContext, ScrapedProduct, RawProduct, PriorityInfo } from "./types"
+import type { StoreScraper, ScraperContext, RawProduct, ScrapeResult } from "./types"
 import { StoreOrigin } from "./types"
 import { fetchHtml, parseHtml, transformRawProduct, extractPriorityInfo, cleanUrl } from "./utils"
 
@@ -14,30 +14,42 @@ export abstract class BaseProductScraper implements StoreScraper {
 
   /**
    * Main scrape method - orchestrates the full scraping flow
+   * Returns a ScrapeResult with type indicating success, not_found (404), or error
    */
-  async scrape(ctx: ScraperContext): Promise<ScrapedProduct | null> {
+  async scrape(ctx: ScraperContext): Promise<ScrapeResult> {
     const cleanedUrl = cleanUrl(ctx.url)
     const priorityInfo = extractPriorityInfo(ctx.previousProduct)
 
     try {
-      const html = await fetchHtml(cleanedUrl)
-      if (!html) {
-        console.warn(`[${this.name}] Failed to fetch HTML from: ${ctx.url}`)
-        return null
+      const fetchResult = await fetchHtml(cleanedUrl)
+
+      // Handle 404 - product definitively doesn't exist
+      if (fetchResult.status === "not_found") {
+        console.warn(`[${this.name}] Product not found (404): ${ctx.url}`)
+        return { type: "not_found", product: null }
       }
 
-      const $ = parseHtml(html)
+      // Handle other fetch errors - don't change availability
+      if (!fetchResult.html) {
+        console.warn(`[${this.name}] Failed to fetch HTML from: ${ctx.url}`)
+        return { type: "error", product: null }
+      }
+
+      const $ = parseHtml(fetchResult.html)
       const rawProduct = await this.extractRawProduct($, cleanedUrl)
 
       if (!rawProduct) {
         console.warn(`[${this.name}] Failed to extract product data from: ${ctx.url}`)
-        return null
+        return { type: "error", product: null }
       }
 
-      return transformRawProduct(rawProduct, this.originId, priorityInfo)
+      return {
+        type: "success",
+        product: transformRawProduct(rawProduct, this.originId, priorityInfo)
+      }
     } catch (error) {
       console.error(`[${this.name}] Unexpected error scraping ${ctx.url}:`, error)
-      return null
+      return { type: "error", product: null }
     }
   }
 

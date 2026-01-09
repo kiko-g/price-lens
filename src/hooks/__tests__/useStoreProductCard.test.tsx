@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { renderHook, act, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -138,9 +141,11 @@ describe("useStoreProductCard", () => {
         result.current.toggleFavorite()
       })
 
-      // Should immediately show optimistic state
+      // Wait for mutation to start and show optimistic state
+      await waitFor(() => {
+        expect(result.current.isFavoritePending).toBe(true)
+      })
       expect(result.current.isFavorited).toBe(true)
-      expect(result.current.isFavoritePending).toBe(true)
     })
 
     it("should show optimistic false state immediately when removing favorite", async () => {
@@ -158,14 +163,20 @@ describe("useStoreProductCard", () => {
         result.current.toggleFavorite()
       })
 
+      // Wait for mutation to start and show optimistic state
+      await waitFor(() => {
+        expect(result.current.isFavoritePending).toBe(true)
+      })
       expect(result.current.isFavorited).toBe(false)
-      expect(result.current.isFavoritePending).toBe(true)
     })
 
     it("should maintain favorited state after successful mutation", async () => {
       const sp = createMockStoreProduct({ is_favorited: false })
 
-      mockAxiosPost.mockResolvedValueOnce({ status: 200, data: {} })
+      // Use async resolution to ensure React Query has time to set isPending
+      mockAxiosPost.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ status: 200, data: {} }), 10)),
+      )
 
       const { result } = renderHook(() => useStoreProductCard(sp), {
         wrapper: createWrapper(),
@@ -175,12 +186,13 @@ describe("useStoreProductCard", () => {
         result.current.toggleFavorite()
       })
 
+      // Wait for mutation to complete and verify optimistic state persists
       await waitFor(() => {
         expect(result.current.isFavoritePending).toBe(false)
+        // Should still show true even after mutation completes (ref holds the value)
+        expect(result.current.isFavorited).toBe(true)
       })
 
-      // Should still show true even after mutation completes (ref holds the value)
-      expect(result.current.isFavorited).toBe(true)
       expect(toast.success).toHaveBeenCalledWith("Added to favorites")
     })
 
@@ -239,8 +251,11 @@ describe("useStoreProductCard", () => {
         result.current.setPriority(5)
       })
 
+      // Wait for mutation to start and show optimistic state
+      await waitFor(() => {
+        expect(result.current.isPriorityPending).toBe(true)
+      })
       expect(result.current.priority).toBe(5)
-      expect(result.current.isPriorityPending).toBe(true)
     })
 
     it("should maintain priority after successful mutation", async () => {
@@ -306,7 +321,10 @@ describe("useStoreProductCard", () => {
         result.current.updateFromSource()
       })
 
-      expect(result.current.isUpdating).toBe(true)
+      // Wait for mutation to start
+      await waitFor(() => {
+        expect(result.current.isUpdating).toBe(true)
+      })
       expect(mockAxiosPost).toHaveBeenCalledWith("/api/products/store", { storeProduct: sp })
     })
 
@@ -358,7 +376,10 @@ describe("useStoreProductCard", () => {
     it("should update when prop catches up to successful mutation", async () => {
       const sp = createMockStoreProduct({ is_favorited: false })
 
-      mockAxiosPost.mockResolvedValueOnce({ status: 200, data: {} })
+      // Use async resolution to ensure React Query has time to set isPending
+      mockAxiosPost.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ status: 200, data: {} }), 10)),
+      )
 
       const { result, rerender } = renderHook(({ product }) => useStoreProductCard(product), {
         wrapper: createWrapper(),
@@ -370,12 +391,12 @@ describe("useStoreProductCard", () => {
         result.current.toggleFavorite()
       })
 
+      // Wait for mutation to complete and verify state
       await waitFor(() => {
         expect(result.current.isFavoritePending).toBe(false)
+        // Should be true from ref
+        expect(result.current.isFavorited).toBe(true)
       })
-
-      // Should be true from ref
-      expect(result.current.isFavorited).toBe(true)
 
       // Simulate query refetch - prop now matches the successful state
       const updatedSp = createMockStoreProduct({ is_favorited: true })

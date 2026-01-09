@@ -10,7 +10,7 @@ import { continenteScraper } from "./origins/continente"
 import { pingoDoceScraper } from "./origins/pingo-doce"
 
 // Re-export types
-export type { StoreScraper, ScrapedProduct, ScraperContext, RawProduct, PriorityInfo } from "./types"
+export type { StoreScraper, ScrapedProduct, ScraperContext, RawProduct, PriorityInfo, ScrapeResult, ScrapeResultType, FetchResult, FetchStatus } from "./types"
 export { StoreOrigin } from "./types"
 
 // Re-export utilities that external code might need
@@ -38,19 +38,26 @@ export function getScraper(originId: number): StoreScraper {
 
 /**
  * Legacy compatibility: Scrapers object with productPage methods
+ * Returns the product or empty object for backwards compatibility
  */
 export const Scrapers = {
   continente: {
-    productPage: async (url: string, prevSp?: StoreProduct) =>
-      continenteScraper.scrape({ url, previousProduct: prevSp }) as Promise<ScrapedProduct | Record<string, never>>,
+    productPage: async (url: string, prevSp?: StoreProduct) => {
+      const result = await continenteScraper.scrape({ url, previousProduct: prevSp })
+      return result.product || {}
+    },
   },
   auchan: {
-    productPage: async (url: string, prevSp?: StoreProduct) =>
-      auchanScraper.scrape({ url, previousProduct: prevSp }) as Promise<ScrapedProduct | Record<string, never>>,
+    productPage: async (url: string, prevSp?: StoreProduct) => {
+      const result = await auchanScraper.scrape({ url, previousProduct: prevSp })
+      return result.product || {}
+    },
   },
   pingoDoce: {
-    productPage: async (url: string, prevSp?: StoreProduct) =>
-      pingoDoceScraper.scrape({ url, previousProduct: prevSp }) as Promise<ScrapedProduct | Record<string, never>>,
+    productPage: async (url: string, prevSp?: StoreProduct) => {
+      const result = await pingoDoceScraper.scrape({ url, previousProduct: prevSp })
+      return result.product || {}
+    },
   },
 }
 
@@ -68,6 +75,10 @@ export function isValidProduct(product: unknown): product is ScrapedProduct {
 
 /**
  * Scrapes a product URL and upserts it to the database
+ * Handles availability tracking:
+ * - Success: sets available = true
+ * - 404: sets available = false (product definitively doesn't exist)
+ * - Other errors: doesn't change availability (might be temporary)
  */
 export async function scrapeAndReplaceProduct(url: string | null, origin: number | null, prevSp?: StoreProduct) {
   if (!url) {
@@ -79,27 +90,34 @@ export async function scrapeAndReplaceProduct(url: string | null, origin: number
   }
 
   const scraper = getScraper(origin)
-  const product = await scraper.scrape({ url, previousProduct: prevSp })
+  const result = await scraper.scrape({ url, previousProduct: prevSp })
 
-  if (!product) {
-    await storeProductQueries.upsertBlank({ url })
-    return NextResponse.json({ error: "StoreProduct scraping failed", url }, { status: 404 })
+  // Handle 404 - product definitively doesn't exist, mark as unavailable
+  if (result.type === "not_found") {
+    await storeProductQueries.markUnavailable({ url })
+    return NextResponse.json({ error: "Product not found (404)", url, available: false }, { status: 404 })
   }
 
-  if (!isValidProduct(product)) {
+  // Handle other errors - don't change availability status
+  if (result.type === "error" || !result.product) {
+    await storeProductQueries.upsertBlank({ url })
+    return NextResponse.json({ error: "StoreProduct scraping failed", url }, { status: 500 })
+  }
+
+  if (!isValidProduct(result.product)) {
     return NextResponse.json({ error: "Invalid product data", url }, { status: 422 })
   }
 
-  // Cast to StoreProduct - id and product_id are assigned by the database on insert
+  // Success - product is available (already set in transformRawProduct)
   const { data, error } = await storeProductQueries.createOrUpdateProduct(
-    product as unknown as import("@/types").StoreProduct,
+    result.product as unknown as import("@/types").StoreProduct,
   )
 
   if (error) {
-    return NextResponse.json({ data, error: "StoreProduct upsert failed", details: error, product }, { status: 500 })
+    return NextResponse.json({ data, error: "StoreProduct upsert failed", details: error, product: result.product }, { status: 500 })
   }
 
-  return NextResponse.json({ data: product, message: "StoreProduct upserted" })
+  return NextResponse.json({ data: result.product, message: "StoreProduct upserted", available: true })
 }
 
 // ============================================================================
@@ -186,7 +204,7 @@ export function batchUrls(urls: string[], batchSize: number): string[][] {
 
 export async function processBatch(urls: string[]): Promise<(ScrapedProduct | { url: string; error: unknown })[]> {
   const products = await Promise.all(
-    urls.map((url) => continenteScraper.scrape({ url }).then((p) => p || { url, error: "Failed to scrape" })),
+    urls.map((url) => continenteScraper.scrape({ url }).then((result) => result.product || { url, error: "Failed to scrape" })),
   )
   return products
 }

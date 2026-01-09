@@ -90,6 +90,98 @@ describe("cleanUrl", () => {
   })
 })
 
+// ============================================================================
+// fetchHtml Tests (404 Detection)
+// ============================================================================
+
+describe("fetchHtml", () => {
+  beforeEach(() => {
+    mockAxiosGet.mockReset()
+  })
+
+  it("should return success status with HTML on successful fetch", async () => {
+    mockAxiosGet.mockResolvedValue({ data: "<html><body>Test</body></html>" })
+
+    const result = await scraper.fetchHtml("https://example.com/product")
+
+    expect(result.status).toBe("success")
+    expect(result.html).toBe("<html><body>Test</body></html>")
+  })
+
+  it("should return not_found status on 404 response", async () => {
+    const axios404Error = new Error("Request failed with status code 404") as any
+    axios404Error.response = { status: 404 }
+    axios404Error.isAxiosError = true
+    mockAxiosGet.mockRejectedValue(axios404Error)
+
+    // We need to mock isAxiosError too
+    const axiosModule = await import("axios")
+    vi.spyOn(axiosModule.default, "isAxiosError").mockReturnValue(true)
+
+    const result = await scraper.fetchHtml("https://example.com/missing-product")
+
+    expect(result.status).toBe("not_found")
+    expect(result.html).toBeNull()
+  })
+
+  it("should return error status on network failure", async () => {
+    const networkError = new Error("Network Error") as any
+    networkError.code = "ECONNREFUSED"
+    mockAxiosGet.mockRejectedValue(networkError)
+
+    const result = await scraper.fetchHtml("https://example.com/product")
+
+    expect(result.status).toBe("error")
+    expect(result.html).toBeNull()
+  })
+
+  it("should return error status on timeout", async () => {
+    const timeoutError = new Error("timeout") as any
+    timeoutError.code = "ECONNABORTED"
+    timeoutError.isAxiosError = true
+    mockAxiosGet.mockRejectedValue(timeoutError)
+
+    const axiosModule = await import("axios")
+    vi.spyOn(axiosModule.default, "isAxiosError").mockReturnValue(true)
+
+    const result = await scraper.fetchHtml("https://example.com/product")
+
+    expect(result.status).toBe("error")
+    expect(result.html).toBeNull()
+  })
+
+  it("should return error status on 500 server error", async () => {
+    const serverError = new Error("Internal Server Error") as any
+    serverError.response = { status: 500 }
+    serverError.isAxiosError = true
+    mockAxiosGet.mockRejectedValue(serverError)
+
+    const axiosModule = await import("axios")
+    vi.spyOn(axiosModule.default, "isAxiosError").mockReturnValue(true)
+
+    const result = await scraper.fetchHtml("https://example.com/product")
+
+    expect(result.status).toBe("error")
+    expect(result.html).toBeNull()
+  })
+
+  it("should return error status on empty response", async () => {
+    mockAxiosGet.mockResolvedValue({ data: null })
+
+    const result = await scraper.fetchHtml("https://example.com/product")
+
+    expect(result.status).toBe("error")
+    expect(result.html).toBeNull()
+  })
+
+  it("should return error status for empty URL", async () => {
+    const result = await scraper.fetchHtml("")
+
+    expect(result.status).toBe("error")
+    expect(result.html).toBeNull()
+  })
+})
+
 describe("isValidProduct", () => {
   it("should return true for valid product objects", () => {
     const validProduct = {
@@ -201,12 +293,12 @@ describe("Continente Scraper", () => {
     expect(result!.url).not.toContain("_ga")
   })
 
-  it("should return null on fetch failure", async () => {
+  it("should return empty object on fetch failure (legacy compatibility)", async () => {
     mockAxiosGet.mockResolvedValue({ data: null })
 
     const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
 
-    expect(result).toBeNull()
+    expect(result).toEqual({})
   })
 
   it("should extract image URL", async () => {
@@ -273,12 +365,12 @@ describe("Auchan Scraper", () => {
     expect(result!).toHaveProperty("price_per_major_unit")
   })
 
-  it("should return null on missing JSON-LD", async () => {
+  it("should return empty object on missing JSON-LD (legacy compatibility)", async () => {
     mockAxiosGet.mockResolvedValue({ data: "<html><body>No data</body></html>" })
 
     const result = await scraper.Scrapers.auchan.productPage("https://www.auchan.pt/pt/test.html")
 
-    expect(result).toBeNull()
+    expect(result).toEqual({})
   })
 })
 
@@ -340,6 +432,116 @@ describe("Pingo Doce Scraper", () => {
 })
 
 // ============================================================================
+// Scraper ScrapeResult Tests (404/Availability)
+// ============================================================================
+
+describe("Scraper ScrapeResult", () => {
+  beforeEach(() => {
+    mockAxiosGet.mockReset()
+  })
+
+  it("should return success type with product on successful scrape", async () => {
+    const fixtureHtml = loadFixture("continente.html")
+    mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
+
+    const scraperObj = scraper.getScraper(1)
+    const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/test.html" })
+
+    expect(result.type).toBe("success")
+    expect(result.product).not.toBeNull()
+    expect(result.product!.available).toBe(true)
+  })
+
+  it("should return not_found type on 404 response", async () => {
+    const axios404Error = new Error("Request failed with status code 404") as any
+    axios404Error.response = { status: 404 }
+    axios404Error.isAxiosError = true
+    mockAxiosGet.mockRejectedValue(axios404Error)
+
+    const axiosModule = await import("axios")
+    vi.spyOn(axiosModule.default, "isAxiosError").mockReturnValue(true)
+
+    const scraperObj = scraper.getScraper(1)
+    const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/missing.html" })
+
+    expect(result.type).toBe("not_found")
+    expect(result.product).toBeNull()
+  })
+
+  it("should return error type on network failure (not 404)", async () => {
+    const networkError = new Error("Network Error") as any
+    networkError.code = "ECONNREFUSED"
+    mockAxiosGet.mockRejectedValue(networkError)
+
+    const scraperObj = scraper.getScraper(1)
+    const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/test.html" })
+
+    expect(result.type).toBe("error")
+    expect(result.product).toBeNull()
+  })
+
+  it("should return error type on empty HTML response", async () => {
+    mockAxiosGet.mockResolvedValue({ data: null })
+
+    const scraperObj = scraper.getScraper(1)
+    const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/test.html" })
+
+    expect(result.type).toBe("error")
+    expect(result.product).toBeNull()
+  })
+
+  it("should return error type when product data cannot be extracted", async () => {
+    // HTML that doesn't contain product data
+    mockAxiosGet.mockResolvedValue({ data: "<html><body>No product here</body></html>" })
+
+    const scraperObj = scraper.getScraper(1)
+    const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/test.html" })
+
+    expect(result.type).toBe("error")
+    expect(result.product).toBeNull()
+  })
+})
+
+describe("Scraper available field", () => {
+  beforeEach(() => {
+    mockAxiosGet.mockReset()
+  })
+
+  it("Continente scraper should set available=true on success", async () => {
+    const fixtureHtml = loadFixture("continente.html")
+    mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
+
+    const scraperObj = scraper.getScraper(1)
+    const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/test.html" })
+
+    expect(result.type).toBe("success")
+    expect(result.product!.available).toBe(true)
+  })
+
+  it("Auchan scraper should set available=true on success", async () => {
+    const fixtureHtml = loadFixture("auchan.html")
+    mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
+
+    const scraperObj = scraper.getScraper(2)
+    const result = await scraperObj.scrape({ url: "https://www.auchan.pt/pt/test.html" })
+
+    expect(result.type).toBe("success")
+    expect(result.product!.available).toBe(true)
+  })
+
+  it("Pingo Doce scraper should set available=true on success", async () => {
+    const fixtureHtml = loadFixture("pingodoce.html")
+    mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
+
+    const scraperObj = scraper.getScraper(3)
+    const result = await scraperObj.scrape({ url: "https://www.pingodoce.pt/produtos/test" })
+
+    expect(result.type).toBe("success")
+    expect(result.product!.available).toBe(true)
+  })
+})
+
+// ============================================================================
 // getScraper Tests
 // ============================================================================
 
@@ -391,6 +593,7 @@ describe("Output Schema Consistency", () => {
     "updated_at",
     "created_at",
     "priority",
+    "available",
   ]
 
   beforeEach(() => {

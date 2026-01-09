@@ -17,6 +17,7 @@ import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Barcode } from "@/components/ui/combo/barcode"
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import {
   DropdownMenu,
@@ -59,12 +60,6 @@ import {
   CalendarPlusIcon,
 } from "lucide-react"
 
-type Props = {
-  sp: StoreProduct
-  imagePriority?: boolean
-  favoritedAt?: string /** When the product was added to favorites (only shown when favorited) */
-}
-
 function resolveImageUrlForCard(image: string, size = 400) {
   const url = new URL(image)
   const p = url.searchParams
@@ -76,7 +71,14 @@ function resolveImageUrlForCard(image: string, size = 400) {
   return url.toString()
 }
 
-export function StoreProductCard({ sp, imagePriority = false, favoritedAt }: Props) {
+type Props = {
+  sp: StoreProduct
+  imagePriority?: boolean
+  favoritedAt?: string /** When the product was added to favorites (only shown when favorited) */
+  showBarcode?: boolean
+}
+
+export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showBarcode = false }: Props) {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   const {
@@ -130,7 +132,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt }: Pro
                 alt={sp.name || "Product Image"}
                 width={500}
                 height={500}
-                className="aspect-square h-full w-full bg-white object-contain object-center transition duration-300 hover:scale-105"
+                className={cn(
+                  "aspect-square h-full w-full bg-white object-contain object-center transition duration-300 hover:scale-105",
+                  sp.available ? "opacity-100" : "opacity-50 grayscale",
+                )}
                 {...(imagePriority && {
                   placeholder: "blur" as const,
                   blurDataURL: imagePlaceholder.productBlur,
@@ -307,6 +312,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt }: Pro
           </h2>
         </div>
 
+        {/* Prices and Actions */}
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {hasDiscount ? (
@@ -491,6 +497,19 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt }: Pro
             </DrawerSheet>
           </div>
         </div>
+
+        {/* Extra Details (Barcode, etc.) */}
+        {showBarcode && sp.barcode ? (
+          <div className="mt-auto flex w-full flex-1 flex-wrap items-center justify-center gap-2">
+            <Barcode value={sp.barcode} height={10} width={1} className="bg-muted mt-2 rounded p-2" />
+          </div>
+        ) : (
+          <div className="mt-auto flex w-full flex-1 flex-wrap items-center justify-center gap-2">
+            <Badge variant="destructive" size="xs" roundedness="sm">
+              No barcode available
+            </Badge>
+          </div>
+        )}
       </div>
     </div>
   )

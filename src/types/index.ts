@@ -85,6 +85,7 @@ export interface StoreProduct {
   priority_updated_at: string | null
   priority_source: PrioritySource | null
   product_id: number | null
+  available: boolean
   created_at: string
   updated_at: string
   is_favorited?: boolean

@@ -1,6 +1,26 @@
 import type { StoreProduct, PrioritySource } from "@/types"
 
 /**
+ * Result of fetching HTML from a URL
+ */
+export type FetchStatus = "success" | "not_found" | "error"
+
+export interface FetchResult {
+  html: string | null
+  status: FetchStatus
+}
+
+/**
+ * Result of a scrape operation
+ */
+export type ScrapeResultType = "success" | "not_found" | "error"
+
+export interface ScrapeResult {
+  type: ScrapeResultType
+  product: ScrapedProduct | null
+}
+
+/**
  * Raw product data extracted from HTML before normalization
  * All fields are optional since different stores may not provide all data
  */
@@ -49,7 +69,7 @@ export interface ScraperContext {
 export interface StoreScraper {
   readonly originId: StoreOrigin
   readonly name: string
-  scrape(ctx: ScraperContext): Promise<ScrapedProduct | null>
+  scrape(ctx: ScraperContext): Promise<ScrapeResult>
 }
 
 /**

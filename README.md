@@ -18,6 +18,8 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Ensure scraper is completely using upserting behavior.
 - [x] Orchestate a job in admin page that efficiently updates every store product by visiting every url.
 - [ ] Review product scheduling. Visualization of the schedule in admin page.
+- [ ] Scraping should include a column `store_products.available` so we can tell wether products became unavaible.
+- [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Investigate if more things can be scraped and what new columns can be used for `store_products`.
 - [ ] Chart error
 

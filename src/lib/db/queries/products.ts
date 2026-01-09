@@ -412,6 +412,25 @@ export const storeProductQueries = {
     )
   },
 
+  /**
+   * Marks a product as unavailable (typically after receiving a 404)
+   * Updates existing record or creates a new one with available = false
+   */
+  async markUnavailable({ url }: { url: string }) {
+    const supabase = createClient()
+    return supabase.from("store_products").upsert(
+      {
+        url,
+        available: false,
+        updated_at: now(),
+      },
+      {
+        onConflict: "url",
+        ignoreDuplicates: false,
+      },
+    )
+  },
+
   async updatePriority(
     id: number,
     priority: number | null,

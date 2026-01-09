@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -114,6 +120,7 @@ export type Database = {
       }
       store_products: {
         Row: {
+          available: boolean
           barcode: string | null
           brand: string | null
           category: string | null
@@ -131,13 +138,16 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at: string | null
           product_id: number | null
           updated_at: string | null
           url: string | null
         }
         Insert: {
+          available?: boolean
           barcode?: string | null
           brand?: string | null
           category?: string | null
@@ -155,13 +165,16 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
-          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source?:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at?: string | null
           product_id?: number | null
           updated_at?: string | null
           url?: string | null
         }
         Update: {
+          available?: boolean
           barcode?: string | null
           brand?: string | null
           category?: string | null
@@ -179,7 +192,9 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
-          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source?:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at?: string | null
           product_id?: number | null
           updated_at?: string | null
@@ -254,6 +269,7 @@ export type Database = {
       get_unsynced_high_priority_products: {
         Args: never
         Returns: {
+          available: boolean
           barcode: string | null
           brand: string | null
           category: string | null
@@ -271,7 +287,9 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at: string | null
           product_id: number | null
           updated_at: string | null
@@ -322,8 +340,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -331,7 +351,9 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -354,7 +376,9 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -377,7 +401,9 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
