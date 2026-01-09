@@ -53,7 +53,7 @@ import {
   EllipsisVerticalIcon,
   RefreshCcwIcon,
   ChartSplineIcon,
-  CloudAlertIcon,
+  WifiOffIcon,
   CircleIcon,
   MicroscopeIcon,
   HeartIcon,
@@ -160,29 +160,6 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
               -{discountValueToPercentage(sp.discount)}
             </Badge>
-          ) : null}
-
-          {hasUpdateError ? (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge variant="warning" size="sm">
-                    <CloudAlertIcon />
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="start"
-                  sideOffset={6}
-                  alignOffset={-6}
-                  size="xs"
-                  variant="glass"
-                  className="max-w-60"
-                >
-                  Product may be unavailable or the URL may be invalid.
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
           ) : null}
         </div>
 
@@ -301,9 +278,13 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             </Tooltip>
           </TooltipProvider>
 
-          <span className="mt-1.5 w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-500">
-            {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
-          </span>
+          <div className="mt-1.5 flex items-center justify-between gap-1.5">
+            <span className="w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-500">
+              {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
+            </span>
+
+            {hasUpdateError ? <WifiOffIcon className="text-destructive size-4" /> : null}
+          </div>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
             <Link href={generateProductPath(sp)} target="_blank" className="hover:underline">
