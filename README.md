@@ -12,3 +12,29 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - https://tweakcn.com/editor/theme
 - https://ui.shadcn.com/themes
 - https://www.shadcnblocks.com/
+
+## Next Steps
+
+- [x] Ensure scraper is completely using upserting behavior.
+- [x] Orchestate a job in admin page that efficiently updates every store product by visiting every url.
+- [ ] Review product scheduling. Visualization of the schedule in admin page.
+- [ ] Investigate if more things can be scraped and what new columns can be used for `store_products`.
+- [ ] Chart error
+
+```
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+```
+
+- [ ] Redis error: sometimes console is just pinging. I wonder if the implementation is healthy dont even remmeber what it does
+
+```
+Redis Client Error Error: read ETIMEDOUT
+    at ignore-listed frames {
+  errno: -60,
+  code: 'ETIMEDOUT',
+  syscall: 'read'
+}
+```

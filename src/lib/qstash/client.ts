@@ -18,14 +18,34 @@ export const getBaseUrl = () => {
   return "http://localhost:3000"
 }
 
-export const PRIORITY_STALENESS_HOURS: Record<number, number> = {
-  5: 1 * 1 * 24, // Premium: every 1 day
-  4: 2 * 1 * 24, // High: every 2 days
-  3: 3 * 1 * 24, // Medium: every 3 days
-  2: 7 * 1 * 24, // Low: weekly (7 days)
-  1: 7 * 2 * 24, // Minimal: every 2 weeks
-  // 0: 7 * 4 * 24, // Unprioritized: every 4 weeks
+/**
+ * SCHEDULE CONFIGURATION
+ *
+ * Defines how often each priority level should be scraped.
+ * The scheduler uses these thresholds to determine which products are "stale".
+ *
+ * Priority 5 (Premium): Daily - high-value products users care most about
+ * Priority 4 (High): Every 2 days - important but less critical
+ * Priority 3 (Medium): Every 3 days - moderate importance
+ * Priority 2 (Low): Weekly - low priority, minimal tracking (DISABLED)
+ * Priority 1 (Minimal): Bi-weekly - rarely tracked (DISABLED)
+ * Priority 0: Never scheduled - excluded from tracking
+ */
+export const PRIORITY_REFRESH_HOURS: Record<number, number> = {
+  5: 24, // Premium: every 1 day
+  4: 48, // High: every 2 days
+  3: 72, // Medium: every 3 days
+  // 2: 168,  // Low: every 7 days (DISABLED - too many products)
+  // 1: 336,  // Minimal: every 14 days (DISABLED - too many products)
+  // 0: N/A  // Never scheduled
 }
+
+// Priorities that are actively scheduled (must match keys in PRIORITY_REFRESH_HOURS)
+export const ACTIVE_PRIORITIES = [5, 4, 3] as const
 
 // Batch size for fan-out (QStash has limits per request)
 export const BATCH_SIZE = 100
+
+// Cost estimation (USD per scrape - includes Vercel function, QStash, external API)
+// Adjust this based on your actual costs
+export const ESTIMATED_COST_PER_SCRAPE = 0.0005 // $0.0005 per scrape (~$0.50 per 1000)

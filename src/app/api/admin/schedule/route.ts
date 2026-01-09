@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { PRIORITY_STALENESS_HOURS } from "@/lib/qstash"
+import { PRIORITY_REFRESH_HOURS, ACTIVE_PRIORITIES, ESTIMATED_COST_PER_SCRAPE } from "@/lib/qstash"
 
 export const maxDuration = 30
 
@@ -13,16 +13,25 @@ interface PriorityStats {
   stalenessThresholdHours: number | null
 }
 
+interface CostEstimate {
+  dailyScrapes: number
+  monthlyScrapes: number
+  costPerScrape: number
+  estimatedMonthlyCost: number
+}
+
 interface ScheduleOverview {
   cronSchedule: string
   cronDescription: string
+  cronFrequencyHours: number
   nextRunEstimate: string | null
-  activePriorities: number[]
+  activePriorities: readonly number[]
   priorityStats: PriorityStats[]
   totalProducts: number
   totalTracked: number
   totalStale: number
   totalDueForScrape: number
+  costEstimate: CostEstimate
 }
 
 interface TimelineProduct {
@@ -45,28 +54,49 @@ interface TimelineData {
 }
 
 // Vercel cron schedule - hardcoded since vercel.json isn't accessible at runtime
-const CRON_SCHEDULE = "0 6 * * *"
-const CRON_DESCRIPTION = "Daily at 6:00 AM UTC"
-
-// Priorities that the scheduler actually processes
-const ACTIVE_PRIORITIES = [5, 4, 3]
+const CRON_SCHEDULE = "0 */6 * * *"
+const CRON_DESCRIPTION = "Every 6 hours"
+const CRON_FREQUENCY_HOURS = 6
 
 function getNextCronRun(): Date {
   const now = new Date()
-  const nextRun = new Date(now)
-  nextRun.setUTCHours(6, 0, 0, 0)
+  const currentHour = now.getUTCHours()
 
-  if (nextRun <= now) {
+  // Find the next 6-hour mark (0, 6, 12, 18)
+  const nextHour = Math.ceil((currentHour + 1) / CRON_FREQUENCY_HOURS) * CRON_FREQUENCY_HOURS
+
+  const nextRun = new Date(now)
+  nextRun.setUTCMinutes(0, 0, 0)
+
+  if (nextHour >= 24) {
     nextRun.setUTCDate(nextRun.getUTCDate() + 1)
+    nextRun.setUTCHours(0)
+  } else {
+    nextRun.setUTCHours(nextHour)
   }
 
   return nextRun
 }
 
+function calculateDailyScrapes(priorityStats: PriorityStats[]): number {
+  let dailyScrapes = 0
+
+  for (const stat of priorityStats) {
+    if (stat.priority === null || !ACTIVE_PRIORITIES.includes(stat.priority as 5 | 4 | 3)) continue
+    if (!stat.stalenessThresholdHours) continue
+
+    // Products per day = total products / refresh period in days
+    const refreshDays = stat.stalenessThresholdHours / 24
+    dailyScrapes += stat.total / refreshDays
+  }
+
+  return Math.ceil(dailyScrapes)
+}
+
 function calculateStaleTime(updatedAt: string | null, priority: number): { staleAt: Date | null; isStale: boolean } {
   if (!updatedAt) return { staleAt: null, isStale: true }
 
-  const thresholdHours = PRIORITY_STALENESS_HOURS[priority]
+  const thresholdHours = PRIORITY_REFRESH_HOURS[priority]
   if (!thresholdHours) return { staleAt: null, isStale: false }
 
   const updated = new Date(updatedAt)
@@ -93,7 +123,7 @@ export async function GET(req: NextRequest) {
       const priorityLevels = [5, 4, 3, 2, 1, 0, null]
 
       for (const priority of priorityLevels) {
-        const thresholdHours = priority !== null ? (PRIORITY_STALENESS_HOURS[priority] || null) : null
+        const thresholdHours = priority !== null ? (PRIORITY_REFRESH_HOURS[priority] || null) : null
         const cutoffTime = thresholdHours
           ? new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString()
           : null
@@ -158,12 +188,23 @@ export async function GET(req: NextRequest) {
         .reduce((sum, p) => sum + p.total, 0)
       const totalStale = priorityStats.reduce((sum, p) => sum + p.stale, 0)
       const totalDueForScrape = priorityStats
-        .filter((p) => ACTIVE_PRIORITIES.includes(p.priority as number))
+        .filter((p) => ACTIVE_PRIORITIES.includes(p.priority as 5 | 4 | 3))
         .reduce((sum, p) => sum + p.stale, 0)
+
+      // Calculate cost estimate
+      const dailyScrapes = calculateDailyScrapes(priorityStats)
+      const monthlyScrapes = dailyScrapes * 30
+      const costEstimate: CostEstimate = {
+        dailyScrapes,
+        monthlyScrapes,
+        costPerScrape: ESTIMATED_COST_PER_SCRAPE,
+        estimatedMonthlyCost: Math.round(monthlyScrapes * ESTIMATED_COST_PER_SCRAPE * 100) / 100,
+      }
 
       const overview: ScheduleOverview = {
         cronSchedule: CRON_SCHEDULE,
         cronDescription: CRON_DESCRIPTION,
+        cronFrequencyHours: CRON_FREQUENCY_HOURS,
         nextRunEstimate: getNextCronRun().toISOString(),
         activePriorities: ACTIVE_PRIORITIES,
         priorityStats,
@@ -171,6 +212,7 @@ export async function GET(req: NextRequest) {
         totalTracked,
         totalStale,
         totalDueForScrape,
+        costEstimate,
       }
 
       return NextResponse.json(overview)
@@ -269,7 +311,7 @@ export async function GET(req: NextRequest) {
       for (const product of products) {
         if (!product.priority) continue
 
-        const thresholdHours = PRIORITY_STALENESS_HOURS[product.priority]
+        const thresholdHours = PRIORITY_REFRESH_HOURS[product.priority]
         if (!thresholdHours) continue
 
         if (!product.updated_at) {

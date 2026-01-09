@@ -21,10 +21,11 @@ import {
   AlertTriangleIcon,
   CheckCircle2Icon,
   ZapIcon,
-  PackageIcon,
   TrendingUpIcon,
   TimerIcon,
   InfoIcon,
+  DollarSignIcon,
+  ActivityIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -37,9 +38,17 @@ interface PriorityStats {
   stalenessThresholdHours: number | null
 }
 
+interface CostEstimate {
+  dailyScrapes: number
+  monthlyScrapes: number
+  costPerScrape: number
+  estimatedMonthlyCost: number
+}
+
 interface ScheduleOverview {
   cronSchedule: string
   cronDescription: string
+  cronFrequencyHours: number
   nextRunEstimate: string | null
   activePriorities: number[]
   priorityStats: PriorityStats[]
@@ -47,6 +56,7 @@ interface ScheduleOverview {
   totalTracked: number
   totalStale: number
   totalDueForScrape: number
+  costEstimate: CostEstimate
 }
 
 interface TimelineProduct {
@@ -85,12 +95,6 @@ const PRIORITY_CONFIG: Record<number, { name: string; color: string; bgColor: st
   2: { name: "Low", color: "text-yellow-500", bgColor: "bg-yellow-500" },
   1: { name: "Minimal", color: "text-orange-500", bgColor: "bg-orange-500" },
   0: { name: "None", color: "text-gray-500", bgColor: "bg-gray-500" },
-}
-
-const ORIGIN_NAMES: Record<number, string> = {
-  1: "Continente",
-  2: "Auchan",
-  3: "Pingo Doce",
 }
 
 function formatThreshold(hours: number | null): string {
@@ -181,7 +185,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Schedule Overview */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-1.5">
@@ -240,6 +244,48 @@ export default function SchedulePage() {
                 <>
                   <p className="text-2xl font-bold text-amber-500">{overview?.totalDueForScrape.toLocaleString()}</p>
                   <p className="text-muted-foreground mt-1 text-xs">Stale products (priority 3-5)</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-1.5">
+                <ActivityIcon className="h-3.5 w-3.5" />
+                Daily Scrapes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoadingOverview ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <>
+                  <p className="text-2xl font-bold">{overview?.costEstimate.dailyScrapes.toLocaleString()}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    ~{overview?.costEstimate.monthlyScrapes.toLocaleString()}/month
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-1.5">
+                <DollarSignIcon className="h-3.5 w-3.5" />
+                Est. Monthly Cost
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoadingOverview ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-emerald-500">
+                    ${overview?.costEstimate.estimatedMonthlyCost.toFixed(2)}
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">${overview?.costEstimate.costPerScrape}/scrape</p>
                 </>
               )}
             </CardContent>

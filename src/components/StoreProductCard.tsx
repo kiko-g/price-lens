@@ -19,6 +19,7 @@ import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { DevBadge } from "@/components/ui/combo/dev-badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -316,6 +317,14 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
         </div>
 
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
+          {sp.barcode ? (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" size="xs" roundedness="sm" className="w-fit">
+                {sp.barcode}
+              </Badge>
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap items-center justify-between gap-2">
             {hasDiscount ? (
               <div className="flex flex-col">
@@ -383,10 +392,13 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
                 {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
                   <>
                     <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
-                    <DropdownMenuLabel>Admin tools</DropdownMenuLabel>
+                    <DropdownMenuLabel className="flex items-center gap-2">
+                      Admin tools
+                      <DevBadge />
+                    </DropdownMenuLabel>
 
                     {onUpdate && (
-                      <DropdownMenuItem asChild variant="caution">
+                      <DropdownMenuItem asChild>
                         <Button
                           variant="dropdown-item"
                           onClick={async () => {
@@ -403,7 +415,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
                       </DropdownMenuItem>
                     )}
 
-                    <DropdownMenuItem asChild variant="caution">
+                    <DropdownMenuItem asChild>
                       <Button
                         variant="dropdown-item"
                         onClick={async () => {
@@ -439,7 +451,7 @@ export function StoreProductCard({ sp, onUpdate, imagePriority = false, favorite
                       </Button>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem asChild variant="caution">
+                    <DropdownMenuItem asChild>
                       <Button
                         variant="dropdown-item"
                         onClick={async () => {

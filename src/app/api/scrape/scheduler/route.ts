@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { qstash, getBaseUrl, PRIORITY_STALENESS_HOURS, BATCH_SIZE } from "@/lib/qstash"
+import { qstash, getBaseUrl, PRIORITY_REFRESH_HOURS, ACTIVE_PRIORITIES, BATCH_SIZE } from "@/lib/qstash"
 
 export const maxDuration = 60 // 1 minute to schedule all jobs
 
 /**
- * Scheduler endpoint - triggered by Vercel cron every 4 hours.
+ * Scheduler endpoint - triggered by Vercel cron every 6 hours.
  *
  * Fetches stale products by priority and fans out to QStash,
  * which will call the worker endpoint for each product.
+ *
+ * Schedule configuration is defined in PRIORITY_REFRESH_HOURS.
+ * Only priorities in ACTIVE_PRIORITIES are processed.
  */
 export async function GET(req: NextRequest) {
   const startTime = Date.now()
@@ -24,13 +27,12 @@ export async function GET(req: NextRequest) {
     const baseUrl = getBaseUrl()
     const workerUrl = `${baseUrl}/api/scrape/worker`
 
-    // Process priority levels from highest to lowest
-    const priorityLevels = [5, 4, 3]
+    // Process active priority levels from highest to lowest
     let totalScheduled = 0
     const results: Record<number, number> = {}
 
-    for (const priority of priorityLevels) {
-      const hoursThreshold = PRIORITY_STALENESS_HOURS[priority] || 24
+    for (const priority of ACTIVE_PRIORITIES) {
+      const hoursThreshold = PRIORITY_REFRESH_HOURS[priority] || 24
       const cutoffTime = new Date(Date.now() - hoursThreshold * 60 * 60 * 1000).toISOString()
 
       // Fetch stale products for this priority
