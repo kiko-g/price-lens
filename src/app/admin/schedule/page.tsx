@@ -296,7 +296,7 @@ export default function SchedulePage() {
                     ))}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    Priority 1-2 not scheduled
+                    Priority 0-1 not scheduled
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -304,8 +304,8 @@ export default function SchedulePage() {
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
                           <p>
-                            90% of products are at priority 1 as a safety measure. Scheduling them would overwhelm the
-                            system.
+                            Most products are at priority 1 as a safety measure. Enable them gradually as you tune
+                            priorities.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -321,10 +321,10 @@ export default function SchedulePage() {
                 <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
                 <div className="space-y-2">
                   <p>
-                    <strong>Cron:</strong> Runs daily at 6:00 AM UTC via Vercel, queuing stale products to QStash.
+                    <strong>Cron:</strong> Runs every 30 min via Vercel, queuing stale products to QStash batch workers.
                   </p>
                   <p>
-                    <strong>Thresholds:</strong> Premium 24h, High 48h, Medium 72h, Low 168h, Minimal 336h.
+                    <strong>Thresholds:</strong> P5: 24h, P4: 48h, P3: 72h, P2: 168h (P1: 336h disabled).
                   </p>
                 </div>
               </div>
