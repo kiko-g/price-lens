@@ -82,6 +82,7 @@ import {
   StoreIcon,
   XIcon,
 } from "lucide-react"
+import { ProductGridWrapper } from "./ProductGridWrapper"
 
 type Props = {
   relevant?: boolean
@@ -682,11 +683,11 @@ WHERE category = '${category1}'
           <Skeleton className="h-3 w-48 rounded" />
           <Skeleton className="h-3 w-24 rounded" />
         </div>
-        <div className="grid-products w-full">
+        <ProductGridWrapper className="w-full">
           {Array.from({ length: limit }).map((_, index) => (
             <StoreProductCardSkeleton key={`product-skeleton-${index}`} />
           ))}
-        </div>
+        </ProductGridWrapper>
       </div>
     )
   }
@@ -1240,11 +1241,11 @@ WHERE category = '${category1}'
 
       {/* Products Grid */}
       {!isLoading && storeProducts && storeProducts.length > 0 ? (
-        <div className="grid-products h-full w-full flex-1 border-b px-4 pt-4 pb-16">
+        <ProductGridWrapper className="h-full w-full flex-1 border-b px-4 pt-4 pb-16">
           {storeProducts.map((product, productIdx) => (
             <StoreProductCard key={`product-${productIdx}`} sp={product} imagePriority={productIdx < 12} />
           ))}
-        </div>
+        </ProductGridWrapper>
       ) : (
         <SectionWrapper>
           <CircleOffIcon className="h-8 w-8" />

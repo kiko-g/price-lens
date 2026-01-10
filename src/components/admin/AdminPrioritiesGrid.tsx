@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AdminProductPriorityCard } from "./AdminProductPriorityCard"
 import { SearchIcon } from "lucide-react"
+import { ProductGridWrapper } from "../ProductGridWrapper"
 
 type Props = {
   initialData: {
@@ -123,11 +124,11 @@ export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPrio
 
       {/* Products Grid */}
       {products.length > 0 ? (
-        <div className="grid-products w-full">
+        <ProductGridWrapper className="w-full">
           {products.map((product) => (
             <AdminProductPriorityCard key={product.id} product={product} onUpdate={handleProductUpdate} />
           ))}
-        </div>
+        </ProductGridWrapper>
       ) : (
         <div className="text-muted-foreground flex min-h-[400px] items-center justify-center text-center">
           <div>

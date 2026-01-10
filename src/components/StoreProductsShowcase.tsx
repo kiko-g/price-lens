@@ -63,6 +63,7 @@ import {
   SearchIcon,
 } from "lucide-react"
 import { PrioritySource } from "@/types"
+import { ProductGridWrapper } from "./ProductGridWrapper"
 
 interface StoreProductsShowcaseProps {
   limit?: number
@@ -889,16 +890,13 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 </div>
               )}
 
-              <div
-                className={cn(
-                  "grid-products w-full transition-opacity duration-200",
-                  showOverlay && "pointer-events-none",
-                )}
+              <ProductGridWrapper
+                className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
               >
                 {products.map((product, idx) => (
                   <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} />
                 ))}
-              </div>
+              </ProductGridWrapper>
             </div>
 
             {/* Bottom Pagination */}
@@ -1567,11 +1565,11 @@ function LoadingGrid({ limit }: { limit: number }) {
         <Skeleton className="h-3 w-48 rounded" />
         <Skeleton className="h-3 w-24 rounded" />
       </div>
-      <div className="grid-products w-full">
+      <ProductGridWrapper className="w-full">
         {Array.from({ length: limit }).map((_, i) => (
           <StoreProductCardSkeleton key={i} />
         ))}
-      </div>
+      </ProductGridWrapper>
     </div>
   )
 }

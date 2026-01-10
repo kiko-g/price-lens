@@ -52,6 +52,7 @@ import {
 } from "lucide-react"
 import { HideFooter } from "@/contexts/FooterContext"
 import { Footer } from "@/components/layout/Footer"
+import { ProductGridWrapper } from "@/components/ProductGridWrapper"
 
 // ============================================================================
 // URL State Management
@@ -581,11 +582,8 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
                 </div>
               )}
 
-              <div
-                className={cn(
-                  "grid-products w-full transition-opacity duration-200",
-                  showOverlay && "pointer-events-none",
-                )}
+              <ProductGridWrapper
+                className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
               >
                 {favorites.map((favorite, idx) => (
                   <StoreProductCard
@@ -595,7 +593,7 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
                     favoritedAt={favorite.created_at}
                   />
                 ))}
-              </div>
+              </ProductGridWrapper>
             </div>
 
             {/* Bottom Pagination */}
@@ -1001,11 +999,11 @@ function LoadingGrid({ limit }: { limit: number }) {
         <Skeleton className="h-3 w-48 rounded" />
         <Skeleton className="h-3 w-24 rounded" />
       </div>
-      <div className="grid-products w-full">
+      <ProductGridWrapper className="w-full">
         {Array.from({ length: limit }).map((_, i) => (
           <StoreProductCardSkeleton key={i} />
         ))}
-      </div>
+      </ProductGridWrapper>
     </div>
   )
 }
