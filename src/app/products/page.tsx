@@ -9,12 +9,14 @@ export const metadata = {
   description: "Browse and compare prices across supermarkets",
 }
 
+const LIMIT = 40
+
 function LoadingFallback() {
   return (
     <div className="flex w-full flex-col gap-3 p-4">
       <Skeleton className="h-12 w-full" />
       <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-        {Array.from({ length: 40 }).map((_, i) => (
+        {Array.from({ length: LIMIT }).map((_, i) => (
           <Skeleton key={i} className="aspect-square w-full rounded-lg" />
         ))}
       </div>
@@ -27,7 +29,7 @@ export default function StoreProductsPage() {
     <main className="h-[calc(100vh-54px)] overflow-hidden">
       <HideFooter />
       <Suspense fallback={<LoadingFallback />}>
-        <StoreProductsShowcase limit={40}>
+        <StoreProductsShowcase limit={LIMIT}>
           <Footer className="bg-transparent px-0 pt-4 pb-0 sm:px-0 sm:pt-4 sm:pb-0 lg:px-0 lg:pt-4 lg:pb-0 dark:bg-transparent" />
         </StoreProductsShowcase>
       </Suspense>

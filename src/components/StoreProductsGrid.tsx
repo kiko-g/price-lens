@@ -682,7 +682,7 @@ WHERE category = '${category1}'
           <Skeleton className="h-3 w-48 rounded" />
           <Skeleton className="h-3 w-24 rounded" />
         </div>
-        <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
+        <div className="grid-products w-full">
           {Array.from({ length: limit }).map((_, index) => (
             <StoreProductCardSkeleton key={`product-skeleton-${index}`} />
           ))}
@@ -1240,7 +1240,7 @@ WHERE category = '${category1}'
 
       {/* Products Grid */}
       {!isLoading && storeProducts && storeProducts.length > 0 ? (
-        <div className="grid h-full w-full flex-1 grid-cols-2 gap-8 border-b px-4 pt-4 pb-16 md:grid-cols-3 lg:grid-cols-4 lg:gap-6 xl:grid-cols-6 2xl:grid-cols-8">
+        <div className="grid-products h-full w-full flex-1 border-b px-4 pt-4 pb-16">
           {storeProducts.map((product, productIdx) => (
             <StoreProductCard key={`product-${productIdx}`} sp={product} imagePriority={productIdx < 12} />
           ))}

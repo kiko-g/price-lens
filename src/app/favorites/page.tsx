@@ -583,7 +583,7 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
 
               <div
                 className={cn(
-                  "grid w-full grid-cols-2 gap-x-3 gap-y-10 transition-opacity duration-200 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6",
+                  "grid-products w-full transition-opacity duration-200",
                   showOverlay && "pointer-events-none",
                 )}
               >
@@ -1001,7 +1001,7 @@ function LoadingGrid({ limit }: { limit: number }) {
         <Skeleton className="h-3 w-48 rounded" />
         <Skeleton className="h-3 w-24 rounded" />
       </div>
-      <div className="grid w-full grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 md:gap-y-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <div className="grid-products w-full">
         {Array.from({ length: limit }).map((_, i) => (
           <StoreProductCardSkeleton key={i} />
         ))}
