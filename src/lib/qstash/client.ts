@@ -31,19 +31,27 @@ export const getBaseUrl = () => {
  * Priority 1 (Minimal): Bi-weekly - rarely tracked (DISABLED)
  * Priority 0: Never scheduled - excluded from tracking
  */
-export const PRIORITY_REFRESH_HOURS: Record<number, number> = {
+export const PRIORITY_REFRESH_HOURS: Record<number, number | null> = {
   5: 24, // Premium: every 1 day
   4: 48, // High: every 2 days
   3: 72, // Medium: every 3 days
-  2: 168, // Low: every 7 days (DISABLED FOR NOW - too many products)
-  // 1: 336,  // Minimal: every 14 days (DISABLED DISABLED FOR NOW - too many products)
-  // 0: N/A  // Never scheduled
+  2: 168, // Low: every 7 days
+  1: 336, // Minimal: every 14 days
+  0: null, // Never scheduled
 }
 
-// Priorities that are actively scheduled (must match keys in PRIORITY_REFRESH_HOURS)
+// Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS)
 export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
 
-// Batch size for fan-out (QStash has limits per request)
+// How many products to include in a single worker batch
+// Each worker has 300 seconds max, ~5 sec per scrape = ~50 products max
+export const WORKER_BATCH_SIZE = 40
+
+// How many batches to send to QStash per scheduler run
+// With 40 products per batch and 10 batches = 400 products per scheduler run
+export const MAX_BATCHES_PER_RUN = 10
+
+// Legacy: Batch size for QStash fan-out (used by bulk-scrape)
 export const BATCH_SIZE = 100
 
 // Cost estimation (USD per scrape - includes Vercel function, QStash, external API)

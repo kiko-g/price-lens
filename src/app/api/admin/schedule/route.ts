@@ -23,7 +23,8 @@ interface CostEstimate {
 interface ScheduleOverview {
   cronSchedule: string
   cronDescription: string
-  cronFrequencyHours: number
+  cronFrequencyMinutes: number
+  runsPerHour: number
   nextRunEstimate: string | null
   activePriorities: readonly number[]
   priorityStats: PriorityStats[]
@@ -54,25 +55,25 @@ interface TimelineData {
 }
 
 // Vercel cron schedule - hardcoded since vercel.json isn't accessible at runtime
-const CRON_SCHEDULE = "0 */6 * * *"
-const CRON_DESCRIPTION = "Every 6 hours"
-const CRON_FREQUENCY_HOURS = 6
+const CRON_SCHEDULE = "*/30 * * * *"
+const CRON_DESCRIPTION = "Every 30 minutes"
+const CRON_FREQUENCY_MINUTES = 30
 
 function getNextCronRun(): Date {
   const now = new Date()
-  const currentHour = now.getUTCHours()
+  const currentMinutes = now.getUTCMinutes()
 
-  // Find the next 6-hour mark (0, 6, 12, 18)
-  const nextHour = Math.ceil((currentHour + 1) / CRON_FREQUENCY_HOURS) * CRON_FREQUENCY_HOURS
+  // Find the next 30-minute mark (0 or 30)
+  const nextMinutes = currentMinutes < 30 ? 30 : 60
 
   const nextRun = new Date(now)
-  nextRun.setUTCMinutes(0, 0, 0)
+  nextRun.setUTCSeconds(0, 0)
 
-  if (nextHour >= 24) {
-    nextRun.setUTCDate(nextRun.getUTCDate() + 1)
-    nextRun.setUTCHours(0)
+  if (nextMinutes === 60) {
+    nextRun.setUTCHours(nextRun.getUTCHours() + 1)
+    nextRun.setUTCMinutes(0)
   } else {
-    nextRun.setUTCHours(nextHour)
+    nextRun.setUTCMinutes(nextMinutes)
   }
 
   return nextRun
@@ -204,7 +205,8 @@ export async function GET(req: NextRequest) {
       const overview: ScheduleOverview = {
         cronSchedule: CRON_SCHEDULE,
         cronDescription: CRON_DESCRIPTION,
-        cronFrequencyHours: CRON_FREQUENCY_HOURS,
+        cronFrequencyMinutes: CRON_FREQUENCY_MINUTES,
+        runsPerHour: 60 / CRON_FREQUENCY_MINUTES,
         nextRunEstimate: getNextCronRun().toISOString(),
         activePriorities: ACTIVE_PRIORITIES,
         priorityStats,

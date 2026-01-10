@@ -101,6 +101,7 @@ export interface BulkScrapeJob {
     origins: number[]
     priorities: number[]
     missingBarcode: boolean
+    available: boolean | null
     category?: string
   }
   total: number

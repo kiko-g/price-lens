@@ -49,7 +49,8 @@ interface CostEstimate {
 interface ScheduleOverview {
   cronSchedule: string
   cronDescription: string
-  cronFrequencyHours: number
+  cronFrequencyMinutes: number
+  runsPerHour: number
   nextRunEstimate: string | null
   activePriorities: number[]
   priorityStats: PriorityStats[]

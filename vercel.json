@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/scrape/scheduler",
-      "schedule": "0 */6 * * *"
+      "schedule": "*/30 * * * *"
     }
   ]
 }
