@@ -173,160 +173,165 @@ export default function SchedulePage() {
   return (
     <Layout>
       <HideFooter />
-      <div className="flex h-full flex-col lg:flex-row">
+      <div className="flex h-[calc(100dvh-54px)] flex-col overflow-hidden lg:flex-row">
         {/* Sidebar - Schedule Overview */}
-        <aside className="flex h-auto flex-col border-b p-4 lg:h-full lg:w-80 lg:min-w-80 lg:overflow-y-auto lg:border-r lg:border-b-0">
-          <div className="mb-4 flex items-center gap-2">
-            <CalendarIcon className="text-primary size-5" />
-            <h2 className="text-lg font-bold">Scrape Schedule</h2>
-          </div>
-
-          {/* Cron Schedule */}
-          <div className="space-y-1">
-            <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
-              <ClockIcon className="h-3.5 w-3.5" />
-              Cron Schedule
+        <aside className="flex h-auto min-h-0 flex-col border-b lg:h-full lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
+          {/* Scrollable content */}
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="mb-4 flex items-center gap-2">
+              <CalendarIcon className="text-primary size-5" />
+              <h2 className="text-lg font-bold">Scrape Schedule</h2>
             </div>
-            {isLoadingOverview ? (
-              <Skeleton className="h-7 w-32" />
-            ) : (
-              <>
-                <p className="text-xl font-bold">{overview?.cronDescription}</p>
-                <p className="text-muted-foreground font-mono text-xs">{overview?.cronSchedule}</p>
-              </>
-            )}
-          </div>
 
-          {/* Next Run */}
-          <div className="mt-4 space-y-1 border-t pt-4">
-            <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
-              <TimerIcon className="h-3.5 w-3.5" />
-              Next Run
-            </div>
-            {isLoadingOverview ? (
-              <Skeleton className="h-7 w-24" />
-            ) : timeUntilNextRun ? (
-              <>
-                <p className="text-xl font-bold">
-                  {timeUntilNextRun.hours}h {timeUntilNextRun.minutes}m
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  {overview?.nextRunEstimate && format(new Date(overview.nextRunEstimate), "MMM d, HH:mm 'UTC'")}
-                </p>
-              </>
-            ) : (
-              <p className="text-muted-foreground">—</p>
-            )}
-          </div>
-
-          {/* Stats Grid */}
-          <div className="mt-4 grid grid-cols-2 gap-3 border-t pt-4">
-            {/* Due for Scrape */}
-            <div className="bg-muted/50 rounded-md p-3">
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <ZapIcon className="h-3 w-3" />
-                Due for Scrape
+            {/* Cron Schedule */}
+            <div className="space-y-1">
+              <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
+                <ClockIcon className="h-3.5 w-3.5" />
+                Cron Schedule
               </div>
               {isLoadingOverview ? (
-                <Skeleton className="mt-1 h-6 w-12" />
+                <Skeleton className="h-7 w-32" />
               ) : (
-                <p className="mt-1 text-lg font-bold text-amber-500">{overview?.totalDueForScrape.toLocaleString()}</p>
+                <>
+                  <p className="text-xl font-bold">{overview?.cronDescription}</p>
+                  <p className="text-muted-foreground font-mono text-xs">{overview?.cronSchedule}</p>
+                </>
               )}
             </div>
 
-            {/* Daily Scrapes */}
-            <div className="bg-muted/50 rounded-md p-3">
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <ActivityIcon className="h-3 w-3" />
-                Daily Scrapes
+            {/* Next Run */}
+            <div className="mt-4 space-y-1 border-t pt-4">
+              <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
+                <TimerIcon className="h-3.5 w-3.5" />
+                Next Run
               </div>
               {isLoadingOverview ? (
-                <Skeleton className="mt-1 h-6 w-12" />
+                <Skeleton className="h-7 w-24" />
+              ) : timeUntilNextRun ? (
+                <>
+                  <p className="text-xl font-bold">
+                    {timeUntilNextRun.hours}h {timeUntilNextRun.minutes}m
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    {overview?.nextRunEstimate && format(new Date(overview.nextRunEstimate), "MMM d, HH:mm 'UTC'")}
+                  </p>
+                </>
               ) : (
-                <p className="mt-1 text-lg font-bold">{overview?.costEstimate.dailyScrapes.toLocaleString()}</p>
+                <p className="text-muted-foreground">—</p>
               )}
             </div>
 
-            {/* Monthly Scrapes */}
-            <div className="bg-muted/50 rounded-md p-3">
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <TrendingUpIcon className="h-3 w-3" />
-                Monthly
-              </div>
-              {isLoadingOverview ? (
-                <Skeleton className="mt-1 h-6 w-16" />
-              ) : (
-                <p className="mt-1 text-lg font-bold">~{overview?.costEstimate.monthlyScrapes.toLocaleString()}</p>
-              )}
-            </div>
-
-            {/* Est. Cost */}
-            <div className="bg-muted/50 rounded-md p-3">
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <DollarSignIcon className="h-3 w-3" />
-                Est. Cost/mo
-              </div>
-              {isLoadingOverview ? (
-                <Skeleton className="mt-1 h-6 w-12" />
-              ) : (
-                <p className="mt-1 text-lg font-bold text-emerald-500">
-                  ${overview?.costEstimate.estimatedMonthlyCost.toFixed(2)}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Active Priorities */}
-          <div className="mt-4 space-y-2 border-t pt-4">
-            <div className="text-muted-foreground text-xs font-medium uppercase">Active Priorities</div>
-            {isLoadingOverview ? (
-              <Skeleton className="h-6 w-full" />
-            ) : (
-              <>
-                <div className="flex flex-wrap gap-1.5">
-                  {overview?.activePriorities.map((p) => (
-                    <Badge key={p} className={cn("text-white", PRIORITY_CONFIG[p]?.bgColor)}>
-                      {PRIORITY_CONFIG[p]?.name}
-                    </Badge>
-                  ))}
+            {/* Stats Grid */}
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t pt-4">
+              {/* Due for Scrape */}
+              <div className="bg-muted/50 rounded-md p-3">
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <ZapIcon className="h-3 w-3" />
+                  Due for Scrape
                 </div>
-                <p className="text-muted-foreground text-xs">
-                  Priority 1-2 not scheduled
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <InfoIcon className="ml-1 inline h-3 w-3" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>
-                          90% of products are at priority 1 as a safety measure. Scheduling them would overwhelm the
-                          system.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </p>
-              </>
-            )}
-          </div>
+                {isLoadingOverview ? (
+                  <Skeleton className="mt-1 h-6 w-12" />
+                ) : (
+                  <p className="mt-1 text-lg font-bold text-amber-500">
+                    {overview?.totalDueForScrape.toLocaleString()}
+                  </p>
+                )}
+              </div>
 
-          {/* Info Section */}
-          <div className="mt-4 space-y-2 border-t pt-4">
-            <div className="text-muted-foreground flex items-start gap-2 text-xs">
-              <InfoIcon className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
-              <div className="space-y-2">
-                <p>
-                  <strong>Cron:</strong> Runs daily at 6:00 AM UTC via Vercel, queuing stale products to QStash.
-                </p>
-                <p>
-                  <strong>Thresholds:</strong> Premium 24h, High 48h, Medium 72h, Low 168h, Minimal 336h.
-                </p>
+              {/* Daily Scrapes */}
+              <div className="bg-muted/50 rounded-md p-3">
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <ActivityIcon className="h-3 w-3" />
+                  Daily Scrapes
+                </div>
+                {isLoadingOverview ? (
+                  <Skeleton className="mt-1 h-6 w-12" />
+                ) : (
+                  <p className="mt-1 text-lg font-bold">{overview?.costEstimate.dailyScrapes.toLocaleString()}</p>
+                )}
+              </div>
+
+              {/* Monthly Scrapes */}
+              <div className="bg-muted/50 rounded-md p-3">
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <TrendingUpIcon className="h-3 w-3" />
+                  Monthly
+                </div>
+                {isLoadingOverview ? (
+                  <Skeleton className="mt-1 h-6 w-16" />
+                ) : (
+                  <p className="mt-1 text-lg font-bold">~{overview?.costEstimate.monthlyScrapes.toLocaleString()}</p>
+                )}
+              </div>
+
+              {/* Est. Cost */}
+              <div className="bg-muted/50 rounded-md p-3">
+                <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <DollarSignIcon className="h-3 w-3" />
+                  Est. Cost/mo
+                </div>
+                {isLoadingOverview ? (
+                  <Skeleton className="mt-1 h-6 w-12" />
+                ) : (
+                  <p className="mt-1 text-lg font-bold text-emerald-500">
+                    ${overview?.costEstimate.estimatedMonthlyCost.toFixed(2)}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Active Priorities */}
+            <div className="mt-4 space-y-2 border-t pt-4">
+              <div className="text-muted-foreground text-xs font-medium uppercase">Active Priorities</div>
+              {isLoadingOverview ? (
+                <Skeleton className="h-6 w-full" />
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-1.5">
+                    {overview?.activePriorities.map((p) => (
+                      <Badge key={p} className={cn("text-white", PRIORITY_CONFIG[p]?.bgColor)}>
+                        {PRIORITY_CONFIG[p]?.name}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    Priority 1-2 not scheduled
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <InfoIcon className="ml-1 inline h-3 w-3" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>
+                            90% of products are at priority 1 as a safety measure. Scheduling them would overwhelm the
+                            system.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* Info Section */}
+            <div className="mt-4 space-y-2 border-t pt-4">
+              <div className="text-muted-foreground flex items-start gap-2 text-xs">
+                <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
+                <div className="space-y-2">
+                  <p>
+                    <strong>Cron:</strong> Runs daily at 6:00 AM UTC via Vercel, queuing stale products to QStash.
+                  </p>
+                  <p>
+                    <strong>Thresholds:</strong> Premium 24h, High 48h, Medium 72h, Low 168h, Minimal 336h.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Refresh Button */}
-          <div className="mt-auto pt-4">
+          {/* Fixed Refresh Button */}
+          <div className="bg-background shrink-0 border-t p-4">
             <Button variant="outline" size="sm" onClick={() => refetchOverview()} className="w-full">
               <RefreshCwIcon className="mr-2 h-4 w-4" />
               Refresh
@@ -335,7 +340,7 @@ export default function SchedulePage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
           <div className="mx-auto max-w-5xl space-y-6">
             {/* Priority Distribution */}
             <Card>
@@ -529,7 +534,7 @@ export default function SchedulePage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div
-                                      className="absolute top-0 left-0 h-full rounded bg-gradient-to-r from-amber-500 to-red-500 transition-all group-hover:opacity-80"
+                                      className="absolute top-0 left-0 h-full rounded bg-linear-to-r from-indigo-500 to-teal-500 transition-all group-hover:opacity-80"
                                       style={{ width: `${Math.max(barWidth, 2)}%` }}
                                     />
                                   </TooltipTrigger>

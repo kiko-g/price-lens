@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
+import { cn } from "@/lib/utils"
+import { useAdminStoreProductFilters } from "@/hooks/useAdminStoreProductFilters"
 
 import { Layout } from "@/components/layout"
 import { HideFooter } from "@/contexts/FooterContext"
@@ -13,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PriorityBubble } from "@/components/PriorityBubble"
 
 import {
   PlayIcon,
@@ -28,8 +31,10 @@ import {
   AlertTriangleIcon,
   ServerIcon,
   MonitorIcon,
+  CircleIcon,
+  CircleCheckIcon,
+  CircleXIcon,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 interface BulkScrapeJob {
   id: string
@@ -56,28 +61,30 @@ interface BulkScrapeJob {
   }
 }
 
-const ORIGIN_OPTIONS = [
-  { id: 1, name: "Continente", hasBarcode: true },
-  { id: 2, name: "Auchan", hasBarcode: true },
-  { id: 3, name: "Pingo Doce", hasBarcode: false },
-]
-
-const PRIORITY_OPTIONS = [
-  { id: 5, name: "Premium", color: "bg-purple-500" },
-  { id: 4, name: "High", color: "bg-blue-500" },
-  { id: 3, name: "Medium", color: "bg-emerald-500" },
-  { id: 2, name: "Low", color: "bg-yellow-500" },
-  { id: 1, name: "Minimal", color: "bg-orange-500" },
-  { id: 0, name: "None", color: "bg-gray-500" },
-]
-
 export default function BulkScrapePage() {
   const queryClient = useQueryClient()
 
-  // Filters state
-  const [selectedOrigins, setSelectedOrigins] = useState<number[]>([1, 2])
-  const [selectedPriorities, setSelectedPriorities] = useState<number[]>([])
-  const [missingBarcode, setMissingBarcode] = useState(true)
+  // Use shared admin filters hook
+  const {
+    origins,
+    priorities,
+    missingBarcode,
+    available,
+    setMissingBarcode,
+    setAvailable,
+    toggleOrigin,
+    togglePriority,
+    filters,
+    count,
+    isLoadingCount,
+    refetchCount,
+    invalidateCount,
+    originOptions,
+    priorityLevels,
+  } = useAdminStoreProductFilters({
+    initialFilters: { origins: [2] },
+    queryKeyPrefix: "bulk-scrape",
+  })
 
   // Mode: "qstash" for production, "direct" for local development
   const [useDirectMode, setUseDirectMode] = useState(true) // Default to direct for local dev
@@ -88,29 +95,6 @@ export default function BulkScrapePage() {
 
   // Ref to track cancellation request (avoids stale closure in while loop)
   const cancelRequestedRef = useRef(false)
-
-  // Memoize filter params string to prevent unnecessary query refetches
-  const filterParamsString = useMemo(() => {
-    const params = new URLSearchParams()
-    if (selectedOrigins.length > 0) params.set("origins", selectedOrigins.join(","))
-    if (selectedPriorities.length > 0) params.set("priorities", selectedPriorities.join(","))
-    params.set("missingBarcode", String(missingBarcode))
-    return params.toString()
-  }, [selectedOrigins, selectedPriorities, missingBarcode])
-
-  // Fetch matching count
-  const {
-    data: countData,
-    isLoading: isLoadingCount,
-    refetch: refetchCount,
-  } = useQuery({
-    queryKey: ["bulk-scrape-count", filterParamsString],
-    queryFn: async () => {
-      const res = await axios.get(`/api/admin/bulk-scrape?${filterParamsString}`)
-      return res.data as { count: number }
-    },
-    staleTime: 30000,
-  })
 
   // Fetch active jobs
   const { data: jobsData, refetch: refetchJobs } = useQuery({
@@ -160,16 +144,17 @@ export default function BulkScrapePage() {
   const startJobMutation = useMutation({
     mutationFn: async () => {
       const res = await axios.post("/api/admin/bulk-scrape", {
-        origins: selectedOrigins,
-        priorities: selectedPriorities.length > 0 ? selectedPriorities : undefined,
-        missingBarcode,
+        origins: filters.origins,
+        priorities: filters.priorities.length > 0 ? filters.priorities : undefined,
+        missingBarcode: filters.missingBarcode,
+        available: filters.available,
       })
       return res.data as { jobId: string; total: number }
     },
     onSuccess: (data) => {
       setActiveJobId(data.jobId)
       refetchJobs()
-      queryClient.invalidateQueries({ queryKey: ["bulk-scrape-count"] })
+      invalidateCount()
     },
   })
 
@@ -193,9 +178,10 @@ export default function BulkScrapePage() {
         const payload = jobId
           ? { jobId, batchSize: 5 }
           : {
-              origins: selectedOrigins,
-              priorities: selectedPriorities.length > 0 ? selectedPriorities : undefined,
-              missingBarcode,
+              origins: filters.origins,
+              priorities: filters.priorities.length > 0 ? filters.priorities : undefined,
+              missingBarcode: filters.missingBarcode,
+              available: filters.available,
               batchSize: 5,
             }
 
@@ -206,7 +192,7 @@ export default function BulkScrapePage() {
         throw error
       }
     },
-    [selectedOrigins, selectedPriorities, missingBarcode],
+    [filters],
   )
 
   // Direct mode continuous processing
@@ -263,151 +249,173 @@ export default function BulkScrapePage() {
     }
   }, [useDirectMode, startDirectMode, startJobMutation])
 
-  const toggleOrigin = useCallback((originId: number) => {
-    setSelectedOrigins((prev) => (prev.includes(originId) ? prev.filter((id) => id !== originId) : [...prev, originId]))
-  }, [])
-
-  const togglePriority = useCallback((priorityId: number) => {
-    setSelectedPriorities((prev) =>
-      prev.includes(priorityId) ? prev.filter((id) => id !== priorityId) : [...prev, priorityId],
-    )
-  }, [])
-
-  const matchingCount = countData?.count ?? 0
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   return (
     <Layout>
       <HideFooter />
-      <div className="flex h-full flex-col lg:flex-row">
+      <div className="flex h-[calc(100dvh-54px)] flex-col overflow-hidden lg:flex-row">
         {/* Sidebar - Filters */}
-        <aside className="flex h-auto flex-col border-b p-4 lg:h-full lg:w-80 lg:min-w-80 lg:overflow-y-auto lg:border-r lg:border-b-0">
-          <div className="mb-2 flex items-center gap-2">
-            <RefreshCwIcon className="text-primary size-5" />
-            <h2 className="text-lg font-bold">Bulk Re-Scrape</h2>
-          </div>
+        <aside className="flex h-auto min-h-0 flex-col border-b lg:h-full lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
+          {/* Scrollable filters section */}
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <RefreshCwIcon className="text-primary size-5" />
+              <h2 className="text-lg font-bold">Bulk Re-Scrape</h2>
+            </div>
 
-          {/* Store Origin Filter */}
-          <div className="space-y-3">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Store Origin</Label>
-            <div className="flex flex-col gap-2">
-              {ORIGIN_OPTIONS.map((origin) => (
-                <label
-                  key={origin.id}
+            {/* Store Origin Filter */}
+            <div className="space-y-3">
+              <Label className="text-muted-foreground text-xs font-medium uppercase">Store Origin</Label>
+              <div className="flex flex-col gap-2">
+                {originOptions.map((origin) => (
+                  <label
+                    key={origin.id}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
+                      origins.includes(origin.id)
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50",
+                    )}
+                  >
+                    <Checkbox checked={origins.includes(origin.id)} onCheckedChange={() => toggleOrigin(origin.id)} />
+                    <span className="text-sm font-medium">{origin.name}</span>
+                    {!origin.hasBarcode && (
+                      <Badge variant="destructive" className="ml-auto text-xs" size="2xs">
+                        No EAN
+                      </Badge>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Missing Data Filter */}
+            <div className="mt-4 space-y-3 border-t pt-4">
+              <Label className="text-muted-foreground text-xs font-medium uppercase">Missing Data</Label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
+                <BarcodeIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">Only products missing barcode</span>
+              </label>
+            </div>
+
+            {/* Availability Filter */}
+            <div className="mt-4 space-y-3 border-t pt-4">
+              <Label className="text-muted-foreground text-xs font-medium uppercase">Availability</Label>
+              <div className="flex flex-wrap gap-2">
+                <div
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                    available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                  )}
+                  onClick={() => setAvailable(null)}
+                >
+                  <CircleIcon className="h-3.5 w-3.5" />
+                  <span className="text-sm">All</span>
+                </div>
+                <div
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                    available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                  )}
+                  onClick={() => setAvailable(true)}
+                >
+                  <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="text-sm">Available</span>
+                </div>
+                <div
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                    available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                  )}
+                  onClick={() => setAvailable(false)}
+                >
+                  <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
+                  <span className="text-sm">Unavailable</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Priority Filter */}
+            <div className="mt-4 space-y-3 border-t pt-4">
+              <Label className="text-muted-foreground text-xs font-medium uppercase">Priority Level (optional)</Label>
+              <div className="flex flex-col gap-2">
+                {priorityLevels.map((level) => (
+                  <div key={level} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`priority-${level}`}
+                      checked={priorities.includes(level)}
+                      onCheckedChange={() => togglePriority(level)}
+                    />
+                    <Label
+                      htmlFor={`priority-${level}`}
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <PriorityBubble priority={level} size="sm" useDescription />
+                    </Label>
+                  </div>
+                ))}
+              </div>
+              {priorities.length === 0 && (
+                <p className="text-muted-foreground text-xs">All priorities will be included</p>
+              )}
+            </div>
+
+            {/* Mode Toggle */}
+            <div className="mt-4 space-y-3 border-t pt-4">
+              <Label className="text-muted-foreground text-xs font-medium uppercase">Processing Mode</Label>
+              <div className="flex flex-col gap-2">
+                <div
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                    selectedOrigins.includes(origin.id)
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/50",
+                    useDirectMode ? "border-primary bg-primary/10" : "border-border",
                   )}
+                  onClick={() => setUseDirectMode(true)}
                 >
-                  <Checkbox
-                    checked={selectedOrigins.includes(origin.id)}
-                    onCheckedChange={() => toggleOrigin(origin.id)}
-                  />
-                  <span className="text-sm font-medium">{origin.name}</span>
-                  {!origin.hasBarcode && (
-                    <Badge variant="destructive" className="ml-auto text-xs" size="2xs">
-                      No EAN
-                    </Badge>
-                  )}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Priority Filter */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Priority Level (optional)</Label>
-            <div className="flex flex-wrap gap-2">
-              {PRIORITY_OPTIONS.map((priority) => (
-                <label
-                  key={priority.id}
+                  <MonitorIcon className="h-4 w-4" />
+                  <span className="text-sm font-medium">Direct Mode</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    Local Dev
+                  </Badge>
+                </div>
+                <div
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 transition-colors",
-                    selectedPriorities.includes(priority.id)
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/50",
+                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
+                    !useDirectMode ? "border-primary bg-primary/10" : "border-border",
                   )}
+                  onClick={() => setUseDirectMode(false)}
                 >
-                  <Checkbox
-                    checked={selectedPriorities.includes(priority.id)}
-                    onCheckedChange={() => togglePriority(priority.id)}
-                    className="size-3.5"
-                  />
-                  <span className={cn("h-2 w-2 rounded-full", priority.color)} />
-                  <span className="text-xs">{priority.name}</span>
-                </label>
-              ))}
-            </div>
-            {selectedPriorities.length === 0 && (
-              <p className="text-muted-foreground text-xs">All priorities will be included</p>
-            )}
-          </div>
-
-          {/* Missing Data Filter */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Missing Data</Label>
-            <label className="flex cursor-pointer items-center gap-2">
-              <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
-              <BarcodeIcon className="h-4 w-4" />
-              <span className="text-sm font-medium">Only products missing barcode</span>
-            </label>
-          </div>
-
-          {/* Mode Toggle */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Processing Mode</Label>
-            <div className="flex flex-col gap-2">
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                  useDirectMode ? "border-primary bg-primary/10" : "border-border",
-                )}
-                onClick={() => setUseDirectMode(true)}
-              >
-                <MonitorIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">Direct Mode</span>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  Local Dev
-                </Badge>
+                  <ServerIcon className="h-4 w-4" />
+                  <span className="text-sm font-medium">QStash Mode</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    Production
+                  </Badge>
+                </div>
               </div>
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                  !useDirectMode ? "border-primary bg-primary/10" : "border-border",
-                )}
-                onClick={() => setUseDirectMode(false)}
-              >
-                <ServerIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">QStash Mode</span>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  Production
-                </Badge>
-              </div>
+              <p className="text-muted-foreground text-xs">
+                {useDirectMode
+                  ? "Direct mode processes products in the browser. Best for local development."
+                  : "QStash mode queues products for async processing. Requires public URL (production)."}
+              </p>
             </div>
-            <p className="text-muted-foreground text-xs">
-              {useDirectMode
-                ? "Direct mode processes products in the browser. Best for local development."
-                : "QStash mode queues products for async processing. Requires public URL (production)."}
-            </p>
           </div>
 
-          {/* Count & Start Button */}
-          <div className="mt-4 space-y-3 border-t pt-4">
+          {/* Fixed Count & Start Button */}
+          <div className="bg-background shrink-0 border-t p-4">
             <div className="flex items-center gap-2">
               <PackageIcon className="text-muted-foreground h-4 w-4" />
               <span className="text-muted-foreground text-sm">Matching:</span>
               {isLoadingCount ? (
                 <Skeleton className="h-5 w-12" />
               ) : (
-                <span className="text-lg font-bold">{matchingCount.toLocaleString()}</span>
+                <span className="text-lg font-bold">{count.toLocaleString()}</span>
               )}
             </div>
             <Button
               onClick={handleStart}
-              disabled={matchingCount === 0 || startJobMutation.isPending || isJobRunning}
-              className="w-full"
+              disabled={count === 0 || startJobMutation.isPending || isJobRunning}
+              className="mt-3 w-full"
             >
               {startJobMutation.isPending || isDirectProcessing ? (
                 <>
@@ -430,7 +438,7 @@ export default function BulkScrapePage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
           <div className="mx-auto max-w-4xl space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">

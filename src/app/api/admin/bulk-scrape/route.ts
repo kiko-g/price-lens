@@ -21,6 +21,7 @@ interface BulkScrapeFilters {
   origins: number[]
   priorities: number[]
   missingBarcode: boolean
+  available: boolean | null
   category?: string
 }
 
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
       origins: body.origins || [1, 2], // Default to Continente + Auchan
       priorities: body.priorities || [],
       missingBarcode: body.missingBarcode ?? true,
+      available: body.available ?? null,
       category: body.category,
     }
 
@@ -191,6 +193,7 @@ export async function PATCH(req: NextRequest) {
         origins: body.origins || [1, 2],
         priorities: body.priorities || [],
         missingBarcode: body.missingBarcode ?? true,
+        available: body.available ?? null,
         category: body.category,
       }
 
@@ -347,6 +350,7 @@ export async function PATCH(req: NextRequest) {
 function parseFilters(searchParams: URLSearchParams): BulkScrapeFilters {
   const originsParam = searchParams.get("origins")
   const prioritiesParam = searchParams.get("priorities")
+  const availableParam = searchParams.get("available")
 
   return {
     origins: originsParam
@@ -362,6 +366,7 @@ function parseFilters(searchParams: URLSearchParams): BulkScrapeFilters {
           .filter((n) => !isNaN(n))
       : [],
     missingBarcode: searchParams.get("missingBarcode") !== "false",
+    available: availableParam === null ? null : availableParam === "true",
     category: searchParams.get("category") || undefined,
   }
 }
@@ -382,6 +387,11 @@ function applyFilters<T extends { in: any; is: any; eq: any; not: any }>(query: 
   // Missing barcode filter
   if (filters.missingBarcode) {
     q = q.is("barcode", null)
+  }
+
+  // Availability filter
+  if (filters.available !== null) {
+    q = q.eq("available", filters.available)
   }
 
   // Category filter
