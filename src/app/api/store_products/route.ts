@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { queryStoreProducts, type StoreProductsQueryParams, SupermarketChain } from "@/lib/db/queries/store-products"
-import type { SearchType, SortByType } from "@/types/extra"
+import type { SearchType, SortByType } from "@/types/business"
 import { PrioritySource } from "@/types"
 
 /**

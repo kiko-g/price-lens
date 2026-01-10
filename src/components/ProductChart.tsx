@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { RANGES, DateRange, daysAmountInRange } from "@/types/extra"
+import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
 import { cn, buildChartData, chartConfig, generateProductPath } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/data/business"
 

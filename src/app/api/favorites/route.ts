@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { favoriteQueries, type FavoritesQueryParams, type FavoritesSortType } from "@/lib/db/queries/favorites"
 import { userQueries } from "@/lib/db/queries/user"
-import type { SearchType } from "@/types/extra"
-import { SupermarketChain } from "@/types/extra"
+import type { SearchType } from "@/types/business"
+import { SupermarketChain } from "@/types/business"
 
 export async function POST(req: NextRequest) {
   try {

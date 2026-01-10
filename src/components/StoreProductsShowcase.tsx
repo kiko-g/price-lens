@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
-import { searchTypes, type SearchType, type SortByType } from "@/types/extra"
+import { searchTypes, type SearchType, type SortByType, PRODUCT_PRIORITY_LEVELS } from "@/types/business"
 import { cn, getCenteredArray } from "@/lib/utils"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
@@ -620,7 +620,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 <div className="flex flex-col gap-2">
-                  {[0, 1, 2, 3, 4, 5].map((level) => (
+                  {PRODUCT_PRIORITY_LEVELS.map((level) => (
                     <div key={level} className="flex items-center space-x-2">
                       <Checkbox
                         id={`priority-${level}`}
@@ -1145,7 +1145,7 @@ function MobileFiltersDrawer({
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                {[0, 1, 2, 3, 4, 5].map((level) => (
+                {PRODUCT_PRIORITY_LEVELS.map((level) => (
                   <div key={level} className="flex items-center space-x-2">
                     <Checkbox
                       id={`mobile-priority-${level}`}

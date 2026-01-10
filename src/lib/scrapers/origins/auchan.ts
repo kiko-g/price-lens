@@ -2,7 +2,7 @@ import type * as cheerio from "cheerio"
 import { BaseProductScraper } from "../base"
 import { StoreOrigin, type RawProduct } from "../types"
 import { formatProductName, priceToNumber, resizeImgSrc } from "../utils"
-import type { ScrapedSchemaAuchan, ScrapedAddOnAuchan } from "@/types/extra"
+import type { ScrapedSchemaAuchan, ScrapedAddOnAuchan } from "@/types/business"
 
 /**
  * Scraper for Auchan supermarket (origin_id: 2)

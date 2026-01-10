@@ -6,7 +6,7 @@ import type {
   FavoritesQueryResult,
   FavoritesSortType,
 } from "@/lib/db/queries/favorites"
-import { SupermarketChain } from "@/types/extra"
+import { SupermarketChain } from "@/types/business"
 
 // ============================================================================
 // API Functions
@@ -122,10 +122,7 @@ export interface UseFavoritesFilteredOptions {
  * }
  * ```
  */
-export function useFavoritesFiltered(
-  params: FavoritesQueryParams = {},
-  options: UseFavoritesFilteredOptions = {},
-) {
+export function useFavoritesFiltered(params: FavoritesQueryParams = {}, options: UseFavoritesFilteredOptions = {}) {
   const { enabled = true, staleTime = 1000 * 60 * 2, refetchOnWindowFocus = false } = options
 
   const queryKey = generateQueryKey(params)
@@ -193,4 +190,3 @@ export function useInvalidateFavorites() {
     },
   }
 }
-

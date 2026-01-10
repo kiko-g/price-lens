@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { createClient as createClientBrowser } from "@/lib/supabase/client"
 import type { PaginationParams, PaginatedQueryResult } from "./types"
 import type { StoreProduct } from "@/types"
-import type { SearchType, SortByType } from "@/types/extra"
-import { SupermarketChain } from "@/types/extra"
+import type { SearchType, SortByType } from "@/types/business"
+import { SupermarketChain } from "@/types/business"
 
 // ============================================================================
 // Favorites Query Types

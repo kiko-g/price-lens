@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { getSearchType, getSortByType, SortByType, type SearchType } from "@/types/extra"
+import { getSearchType, getSortByType, SortByType, type SearchType } from "@/types/business"
 
 import { Layout } from "@/components/layout"
 import { StoreProductsGrid } from "@/components/StoreProductsGrid"

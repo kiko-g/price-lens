@@ -1,5 +1,5 @@
-import type { SearchType, SortByType } from "@/types/extra"
-import { SupermarketChain } from "@/types/extra"
+import type { SearchType, SortByType } from "@/types/business"
+import { SupermarketChain } from "@/types/business"
 import type { StoreProduct, PrioritySource } from "@/types"
 
 /**

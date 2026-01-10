@@ -1,4 +1,4 @@
-import type { SearchType, SortByType } from "@/types/extra"
+import type { SearchType, SortByType } from "@/types/business"
 
 // Pagination types
 export interface PaginationParams {

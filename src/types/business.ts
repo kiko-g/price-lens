@@ -76,10 +76,9 @@ export const sortTypesLabels: {
   "price-high-low": "Price: High to Low",
   "only-nulls": "Invalid products",
 }
+
 export const getSortByType = (sortBy: string) => {
-  if (sortByTypes.includes(sortBy as SortByType)) {
-    return sortBy as SortByType
-  }
+  if (sortByTypes.includes(sortBy as SortByType)) return sortBy as SortByType
   return sortByTypes[0]
 }
 
@@ -100,3 +99,6 @@ export const daysAmountInRange: {
   "5Y": 1825,
   Max: 3650,
 }
+
+export const PRODUCT_PRIORITY_LEVELS = [0, 1, 2, 3, 4, 5] as const
+export type ProductPriorityLevel = (typeof PRODUCT_PRIORITY_LEVELS)[number]

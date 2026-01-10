@@ -1,4 +1,4 @@
-import { SupermarketChain } from "@/types/extra"
+import { SupermarketChain } from "@/types/business"
 
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"

@@ -1,7 +1,7 @@
 "use client"
 
 import { type StoreProduct } from "@/types"
-import { searchTypes, type SearchType, type SortByType } from "@/types/extra"
+import { searchTypes, type SearchType, type SortByType } from "@/types/business"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 

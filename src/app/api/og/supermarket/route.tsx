@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og"
 import { getSupermarketProducts } from "@/app/supermarket/actions"
-import { getSearchType, getSortByType } from "@/types/extra"
+import { getSearchType, getSortByType } from "@/types/business"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 
 export async function GET(request: Request) {

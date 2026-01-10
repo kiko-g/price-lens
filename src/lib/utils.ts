@@ -1,6 +1,6 @@
 import { ChartConfig } from "@/components/ui/chart"
 import type { Price, ProductChartEntry, StoreProduct } from "@/types"
-import type { DateRange } from "@/types/extra"
+import type { DateRange } from "@/types/business"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 

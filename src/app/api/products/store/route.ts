@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { type SearchType, type SortByType } from "@/types/extra"
+import { type SearchType, type SortByType } from "@/types/business"
 
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { storeProductQueries } from "@/lib/db/queries/products"

@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 
+import { PRODUCT_PRIORITY_LEVELS } from "@/types/business"
+
 import {
   Dialog,
   DialogContent,
@@ -124,7 +126,7 @@ export function BulkPriorityDialog({ filterParams, filterSummary, children }: Bu
             <div className="space-y-2">
               <Label className="text-xs font-medium uppercase">Select New Priority</Label>
               <div className="grid grid-cols-3 gap-2">
-                {[0, 1, 2, 3, 4, 5].map((level) => (
+                {PRODUCT_PRIORITY_LEVELS.map((level) => (
                   <button
                     key={level}
                     onClick={() => setSelectedPriority(level)}

@@ -5,7 +5,7 @@ import {
   type StoreProductsQueryParams,
   SupermarketChain,
 } from "@/lib/db/queries/store-products"
-import type { SearchType } from "@/types/extra"
+import type { SearchType } from "@/types/business"
 import { PrioritySource } from "@/types"
 
 /**
@@ -177,4 +177,3 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
 
   return queryParams
 }
-

@@ -1,7 +1,7 @@
 import { storeProductQueries } from "@/lib/db/queries/products"
 import { createClient } from "@/lib/supabase/server"
 import type { StoreProduct } from "@/types"
-import type { SearchType, SortByType } from "@/types/extra"
+import type { SearchType, SortByType } from "@/types/business"
 
 export type SupermarketProductsResult = {
   products: StoreProduct[]

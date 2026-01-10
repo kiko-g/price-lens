@@ -6,7 +6,7 @@ import Link from "next/link"
 
 import { useUser } from "@/hooks/useUser"
 import { useFavoritesFiltered, type FavoritesQueryParams, type FavoritesSortType } from "@/hooks/useFavoritesFiltered"
-import { searchTypes, type SearchType } from "@/types/extra"
+import { searchTypes, type SearchType } from "@/types/business"
 import { cn, getCenteredArray } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
