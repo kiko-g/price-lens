@@ -44,8 +44,26 @@ async function handler(req: NextRequest) {
   console.log("[BatchWorker] === REQUEST RECEIVED ===")
   const batchStartTime = Date.now()
 
+  // Debug: Log headers
+  const contentType = req.headers.get("content-type")
+  const upstashSignature = req.headers.get("upstash-signature")
+  console.log(`[BatchWorker] Content-Type: ${contentType}, Has Upstash Signature: ${!!upstashSignature}`)
+
   try {
-    const body: BatchRequest = await req.json()
+    // Debug: Log raw body first
+    const rawBody = await req.text()
+    console.log(`[BatchWorker] Raw body length: ${rawBody.length}`)
+    console.log(`[BatchWorker] Raw body preview: ${rawBody.substring(0, 500)}`)
+
+    // Parse the body
+    let body: BatchRequest
+    try {
+      body = JSON.parse(rawBody)
+    } catch (parseError) {
+      console.error("[BatchWorker] JSON parse error:", parseError)
+      return NextResponse.json({ error: "Invalid JSON body", rawPreview: rawBody.substring(0, 200) }, { status: 400 })
+    }
+
     console.log(`[BatchWorker] Batch ID: ${body.batchId}, Products: ${body.products?.length || 0}`)
     const { batchId, products } = body
 

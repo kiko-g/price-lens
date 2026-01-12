@@ -134,9 +134,10 @@ export async function GET(req: NextRequest) {
     console.log(`[Scheduler] Found ${products.length} overdue products, sending ${batchesToSend.length} batches`)
 
     // Send batched messages to QStash
+    // NOTE: batchJSON() auto-stringifies, so pass objects NOT strings
     const qstashMessages = batchesToSend.map((batch, index) => ({
       url: batchWorkerUrl,
-      body: JSON.stringify({
+      body: {
         batchId: `${now.toISOString()}-${index}`,
         products: batch.map((p) => ({
           id: p.id,
@@ -145,7 +146,7 @@ export async function GET(req: NextRequest) {
           originId: p.origin_id,
           priority: p.priority,
         })),
-      }),
+      },
       headers: {
         "Content-Type": "application/json",
       },
