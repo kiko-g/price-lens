@@ -28,7 +28,10 @@ import {
   DollarSignIcon,
   ActivityIcon,
   PlayCircleIcon,
-  ExternalLinkIcon,
+  TestTube2Icon,
+  ServerIcon,
+  PackageIcon,
+  GaugeIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PriorityBubble } from "@/components/PriorityBubble"
@@ -102,6 +105,31 @@ interface ActivityData {
   scrapesPerHour: number
 }
 
+interface SchedulerTestResult {
+  dryRun: boolean
+  message: string
+  scheduled: number
+  wouldSchedule: number
+  batches: number
+  byPriority: Record<number, number>
+  batchWorkerUrl: string
+  hasQstashToken: boolean
+  nodeEnv: string
+  duration: number
+  sampleProducts: {
+    id: number
+    name: string
+    priority: number
+    urgencyScore: string
+    hoursOverdue: string
+  }[]
+  config: {
+    batchSize: number
+    maxBatches: number
+    activePriorities: number[]
+  }
+}
+
 const PRIORITY_CONFIG: Record<number, { name: string; color: string; bgColor: string }> = {
   5: { name: "Premium", color: "text-purple-500", bgColor: "bg-purple-500" },
   4: { name: "High", color: "text-blue-500", bgColor: "bg-blue-500" },
@@ -129,6 +157,25 @@ export default function SchedulePage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [activityLogPage, setActivityLogPage] = useState(1)
   const ACTIVITY_LOG_LIMIT = 25
+
+  // Scheduler test state
+  const [schedulerTestResult, setSchedulerTestResult] = useState<SchedulerTestResult | null>(null)
+  const [isTestingScheduler, setIsTestingScheduler] = useState(false)
+  const [schedulerTestError, setSchedulerTestError] = useState<string | null>(null)
+
+  const runSchedulerTest = async () => {
+    setIsTestingScheduler(true)
+    setSchedulerTestError(null)
+    try {
+      const res = await axios.get("/api/scrape/scheduler?test=true&dry=true")
+      setSchedulerTestResult(res.data)
+    } catch (err) {
+      setSchedulerTestError(err instanceof Error ? err.message : "Test failed")
+      setSchedulerTestResult(null)
+    } finally {
+      setIsTestingScheduler(false)
+    }
+  }
 
   // Fetch overview data
   const {
@@ -395,14 +442,8 @@ export default function SchedulePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => refetchActivity()}>
-                      <RefreshCwIcon className="mr-2 h-4 w-4" />
+                      <RefreshCwIcon className="h-4 w-4" />
                       Refresh
-                    </Button>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href="https://console.upstash.com" target="_blank" rel="noopener noreferrer">
-                        <ExternalLinkIcon className="mr-2 h-4 w-4" />
-                        QStash Console
-                      </a>
                     </Button>
                   </div>
                 </div>
@@ -486,6 +527,204 @@ export default function SchedulePage() {
                           No recent activity
                         </Badge>
                       )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Scheduler Test (Dry Run) */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <TestTube2Icon className="h-5 w-5 text-violet-500" />
+                      Scheduler Test
+                    </CardTitle>
+                    <CardDescription>Dry run to see what the scheduler would do on next execution</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={runSchedulerTest} disabled={isTestingScheduler}>
+                    {isTestingScheduler ? (
+                      <>
+                        <RefreshCwIcon className="mr-2 h-4 w-4 animate-spin" />
+                        Testing...
+                      </>
+                    ) : (
+                      <>
+                        <PlayCircleIcon className="mr-2 h-4 w-4" />
+                        Run Test
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {schedulerTestError && (
+                  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30">
+                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <AlertTriangleIcon className="h-4 w-4" />
+                      <span className="font-medium">Test Failed</span>
+                    </div>
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{schedulerTestError}</p>
+                  </div>
+                )}
+
+                {!schedulerTestResult && !isTestingScheduler && !schedulerTestError && (
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+                    <TestTube2Icon className="text-muted-foreground mb-2 h-8 w-8" />
+                    <h4 className="font-medium">No test results yet</h4>
+                    <p className="text-muted-foreground text-sm">
+                      Click &quot;Run Test&quot; to see what the scheduler would do
+                    </p>
+                  </div>
+                )}
+
+                {isTestingScheduler && (
+                  <div className="space-y-4">
+                    <Skeleton className="h-20 w-full" />
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <Skeleton key={i} className="h-16" />
+                      ))}
+                    </div>
+                    <Skeleton className="h-32 w-full" />
+                  </div>
+                )}
+
+                {schedulerTestResult && !isTestingScheduler && (
+                  <div className="space-y-4">
+                    {/* Summary */}
+                    <div className="rounded-lg border border-violet-200 bg-violet-50 p-4 dark:border-violet-900 dark:bg-violet-950/30">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2Icon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                          <span className="font-medium text-violet-600 dark:text-violet-400">
+                            {schedulerTestResult.message}
+                          </span>
+                        </div>
+                        <Badge variant="outline" className="border-violet-500 text-violet-600">
+                          {schedulerTestResult.duration}ms
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-lg border p-3">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                          <PackageIcon className="h-3.5 w-3.5" />
+                          Would Schedule
+                        </div>
+                        <p className="mt-1 text-2xl font-bold text-violet-600">
+                          {schedulerTestResult.wouldSchedule.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                          <ServerIcon className="h-3.5 w-3.5" />
+                          Batches
+                        </div>
+                        <p className="mt-1 text-2xl font-bold">{schedulerTestResult.batches}</p>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                          <GaugeIcon className="h-3.5 w-3.5" />
+                          Batch Size
+                        </div>
+                        <p className="mt-1 text-2xl font-bold">{schedulerTestResult.config.batchSize}</p>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                          <InfoIcon className="h-3.5 w-3.5" />
+                          Environment
+                        </div>
+                        <p className="mt-1 text-lg font-bold">{schedulerTestResult.nodeEnv}</p>
+                        <p className="text-muted-foreground text-xs">
+                          QStash: {schedulerTestResult.hasQstashToken ? "✓" : "✗"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Priority Breakdown */}
+                    <div className="rounded-lg border p-4">
+                      <h4 className="mb-3 text-sm font-medium">Priority Breakdown</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(schedulerTestResult.byPriority)
+                          .sort(([a], [b]) => Number(b) - Number(a))
+                          .map(([priority, count]) => (
+                            <div key={priority} className="bg-muted/50 flex items-center gap-2 rounded-lg px-3 py-2">
+                              <PriorityBubble priority={Number(priority)} size="sm" />
+                              <span className="font-medium">{PRIORITY_CONFIG[Number(priority)]?.name}</span>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Sample Products */}
+                    {schedulerTestResult.sampleProducts.length > 0 && (
+                      <div className="rounded-lg border p-4">
+                        <h4 className="mb-3 text-sm font-medium">Most Urgent Products (Sample)</h4>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted/50">
+                              <tr>
+                                <th className="p-2 text-left font-medium">Product</th>
+                                <th className="p-2 text-left font-medium">Priority</th>
+                                <th className="p-2 text-right font-medium">Urgency Score</th>
+                                <th className="p-2 text-right font-medium">Hours Overdue</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                              {schedulerTestResult.sampleProducts.map((product) => (
+                                <tr key={product.id}>
+                                  <td className="p-2">
+                                    <span className="line-clamp-1">{product.name}</span>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="flex items-center gap-1.5">
+                                      <PriorityBubble priority={product.priority} size="xs" />
+                                      <span className="text-muted-foreground text-xs">
+                                        {PRIORITY_CONFIG[product.priority]?.name}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="p-2 text-right">
+                                    <Badge
+                                      variant="outline"
+                                      className={cn(
+                                        parseFloat(product.urgencyScore) > 5
+                                          ? "border-red-500 text-red-500"
+                                          : parseFloat(product.urgencyScore) > 2
+                                            ? "border-amber-500 text-amber-500"
+                                            : "border-emerald-500 text-emerald-500",
+                                      )}
+                                    >
+                                      {product.urgencyScore}x
+                                    </Badge>
+                                  </td>
+                                  <td className="text-muted-foreground p-2 text-right">
+                                    {parseFloat(product.hoursOverdue).toFixed(0)}h
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          Urgency score = hours since last scrape / refresh threshold. Score {">"}1 means overdue.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Batch Worker URL */}
+                    <div className="text-muted-foreground bg-muted/30 flex items-center gap-2 rounded-lg px-3 py-2 text-xs">
+                      <ServerIcon className="h-3.5 w-3.5" />
+                      <span>Batch Worker:</span>
+                      <code className="bg-muted rounded px-1.5 py-0.5 font-mono">
+                        {schedulerTestResult.batchWorkerUrl}
+                      </code>
                     </div>
                   </div>
                 )}

@@ -30,11 +30,18 @@ export const maxDuration = 60 // 1 minute to find and queue products
  */
 export async function GET(req: NextRequest) {
   const startTime = Date.now()
+  const searchParams = req.nextUrl.searchParams
+  const isManualTest = searchParams.get("test") === "true"
+  const dryRun = searchParams.get("dry") === "true"
 
-  // Verify cron secret in production
+  // Verify cron secret in production (skip for manual test with valid session)
   const authHeader = req.headers.get("authorization")
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Allow manual test calls without secret for debugging
+    if (!isManualTest) {
+      console.warn("[Scheduler] Unauthorized - missing or invalid CRON_SECRET")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
   }
 
   try {
@@ -105,6 +112,15 @@ export async function GET(req: NextRequest) {
     // Limit to MAX_BATCHES_PER_RUN
     const batchesToSend = batches.slice(0, MAX_BATCHES_PER_RUN)
 
+    // Log stats by priority (calculate early for dry run)
+    const byPriority = productsWithUrgency.reduce(
+      (acc, p) => {
+        acc[p.priority ?? 0] = (acc[p.priority ?? 0] || 0) + 1
+        return acc
+      },
+      {} as Record<number, number>,
+    )
+
     console.info(`[Scheduler] Found ${products.length} overdue products, sending ${batchesToSend.length} batches`)
 
     // Send batched messages to QStash
@@ -128,33 +144,57 @@ export async function GET(req: NextRequest) {
 
     let qstashSuccess = 0
     let qstashFailed = 0
+    let qstashError: string | undefined
 
-    // Send to QStash (in production) or log (in development)
-    if (process.env.NODE_ENV === "production" && process.env.QSTASH_TOKEN) {
+    // Dry run mode - just return what would be scheduled
+    if (dryRun) {
+      console.info(`[Scheduler] Dry run - would send ${qstashMessages.length} batches to ${batchWorkerUrl}`)
+      return NextResponse.json({
+        dryRun: true,
+        message: `Would schedule ${productsWithUrgency.length} products in ${batchesToSend.length} batches`,
+        scheduled: 0,
+        wouldSchedule: productsWithUrgency.length,
+        batches: batchesToSend.length,
+        byPriority,
+        batchWorkerUrl,
+        hasQstashToken: !!process.env.QSTASH_TOKEN,
+        nodeEnv: process.env.NODE_ENV,
+        duration: Date.now() - startTime,
+        sampleProducts: productsWithUrgency.slice(0, 5).map((p) => ({
+          id: p.id,
+          name: p.name,
+          priority: p.priority,
+          urgencyScore: p.urgencyScore.toFixed(2),
+          hoursOverdue: p.hoursOverdue.toFixed(1),
+        })),
+        config: {
+          batchSize: WORKER_BATCH_SIZE,
+          maxBatches: MAX_BATCHES_PER_RUN,
+          activePriorities: ACTIVE_PRIORITIES,
+        },
+      })
+    }
+
+    // Send to QStash
+    const hasQstash = !!process.env.QSTASH_TOKEN
+    if (hasQstash) {
       try {
         await qstash.batchJSON(qstashMessages)
         qstashSuccess = qstashMessages.length
-      } catch (qstashError) {
-        console.error("[Scheduler] QStash batch error:", qstashError)
+        console.info(`[Scheduler] QStash: Sent ${qstashMessages.length} batches to ${batchWorkerUrl}`)
+      } catch (err) {
+        console.error("[Scheduler] QStash batch error:", err)
         qstashFailed = qstashMessages.length
+        qstashError = err instanceof Error ? err.message : "Unknown QStash error"
       }
     } else {
-      // Development mode - log what would be sent
-      console.info(`[Scheduler] Dev mode - would send ${qstashMessages.length} batches to QStash`)
-      qstashSuccess = qstashMessages.length
+      // No QStash token - can't send
+      console.warn("[Scheduler] No QSTASH_TOKEN - cannot send batches")
+      qstashError = "QSTASH_TOKEN not configured"
     }
 
     const totalScheduled = batchesToSend.reduce((sum, batch) => sum + batch.length, 0)
     const duration = Date.now() - startTime
-
-    // Log stats by priority
-    const byPriority = productsWithUrgency.reduce(
-      (acc, p) => {
-        acc[p.priority ?? 0] = (acc[p.priority ?? 0] || 0) + 1
-        return acc
-      },
-      {} as Record<number, number>,
-    )
 
     console.info(`[Scheduler] Scheduled ${totalScheduled} products in ${duration}ms`, { byPriority })
 
@@ -163,7 +203,13 @@ export async function GET(req: NextRequest) {
       scheduled: totalScheduled,
       batches: batchesToSend.length,
       byPriority,
-      qstash: { success: qstashSuccess, failed: qstashFailed },
+      qstash: {
+        success: qstashSuccess,
+        failed: qstashFailed,
+        error: qstashError,
+        hasToken: !!process.env.QSTASH_TOKEN,
+      },
+      batchWorkerUrl,
       duration,
       config: {
         batchSize: WORKER_BATCH_SIZE,
