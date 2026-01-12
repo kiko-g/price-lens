@@ -7,13 +7,15 @@ export const qstash = new Client({
 })
 
 // Base URL for worker endpoints
-// In production, this should be your Vercel deployment URL
+// Use production domain for QStash callbacks (not deployment-specific preview URLs)
 export const getBaseUrl = () => {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
-  }
+  // Always prefer explicit site URL (your production domain)
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL
+  }
+  // Fallback to Vercel URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
   }
   return "http://localhost:3000"
 }
