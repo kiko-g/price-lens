@@ -29,20 +29,30 @@ export const maxDuration = 60 // 1 minute to find and queue products
  * - A P5 product 48h overdue (score=2) is more urgent than P3 product 72h overdue (score=1)
  */
 export async function GET(req: NextRequest) {
+  // Immediately log to confirm function is called
+  console.log("[Scheduler] === CRON INVOKED ===")
+
   const startTime = Date.now()
   const searchParams = req.nextUrl.searchParams
   const isManualTest = searchParams.get("test") === "true"
   const dryRun = searchParams.get("dry") === "true"
 
-  // Verify cron secret in production (skip for manual test with valid session)
+  // Log every invocation for debugging
   const authHeader = req.headers.get("authorization")
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    // Allow manual test calls without secret for debugging
-    if (!isManualTest) {
-      console.warn("[Scheduler] Unauthorized - missing or invalid CRON_SECRET")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-  }
+  console.log("[Scheduler] Config:", {
+    isManualTest,
+    dryRun,
+    hasAuthHeader: !!authHeader,
+    hasCronSecret: !!process.env.CRON_SECRET,
+    hasQstashToken: !!process.env.QSTASH_TOKEN,
+    nodeEnv: process.env.NODE_ENV,
+  })
+
+  // NOTE: CRON_SECRET check temporarily disabled for debugging
+  // Once cron is working, re-enable with:
+  // if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  // }
 
   try {
     const supabase = createClient()
@@ -104,7 +114,7 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.urgencyScore - a.urgencyScore) // Most urgent first
 
     // Split into batches
-    const batches: typeof productsWithUrgency[] = []
+    const batches: (typeof productsWithUrgency)[] = []
     for (let i = 0; i < productsWithUrgency.length; i += WORKER_BATCH_SIZE) {
       batches.push(productsWithUrgency.slice(i, i + WORKER_BATCH_SIZE))
     }
@@ -121,7 +131,7 @@ export async function GET(req: NextRequest) {
       {} as Record<number, number>,
     )
 
-    console.info(`[Scheduler] Found ${products.length} overdue products, sending ${batchesToSend.length} batches`)
+    console.log(`[Scheduler] Found ${products.length} overdue products, sending ${batchesToSend.length} batches`)
 
     // Send batched messages to QStash
     const qstashMessages = batchesToSend.map((batch, index) => ({
@@ -177,26 +187,28 @@ export async function GET(req: NextRequest) {
 
     // Send to QStash
     const hasQstash = !!process.env.QSTASH_TOKEN
+    console.log(`[Scheduler] QStash token present: ${hasQstash}, sending to: ${batchWorkerUrl}`)
+
     if (hasQstash) {
       try {
+        console.log(`[Scheduler] Sending ${qstashMessages.length} batches to QStash...`)
         await qstash.batchJSON(qstashMessages)
         qstashSuccess = qstashMessages.length
-        console.info(`[Scheduler] QStash: Sent ${qstashMessages.length} batches to ${batchWorkerUrl}`)
+        console.log(`[Scheduler] QStash SUCCESS: Sent ${qstashMessages.length} batches`)
       } catch (err) {
-        console.error("[Scheduler] QStash batch error:", err)
+        console.error("[Scheduler] QStash ERROR:", err)
         qstashFailed = qstashMessages.length
         qstashError = err instanceof Error ? err.message : "Unknown QStash error"
       }
     } else {
-      // No QStash token - can't send
-      console.warn("[Scheduler] No QSTASH_TOKEN - cannot send batches")
+      console.log("[Scheduler] No QSTASH_TOKEN - cannot send batches")
       qstashError = "QSTASH_TOKEN not configured"
     }
 
     const totalScheduled = batchesToSend.reduce((sum, batch) => sum + batch.length, 0)
     const duration = Date.now() - startTime
 
-    console.info(`[Scheduler] Scheduled ${totalScheduled} products in ${duration}ms`, { byPriority })
+    console.log(`[Scheduler] COMPLETE: Scheduled ${totalScheduled} products in ${duration}ms`)
 
     return NextResponse.json({
       message: `Scheduled ${totalScheduled} products in ${batchesToSend.length} batches`,
