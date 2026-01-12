@@ -29,6 +29,7 @@ import {
   ActivityIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PriorityBubble } from "@/components/PriorityBubble"
 
 interface PriorityStats {
   priority: number | null
@@ -342,7 +343,7 @@ export default function SchedulePage() {
 
         {/* Main Content */}
         <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="mx-auto max-w-5xl space-y-6">
+          <div className="flex max-w-7xl flex-col gap-6 space-y-6">
             {/* Priority Distribution */}
             <Card>
               <CardHeader>
@@ -351,13 +352,13 @@ export default function SchedulePage() {
               </CardHeader>
               <CardContent>
                 {isLoadingOverview ? (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <Skeleton key={i} className="h-12 w-full" />
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {overview?.priorityStats
                       .filter((s) => s.priority !== null)
                       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
@@ -368,20 +369,33 @@ export default function SchedulePage() {
                         const freshPercent = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
 
                         return (
-                          <div key={stat.priority} className={cn("rounded-lg border p-4", !isActive && "opacity-50")}>
-                            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <span className={cn("h-3 w-3 rounded-full", config?.bgColor)} />
-                                <span className="font-medium">{config?.name}</span>
-                                <span className="text-muted-foreground text-sm">
-                                  ({stat.total.toLocaleString()} products)
-                                </span>
+                          <div
+                            key={stat.priority}
+                            className={cn(
+                              "rounded-lg border p-4",
+                              !isActive && "bg-accent cursor-not-allowed border border-dashed opacity-80",
+                            )}
+                          >
+                            <div className="mb-2 flex flex-col flex-wrap gap-2">
+                              {/* Priority and name */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <PriorityBubble priority={stat.priority} size="sm" />
+                                  <span className="font-medium">{config?.name}</span>
+                                </div>
                                 {!isActive && (
-                                  <Badge variant="outline" className="text-muted-foreground text-xs">
+                                  <Badge variant="default" className="text-xs" size="xs">
                                     Not scheduled
                                   </Badge>
                                 )}
                               </div>
+
+                              {/* Total products */}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{stat.total.toLocaleString()} products</span>
+                              </div>
+
+                              {/* Staleness threshold */}
                               <div className="flex items-center gap-4 text-sm">
                                 <span className="text-muted-foreground">
                                   Refresh: {formatThreshold(stat.stalenessThresholdHours)}
@@ -436,14 +450,14 @@ export default function SchedulePage() {
                               )}
                             </div>
 
-                            <div className="mt-2 flex flex-wrap gap-4 text-xs">
-                              <span className="flex items-center gap-1 text-red-500">
+                            <div className="mt-2 flex flex-wrap gap-4 text-xs font-medium">
+                              <span className="text-destructive flex items-center gap-1">
                                 <AlertTriangleIcon className="h-3 w-3" />
-                                {stat.stale.toLocaleString()} stale
+                                {stat.stale.toLocaleString()} stale ({stalePercent}%)
                               </span>
-                              <span className="flex items-center gap-1 text-emerald-500">
+                              <span className="text-success flex items-center gap-1">
                                 <CheckCircle2Icon className="h-3 w-3" />
-                                {stat.fresh.toLocaleString()} fresh
+                                {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
                               </span>
                               {stat.neverScraped > 0 && (
                                 <span className="text-muted-foreground">
@@ -457,14 +471,17 @@ export default function SchedulePage() {
 
                     {/* Null priority section */}
                     {overview?.priorityStats.find((s) => s.priority === null) && (
-                      <div className="rounded-lg border border-dashed p-4 opacity-50">
+                      <div className="bg-accent col-span-1 flex justify-between gap-2 rounded-lg border border-dashed p-4 opacity-80 sm:col-span-2 lg:col-span-3">
                         <div className="flex items-center gap-2">
-                          <span className="h-3 w-3 rounded-full bg-gray-300" />
+                          <PriorityBubble priority={null} size="sm" />
                           <span className="font-medium">Unclassified</span>
                           <span className="text-muted-foreground text-sm">
                             ({overview.priorityStats.find((s) => s.priority === null)?.total.toLocaleString()} products)
                           </span>
-                          <Badge variant="outline" className="text-muted-foreground text-xs">
+                        </div>
+
+                        <div>
+                          <Badge variant="default" className="text-xs" size="xs">
                             Not scheduled
                           </Badge>
                         </div>
@@ -505,8 +522,8 @@ export default function SchedulePage() {
               <CardContent>
                 {isLoadingTimeline ? (
                   <div className="space-y-2">
-                    {[...Array(12)].map((_, i) => (
-                      <Skeleton key={i} className="h-8 w-full" />
+                    {Array.from({ length: 12 }).map((_, i: number) => (
+                      <Skeleton className="h-8 w-full" key={i} />
                     ))}
                   </div>
                 ) : (
@@ -592,12 +609,14 @@ export default function SchedulePage() {
               <CardContent>
                 {isLoadingBreakdown ? (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* FIXME: */}
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <Skeleton key={i} className="h-24" />
                     ))}
                   </div>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* FIXME: */}
                     {staleBreakdown?.buckets.map((bucket, idx) => {
                       const isNeverScraped = bucket.min === null
                       const severity =

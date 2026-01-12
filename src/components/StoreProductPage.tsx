@@ -173,9 +173,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <p className="text-muted-foreground">No image available</p>
               </div>
             )}
-          </div>
 
-          <Barcode value={sp.barcode} height={40} width={2} showMissingValue />
+            <Barcode value={sp.barcode} height={40} width={2} showMissingValue className="mt-2" />
+          </div>
         </div>
 
         {/* Product Details */}

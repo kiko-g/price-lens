@@ -38,7 +38,9 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Define protected routes that require authentication
-  const protectedRoutes = ["/profile", "/admin"]
+  // In development, only protect /profile (allow /admin without auth for testing)
+  const isDev = process.env.NODE_ENV === "development"
+  const protectedRoutes = isDev ? ["/profile"] : ["/profile", "/admin"]
 
   // If the user is not authenticated and is trying to access a protected route,
   // redirect them to the login page.

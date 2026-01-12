@@ -9,6 +9,9 @@ import { ProductShowcaseCarousel } from "@/components/home/showcase/ProductShowc
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 
 export function Hero() {
+  const supermarketProductsLink = "/products?priority_order=true"
+  const trackedProductsLink = "/products?priority=2,3,4,5"
+
   return (
     <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">
       <div className="flex w-full flex-1 flex-col gap-4 pt-12 pb-4 md:gap-4 lg:pt-0 lg:pb-0">
@@ -25,14 +28,14 @@ export function Hero() {
 
         <div className="animate-fade-in flex flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">
           <Button variant="primary" size="lg" className="w-full md:w-auto" asChild>
-            <Link href="/products">
+            <Link href={supermarketProductsLink}>
               Explore Supermarket
               <ShoppingBasketIcon />
             </Link>
           </Button>
 
           <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
-            <Link href="/products?priority=3,4,5">
+            <Link href={trackedProductsLink}>
               Tracked Products
               <BadgeEuroIcon />
             </Link>
