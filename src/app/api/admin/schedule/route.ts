@@ -83,7 +83,7 @@ function calculateDailyScrapes(priorityStats: PriorityStats[]): number {
   let dailyScrapes = 0
 
   for (const stat of priorityStats) {
-    if (stat.priority === null || !ACTIVE_PRIORITIES.includes(stat.priority as 5 | 4 | 3)) continue
+    if (stat.priority === null || !(ACTIVE_PRIORITIES as readonly number[]).includes(stat.priority)) continue
     if (!stat.stalenessThresholdHours) continue
 
     // Products per day = total products / refresh period in days
@@ -124,15 +124,16 @@ export async function GET(req: NextRequest) {
       const priorityLevels = [5, 4, 3, 2, 1, 0, null]
 
       for (const priority of priorityLevels) {
-        const thresholdHours = priority !== null ? (PRIORITY_REFRESH_HOURS[priority] || null) : null
+        const thresholdHours = priority !== null ? PRIORITY_REFRESH_HOURS[priority] || null : null
         const cutoffTime = thresholdHours
           ? new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString()
           : null
 
         // Build base query for this priority
-        const baseFilter = priority === null
-          ? supabase.from("store_products").select("id", { count: "exact", head: true }).is("priority", null)
-          : supabase.from("store_products").select("id", { count: "exact", head: true }).eq("priority", priority)
+        const baseFilter =
+          priority === null
+            ? supabase.from("store_products").select("id", { count: "exact", head: true }).is("priority", null)
+            : supabase.from("store_products").select("id", { count: "exact", head: true }).eq("priority", priority)
 
         // Get total count
         const { count: total } = await baseFilter
@@ -150,9 +151,18 @@ export async function GET(req: NextRequest) {
         }
 
         // Get never scraped count (updated_at is null)
-        const neverScrapedQuery = priority === null
-          ? supabase.from("store_products").select("id", { count: "exact", head: true }).is("priority", null).is("updated_at", null)
-          : supabase.from("store_products").select("id", { count: "exact", head: true }).eq("priority", priority).is("updated_at", null)
+        const neverScrapedQuery =
+          priority === null
+            ? supabase
+                .from("store_products")
+                .select("id", { count: "exact", head: true })
+                .is("priority", null)
+                .is("updated_at", null)
+            : supabase
+                .from("store_products")
+                .select("id", { count: "exact", head: true })
+                .eq("priority", priority)
+                .is("updated_at", null)
         const { count: neverScraped } = await neverScrapedQuery
 
         let stale = neverScraped ?? 0
@@ -160,9 +170,20 @@ export async function GET(req: NextRequest) {
 
         if (cutoffTime) {
           // Get stale count (updated_at < cutoffTime, excluding never scraped)
-          const staleQuery = priority === null
-            ? supabase.from("store_products").select("id", { count: "exact", head: true }).is("priority", null).not("updated_at", "is", null).lt("updated_at", cutoffTime)
-            : supabase.from("store_products").select("id", { count: "exact", head: true }).eq("priority", priority).not("updated_at", "is", null).lt("updated_at", cutoffTime)
+          const staleQuery =
+            priority === null
+              ? supabase
+                  .from("store_products")
+                  .select("id", { count: "exact", head: true })
+                  .is("priority", null)
+                  .not("updated_at", "is", null)
+                  .lt("updated_at", cutoffTime)
+              : supabase
+                  .from("store_products")
+                  .select("id", { count: "exact", head: true })
+                  .eq("priority", priority)
+                  .not("updated_at", "is", null)
+                  .lt("updated_at", cutoffTime)
           const { count: staleCount } = await staleQuery
           stale += staleCount ?? 0
 
@@ -189,7 +210,7 @@ export async function GET(req: NextRequest) {
         .reduce((sum, p) => sum + p.total, 0)
       const totalStale = priorityStats.reduce((sum, p) => sum + p.stale, 0)
       const totalDueForScrape = priorityStats
-        .filter((p) => ACTIVE_PRIORITIES.includes(p.priority as 5 | 4 | 3))
+        .filter((p) => p.priority !== null && (ACTIVE_PRIORITIES as readonly number[]).includes(p.priority))
         .reduce((sum, p) => sum + p.stale, 0)
 
       // Calculate cost estimate
@@ -307,8 +328,15 @@ export async function GET(req: NextRequest) {
       const breakdown = buckets.map((bucket) => ({
         ...bucket,
         count: 0,
-        byPriority: { 5: 0, 4: 0, 3: 0 } as Record<number, number>,
+        byPriority: {} as Record<number, number>,
       }))
+
+      // Initialize byPriority for all active priorities
+      for (const bucket of breakdown) {
+        for (const p of ACTIVE_PRIORITIES) {
+          bucket.byPriority[p] = 0
+        }
+      }
 
       for (const product of products) {
         if (!product.priority) continue
@@ -345,12 +373,113 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ buckets: breakdown })
     }
 
+    if (action === "activity") {
+      // Show recent scraping activity - products updated recently
+      const timeWindows = [
+        { label: "Last 30 minutes", hours: 0.5 },
+        { label: "Last hour", hours: 1 },
+        { label: "Last 6 hours", hours: 6 },
+        { label: "Last 24 hours", hours: 24 },
+      ]
+
+      const activityData: {
+        windows: { label: string; count: number; byPriority: Record<number, number> }[]
+        scrapesPerHour: number
+      } = {
+        windows: [],
+        scrapesPerHour: 0,
+      }
+
+      for (const window of timeWindows) {
+        const cutoff = new Date(now.getTime() - window.hours * 60 * 60 * 1000).toISOString()
+
+        const { data: products } = await supabase
+          .from("store_products")
+          .select("id, priority")
+          .gte("updated_at", cutoff)
+
+        const byPriority: Record<number, number> = {}
+        for (const p of [5, 4, 3, 2, 1, 0]) {
+          byPriority[p] = 0
+        }
+
+        if (products) {
+          for (const p of products) {
+            if (p.priority !== null) {
+              byPriority[p.priority] = (byPriority[p.priority] || 0) + 1
+            }
+          }
+        }
+
+        activityData.windows.push({
+          label: window.label,
+          count: products?.length || 0,
+          byPriority,
+        })
+      }
+
+      // Calculate scrapes per hour based on last hour
+      const lastHourWindow = activityData.windows.find((w) => w.label === "Last hour")
+      activityData.scrapesPerHour = lastHourWindow?.count || 0
+
+      return NextResponse.json(activityData)
+    }
+
+    if (action === "activity-log") {
+      // Paginated activity log of recently scraped products
+      const page = parseInt(searchParams.get("page") || "1", 10)
+      const limit = parseInt(searchParams.get("limit") || "50", 10)
+      const offset = (page - 1) * limit
+
+      // Get total count of scraped products
+      const { count: totalCount, error: countError } = await supabase
+        .from("store_products")
+        .select("id", { count: "exact", head: true })
+        .not("updated_at", "is", null)
+
+      if (countError) {
+        console.error("Activity log count error:", countError)
+      }
+
+      // Get paginated products - using only columns we know exist
+      const { data: products, error: productsError } = await supabase
+        .from("store_products")
+        .select("id, name, priority, origin_id, updated_at")
+        .not("updated_at", "is", null)
+        .order("updated_at", { ascending: false })
+        .range(offset, offset + limit - 1)
+
+      if (productsError) {
+        console.error("Activity log products error:", productsError)
+        return NextResponse.json({ error: "Failed to fetch products", details: productsError.message }, { status: 500 })
+      }
+
+      const totalPages = Math.ceil((totalCount || 0) / limit)
+
+      return NextResponse.json({
+        products: (products || []).map((p) => ({
+          id: p.id,
+          name: p.name,
+          priority: p.priority,
+          origin_id: p.origin_id,
+          updated_at: p.updated_at!,
+        })),
+        pagination: {
+          page,
+          limit,
+          totalCount: totalCount || 0,
+          totalPages,
+          hasMore: page < totalPages,
+        },
+      })
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 })
   } catch (error) {
     console.error("Schedule API error:", error)
     return NextResponse.json(
       { error: "Failed to fetch schedule data", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
