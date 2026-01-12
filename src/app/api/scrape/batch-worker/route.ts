@@ -55,10 +55,16 @@ async function handler(req: NextRequest) {
     console.log(`[BatchWorker] Raw body length: ${rawBody.length}`)
     console.log(`[BatchWorker] Raw body preview: ${rawBody.substring(0, 500)}`)
 
-    // Parse the body
+    // Parse the body - handle potential double-encoding from QStash
     let body: BatchRequest
     try {
-      body = JSON.parse(rawBody)
+      let parsed = JSON.parse(rawBody)
+      // If QStash double-encoded, parsed will be a string, not an object
+      if (typeof parsed === "string") {
+        console.log("[BatchWorker] Detected double-encoded JSON, parsing again")
+        parsed = JSON.parse(parsed)
+      }
+      body = parsed
     } catch (parseError) {
       console.error("[BatchWorker] JSON parse error:", parseError)
       return NextResponse.json({ error: "Invalid JSON body", rawPreview: rawBody.substring(0, 200) }, { status: 400 })
