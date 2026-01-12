@@ -3,7 +3,14 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+    // Only remove console.debug and console.trace in production
+    // Keep console.log, console.warn, console.error, console.info for observability
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["log", "warn", "error", "info"],
+          }
+        : false,
   },
   images: {
     // Limit device sizes to reduce number of image transformations

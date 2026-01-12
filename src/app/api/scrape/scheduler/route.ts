@@ -9,7 +9,7 @@ import {
   MAX_BATCHES_PER_RUN,
 } from "@/lib/qstash"
 
-export const maxDuration = 60 // 1 minute to find and queue products
+export const maxDuration = 300 // 5 minutes at most to find and queue products
 
 /**
  * ADAPTIVE SCHEDULER
