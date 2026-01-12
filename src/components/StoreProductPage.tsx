@@ -174,8 +174,15 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               </div>
             )}
 
-            <Barcode value={sp.barcode} height={40} width={2} showMissingValue className="mt-2" />
+            <Barcode
+              value={sp.barcode}
+              height={30}
+              width={1.5}
+              showMissingValue
+              className="absolute right-2 bottom-2 inline-flex rounded bg-white text-black md:hidden"
+            />
           </div>
+          <Barcode value={sp.barcode} height={40} width={2} showMissingValue className="mt-2 hidden md:inline-flex" />
         </div>
 
         {/* Product Details */}
@@ -183,7 +190,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.category || sp.category_2 || sp.category_3 ? (
-                <Badge variant="boring" size="2xs" roundedness="sm" className="w-fit max-w-80">
+                <Badge variant="boring" size="xs" roundedness="sm" className="w-fit max-w-96">
                   {sp.category} {sp.category_2 && ` > ${sp.category_2}`} {sp.category_3 && ` > ${sp.category_3}`}
                 </Badge>
               ) : null}
