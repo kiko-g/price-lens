@@ -34,8 +34,17 @@ export interface TextSearchFilter {
 }
 
 /**
+ * A category tuple representing a combination of category levels
+ */
+export interface CategoryTuple {
+  category: string
+  category_2: string
+  category_3?: string
+}
+
+/**
  * Category filter options
- * Supports both flat category selection and hierarchical 3-level categories
+ * Supports flat category selection, hierarchical 3-level categories, or tuple multi-select
  */
 export interface CategoryFilter {
   /**
@@ -53,6 +62,13 @@ export interface CategoryFilter {
     category2?: string
     category3?: string
   }
+
+  /**
+   * Category tuple multi-select
+   * Each tuple represents a category combination.
+   * If category_3 is omitted, matches all products with that category + category_2 combination.
+   */
+  tuples?: CategoryTuple[]
 }
 
 /**
@@ -269,6 +285,15 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     return [...params.categories.categories].sort().join(",")
   }
 
+  // Helper to normalize tuples to a stable string
+  const getTuplesKey = (): QueryKeyValue => {
+    if (!params.categories?.tuples?.length) return null
+    return params.categories.tuples
+      .map((t) => `${t.category}|${t.category_2}|${t.category_3 ?? ""}`)
+      .sort()
+      .join(";")
+  }
+
   return [
     "storeProducts",
     // Search
@@ -280,6 +305,8 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     params.categories?.hierarchy?.category1 ?? null,
     params.categories?.hierarchy?.category2 ?? null,
     params.categories?.hierarchy?.category3 ?? null,
+    // Categories (tuples)
+    getTuplesKey(),
     // Origin
     getOriginKey(),
     // Priority

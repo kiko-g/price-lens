@@ -177,6 +177,23 @@ function applySourceFilter<Q extends { [key: string]: any }>(query: Q, params: S
 function applyCategoryFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.categories) return query
 
+  // Tuple-based filtering (OR logic for multiple tuples)
+  if (params.categories.tuples && params.categories.tuples.length > 0) {
+    const conditions = params.categories.tuples.map((tuple) => {
+      // Escape special characters in category values for PostgREST
+      const escapeCat = (s: string) => s.replace(/[,()]/g, "\\$&")
+
+      if (tuple.category_3) {
+        // 3-way tuple: exact match on all three levels
+        return `and(category.eq.${escapeCat(tuple.category)},category_2.eq.${escapeCat(tuple.category_2)},category_3.eq.${escapeCat(tuple.category_3)})`
+      } else {
+        // 2-way tuple: match any product with that category + category_2 combination
+        return `and(category.eq.${escapeCat(tuple.category)},category_2.eq.${escapeCat(tuple.category_2)})`
+      }
+    })
+    return query.or(conditions.join(","))
+  }
+
   // Hierarchical categories - apply each level if provided
   if (params.categories.hierarchy) {
     const { category1, category2, category3 } = params.categories.hierarchy

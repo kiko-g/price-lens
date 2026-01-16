@@ -143,24 +143,45 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
     }
   }
 
-  // Category filter (hierarchical)
-  const category1 = params.get("category")
-  const category2 = params.get("category_2")
-  const category3 = params.get("category_3")
-  if (category1 || category2 || category3) {
-    queryParams.categories = {
-      hierarchy: {
-        category1: category1 || undefined,
-        category2: category2 || undefined,
-        category3: category3 || undefined,
-      },
+  // Category tuple filter (takes precedence)
+  const catTuplesParam = params.get("catTuples")
+  if (catTuplesParam) {
+    const tuples = catTuplesParam
+      .split(";")
+      .filter(Boolean)
+      .map((tupleStr) => {
+        const [category, category_2, category_3] = tupleStr.split("|")
+        return {
+          category: category || "",
+          category_2: category_2 || "",
+          category_3: category_3 || undefined,
+        }
+      })
+      .filter((t) => t.category && t.category_2)
+
+    if (tuples.length > 0) {
+      queryParams.categories = { tuples }
     }
   } else {
-    const categoriesParam = params.get("categories")
-    if (categoriesParam) {
-      const categories = categoriesParam.split(";").filter(Boolean)
-      if (categories.length > 0) {
-        queryParams.categories = { categories }
+    // Category filter (hierarchical)
+    const category1 = params.get("category")
+    const category2 = params.get("category_2")
+    const category3 = params.get("category_3")
+    if (category1 || category2 || category3) {
+      queryParams.categories = {
+        hierarchy: {
+          category1: category1 || undefined,
+          category2: category2 || undefined,
+          category3: category3 || undefined,
+        },
+      }
+    } else {
+      const categoriesParam = params.get("categories")
+      if (categoriesParam) {
+        const categories = categoriesParam.split(";").filter(Boolean)
+        if (categories.length > 0) {
+          queryParams.categories = { categories }
+        }
       }
     }
   }

@@ -131,25 +131,47 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
     }
   }
 
-  // Category filter (hierarchical - supports partial selection)
-  const category1 = params.get("category")
-  const category2 = params.get("category_2")
-  const category3 = params.get("category_3")
-  if (category1 || category2 || category3) {
-    queryParams.categories = {
-      hierarchy: {
-        category1: category1 || undefined,
-        category2: category2 || undefined,
-        category3: category3 || undefined,
-      },
+  // Category tuple filter (takes precedence)
+  // Format: catTuples=cat1|cat2|cat3;cat1|cat2|cat3 (semicolon-separated tuples, pipe-separated values)
+  const catTuplesParam = params.get("catTuples")
+  if (catTuplesParam) {
+    const tuples = catTuplesParam
+      .split(";")
+      .filter(Boolean)
+      .map((tupleStr) => {
+        const [category, category_2, category_3] = tupleStr.split("|")
+        return {
+          category: category || "",
+          category_2: category_2 || "",
+          category_3: category_3 || undefined,
+        }
+      })
+      .filter((t) => t.category && t.category_2)
+
+    if (tuples.length > 0) {
+      queryParams.categories = { tuples }
     }
   } else {
-    // Category filter (flat list)
-    const categoriesParam = params.get("categories")
-    if (categoriesParam) {
-      const categories = categoriesParam.split(";").filter(Boolean)
-      if (categories.length > 0) {
-        queryParams.categories = { categories }
+    // Category filter (hierarchical - supports partial selection)
+    const category1 = params.get("category")
+    const category2 = params.get("category_2")
+    const category3 = params.get("category_3")
+    if (category1 || category2 || category3) {
+      queryParams.categories = {
+        hierarchy: {
+          category1: category1 || undefined,
+          category2: category2 || undefined,
+          category3: category3 || undefined,
+        },
+      }
+    } else {
+      // Category filter (flat list)
+      const categoriesParam = params.get("categories")
+      if (categoriesParam) {
+        const categories = categoriesParam.split(";").filter(Boolean)
+        if (categories.length > 0) {
+          queryParams.categories = { categories }
+        }
       }
     }
   }
