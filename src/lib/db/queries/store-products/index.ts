@@ -32,6 +32,7 @@ export type {
   // Filter types
   TextSearchFilter,
   CategoryFilter,
+  CategoryTuple,
   OriginFilter,
   PriorityFilter,
   SourceFilter,
