@@ -173,14 +173,6 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <p className="text-muted-foreground">No image available</p>
               </div>
             )}
-
-            <Barcode
-              value={sp.barcode}
-              height={30}
-              width={1.5}
-              showMissingValue
-              className="absolute right-2 bottom-2 inline-flex rounded bg-white text-black md:hidden"
-            />
           </div>
           <Barcode value={sp.barcode} height={40} width={2} showMissingValue className="mt-2 hidden md:inline-flex" />
         </div>
@@ -273,6 +265,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
           </div>
 
+          {/* Price */}
           <div className="flex flex-wrap items-center gap-2">
             {hasDiscount ? (
               <>
@@ -288,6 +281,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
           </div>
 
+          {/* Price per unit and discount */}
           <div className="flex items-center gap-2">
             {sp.price_per_major_unit && sp.major_unit ? (
               <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
@@ -302,7 +296,16 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             ) : null}
           </div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-2">
+          {/* Barcode */}
+          <Barcode
+            value={sp.barcode}
+            height={20}
+            width={1}
+            showMissingValue
+            className="inline-flex rounded md:hidden"
+          />
+
+          <div className="flex flex-wrap items-center gap-2">
             <FavoriteButton storeProduct={sp} />
             <ShareButton url={sp.url} title={sp.name} description={sp.name} />
             <DropdownMenu>
