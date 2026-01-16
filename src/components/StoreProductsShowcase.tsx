@@ -564,11 +564,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           )}
 
           {/* Filters Accordion */}
-          <Accordion
-            type="multiple"
-            className="w-full border-t"
-            defaultValue={["store-origin", "priority", "categories", "sort", "options"]}
-          >
+          <Accordion type="multiple" className="w-full border-t" defaultValue={["store-origin", "sort", "options"]}>
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -631,6 +627,85 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
                       <PingoDoceSvg className="h-4 min-h-4 w-auto" />
+                    </Label>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Sort Options */}
+            <AccordionItem value="sort">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Sort By
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-1">
+                  <SortOption
+                    label="Name A-Z"
+                    value="a-z"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowDownAZ className="h-4 w-4" />}
+                  />
+                  <SortOption
+                    label="Name Z-A"
+                    value="z-a"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowUpAZ className="h-4 w-4" />}
+                  />
+                  <SortOption
+                    label="Price: High to Low"
+                    value="price-high-low"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
+                  />
+                  <SortOption
+                    label="Price: Low to High"
+                    value="price-low-high"
+                    current={urlState.sortBy}
+                    onChange={handleSortChange}
+                    icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Checkbox Filter Options */}
+            <AccordionItem value="options">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Options
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-discounted"
+                      checked={urlState.onlyDiscounted}
+                      onCheckedChange={handleToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="order-by-priority"
+                      checked={urlState.orderByPriority}
+                      onCheckedChange={handleTogglePriorityOrder}
+                    />
+                    <Label
+                      htmlFor="order-by-priority"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CrownIcon className="h-4 w-4" />
+                      Order by priority
                     </Label>
                   </div>
                 </div>
@@ -711,85 +786,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                   onCategory2Change={handleCategory2Change}
                   onCategory3Change={handleCategory3Change}
                 />
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Sort Options */}
-            <AccordionItem value="sort">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Sort By
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-1">
-                  <SortOption
-                    label="Name A-Z"
-                    value="a-z"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowDownAZ className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Name Z-A"
-                    value="z-a"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowUpAZ className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Price: High to Low"
-                    value="price-high-low"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Price: Low to High"
-                    value="price-low-high"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Filter Options */}
-            <AccordionItem value="options">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Options
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-discounted"
-                      checked={urlState.onlyDiscounted}
-                      onCheckedChange={handleToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="order-by-priority"
-                      checked={urlState.orderByPriority}
-                      onCheckedChange={handleTogglePriorityOrder}
-                    />
-                    <Label
-                      htmlFor="order-by-priority"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CrownIcon className="h-4 w-4" />
-                      Order by priority
-                    </Label>
-                  </div>
-                </div>
               </AccordionContent>
             </AccordionItem>
 
