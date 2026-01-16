@@ -234,7 +234,7 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
                       alt={sp.name}
                       width={400}
                       height={400}
-                      className="aspect-square size-24 rounded-md border bg-white object-contain p-1 md:size-32"
+                      className="aspect-square size-24 rounded-md border bg-white object-contain p-1 md:size-28"
                       placeholder="empty"
                       blurDataURL={imagePlaceholder.productBlur}
                       loading="lazy"
@@ -250,7 +250,7 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
                 </div>
               ))}
 
-            {options?.showBarcode && <Barcode value={sp.barcode} height={12} width={1.3} />}
+            {options?.showBarcode && <Barcode value={sp.barcode} height={10} width={1} />}
           </div>
         </header>
       )}
