@@ -72,7 +72,7 @@ export const navigation = [
     icon: WorkflowIcon,
     label: "Admin",
     href: "/admin",
-    shown: process.env.NODE_ENV === "development",
+    shown: true,
   },
 ]
 

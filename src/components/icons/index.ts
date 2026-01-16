@@ -4,6 +4,7 @@ import { GithubIcon } from "./GithubIcon"
 import { InstagramIcon } from "./InstagramIcon"
 import { LinkedinIcon } from "./LinkedinIcon"
 import { LoadingIcon } from "./LoadingIcon"
+import { LogoIcon } from "./LogoIcon"
 import { ReactIcon } from "./ReactIcon"
 import { ShadCnIcon } from "./ShadCnIcon"
 import { SidebarIcon } from "./SidebarIcon"
@@ -21,6 +22,7 @@ export {
   InstagramIcon,
   LinkedinIcon,
   LoadingIcon,
+  LogoIcon,
   ReactIcon,
   ShadCnIcon,
   SidebarIcon,

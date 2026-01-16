@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 
-import { Layout } from "@/components/layout"
-
 import { TestScrapers } from "@/components/admin/TestScrapers"
 
 export const metadata: Metadata = {
@@ -10,9 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function AdminTestScrapers() {
-  return (
-    <Layout>
-      <TestScrapers />
-    </Layout>
-  )
+  return <TestScrapers />
 }

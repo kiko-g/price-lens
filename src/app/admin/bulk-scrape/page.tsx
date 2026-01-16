@@ -6,8 +6,6 @@ import axios from "axios"
 import { cn } from "@/lib/utils"
 import { useAdminStoreProductFilters } from "@/hooks/useAdminStoreProductFilters"
 
-import { Layout } from "@/components/layout"
-import { HideFooter } from "@/contexts/FooterContext"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -252,11 +250,9 @@ export default function BulkScrapePage() {
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   return (
-    <Layout>
-      <HideFooter />
-      <div className="flex h-[calc(100dvh-54px)] flex-col overflow-hidden lg:flex-row">
+    <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Sidebar - Filters */}
-        <aside className="flex h-auto min-h-0 flex-col border-b lg:h-full lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
+        <aside className="flex h-auto min-h-0 flex-col border-b lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
           {/* Scrollable filters section */}
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             <div className="mb-2 flex items-center gap-2">
@@ -614,7 +610,6 @@ export default function BulkScrapePage() {
           </div>
         </main>
       </div>
-    </Layout>
   )
 }
 

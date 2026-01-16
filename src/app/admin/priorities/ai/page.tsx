@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 
-import { Layout } from "@/components/layout"
-
 import { AiPriorityClassifier } from "@/components/admin/AiPriorityClassifier"
 
 export const metadata: Metadata = {
@@ -10,9 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function AdminAiPriorityClassifier() {
-  return (
-    <Layout>
-      <AiPriorityClassifier />
-    </Layout>
-  )
+  return <AiPriorityClassifier />
 }

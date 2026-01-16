@@ -7,8 +7,6 @@ import { format, addDays, subDays, isToday, isTomorrow, isYesterday, formatDista
 import { cn } from "@/lib/utils"
 import { useActivityLog } from "@/hooks/useActivityLog"
 
-import { Layout } from "@/components/layout"
-import { HideFooter } from "@/contexts/FooterContext"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -259,59 +257,114 @@ export default function SchedulePage() {
   }, [overview?.nextRunEstimate])
 
   return (
-    <Layout>
-      <HideFooter />
-      <div className="flex h-[calc(100dvh-54px)] flex-col overflow-hidden lg:flex-row">
-        {/* Sidebar - Schedule Overview */}
-        <aside className="flex h-auto min-h-0 flex-col border-b lg:h-full lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
-          {/* Scrollable content */}
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <div className="mb-4 flex items-center gap-2">
-              <CalendarIcon className="text-primary size-5" />
-              <h2 className="text-lg font-bold">Scrape Schedule</h2>
+    <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        {/* Schedule Overview Card */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CalendarIcon className="text-primary size-5" />
+                Scrape Schedule
+              </CardTitle>
+              <Button variant="outline" size="sm" onClick={() => refetchOverview()}>
+                <RefreshCwIcon className="mr-2 h-4 w-4" />
+                Refresh
+              </Button>
             </div>
-
-            {/* Cron Schedule */}
-            <div className="space-y-1">
-              <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
-                <ClockIcon className="h-3.5 w-3.5" />
-                Cron Schedule
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Cron Schedule */}
+              <div className="space-y-1">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
+                  <ClockIcon className="h-3.5 w-3.5" />
+                  Cron Schedule
+                </div>
+                {isLoadingOverview ? (
+                  <Skeleton className="h-7 w-32" />
+                ) : (
+                  <>
+                    <p className="text-xl font-bold">{overview?.cronDescription}</p>
+                    <p className="text-muted-foreground font-mono text-xs">{overview?.cronSchedule}</p>
+                  </>
+                )}
               </div>
-              {isLoadingOverview ? (
-                <Skeleton className="h-7 w-32" />
-              ) : (
-                <>
-                  <p className="text-xl font-bold">{overview?.cronDescription}</p>
-                  <p className="text-muted-foreground font-mono text-xs">{overview?.cronSchedule}</p>
-                </>
-              )}
-            </div>
 
-            {/* Next Run */}
-            <div className="mt-4 space-y-1 border-t pt-4">
-              <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
-                <TimerIcon className="h-3.5 w-3.5" />
-                Next Run
+              {/* Next Run */}
+              <div className="space-y-1">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase">
+                  <TimerIcon className="h-3.5 w-3.5" />
+                  Next Run
+                </div>
+                {isLoadingOverview ? (
+                  <Skeleton className="h-7 w-24" />
+                ) : timeUntilNextRun ? (
+                  <>
+                    <p className="text-xl font-bold">
+                      {timeUntilNextRun.hours}h {timeUntilNextRun.minutes}m
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {overview?.nextRunEstimate && format(new Date(overview.nextRunEstimate), "MMM d, HH:mm 'UTC'")}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">—</p>
+                )}
               </div>
-              {isLoadingOverview ? (
-                <Skeleton className="h-7 w-24" />
-              ) : timeUntilNextRun ? (
-                <>
-                  <p className="text-xl font-bold">
-                    {timeUntilNextRun.hours}h {timeUntilNextRun.minutes}m
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    {overview?.nextRunEstimate && format(new Date(overview.nextRunEstimate), "MMM d, HH:mm 'UTC'")}
-                  </p>
-                </>
-              ) : (
-                <p className="text-muted-foreground">—</p>
-              )}
+
+              {/* Active Priorities */}
+              <div className="space-y-2">
+                <div className="text-muted-foreground text-xs font-medium uppercase">Active Priorities</div>
+                {isLoadingOverview ? (
+                  <Skeleton className="h-6 w-full" />
+                ) : (
+                  <>
+                    <div className="flex flex-wrap gap-1.5">
+                      {overview?.activePriorities.map((p) => (
+                        <Badge key={p} className={cn("text-white", PRIORITY_CONFIG[p]?.bgColor)}>
+                          {PRIORITY_CONFIG[p]?.name}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      Priority 0-1 not scheduled
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="ml-1 inline h-3 w-3" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>
+                              Most products are at priority 1 as a safety measure. Enable them gradually as you tune
+                              priorities.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="space-y-2">
+                <div className="text-muted-foreground flex items-start gap-2 text-xs">
+                  <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
+                  <div className="space-y-1">
+                    <p>
+                      <strong>Cron:</strong> Runs every 30 min via Vercel.
+                    </p>
+                    <p>
+                      <strong>Thresholds:</strong> P5: 24h, P4: 48h, P3: 72h, P2: 168h.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t pt-4">
-              {/* Due for Scrape */}
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t pt-4 md:grid-cols-4">
               <div className="bg-muted/50 rounded-md p-3">
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <ZapIcon className="h-3 w-3" />
@@ -325,8 +378,6 @@ export default function SchedulePage() {
                   </p>
                 )}
               </div>
-
-              {/* Daily Scrapes */}
               <div className="bg-muted/50 rounded-md p-3">
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <ActivityIcon className="h-3 w-3" />
@@ -338,8 +389,6 @@ export default function SchedulePage() {
                   <p className="mt-1 text-lg font-bold">{overview?.costEstimate.dailyScrapes.toLocaleString()}</p>
                 )}
               </div>
-
-              {/* Monthly Scrapes */}
               <div className="bg-muted/50 rounded-md p-3">
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <TrendingUpIcon className="h-3 w-3" />
@@ -351,8 +400,6 @@ export default function SchedulePage() {
                   <p className="mt-1 text-lg font-bold">~{overview?.costEstimate.monthlyScrapes.toLocaleString()}</p>
                 )}
               </div>
-
-              {/* Est. Cost */}
               <div className="bg-muted/50 rounded-md p-3">
                 <div className="text-muted-foreground flex items-center gap-1 text-xs">
                   <DollarSignIcon className="h-3 w-3" />
@@ -367,69 +414,8 @@ export default function SchedulePage() {
                 )}
               </div>
             </div>
-
-            {/* Active Priorities */}
-            <div className="mt-4 space-y-2 border-t pt-4">
-              <div className="text-muted-foreground text-xs font-medium uppercase">Active Priorities</div>
-              {isLoadingOverview ? (
-                <Skeleton className="h-6 w-full" />
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-1.5">
-                    {overview?.activePriorities.map((p) => (
-                      <Badge key={p} className={cn("text-white", PRIORITY_CONFIG[p]?.bgColor)}>
-                        {PRIORITY_CONFIG[p]?.name}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground text-xs">
-                    Priority 0-1 not scheduled
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <InfoIcon className="ml-1 inline h-3 w-3" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs">
-                          <p>
-                            Most products are at priority 1 as a safety measure. Enable them gradually as you tune
-                            priorities.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </p>
-                </>
-              )}
-            </div>
-
-            {/* Info Section */}
-            <div className="mt-4 space-y-2 border-t pt-4">
-              <div className="text-muted-foreground flex items-start gap-2 text-xs">
-                <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
-                <div className="space-y-2">
-                  <p>
-                    <strong>Cron:</strong> Runs every 30 min via Vercel, queuing stale products to QStash batch workers.
-                  </p>
-                  <p>
-                    <strong>Thresholds:</strong> P5: 24h, P4: 48h, P3: 72h, P2: 168h (P1: 336h disabled).
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Fixed Refresh Button */}
-          <div className="bg-background shrink-0 border-t p-4">
-            <Button variant="outline" size="sm" onClick={() => refetchOverview()} className="w-full">
-              <RefreshCwIcon className="mr-2 h-4 w-4" />
-              Refresh
-            </Button>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="flex max-w-7xl flex-col gap-6 space-y-6">
+          </CardContent>
+        </Card>
             {/* Recent Activity - Shows if scraping is actually happening */}
             <Card>
               <CardHeader>
@@ -1216,9 +1202,7 @@ export default function SchedulePage() {
                 )}
               </CardContent>
             </Card>
-          </div>
-        </main>
       </div>
-    </Layout>
+    </div>
   )
 }

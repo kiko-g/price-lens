@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
-import { Layout } from "@/components/layout"
 import { AdminDashboardPrices } from "@/components/admin/AdminDashboardPrices"
 import { Loader2 } from "lucide-react"
 
@@ -19,10 +18,8 @@ function LoadingFallback() {
 
 export default function AdminDashboardPricesPage() {
   return (
-    <Layout>
-      <Suspense fallback={<LoadingFallback />}>
-        <AdminDashboardPrices />
-      </Suspense>
-    </Layout>
+    <Suspense fallback={<LoadingFallback />}>
+      <AdminDashboardPrices />
+    </Suspense>
   )
 }

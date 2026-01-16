@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Layout } from "@/components/layout"
 import { AdminDashboardProducts } from "@/components/admin/AdminDashboardProducts"
 
 export const metadata: Metadata = {
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminDashboardProductsPage() {
-  return (
-    <Layout>
-      <AdminDashboardProducts />
-    </Layout>
-  )
+  return <AdminDashboardProducts />
 }
