@@ -49,6 +49,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
 } from "@/components/ui/sidebar"
 import {
   DropdownMenu,
@@ -61,7 +62,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Skeleton } from "@/components/ui/skeleton"
-import { LogoIcon } from "../icons"
 
 interface NavItem {
   title: string
@@ -120,9 +120,17 @@ export function AdminSidebar() {
 
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SiteNavigationDropup />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
       <SidebarContent className="pt-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Utilities</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_ITEMS.map((item) =>
@@ -146,9 +154,6 @@ export function AdminSidebar() {
 
       <SidebarFooter>
         <SidebarMenu className="gap-2">
-          <SidebarMenuItem>
-            <SiteNavigationDropup />
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <UserDropup />
           </SidebarMenuItem>

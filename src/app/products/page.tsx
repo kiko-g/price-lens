@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer"
 import { HideFooter } from "@/contexts/FooterContext"
 
 export const metadata = {
-  title: "Products | Price Lens",
+  title: "Products",
   description: "Browse and compare prices across supermarkets",
 }
 
