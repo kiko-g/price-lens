@@ -454,11 +454,11 @@ describe("storeProductQueries", () => {
         { category: "Food", category_2: "Meat", category_3: "Chicken" },
         { category: "Food", category_2: "Dairy", category_3: "Milk" },
       ]
-      mockChain.range.mockResolvedValueOnce({ data: mockCategories, error: null })
-      mockChain.range.mockResolvedValueOnce({ data: [], error: null })
+      mockSupabase.rpc.mockResolvedValueOnce({ data: mockCategories, error: null })
 
       const result = await storeProductQueries.getAllCategories({})
 
+      expect(mockSupabase.rpc).toHaveBeenCalledWith("get_distinct_categories")
       expect(result.data).toHaveProperty("category")
       expect(result.data).toHaveProperty("category_2")
       expect(result.data).toHaveProperty("category_3")

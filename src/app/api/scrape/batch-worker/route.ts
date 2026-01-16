@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { verifySignatureAppRouter } from "@upstash/qstash/nextjs"
 import { createClient } from "@/lib/supabase/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { updatePricePoint } from "@/lib/pricing"

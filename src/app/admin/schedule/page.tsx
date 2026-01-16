@@ -4,6 +4,9 @@ import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { format, addDays, subDays, isToday, isTomorrow, isYesterday, formatDistanceToNow } from "date-fns"
+import { cn } from "@/lib/utils"
+import { useActivityLog } from "@/hooks/useActivityLog"
+
 import { Layout } from "@/components/layout"
 import { HideFooter } from "@/contexts/FooterContext"
 import { Button } from "@/components/ui/button"
@@ -11,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { useActivityLog } from "@/hooks/useActivityLog"
+import { PriorityBubble } from "@/components/PriorityBubble"
 
 import {
   CalendarIcon,
@@ -33,8 +36,6 @@ import {
   PackageIcon,
   GaugeIcon,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { PriorityBubble } from "@/components/PriorityBubble"
 
 interface PriorityStats {
   priority: number | null

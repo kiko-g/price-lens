@@ -558,51 +558,46 @@ export const storeProductQueries = {
     }
 
     const supabase = createClient()
-    const PAGE_SIZE = 1000 // supabase limit
-    let allCategories: { category: string; category_2: string; category_3: string }[] = []
-    let page = 0
-    let hasMore = true
 
-    while (hasMore) {
-      const { data: pageData, error: pageError } = await supabase
-        .from("store_products")
-        .select("category, category_2, category_3")
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+    type CategoryRow = { category: string | null; category_2: string | null; category_3: string | null }
 
-      if (pageError) {
-        return {
-          data: null,
-          error: pageError,
-        }
-      }
+    // Use database function for efficient DISTINCT query
+    const { data, error } = await supabase.rpc("get_distinct_categories")
 
-      if (pageData && pageData.length > 0) {
-        allCategories = [...allCategories, ...pageData]
-        page++
-      } else {
-        hasMore = false
+    if (error) {
+      return {
+        data: null,
+        error,
       }
     }
 
-    const categories = [...new Set(allCategories.map((c) => c.category).filter(Boolean))].sort()
-    const categories2 = [...new Set(allCategories.map((c) => c.category_2).filter(Boolean))].sort()
-    const categories3 = [...new Set(allCategories.map((c) => c.category_3).filter(Boolean))].sort()
+    const allCategories = (data ?? []) as CategoryRow[]
+
+    const categories = [...new Set(allCategories.map((c) => c.category).filter(Boolean) as string[])].sort()
+    const categories2 = [...new Set(allCategories.map((c) => c.category_2).filter(Boolean) as string[])].sort()
+    const categories3 = [...new Set(allCategories.map((c) => c.category_3).filter(Boolean) as string[])].sort()
 
     let filtered3WayCategories = allCategories.filter((c) => c.category && c.category_2 && c.category_3)
     let filtered2WayCategories = allCategories.filter((c) => c.category && c.category_2)
 
     if (category1List.length > 0) {
-      filtered3WayCategories = filtered3WayCategories.filter((c) => category1List.includes(c.category))
-      filtered2WayCategories = filtered2WayCategories.filter((c) => category1List.includes(c.category))
+      filtered3WayCategories = filtered3WayCategories.filter((c) => c.category && category1List.includes(c.category))
+      filtered2WayCategories = filtered2WayCategories.filter((c) => c.category && category1List.includes(c.category))
     }
 
     if (category2List.length > 0) {
-      filtered3WayCategories = filtered3WayCategories.filter((c) => category2List.includes(c.category_2))
-      filtered2WayCategories = filtered2WayCategories.filter((c) => category2List.includes(c.category_2))
+      filtered3WayCategories = filtered3WayCategories.filter(
+        (c) => c.category_2 && category2List.includes(c.category_2),
+      )
+      filtered2WayCategories = filtered2WayCategories.filter(
+        (c) => c.category_2 && category2List.includes(c.category_2),
+      )
     }
 
     if (category3List.length > 0) {
-      filtered3WayCategories = filtered3WayCategories.filter((c) => category3List.includes(c.category_3))
+      filtered3WayCategories = filtered3WayCategories.filter(
+        (c) => c.category_3 && category3List.includes(c.category_3),
+      )
     }
 
     const threeWayTuples = Array.from(
