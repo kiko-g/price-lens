@@ -25,6 +25,11 @@ import {
   UserIcon,
   ScanFaceIcon,
   MoreHorizontalIcon,
+  ActivityIcon,
+  TestTube2Icon,
+  PieChartIcon,
+  ClockIcon,
+  LayoutDashboardIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -70,6 +75,13 @@ const NAV_ITEMS: NavItem[] = [
     title: "Schedule",
     href: "/admin/schedule",
     icon: CalendarClockIcon,
+    items: [
+      { title: "Overview", href: "/admin/schedule", icon: LayoutDashboardIcon },
+      { title: "Activity", href: "/admin/schedule/activity", icon: ActivityIcon },
+      { title: "Test", href: "/admin/schedule/test", icon: TestTube2Icon },
+      { title: "Distribution", href: "/admin/schedule/distribution", icon: PieChartIcon },
+      { title: "Timeline", href: "/admin/schedule/timeline", icon: ClockIcon },
+    ],
   },
   {
     title: "Database",
