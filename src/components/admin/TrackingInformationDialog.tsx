@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -45,7 +44,7 @@ export function TrackingInformationDialog() {
 
             <p>
               To combat this, you can{" "}
-              <strong>add a product to your favorites to increase its priority to 4 automatically</strong>. To have
+              <strong>add a product to your favorites to increase its priority to 5/5 automatically</strong>. To have
               favorites, you need to be logged in.
             </p>
           </div>
