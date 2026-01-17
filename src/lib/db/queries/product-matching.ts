@@ -9,30 +9,95 @@ import type { StoreProduct } from "@/types"
 
 // Portuguese stop words to filter out
 const STOP_WORDS = new Set([
-  "de", "da", "do", "das", "dos", "com", "sem", "para", "por", "em", "na", "no",
-  "nas", "nos", "e", "o", "a", "os", "as", "um", "uma", "uns", "umas", "ao", "aos",
-  "à", "às", "pelo", "pela", "pelos", "pelas", "este", "esta", "esse", "essa",
-  "aquele", "aquela", "que", "qual", "quais", "ou", "mais", "menos", "muito",
-  "muita", "pouco", "pouca", "todo", "toda", "cada", "outro", "outra",
+  "de",
+  "da",
+  "do",
+  "das",
+  "dos",
+  "com",
+  "sem",
+  "para",
+  "por",
+  "em",
+  "na",
+  "no",
+  "nas",
+  "nos",
+  "e",
+  "o",
+  "a",
+  "os",
+  "as",
+  "um",
+  "uma",
+  "uns",
+  "umas",
+  "ao",
+  "aos",
+  "à",
+  "às",
+  "pelo",
+  "pela",
+  "pelos",
+  "pelas",
+  "este",
+  "esta",
+  "esse",
+  "essa",
+  "aquele",
+  "aquela",
+  "que",
+  "qual",
+  "quais",
+  "ou",
+  "mais",
+  "menos",
+  "muito",
+  "muita",
+  "pouco",
+  "pouca",
+  "todo",
+  "toda",
+  "cada",
+  "outro",
+  "outra",
 ])
 
 // Unit aliases for normalization
 const UNIT_ALIASES: Record<string, string> = {
-  "l": "l", "lt": "l", "litro": "l", "litros": "l", "ltr": "l",
-  "ml": "ml", "mililitro": "ml", "mililitros": "ml",
-  "kg": "kg", "kilo": "kg", "kilos": "kg", "quilos": "kg", "quilo": "kg",
-  "g": "g", "gr": "g", "grama": "g", "gramas": "g",
-  "un": "un", "und": "un", "unidade": "un", "unidades": "un",
-  "cl": "cl", "centilitro": "cl", "centilitros": "cl",
+  l: "l",
+  lt: "l",
+  litro: "l",
+  litros: "l",
+  ltr: "l",
+  ml: "ml",
+  mililitro: "ml",
+  mililitros: "ml",
+  kg: "kg",
+  kilo: "kg",
+  kilos: "kg",
+  quilos: "kg",
+  quilo: "kg",
+  g: "g",
+  gr: "g",
+  grama: "g",
+  gramas: "g",
+  un: "un",
+  und: "un",
+  unidade: "un",
+  unidades: "un",
+  cl: "cl",
+  centilitro: "cl",
+  centilitros: "cl",
 }
 
 // Unit conversion to base units (ml for liquids, g for weight)
 const UNIT_TO_BASE: Record<string, { unit: string; multiplier: number }> = {
-  "l": { unit: "ml", multiplier: 1000 },
-  "ml": { unit: "ml", multiplier: 1 },
-  "cl": { unit: "ml", multiplier: 10 },
-  "kg": { unit: "g", multiplier: 1000 },
-  "g": { unit: "g", multiplier: 1 },
+  l: { unit: "ml", multiplier: 1000 },
+  ml: { unit: "ml", multiplier: 1 },
+  cl: { unit: "ml", multiplier: 10 },
+  kg: { unit: "g", multiplier: 1000 },
+  g: { unit: "g", multiplier: 1 },
 }
 
 interface NormalizedSize {
@@ -58,7 +123,8 @@ function normalizeName(name: string | null): string {
   if (!name) return ""
   return name
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
     .replace(/[^\w\s]/g, " ") // Replace special chars with space
     .replace(/\s+/g, " ")
     .trim()
@@ -70,9 +136,7 @@ function normalizeName(name: string | null): string {
 function extractWords(name: string | null): string[] {
   if (!name) return []
   const normalized = normalizeName(name)
-  return normalized
-    .split(" ")
-    .filter(word => word.length > 1 && !STOP_WORDS.has(word))
+  return normalized.split(" ").filter((word) => word.length > 1 && !STOP_WORDS.has(word))
 }
 
 /**
@@ -150,7 +214,10 @@ function calculateSizeSimilarity(size1: NormalizedSize | null, size2: Normalized
  * Calculates word-level similarity between two product names
  * More strict than Jaccard - penalizes missing words heavily
  */
-function calculateNameSimilarity(name1: string | null, name2: string | null): {
+function calculateNameSimilarity(
+  name1: string | null,
+  name2: string | null,
+): {
   similarity: number
   matchedWords: string[]
   missingWords: string[]
@@ -166,9 +233,9 @@ function calculateNameSimilarity(name1: string | null, name2: string | null): {
   const set1 = new Set(words1)
   const set2 = new Set(words2)
 
-  const matchedWords = words1.filter(w => set2.has(w))
-  const missingWords = words1.filter(w => !set2.has(w))
-  const extraWords = words2.filter(w => !set1.has(w))
+  const matchedWords = words1.filter((w) => set2.has(w))
+  const missingWords = words1.filter((w) => !set2.has(w))
+  const extraWords = words2.filter((w) => !set1.has(w))
 
   // Weighted similarity:
   // - Matched words contribute positively
@@ -194,10 +261,7 @@ function calculateNameSimilarity(name1: string | null, name2: string | null): {
 /**
  * Calculates price per unit similarity (0-1)
  */
-function calculatePricePerUnitSimilarity(
-  price1: number | null,
-  price2: number | null
-): number {
+function calculatePricePerUnitSimilarity(price1: number | null, price2: number | null): number {
   if (!price1 || !price2 || price1 <= 0 || price2 <= 0) return 0
 
   const ratio = Math.min(price1, price2) / Math.max(price1, price2)
@@ -257,11 +321,7 @@ function levenshteinDistance(a: string, b: string): number {
   for (let i = 1; i <= b.length; i++) {
     for (let j = 1; j <= a.length; j++) {
       const cost = a[j - 1] === b[i - 1] ? 0 : 1
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
-      )
+      matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost)
     }
   }
 
@@ -310,10 +370,7 @@ function scoreIdenticalMatch(source: StoreProduct, candidate: StoreProduct): Pro
   }
 
   // 6. Price per unit similarity (good signal)
-  const pricePerUnitSim = calculatePricePerUnitSimilarity(
-    source.price_per_major_unit,
-    candidate.price_per_major_unit
-  )
+  const pricePerUnitSim = calculatePricePerUnitSimilarity(source.price_per_major_unit, candidate.price_per_major_unit)
   if (pricePerUnitSim > 0) {
     factors.push(`price_per_unit_${(pricePerUnitSim * 100).toFixed(0)}%`)
     score += pricePerUnitSim * 10
@@ -362,10 +419,7 @@ function scoreRelatedMatch(source: StoreProduct, candidate: StoreProduct): Produ
   }
 
   // Price per unit similarity
-  const pricePerUnitSim = calculatePricePerUnitSimilarity(
-    source.price_per_major_unit,
-    candidate.price_per_major_unit
-  )
+  const pricePerUnitSim = calculatePricePerUnitSimilarity(source.price_per_major_unit, candidate.price_per_major_unit)
   if (pricePerUnitSim > 0) {
     factors.push(`price_per_unit_${(pricePerUnitSim * 100).toFixed(0)}%`)
     score += pricePerUnitSim * 10
@@ -396,16 +450,15 @@ function scoreRelatedMatch(source: StoreProduct, candidate: StoreProduct): Produ
  */
 export async function findIdenticalProducts(
   productId: string,
-  limit: number = 10
-): Promise<{ data: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] | null; error: unknown }> {
+  limit: number = 10,
+): Promise<{
+  data: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] | null
+  error: unknown
+}> {
   const supabase = createClient()
 
   // Get source product
-  const { data: source, error } = await supabase
-    .from("store_products")
-    .select("*")
-    .eq("id", productId)
-    .single()
+  const { data: source, error } = await supabase.from("store_products").select("*").eq("id", productId).single()
 
   if (error || !source) {
     return { data: null, error: error || "Product not found" }
@@ -442,14 +495,10 @@ export async function findIdenticalProducts(
   // STEP 2: Fuzzy matching to find additional matches (or if no barcode)
   // Skip if we already have enough results from barcode matching
   if (results.length < limit) {
-    const existingIds = new Set(results.map(r => r.id))
+    const existingIds = new Set(results.map((r) => r.id))
 
     // Build search query - get candidates from other stores
-    let query = supabase
-      .from("store_products")
-      .select("*")
-      .neq("origin_id", source.origin_id)
-      .neq("id", productId)
+    let query = supabase.from("store_products").select("*").neq("origin_id", source.origin_id).neq("id", productId)
 
     // Filter by brand if available (use ilike for fuzzy brand matching)
     // This handles "Compal" matching "Compal Classico" and vice versa
@@ -475,7 +524,8 @@ export async function findIdenticalProducts(
       if (existingIds.has(candidate.id)) continue
 
       const match = scoreIdenticalMatch(source, candidate)
-      if (match && match.score > 50) { // Minimum score for "identical"
+      if (match && match.score > 50) {
+        // Minimum score for "identical"
         matches.push(match)
       }
     }
@@ -504,16 +554,15 @@ export async function findIdenticalProducts(
  */
 export async function findRelatedProducts(
   productId: string,
-  limit: number = 10
-): Promise<{ data: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] | null; error: unknown }> {
+  limit: number = 10,
+): Promise<{
+  data: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] | null
+  error: unknown
+}> {
   const supabase = createClient()
 
   // Get source product
-  const { data: source, error } = await supabase
-    .from("store_products")
-    .select("*")
-    .eq("id", productId)
-    .single()
+  const { data: source, error } = await supabase.from("store_products").select("*").eq("id", productId).single()
 
   if (error || !source) {
     return { data: null, error: error || "Product not found" }
@@ -525,12 +574,7 @@ export async function findRelatedProducts(
   // Same brand products
   if (source.brand) {
     queries.push(
-      supabase
-        .from("store_products")
-        .select("*")
-        .ilike("brand", source.brand)
-        .neq("id", productId)
-        .limit(100)
+      supabase.from("store_products").select("*").ilike("brand", source.brand).neq("id", productId).limit(100),
     )
   }
 
@@ -539,12 +583,7 @@ export async function findRelatedProducts(
   if (words.length >= 2) {
     const searchTerms = words.slice(0, 3).join(" & ")
     queries.push(
-      supabase
-        .from("store_products")
-        .select("*")
-        .textSearch("name", searchTerms)
-        .neq("id", productId)
-        .limit(100)
+      supabase.from("store_products").select("*").textSearch("name", searchTerms).neq("id", productId).limit(100),
     )
   }
 
@@ -571,7 +610,7 @@ export async function findRelatedProducts(
   // Sort by score and return top matches
   matches.sort((a, b) => b.score - a.score)
 
-  const final = matches.slice(0, limit).map(m => ({
+  const final = matches.slice(0, limit).map((m) => ({
     ...m.product,
     similarity_score: m.score,
     similarity_factors: m.factors,
@@ -579,4 +618,3 @@ export async function findRelatedProducts(
 
   return { data: final, error: null }
 }
-

@@ -503,9 +503,7 @@ export async function GET(req: NextRequest) {
       // Fix: Reset their updated_at to NULL so the scheduler picks them up
 
       // Step 1: Get all store_product_ids that have at least one price record
-      const { data: productsWithPrices, error: pricesError } = await supabase
-        .from("prices")
-        .select("store_product_id")
+      const { data: productsWithPrices, error: pricesError } = await supabase.from("prices").select("store_product_id")
 
       if (pricesError) {
         console.error("Error fetching prices:", pricesError)

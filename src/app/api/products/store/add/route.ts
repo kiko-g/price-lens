@@ -35,18 +35,29 @@ export async function POST(req: NextRequest) {
     // Handle 404 - product doesn't exist
     if (result.type === "not_found") {
       await storeProductQueries.markUnavailable({ url })
-      return NextResponse.json({ error: "Product not found (404)", url, origin: originInt, available: false }, { status: 404 })
+      return NextResponse.json(
+        { error: "Product not found (404)", url, origin: originInt, available: false },
+        { status: 404 },
+      )
     }
 
     if (!result.product) {
       return NextResponse.json({ error: "Failed to scrape product", url, origin: originInt }, { status: 400 })
     }
 
-    const { data: product, error: productError } = await storeProductQueries.createOrUpdateProduct(result.product as unknown as StoreProduct)
+    const { data: product, error: productError } = await storeProductQueries.createOrUpdateProduct(
+      result.product as unknown as StoreProduct,
+    )
 
     if (productError) {
       return NextResponse.json(
-        { error: "Failed to add product", details: productError, scrapedProduct: result.product, origin: originInt, url },
+        {
+          error: "Failed to add product",
+          details: productError,
+          scrapedProduct: result.product,
+          origin: originInt,
+          url,
+        },
         { status: 400 },
       )
     }

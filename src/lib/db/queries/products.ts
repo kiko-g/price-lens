@@ -423,11 +423,7 @@ export const storeProductQueries = {
     const supabase = createClient()
 
     // First, get the product to find its ID
-    const { data: existingProduct } = await supabase
-      .from("store_products")
-      .select("id")
-      .eq("url", url)
-      .maybeSingle()
+    const { data: existingProduct } = await supabase.from("store_products").select("id").eq("url", url).maybeSingle()
 
     // Mark as unavailable
     await supabase.from("store_products").upsert(

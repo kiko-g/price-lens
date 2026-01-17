@@ -13,9 +13,8 @@ export async function GET() {
     totalPricePoints: stats.totalPricePoints,
     duplicateCount: stats.duplicateCount,
     affectedProductsCount: stats.affectedProductsCount,
-    savingsPercentage: stats.totalPricePoints > 0
-      ? ((stats.duplicateCount / stats.totalPricePoints) * 100).toFixed(1)
-      : "0",
+    savingsPercentage:
+      stats.totalPricePoints > 0 ? ((stats.duplicateCount / stats.totalPricePoints) * 100).toFixed(1) : "0",
   })
 }
 
@@ -30,10 +29,12 @@ export async function DELETE() {
   return NextResponse.json({
     message: "Duplicate price points deleted",
     deleted: result.deleted,
-    stats: result.stats ? {
-      totalPricePoints: result.stats.totalPricePoints,
-      duplicateCount: result.stats.duplicateCount,
-      affectedProductsCount: result.stats.affectedProductsCount,
-    } : null,
+    stats: result.stats
+      ? {
+          totalPricePoints: result.stats.totalPricePoints,
+          duplicateCount: result.stats.duplicateCount,
+          affectedProductsCount: result.stats.affectedProductsCount,
+        }
+      : null,
   })
 }

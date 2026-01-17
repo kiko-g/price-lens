@@ -235,9 +235,7 @@ export default function ScheduleTestPage() {
                 <div className="text-muted-foreground bg-muted/30 flex items-center gap-2 rounded-lg px-3 py-2 text-xs">
                   <ServerIcon className="h-3.5 w-3.5" />
                   <span>Batch Worker:</span>
-                  <code className="bg-muted rounded px-1.5 py-0.5 font-mono">
-                    {schedulerTestResult.batchWorkerUrl}
-                  </code>
+                  <code className="bg-muted rounded px-1.5 py-0.5 font-mono">{schedulerTestResult.batchWorkerUrl}</code>
                 </div>
               </div>
             )}

@@ -251,365 +251,363 @@ export default function BulkScrapePage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
-        {/* Sidebar - Filters */}
-        <aside className="flex h-auto min-h-0 flex-col border-b lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
-          {/* Scrollable filters section */}
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <RefreshCwIcon className="text-primary size-5" />
-              <h2 className="text-lg font-bold">Bulk Re-Scrape</h2>
-            </div>
+      {/* Sidebar - Filters */}
+      <aside className="flex h-auto min-h-0 flex-col border-b lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
+        {/* Scrollable filters section */}
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <RefreshCwIcon className="text-primary size-5" />
+            <h2 className="text-lg font-bold">Bulk Re-Scrape</h2>
+          </div>
 
-            {/* Store Origin Filter */}
-            <div className="space-y-3">
-              <Label className="text-muted-foreground text-xs font-medium uppercase">Store Origin</Label>
-              <div className="flex flex-col gap-2">
-                {originOptions.map((origin) => (
-                  <label
-                    key={origin.id}
-                    className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                      origins.includes(origin.id)
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/50",
-                    )}
-                  >
-                    <Checkbox checked={origins.includes(origin.id)} onCheckedChange={() => toggleOrigin(origin.id)} />
-                    <span className="text-sm font-medium">{origin.name}</span>
-                    {!origin.hasBarcode && (
-                      <Badge variant="destructive" className="ml-auto text-xs" size="2xs">
-                        No EAN
-                      </Badge>
-                    )}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Missing Data Filter */}
-            <div className="mt-4 space-y-3 border-t pt-4">
-              <Label className="text-muted-foreground text-xs font-medium uppercase">Missing Data</Label>
-              <label className="flex cursor-pointer items-center gap-2">
-                <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
-                <BarcodeIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">Only products missing barcode</span>
-              </label>
-            </div>
-
-            {/* Availability Filter */}
-            <div className="mt-4 space-y-3 border-t pt-4">
-              <Label className="text-muted-foreground text-xs font-medium uppercase">Availability</Label>
-              <div className="flex flex-wrap gap-2">
-                <div
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                    available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                  )}
-                  onClick={() => setAvailable(null)}
-                >
-                  <CircleIcon className="h-3.5 w-3.5" />
-                  <span className="text-sm">All</span>
-                </div>
-                <div
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                    available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                  )}
-                  onClick={() => setAvailable(true)}
-                >
-                  <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                  <span className="text-sm">Available</span>
-                </div>
-                <div
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                    available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                  )}
-                  onClick={() => setAvailable(false)}
-                >
-                  <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
-                  <span className="text-sm">Unavailable</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Priority Filter */}
-            <div className="mt-4 space-y-3 border-t pt-4">
-              <Label className="text-muted-foreground text-xs font-medium uppercase">Priority Level (optional)</Label>
-              <div className="flex flex-col gap-2">
-                {priorityLevels.map((level) => (
-                  <div key={level} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`priority-${level}`}
-                      checked={priorities.includes(level)}
-                      onCheckedChange={() => togglePriority(level)}
-                    />
-                    <Label
-                      htmlFor={`priority-${level}`}
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <PriorityBubble priority={level} size="sm" useDescription />
-                    </Label>
-                  </div>
-                ))}
-              </div>
-              {priorities.length === 0 && (
-                <p className="text-muted-foreground text-xs">All priorities will be included</p>
-              )}
-            </div>
-
-            {/* Mode Toggle */}
-            <div className="mt-4 space-y-3 border-t pt-4">
-              <Label className="text-muted-foreground text-xs font-medium uppercase">Processing Mode</Label>
-              <div className="flex flex-col gap-2">
-                <div
+          {/* Store Origin Filter */}
+          <div className="space-y-3">
+            <Label className="text-muted-foreground text-xs font-medium uppercase">Store Origin</Label>
+            <div className="flex flex-col gap-2">
+              {originOptions.map((origin) => (
+                <label
+                  key={origin.id}
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                    useDirectMode ? "border-primary bg-primary/10" : "border-border",
+                    origins.includes(origin.id)
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover:border-primary/50",
                   )}
-                  onClick={() => setUseDirectMode(true)}
                 >
-                  <MonitorIcon className="h-4 w-4" />
-                  <span className="text-sm font-medium">Direct Mode</span>
-                  <Badge variant="secondary" className="ml-auto text-xs">
-                    Local Dev
-                  </Badge>
-                </div>
-                <div
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                    !useDirectMode ? "border-primary bg-primary/10" : "border-border",
+                  <Checkbox checked={origins.includes(origin.id)} onCheckedChange={() => toggleOrigin(origin.id)} />
+                  <span className="text-sm font-medium">{origin.name}</span>
+                  {!origin.hasBarcode && (
+                    <Badge variant="destructive" className="ml-auto text-xs" size="2xs">
+                      No EAN
+                    </Badge>
                   )}
-                  onClick={() => setUseDirectMode(false)}
-                >
-                  <ServerIcon className="h-4 w-4" />
-                  <span className="text-sm font-medium">QStash Mode</span>
-                  <Badge variant="secondary" className="ml-auto text-xs">
-                    Production
-                  </Badge>
-                </div>
-              </div>
-              <p className="text-muted-foreground text-xs">
-                {useDirectMode
-                  ? "Direct mode processes products in the browser. Best for local development."
-                  : "QStash mode queues products for async processing. Requires public URL (production)."}
-              </p>
+                </label>
+              ))}
             </div>
           </div>
 
-          {/* Fixed Count & Start Button */}
-          <div className="bg-background shrink-0 border-t p-4">
-            <div className="flex items-center gap-2">
-              <PackageIcon className="text-muted-foreground h-4 w-4" />
-              <span className="text-muted-foreground text-sm">Matching:</span>
-              {isLoadingCount ? (
-                <Skeleton className="h-5 w-12" />
-              ) : (
-                <span className="text-lg font-bold">{count.toLocaleString()}</span>
-              )}
+          {/* Missing Data Filter */}
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <Label className="text-muted-foreground text-xs font-medium uppercase">Missing Data</Label>
+            <label className="flex cursor-pointer items-center gap-2">
+              <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
+              <BarcodeIcon className="h-4 w-4" />
+              <span className="text-sm font-medium">Only products missing barcode</span>
+            </label>
+          </div>
+
+          {/* Availability Filter */}
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <Label className="text-muted-foreground text-xs font-medium uppercase">Availability</Label>
+            <div className="flex flex-wrap gap-2">
+              <div
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                  available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                )}
+                onClick={() => setAvailable(null)}
+              >
+                <CircleIcon className="h-3.5 w-3.5" />
+                <span className="text-sm">All</span>
+              </div>
+              <div
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                  available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                )}
+                onClick={() => setAvailable(true)}
+              >
+                <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                <span className="text-sm">Available</span>
+              </div>
+              <div
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                  available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                )}
+                onClick={() => setAvailable(false)}
+              >
+                <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
+                <span className="text-sm">Unavailable</span>
+              </div>
             </div>
-            <Button
-              onClick={handleStart}
-              disabled={count === 0 || startJobMutation.isPending || isJobRunning}
-              className="mt-3 w-full"
-            >
-              {startJobMutation.isPending || isDirectProcessing ? (
-                <>
-                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                  {isDirectProcessing ? "Processing..." : "Starting..."}
-                </>
-              ) : isJobRunning ? (
-                <>
-                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                  Job Running...
-                </>
-              ) : (
-                <>
-                  <PlayIcon className="mr-2 h-4 w-4" />
-                  Start Re-Scrape
-                </>
-              )}
+          </div>
+
+          {/* Priority Filter */}
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <Label className="text-muted-foreground text-xs font-medium uppercase">Priority Level (optional)</Label>
+            <div className="flex flex-col gap-2">
+              {priorityLevels.map((level) => (
+                <div key={level} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`priority-${level}`}
+                    checked={priorities.includes(level)}
+                    onCheckedChange={() => togglePriority(level)}
+                  />
+                  <Label
+                    htmlFor={`priority-${level}`}
+                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                  >
+                    <PriorityBubble priority={level} size="sm" useDescription />
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {priorities.length === 0 && (
+              <p className="text-muted-foreground text-xs">All priorities will be included</p>
+            )}
+          </div>
+
+          {/* Mode Toggle */}
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <Label className="text-muted-foreground text-xs font-medium uppercase">Processing Mode</Label>
+            <div className="flex flex-col gap-2">
+              <div
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
+                  useDirectMode ? "border-primary bg-primary/10" : "border-border",
+                )}
+                onClick={() => setUseDirectMode(true)}
+              >
+                <MonitorIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">Direct Mode</span>
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  Local Dev
+                </Badge>
+              </div>
+              <div
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
+                  !useDirectMode ? "border-primary bg-primary/10" : "border-border",
+                )}
+                onClick={() => setUseDirectMode(false)}
+              >
+                <ServerIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">QStash Mode</span>
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  Production
+                </Badge>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {useDirectMode
+                ? "Direct mode processes products in the browser. Best for local development."
+                : "QStash mode queues products for async processing. Requires public URL (production)."}
+            </p>
+          </div>
+        </div>
+
+        {/* Fixed Count & Start Button */}
+        <div className="bg-background shrink-0 border-t p-4">
+          <div className="flex items-center gap-2">
+            <PackageIcon className="text-muted-foreground h-4 w-4" />
+            <span className="text-muted-foreground text-sm">Matching:</span>
+            {isLoadingCount ? (
+              <Skeleton className="h-5 w-12" />
+            ) : (
+              <span className="text-lg font-bold">{count.toLocaleString()}</span>
+            )}
+          </div>
+          <Button
+            onClick={handleStart}
+            disabled={count === 0 || startJobMutation.isPending || isJobRunning}
+            className="mt-3 w-full"
+          >
+            {startJobMutation.isPending || isDirectProcessing ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                {isDirectProcessing ? "Processing..." : "Starting..."}
+              </>
+            ) : isJobRunning ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                Job Running...
+              </>
+            ) : (
+              <>
+                <PlayIcon className="mr-2 h-4 w-4" />
+                Start Re-Scrape
+              </>
+            )}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
+        <div className="mx-auto max-w-4xl space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold">Jobs & Progress</h1>
+            <Button variant="outline" size="sm" onClick={() => refetchCount()}>
+              <RefreshCwIcon className="mr-2 h-4 w-4" />
+              Refresh
             </Button>
           </div>
-        </aside>
 
-        {/* Main Content */}
-        <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="mx-auto max-w-4xl space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-semibold">Jobs & Progress</h1>
-              <Button variant="outline" size="sm" onClick={() => refetchCount()}>
-                <RefreshCwIcon className="mr-2 h-4 w-4" />
-                Refresh
-              </Button>
-            </div>
-
-            {/* Live Progress */}
-            {jobProgress && (
-              <Card className="border-primary/50">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      {jobProgress.status === "running" && (
-                        <Loader2Icon className="h-5 w-5 animate-spin text-blue-500" />
-                      )}
-                      {jobProgress.status === "completed" && <CheckCircle2Icon className="h-5 w-5 text-emerald-500" />}
-                      {jobProgress.status === "cancelled" && <XCircleIcon className="h-5 w-5 text-amber-500" />}
-                      {jobProgress.status === "failed" && <AlertTriangleIcon className="h-5 w-5 text-red-500" />}
-                      Job {jobProgress.id}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={
-                          jobProgress.status === "running"
-                            ? "default"
-                            : jobProgress.status === "completed"
-                              ? "secondary"
-                              : "destructive"
-                        }
+          {/* Live Progress */}
+          {jobProgress && (
+            <Card className="border-primary/50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    {jobProgress.status === "running" && <Loader2Icon className="h-5 w-5 animate-spin text-blue-500" />}
+                    {jobProgress.status === "completed" && <CheckCircle2Icon className="h-5 w-5 text-emerald-500" />}
+                    {jobProgress.status === "cancelled" && <XCircleIcon className="h-5 w-5 text-amber-500" />}
+                    {jobProgress.status === "failed" && <AlertTriangleIcon className="h-5 w-5 text-red-500" />}
+                    Job {jobProgress.id}
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={
+                        jobProgress.status === "running"
+                          ? "default"
+                          : jobProgress.status === "completed"
+                            ? "secondary"
+                            : "destructive"
+                      }
+                    >
+                      {jobProgress.status}
+                    </Badge>
+                    {jobProgress.status === "running" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cancelJobMutation.mutate(jobProgress.id)}
+                        disabled={cancelJobMutation.isPending}
                       >
-                        {jobProgress.status}
-                      </Badge>
-                      {jobProgress.status === "running" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => cancelJobMutation.mutate(jobProgress.id)}
-                          disabled={cancelJobMutation.isPending}
-                        >
-                          <SquareIcon className="mr-1 h-3 w-3" />
-                          Cancel
-                        </Button>
-                      )}
-                    </div>
+                        <SquareIcon className="mr-1 h-3 w-3" />
+                        Cancel
+                      </Button>
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">
-                        {jobProgress.processed.toLocaleString()} / {jobProgress.total.toLocaleString()}
-                        <span className="text-muted-foreground ml-1">({jobProgress.stats?.progress ?? 0}%)</span>
-                      </span>
-                    </div>
-                    <Progress value={jobProgress.stats?.progress ?? 0} className="h-3" />
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <StatCard
-                      icon={<PackageIcon className="h-4 w-4" />}
-                      label="Processed"
-                      value={jobProgress.processed.toLocaleString()}
-                      color="text-blue-500"
-                    />
-                    <StatCard
-                      icon={<XCircleIcon className="h-4 w-4" />}
-                      label="Failed"
-                      value={jobProgress.failed.toLocaleString()}
-                      color="text-red-500"
-                    />
-                    <StatCard
-                      icon={<BarcodeIcon className="h-4 w-4" />}
-                      label="Barcodes Found"
-                      value={jobProgress.barcodesFound.toLocaleString()}
-                      color="text-emerald-500"
-                    />
-                    <StatCard
-                      icon={<ZapIcon className="h-4 w-4" />}
-                      label="Rate"
-                      value={jobProgress.stats?.rate ?? "—"}
-                      color="text-amber-500"
-                    />
-                  </div>
-
-                  {/* Time Info */}
-                  <div className="text-muted-foreground flex flex-wrap items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1">
-                      <ClockIcon className="h-3.5 w-3.5" />
-                      Started: {new Date(jobProgress.startedAt).toLocaleTimeString()}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="font-medium">
+                      {jobProgress.processed.toLocaleString()} / {jobProgress.total.toLocaleString()}
+                      <span className="text-muted-foreground ml-1">({jobProgress.stats?.progress ?? 0}%)</span>
                     </span>
-                    {jobProgress.stats?.etaSeconds && jobProgress.status === "running" && (
-                      <span>ETA: ~{formatDuration(jobProgress.stats.etaSeconds)}</span>
-                    )}
-                    {jobProgress.completedAt && (
-                      <span>Completed: {new Date(jobProgress.completedAt).toLocaleTimeString()}</span>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  <Progress value={jobProgress.stats?.progress ?? 0} className="h-3" />
+                </div>
 
-            {/* Empty state when no job is running */}
-            {!jobProgress && (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                  <PackageIcon className="text-muted-foreground mb-4 h-12 w-12" />
-                  <h3 className="text-lg font-medium">No Active Job</h3>
-                  <p className="text-muted-foreground mt-1 max-w-sm text-sm">
-                    Configure your filters in the sidebar and click &quot;Start Re-Scrape&quot; to begin processing
-                    products.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <StatCard
+                    icon={<PackageIcon className="h-4 w-4" />}
+                    label="Processed"
+                    value={jobProgress.processed.toLocaleString()}
+                    color="text-blue-500"
+                  />
+                  <StatCard
+                    icon={<XCircleIcon className="h-4 w-4" />}
+                    label="Failed"
+                    value={jobProgress.failed.toLocaleString()}
+                    color="text-red-500"
+                  />
+                  <StatCard
+                    icon={<BarcodeIcon className="h-4 w-4" />}
+                    label="Barcodes Found"
+                    value={jobProgress.barcodesFound.toLocaleString()}
+                    color="text-emerald-500"
+                  />
+                  <StatCard
+                    icon={<ZapIcon className="h-4 w-4" />}
+                    label="Rate"
+                    value={jobProgress.stats?.rate ?? "—"}
+                    color="text-amber-500"
+                  />
+                </div>
 
-            {/* Recent Jobs */}
-            {jobsData?.jobs && jobsData.jobs.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Recent Jobs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {jobsData.jobs.slice(0, 5).map((job) => (
-                      <div
-                        key={job.id}
-                        className={cn(
-                          "flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between",
-                          activeJobId === job.id && "border-primary bg-primary/5",
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Badge
-                            variant={
-                              job.status === "running"
-                                ? "default"
-                                : job.status === "completed"
-                                  ? "secondary"
-                                  : "destructive"
-                            }
-                            className="w-20 justify-center"
-                          >
-                            {job.status}
-                          </Badge>
-                          <span className="font-mono text-sm">{job.id}</span>
-                          <span className="text-muted-foreground text-sm">
-                            {job.processed.toLocaleString()} / {job.total.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-muted-foreground text-xs">
-                            {new Date(job.startedAt).toLocaleString()}
-                          </span>
-                          {job.status === "running" && activeJobId !== job.id && (
-                            <Button variant="ghost" size="sm" onClick={() => setActiveJobId(job.id)}>
-                              View
-                            </Button>
-                          )}
-                        </div>
+                {/* Time Info */}
+                <div className="text-muted-foreground flex flex-wrap items-center gap-4 text-sm">
+                  <span className="flex items-center gap-1">
+                    <ClockIcon className="h-3.5 w-3.5" />
+                    Started: {new Date(jobProgress.startedAt).toLocaleTimeString()}
+                  </span>
+                  {jobProgress.stats?.etaSeconds && jobProgress.status === "running" && (
+                    <span>ETA: ~{formatDuration(jobProgress.stats.etaSeconds)}</span>
+                  )}
+                  {jobProgress.completedAt && (
+                    <span>Completed: {new Date(jobProgress.completedAt).toLocaleTimeString()}</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Empty state when no job is running */}
+          {!jobProgress && (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <PackageIcon className="text-muted-foreground mb-4 h-12 w-12" />
+                <h3 className="text-lg font-medium">No Active Job</h3>
+                <p className="text-muted-foreground mt-1 max-w-sm text-sm">
+                  Configure your filters in the sidebar and click &quot;Start Re-Scrape&quot; to begin processing
+                  products.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent Jobs */}
+          {jobsData?.jobs && jobsData.jobs.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Recent Jobs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {jobsData.jobs.slice(0, 5).map((job) => (
+                    <div
+                      key={job.id}
+                      className={cn(
+                        "flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between",
+                        activeJobId === job.id && "border-primary bg-primary/5",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant={
+                            job.status === "running"
+                              ? "default"
+                              : job.status === "completed"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                          className="w-20 justify-center"
+                        >
+                          {job.status}
+                        </Badge>
+                        <span className="font-mono text-sm">{job.id}</span>
+                        <span className="text-muted-foreground text-sm">
+                          {job.processed.toLocaleString()} / {job.total.toLocaleString()}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </main>
-      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground text-xs">
+                          {new Date(job.startedAt).toLocaleString()}
+                        </span>
+                        {job.status === "running" && activeJobId !== job.id && (
+                          <Button variant="ghost" size="sm" onClick={() => setActiveJobId(job.id)}>
+                            View
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </main>
+    </div>
   )
 }
 

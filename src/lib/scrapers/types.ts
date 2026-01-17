@@ -42,9 +42,11 @@ export interface RawProduct {
 
 /**
  * Scraped product ready for database insertion
- * Excludes id and product_id which are assigned by the database
+ * Excludes id, product_id, and updated_at which are managed separately:
+ * - id and product_id are assigned by the database
+ * - updated_at is only set by touchUpdatedAt() when a valid price is recorded
  */
-export type ScrapedProduct = Omit<StoreProduct, "id" | "product_id">
+export type ScrapedProduct = Omit<StoreProduct, "id" | "product_id" | "updated_at">
 
 /**
  * Store origin identifiers
@@ -80,4 +82,3 @@ export interface PriorityInfo {
   prioritySource: PrioritySource | null
   priorityUpdatedAt: string | null
 }
-

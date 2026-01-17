@@ -11,7 +11,17 @@ import { continenteScraper } from "./origins/continente"
 import { pingoDoceScraper } from "./origins/pingo-doce"
 
 // Re-export types
-export type { StoreScraper, ScrapedProduct, ScraperContext, RawProduct, PriorityInfo, ScrapeResult, ScrapeResultType, FetchResult, FetchStatus } from "./types"
+export type {
+  StoreScraper,
+  ScrapedProduct,
+  ScraperContext,
+  RawProduct,
+  PriorityInfo,
+  ScrapeResult,
+  ScrapeResultType,
+  FetchResult,
+  FetchStatus,
+} from "./types"
 export { StoreOrigin } from "./types"
 
 // Re-export utilities that external code might need
@@ -122,7 +132,10 @@ export async function scrapeAndReplaceProduct(url: string | null, origin: number
   )
 
   if (error) {
-    return NextResponse.json({ data, error: "StoreProduct upsert failed", details: error, product: result.product }, { status: 500 })
+    return NextResponse.json(
+      { data, error: "StoreProduct upsert failed", details: error, product: result.product },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ data: result.product, message: "StoreProduct upserted", available: true })
@@ -212,7 +225,9 @@ export function batchUrls(urls: string[], batchSize: number): string[][] {
 
 export async function processBatch(urls: string[]): Promise<(ScrapedProduct | { url: string; error: unknown })[]> {
   const products = await Promise.all(
-    urls.map((url) => continenteScraper.scrape({ url }).then((result) => result.product || { url, error: "Failed to scrape" })),
+    urls.map((url) =>
+      continenteScraper.scrape({ url }).then((result) => result.product || { url, error: "Failed to scrape" }),
+    ),
   )
   return products
 }

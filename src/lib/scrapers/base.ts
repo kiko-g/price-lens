@@ -52,7 +52,7 @@ export abstract class BaseProductScraper implements StoreScraper {
 
       return {
         type: "success",
-        product: transformRawProduct(rawProduct, this.originId, priorityInfo)
+        product: transformRawProduct(rawProduct, this.originId, priorityInfo),
       }
     } catch (error) {
       console.error(`[${this.name}] Unexpected error scraping ${ctx.url}:`, error)
@@ -103,4 +103,3 @@ export abstract class BaseProductScraper implements StoreScraper {
     }
   }
 }
-

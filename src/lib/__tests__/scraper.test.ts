@@ -318,20 +318,6 @@ describe("Continente Scraper", () => {
     expect(product.image).toContain("sw=500")
     expect(product.image).toContain("sh=500")
   })
-
-  it("should set updated_at timestamp", async () => {
-    const fixtureHtml = loadFixture("continente.html")
-    mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
-
-    const before = new Date().toISOString()
-    const result = await scraper.Scrapers.continente.productPage("https://www.continente.pt/produto/test.html")
-    const product = result as ScrapedProduct
-    const after = new Date().toISOString()
-
-    expect(product.updated_at).toBeDefined()
-    expect(product.updated_at >= before).toBe(true)
-    expect(product.updated_at <= after).toBe(true)
-  })
 })
 
 describe("Auchan Scraper", () => {

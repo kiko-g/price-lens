@@ -16,11 +16,7 @@ export function FooterProvider({ children }: { children: ReactNode }) {
   const hideFooter = useCallback(() => setIsFooterHidden(true), [])
   const showFooter = useCallback(() => setIsFooterHidden(false), [])
 
-  return (
-    <FooterContext.Provider value={{ isFooterHidden, hideFooter, showFooter }}>
-      {children}
-    </FooterContext.Provider>
-  )
+  return <FooterContext.Provider value={{ isFooterHidden, hideFooter, showFooter }}>{children}</FooterContext.Provider>
 }
 
 export function useFooter() {

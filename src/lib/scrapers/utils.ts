@@ -175,7 +175,10 @@ export function transformRawProduct(
 /**
  * Extracts priority info from a previous product (for updates)
  */
-export function extractPriorityInfo(prevProduct?: { priority?: number | null; priority_source?: string | null }): PriorityInfo {
+export function extractPriorityInfo(prevProduct?: {
+  priority?: number | null
+  priority_source?: string | null
+}): PriorityInfo {
   return {
     priority: prevProduct?.priority ?? null,
     prioritySource: (prevProduct?.priority_source as PriorityInfo["prioritySource"]) ?? "ai",
@@ -185,4 +188,3 @@ export function extractPriorityInfo(prevProduct?: { priority?: number | null; pr
 
 // Re-export utility functions that scrapers might need
 export { formatProductName, priceToNumber, resizeImgSrc, packageToUnit }
-
