@@ -32,6 +32,7 @@ interface ScheduleOverview {
   totalTracked: number
   totalStale: number
   totalDueForScrape: number
+  totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
   costEstimate: CostEstimate
 }
 
@@ -213,6 +214,27 @@ export async function GET(req: NextRequest) {
         .filter((p) => p.priority !== null && (ACTIVE_PRIORITIES as readonly number[]).includes(p.priority))
         .reduce((sum, p) => sum + p.stale, 0)
 
+      // Calculate phantom scraped products (have updated_at but no price records)
+      // This is a data integrity issue we need to surface
+      let totalPhantomScraped = 0
+      try {
+        // Get all store_product_ids that have at least one price record
+        const { data: productsWithPrices } = await supabase.from("prices").select("store_product_id")
+        const idsWithPrices = new Set(productsWithPrices?.map((p) => p.store_product_id) || [])
+
+        // Get all products with active priorities that have updated_at set
+        const { data: scrapedProducts } = await supabase
+          .from("store_products")
+          .select("id")
+          .in("priority", [...ACTIVE_PRIORITIES])
+          .not("updated_at", "is", null)
+
+        // Count products that appear scraped but have no price records
+        totalPhantomScraped = (scrapedProducts || []).filter((p) => !idsWithPrices.has(p.id)).length
+      } catch (err) {
+        console.error("Error calculating phantom scraped:", err)
+      }
+
       // Calculate cost estimate
       const dailyScrapes = calculateDailyScrapes(priorityStats)
       const monthlyScrapes = dailyScrapes * 30
@@ -235,6 +257,7 @@ export async function GET(req: NextRequest) {
         totalTracked,
         totalStale,
         totalDueForScrape,
+        totalPhantomScraped,
         costEstimate,
       }
 
@@ -471,6 +494,83 @@ export async function GET(req: NextRequest) {
           totalPages,
           hasMore: page < totalPages,
         },
+      })
+    }
+
+    if (action === "fix-phantom-scraped") {
+      // Find and fix "phantom scraped" products - they have updated_at set but no price records
+      // This is a data integrity issue where products appear "fresh" but have no actual price data
+      // Fix: Reset their updated_at to NULL so the scheduler picks them up
+
+      // Step 1: Get all store_product_ids that have at least one price record
+      const { data: productsWithPrices, error: pricesError } = await supabase
+        .from("prices")
+        .select("store_product_id")
+
+      if (pricesError) {
+        console.error("Error fetching prices:", pricesError)
+        return NextResponse.json({ error: "Failed to query prices" }, { status: 500 })
+      }
+
+      const idsWithPrices = new Set(productsWithPrices?.map((p) => p.store_product_id) || [])
+
+      // Step 2: Get all products with active priorities that have updated_at set
+      const { data: scrapedProducts, error: productsError } = await supabase
+        .from("store_products")
+        .select("id, name, priority, updated_at")
+        .in("priority", [...ACTIVE_PRIORITIES])
+        .not("updated_at", "is", null)
+
+      if (productsError) {
+        console.error("Error fetching products:", productsError)
+        return NextResponse.json({ error: "Failed to query products" }, { status: 500 })
+      }
+
+      // Step 3: Find products that appear scraped but have no price records
+      const phantomProducts = (scrapedProducts || []).filter((p) => !idsWithPrices.has(p.id))
+
+      if (phantomProducts.length === 0) {
+        return NextResponse.json({
+          message: "No phantom scraped products found",
+          fixed: 0,
+        })
+      }
+
+      // Check if this is a dry run
+      const dryRun = searchParams.get("dry") === "true"
+
+      if (dryRun) {
+        return NextResponse.json({
+          dryRun: true,
+          message: `Found ${phantomProducts.length} phantom scraped products`,
+          wouldFix: phantomProducts.length,
+          sampleProducts: phantomProducts.slice(0, 10).map((p) => ({
+            id: p.id,
+            name: p.name,
+            priority: p.priority,
+            updated_at: p.updated_at,
+          })),
+        })
+      }
+
+      // Step 4: Reset updated_at to NULL for these products
+      const phantomIds = phantomProducts.map((p) => p.id)
+      const { error: updateError } = await supabase
+        .from("store_products")
+        .update({ updated_at: null })
+        .in("id", phantomIds)
+
+      if (updateError) {
+        console.error("Error resetting updated_at:", updateError)
+        return NextResponse.json({ error: "Failed to reset updated_at" }, { status: 500 })
+      }
+
+      console.log(`[Schedule] Fixed ${phantomIds.length} phantom scraped products`)
+
+      return NextResponse.json({
+        message: `Reset updated_at for ${phantomIds.length} phantom scraped products`,
+        fixed: phantomIds.length,
+        productIds: phantomIds.slice(0, 50), // Return first 50 IDs for reference
       })
     }
 

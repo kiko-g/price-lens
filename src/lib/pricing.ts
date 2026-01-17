@@ -2,6 +2,7 @@ import { StoreProduct, Price } from "@/types"
 
 import { now } from "./utils"
 import { priceQueries } from "./db/queries/prices"
+import { storeProductQueries } from "./db/queries/products"
 
 export function isValidPriceValue(value: number | null): boolean {
   return typeof value === "number" && !isNaN(value)
@@ -150,6 +151,8 @@ export async function updatePricePoint(sp: StoreProduct) {
   if (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint)) {
     console.info("Price point already exists and is up to date.", existingPricePoint)
     await priceQueries.updatePricePointUpdatedAt(existingPricePoint.id)
+    // Update store product's updated_at to mark successful price check
+    await storeProductQueries.touchUpdatedAt(sp.id)
     return
   }
 
@@ -157,9 +160,13 @@ export async function updatePricePoint(sp: StoreProduct) {
   if (existingPricePoint) {
     console.info("Price point already exists but is outdated.", existingPricePoint)
     await priceQueries.closeExistingPricePoint(existingPricePoint.id, newPricePoint)
+    // Update store product's updated_at to mark successful price recording
+    await storeProductQueries.touchUpdatedAt(sp.id)
     return
   }
 
   // First price point for this product
   await priceQueries.insertNewPricePoint(newPricePoint)
+  // Update store product's updated_at to mark first successful price recording
+  await storeProductQueries.touchUpdatedAt(sp.id)
 }

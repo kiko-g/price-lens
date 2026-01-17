@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import type { StoreProduct } from "@/types"
 import { storeProductQueries } from "@/lib/db/queries/products"
+import { priceQueries } from "@/lib/db/queries/prices"
 
 import { StoreOrigin, type StoreScraper, type ScrapedProduct } from "./types"
 import { fetchHtml } from "./utils"
@@ -92,9 +93,16 @@ export async function scrapeAndReplaceProduct(url: string | null, origin: number
   const scraper = getScraper(origin)
   const result = await scraper.scrape({ url, previousProduct: prevSp })
 
-  // Handle 404 - product definitively doesn't exist, mark as unavailable
+  // Handle 404 - product definitively doesn't exist
+  // Mark as unavailable AND close the price point (price is no longer valid)
   if (result.type === "not_found") {
-    await storeProductQueries.markUnavailable({ url })
+    const { productId } = await storeProductQueries.markUnavailable({ url })
+
+    // Close the latest price point - the product is gone, so its price is no longer valid
+    if (productId) {
+      await priceQueries.closeLatestPricePoint(productId)
+    }
+
     return NextResponse.json({ error: "Product not found (404)", url, available: false }, { status: 404 })
   }
 

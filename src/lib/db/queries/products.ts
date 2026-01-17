@@ -399,36 +399,50 @@ export const storeProductQueries = {
 
   async upsertBlank({ url }: { url: string }) {
     const supabase = createClient()
+    // Only set created_at, NOT updated_at - we want updated_at to reflect
+    // when a product was last successfully scraped with valid price data
     return supabase.from("store_products").upsert(
       {
         url,
         created_at: now(),
-        updated_at: now(),
       },
       {
         onConflict: "url",
-        ignoreDuplicates: false,
+        ignoreDuplicates: true, // Don't overwrite existing records
       },
     )
   },
 
   /**
    * Marks a product as unavailable (typically after receiving a 404)
-   * Updates existing record or creates a new one with available = false
+   * Sets available = false and returns the product ID for further processing
+   * Note: Does NOT update updated_at - we want that to reflect last successful scrape
+   * Note: Caller should close the price point separately using priceQueries.closeLatestPricePoint
    */
   async markUnavailable({ url }: { url: string }) {
     const supabase = createClient()
-    return supabase.from("store_products").upsert(
+
+    // First, get the product to find its ID
+    const { data: existingProduct } = await supabase
+      .from("store_products")
+      .select("id")
+      .eq("url", url)
+      .maybeSingle()
+
+    // Mark as unavailable
+    await supabase.from("store_products").upsert(
       {
         url,
         available: false,
-        updated_at: now(),
       },
       {
         onConflict: "url",
         ignoreDuplicates: false,
       },
     )
+
+    // Return the product ID so caller can close the price point
+    return { productId: existingProduct?.id ?? null }
   },
 
   async updatePriority(
@@ -499,14 +513,18 @@ export const storeProductQueries = {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
       .from("store_products")
-      .select("created_at")
+      .select("created_at, updated_at")
       .eq("url", sp.url)
       .single()
 
+    // IMPORTANT: We explicitly preserve existing updated_at (which may be null)
+    // updated_at should ONLY be set by touchUpdatedAt() when a valid price is recorded
+    // This prevents the database from auto-setting updated_at on every upsert
     const productToUpsert = {
       ...sp,
       priority: sp.priority || 1,
-      created_at: sp.created_at || existingProduct?.created_at || sp.updated_at,
+      created_at: sp.created_at || existingProduct?.created_at || new Date().toISOString(),
+      updated_at: existingProduct?.updated_at ?? null, // Preserve existing value, or null for new products
     }
 
     const { data, error } = await supabase.from("store_products").upsert(productToUpsert, {
@@ -898,6 +916,21 @@ export const storeProductQueries = {
     const supabase = createClient()
     const { data, error } = await supabase.from("store_products").insert([sp]).select().single()
     return { data, error }
+  },
+
+  /**
+   * Updates the updated_at timestamp on a store product
+   * Should only be called when a valid price point is recorded
+   */
+  async touchUpdatedAt(id: number) {
+    const supabase = createClient()
+    const { error } = await supabase.from("store_products").update({ updated_at: now() }).eq("id", id)
+
+    if (error) {
+      console.error("Error updating store product updated_at:", error)
+    }
+
+    return { error }
   },
 
   async getSameProductDifferentStores(id: string, limit: number = 10) {

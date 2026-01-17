@@ -1,21 +1,26 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import axios from "axios"
 import { cn } from "@/lib/utils"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PriorityBubble } from "@/components/PriorityBubble"
 
-import { AlertTriangleIcon, CheckCircle2Icon } from "lucide-react"
+import { AlertTriangleIcon, CheckCircle2Icon, WrenchIcon, Loader2Icon, CircleIcon } from "lucide-react"
 
 import type { ScheduleOverview } from "../types"
 import { PRIORITY_CONFIG, formatThreshold } from "../constants"
 
 export default function ScheduleDistributionPage() {
+  const queryClient = useQueryClient()
+  const [fixResult, setFixResult] = useState<{ fixed: number } | null>(null)
+
   const { data: overview, isLoading: isLoadingOverview } = useQuery({
     queryKey: ["schedule-overview"],
     queryFn: async () => {
@@ -25,9 +30,66 @@ export default function ScheduleDistributionPage() {
     staleTime: 60000,
   })
 
+  const fixPhantomMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.get("/api/admin/schedule?action=fix-phantom-scraped")
+      return res.data as { fixed: number; message: string }
+    },
+    onSuccess: (data) => {
+      setFixResult({ fixed: data.fixed })
+      queryClient.invalidateQueries({ queryKey: ["schedule-overview"] })
+    },
+  })
+
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        {/* Phantom Scraped Warning */}
+        {overview && overview.totalPhantomScraped > 0 && (
+          <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg text-amber-700 dark:text-amber-400">
+                <AlertTriangleIcon className="h-5 w-5" />
+                Data Integrity Issue Detected
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3 text-sm">
+                Found <strong className="text-foreground">{overview.totalPhantomScraped.toLocaleString()}</strong>{" "}
+                products that appear scraped (have{" "}
+                <code className="rounded bg-amber-100 px-1 dark:bg-amber-900">updated_at</code> set) but have{" "}
+                <strong>no price records</strong>. These products won&apos;t be picked up by the scheduler.
+              </p>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fixPhantomMutation.mutate()}
+                  disabled={fixPhantomMutation.isPending}
+                  className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
+                >
+                  {fixPhantomMutation.isPending ? (
+                    <>
+                      <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                      Fixing...
+                    </>
+                  ) : (
+                    <>
+                      <WrenchIcon className="mr-2 h-4 w-4" />
+                      Fix {overview.totalPhantomScraped.toLocaleString()} products
+                    </>
+                  )}
+                </Button>
+                {fixResult && (
+                  <span className="text-sm text-emerald-600 dark:text-emerald-400">
+                    ✓ Fixed {fixResult.fixed} products - they will be scraped on the next run
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Priority Distribution</CardTitle>
@@ -129,18 +191,19 @@ export default function ScheduleDistributionPage() {
                           )}
                         </div>
 
-                        <div className="mt-2 flex flex-wrap gap-4 text-xs font-medium">
+                        <div className="mt-3 flex flex-col gap-1 text-xs font-medium">
                           <span className="text-destructive flex items-center gap-1">
-                            <AlertTriangleIcon className="h-3 w-3" />
+                            <AlertTriangleIcon className="h-4 w-4" />
                             {stat.stale.toLocaleString()} stale ({stalePercent}%)
                           </span>
                           <span className="text-success flex items-center gap-1">
-                            <CheckCircle2Icon className="h-3 w-3" />
+                            <CheckCircle2Icon className="h-4 w-4" />
                             {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
                           </span>
                           {stat.neverScraped > 0 && (
-                            <span className="text-muted-foreground">
-                              ({stat.neverScraped.toLocaleString()} never scraped)
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <CircleIcon className="h-4 w-4" />
+                              {stat.neverScraped.toLocaleString()} never scraped
                             </span>
                           )}
                         </div>

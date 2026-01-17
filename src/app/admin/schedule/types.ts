@@ -26,6 +26,7 @@ export interface ScheduleOverview {
   totalTracked: number
   totalStale: number
   totalDueForScrape: number
+  totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
   costEstimate: CostEstimate
 }
 

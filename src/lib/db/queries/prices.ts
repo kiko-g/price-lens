@@ -310,6 +310,48 @@ export const priceQueries = {
     return { success: true }
   },
 
+  /**
+   * Closes the latest open price point for a store product
+   * Used when a product becomes unavailable (404) to mark the end of its price validity
+   */
+  async closeLatestPricePoint(storeProductId: number): Promise<{ closed: boolean; error?: string }> {
+    const supabase = createClient()
+
+    // Find the latest open price point (valid_to is null)
+    const { data: latestPrice, error: fetchError } = await supabase
+      .from("prices")
+      .select("id")
+      .eq("store_product_id", storeProductId)
+      .is("valid_to", null)
+      .order("valid_from", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (fetchError) {
+      console.error("Error fetching latest price point:", fetchError)
+      return { closed: false, error: fetchError.message }
+    }
+
+    if (!latestPrice) {
+      // No open price point to close
+      return { closed: false }
+    }
+
+    // Close it by setting valid_to to now
+    const { error: updateError } = await supabase
+      .from("prices")
+      .update({ valid_to: now(), updated_at: now() })
+      .eq("id", latestPrice.id)
+
+    if (updateError) {
+      console.error("Error closing price point:", updateError)
+      return { closed: false, error: updateError.message }
+    }
+
+    console.info(`[Prices] Closed price point ${latestPrice.id} for store product ${storeProductId}`)
+    return { closed: true }
+  },
+
   async getDuplicatePricePointsStats() {
     const supabase = createClient()
 
