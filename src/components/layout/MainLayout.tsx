@@ -8,10 +8,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith("/admin")
 
-  // Admin pages have their own layout with sidebar
-  if (isAdmin) {
-    return <>{children}</>
-  }
+  if (isAdmin) return <>{children}</>
 
   return (
     <div className="flex min-h-screen flex-col">

@@ -38,18 +38,36 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Define protected routes that require authentication
-  // In development, only protect /profile (allow /admin without auth for testing)
-  const isDev = process.env.NODE_ENV === "development"
-  const protectedRoutes = isDev ? ["/profile"] : ["/profile", "/admin"]
+  const protectedRoutes = ["/profile", "/admin", "/api/admin"]
 
-  // If the user is not authenticated and is trying to access a protected route,
-  // redirect them to the login page.
+  // If the user is not authenticated and is trying to access a protected route
   if (!user && protectedRoutes.some((path) => pathname.startsWith(path))) {
+    // For API routes, return 401 Unauthorized
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    // For page routes, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = "/login"
-    // store the intended path to redirect back after login
     url.searchParams.set("next", pathname)
     return NextResponse.redirect(url)
+  }
+
+  // Admin routes require admin role (both pages and API routes)
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin")
+  if (user && isAdminRoute) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+    if (profile?.role !== "admin") {
+      // For API routes, return 403 Forbidden
+      if (pathname.startsWith("/api/admin")) {
+        return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 })
+      }
+      // For page routes, redirect to home
+      const url = request.nextUrl.clone()
+      url.pathname = "/"
+      return NextResponse.redirect(url)
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
