@@ -214,7 +214,7 @@ export default function ScheduleDistributionPage() {
                                     className="flex items-center justify-center bg-emerald-500 text-xs font-medium text-white transition-all"
                                     style={{ width: `${freshPercent}%` }}
                                   >
-                                    {`${stat.fresh.toLocaleString()}`}
+                                    {freshPercent > 10 && `${stat.fresh.toLocaleString()}`}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
