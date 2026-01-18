@@ -208,13 +208,13 @@ export default function ScheduleDistributionPage() {
                         <div className="flex h-6 w-full overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
                           {stat.fresh > 0 && (
                             <TooltipProvider>
-                              <Tooltip>
+                              <Tooltip delayDuration={100}>
                                 <TooltipTrigger asChild>
                                   <div
                                     className="flex items-center justify-center bg-emerald-500 text-xs font-medium text-white transition-all"
                                     style={{ width: `${freshPercent}%` }}
                                   >
-                                    {freshPercent > 10 && `${stat.fresh.toLocaleString()}`}
+                                    {freshPercent > 10 && stat.fresh.toLocaleString()}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -227,13 +227,13 @@ export default function ScheduleDistributionPage() {
                           )}
                           {stat.staleActionable > 0 && (
                             <TooltipProvider>
-                              <Tooltip>
+                              <Tooltip delayDuration={100}>
                                 <TooltipTrigger asChild>
                                   <div
                                     className="flex items-center justify-center bg-orange-500 text-xs font-medium text-white transition-all"
                                     style={{ width: `${staleActionablePercent}%` }}
                                   >
-                                    {staleActionablePercent > 10 && `${stat.staleActionable.toLocaleString()}`}
+                                    {staleActionablePercent > 10 && stat.staleActionable.toLocaleString()}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -247,13 +247,13 @@ export default function ScheduleDistributionPage() {
                           )}
                           {stat.unavailable > 0 && (
                             <TooltipProvider>
-                              <Tooltip>
+                              <Tooltip delayDuration={100}>
                                 <TooltipTrigger asChild>
                                   <div
                                     className="flex items-center justify-center bg-gray-400 text-xs font-medium text-white transition-all dark:bg-gray-600"
                                     style={{ width: `${unavailablePercent}%` }}
                                   >
-                                    {unavailablePercent > 10 && `${stat.unavailable.toLocaleString()}`}
+                                    {unavailablePercent > 10 && stat.unavailable.toLocaleString()}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>

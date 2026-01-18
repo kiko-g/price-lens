@@ -57,6 +57,7 @@ import {
   RadarIcon,
   MicroscopeIcon,
   CircleIcon,
+  AlertTriangleIcon,
 } from "lucide-react"
 
 function resolveImageUrlForPage(image: string, size = 800) {
@@ -177,6 +178,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             {!sp.available && (
               <div className="absolute top-3 left-3 z-10">
                 <Badge variant="destructive" size="sm" roundedness="sm" className="w-fit">
+                  <AlertTriangleIcon className="h-4 w-4" />
                   Not available
                 </Badge>
               </div>
