@@ -21,7 +21,7 @@ export function Barcode({
 }: BarcodeProps) {
   if (showMissingValue && !value) {
     return (
-      <div className="inline-flex flex-col items-center gap-1">
+      <div className={cn("inline-flex flex-col items-start justify-center gap-1", className)}>
         <span className="text-muted-foreground font-mono text-xs tracking-wider">No barcode available</span>
       </div>
     )

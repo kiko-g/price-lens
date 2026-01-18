@@ -1,9 +1,10 @@
 export interface PriorityStats {
   priority: number | null
   total: number
-  stale: number
-  fresh: number
-  neverScraped: number
+  fresh: number // available=true AND recently scraped
+  staleActionable: number // available=true AND needs scraping (we can fix this)
+  unavailable: number // available=false (not our problem)
+  neverScraped: number // updated_at IS NULL (informational, overlaps with other categories)
   stalenessThresholdHours: number | null
 }
 
@@ -24,7 +25,8 @@ export interface ScheduleOverview {
   priorityStats: PriorityStats[]
   totalProducts: number
   totalTracked: number
-  totalStale: number
+  totalStaleActionable: number // Products that need scraping and are available
+  totalUnavailable: number // Products that are unavailable (can't be scraped)
   totalDueForScrape: number
   totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
   costEstimate: CostEstimate
@@ -68,7 +70,7 @@ export interface ActivityData {
   scrapesPerHour: number
 }
 
-export type StalenessStatus = "stale" | "never-scraped" | "fresh"
+export type StalenessStatus = "stale-actionable" | "never-scraped" | "fresh" | "unavailable"
 
 export interface ProductsByStalenessResponse {
   data: import("@/types").StoreProduct[]

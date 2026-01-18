@@ -7,9 +7,10 @@ export const maxDuration = 30
 interface PriorityStats {
   priority: number | null
   total: number
-  stale: number
-  fresh: number
-  neverScraped: number
+  fresh: number // available=true AND recently scraped
+  staleActionable: number // available=true AND needs scraping (we can fix this)
+  unavailable: number // available=false (not our problem)
+  neverScraped: number // updated_at IS NULL (informational, overlaps with other categories)
   stalenessThresholdHours: number | null
 }
 
@@ -30,7 +31,8 @@ interface ScheduleOverview {
   priorityStats: PriorityStats[]
   totalProducts: number
   totalTracked: number
-  totalStale: number
+  totalStaleActionable: number // Products that need scraping and are available
+  totalUnavailable: number // Products that are unavailable (can't be scraped)
   totalDueForScrape: number
   totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
   costEstimate: CostEstimate
@@ -143,15 +145,31 @@ export async function GET(req: NextRequest) {
           priorityStats.push({
             priority,
             total: 0,
-            stale: 0,
             fresh: 0,
+            staleActionable: 0,
+            unavailable: 0,
             neverScraped: 0,
             stalenessThresholdHours: thresholdHours,
           })
           continue
         }
 
-        // Get never scraped count (updated_at is null)
+        // Get unavailable count (available = false)
+        const unavailableQuery =
+          priority === null
+            ? supabase
+                .from("store_products")
+                .select("id", { count: "exact", head: true })
+                .is("priority", null)
+                .eq("available", false)
+            : supabase
+                .from("store_products")
+                .select("id", { count: "exact", head: true })
+                .eq("priority", priority)
+                .eq("available", false)
+        const { count: unavailable } = await unavailableQuery
+
+        // Get never scraped count (updated_at is null) - informational, overlaps with other categories
         const neverScrapedQuery =
           priority === null
             ? supabase
@@ -166,40 +184,61 @@ export async function GET(req: NextRequest) {
                 .is("updated_at", null)
         const { count: neverScraped } = await neverScrapedQuery
 
-        let stale = neverScraped ?? 0
+        // Calculate fresh and staleActionable for AVAILABLE products only
+        const availableTotal = total - (unavailable ?? 0)
         let fresh = 0
+        let staleActionable = 0
 
-        if (cutoffTime) {
-          // Get stale count (updated_at < cutoffTime, excluding never scraped)
-          const staleQuery =
-            priority === null
-              ? supabase
-                  .from("store_products")
-                  .select("id", { count: "exact", head: true })
-                  .is("priority", null)
-                  .not("updated_at", "is", null)
-                  .lt("updated_at", cutoffTime)
-              : supabase
-                  .from("store_products")
-                  .select("id", { count: "exact", head: true })
-                  .eq("priority", priority)
-                  .not("updated_at", "is", null)
-                  .lt("updated_at", cutoffTime)
-          const { count: staleCount } = await staleQuery
-          stale += staleCount ?? 0
+        if (availableTotal > 0) {
+          if (cutoffTime) {
+            // Fresh = available AND updated_at >= cutoffTime
+            const freshQuery =
+              priority === null
+                ? supabase
+                    .from("store_products")
+                    .select("id", { count: "exact", head: true })
+                    .is("priority", null)
+                    .eq("available", true)
+                    .gte("updated_at", cutoffTime)
+                : supabase
+                    .from("store_products")
+                    .select("id", { count: "exact", head: true })
+                    .eq("priority", priority)
+                    .eq("available", true)
+                    .gte("updated_at", cutoffTime)
+            const { count: freshCount } = await freshQuery
+            fresh = freshCount ?? 0
 
-          // Fresh = total - stale
-          fresh = total - stale
-        } else {
-          // No threshold = everything scraped is "fresh"
-          fresh = total - stale
+            // Stale actionable = available - fresh
+            staleActionable = availableTotal - fresh
+          } else {
+            // No threshold = all available scraped products are "fresh", never scraped available are "stale"
+            const neverScrapedAvailableQuery =
+              priority === null
+                ? supabase
+                    .from("store_products")
+                    .select("id", { count: "exact", head: true })
+                    .is("priority", null)
+                    .eq("available", true)
+                    .is("updated_at", null)
+                : supabase
+                    .from("store_products")
+                    .select("id", { count: "exact", head: true })
+                    .eq("priority", priority)
+                    .eq("available", true)
+                    .is("updated_at", null)
+            const { count: neverScrapedAvailable } = await neverScrapedAvailableQuery
+            staleActionable = neverScrapedAvailable ?? 0
+            fresh = availableTotal - staleActionable
+          }
         }
 
         priorityStats.push({
           priority,
           total,
-          stale,
           fresh,
+          staleActionable,
+          unavailable: unavailable ?? 0,
           neverScraped: neverScraped ?? 0,
           stalenessThresholdHours: thresholdHours,
         })
@@ -209,10 +248,11 @@ export async function GET(req: NextRequest) {
       const totalTracked = priorityStats
         .filter((p) => p.priority !== null && p.priority > 0)
         .reduce((sum, p) => sum + p.total, 0)
-      const totalStale = priorityStats.reduce((sum, p) => sum + p.stale, 0)
+      const totalStaleActionable = priorityStats.reduce((sum, p) => sum + p.staleActionable, 0)
+      const totalUnavailable = priorityStats.reduce((sum, p) => sum + p.unavailable, 0)
       const totalDueForScrape = priorityStats
         .filter((p) => p.priority !== null && (ACTIVE_PRIORITIES as readonly number[]).includes(p.priority))
-        .reduce((sum, p) => sum + p.stale, 0)
+        .reduce((sum, p) => sum + p.staleActionable, 0)
 
       // Calculate phantom scraped products (have updated_at but no price records)
       // This is a data integrity issue we need to surface
@@ -250,7 +290,8 @@ export async function GET(req: NextRequest) {
         priorityStats,
         totalProducts,
         totalTracked,
-        totalStale,
+        totalStaleActionable,
+        totalUnavailable,
         totalDueForScrape,
         totalPhantomScraped,
         costEstimate,
@@ -495,7 +536,7 @@ export async function GET(req: NextRequest) {
     if (action === "products-by-staleness") {
       // Fetch products filtered by priority and staleness status
       const priority = searchParams.get("priority")
-      const status = searchParams.get("status") || "stale" // stale | never-scraped | fresh
+      const status = searchParams.get("status") || "stale-actionable" // stale-actionable | never-scraped | fresh | unavailable
       const page = parseInt(searchParams.get("page") || "1", 10)
       const limit = parseInt(searchParams.get("limit") || "24", 10)
       const offset = (page - 1) * limit
@@ -522,12 +563,24 @@ export async function GET(req: NextRequest) {
       }
 
       // Apply staleness filter based on status
-      if (status === "never-scraped") {
+      if (status === "unavailable") {
+        // Products that are not available (can't be scraped)
+        query = query.eq("available", false)
+      } else if (status === "never-scraped") {
+        // Products never scraped (informational - includes both available and unavailable)
         query = query.is("updated_at", null)
-      } else if (status === "fresh" && cutoffTime) {
-        query = query.not("updated_at", "is", null).gte("updated_at", cutoffTime)
-      } else if (status === "stale") {
-        // Stale = never scraped OR (has cutoff AND updated_at < cutoff)
+      } else if (status === "fresh") {
+        // Fresh = available AND recently scraped
+        query = query.eq("available", true)
+        if (cutoffTime) {
+          query = query.gte("updated_at", cutoffTime)
+        } else {
+          // No threshold = all scraped available products are fresh
+          query = query.not("updated_at", "is", null)
+        }
+      } else if (status === "stale-actionable") {
+        // Stale actionable = available AND needs scraping
+        query = query.eq("available", true)
         if (cutoffTime) {
           query = query.or(`updated_at.is.null,updated_at.lt.${cutoffTime}`)
         } else {

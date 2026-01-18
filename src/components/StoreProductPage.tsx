@@ -164,13 +164,21 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 fill
                 src={resolveImageUrlForPage(sp.image, 800)}
                 alt={sp.name}
-                className="max-h-full max-w-full object-contain object-center"
+                className={cn("max-h-full max-w-full object-contain object-center", sp.available ? "opacity-100 hover:scale-105" : "opacity-50 grayscale")}
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority={true}
               />
             ) : (
               <div className="bg-muted flex h-full w-full items-center justify-center">
                 <p className="text-muted-foreground">No image available</p>
+              </div>
+            )}
+
+            {!sp.available && (
+              <div className="absolute top-3 left-3 z-10">
+                <Badge variant="destructive" size="sm" roundedness="sm" className="w-fit">
+                  Not available
+                </Badge>
               </div>
             )}
           </div>

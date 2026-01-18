@@ -23,6 +23,7 @@ import {
   XIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  BanIcon,
 } from "lucide-react"
 
 import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "../types"
@@ -32,7 +33,7 @@ export default function ScheduleDistributionPage() {
   const queryClient = useQueryClient()
   const [fixResult, setFixResult] = useState<{ fixed: number } | null>(null)
   const [selectedPriority, setSelectedPriority] = useState<number | null | undefined>(undefined)
-  const [stalenessFilter, setStalenessFilter] = useState<StalenessStatus>("stale")
+  const [stalenessFilter, setStalenessFilter] = useState<StalenessStatus>("stale-actionable")
   const [page, setPage] = useState(1)
   const limit = 24
 
@@ -76,17 +77,16 @@ export default function ScheduleDistributionPage() {
 
   const handlePriorityClick = (priority: number | null) => {
     if (selectedPriority === priority) {
-      // Clicking the same priority deselects it
       setSelectedPriority(undefined)
     } else {
       setSelectedPriority(priority)
-      setPage(1) // Reset page when changing priority
+      setPage(1)
     }
   }
 
   const handleFilterChange = (filter: StalenessStatus) => {
     setStalenessFilter(filter)
-    setPage(1) // Reset page when changing filter
+    setPage(1)
   }
 
   const selectedStat = overview?.priorityStats.find((s) => s.priority === selectedPriority)
@@ -161,9 +161,13 @@ export default function ScheduleDistributionPage() {
                   .map((stat) => {
                     const config = PRIORITY_CONFIG[stat.priority ?? 0]
                     const isActive = overview.activePriorities.includes(stat.priority ?? 0)
-                    const stalePercent = stat.total > 0 ? Math.round((stat.stale / stat.total) * 100) : 0
-                    const freshPercent = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
                     const isSelected = selectedPriority === stat.priority
+
+                    // Calculate percentages for the 3-segment bar (Fresh | Stale Actionable | Unavailable)
+                    const freshPercent = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
+                    const staleActionablePercent =
+                      stat.total > 0 ? Math.round((stat.staleActionable / stat.total) * 100) : 0
+                    const unavailablePercent = stat.total > 0 ? Math.round((stat.unavailable / stat.total) * 100) : 0
 
                     return (
                       <div
@@ -200,31 +204,8 @@ export default function ScheduleDistributionPage() {
                           </div>
                         </div>
 
+                        {/* 3-segment progress bar: Fresh (green) | Stale Actionable (orange) | Unavailable (gray) */}
                         <div className="flex h-6 w-full overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
-                          {stat.stale > 0 && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div
-                                    className="flex items-center justify-center bg-red-500 text-xs font-medium text-white transition-all"
-                                    style={{ width: `${stalePercent}%` }}
-                                  >
-                                    {stalePercent > 10 && `${stat.stale.toLocaleString()}`}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    {stat.stale.toLocaleString()} stale ({stalePercent}%)
-                                  </p>
-                                  {stat.neverScraped > 0 && (
-                                    <p className="text-muted-foreground text-xs">
-                                      Including {stat.neverScraped.toLocaleString()} never scraped
-                                    </p>
-                                  )}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
                           {stat.fresh > 0 && (
                             <TooltipProvider>
                               <Tooltip>
@@ -233,7 +214,7 @@ export default function ScheduleDistributionPage() {
                                     className="flex items-center justify-center bg-emerald-500 text-xs font-medium text-white transition-all"
                                     style={{ width: `${freshPercent}%` }}
                                   >
-                                    {freshPercent > 10 && `${stat.fresh.toLocaleString()}`}
+                                    {`${stat.fresh.toLocaleString()}`}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -244,20 +225,69 @@ export default function ScheduleDistributionPage() {
                               </Tooltip>
                             </TooltipProvider>
                           )}
+                          {stat.staleActionable > 0 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className="flex items-center justify-center bg-orange-500 text-xs font-medium text-white transition-all"
+                                    style={{ width: `${staleActionablePercent}%` }}
+                                  >
+                                    {staleActionablePercent > 10 && `${stat.staleActionable.toLocaleString()}`}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
+                                  </p>
+                                  <p className="text-muted-foreground text-xs">Products that need scraping</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                          {stat.unavailable > 0 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className="flex items-center justify-center bg-gray-400 text-xs font-medium text-white transition-all dark:bg-gray-600"
+                                    style={{ width: `${unavailablePercent}%` }}
+                                  >
+                                    {unavailablePercent > 10 && `${stat.unavailable.toLocaleString()}`}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
+                                  </p>
+                                  <p className="text-muted-foreground text-xs">Products that can&apos;t be scraped</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </div>
 
+                        {/* Stats breakdown */}
                         <div className="mt-3 flex flex-col gap-1 text-xs font-medium">
-                          <span className="text-destructive flex items-center gap-1">
-                            <AlertTriangleIcon className="h-4 w-4" />
-                            {stat.stale.toLocaleString()} stale ({stalePercent}%)
-                          </span>
                           <span className="text-success flex items-center gap-1">
                             <CheckCircle2Icon className="h-4 w-4" />
                             {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
                           </span>
-                          {stat.neverScraped > 0 && (
+                          {stat.staleActionable > 0 && (
+                            <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                              <AlertTriangleIcon className="h-4 w-4" />
+                              {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
+                            </span>
+                          )}
+                          {stat.unavailable > 0 && (
                             <span className="text-muted-foreground flex items-center gap-1">
-                              <CircleIcon className="h-4 w-4" />
+                              <BanIcon className="h-4 w-4" />
+                              {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
+                            </span>
+                          )}
+                          {stat.neverScraped > 0 && (
+                            <span className="text-muted-foreground flex items-center gap-1 text-[11px] opacity-70">
+                              <CircleIcon className="h-3 w-3" />
                               {stat.neverScraped.toLocaleString()} never scraped
                             </span>
                           )}
@@ -323,22 +353,13 @@ export default function ScheduleDistributionPage() {
                 onValueChange={(v) => handleFilterChange(v as StalenessStatus)}
                 className="mb-6"
               >
-                <TabsList>
-                  <TabsTrigger value="stale" className="gap-2">
+                <TabsList className="flex-wrap">
+                  <TabsTrigger value="stale-actionable" className="gap-2">
                     <AlertTriangleIcon className="h-4 w-4" />
-                    All Stale
+                    Stale Actionable
                     {selectedStat && (
                       <Badge variant="secondary" size="xs">
-                        {selectedStat.stale.toLocaleString()}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="never-scraped" className="gap-2">
-                    <CircleIcon className="h-4 w-4" />
-                    Never Scraped
-                    {selectedStat && (
-                      <Badge variant="secondary" size="xs">
-                        {selectedStat.neverScraped.toLocaleString()}
+                        {selectedStat.staleActionable.toLocaleString()}
                       </Badge>
                     )}
                   </TabsTrigger>
@@ -348,6 +369,24 @@ export default function ScheduleDistributionPage() {
                     {selectedStat && (
                       <Badge variant="secondary" size="xs">
                         {selectedStat.fresh.toLocaleString()}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="unavailable" className="gap-2">
+                    <BanIcon className="h-4 w-4" />
+                    Unavailable
+                    {selectedStat && (
+                      <Badge variant="secondary" size="xs">
+                        {selectedStat.unavailable.toLocaleString()}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="never-scraped" className="gap-2">
+                    <CircleIcon className="h-4 w-4" />
+                    Never Scraped
+                    {selectedStat && (
+                      <Badge variant="secondary" size="xs">
+                        {selectedStat.neverScraped.toLocaleString()}
                       </Badge>
                     )}
                   </TabsTrigger>
@@ -408,8 +447,13 @@ export default function ScheduleDistributionPage() {
                   <CircleIcon className="mb-4 h-12 w-12 opacity-50" />
                   <p className="text-lg font-medium">No products found</p>
                   <p className="text-sm">
-                    There are no {stalenessFilter === "never-scraped" ? "never scraped" : stalenessFilter} products for
-                    this priority level.
+                    There are no{" "}
+                    {stalenessFilter === "stale-actionable"
+                      ? "stale actionable"
+                      : stalenessFilter === "never-scraped"
+                        ? "never scraped"
+                        : stalenessFilter}{" "}
+                    products for this priority level.
                   </p>
                 </div>
               )}
