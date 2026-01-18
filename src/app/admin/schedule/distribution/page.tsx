@@ -10,16 +10,31 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PriorityBubble } from "@/components/PriorityBubble"
+import { StoreProductCard, ProductCardSkeleton } from "@/components/StoreProductCard"
 
-import { AlertTriangleIcon, CheckCircle2Icon, WrenchIcon, Loader2Icon, CircleIcon } from "lucide-react"
+import {
+  AlertTriangleIcon,
+  CheckCircle2Icon,
+  WrenchIcon,
+  Loader2Icon,
+  CircleIcon,
+  XIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react"
 
-import type { ScheduleOverview } from "../types"
+import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "../types"
 import { PRIORITY_CONFIG, formatThreshold } from "../constants"
 
 export default function ScheduleDistributionPage() {
   const queryClient = useQueryClient()
   const [fixResult, setFixResult] = useState<{ fixed: number } | null>(null)
+  const [selectedPriority, setSelectedPriority] = useState<number | null | undefined>(undefined)
+  const [stalenessFilter, setStalenessFilter] = useState<StalenessStatus>("stale")
+  const [page, setPage] = useState(1)
+  const limit = 24
 
   const { data: overview, isLoading: isLoadingOverview } = useQuery({
     queryKey: ["schedule-overview"],
@@ -40,6 +55,42 @@ export default function ScheduleDistributionPage() {
       queryClient.invalidateQueries({ queryKey: ["schedule-overview"] })
     },
   })
+
+  // Fetch products when a priority is selected
+  const {
+    data: productsData,
+    isLoading: isLoadingProducts,
+    isFetching: isFetchingProducts,
+  } = useQuery({
+    queryKey: ["products-by-staleness", selectedPriority, stalenessFilter, page],
+    queryFn: async () => {
+      const priorityParam = selectedPriority === null ? "null" : selectedPriority
+      const res = await axios.get(
+        `/api/admin/schedule?action=products-by-staleness&priority=${priorityParam}&status=${stalenessFilter}&page=${page}&limit=${limit}`,
+      )
+      return res.data as ProductsByStalenessResponse
+    },
+    enabled: selectedPriority !== undefined,
+    staleTime: 30000,
+  })
+
+  const handlePriorityClick = (priority: number | null) => {
+    if (selectedPriority === priority) {
+      // Clicking the same priority deselects it
+      setSelectedPriority(undefined)
+    } else {
+      setSelectedPriority(priority)
+      setPage(1) // Reset page when changing priority
+    }
+  }
+
+  const handleFilterChange = (filter: StalenessStatus) => {
+    setStalenessFilter(filter)
+    setPage(1) // Reset page when changing filter
+  }
+
+  const selectedStat = overview?.priorityStats.find((s) => s.priority === selectedPriority)
+  const priorityConfig = selectedPriority !== null ? PRIORITY_CONFIG[selectedPriority ?? 0] : null
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
@@ -112,13 +163,17 @@ export default function ScheduleDistributionPage() {
                     const isActive = overview.activePriorities.includes(stat.priority ?? 0)
                     const stalePercent = stat.total > 0 ? Math.round((stat.stale / stat.total) * 100) : 0
                     const freshPercent = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
+                    const isSelected = selectedPriority === stat.priority
 
                     return (
                       <div
                         key={stat.priority}
+                        onClick={() => handlePriorityClick(stat.priority)}
                         className={cn(
-                          "rounded-lg border p-4",
-                          !isActive && "bg-accent cursor-not-allowed border border-dashed opacity-80",
+                          "cursor-pointer rounded-lg border p-4 transition-all",
+                          !isActive && "bg-accent border-dashed opacity-80",
+                          isSelected && "ring-primary ring-2 ring-offset-2",
+                          !isSelected && "hover:border-primary/50 hover:shadow-sm",
                         )}
                       >
                         <div className="mb-2 flex flex-col flex-wrap gap-2">
@@ -212,7 +267,14 @@ export default function ScheduleDistributionPage() {
                   })}
 
                 {overview?.priorityStats.find((s) => s.priority === null) && (
-                  <div className="bg-accent col-span-1 flex justify-between gap-2 rounded-lg border border-dashed p-4 opacity-80 sm:col-span-2 lg:col-span-3">
+                  <div
+                    onClick={() => handlePriorityClick(null)}
+                    className={cn(
+                      "bg-accent col-span-1 flex cursor-pointer justify-between gap-2 rounded-lg border border-dashed p-4 opacity-80 transition-all sm:col-span-2 lg:col-span-3",
+                      selectedPriority === null && "ring-primary ring-2 ring-offset-2",
+                      selectedPriority !== null && "hover:border-primary/50 hover:shadow-sm",
+                    )}
+                  >
                     <div className="flex items-center gap-2">
                       <PriorityBubble priority={null} size="sm" />
                       <span className="font-medium">Unclassified</span>
@@ -232,6 +294,128 @@ export default function ScheduleDistributionPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Product Detail Section */}
+        {selectedPriority !== undefined && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <PriorityBubble priority={selectedPriority} size="md" />
+                  <div>
+                    <CardTitle className="text-lg">
+                      {selectedPriority === null ? "Unclassified" : priorityConfig?.name} Products
+                    </CardTitle>
+                    <CardDescription>
+                      {productsData?.pagination.totalCount.toLocaleString() ?? "..."} products matching filter
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon-sm" onClick={() => setSelectedPriority(undefined)}>
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Filter Tabs */}
+              <Tabs
+                value={stalenessFilter}
+                onValueChange={(v) => handleFilterChange(v as StalenessStatus)}
+                className="mb-6"
+              >
+                <TabsList>
+                  <TabsTrigger value="stale" className="gap-2">
+                    <AlertTriangleIcon className="h-4 w-4" />
+                    All Stale
+                    {selectedStat && (
+                      <Badge variant="secondary" size="xs">
+                        {selectedStat.stale.toLocaleString()}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="never-scraped" className="gap-2">
+                    <CircleIcon className="h-4 w-4" />
+                    Never Scraped
+                    {selectedStat && (
+                      <Badge variant="secondary" size="xs">
+                        {selectedStat.neverScraped.toLocaleString()}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="fresh" className="gap-2">
+                    <CheckCircle2Icon className="h-4 w-4" />
+                    Fresh
+                    {selectedStat && (
+                      <Badge variant="secondary" size="xs">
+                        {selectedStat.fresh.toLocaleString()}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {/* Products Grid */}
+              {isLoadingProducts ? (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {Array.from({ length: limit }).map((_, i) => (
+                    <ProductCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : productsData?.data && productsData.data.length > 0 ? (
+                <>
+                  <div
+                    className={cn(
+                      "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6",
+                      isFetchingProducts && "opacity-50",
+                    )}
+                  >
+                    {productsData.data.map((product) => (
+                      <StoreProductCard key={product.id} sp={product} />
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {productsData.pagination.totalPages > 1 && (
+                    <div className="mt-6 flex items-center justify-between">
+                      <p className="text-muted-foreground text-sm">
+                        Page {productsData.pagination.page} of {productsData.pagination.totalPages}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          disabled={!productsData.pagination.hasPreviousPage || isFetchingProducts}
+                        >
+                          <ChevronLeftIcon className="mr-1 h-4 w-4" />
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage((p) => p + 1)}
+                          disabled={!productsData.pagination.hasNextPage || isFetchingProducts}
+                        >
+                          Next
+                          <ChevronRightIcon className="ml-1 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-12 text-center">
+                  <CircleIcon className="mb-4 h-12 w-12 opacity-50" />
+                  <p className="text-lg font-medium">No products found</p>
+                  <p className="text-sm">
+                    There are no {stalenessFilter === "never-scraped" ? "never scraped" : stalenessFilter} products for
+                    this priority level.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

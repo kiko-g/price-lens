@@ -492,6 +492,82 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    if (action === "products-by-staleness") {
+      // Fetch products filtered by priority and staleness status
+      const priority = searchParams.get("priority")
+      const status = searchParams.get("status") || "stale" // stale | never-scraped | fresh
+      const page = parseInt(searchParams.get("page") || "1", 10)
+      const limit = parseInt(searchParams.get("limit") || "24", 10)
+      const offset = (page - 1) * limit
+
+      if (priority === null) {
+        return NextResponse.json({ error: "Priority parameter is required" }, { status: 400 })
+      }
+
+      const priorityValue = priority === "null" ? null : parseInt(priority, 10)
+      const thresholdHours =
+        priorityValue !== null ? PRIORITY_REFRESH_HOURS[priorityValue] || null : null
+      const cutoffTime = thresholdHours
+        ? new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString()
+        : null
+
+      // Build base query for products
+      let query = supabase.from("store_products").select("*", { count: "exact" })
+
+      // Apply priority filter
+      if (priorityValue === null) {
+        query = query.is("priority", null)
+      } else {
+        query = query.eq("priority", priorityValue)
+      }
+
+      // Apply staleness filter based on status
+      if (status === "never-scraped") {
+        query = query.is("updated_at", null)
+      } else if (status === "fresh" && cutoffTime) {
+        query = query.not("updated_at", "is", null).gte("updated_at", cutoffTime)
+      } else if (status === "stale") {
+        // Stale = never scraped OR (has cutoff AND updated_at < cutoff)
+        if (cutoffTime) {
+          query = query.or(`updated_at.is.null,updated_at.lt.${cutoffTime}`)
+        } else {
+          // No threshold means only never scraped are "stale"
+          query = query.is("updated_at", null)
+        }
+      }
+      // If status is "all" or anything else, we just get all products for this priority
+
+      // Order by updated_at (never scraped first, then oldest)
+      query = query.order("updated_at", { ascending: true, nullsFirst: true })
+
+      // Apply pagination
+      query = query.range(offset, offset + limit - 1)
+
+      const { data: products, error: productsError, count: totalCount } = await query
+
+      if (productsError) {
+        console.error("Products by staleness error:", productsError)
+        return NextResponse.json(
+          { error: "Failed to fetch products", details: productsError.message },
+          { status: 500 },
+        )
+      }
+
+      const totalPages = Math.ceil((totalCount || 0) / limit)
+
+      return NextResponse.json({
+        data: products || [],
+        pagination: {
+          page,
+          limit,
+          totalCount: totalCount || 0,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+      })
+    }
+
     if (action === "fix-phantom-scraped") {
       // Find and fix "phantom scraped" products - they have updated_at set but no price records
       // This is a data integrity issue where products appear "fresh" but have no actual price data

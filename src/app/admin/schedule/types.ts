@@ -68,6 +68,20 @@ export interface ActivityData {
   scrapesPerHour: number
 }
 
+export type StalenessStatus = "stale" | "never-scraped" | "fresh"
+
+export interface ProductsByStalenessResponse {
+  data: import("@/types").StoreProduct[]
+  pagination: {
+    page: number
+    limit: number
+    totalCount: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
+}
+
 export interface SchedulerTestResult {
   dryRun: boolean
   message: string
