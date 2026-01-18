@@ -25,6 +25,60 @@ export class ContinenteScraper extends BaseProductScraper {
   readonly originId = StoreOrigin.Continente
   readonly name = "Continente"
 
+  /**
+   * Detects when Continente redirects to homepage instead of returning 404
+   * This happens when a product URL becomes unavailable
+   */
+  protected isSoftNotFound($: cheerio.CheerioAPI): boolean {
+    // Check canonical URL - if it's the homepage, we got redirected
+    const canonical = $('link[rel="canonical"]').attr("href")
+    if (canonical) {
+      try {
+        const canonicalUrl = new URL(canonical)
+        // Homepage canonical is just the root path or empty
+        if (canonicalUrl.pathname === "/" || canonicalUrl.pathname === "") {
+          return true
+        }
+      } catch {
+        // Invalid URL, continue with other checks
+      }
+    }
+
+    // Check for homepage-specific elements (Continente homepage has these)
+    const hasHomepageCarousel = $(".homepage-carousel, .home-carousel, .hp-carousel").length > 0
+    const hasHomepageBanners = $(".homepage-banners, .home-banners, .hp-banners").length > 0
+    if (hasHomepageCarousel || hasHomepageBanners) {
+      return true
+    }
+
+    // Product pages must have either GTM data or JSON-LD product data
+    // If both are missing AND we have clear homepage indicators, it's a soft 404
+    const hasGtmData = $("#maincontent [data-product-detail-impression]").length > 0
+    const hasJsonLd = $('script[type="application/ld+json"]')
+      .toArray()
+      .some((el) => {
+        try {
+          const json = $(el).text()
+          const parsed = JSON.parse(json)
+          const items = Array.isArray(parsed) ? parsed : [parsed]
+          return items.some((item) => item["@type"] === "Product")
+        } catch {
+          return false
+        }
+      })
+
+    // If no product data indicators exist, likely redirected to homepage
+    if (!hasGtmData && !hasJsonLd) {
+      // Double-check by looking for product page structure
+      const hasProductStructure = $(".product-images-container, .ct-pdp--info, .pdp-main").length > 0
+      if (!hasProductStructure) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   protected async extractRawProduct($: cheerio.CheerioAPI, url: string): Promise<RawProduct | null> {
     const jsonLd = extractJsonLd($)
     const gtmData = this.extractGtmData($)

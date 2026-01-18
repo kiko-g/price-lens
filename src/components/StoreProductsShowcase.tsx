@@ -513,7 +513,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         </div>
 
         <p className="text-muted-foreground mb-4 text-sm">
-          Priority affects how often the prices are updated. Favorited products are assigned a priority of 4.
+          Priority affects how often prices are updated. Favorited products are assigned max priority.
         </p>
 
         <div className="flex items-center gap-2">
