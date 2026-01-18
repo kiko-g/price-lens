@@ -38,6 +38,7 @@ export interface RawProduct {
   category: string | null
   category2: string | null
   category3: string | null
+  available?: boolean
 }
 
 /**

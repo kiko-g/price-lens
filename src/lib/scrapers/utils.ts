@@ -165,7 +165,7 @@ export function transformRawProduct(
     priority: priorityInfo.priority,
     priority_source: priorityInfo.prioritySource,
     priority_updated_at: priorityInfo.priorityUpdatedAt || now(),
-    available: true, // Successfully scraped = available
+    available: raw.available ?? true, // Default to true unless explicitly set to false
     created_at: "",
     // NOTE: updated_at is intentionally NOT set here - it should only be set
     // when a valid price point is recorded in updatePricePoint()

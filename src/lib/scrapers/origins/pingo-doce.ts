@@ -33,6 +33,7 @@ export class PingoDoceScraper extends BaseProductScraper {
     const majorUnit = this.extractMajorUnit(pricePerMajorUnitStr)
     const pricePerMajorUnit = this.extractPricePerUnit(pricePerMajorUnitStr)
     const categories = this.extractCategoriesFromUrl(url)
+    const available = this.isProductAvailable($)
 
     return {
       url,
@@ -48,7 +49,14 @@ export class PingoDoceScraper extends BaseProductScraper {
       category: categories.category,
       category2: categories.category2,
       category3: categories.category3,
+      available,
     }
+  }
+
+  private isProductAvailable($: cheerio.CheerioAPI): boolean {
+    // Check for the "Indisponível" button/section
+    const hasUnavailableButton = $(".product-unavailable").length > 0 || $(".btn-product-unavailable").length > 0
+    return !hasUnavailableButton
   }
 
   private extractGtmData($: cheerio.CheerioAPI): PingoDoceGtmData | null {
