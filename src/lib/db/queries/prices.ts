@@ -263,25 +263,57 @@ export const priceQueries = {
     return data
   },
 
-  async closeExistingPricePoint(id: number, newPrice: Price) {
+  /**
+   * Closes an existing price point and inserts a new one.
+   * IMPORTANT: This closes ALL open price points for the product, not just the specified one,
+   * to handle data corruption where multiple open price points exist.
+   */
+  async closeExistingPricePoint(
+    id: number,
+    newPrice: Price,
+  ): Promise<{ success: boolean; closedCount: number; error?: string }> {
     const supabase = createClient()
 
-    const { data, error } = await supabase
+    if (!newPrice.store_product_id) {
+      console.error("closeExistingPricePoint: Missing store_product_id in newPrice")
+      return { success: false, closedCount: 0, error: "Missing store_product_id" }
+    }
+
+    // Close ALL open price points for this product, not just the one specified
+    // This handles data corruption where multiple open price points exist
+    const { data: closedData, error: closeError } = await supabase
       .from("prices")
       .update({
         valid_to: newPrice.valid_from,
         updated_at: now(),
       })
-      .eq("id", id)
+      .eq("store_product_id", newPrice.store_product_id)
+      .is("valid_to", null)
+      .select("id")
 
-    if (error) {
-      console.error("Error closing price point:", error)
-      return null
+    if (closeError) {
+      console.error("Error closing price points:", closeError)
+      return { success: false, closedCount: 0, error: closeError.message }
     }
 
-    await this.insertNewPricePoint(newPrice)
+    const closedCount = closedData?.length ?? 0
+    if (closedCount > 1) {
+      console.warn(
+        `[Prices] Closed ${closedCount} open price points for product ${newPrice.store_product_id} (data corruption detected)`,
+      )
+    }
 
-    return data
+    // Now insert the new price point
+    const insertResult = await this.insertNewPricePoint(newPrice)
+    if (!insertResult) {
+      console.error("Error inserting new price point after closing existing ones")
+      return { success: false, closedCount, error: "Failed to insert new price point" }
+    }
+
+    console.info(
+      `[Prices] Closed ${closedCount} price point(s) and created new one for product ${newPrice.store_product_id}`,
+    )
+    return { success: true, closedCount }
   },
 
   async insertNewPricePoint(price: Price) {

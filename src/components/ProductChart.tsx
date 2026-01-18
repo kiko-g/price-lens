@@ -413,11 +413,11 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
                     </TableCell>
 
                     <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                      {point.price_recommended.toFixed(2)}€
+                      {point.price_recommended?.toFixed(2)}€
                     </TableCell>
 
                     <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                      {point.price_per_major_unit.toFixed(2)}€
+                      {point.price_per_major_unit?.toFixed(2)}€
                     </TableCell>
 
                     <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">

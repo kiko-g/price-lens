@@ -240,9 +240,14 @@ describe("priceQueries", () => {
   })
 
   describe("closeExistingPricePoint", () => {
-    it("should close existing price and insert new one", async () => {
-      const newPrice = createMockPrice({ id: 2, valid_from: "2024-01-10T00:00:00Z" })
-      mockChain.eq.mockResolvedValue({ data: {}, error: null })
+    it("should close all open price points and insert new one", async () => {
+      const newPrice = createMockPrice({ id: 2, store_product_id: 1, valid_from: "2024-01-10T00:00:00Z" })
+
+      // Create a more specific chain for the select after update
+      const selectChain: any = {}
+      selectChain.select = vi.fn().mockResolvedValue({ data: [{ id: 1 }], error: null })
+
+      mockChain.is = vi.fn().mockReturnValue(selectChain)
       mockChain.insert.mockResolvedValue({ data: newPrice, error: null })
 
       const result = await priceQueries.closeExistingPricePoint(1, newPrice)
@@ -251,16 +256,27 @@ describe("priceQueries", () => {
         valid_to: newPrice.valid_from,
         updated_at: "2024-01-15T12:00:00Z",
       })
-      expect(result).toEqual({})
+      expect(result).toEqual({ success: true, closedCount: 1 })
     })
 
-    it("should return null on update error", async () => {
-      const newPrice = createMockPrice({ id: 2 })
-      mockChain.eq.mockResolvedValue({ data: null, error: { message: "Update failed" } })
+    it("should return error when store_product_id is missing", async () => {
+      const newPrice = createMockPrice({ id: 2, store_product_id: null })
 
       const result = await priceQueries.closeExistingPricePoint(1, newPrice)
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ success: false, closedCount: 0, error: "Missing store_product_id" })
+    })
+
+    it("should return error on update failure", async () => {
+      const newPrice = createMockPrice({ id: 2, store_product_id: 1 })
+
+      const selectChain: any = {}
+      selectChain.select = vi.fn().mockResolvedValue({ data: null, error: { message: "Update failed" } })
+      mockChain.is = vi.fn().mockReturnValue(selectChain)
+
+      const result = await priceQueries.closeExistingPricePoint(1, newPrice)
+
+      expect(result).toEqual({ success: false, closedCount: 0, error: "Update failed" })
     })
   })
 

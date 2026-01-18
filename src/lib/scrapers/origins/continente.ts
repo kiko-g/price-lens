@@ -97,7 +97,7 @@ export class ContinenteScraper extends BaseProductScraper {
       name: this.extractName($, jsonLd, gtmItem, root),
       brand: this.extractBrand($, jsonLd, gtmItem, root),
       barcode: this.extractBarcode($, jsonLd),
-      pack: this.getText($, `${root} .ct-pdp--unit`),
+      pack: this.extractPack($, root),
       price: this.extractPrice(jsonLd, gtmItem, $, root),
       priceRecommended: this.extractPriceRecommended($, gtmItem, root),
       pricePerMajorUnit: this.extractPricePerUnit($, gtmItem, root),
@@ -107,6 +107,11 @@ export class ContinenteScraper extends BaseProductScraper {
       category2: gtmItem?.item_category2 || breadcrumbs[1] || null,
       category3: gtmItem?.item_category3 || breadcrumbs[2] || null,
     }
+  }
+
+  private extractPack($: cheerio.CheerioAPI, root?: string): string | null {
+    const text = this.getText($, `${root} .ct-pdp--unit`)
+    return text
   }
 
   private extractGtmData($: cheerio.CheerioAPI): ContinenteGtmData | null {
@@ -204,12 +209,28 @@ export class ContinenteScraper extends BaseProductScraper {
     gtmItem?: ContinenteGtmItem,
     root?: string,
   ): string | number | null {
-    return gtmItem?.price_per_major_unit || this.getText($, `${root} .ct-price-value`)
+    if (gtmItem?.price_per_major_unit) return gtmItem.price_per_major_unit
+
+    const text = this.getText($, `${root} .pwc-tile--price-secondary`)
+    if (!text) return null
+
+    // Text format: "63,12€/kg" - extract price before €
+    const priceMatch = text.match(/^([\d.,]+)/)
+    if (!priceMatch) return null
+
+    // Convert European format (comma as decimal) to number
+    const priceStr = priceMatch[1].replace(",", ".")
+    const price = parseFloat(priceStr)
+    return isNaN(price) ? null : price
   }
 
   private extractMajorUnit($: cheerio.CheerioAPI, root: string): string | null {
-    const text = $(`${root} .ct-price-value`).siblings(".pwc-m-unit").text().replace(/\s+/g, " ").trim()
-    return text || null
+    const text = this.getText($, `${root} .pwc-tile--price-secondary`)
+    if (!text) return null
+
+    // Text format: "63,12€/kg" - extract unit after /
+    const unitMatch = text.match(/\/(.+)$/)
+    return unitMatch ? unitMatch[1].trim() : null
   }
 }
 

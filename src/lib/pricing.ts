@@ -137,7 +137,9 @@ export async function updatePricePoint(sp: StoreProduct) {
     updated_at: timestamp,
   }
 
-  const isInvalidPricePoint = !sp.price || !sp.price_recommended || !sp.price_per_major_unit
+  // Only require price to be valid - price_recommended and price_per_major_unit are optional
+  // Many products don't have price_per_major_unit, and we shouldn't skip updates because of it
+  const isInvalidPricePoint = !sp.price || sp.price <= 0
 
   // Skip invalid price data entirely
   if (isInvalidPricePoint) {
@@ -158,8 +160,27 @@ export async function updatePricePoint(sp: StoreProduct) {
 
   // Price changed - close old price point and insert new one
   if (existingPricePoint) {
-    console.info("Price point already exists but is outdated.", existingPricePoint)
-    await priceQueries.closeExistingPricePoint(existingPricePoint.id, newPricePoint)
+    console.info(`[Pricing] Price changed for product ${sp.id}:`, {
+      old: {
+        price: existingPricePoint.price,
+        price_recommended: existingPricePoint.price_recommended,
+        price_per_major_unit: existingPricePoint.price_per_major_unit,
+      },
+      new: {
+        price: newPricePoint.price,
+        price_recommended: newPricePoint.price_recommended,
+        price_per_major_unit: newPricePoint.price_per_major_unit,
+      },
+    })
+
+    const result = await priceQueries.closeExistingPricePoint(existingPricePoint.id, newPricePoint)
+
+    if (!result.success) {
+      console.error(`[Pricing] Failed to update price point for product ${sp.id}:`, result.error)
+      // Don't update store product's updated_at - the price recording failed!
+      return
+    }
+
     // Update store product's updated_at to mark successful price recording
     await storeProductQueries.touchUpdatedAt(sp.id)
     return
