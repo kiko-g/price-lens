@@ -363,7 +363,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
                     <DropdownMenuItem asChild>
                       <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
-                        Update from source
+                        Update from origin ({supermarketChain?.name})
                         <RefreshCcwIcon />
                       </Button>
                     </DropdownMenuItem>

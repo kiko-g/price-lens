@@ -21,12 +21,21 @@ export async function GET(_req: Request, { params }: { params: Promise<{ store_p
     }
 
     const mergedPrices = mergeAndSanitize(prices)
-    prices.forEach((price) => priceQueries.deletePricePoint(price.id))
-    mergedPrices.forEach((price) => priceQueries.insertNewPricePoint(price))
+
+    // Delete old prices
+    await Promise.all(prices.map((price) => priceQueries.deletePricePoint(price.id)))
+
+    // Insert merged prices
+    const insertResults = await Promise.all(mergedPrices.map((price) => priceQueries.insertNewPricePoint(price)))
+    const errors = insertResults.filter((r) => r.error).map((r) => r.error)
+    if (errors.length > 0) {
+      console.error("Errors inserting merged prices:", errors)
+    }
 
     return NextResponse.json({
       deleted: prices,
       merged: mergedPrices,
+      errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {
     console.error("Error in price points route:", error)

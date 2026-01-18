@@ -187,7 +187,11 @@ export async function updatePricePoint(sp: StoreProduct) {
   }
 
   // First price point for this product
-  await priceQueries.insertNewPricePoint(newPricePoint)
+  const insertResult = await priceQueries.insertNewPricePoint(newPricePoint)
+  if (insertResult.error) {
+    console.error(`[Pricing] Failed to insert first price point for product ${sp.id}:`, insertResult.error)
+    return
+  }
   // Update store product's updated_at to mark first successful price recording
   await storeProductQueries.touchUpdatedAt(sp.id)
 }

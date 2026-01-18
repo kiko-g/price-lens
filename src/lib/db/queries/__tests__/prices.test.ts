@@ -288,16 +288,15 @@ describe("priceQueries", () => {
       const result = await priceQueries.insertNewPricePoint(newPrice)
 
       expect(mockSupabase.from).toHaveBeenCalledWith("prices")
-      expect(mockChain.insert).toHaveBeenCalledWith(newPrice)
-      expect(result).toEqual(newPrice)
+      expect(result).toEqual({ data: newPrice, error: null })
     })
 
-    it("should return null on error", async () => {
+    it("should return error on failure", async () => {
       mockChain.insert.mockResolvedValue({ data: null, error: { message: "Insert failed" } })
 
       const result = await priceQueries.insertNewPricePoint(createMockPrice())
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ data: null, error: "Insert failed" })
     })
   })
 

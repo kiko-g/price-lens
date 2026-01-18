@@ -305,9 +305,9 @@ export const priceQueries = {
 
     // Now insert the new price point
     const insertResult = await this.insertNewPricePoint(newPrice)
-    if (!insertResult) {
-      console.error("Error inserting new price point after closing existing ones")
-      return { success: false, closedCount, error: "Failed to insert new price point" }
+    if (insertResult.error) {
+      console.error(`[Prices] Failed to insert new price point after closing ${closedCount} existing ones`)
+      return { success: false, closedCount, error: insertResult.error }
     }
 
     console.info(
@@ -316,17 +316,35 @@ export const priceQueries = {
     return { success: true, closedCount }
   },
 
-  async insertNewPricePoint(price: Price) {
+  async insertNewPricePoint(price: Price): Promise<{ data: any; error: string | null }> {
     const supabase = createClient()
 
-    const { data, error } = await supabase.from("prices").insert(price)
-
-    if (error) {
-      console.error("Error inserting price entry:", error)
-      return null
+    // Remove any undefined/null id field that might cause issues
+    const priceToInsert = { ...price }
+    if (priceToInsert.id === undefined || priceToInsert.id === null) {
+      delete priceToInsert.id
     }
 
-    return data
+    const { data, error } = await supabase.from("prices").insert(priceToInsert)
+
+    if (error) {
+      console.error(`[Prices] INSERT FAILED for store_product_id ${price.store_product_id}:`, {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        priceData: {
+          store_product_id: price.store_product_id,
+          price: price.price,
+          price_recommended: price.price_recommended,
+          price_per_major_unit: price.price_per_major_unit,
+          discount: price.discount,
+        },
+      })
+      return { data: null, error: error.message }
+    }
+
+    return { data, error: null }
   },
 
   async deletePricePoint(id: number): Promise<{ success: boolean; error?: string }> {

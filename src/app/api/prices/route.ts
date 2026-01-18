@@ -23,7 +23,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "(Supermarket) Product IDs are required" }, { status: 400 })
     }
 
-    await priceQueries.insertNewPricePoint(price)
+    const result = await priceQueries.insertNewPricePoint(price)
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 500 })
+    }
 
     return NextResponse.json({
       message: "Price updated successfully",

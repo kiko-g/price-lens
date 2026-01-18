@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { type SearchType, type SortByType } from "@/types/business"
 
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
+import { updatePricePoint } from "@/lib/pricing"
 import { storeProductQueries } from "@/lib/db/queries/products"
 import { createClient } from "@/lib/supabase/server"
 
@@ -96,7 +97,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Bad request", details: "Missing storeProduct or url" }, { status: 400 })
     }
 
-    return await scrapeAndReplaceProduct(storeProduct.url, storeProduct.origin_id, storeProduct)
+    // Scrape and update the product
+    const response = await scrapeAndReplaceProduct(storeProduct.url, storeProduct.origin_id, storeProduct)
+    const json = await response.json()
+
+    // If scrape failed, return the error response
+    if (response.status !== 200) {
+      return NextResponse.json(json, { status: response.status })
+    }
+
+    // Update price point if we have a product ID
+    const productId = storeProduct.id
+
+    if (productId && json.data) {
+      // Update price point - same as automated scrapers do
+      await updatePricePoint({
+        ...json.data,
+        id: productId,
+      })
+    }
+
+    return NextResponse.json(json, { status: 200 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
