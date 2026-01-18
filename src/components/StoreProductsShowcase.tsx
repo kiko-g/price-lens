@@ -70,7 +70,6 @@ import {
   SearchIcon,
 } from "lucide-react"
 
-
 interface StoreProductsShowcaseProps {
   limit?: number
   children?: React.ReactNode
@@ -490,12 +489,10 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 <ScrapeUrlDialog />
               </DropdownMenuItem>
 
-
-
-                <DropdownMenuLabel>More</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <TrackingInformationDialog />
-                </DropdownMenuItem>
+              <DropdownMenuLabel>More</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <TrackingInformationDialog />
+              </DropdownMenuItem>
 
               {/* Bulk Set Priority (dev only) */}
               {process.env.NODE_ENV === "development" && (

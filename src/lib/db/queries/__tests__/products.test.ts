@@ -652,8 +652,10 @@ describe("storeProductQueries", () => {
   describe("createOrUpdateProduct", () => {
     it("should upsert product with existing created_at", async () => {
       const mockProduct = createMockStoreProduct()
+      // First .single() call is for fetching existing created_at
       mockChain.single.mockResolvedValueOnce({ data: { created_at: "2024-01-01T00:00:00Z" }, error: null })
-      mockChain.upsert.mockResolvedValue({ data: mockProduct, error: null })
+      // Second .single() call is for upsert result
+      mockChain.single.mockResolvedValueOnce({ data: mockProduct, error: null })
 
       const result = await storeProductQueries.createOrUpdateProduct(mockProduct)
 
@@ -662,8 +664,10 @@ describe("storeProductQueries", () => {
 
     it("should set default priority of 1 when none provided", async () => {
       const mockProduct = createMockStoreProduct({ priority: null })
+      // First .single() call is for fetching existing created_at
       mockChain.single.mockResolvedValueOnce({ data: null, error: null })
-      mockChain.upsert.mockResolvedValue({ data: mockProduct, error: null })
+      // Second .single() call is for upsert result
+      mockChain.single.mockResolvedValueOnce({ data: mockProduct, error: null })
 
       await storeProductQueries.createOrUpdateProduct(mockProduct)
 

@@ -523,10 +523,14 @@ export const storeProductQueries = {
       updated_at: existingProduct?.updated_at ?? null, // Preserve existing value, or null for new products
     }
 
-    const { data, error } = await supabase.from("store_products").upsert(productToUpsert, {
-      onConflict: "url",
-      ignoreDuplicates: false,
-    })
+    const { data, error } = await supabase
+      .from("store_products")
+      .upsert(productToUpsert, {
+        onConflict: "url",
+        ignoreDuplicates: false,
+      })
+      .select("*")
+      .single()
 
     // Clear categories cache when products are updated as they might introduce new categories
     if (!error) {
