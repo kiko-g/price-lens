@@ -78,9 +78,9 @@ const NAV_ITEMS: NavItem[] = [
     items: [
       { title: "Overview", href: "/admin/schedule", icon: LayoutDashboardIcon },
       { title: "Activity", href: "/admin/schedule/activity", icon: ActivityIcon },
-      { title: "Test", href: "/admin/schedule/test", icon: TestTube2Icon },
       { title: "Distribution", href: "/admin/schedule/distribution", icon: PieChartIcon },
       { title: "Timeline", href: "/admin/schedule/timeline", icon: ClockIcon },
+      { title: "Test", href: "/admin/schedule/test", icon: TestTube2Icon },
     ],
   },
   {

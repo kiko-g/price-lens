@@ -216,21 +216,16 @@ export async function GET(req: NextRequest) {
 
       // Calculate phantom scraped products (have updated_at but no price records)
       // This is a data integrity issue we need to surface
+      // Uses database function for efficient counting without row limits
       let totalPhantomScraped = 0
       try {
-        // Get all store_product_ids that have at least one price record
-        const { data: productsWithPrices } = await supabase.from("prices").select("store_product_id")
-        const idsWithPrices = new Set(productsWithPrices?.map((p) => p.store_product_id) || [])
+        const { data, error } = await supabase.rpc("count_phantom_scraped_products", {
+          active_priorities: [...ACTIVE_PRIORITIES],
+        })
 
-        // Get all products with active priorities that have updated_at set
-        const { data: scrapedProducts } = await supabase
-          .from("store_products")
-          .select("id")
-          .in("priority", [...ACTIVE_PRIORITIES])
-          .not("updated_at", "is", null)
-
-        // Count products that appear scraped but have no price records
-        totalPhantomScraped = (scrapedProducts || []).filter((p) => !idsWithPrices.has(p.id)).length
+        if (!error && data !== null) {
+          totalPhantomScraped = data
+        }
       } catch (err) {
         console.error("Error calculating phantom scraped:", err)
       }
@@ -502,30 +497,23 @@ export async function GET(req: NextRequest) {
       // This is a data integrity issue where products appear "fresh" but have no actual price data
       // Fix: Reset their updated_at to NULL so the scheduler picks them up
 
-      // Step 1: Get all store_product_ids that have at least one price record
-      const { data: productsWithPrices, error: pricesError } = await supabase.from("prices").select("store_product_id")
+      // Use database function to get phantom product IDs efficiently
+      const { data, error: phantomError } = await supabase.rpc("get_phantom_scraped_products", {
+        active_priorities: [...ACTIVE_PRIORITIES],
+        max_results: 10000,
+      })
 
-      if (pricesError) {
-        console.error("Error fetching prices:", pricesError)
-        return NextResponse.json({ error: "Failed to query prices" }, { status: 500 })
+      if (phantomError) {
+        console.error("Error fetching phantom products:", phantomError)
+        return NextResponse.json({ error: "Failed to query phantom products" }, { status: 500 })
       }
 
-      const idsWithPrices = new Set(productsWithPrices?.map((p) => p.store_product_id) || [])
-
-      // Step 2: Get all products with active priorities that have updated_at set
-      const { data: scrapedProducts, error: productsError } = await supabase
-        .from("store_products")
-        .select("id, name, priority, updated_at")
-        .in("priority", [...ACTIVE_PRIORITIES])
-        .not("updated_at", "is", null)
-
-      if (productsError) {
-        console.error("Error fetching products:", productsError)
-        return NextResponse.json({ error: "Failed to query products" }, { status: 500 })
-      }
-
-      // Step 3: Find products that appear scraped but have no price records
-      const phantomProducts = (scrapedProducts || []).filter((p) => !idsWithPrices.has(p.id))
+      const phantomProducts = (data || []) as {
+        id: number
+        name: string | null
+        priority: number
+        updated_at: string
+      }[]
 
       if (phantomProducts.length === 0) {
         return NextResponse.json({

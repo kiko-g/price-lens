@@ -45,9 +45,10 @@ import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/PriorityBubble"
+import { ProductGridWrapper } from "@/components/ProductGridWrapper"
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 import { BulkPriorityDialog } from "@/components/admin/BulkPriorityDialog"
-import { ProductGridWrapper } from "@/components/ProductGridWrapper"
+import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"
 
 import {
   ArrowDownAZ,
@@ -68,6 +69,7 @@ import {
   RefreshCcwIcon,
   SearchIcon,
 } from "lucide-react"
+
 
 interface StoreProductsShowcaseProps {
   limit?: number
@@ -487,6 +489,13 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               <DropdownMenuItem asChild>
                 <ScrapeUrlDialog />
               </DropdownMenuItem>
+
+
+
+                <DropdownMenuLabel>More</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <TrackingInformationDialog />
+                </DropdownMenuItem>
 
               {/* Bulk Set Priority (dev only) */}
               {process.env.NODE_ENV === "development" && (
