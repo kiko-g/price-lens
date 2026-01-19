@@ -30,17 +30,20 @@ export function Header() {
           <nav className="ml-3 hidden items-center gap-1.5 md:flex">
             {navigation
               .filter((item) => item.shown)
-              .map((item) => (
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className={cn("", pathname === item.href && "bg-zinc-200 dark:bg-zinc-100/20")}
-                  key={item.href}
-                >
-                  <Link href={item.href}>{item.label}</Link>
-                </Button>
-              ))}
+              .map((item) => {
+                const hrefSanitized = item.href.split("?")[0]
+                return (
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className={cn("", pathname === hrefSanitized && "bg-zinc-200 dark:bg-zinc-100/20")}
+                    key={item.href}
+                  >
+                    <Link href={item.href}>{item.label}</Link>
+                  </Button>
+                )
+              })}
           </nav>
         </div>
 

@@ -1,0 +1,49 @@
+User-agent: *
+
+# Block internal SFCC system endpoints
+#Disallow: /on/demandware.static/
+Disallow: /on/demandware.store/
+Disallow: /s/-/
+Disallow: /CSRF-/
+Disallow: /Internal-/
+Disallow: /Service-/
+Disallow: /Error-/
+
+# Block customer/account/cart/checkout flows
+Disallow: /Account-/
+Disallow: /Cart-/
+Disallow: /Checkout-/
+Disallow: /Login-/
+Disallow: /Order-/
+Disallow: /PasswordReset-/
+
+# Block product/service duplicates or ajax calls
+Disallow: /Product-Variation
+Disallow: /Search-ShowAjax
+Disallow: /Search-ShowContent
+Disallow: /SearchServices-/
+
+# Block faceted navigation / query parameters
+Disallow: /*?start=*
+Disallow: /*?sz=*
+Disallow: /*?prefn*
+Disallow: /*?prefv*
+Disallow: /*?cgid=*
+Disallow: /*?lang=*
+Disallow: /*?country=*
+
+# Allow static assets (important for rendering)
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.gif$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.svg$
+Allow: /*.webp$
+Allow: /*.woff$
+Allow: /*.woff2$
+Allow: /on/demandware.static/Sites-pingo-doce-Site/-/default/*/images/favicons/*
+
+# Sitemap
+Sitemap: https://www.pingodoce.pt/home/sitemap_index.xml

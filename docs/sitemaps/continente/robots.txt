@@ -1,0 +1,76 @@
+User-agent: *
+
+### SITEMAPS
+
+## CONTINENTE ONLINE
+
+# SITEMAP GERAL
+Sitemap: https://www.continente.pt/sitemap_index.xml
+
+# SITEMAP ESTRUTURA
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_15-category.xml
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_16-categoryRefinements.xml
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_18-categoryRefinements.xml
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_1-product.xml
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_4-product.xml
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_8-product.xml
+Sitemap: https://www.continente.pt/sitemap-custom_sitemap_12-product.xml
+
+
+
+## ZU
+
+# SITEMAP GERAL
+Sitemap: https://www.zu.pt/sitemap_index.xml
+
+# SITEMAP ESTRUTURA
+Sitemap: https://www.zu.pt/sitemap-custom_sitemap_3-category.xml
+Sitemap: https://www.zu.pt/sitemap-custom_sitemap_4-categoryRefinements.xml
+Sitemap: https://www.zu.pt/sitemap-custom_sitemap_1-product.xml
+Sitemap: https://www.zu.pt/sitemap-custom_sitemap_2-image.xml
+
+
+
+### URLS DE PARÂMETROS
+Disallow: *?*brand*
+Disallow: *?*prefn*
+Disallow: *?*prefv*
+Disallow: *?*pmin*
+Disallow: *?*pmax*
+Disallow: *?*srule*
+Disallow: *?*show*
+Disallow: *?*start*
+Disallow: *?*cgid*
+Disallow: *?*q=*
+Disallow: *?*rurl*
+Disallow: *?*url*
+Disallow: *?*action*
+Disallow: *?*list*
+Disallow: *?*lang*
+Disallow: *?*search-button*
+Disallow: *?*orderID*
+Disallow: *?*gclid*
+Disallow: *?*gad*
+Disallow: *?*token*
+Disallow: *?*ID=*
+Disallow: *?*utm*
+
+
+
+### OTHER URLS
+Disallow: /quickview*
+Disallow: /pesquisa*
+Disallow: /test*
+Disallow: /recomendacoes*
+Disallow: /folhetos-pesquisa*
+Disallow: /resultado-de-pesquisa*
+Disallow: /marca-da-semana*
+Disallow: /lojas/*
+Disallow: /checkout*
+Disallow: /onboarding*
+Disallow: /destaques/novidades/*
+Disallow: /loja-online/ajuda/*
+Disallow: *ver-todos*
+Disallow: *lojas-de-marcas*
+Disallow: *searchResults*
+Disallow: *lojas-de-marcas*

@@ -30,6 +30,7 @@ import {
   PieChartIcon,
   ClockIcon,
   LayoutDashboardIcon,
+  MapIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -82,6 +83,11 @@ const NAV_ITEMS: NavItem[] = [
       { title: "Timeline", href: "/admin/schedule/timeline", icon: ClockIcon },
       { title: "Test", href: "/admin/schedule/test", icon: TestTube2Icon },
     ],
+  },
+  {
+    title: "Discovery",
+    href: "/admin/discovery",
+    icon: MapIcon,
   },
   {
     title: "Database",
