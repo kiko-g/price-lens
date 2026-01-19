@@ -509,18 +509,20 @@ export const storeProductQueries = {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
       .from("store_products")
-      .select("created_at, updated_at")
+      .select("created_at, updated_at, barcode")
       .eq("url", sp.url)
       .single()
 
     // IMPORTANT: We explicitly preserve existing updated_at (which may be null)
     // updated_at should ONLY be set by touchUpdatedAt() when a valid price is recorded
     // This prevents the database from auto-setting updated_at on every upsert
+    // Also preserve existing barcode if the new one is null (conservative upsert)
     const productToUpsert = {
       ...sp,
       priority: sp.priority || 1,
       created_at: sp.created_at || existingProduct?.created_at || new Date().toISOString(),
       updated_at: existingProduct?.updated_at ?? null, // Preserve existing value, or null for new products
+      barcode: sp.barcode || existingProduct?.barcode || null, // Preserve existing barcode if new is null
     }
 
     const { data, error } = await supabase

@@ -18,7 +18,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "supabase:generate:types": "npx supabase gen types typescript --project-id srpjxzydhsumqbrzpisa > src/types/supabase.ts"
+    "supabase:generate:types": "npx supabase gen types typescript --project-id srpjxzydhsumqbrzpisa > src/types/supabase.ts",
+    "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.86",
@@ -98,9 +99,11 @@
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "puppeteer": "^24.35.0",
     "supabase": "^2.67.1",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }
