@@ -546,11 +546,8 @@ export async function GET(req: NextRequest) {
       }
 
       const priorityValue = priority === "null" ? null : parseInt(priority, 10)
-      const thresholdHours =
-        priorityValue !== null ? PRIORITY_REFRESH_HOURS[priorityValue] || null : null
-      const cutoffTime = thresholdHours
-        ? new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString()
-        : null
+      const thresholdHours = priorityValue !== null ? PRIORITY_REFRESH_HOURS[priorityValue] || null : null
+      const cutoffTime = thresholdHours ? new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString() : null
 
       // Build base query for products
       let query = supabase.from("store_products").select("*", { count: "exact" })
@@ -600,10 +597,7 @@ export async function GET(req: NextRequest) {
 
       if (productsError) {
         console.error("Products by staleness error:", productsError)
-        return NextResponse.json(
-          { error: "Failed to fetch products", details: productsError.message },
-          { status: 500 },
-        )
+        return NextResponse.json({ error: "Failed to fetch products", details: productsError.message }, { status: 500 })
       }
 
       const totalPages = Math.ceil((totalCount || 0) / limit)

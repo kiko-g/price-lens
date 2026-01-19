@@ -131,15 +131,17 @@ async function extractBarcode(
 
     // Wait for BV to potentially load (it's async)
     // Try waiting up to 5 seconds for window.BV to appear
-    await page.waitForFunction(
-      () => {
-        // @ts-expect-error - BV is a global variable
-        return typeof window.BV !== "undefined" && window.BV?.rating_summary?.data
-      },
-      { timeout: 5000 },
-    ).catch(() => {
-      // BV didn't load in time, continue anyway
-    })
+    await page
+      .waitForFunction(
+        () => {
+          // @ts-expect-error - BV is a global variable
+          return typeof window.BV !== "undefined" && window.BV?.rating_summary?.data
+        },
+        { timeout: 5000 },
+      )
+      .catch(() => {
+        // BV didn't load in time, continue anyway
+      })
 
     // Additional wait for data to populate
     await new Promise((resolve) => setTimeout(resolve, 1000))
