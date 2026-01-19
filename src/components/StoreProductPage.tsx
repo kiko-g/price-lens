@@ -211,7 +211,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </Link>
               )}
 
-              {sp.priority && sp.priority >= 3 ? (
+              {sp.priority !== null && sp.priority > 0 ? (
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>

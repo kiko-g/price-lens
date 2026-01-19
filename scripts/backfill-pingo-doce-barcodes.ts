@@ -8,10 +8,19 @@
  *   pnpm tsx scripts/backfill-pingo-doce-barcodes.ts
  *
  * Options:
- *   --dry-run    Only generate CSV, don't update Supabase
- *   --limit=N    Only process N products (for testing)
- *   --update     Update Supabase directly after scraping
- *   --debug      Show detailed window.BV structure for debugging
+ *   --dry-run      Only generate CSV, don't update Supabase
+ *   --limit=N      Only process N products (for testing)
+ *   --offset=N     Skip the first N products (to avoid re-processing failed ones)
+ *   --update       Update Supabase directly after scraping
+ *   --debug        Show detailed window.BV structure for debugging
+ *   --skip-failed  Skip products that previously failed (reads from failed-ids.txt)
+ *
+ * The script saves failed product IDs to scripts/pingo-doce-failed-ids.txt
+ * Use --skip-failed on subsequent runs to skip these products.
+ *
+ * Recommended usage:
+ * pnpm backfill:pingo-doce-barcodes --limit=100 --update --debug
+ * pnpm backfill:pingo-doce-barcodes --limit=100 --update --skip-failed --debug
  */
 
 import * as fs from "fs"
@@ -63,8 +72,43 @@ const args = process.argv.slice(2)
 const isDryRun = args.includes("--dry-run")
 const shouldUpdate = args.includes("--update")
 const isDebug = args.includes("--debug")
+const skipFailed = args.includes("--skip-failed")
 const limitArg = args.find((a) => a.startsWith("--limit="))
 const limit = limitArg ? parseInt(limitArg.split("=")[1]) : undefined
+const offsetArg = args.find((a) => a.startsWith("--offset="))
+const offset = offsetArg ? parseInt(offsetArg.split("=")[1]) : 0
+
+// Failed IDs file path
+const FAILED_IDS_FILE = path.join(process.cwd(), "scripts", "pingo-doce-failed-ids.txt")
+
+/**
+ * Load previously failed IDs from file
+ */
+function loadFailedIds(): Set<number> {
+  if (!fs.existsSync(FAILED_IDS_FILE)) {
+    return new Set()
+  }
+  const content = fs.readFileSync(FAILED_IDS_FILE, "utf-8")
+  const ids = content
+    .split("\n")
+    .map((line) => parseInt(line.trim()))
+    .filter((id) => !isNaN(id))
+  return new Set(ids)
+}
+
+/**
+ * Save failed IDs to file (appends new IDs)
+ */
+function saveFailedIds(ids: number[]): void {
+  if (ids.length === 0) return
+
+  const existingIds = loadFailedIds()
+  const allIds = new Set([...existingIds, ...ids])
+  const content = [...allIds].sort((a, b) => a - b).join("\n") + "\n"
+  fs.writeFileSync(FAILED_IDS_FILE, content)
+  console.log(`\n📝 Saved ${ids.length} new failed IDs to: ${FAILED_IDS_FILE}`)
+  console.log(`   Total failed IDs: ${allIds.size}`)
+}
 
 // Validate env vars
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
@@ -85,17 +129,36 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 async function fetchProductsWithoutBarcodes(): Promise<StoreProduct[]> {
   console.log("📦 Fetching Pingo Doce products without barcodes...")
 
+  // Load failed IDs to skip
+  const failedIds = skipFailed ? loadFailedIds() : new Set<number>()
+  if (skipFailed && failedIds.size > 0) {
+    console.log(`   Skipping ${failedIds.size} previously failed products`)
+  }
+
+  // Build query
   let query = supabase
     .from("store_products")
     .select("id, url, name, barcode")
     .eq("origin_id", PINGO_DOCE_ORIGIN_ID)
     .is("barcode", null)
     .eq("available", true)
-    .order("id", { ascending: true })
 
-  if (limit) {
-    query = query.limit(limit)
+  // Exclude failed IDs directly in the query (more efficient than filtering after)
+  if (skipFailed && failedIds.size > 0) {
+    const failedIdsArray = [...failedIds]
+    query = query.not("id", "in", `(${failedIdsArray.join(",")})`)
   }
+
+  // Apply offset and limit
+  if (offset > 0) {
+    query = query.range(offset, offset + (limit || 1000) - 1)
+  } else if (limit) {
+    query = query.limit(limit)
+  } else {
+    query = query.limit(1000)
+  }
+
+  query = query.order("id", { ascending: true })
 
   const { data, error } = await query
 
@@ -103,7 +166,7 @@ async function fetchProductsWithoutBarcodes(): Promise<StoreProduct[]> {
     throw new Error(`Failed to fetch products: ${error.message}`)
   }
 
-  console.log(`   Found ${data?.length || 0} products without barcodes`)
+  console.log(`   Found ${data?.length || 0} products to process`)
   return data || []
 }
 
@@ -235,7 +298,6 @@ async function extractBarcode(
 async function processProducts(products: StoreProduct[], browser: Browser): Promise<BarcodeResult[]> {
   const results: BarcodeResult[] = []
   const total = products.length
-  let processed = 0
   let found = 0
   let failed = 0
 
@@ -245,55 +307,60 @@ async function processProducts(products: StoreProduct[], browser: Browser): Prom
   for (let i = 0; i < products.length; i += batchSize) {
     const chunk = products.slice(i, i + batchSize)
 
-    const chunkResults = await Promise.all(
-      chunk.map(async (product) => {
-        const page = await browser.newPage()
-        try {
-          // Log the URL being visited
-          console.log(`\n🔗 [${processed + 1}/${total}] Visiting: ${product.url}`)
-          console.log(`   Product: ${product.name.substring(0, 50)}${product.name.length > 50 ? "..." : ""}`)
+    // Process chunk sequentially for cleaner logging
+    const chunkResults: BarcodeResult[] = []
 
-          const { barcode, debugInfo } = await extractBarcode(page, product.url, isDebug)
-          processed++
+    for (let j = 0; j < chunk.length; j++) {
+      const product = chunk[j]
+      const productIndex = i + j + 1
+      const page = await browser.newPage()
+      const scrapeStart = Date.now()
 
-          if (isDebug && debugInfo) {
-            console.log(`   🔍 Debug info:`)
-            console.log(`      - window.BV exists: ${debugInfo.hasBV}`)
-            console.log(`      - Has rating_summary: ${debugInfo.hasRatingSummary}`)
-            console.log(`      - Has data: ${debugInfo.hasData}`)
-            console.log(`      - Has Results: ${debugInfo.hasResults}`)
-            if (debugInfo.resultKeys.length > 0) {
-              console.log(`      - Result keys: ${debugInfo.resultKeys.join(", ")}`)
-            }
-            if (debugInfo.eans.length > 0) {
-              console.log(`      - EANs found: ${debugInfo.eans.join(", ")}`)
-            }
-            if (debugInfo.gtin14) {
-              console.log(`      - GTIN14: ${debugInfo.gtin14}`)
-            }
-            if (debugInfo.apiDataKeys.length > 0) {
-              console.log(`      - apiData keys: ${debugInfo.apiDataKeys.join(", ")}`)
-            }
+      try {
+        // Log the URL being visited
+        console.log(`\n🔗 [${productIndex}/${total}] Visiting: ${product.url}`)
+        console.log(`   Product: ${product.name.substring(0, 50)}${product.name.length > 50 ? "..." : ""}`)
+
+        const { barcode, debugInfo } = await extractBarcode(page, product.url, isDebug)
+        const scrapeDuration = ((Date.now() - scrapeStart) / 1000).toFixed(1)
+
+        if (isDebug && debugInfo) {
+          console.log(`   🔍 Debug info:`)
+          console.log(`      - window.BV exists: ${debugInfo.hasBV}`)
+          console.log(`      - Has rating_summary: ${debugInfo.hasRatingSummary}`)
+          console.log(`      - Has data: ${debugInfo.hasData}`)
+          console.log(`      - Has Results: ${debugInfo.hasResults}`)
+          if (debugInfo.resultKeys.length > 0) {
+            console.log(`      - Result keys: ${debugInfo.resultKeys.join(", ")}`)
           }
-
-          if (barcode) {
-            found++
-            console.log(`   ✅ Barcode found: ${barcode}`)
-          } else {
-            failed++
-            console.log(`   ❌ No barcode found`)
+          if (debugInfo.eans.length > 0) {
+            console.log(`      - EANs found: ${debugInfo.eans.join(", ")}`)
           }
-
-          return {
-            id: product.id,
-            url: product.url,
-            barcode,
+          if (debugInfo.gtin14) {
+            console.log(`      - GTIN14: ${debugInfo.gtin14}`)
           }
-        } finally {
-          await page.close()
+          if (debugInfo.apiDataKeys.length > 0) {
+            console.log(`      - apiData keys: ${debugInfo.apiDataKeys.join(", ")}`)
+          }
         }
-      }),
-    )
+
+        if (barcode) {
+          found++
+          console.log(`   ✅ Barcode found: ${barcode} (${scrapeDuration}s)`)
+        } else {
+          failed++
+          console.log(`   ❌ No barcode found (${scrapeDuration}s)`)
+        }
+
+        chunkResults.push({
+          id: product.id,
+          url: product.url,
+          barcode,
+        })
+      } finally {
+        await page.close()
+      }
+    }
 
     results.push(...chunkResults)
 
@@ -359,13 +426,36 @@ async function updateSupabase(results: BarcodeResult[]): Promise<void> {
 }
 
 /**
+ * Format duration in human readable format
+ */
+function formatDuration(ms: number): string {
+  const seconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m ${seconds % 60}s`
+  } else if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`
+  } else {
+    return `${seconds}s`
+  }
+}
+
+/**
  * Main
  */
 async function main() {
+  const scriptStart = Date.now()
+  const startTime = new Date().toLocaleTimeString()
+
   console.log("🚀 Pingo Doce Barcode Backfill Script")
   console.log("=====================================")
+  console.log(`   Started at: ${startTime}`)
   console.log(`   Mode: ${isDryRun ? "Dry run (CSV only)" : shouldUpdate ? "Update Supabase" : "CSV only"}`)
   if (limit) console.log(`   Limit: ${limit} products`)
+  if (offset > 0) console.log(`   Offset: ${offset} (skipping first ${offset} products)`)
+  if (skipFailed) console.log(`   Skip failed: enabled`)
   if (isDebug) console.log(`   Debug: enabled (will show window.BV structure)`)
   console.log("")
 
@@ -384,13 +474,21 @@ async function main() {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   })
 
+  let results: BarcodeResult[] = []
+
   try {
     // Process products
     console.log("\n🔍 Extracting barcodes...\n")
-    const results = await processProducts(products, browser)
+    results = await processProducts(products, browser)
 
     // Write CSV
     writeCSV(results)
+
+    // Save failed IDs for future runs
+    const failedIds = results.filter((r) => !r.barcode).map((r) => r.id)
+    if (failedIds.length > 0) {
+      saveFailedIds(failedIds)
+    }
 
     // Update Supabase if requested
     if (shouldUpdate && !isDryRun) {
@@ -402,7 +500,13 @@ async function main() {
     await browser.close()
   }
 
-  console.log("\n✨ Done!")
+  const endTime = new Date().toLocaleTimeString()
+  const totalDuration = formatDuration(Date.now() - scriptStart)
+
+  console.log(`\n✨ Done!`)
+  console.log(`   Started: ${startTime}`)
+  console.log(`   Finished: ${endTime}`)
+  console.log(`   Total duration: ${totalDuration}`)
 }
 
 main().catch((error) => {

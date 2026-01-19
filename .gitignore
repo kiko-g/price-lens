@@ -47,3 +47,4 @@ docs/*.md
 
 # scripts output
 scripts/*.csv
+scripts/*-failed-ids.txt
