@@ -13,7 +13,11 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { PriorityBubble } from "@/components/PriorityBubble"
+import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
 import {
   PlayIcon,
@@ -23,7 +27,6 @@ import {
   CheckCircle2Icon,
   XCircleIcon,
   ClockIcon,
-  ZapIcon,
   PackageIcon,
   Loader2Icon,
   AlertTriangleIcon,
@@ -32,7 +35,23 @@ import {
   CircleIcon,
   CircleCheckIcon,
   CircleXIcon,
+  SettingsIcon,
+  ActivityIcon,
+  RotateCcwIcon,
+  WifiOffIcon,
+  TimerIcon,
+  TrendingUpIcon,
+  PercentIcon,
+  LayersIcon,
+  StoreIcon,
 } from "lucide-react"
+
+// Store origin mapping for SVG logos
+const STORE_ORIGINS = [
+  { id: 1, name: "Continente", Logo: ContinenteSvg, hasBarcode: true },
+  { id: 2, name: "Auchan", Logo: AuchanSvg, hasBarcode: true },
+  { id: 3, name: "Pingo Doce", Logo: PingoDoceSvg, hasBarcode: false },
+]
 
 interface BulkScrapeJob {
   id: string
@@ -59,6 +78,26 @@ interface BulkScrapeJob {
   }
 }
 
+interface LogEntry {
+  id: string
+  timestamp: Date
+  type: "info" | "success" | "error" | "warning" | "retry"
+  message: string
+}
+
+interface EnhancedStats {
+  totalProcessed: number
+  totalFailed: number
+  totalRetries: number
+  networkErrors: number
+  scrapeErrors: number
+  barcodesFound: number
+  startTime: Date | null
+  avgTimePerProduct: number
+  productsPerMinute: number
+  successRate: number
+}
+
 export default function BulkScrapePage() {
   const queryClient = useQueryClient()
 
@@ -68,8 +107,10 @@ export default function BulkScrapePage() {
     priorities,
     missingBarcode,
     available,
+    onlyUrl,
     setMissingBarcode,
     setAvailable,
+    setOnlyUrl,
     toggleOrigin,
     togglePriority,
     filters,
@@ -77,22 +118,83 @@ export default function BulkScrapePage() {
     isLoadingCount,
     refetchCount,
     invalidateCount,
-    originOptions,
     priorityLevels,
   } = useAdminStoreProductFilters({
-    initialFilters: { origins: [2] },
+    initialFilters: {},
     queryKeyPrefix: "bulk-scrape",
   })
 
   // Mode: "qstash" for production, "direct" for local development
-  const [useDirectMode, setUseDirectMode] = useState(true) // Default to direct for local dev
+  const [useDirectMode, setUseDirectMode] = useState(true)
   const [isDirectProcessing, setIsDirectProcessing] = useState(false)
+  const [batchSize, setBatchSize] = useState(5)
 
   // Active job tracking
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
 
-  // Ref to track cancellation request (avoids stale closure in while loop)
+  // Cancel state
   const cancelRequestedRef = useRef(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [inFlightCount, setInFlightCount] = useState(0)
+
+  // Wake Lock
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+
+  // Logs
+  const [logs, setLogs] = useState<LogEntry[]>([])
+  const logsEndRef = useRef<HTMLDivElement>(null)
+
+  // Enhanced stats
+  const [enhancedStats, setEnhancedStats] = useState<EnhancedStats>({
+    totalProcessed: 0,
+    totalFailed: 0,
+    totalRetries: 0,
+    networkErrors: 0,
+    scrapeErrors: 0,
+    barcodesFound: 0,
+    startTime: null,
+    avgTimePerProduct: 0,
+    productsPerMinute: 0,
+    successRate: 100,
+  })
+
+  // Add log entry
+  const addLog = useCallback((type: LogEntry["type"], message: string) => {
+    const entry: LogEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date(),
+      type,
+      message,
+    }
+    setLogs((prev) => [...prev.slice(-199), entry]) // Keep last 200 logs
+  }, [])
+
+  // Auto-scroll logs
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [logs])
+
+  // Wake Lock management
+  const requestWakeLock = useCallback(async () => {
+    if ("wakeLock" in navigator) {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request("screen")
+        addLog("info", "Wake Lock acquired - screen will stay on")
+        wakeLockRef.current.addEventListener("release", () => {
+          addLog("warning", "Wake Lock released")
+        })
+      } catch (err) {
+        addLog("warning", `Wake Lock failed: ${err}`)
+      }
+    }
+  }, [addLog])
+
+  const releaseWakeLock = useCallback(() => {
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release()
+      wakeLockRef.current = null
+    }
+  }, [])
 
   // Fetch active jobs
   const { data: jobsData, refetch: refetchJobs } = useQuery({
@@ -101,8 +203,7 @@ export default function BulkScrapePage() {
       const res = await axios.get("/api/admin/bulk-scrape?action=jobs")
       return res.data as { jobs: BulkScrapeJob[] }
     },
-    staleTime: 60000, // Consider fresh for 60 seconds
-    // No polling - we manually refetch when starting/stopping jobs
+    staleTime: 60000,
   })
 
   // Fetch active job progress
@@ -130,7 +231,6 @@ export default function BulkScrapePage() {
   // Clear active job when completed
   useEffect(() => {
     if (jobProgress?.status === "completed" || jobProgress?.status === "cancelled") {
-      // Keep showing for a bit then clear
       const timer = setTimeout(() => {
         refetchJobs()
       }, 2000)
@@ -138,7 +238,7 @@ export default function BulkScrapePage() {
     }
   }, [jobProgress?.status, refetchJobs])
 
-  // Start job mutation
+  // Start job mutation (QStash mode)
   const startJobMutation = useMutation({
     mutationFn: async () => {
       const res = await axios.post("/api/admin/bulk-scrape", {
@@ -146,6 +246,7 @@ export default function BulkScrapePage() {
         priorities: filters.priorities.length > 0 ? filters.priorities : undefined,
         missingBarcode: filters.missingBarcode,
         available: filters.available,
+        onlyUrl: filters.onlyUrl,
       })
       return res.data as { jobId: string; total: number }
     },
@@ -159,84 +260,209 @@ export default function BulkScrapePage() {
   // Cancel job mutation
   const cancelJobMutation = useMutation({
     mutationFn: async (jobId: string) => {
-      // Set ref immediately so the while loop can check it
       cancelRequestedRef.current = true
+      setIsCancelling(true)
+      addLog("warning", "Cancel requested - waiting for current batch to finish...")
       await axios.delete(`/api/admin/bulk-scrape/${jobId}`)
     },
     onSuccess: () => {
-      setIsDirectProcessing(false)
+      addLog("info", "Job cancelled successfully")
       refetchJobs()
     },
   })
 
+  // Retry wrapper with exponential backoff
+  const withRetry = useCallback(
+    async <T,>(fn: () => Promise<T>, maxRetries: number = 3, context: string = "request"): Promise<T> => {
+      let lastError: Error | null = null
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          return await fn()
+        } catch (error) {
+          lastError = error as Error
+          const isNetworkError =
+            axios.isAxiosError(error) &&
+            (!error.response || error.code === "ECONNABORTED" || error.code === "ERR_NETWORK")
+
+          if (isNetworkError && attempt < maxRetries) {
+            const delay = Math.pow(2, attempt) * 1000 // 1s, 2s, 4s
+            addLog(
+              "retry",
+              `${context} failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay / 1000}s...`,
+            )
+            setEnhancedStats((prev) => ({
+              ...prev,
+              totalRetries: prev.totalRetries + 1,
+              networkErrors: prev.networkErrors + 1,
+            }))
+            await new Promise((resolve) => setTimeout(resolve, delay))
+          } else {
+            throw error
+          }
+        }
+      }
+
+      throw lastError
+    },
+    [addLog],
+  )
+
   // Direct mode: process batches continuously
   const processDirectBatch = useCallback(
     async (jobId: string | null) => {
-      try {
-        const payload = jobId
-          ? { jobId, batchSize: 5 }
-          : {
-              origins: filters.origins,
-              priorities: filters.priorities.length > 0 ? filters.priorities : undefined,
-              missingBarcode: filters.missingBarcode,
-              available: filters.available,
-              batchSize: 5,
-            }
+      const payload = jobId
+        ? { jobId, batchSize }
+        : {
+            origins: filters.origins,
+            priorities: filters.priorities.length > 0 ? filters.priorities : undefined,
+            missingBarcode: filters.missingBarcode,
+            available: filters.available,
+            onlyUrl: filters.onlyUrl,
+            batchSize,
+          }
 
-        const res = await axios.patch("/api/admin/bulk-scrape", payload)
-        return res.data
-      } catch (error) {
-        console.error("Direct batch error:", error)
-        throw error
-      }
+      return await withRetry(
+        async () => {
+          const res = await axios.patch("/api/admin/bulk-scrape", payload)
+          return res.data
+        },
+        3,
+        "Batch processing",
+      )
     },
-    [filters],
+    [filters, batchSize, withRetry],
   )
+
+  // Update enhanced stats
+  const updateStats = useCallback((result: { processed?: number; failed?: number; barcodesFound?: number }) => {
+    setEnhancedStats((prev) => {
+      const newProcessed = prev.totalProcessed + (result.processed ?? 0)
+      const newFailed = prev.totalFailed + (result.failed ?? 0)
+      const newBarcodes = prev.barcodesFound + (result.barcodesFound ?? 0)
+
+      const elapsedMs = prev.startTime ? Date.now() - prev.startTime.getTime() : 0
+      const elapsedMinutes = elapsedMs / 60000
+
+      return {
+        ...prev,
+        totalProcessed: newProcessed,
+        totalFailed: newFailed,
+        barcodesFound: newBarcodes,
+        scrapeErrors: newFailed,
+        avgTimePerProduct: newProcessed > 0 ? elapsedMs / newProcessed : 0,
+        productsPerMinute: elapsedMinutes > 0 ? newProcessed / elapsedMinutes : 0,
+        successRate: newProcessed > 0 ? ((newProcessed - newFailed) / newProcessed) * 100 : 100,
+      }
+    })
+  }, [])
 
   // Direct mode continuous processing
   const startDirectMode = useCallback(async () => {
     setIsDirectProcessing(true)
-    cancelRequestedRef.current = false // Reset cancel flag
+    setIsCancelling(false)
+    cancelRequestedRef.current = false
+    setLogs([])
+    setEnhancedStats({
+      totalProcessed: 0,
+      totalFailed: 0,
+      totalRetries: 0,
+      networkErrors: 0,
+      scrapeErrors: 0,
+      barcodesFound: 0,
+      startTime: new Date(),
+      avgTimePerProduct: 0,
+      productsPerMinute: 0,
+      successRate: 100,
+    })
+
     let currentJobId: string | null = null
 
+    // Request wake lock
+    await requestWakeLock()
+
+    addLog("info", `Starting bulk re-scrape with batch size ${batchSize}...`)
+
     try {
-      // First call creates the job
-      const firstResult = await processDirectBatch(null)
-      currentJobId = firstResult.jobId
-      setActiveJobId(currentJobId)
+      // Use Web Locks API to maintain execution priority
+      await navigator.locks.request("bulk-scrape-lock", async () => {
+        // First call creates the job
+        const firstResult = await processDirectBatch(null)
+        currentJobId = firstResult.jobId
+        setActiveJobId(currentJobId)
+        addLog("success", `Job ${currentJobId} created with ${firstResult.total} products`)
 
-      // Keep processing until complete
-      while (true) {
-        // Check local cancel flag first (immediate response)
-        if (cancelRequestedRef.current) {
-          console.info("[Direct Mode] Cancel requested, stopping...")
-          break
+        let batchNumber = 1
+
+        // Keep processing until complete
+        while (true) {
+          if (cancelRequestedRef.current) {
+            addLog("warning", "Cancel acknowledged - stopping after current batch")
+            break
+          }
+
+          // Check if job was cancelled/completed on server
+          const job = await axios.get(`/api/admin/bulk-scrape/${currentJobId}`)
+          if (job.data.status === "cancelled" || job.data.status === "completed") {
+            addLog("info", `Job ${job.data.status}`)
+            break
+          }
+
+          setInFlightCount(batchSize)
+          const batchStartTime = Date.now()
+
+          try {
+            const result = await processDirectBatch(currentJobId)
+            const batchDuration = Date.now() - batchStartTime
+
+            // Log batch results (API returns batchProcessed, batchSuccess, batchFailed, batchBarcodesFound)
+            const processed = result.batchProcessed ?? result.batchSuccess ?? 0
+            const failed = result.batchFailed ?? 0
+            const barcodes = result.batchBarcodesFound ?? 0
+
+            addLog(
+              "success",
+              `Batch #${batchNumber}: ${processed} processed, ${failed} failed, ${barcodes} barcodes (${batchDuration}ms)`,
+            )
+
+            updateStats({
+              processed: processed || batchSize,
+              failed,
+              barcodesFound: barcodes,
+            })
+
+            batchNumber++
+
+            if (result.status === "completed") {
+              addLog("success", "🎉 Job completed successfully!")
+              break
+            }
+          } catch (error) {
+            addLog("error", `Batch #${batchNumber} error: ${error}`)
+            setEnhancedStats((prev) => ({ ...prev, totalFailed: prev.totalFailed + batchSize }))
+          } finally {
+            setInFlightCount(0)
+          }
+
+          // Small delay between batches
+          await new Promise((resolve) => setTimeout(resolve, 100))
         }
-
-        // Check if job was cancelled/completed on server
-        const job = await axios.get(`/api/admin/bulk-scrape/${currentJobId}`)
-        if (job.data.status === "cancelled" || job.data.status === "completed") {
-          break
-        }
-
-        const result = await processDirectBatch(currentJobId)
-
-        if (result.status === "completed") {
-          break
-        }
-
-        // Small delay between batches to avoid overwhelming the server
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
+      })
     } catch (error) {
-      console.error("Direct mode error:", error)
+      addLog("error", `Direct mode error: ${error}`)
     } finally {
       setIsDirectProcessing(false)
+      setIsCancelling(false)
       cancelRequestedRef.current = false
+      setInFlightCount(0)
+      releaseWakeLock()
       refetchJobs()
-      queryClient.invalidateQueries({ queryKey: ["bulk-scrape-progress", currentJobId] })
+      if (currentJobId) {
+        queryClient.invalidateQueries({ queryKey: ["bulk-scrape-progress", currentJobId] })
+      }
+      addLog("info", "Processing finished")
     }
-  }, [processDirectBatch, refetchJobs, queryClient])
+  }, [batchSize, processDirectBatch, refetchJobs, queryClient, requestWakeLock, releaseWakeLock, addLog, updateStats])
 
   // Handle start button click
   const handleStart = useCallback(() => {
@@ -249,157 +475,286 @@ export default function BulkScrapePage() {
 
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
+  // Accordion default open values
+  const defaultAccordionValues = ["processing-mode", "batch-size"]
+
   return (
-    <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+    <div className="flex flex-1 flex-col overflow-hidden xl:flex-row">
       {/* Sidebar - Filters */}
-      <aside className="flex h-auto min-h-0 flex-col border-b lg:w-80 lg:min-w-80 lg:shrink-0 lg:border-r lg:border-b-0">
+      <aside className="flex h-auto min-h-0 flex-col border-b xl:w-[400px] xl:min-w-[400px] xl:shrink-0 xl:border-r xl:border-b-0">
         {/* Scrollable filters section */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-2">
             <RefreshCwIcon className="text-primary size-5" />
             <h2 className="text-lg font-bold">Bulk Re-Scrape</h2>
           </div>
 
-          {/* Store Origin Filter */}
-          <div className="space-y-3">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Store Origin</Label>
-            <div className="flex flex-col gap-2">
-              {originOptions.map((origin) => (
-                <label
-                  key={origin.id}
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                    origins.includes(origin.id)
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/50",
-                  )}
-                >
-                  <Checkbox checked={origins.includes(origin.id)} onCheckedChange={() => toggleOrigin(origin.id)} />
-                  <span className="text-sm font-medium">{origin.name}</span>
-                  {!origin.hasBarcode && (
-                    <Badge variant="destructive" className="ml-auto text-xs" size="2xs">
-                      No EAN
-                    </Badge>
-                  )}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Missing Data Filter */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Missing Data</Label>
-            <label className="flex cursor-pointer items-center gap-2">
-              <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
-              <BarcodeIcon className="h-4 w-4" />
-              <span className="text-sm font-medium">Only products missing barcode</span>
-            </label>
-          </div>
-
-          {/* Availability Filter */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Availability</Label>
-            <div className="flex flex-wrap gap-2">
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                  available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                )}
-                onClick={() => setAvailable(null)}
-              >
-                <CircleIcon className="h-3.5 w-3.5" />
-                <span className="text-sm">All</span>
-              </div>
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                  available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                )}
-                onClick={() => setAvailable(true)}
-              >
-                <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                <span className="text-sm">Available</span>
-              </div>
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                  available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                )}
-                onClick={() => setAvailable(false)}
-              >
-                <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
-                <span className="text-sm">Unavailable</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Priority Filter */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Priority Level (optional)</Label>
-            <div className="flex flex-col gap-2">
-              {priorityLevels.map((level) => (
-                <div key={level} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`priority-${level}`}
-                    checked={priorities.includes(level)}
-                    onCheckedChange={() => togglePriority(level)}
-                  />
-                  <Label
-                    htmlFor={`priority-${level}`}
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <PriorityBubble priority={level} size="sm" useDescription />
-                  </Label>
+          <Accordion type="multiple" defaultValue={defaultAccordionValues} className="w-full">
+            {/* Processing Mode - Always at top */}
+            <AccordionItem value="processing-mode">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <SettingsIcon className="h-4 w-4" />
+                  Processing Mode
                 </div>
-              ))}
-            </div>
-            {priorities.length === 0 && (
-              <p className="text-muted-foreground text-xs">All priorities will be included</p>
-            )}
-          </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setUseDirectMode(true)}
+                  >
+                    <MonitorIcon className="h-4 w-4" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">Direct Mode</span>
+                      <p className="text-muted-foreground text-xs">Processes in browser. Best for local development.</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      Local Dev
+                    </Badge>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      !useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setUseDirectMode(false)}
+                  >
+                    <ServerIcon className="h-4 w-4" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">QStash Mode</span>
+                      <p className="text-muted-foreground text-xs">Async queue processing. Requires public URL.</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      Production
+                    </Badge>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          {/* Mode Toggle */}
-          <div className="mt-4 space-y-3 border-t pt-4">
-            <Label className="text-muted-foreground text-xs font-medium uppercase">Processing Mode</Label>
-            <div className="flex flex-col gap-2">
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                  useDirectMode ? "border-primary bg-primary/10" : "border-border",
+            {/* Batch Size */}
+            <AccordionItem value="batch-size">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <LayersIcon className="h-4 w-4" />
+                  Batch Size
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={batchSize}
+                      onChange={(e) => setBatchSize(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                      className="w-20"
+                      disabled={isJobRunning}
+                    />
+                    <div className="flex gap-1">
+                      {[1, 5, 10, 20].map((size) => (
+                        <Button
+                          key={size}
+                          variant={batchSize === size ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setBatchSize(size)}
+                          disabled={isJobRunning}
+                        >
+                          {size}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    Higher values = faster but more server load. Recommended: 5-10 for local dev.
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Store Origin Filter - with SVG logos */}
+            <AccordionItem value="store-origin">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex flex-1 items-center gap-2">
+                  <div className="flex flex-1 items-center gap-2">
+                    <StoreIcon className="h-4 w-4" />
+                    Store Origin
+                  </div>
+                  {origins.length > 0 && <span className="text-muted-foreground text-xs">({origins.length})</span>}
+                </div>
+                {origins.length > 0 && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      origins.forEach((o) => toggleOrigin(o))
+                    }}
+                    className="text-muted-foreground hover:text-foreground mr-2 text-xs underline-offset-2 hover:underline"
+                  >
+                    Clear
+                  </span>
                 )}
-                onClick={() => setUseDirectMode(true)}
-              >
-                <MonitorIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">Direct Mode</span>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  Local Dev
-                </Badge>
-              </div>
-              <div
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
-                  !useDirectMode ? "border-primary bg-primary/10" : "border-border",
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  {STORE_ORIGINS.map((origin) => (
+                    <div key={origin.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`origin-${origin.id}`}
+                        checked={origins.includes(origin.id)}
+                        onCheckedChange={() => toggleOrigin(origin.id)}
+                      />
+                      <Label
+                        htmlFor={`origin-${origin.id}`}
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <origin.Logo className="h-4 min-h-4 w-auto" />
+                        {!origin.hasBarcode && (
+                          <Badge variant="destructive" className="ml-auto text-xs" size="2xs">
+                            No EAN
+                          </Badge>
+                        )}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* More Options Filter */}
+            <AccordionItem value="more-options">
+              <AccordionTrigger className="w-full cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex flex-1 items-center gap-2">
+                  <SettingsIcon className="h-4 w-4" />
+                  More Options
+                </div>
+                {(missingBarcode || onlyUrl) && (
+                  <Badge variant="secondary" className="mr-2 text-xs">
+                    {[missingBarcode && "No barcode", onlyUrl && "Only URL"].filter(Boolean).join(", ")}
+                  </Badge>
                 )}
-                onClick={() => setUseDirectMode(false)}
-              >
-                <ServerIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">QStash Mode</span>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  Production
-                </Badge>
-              </div>
-            </div>
-            <p className="text-muted-foreground text-xs">
-              {useDirectMode
-                ? "Direct mode processes products in the browser. Best for local development."
-                : "QStash mode queues products for async processing. Requires public URL (production)."}
-            </p>
-          </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-3">
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <Checkbox checked={onlyUrl} onCheckedChange={() => setOnlyUrl(!onlyUrl)} />
+                    <span className="text-sm">Only products with URL (no data scraped)</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
+                    <span className="text-sm">Only products missing barcode</span>
+                  </label>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Availability Filter */}
+            <AccordionItem value="availability">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex flex-1 items-center gap-2">
+                  <CircleCheckIcon className="h-4 w-4" />
+                  Availability
+                </div>
+                {available !== null && (
+                  <Badge variant="secondary" className="mr-2 text-xs">
+                    {available ? "Available" : "Unavailable"}
+                  </Badge>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-wrap gap-2">
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                      available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setAvailable(null)}
+                  >
+                    <CircleIcon className="h-3.5 w-3.5" />
+                    <span className="text-sm">All</span>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                      available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setAvailable(true)}
+                  >
+                    <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-sm">Available</span>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                      available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setAvailable(false)}
+                  >
+                    <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
+                    <span className="text-sm">Unavailable</span>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Priority Filter */}
+            <AccordionItem value="priority">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex flex-1 items-center gap-2">
+                  Priority Level
+                  {priorities.length > 0 && (
+                    <span className="text-muted-foreground text-xs">({priorities.length})</span>
+                  )}
+                </div>
+                {priorities.length > 0 && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      priorities.forEach((p) => togglePriority(p))
+                    }}
+                    className="text-muted-foreground hover:text-foreground mr-2 text-xs underline-offset-2 hover:underline"
+                  >
+                    Clear
+                  </span>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  {priorityLevels.map((level) => (
+                    <div key={level} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`priority-${level}`}
+                        checked={priorities.includes(level)}
+                        onCheckedChange={() => togglePriority(level)}
+                      />
+                      <Label
+                        htmlFor={`priority-${level}`}
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={level} size="sm" useDescription />
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {priorities.length === 0 && (
+                  <p className="text-muted-foreground mt-2 text-xs">All priorities will be included</p>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
 
         {/* Fixed Count & Start Button */}
         <div className="bg-background shrink-0 border-t p-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center gap-2">
             <PackageIcon className="text-muted-foreground h-4 w-4" />
             <span className="text-muted-foreground text-sm">Matching:</span>
             {isLoadingCount ? (
@@ -412,6 +767,7 @@ export default function BulkScrapePage() {
             onClick={handleStart}
             disabled={count === 0 || startJobMutation.isPending || isJobRunning}
             className="mt-3 w-full"
+            size="lg"
           >
             {startJobMutation.isPending || isDirectProcessing ? (
               <>
@@ -434,8 +790,8 @@ export default function BulkScrapePage() {
       </aside>
 
       {/* Main Content */}
-      <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <main className="min-h-0 flex-1 overflow-y-auto p-4 xl:p-6">
+        <div className="mx-auto max-w-5xl space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold">Jobs & Progress</h1>
@@ -446,38 +802,44 @@ export default function BulkScrapePage() {
           </div>
 
           {/* Live Progress */}
-          {jobProgress && (
+          {(jobProgress || isDirectProcessing) && (
             <Card className="border-primary/50">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    {jobProgress.status === "running" && <Loader2Icon className="h-5 w-5 animate-spin text-blue-500" />}
-                    {jobProgress.status === "completed" && <CheckCircle2Icon className="h-5 w-5 text-emerald-500" />}
-                    {jobProgress.status === "cancelled" && <XCircleIcon className="h-5 w-5 text-amber-500" />}
-                    {jobProgress.status === "failed" && <AlertTriangleIcon className="h-5 w-5 text-red-500" />}
-                    Job {jobProgress.id}
+                    {(jobProgress?.status === "running" || isDirectProcessing) && (
+                      <Loader2Icon className="h-5 w-5 animate-spin text-blue-500" />
+                    )}
+                    {jobProgress?.status === "completed" && <CheckCircle2Icon className="h-5 w-5 text-emerald-500" />}
+                    {jobProgress?.status === "cancelled" && <XCircleIcon className="h-5 w-5 text-amber-500" />}
+                    {jobProgress?.status === "failed" && <AlertTriangleIcon className="h-5 w-5 text-red-500" />}
+                    Job {jobProgress?.id || activeJobId || "Starting..."}
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge
                       variant={
-                        jobProgress.status === "running"
+                        jobProgress?.status === "running" || isDirectProcessing
                           ? "default"
-                          : jobProgress.status === "completed"
+                          : jobProgress?.status === "completed"
                             ? "secondary"
                             : "destructive"
                       }
                     >
-                      {jobProgress.status}
+                      {isDirectProcessing ? "running" : jobProgress?.status}
                     </Badge>
-                    {jobProgress.status === "running" && (
+                    {(jobProgress?.status === "running" || isDirectProcessing) && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => cancelJobMutation.mutate(jobProgress.id)}
-                        disabled={cancelJobMutation.isPending}
+                        onClick={() => activeJobId && cancelJobMutation.mutate(activeJobId)}
+                        disabled={cancelJobMutation.isPending || isCancelling}
                       >
                         <SquareIcon className="h-3 w-3" />
-                        Cancel
+                        {isCancelling
+                          ? inFlightCount > 0
+                            ? `Waiting (${inFlightCount} items)...`
+                            : "Cancelling..."
+                          : "Cancel"}
                       </Button>
                     )}
                   </div>
@@ -489,38 +851,103 @@ export default function BulkScrapePage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Progress</span>
                     <span className="font-medium">
-                      {jobProgress.processed.toLocaleString()} / {jobProgress.total.toLocaleString()}
-                      <span className="text-muted-foreground ml-1">({jobProgress.stats?.progress ?? 0}%)</span>
+                      {(jobProgress?.processed ?? enhancedStats.totalProcessed).toLocaleString()} /{" "}
+                      {(jobProgress?.total ?? count).toLocaleString()}
+                      <span className="text-muted-foreground ml-1">
+                        (
+                        {(jobProgress?.stats?.progress ?? Math.round((enhancedStats.totalProcessed / count) * 100)) ||
+                          0}
+                        %)
+                      </span>
                     </span>
                   </div>
-                  <Progress value={jobProgress.stats?.progress ?? 0} className="h-3" />
+                  <Progress
+                    value={
+                      (jobProgress?.stats?.progress ?? Math.round((enhancedStats.totalProcessed / count) * 100)) || 0
+                    }
+                    className="h-3"
+                  />
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {/* Enhanced Stats Grid */}
+                <div className="grid grid-cols-2 gap-3 xl:grid-cols-3 2xl:grid-cols-6">
                   <StatCard
                     icon={<PackageIcon className="h-4 w-4" />}
                     label="Processed"
-                    value={jobProgress.processed.toLocaleString()}
+                    value={(jobProgress?.processed ?? enhancedStats.totalProcessed).toLocaleString()}
                     color="text-blue-500"
                   />
                   <StatCard
                     icon={<XCircleIcon className="h-4 w-4" />}
                     label="Failed"
-                    value={jobProgress.failed.toLocaleString()}
+                    value={(jobProgress?.failed ?? enhancedStats.totalFailed).toLocaleString()}
                     color="text-red-500"
                   />
                   <StatCard
                     icon={<BarcodeIcon className="h-4 w-4" />}
-                    label="Barcodes Found"
-                    value={jobProgress.barcodesFound.toLocaleString()}
+                    label="Barcodes"
+                    value={(jobProgress?.barcodesFound ?? enhancedStats.barcodesFound).toLocaleString()}
                     color="text-emerald-500"
                   />
                   <StatCard
-                    icon={<ZapIcon className="h-4 w-4" />}
-                    label="Rate"
-                    value={jobProgress.stats?.rate ?? "—"}
+                    icon={<PercentIcon className="h-4 w-4" />}
+                    label="Success Rate"
+                    value={`${enhancedStats.successRate.toFixed(1)}%`}
+                    color="text-purple-500"
+                  />
+                  <StatCard
+                    icon={<RotateCcwIcon className="h-4 w-4" />}
+                    label="Retries"
+                    value={enhancedStats.totalRetries.toLocaleString()}
                     color="text-amber-500"
+                  />
+                  <StatCard
+                    icon={<TrendingUpIcon className="h-4 w-4" />}
+                    label="Rate"
+                    value={jobProgress?.stats?.rate ?? `${enhancedStats.productsPerMinute.toFixed(1)}/min`}
+                    color="text-cyan-500"
+                  />
+                </div>
+
+                {/* Additional Stats Row */}
+                <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+                  <StatCard
+                    icon={<TimerIcon className="h-4 w-4" />}
+                    label="Avg Time"
+                    value={`${(enhancedStats.avgTimePerProduct / 1000).toFixed(2)}s`}
+                    color="text-indigo-500"
+                    small
+                  />
+                  <StatCard
+                    icon={<WifiOffIcon className="h-4 w-4" />}
+                    label="Network Errors"
+                    value={enhancedStats.networkErrors.toLocaleString()}
+                    color="text-orange-500"
+                    small
+                  />
+                  <StatCard
+                    icon={<AlertTriangleIcon className="h-4 w-4" />}
+                    label="Scrape Errors"
+                    value={enhancedStats.scrapeErrors.toLocaleString()}
+                    color="text-red-400"
+                    small
+                  />
+                  <StatCard
+                    icon={<ClockIcon className="h-4 w-4" />}
+                    label="ETA"
+                    value={
+                      jobProgress?.stats?.etaSeconds
+                        ? formatDuration(jobProgress.stats.etaSeconds)
+                        : enhancedStats.productsPerMinute > 0
+                          ? formatDuration(
+                              Math.round(
+                                ((count - enhancedStats.totalProcessed) / enhancedStats.productsPerMinute) * 60,
+                              ),
+                            )
+                          : "—"
+                    }
+                    color="text-teal-500"
+                    small
                   />
                 </div>
 
@@ -528,21 +955,72 @@ export default function BulkScrapePage() {
                 <div className="text-muted-foreground flex flex-wrap items-center gap-4 text-sm">
                   <span className="flex items-center gap-1">
                     <ClockIcon className="h-3.5 w-3.5" />
-                    Started: {new Date(jobProgress.startedAt).toLocaleTimeString()}
+                    Started:{" "}
+                    {enhancedStats.startTime?.toLocaleTimeString() ??
+                      (jobProgress?.startedAt ? new Date(jobProgress.startedAt).toLocaleTimeString() : "—")}
                   </span>
-                  {jobProgress.stats?.etaSeconds && jobProgress.status === "running" && (
-                    <span>ETA: ~{formatDuration(jobProgress.stats.etaSeconds)}</span>
-                  )}
-                  {jobProgress.completedAt && (
-                    <span>Completed: {new Date(jobProgress.completedAt).toLocaleTimeString()}</span>
+                  {enhancedStats.startTime && (
+                    <span>
+                      Elapsed: {formatDuration(Math.round((Date.now() - enhancedStats.startTime.getTime()) / 1000))}
+                    </span>
                   )}
                 </div>
               </CardContent>
             </Card>
           )}
 
+          {/* Live Logs */}
+          {(isDirectProcessing || logs.length > 0) && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <ActivityIcon className="h-5 w-5" />
+                  Live Activity Log
+                  <Badge variant="outline" className="ml-auto">
+                    {logs.length} entries
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="bg-muted/30 h-64 w-full rounded-md border p-3">
+                  <div className="space-y-1 font-mono text-xs">
+                    {logs.map((log) => (
+                      <div
+                        key={log.id}
+                        className={cn(
+                          "flex items-start gap-2",
+                          log.type === "error" && "text-red-500",
+                          log.type === "success" && "text-emerald-500",
+                          log.type === "warning" && "text-amber-500",
+                          log.type === "retry" && "text-orange-400",
+                          log.type === "info" && "text-muted-foreground",
+                        )}
+                      >
+                        <span className="shrink-0 opacity-60">{log.timestamp.toLocaleTimeString()}</span>
+                        <span
+                          className={cn(
+                            "shrink-0 rounded px-1",
+                            log.type === "error" && "bg-red-500/20",
+                            log.type === "success" && "bg-emerald-500/20",
+                            log.type === "warning" && "bg-amber-500/20",
+                            log.type === "retry" && "bg-orange-500/20",
+                            log.type === "info" && "bg-muted",
+                          )}
+                        >
+                          {log.type.toUpperCase()}
+                        </span>
+                        <span className="break-all">{log.message}</span>
+                      </div>
+                    ))}
+                    <div ref={logsEndRef} />
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Empty state when no job is running */}
-          {!jobProgress && (
+          {!jobProgress && !isDirectProcessing && logs.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <PackageIcon className="text-muted-foreground mb-4 h-12 w-12" />
@@ -567,7 +1045,7 @@ export default function BulkScrapePage() {
                     <div
                       key={job.id}
                       className={cn(
-                        "flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between",
+                        "flex flex-col gap-2 rounded-md border p-3 xl:flex-row xl:items-center xl:justify-between",
                         activeJobId === job.id && "border-primary bg-primary/5",
                       )}
                     >
@@ -616,19 +1094,21 @@ function StatCard({
   label,
   value,
   color,
+  small = false,
 }: {
   icon: React.ReactNode
   label: string
   value: string
   color: string
+  small?: boolean
 }) {
   return (
-    <div className="bg-muted/50 rounded-md p-3">
+    <div className={cn("rounded-md p-3", small ? "bg-muted/30" : "bg-muted/50")}>
       <div className={`flex items-center gap-1.5 ${color}`}>
         {icon}
-        <span className="text-xs font-medium uppercase">{label}</span>
+        <span className={cn("font-medium uppercase", small ? "text-[10px]" : "text-xs")}>{label}</span>
       </div>
-      <div className="mt-1 text-xl font-bold">{value}</div>
+      <div className={cn("mt-1 font-bold", small ? "text-base" : "text-xl")}>{value}</div>
     </div>
   )
 }

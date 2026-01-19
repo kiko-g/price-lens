@@ -15,6 +15,7 @@ export interface AdminStoreProductFilters {
   priorities: number[]
   missingBarcode: boolean
   available: boolean | null
+  onlyUrl: boolean
 }
 
 export interface UseAdminStoreProductFiltersOptions {
@@ -29,10 +30,11 @@ export interface UseAdminStoreProductFiltersOptions {
 }
 
 const DEFAULT_FILTERS: AdminStoreProductFilters = {
-  origins: [1, 2],
+  origins: [],
   priorities: [],
-  missingBarcode: true,
+  missingBarcode: false,
   available: null,
+  onlyUrl: false,
 }
 
 export function useAdminStoreProductFilters(options: UseAdminStoreProductFiltersOptions = {}) {
@@ -57,6 +59,7 @@ export function useAdminStoreProductFilters(options: UseAdminStoreProductFilters
   const [priorities, setPriorities] = useState<number[]>(() => mergedInitialFilters.priorities)
   const [missingBarcode, setMissingBarcode] = useState(() => mergedInitialFilters.missingBarcode)
   const [available, setAvailable] = useState<boolean | null>(() => mergedInitialFilters.available)
+  const [onlyUrl, setOnlyUrl] = useState(() => mergedInitialFilters.onlyUrl)
 
   // Toggle functions
   const toggleOrigin = useCallback((originId: number) => {
@@ -76,12 +79,14 @@ export function useAdminStoreProductFilters(options: UseAdminStoreProductFilters
   // Computed filter params string for API calls
   const filterParamsString = useMemo(() => {
     const params = new URLSearchParams()
-    if (origins.length > 0) params.set("origins", origins.join(","))
+    // Always send origins - empty string means "all origins" (no filter)
+    params.set("origins", origins.join(","))
     if (priorities.length > 0) params.set("priorities", priorities.join(","))
     params.set("missingBarcode", String(missingBarcode))
     if (available !== null) params.set("available", String(available))
+    params.set("onlyUrl", String(onlyUrl))
     return params.toString()
-  }, [origins, priorities, missingBarcode, available])
+  }, [origins, priorities, missingBarcode, available, onlyUrl])
 
   // Computed filters object for POST/PATCH requests
   const filters = useMemo<AdminStoreProductFilters>(
@@ -90,8 +95,9 @@ export function useAdminStoreProductFilters(options: UseAdminStoreProductFilters
       priorities,
       missingBarcode,
       available,
+      onlyUrl,
     }),
-    [origins, priorities, missingBarcode, available],
+    [origins, priorities, missingBarcode, available, onlyUrl],
   )
 
   // Count query
@@ -121,6 +127,7 @@ export function useAdminStoreProductFilters(options: UseAdminStoreProductFilters
     setPriorities(mergedInitialFilters.priorities)
     setMissingBarcode(mergedInitialFilters.missingBarcode)
     setAvailable(mergedInitialFilters.available)
+    setOnlyUrl(mergedInitialFilters.onlyUrl)
   }, [mergedInitialFilters])
 
   return {
@@ -129,12 +136,14 @@ export function useAdminStoreProductFilters(options: UseAdminStoreProductFilters
     priorities,
     missingBarcode,
     available,
+    onlyUrl,
 
     // Setters
     setOrigins,
     setPriorities,
     setMissingBarcode,
     setAvailable,
+    setOnlyUrl,
 
     // Toggle functions
     toggleOrigin,

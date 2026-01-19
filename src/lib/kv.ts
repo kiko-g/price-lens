@@ -102,6 +102,7 @@ export interface BulkScrapeJob {
     priorities: number[]
     missingBarcode: boolean
     available: boolean | null
+    onlyUrl?: boolean
     category?: string
   }
   total: number

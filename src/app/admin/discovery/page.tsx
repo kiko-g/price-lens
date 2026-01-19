@@ -365,10 +365,10 @@ export default function DiscoveryPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">How Discovery Works</CardTitle>
           </CardHeader>
-          <CardContent className="text-muted-foreground space-y-2 text-xs">
+          <CardContent className="text-muted-foreground space-y-2 text-sm">
             <p>
-              <strong>1. Sitemap Fetch:</strong> Downloads the store's sitemap index and identifies product-specific
-              sitemaps.
+              <strong>1. Sitemap Fetch:</strong> Downloads the store&apos;s sitemap index and identifies
+              product-specific sitemaps.
             </p>
             <p>
               <strong>2. URL Extraction:</strong> Parses all product URLs from the sitemaps.

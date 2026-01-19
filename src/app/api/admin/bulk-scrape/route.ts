@@ -22,6 +22,7 @@ interface BulkScrapeFilters {
   priorities: number[]
   missingBarcode: boolean
   available: boolean | null
+  onlyUrl: boolean
   category?: string
 }
 
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
       priorities: body.priorities || [],
       missingBarcode: body.missingBarcode ?? true,
       available: body.available ?? null,
+      onlyUrl: body.onlyUrl ?? false,
       category: body.category,
     }
 
@@ -194,6 +196,7 @@ export async function PATCH(req: NextRequest) {
         priorities: body.priorities || [],
         missingBarcode: body.missingBarcode ?? true,
         available: body.available ?? null,
+        onlyUrl: body.onlyUrl ?? false,
         category: body.category,
       }
 
@@ -245,7 +248,7 @@ export async function PATCH(req: NextRequest) {
       .select("id, url, name, origin_id, priority, barcode")
       .not("url", "is", null)
 
-    query = applyFilters(query, job.filters)
+    query = applyFilters(query, { ...job.filters, onlyUrl: job.filters.onlyUrl ?? false })
 
     // Skip already processed products by using offset
     const { data: products, error } = await query
@@ -352,13 +355,23 @@ function parseFilters(searchParams: URLSearchParams): BulkScrapeFilters {
   const prioritiesParam = searchParams.get("priorities")
   const availableParam = searchParams.get("available")
 
+  // Parse origins - empty string means "all origins" (no filter)
+  // Only default to [1, 2] if origins param is not provided at all
+  let origins: number[] = []
+  if (originsParam === null) {
+    // Param not provided - use default (Continente + Auchan)
+    origins = [1, 2]
+  } else if (originsParam !== "") {
+    // Param provided with values - parse them
+    origins = originsParam
+      .split(",")
+      .map((n) => parseInt(n, 10))
+      .filter((n) => !isNaN(n))
+  }
+  // else: empty string means no filter (all origins)
+
   return {
-    origins: originsParam
-      ? originsParam
-          .split(",")
-          .map((n) => parseInt(n, 10))
-          .filter((n) => !isNaN(n))
-      : [1, 2], // Default: Continente + Auchan (skip Pingo Doce)
+    origins,
     priorities: prioritiesParam
       ? prioritiesParam
           .split(",")
@@ -367,6 +380,7 @@ function parseFilters(searchParams: URLSearchParams): BulkScrapeFilters {
       : [],
     missingBarcode: searchParams.get("missingBarcode") !== "false",
     available: availableParam === null ? null : availableParam === "true",
+    onlyUrl: searchParams.get("onlyUrl") === "true",
     category: searchParams.get("category") || undefined,
   }
 }
@@ -399,8 +413,14 @@ function applyFilters<T extends { in: any; is: any; eq: any; not: any }>(query: 
     q = q.eq("category", filters.category)
   }
 
-  // Only products with valid names (not blank entries)
-  q = q.not("name", "is", null)
+  // Only URL filter - products that have only URL (no name scraped yet)
+  // When onlyUrl is true, filter for products with no name (never scraped)
+  // When onlyUrl is false (default), don't apply any name filter - show all products
+  if (filters.onlyUrl) {
+    q = q.is("name", null)
+  }
+  // Note: We intentionally don't filter by name when onlyUrl is false
+  // This allows the default view to show ALL products (including unscraped ones)
 
   return q
 }
