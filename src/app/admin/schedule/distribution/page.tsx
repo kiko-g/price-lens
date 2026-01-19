@@ -121,12 +121,12 @@ export default function ScheduleDistributionPage() {
                 >
                   {fixPhantomMutation.isPending ? (
                     <>
-                      <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
                       Fixing...
                     </>
                   ) : (
                     <>
-                      <WrenchIcon className="mr-2 h-4 w-4" />
+                      <WrenchIcon className="h-4 w-4" />
                       Fix {overview.totalPhantomScraped.toLocaleString()} products
                     </>
                   )}
@@ -426,7 +426,7 @@ export default function ScheduleDistributionPage() {
                           onClick={() => setPage((p) => Math.max(1, p - 1))}
                           disabled={!productsData.pagination.hasPreviousPage || isFetchingProducts}
                         >
-                          <ChevronLeftIcon className="mr-1 h-4 w-4" />
+                          <ChevronLeftIcon className="h-4 w-4" />
                           Previous
                         </Button>
                         <Button

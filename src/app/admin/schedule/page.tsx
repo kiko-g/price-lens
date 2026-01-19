@@ -62,7 +62,7 @@ export default function SchedulePage() {
                 Scrape Schedule
               </CardTitle>
               <Button variant="outline" size="sm" onClick={() => refetchOverview()}>
-                <RefreshCwIcon className="mr-2 h-4 w-4" />
+                <RefreshCwIcon className="h-4 w-4" />
                 Refresh
               </Button>
             </div>

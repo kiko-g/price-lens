@@ -60,12 +60,12 @@ export default function ScheduleTestPage() {
               <Button variant="outline" size="sm" onClick={runSchedulerTest} disabled={isTestingScheduler}>
                 {isTestingScheduler ? (
                   <>
-                    <RefreshCwIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <RefreshCwIcon className="h-4 w-4 animate-spin" />
                     Testing...
                   </>
                 ) : (
                   <>
-                    <PlayCircleIcon className="mr-2 h-4 w-4" />
+                    <PlayCircleIcon className="h-4 w-4" />
                     Run Test
                   </>
                 )}

@@ -216,9 +216,9 @@ function DuplicateStatsCard() {
             disabled={deleteMutation.isPending}
           >
             {deleteMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Trash2Icon className="mr-2 h-4 w-4" />
+              <Trash2Icon className="h-4 w-4" />
             )}
             Clean Up
           </Button>

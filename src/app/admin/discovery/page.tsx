@@ -13,12 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { toast } from "sonner"
 
 import {
@@ -68,7 +63,11 @@ export default function DiscoveryPage() {
   const [runningOrigin, setRunningOrigin] = useState<number | "all" | null>(null)
   const [lastResults, setLastResults] = useState<DiscoveryResult[] | null>(null)
 
-  const { data: status, isLoading, refetch } = useQuery({
+  const {
+    data: status,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["discovery-status"],
     queryFn: async () => {
       const res = await axios.get("/api/admin/discovery?action=status")
@@ -132,7 +131,7 @@ export default function DiscoveryPage() {
                 </CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                <RefreshCwIcon className="mr-2 h-4 w-4" />
+                <RefreshCwIcon className="h-4 w-4" />
                 Refresh
               </Button>
             </div>
@@ -155,12 +154,12 @@ export default function DiscoveryPage() {
               >
                 {runningOrigin === "all" ? (
                   <>
-                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
                     Running...
                   </>
                 ) : (
                   <>
-                    <PlayIcon className="mr-2 h-4 w-4" />
+                    <PlayIcon className="h-4 w-4" />
                     Run All Stores
                   </>
                 )}
@@ -195,7 +194,7 @@ export default function DiscoveryPage() {
                         <Loader2Icon className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          <SearchIcon className="mr-1.5 h-3.5 w-3.5" />
+                          <SearchIcon className="h-3.5 w-3.5" />
                           Discover
                         </>
                       )}
@@ -217,9 +216,7 @@ export default function DiscoveryPage() {
                         Last Discovery
                       </div>
                       <p className="mt-0.5 text-sm font-medium">
-                        {store.lastDiscoveryRun
-                          ? format(new Date(store.lastDiscoveryRun), "MMM d, HH:mm")
-                          : "Never"}
+                        {store.lastDiscoveryRun ? format(new Date(store.lastDiscoveryRun), "MMM d, HH:mm") : "Never"}
                       </p>
                     </div>
                   </div>
@@ -269,19 +266,15 @@ export default function DiscoveryPage() {
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex w-full items-center justify-between pr-4">
                         <div className="flex items-center gap-2">
-                          <div className={cn("h-2.5 w-2.5 rounded-full", storeColors[result.originName] || "bg-gray-500")} />
+                          <div
+                            className={cn("h-2.5 w-2.5 rounded-full", storeColors[result.originName] || "bg-gray-500")}
+                          />
                           <span className="font-medium">{result.originName}</span>
                         </div>
                         <div className="flex items-center gap-4 text-sm">
-                          <span className="text-emerald-500 font-medium">
-                            +{result.urlsNew.toLocaleString()} new
-                          </span>
-                          <span className="text-muted-foreground">
-                            {result.urlsFound.toLocaleString()} found
-                          </span>
-                          <span className="text-muted-foreground">
-                            {(result.durationMs / 1000).toFixed(1)}s
-                          </span>
+                          <span className="font-medium text-emerald-500">+{result.urlsNew.toLocaleString()} new</span>
+                          <span className="text-muted-foreground">{result.urlsFound.toLocaleString()} found</span>
+                          <span className="text-muted-foreground">{(result.durationMs / 1000).toFixed(1)}s</span>
                         </div>
                       </div>
                     </AccordionTrigger>
@@ -318,10 +311,7 @@ export default function DiscoveryPage() {
                                 {((result.urlsExisting / result.urlsFound) * 100).toFixed(1)}% already tracked
                               </span>
                             </div>
-                            <Progress
-                              value={(result.urlsExisting / result.urlsFound) * 100}
-                              className="h-2"
-                            />
+                            <Progress value={(result.urlsExisting / result.urlsFound) * 100} className="h-2" />
                           </div>
                         )}
 
@@ -354,7 +344,7 @@ export default function DiscoveryPage() {
                               <AlertCircleIcon className="h-3.5 w-3.5" />
                               Errors ({result.errors.length}):
                             </p>
-                            <div className="bg-red-500/10 max-h-24 overflow-y-auto rounded-md p-2 text-xs text-red-500">
+                            <div className="max-h-24 overflow-y-auto rounded-md bg-red-500/10 p-2 text-xs text-red-500">
                               {result.errors.map((err, i) => (
                                 <p key={i}>{err}</p>
                               ))}
@@ -377,7 +367,8 @@ export default function DiscoveryPage() {
           </CardHeader>
           <CardContent className="text-muted-foreground space-y-2 text-xs">
             <p>
-              <strong>1. Sitemap Fetch:</strong> Downloads the store's sitemap index and identifies product-specific sitemaps.
+              <strong>1. Sitemap Fetch:</strong> Downloads the store's sitemap index and identifies product-specific
+              sitemaps.
             </p>
             <p>
               <strong>2. URL Extraction:</strong> Parses all product URLs from the sitemaps.
@@ -389,7 +380,8 @@ export default function DiscoveryPage() {
               <strong>4. Deduplication:</strong> Compares against existing products in the database.
             </p>
             <p>
-              <strong>5. Insert:</strong> New products are added with priority 0 (unclassified) for later AI classification.
+              <strong>5. Insert:</strong> New products are added with priority 0 (unclassified) for later AI
+              classification.
             </p>
             <p className="pt-2 font-medium text-amber-500">
               💡 Tip: Run in dry-run mode first to preview what would be discovered without making changes.

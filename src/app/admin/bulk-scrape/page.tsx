@@ -415,17 +415,17 @@ export default function BulkScrapePage() {
           >
             {startJobMutation.isPending || isDirectProcessing ? (
               <>
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2Icon className="h-4 w-4 animate-spin" />
                 {isDirectProcessing ? "Processing..." : "Starting..."}
               </>
             ) : isJobRunning ? (
               <>
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2Icon className="h-4 w-4 animate-spin" />
                 Job Running...
               </>
             ) : (
               <>
-                <PlayIcon className="mr-2 h-4 w-4" />
+                <PlayIcon className="h-4 w-4" />
                 Start Re-Scrape
               </>
             )}
@@ -440,7 +440,7 @@ export default function BulkScrapePage() {
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold">Jobs & Progress</h1>
             <Button variant="outline" size="sm" onClick={() => refetchCount()}>
-              <RefreshCwIcon className="mr-2 h-4 w-4" />
+              <RefreshCwIcon className="h-4 w-4" />
               Refresh
             </Button>
           </div>
@@ -476,7 +476,7 @@ export default function BulkScrapePage() {
                         onClick={() => cancelJobMutation.mutate(jobProgress.id)}
                         disabled={cancelJobMutation.isPending}
                       >
-                        <SquareIcon className="mr-1 h-3 w-3" />
+                        <SquareIcon className="h-3 w-3" />
                         Cancel
                       </Button>
                     )}

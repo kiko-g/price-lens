@@ -145,7 +145,7 @@ export default function ScheduleActivityPage() {
                   </div>
                   {activity?.scrapesPerHour === 0 && (
                     <Badge variant="outline" className="border-amber-500 text-amber-500">
-                      <AlertTriangleIcon className="mr-1 h-3 w-3" />
+                      <AlertTriangleIcon className="h-3 w-3" />
                       No recent activity
                     </Badge>
                   )}
@@ -171,7 +171,7 @@ export default function ScheduleActivityPage() {
                 </CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={() => refetchActivityLog()}>
-                <RefreshCwIcon className="mr-2 h-4 w-4" />
+                <RefreshCwIcon className="h-4 w-4" />
                 Refresh
               </Button>
             </div>

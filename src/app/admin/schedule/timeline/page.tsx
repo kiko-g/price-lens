@@ -74,7 +74,7 @@ export default function ScheduleTimelinePage() {
                   onClick={() => setSelectedDate(new Date())}
                   disabled={isToday(selectedDate)}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   {formatDateLabel(selectedDate)}
                 </Button>
                 <Button variant="outline" size="icon" onClick={() => navigateDate("next")}>

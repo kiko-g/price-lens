@@ -77,7 +77,7 @@ export function TestScrapers() {
                 }}
                 disabled={testMutation.isPending}
               >
-                {testMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {testMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Test
               </Button>
             </div>
