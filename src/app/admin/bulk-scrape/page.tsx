@@ -44,6 +44,7 @@ import {
   PercentIcon,
   LayersIcon,
   StoreIcon,
+  MicroscopeIcon,
 } from "lucide-react"
 
 // Store origin mapping for SVG logos
@@ -415,19 +416,51 @@ export default function BulkScrapePage() {
             const result = await processDirectBatch(currentJobId)
             const batchDuration = Date.now() - batchStartTime
 
-            // Log batch results (API returns batchProcessed, batchSuccess, batchFailed, batchBarcodesFound)
-            const processed = result.batchProcessed ?? result.batchSuccess ?? 0
-            const failed = result.batchFailed ?? 0
+            // Log batch results with detailed breakdown
+            const success = result.batchSuccess ?? 0
+            const unavailable = result.batchUnavailable ?? 0
+            const errors = result.batchErrors ?? 0
             const barcodes = result.batchBarcodesFound ?? 0
+            const errorDetails = result.errors as
+              | Array<{
+                  productId: number
+                  status: string
+                  statusCode?: number
+                  error?: string
+                }>
+              | undefined
 
+            // Build detailed log message
+            const parts = [`${success} ok`]
+            if (unavailable > 0) parts.push(`${unavailable} unavailable`)
+            if (errors > 0) parts.push(`${errors} errors`)
+            if (barcodes > 0) parts.push(`${barcodes} barcodes`)
+
+            const hasProblems = unavailable > 0 || errors > 0
             addLog(
-              "success",
-              `Batch #${batchNumber}: ${processed} processed, ${failed} failed, ${barcodes} barcodes (${batchDuration}ms)`,
+              hasProblems ? "warning" : "success",
+              `Batch #${batchNumber}: ${parts.join(", ")} (${batchDuration}ms)`,
             )
 
+            // Log individual errors if any (especially useful for debugging blocks)
+            if (errorDetails && errorDetails.length > 0) {
+              const errorsByType = errorDetails.reduce(
+                (acc, err) => {
+                  const key = err.statusCode ? `HTTP ${err.statusCode}` : err.status
+                  acc[key] = (acc[key] || 0) + 1
+                  return acc
+                },
+                {} as Record<string, number>,
+              )
+              const errorSummary = Object.entries(errorsByType)
+                .map(([type, count]) => `${count}x ${type}`)
+                .join(", ")
+              addLog("error", `  └─ ${errorSummary}`)
+            }
+
             updateStats({
-              processed: processed || batchSize,
-              failed,
+              processed: success + unavailable + errors,
+              failed: unavailable + errors,
               barcodesFound: barcodes,
             })
 
@@ -476,7 +509,7 @@ export default function BulkScrapePage() {
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   // Accordion default open values
-  const defaultAccordionValues = ["processing-mode", "batch-size"]
+  const defaultAccordionValues = ["processing-mode", "batch-size", "more-options"]
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden xl:flex-row">
@@ -557,7 +590,7 @@ export default function BulkScrapePage() {
                       disabled={isJobRunning}
                     />
                     <div className="flex gap-1">
-                      {[1, 5, 10, 20].map((size) => (
+                      {[1, 3, 5, 8].map((size) => (
                         <Button
                           key={size}
                           variant={batchSize === size ? "default" : "outline"}
@@ -570,14 +603,38 @@ export default function BulkScrapePage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-muted-foreground text-xs">
-                    Higher values = faster but more server load. Recommended: 5-10 for local dev.
-                  </p>
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* Store Origin Filter - with SVG logos */}
+            {/* More Options Filter */}
+            <AccordionItem value="more-options">
+              <AccordionTrigger className="w-full cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex flex-1 items-center gap-2">
+                  <SettingsIcon className="h-4 w-4" />
+                  More Options
+                </div>
+                {(missingBarcode || onlyUrl) && (
+                  <Badge variant="secondary" className="mr-2 text-xs">
+                    {[missingBarcode && "No barcode", onlyUrl && "Only URL"].filter(Boolean).join(", ")}
+                  </Badge>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-3">
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <Checkbox checked={onlyUrl} onCheckedChange={() => setOnlyUrl(!onlyUrl)} />
+                    <span className="text-sm">Only products with URL (no data scraped)</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
+                    <span className="text-sm">Only products missing barcode</span>
+                  </label>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                 <div className="flex flex-1 items-center gap-2">
@@ -623,33 +680,6 @@ export default function BulkScrapePage() {
                       </Label>
                     </div>
                   ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* More Options Filter */}
-            <AccordionItem value="more-options">
-              <AccordionTrigger className="w-full cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                <div className="flex flex-1 items-center gap-2">
-                  <SettingsIcon className="h-4 w-4" />
-                  More Options
-                </div>
-                {(missingBarcode || onlyUrl) && (
-                  <Badge variant="secondary" className="mr-2 text-xs">
-                    {[missingBarcode && "No barcode", onlyUrl && "Only URL"].filter(Boolean).join(", ")}
-                  </Badge>
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-3">
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <Checkbox checked={onlyUrl} onCheckedChange={() => setOnlyUrl(!onlyUrl)} />
-                    <span className="text-sm">Only products with URL (no data scraped)</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
-                    <span className="text-sm">Only products missing barcode</span>
-                  </label>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -707,7 +737,10 @@ export default function BulkScrapePage() {
             <AccordionItem value="priority">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                 <div className="flex flex-1 items-center gap-2">
-                  Priority Level
+                  <div className="flex flex-1 items-center gap-2">
+                    <MicroscopeIcon className="h-4 w-4" />
+                    <span>Priority Level</span>
+                  </div>
                   {priorities.length > 0 && (
                     <span className="text-muted-foreground text-xs">({priorities.length})</span>
                   )}

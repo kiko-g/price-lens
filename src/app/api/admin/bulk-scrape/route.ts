@@ -297,8 +297,25 @@ export async function PATCH(req: NextRequest) {
           )
           const json = await response.json()
 
+          if (response.status === 404) {
+            // Product not found / unavailable
+            return {
+              success: false,
+              productId: product.id,
+              status: "unavailable",
+              error: json.error || "Product not found (404)",
+            }
+          }
+
           if (response.status !== 200) {
-            return { success: false, productId: product.id, error: json.error }
+            // Other error (blocked, network error, etc.)
+            return {
+              success: false,
+              productId: product.id,
+              status: "error",
+              statusCode: response.status,
+              error: json.error || `HTTP ${response.status}`,
+            }
           }
 
           // Update price point
@@ -307,17 +324,28 @@ export async function PATCH(req: NextRequest) {
           const newBarcode = json.data?.barcode
           const barcodeFound = !hadBarcode && !!newBarcode
 
-          return { success: true, productId: product.id, barcodeFound, barcode: newBarcode }
+          return { success: true, productId: product.id, status: "success", barcodeFound, barcode: newBarcode }
         } catch (err) {
-          return { success: false, productId: product.id, error: String(err) }
+          return { success: false, productId: product.id, status: "error", error: String(err) }
         }
       }),
     )
 
-    // Count results
+    // Count results with more detail
     const successCount = results.filter((r) => r.success).length
-    const failCount = results.filter((r) => !r.success).length
+    const unavailableCount = results.filter((r) => !r.success && r.status === "unavailable").length
+    const errorCount = results.filter((r) => !r.success && r.status === "error").length
     const barcodesFound = results.filter((r) => r.success && r.barcodeFound).length
+
+    // Collect errors for logging
+    const errors = results
+      .filter((r) => !r.success)
+      .map((r) => ({
+        productId: r.productId,
+        status: r.status,
+        statusCode: (r as { statusCode?: number }).statusCode,
+        error: (r as { error?: string }).error,
+      }))
 
     // Update job progress
     const newProcessed = job.processed + products.length
@@ -325,7 +353,7 @@ export async function PATCH(req: NextRequest) {
 
     await updateBulkScrapeJob(job.id, {
       processed: newProcessed,
-      failed: job.failed + failCount,
+      failed: job.failed + errorCount + unavailableCount,
       barcodesFound: job.barcodesFound + barcodesFound,
       status: isComplete ? "completed" : "running",
       completedAt: isComplete ? new Date().toISOString() : undefined,
@@ -336,8 +364,10 @@ export async function PATCH(req: NextRequest) {
       status: isComplete ? "completed" : "running",
       batchProcessed: products.length,
       batchSuccess: successCount,
-      batchFailed: failCount,
+      batchUnavailable: unavailableCount,
+      batchErrors: errorCount,
       batchBarcodesFound: barcodesFound,
+      errors, // Include error details for logging
       totalProcessed: newProcessed,
       totalRemaining: job.total - newProcessed,
       mode: "direct",

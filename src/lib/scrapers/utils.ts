@@ -14,8 +14,27 @@ const httpsAgent = new https.Agent({
   timeout: 30000,
 })
 
-const USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+// Rotating User-Agents to look like different browsers
+const USER_AGENTS = [
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0",
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+]
+
+function getRandomUserAgent(): string {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
+}
+
+// Random delay to mimic human behavior (500ms - 2000ms)
+export async function randomDelay(min = 500, max = 2000): Promise<void> {
+  const delay = Math.floor(Math.random() * (max - min + 1)) + min
+  await new Promise((resolve) => setTimeout(resolve, delay))
+}
+
+const USER_AGENT = USER_AGENTS[0] // Default for non-scraping requests
 
 const TRACKING_PARAMS = [
   "_gl",
@@ -65,16 +84,27 @@ export function cleanUrl(url: string): string {
 /**
  * Fetches HTML from a URL with error handling
  * Returns structured result with status to distinguish 404 from other errors
+ * Includes anti-blocking measures: random delay + rotating User-Agent
  */
-export async function fetchHtml(url: string): Promise<FetchResult> {
+export async function fetchHtml(url: string, skipDelay = false): Promise<FetchResult> {
   if (!url) {
     console.warn("URL is required. Skipping product.")
     return { html: null, status: "error" }
   }
 
+  // Add random delay before request to avoid rate limiting (unless explicitly skipped)
+  if (!skipDelay) {
+    await randomDelay(300, 1500)
+  }
+
   const cleanedUrl = cleanUrl(url)
   try {
-    const response = await httpClient.get(cleanedUrl)
+    // Use random User-Agent for each request
+    const response = await httpClient.get(cleanedUrl, {
+      headers: {
+        "User-Agent": getRandomUserAgent(),
+      },
+    })
     if (!response.data || typeof response.data !== "string") {
       console.warn("Empty or invalid response received. Skipping product.")
       return { html: null, status: "error" }
@@ -86,6 +116,11 @@ export async function fetchHtml(url: string): Promise<FetchResult> {
       if (error.response?.status === 404) {
         console.warn(`[404] Product not found at URL: ${cleanedUrl}`)
         return { html: null, status: "not_found" }
+      }
+      // Rate limiting / blocking responses (429, 474, 403, etc.)
+      if (error.response?.status && [429, 474, 403].includes(error.response.status)) {
+        console.warn(`[${error.response.status}] Rate limited/blocked at URL: ${cleanedUrl}`)
+        return { html: null, status: "error" }
       }
       if (error.code === "ECONNABORTED") {
         console.warn("Request timed out. Skipping product.")
