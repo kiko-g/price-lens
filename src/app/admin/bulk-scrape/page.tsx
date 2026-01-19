@@ -442,20 +442,31 @@ export default function BulkScrapePage() {
               `Batch #${batchNumber}: ${parts.join(", ")} (${batchDuration}ms)`,
             )
 
-            // Log individual errors if any (especially useful for debugging blocks)
+            // Log details for unavailable (warning) and errors (error) separately
             if (errorDetails && errorDetails.length > 0) {
-              const errorsByType = errorDetails.reduce(
-                (acc, err) => {
-                  const key = err.statusCode ? `HTTP ${err.statusCode}` : err.status
-                  acc[key] = (acc[key] || 0) + 1
-                  return acc
-                },
-                {} as Record<string, number>,
-              )
-              const errorSummary = Object.entries(errorsByType)
-                .map(([type, count]) => `${count}x ${type}`)
-                .join(", ")
-              addLog("error", `  └─ ${errorSummary}`)
+              const unavailableItems = errorDetails.filter((e) => e.status === "unavailable")
+              const errorItems = errorDetails.filter((e) => e.status === "error")
+
+              // Log unavailable as warning (expected - products removed from store)
+              if (unavailableItems.length > 0) {
+                addLog("warning", `  └─ ${unavailableItems.length}x unavailable (404)`)
+              }
+
+              // Log actual errors (blocks, timeouts, etc.)
+              if (errorItems.length > 0) {
+                const errorsByType = errorItems.reduce(
+                  (acc, err) => {
+                    const key = err.statusCode ? `HTTP ${err.statusCode}` : "error"
+                    acc[key] = (acc[key] || 0) + 1
+                    return acc
+                  },
+                  {} as Record<string, number>,
+                )
+                const errorSummary = Object.entries(errorsByType)
+                  .map(([type, count]) => `${count}x ${type}`)
+                  .join(", ")
+                addLog("error", `  └─ ${errorSummary}`)
+              }
             }
 
             updateStats({
@@ -509,7 +520,7 @@ export default function BulkScrapePage() {
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   // Accordion default open values
-  const defaultAccordionValues = ["processing-mode", "batch-size", "more-options"]
+  const defaultAccordionValues = ["processing-mode", "batch-size", "more-options", "availability"]
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden xl:flex-row">
@@ -634,6 +645,55 @@ export default function BulkScrapePage() {
               </AccordionContent>
             </AccordionItem>
 
+            {/* Availability Filter */}
+            <AccordionItem value="availability">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex flex-1 items-center gap-2">
+                  <CircleCheckIcon className="h-4 w-4" />
+                  Availability
+                </div>
+                {available !== null && (
+                  <Badge variant="secondary" className="mr-2 text-xs">
+                    {available ? "Available" : "Unavailable"}
+                  </Badge>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-wrap gap-2">
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                      available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setAvailable(null)}
+                  >
+                    <CircleIcon className="h-3.5 w-3.5" />
+                    <span className="text-sm">All</span>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                      available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setAvailable(true)}
+                  >
+                    <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-sm">Available</span>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
+                      available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setAvailable(false)}
+                  >
+                    <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
+                    <span className="text-sm">Unavailable</span>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -680,55 +740,6 @@ export default function BulkScrapePage() {
                       </Label>
                     </div>
                   ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Availability Filter */}
-            <AccordionItem value="availability">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                <div className="flex flex-1 items-center gap-2">
-                  <CircleCheckIcon className="h-4 w-4" />
-                  Availability
-                </div>
-                {available !== null && (
-                  <Badge variant="secondary" className="mr-2 text-xs">
-                    {available ? "Available" : "Unavailable"}
-                  </Badge>
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-wrap gap-2">
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                      available === null ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setAvailable(null)}
-                  >
-                    <CircleIcon className="h-3.5 w-3.5" />
-                    <span className="text-sm">All</span>
-                  </div>
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                      available === true ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setAvailable(true)}
-                  >
-                    <CircleCheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                    <span className="text-sm">Available</span>
-                  </div>
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 transition-colors",
-                      available === false ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setAvailable(false)}
-                  >
-                    <CircleXIcon className="h-3.5 w-3.5 text-red-500" />
-                    <span className="text-sm">Unavailable</span>
-                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
