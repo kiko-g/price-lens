@@ -509,20 +509,30 @@ export const storeProductQueries = {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
       .from("store_products")
-      .select("created_at, updated_at, barcode")
+      .select("created_at, updated_at, barcode, brand, image, pack, category, category_2, category_3")
       .eq("url", sp.url)
       .single()
 
     // IMPORTANT: We explicitly preserve existing updated_at (which may be null)
     // updated_at should ONLY be set by touchUpdatedAt() when a valid price is recorded
     // This prevents the database from auto-setting updated_at on every upsert
-    // Also preserve existing barcode if the new one is null (conservative upsert)
+    //
+    // CONSERVATIVE UPSERT: For descriptive fields that rarely change, we preserve
+    // existing values if the new scrape returns null. This prevents data loss when
+    // scraping fails to extract certain fields due to page changes or network issues.
     const productToUpsert = {
       ...sp,
       priority: sp.priority || 1,
       created_at: sp.created_at || existingProduct?.created_at || new Date().toISOString(),
-      updated_at: existingProduct?.updated_at ?? null, // Preserve existing value, or null for new products
-      barcode: sp.barcode || existingProduct?.barcode || null, // Preserve existing barcode if new is null
+      updated_at: existingProduct?.updated_at ?? null,
+      // Conservative fields - preserve existing if new is null
+      barcode: sp.barcode || existingProduct?.barcode || null,
+      brand: sp.brand || existingProduct?.brand || null,
+      image: sp.image || existingProduct?.image || null,
+      pack: sp.pack || existingProduct?.pack || null,
+      category: sp.category || existingProduct?.category || null,
+      category_2: sp.category_2 || existingProduct?.category_2 || null,
+      category_3: sp.category_3 || existingProduct?.category_3 || null,
     }
 
     const { data, error } = await supabase
