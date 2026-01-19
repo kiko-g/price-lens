@@ -84,27 +84,24 @@ export function cleanUrl(url: string): string {
 /**
  * Fetches HTML from a URL with error handling
  * Returns structured result with status to distinguish 404 from other errors
- * Includes anti-blocking measures: random delay + rotating User-Agent
+ * When useAntiBlock is true, adds random delay + rotating User-Agent (for bulk scraping)
  */
-export async function fetchHtml(url: string, skipDelay = false): Promise<FetchResult> {
+export async function fetchHtml(url: string, useAntiBlock = false): Promise<FetchResult> {
   if (!url) {
     console.warn("URL is required. Skipping product.")
     return { html: null, status: "error" }
   }
 
-  // Add random delay before request to avoid rate limiting (unless explicitly skipped)
-  if (!skipDelay) {
+  // Add random delay before request to avoid rate limiting (only for bulk scraping)
+  if (useAntiBlock) {
     await randomDelay(300, 1500)
   }
 
   const cleanedUrl = cleanUrl(url)
   try {
-    // Use random User-Agent for each request
-    const response = await httpClient.get(cleanedUrl, {
-      headers: {
-        "User-Agent": getRandomUserAgent(),
-      },
-    })
+    // Use random User-Agent when anti-blocking is enabled
+    const headers = useAntiBlock ? { "User-Agent": getRandomUserAgent() } : {}
+    const response = await httpClient.get(cleanedUrl, { headers })
     if (!response.data || typeof response.data !== "string") {
       console.warn("Empty or invalid response received. Skipping product.")
       return { html: null, status: "error" }

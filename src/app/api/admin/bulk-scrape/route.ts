@@ -289,11 +289,12 @@ export async function PATCH(req: NextRequest) {
             .eq("id", product.id)
             .single()
 
-          // Scrape
+          // Scrape with anti-blocking enabled for bulk operations
           const response = await scrapeAndReplaceProduct(
             product.url,
             product.origin_id,
             existingProduct as StoreProduct | undefined,
+            true, // useAntiBlock - enable delays and rotating UA
           )
           const json = await response.json()
 

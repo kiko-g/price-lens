@@ -64,6 +64,8 @@ export enum StoreOrigin {
 export interface ScraperContext {
   url: string
   previousProduct?: StoreProduct
+  /** Enable anti-blocking measures (random delays, rotating UA). Use for bulk scraping. */
+  useAntiBlock?: boolean
 }
 
 /**

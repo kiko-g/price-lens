@@ -90,8 +90,15 @@ export function isValidProduct(product: unknown): product is ScrapedProduct {
  * - Success: sets available = true
  * - 404: sets available = false (product definitively doesn't exist)
  * - Other errors: doesn't change availability (might be temporary)
+ *
+ * @param useAntiBlock - Enable anti-blocking measures (random delays, rotating UA) for bulk scraping
  */
-export async function scrapeAndReplaceProduct(url: string | null, origin: number | null, prevSp?: StoreProduct) {
+export async function scrapeAndReplaceProduct(
+  url: string | null,
+  origin: number | null,
+  prevSp?: StoreProduct,
+  useAntiBlock = false,
+) {
   if (!url) {
     return NextResponse.json({ error: "URL is required" }, { status: 400 })
   }
@@ -101,7 +108,7 @@ export async function scrapeAndReplaceProduct(url: string | null, origin: number
   }
 
   const scraper = getScraper(origin)
-  const result = await scraper.scrape({ url, previousProduct: prevSp })
+  const result = await scraper.scrape({ url, previousProduct: prevSp, useAntiBlock })
 
   // Handle 404 - product definitively doesn't exist
   // Mark as unavailable AND close the price point (price is no longer valid)

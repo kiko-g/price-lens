@@ -21,7 +21,8 @@ export abstract class BaseProductScraper implements StoreScraper {
     const priorityInfo = extractPriorityInfo(ctx.previousProduct)
 
     try {
-      const fetchResult = await fetchHtml(cleanedUrl)
+      // Pass useAntiBlock to enable delays/rotating UA for bulk scraping
+      const fetchResult = await fetchHtml(cleanedUrl, ctx.useAntiBlock)
 
       // Handle 404 - product definitively doesn't exist
       if (fetchResult.status === "not_found") {
