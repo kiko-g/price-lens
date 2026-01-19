@@ -37,7 +37,7 @@ export function Brands({ className }: { className?: string }) {
                 <brand.component
                   className={cn(
                     "h-auto w-24 sm:w-36 md:w-32 lg:w-32 xl:w-36",
-                    brand.disabled && "opacity-50 grayscale",
+                    brand.disabled && "cursor-not-allowed grayscale",
                   )}
                 />
               </TooltipTrigger>

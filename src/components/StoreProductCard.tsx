@@ -134,7 +134,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 height={500}
                 className={cn(
                   "aspect-square h-full w-full bg-white object-contain object-center transition duration-300",
-                  sp.available ? "opacity-100 hover:scale-105" : "opacity-50 grayscale",
+                  sp.available ? "opacity-100 hover:scale-105" : "cursor-not-allowed grayscale",
                 )}
                 {...(imagePriority && {
                   placeholder: "blur" as const,
@@ -196,7 +196,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
         </div>
 
         {user ? (
-          <div className="absolute bottom-2 left-2 z-10 flex flex-col items-end gap-0 md:gap-0.5">
+          <div className="absolute bottom-2 left-2 z-5 flex flex-col items-end gap-0 md:gap-0.5">
             <Button
               variant="outline"
               size="icon-sm"
@@ -283,7 +283,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
             </span>
 
-            {hasUpdateError ? <WifiOffIcon className="text-destructive size-4" /> : null}
+            {hasUpdateError || !sp.available ? <WifiOffIcon className="text-destructive size-4" /> : null}
           </div>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">

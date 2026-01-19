@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
 import { cn, buildChartData, chartConfig, generateProductPath } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/data/business"
@@ -16,11 +16,12 @@ import { usePricesWithAnalytics } from "@/hooks/usePrices"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Barcode } from "@/components/ui/combo/barcode"
+import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PricesVariationCard } from "@/components/PricesVariationCard"
 
-import { BinocularsIcon, ImageIcon, Loader2Icon, ScanBarcodeIcon } from "lucide-react"
+import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
 
 const CHART_TRANSITION_DURATION = 300 // ms for fade transition
 
@@ -42,7 +43,7 @@ const defaultOptions: Props["options"] = {
   showBarcode: true,
 }
 
-export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange, options = defaultOptions }: Props) {
+export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange, options = defaultOptions }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>(defaultRange)
@@ -227,22 +228,39 @@ export function ProductChart({ sp, className, defaultRange = "1M", onRangeChange
           <div className="flex flex-1 flex-col items-end justify-center gap-3">
             {options?.showImage &&
               (sp.image ? (
-                <div className="relative">
+                <div className="relative overflow-hidden">
                   <Link href={generateProductPath(sp)} target="_blank">
                     <Image
                       src={resolveImageUrlForDrawer(sp.image, 400)}
                       alt={sp.name}
                       width={400}
                       height={400}
-                      className="aspect-square size-24 rounded-md border bg-white object-contain p-1 md:size-28"
+                      className={cn(
+                        "aspect-square size-24 rounded-md border bg-white object-contain p-1 transition-all duration-300 md:size-28",
+                        sp.available ? "opacity-100 hover:scale-105" : "grayscale hover:scale-105",
+                      )}
                       placeholder="empty"
                       blurDataURL={imagePlaceholder.productBlur}
                       loading="lazy"
                     />
-                    <Badge className="absolute right-1 bottom-1" size="sm" variant="boring">
-                      <ScanBarcodeIcon />
-                    </Badge>
                   </Link>
+
+                  <div className="absolute top-1 left-1 flex flex-col gap-1">
+                    {!sp.available && (
+                      <Badge size="xs" variant="destructive">
+                        <TooltipProvider>
+                          <TooltipUI delayDuration={100}>
+                            <TooltipTrigger>
+                              <WifiOffIcon className="h-4 w-4" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>This product is not available in this store.</p>
+                            </TooltipContent>
+                          </TooltipUI>
+                        </TooltipProvider>
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="bg-muted flex aspect-square w-24 items-center justify-center rounded-md">

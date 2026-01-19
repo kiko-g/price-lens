@@ -165,7 +165,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 fill
                 src={resolveImageUrlForPage(sp.image, 800)}
                 alt={sp.name}
-                className={cn("max-h-full max-w-full object-contain object-center", sp.available ? "opacity-100 hover:scale-105" : "opacity-50 grayscale")}
+                className={cn(
+                  "max-h-full max-w-full object-contain object-center",
+                  sp.available ? "opacity-100" : "cursor-not-allowed grayscale",
+                )}
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority={true}
               />
