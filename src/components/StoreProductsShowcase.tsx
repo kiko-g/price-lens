@@ -8,7 +8,7 @@ import { PrioritySource } from "@/types"
 
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
 import { searchTypes, type SearchType, type SortByType, PRODUCT_PRIORITY_LEVELS } from "@/types/business"
-import { cn, getCenteredArray } from "@/lib/utils"
+import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { Button } from "@/components/ui/button"
@@ -57,7 +57,11 @@ import {
   ArrowUpWideNarrowIcon,
   BadgePercentIcon,
   BotIcon,
+  CalendarArrowDown,
+  CalendarArrowUp,
   CircleOffIcon,
+  ClockArrowDown,
+  ClockArrowUp,
   CrownIcon,
   FilterIcon,
   HandIcon,
@@ -70,63 +74,63 @@ import {
   SearchIcon,
 } from "lucide-react"
 
-interface StoreProductsShowcaseProps {
-  limit?: number
-  children?: React.ReactNode
-}
+/**
+ * Single source of truth for URL filter parameters.
+ * - `key`: The URL search param name
+ * - `default`: The default value (omitted from URL when matched)
+ */
+const FILTER_CONFIG = {
+  page: { key: "page", default: 1 },
+  sortBy: { key: "sort", default: "a-z" },
+  origin: { key: "origin", default: "" },
+  searchType: { key: "t", default: "any" },
+  query: { key: "q", default: "" },
+  orderByPriority: { key: "priority_order", default: false },
+  onlyDiscounted: { key: "discounted", default: false },
+  priority: { key: "priority", default: "" },
+  source: { key: "source", default: "" },
+  category: { key: "cat", default: "" },
+  category2: { key: "cat2", default: "" },
+  category3: { key: "cat3", default: "" },
+  catTuples: { key: "catTuples", default: "" },
+} as const
 
-// ============================================================================
-// URL State Management
-// ============================================================================
+// Build a reverse lookup: URL key -> default value
+const URL_KEY_DEFAULTS = Object.fromEntries(
+  Object.values(FILTER_CONFIG).map(({ key, default: def }) => [key, def]),
+) as Record<string, string | number | boolean>
 
 function useUrlState() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Read URL params as source of truth
   const urlState = useMemo(
     () => ({
-      page: parseInt(searchParams.get("page") ?? "1", 10),
-      sortBy: (searchParams.get("sort") ?? "a-z") as SortByType,
-      origin: searchParams.get("origin"),
-      searchType: (searchParams.get("t") ?? "any") as SearchType,
-      query: searchParams.get("q") ?? "",
-      orderByPriority: searchParams.get("priority_order") === "true",
-      onlyDiscounted: searchParams.get("discounted") === "true",
-      priority: searchParams.get("priority") ?? "",
-      source: searchParams.get("source") ?? "",
-      // Category hierarchy
-      category: searchParams.get("cat") ?? "",
-      category2: searchParams.get("cat2") ?? "",
-      category3: searchParams.get("cat3") ?? "",
-      // Category tuples (multi-select)
-      catTuples: searchParams.get("catTuples") ?? "",
+      page: parseInt(searchParams.get(FILTER_CONFIG.page.key) ?? String(FILTER_CONFIG.page.default), 10),
+      sortBy: (searchParams.get(FILTER_CONFIG.sortBy.key) ?? FILTER_CONFIG.sortBy.default) as SortByType,
+      origin: searchParams.get(FILTER_CONFIG.origin.key) ?? FILTER_CONFIG.origin.default,
+      searchType: (searchParams.get(FILTER_CONFIG.searchType.key) ?? FILTER_CONFIG.searchType.default) as SearchType,
+      query: searchParams.get(FILTER_CONFIG.query.key) ?? FILTER_CONFIG.query.default,
+      orderByPriority: searchParams.get(FILTER_CONFIG.orderByPriority.key) === "true",
+      onlyDiscounted: searchParams.get(FILTER_CONFIG.onlyDiscounted.key) === "true",
+      priority: searchParams.get(FILTER_CONFIG.priority.key) ?? FILTER_CONFIG.priority.default,
+      source: searchParams.get(FILTER_CONFIG.source.key) ?? FILTER_CONFIG.source.default,
+      category: searchParams.get(FILTER_CONFIG.category.key) ?? FILTER_CONFIG.category.default,
+      category2: searchParams.get(FILTER_CONFIG.category2.key) ?? FILTER_CONFIG.category2.default,
+      category3: searchParams.get(FILTER_CONFIG.category3.key) ?? FILTER_CONFIG.category3.default,
+      catTuples: searchParams.get(FILTER_CONFIG.catTuples.key) ?? FILTER_CONFIG.catTuples.default,
     }),
     [searchParams],
   )
 
-  // Update URL params
   const updateUrl = useCallback(
     (updates: Record<string, string | number | boolean | null | undefined>) => {
       const params = new URLSearchParams(searchParams.toString())
 
       for (const [key, value] of Object.entries(updates)) {
-        // Remove params that should be hidden (defaults or empty)
-        const shouldRemove =
-          value === undefined ||
-          value === null ||
-          value === "" ||
-          (key === "page" && value === 1) ||
-          (key === "sort" && value === "a-z") ||
-          (key === "t" && value === "any") ||
-          (key === "priority_order" && value === false) ||
-          (key === "discounted" && value === false) ||
-          (key === "priority" && value === "") ||
-          (key === "source" && value === "") ||
-          (key === "cat" && value === "") ||
-          (key === "cat2" && value === "") ||
-          (key === "cat3" && value === "") ||
-          (key === "catTuples" && value === "")
+        // Remove params when value is null/undefined or matches its default
+        const defaultValue = URL_KEY_DEFAULTS[key]
+        const shouldRemove = value === undefined || value === null || value === defaultValue
 
         if (shouldRemove) {
           params.delete(key)
@@ -143,10 +147,6 @@ function useUrlState() {
 
   return { urlState, updateUrl }
 }
-
-// ============================================================================
-// Build Query Params from URL State
-// ============================================================================
 
 function buildQueryParams(
   urlState: ReturnType<typeof useUrlState>["urlState"],
@@ -239,11 +239,7 @@ function buildQueryParams(
   return params
 }
 
-// ============================================================================
-// Parse helper functions
-// ============================================================================
-
-const parseArrayParam = (param: string | null): number[] => {
+function parseArrayParam(param: string | null): number[] {
   if (!param) return []
   return param
     .split(",")
@@ -251,14 +247,13 @@ const parseArrayParam = (param: string | null): number[] => {
     .filter((v) => !isNaN(v))
 }
 
-const serializeArray = (arr: number[]): string | null => {
-  if (arr.length === 0) return null
-  return arr.join(",")
-}
-
 // ============================================================================
 // Main Component
 // ============================================================================
+interface StoreProductsShowcaseProps {
+  limit?: number
+  children?: React.ReactNode
+}
 
 export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
@@ -570,11 +565,133 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           )}
 
           {/* Filters Accordion */}
-          <Accordion type="multiple" className="w-full border-t" defaultValue={["store-origin", "sort", "options"]}>
+          <Accordion type="multiple" className="w-full border-t" defaultValue={["sort", "options", "store-origin"]}>
+            {/* Sort Options */}
+            <AccordionItem value="sort">
+              <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
+                <span className="flex flex-1 items-center gap-1">
+                  <span>Sort By</span>
+                  {urlState.sortBy && <span className="text-muted-foreground text-xs">({urlState.sortBy})</span>}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="p-px pb-3">
+                <Select value={urlState.sortBy} onValueChange={(v) => handleSortChange(v as SortByType)}>
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue className="flex items-center gap-2 text-sm" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Name</SelectLabel>
+                      <SelectItem value="a-z">
+                        <div className="flex items-center gap-2">
+                          <ArrowDownAZ className="h-4 w-4" />
+                          <span>A to Z</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="z-a">
+                        <div className="flex items-center gap-2">
+                          <ArrowUpAZ className="h-4 w-4" />
+                          <span>Z to A</span>
+                        </div>
+                      </SelectItem>
+                    </SelectGroup>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel>Price</SelectLabel>
+                      <SelectItem value="price-high-low">
+                        <div className="flex items-center gap-2">
+                          <ArrowUpWideNarrowIcon className="h-4 w-4" />
+                          <span>High to Low</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="price-low-high">
+                        <div className="flex items-center gap-2">
+                          <ArrowDownWideNarrowIcon className="h-4 w-4" />
+                          <span>Low to High</span>
+                        </div>
+                      </SelectItem>
+                    </SelectGroup>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel>Date Added</SelectLabel>
+                      <SelectItem value="created-newest">
+                        <div className="flex items-center gap-2">
+                          <CalendarArrowDown className="h-4 w-4" />
+                          <span>Newest First</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="created-oldest">
+                        <div className="flex items-center gap-2">
+                          <CalendarArrowUp className="h-4 w-4" />
+                          <span>Oldest First</span>
+                        </div>
+                      </SelectItem>
+                    </SelectGroup>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel>Last Updated</SelectLabel>
+                      <SelectItem value="updated-newest">
+                        <div className="flex items-center gap-2">
+                          <ClockArrowDown className="h-4 w-4" />
+                          <span>Recently Updated</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="updated-oldest">
+                        <div className="flex items-center gap-2">
+                          <ClockArrowUp className="h-4 w-4" />
+                          <span>Least Recently</span>
+                        </div>
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Checkbox Filter Options */}
+            <AccordionItem value="options">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Options
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-discounted"
+                      checked={urlState.onlyDiscounted}
+                      onCheckedChange={handleToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="order-by-priority"
+                      checked={urlState.orderByPriority}
+                      onCheckedChange={handleTogglePriorityOrder}
+                    />
+                    <Label
+                      htmlFor="order-by-priority"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CrownIcon className="h-4 w-4" />
+                      Order by priority
+                    </Label>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Store Origin
+                <span>Store Origin</span>
                 {selectedOrigins.length > 0 && (
                   <>
                     <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
@@ -633,85 +750,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
                       <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                    </Label>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Sort Options */}
-            <AccordionItem value="sort">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Sort By
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-1">
-                  <SortOption
-                    label="Name A-Z"
-                    value="a-z"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowDownAZ className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Name Z-A"
-                    value="z-a"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowUpAZ className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Price: High to Low"
-                    value="price-high-low"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Price: Low to High"
-                    value="price-low-high"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Checkbox Filter Options */}
-            <AccordionItem value="options">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Options
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-discounted"
-                      checked={urlState.onlyDiscounted}
-                      onCheckedChange={handleToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="order-by-priority"
-                      checked={urlState.orderByPriority}
-                      onCheckedChange={handleTogglePriorityOrder}
-                    />
-                    <Label
-                      htmlFor="order-by-priority"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CrownIcon className="h-4 w-4" />
-                      Order by priority
                     </Label>
                   </div>
                 </div>
@@ -813,7 +851,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
             {process.env.NODE_ENV === "development" && (
               <AccordionItem value="source">
                 <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                  <span className="flex items-center gap-1">
+                  <span className="flex flex-1 items-center gap-1">
                     Source
                     <DevBadge />
                   </span>
@@ -1873,34 +1911,6 @@ function CategoryTupleSheet({ selectedTuples, onApply, onClear }: CategoryTupleS
 // ============================================================================
 // Shared UI Components
 // ============================================================================
-
-function SortOption({
-  label,
-  value,
-  current,
-  onChange,
-  icon,
-}: {
-  label: string
-  value: SortByType
-  current: SortByType
-  onChange: (v: SortByType) => void
-  icon: React.ReactNode
-}) {
-  const isSelected = current === value
-  return (
-    <button
-      onClick={() => onChange(value)}
-      className={cn(
-        "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-        isSelected ? "bg-foreground text-background" : "hover:bg-muted",
-      )}
-    >
-      {icon}
-      {label}
-    </button>
-  )
-}
 
 function SortButton({
   label,

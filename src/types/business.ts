@@ -4,57 +4,6 @@ export enum SupermarketChain {
   PingoDoce = 3,
 }
 
-export interface ScrapedSchemaAuchan {
-  "@context": string
-  "@type": string
-  "@id": string
-  name: string
-  description: string
-  sku: string
-  gtin: string
-  brand: {
-    "@type": "Brand"
-    name: string
-  }
-  image: string[]
-  offers: {
-    url: Record<string, unknown>
-    "@type": "Offer"
-    priceCurrency: string
-    priceValidUntil: string
-    price: string
-    pricevaliduntil: string
-    availability: string
-  }
-}
-
-export interface ScrapedAddOnAuchan {
-  event: string
-  ecommerce: {
-    value: number
-    currency: string
-    items: Array<{
-      item_id: string
-      item_name: string
-      item_brand: string
-      item_category: string
-      affiliation: string
-      coupon: string
-      location_id: string
-      item_list_id: string
-      item_list_name: string
-      item_variant: string
-      item_category2: string
-      item_category3: string
-      item_category4: string
-      quantity: string
-      price: string
-      discount: string
-      index: number
-    }>
-  }
-}
-
 export const searchTypes = ["any", "name", "brand", "url", "category"] as const
 
 export function getSearchType(searchType: string): SearchType {
@@ -66,14 +15,29 @@ export function getSearchType(searchType: string): SearchType {
 
 export type SearchType = (typeof searchTypes)[number]
 
-export const sortByTypes = ["a-z", "z-a", "price-low-high", "price-high-low", "only-nulls"]
+export const sortByTypes = [
+  "a-z",
+  "z-a",
+  "price-low-high",
+  "price-high-low",
+  "created-newest",
+  "created-oldest",
+  "updated-newest",
+  "updated-oldest",
+  "only-nulls",
+] as const
+
 export const sortTypesLabels: {
   [key in SortByType]: string
 } = {
   "a-z": "A to Z",
   "z-a": "Z to A",
-  "price-low-high": "Price: Low to High",
-  "price-high-low": "Price: High to Low",
+  "price-low-high": "High to Low",
+  "price-high-low": "Low to High",
+  "created-newest": "Newest First",
+  "created-oldest": "Oldest First",
+  "updated-newest": "Recently Updated",
+  "updated-oldest": "Least Recently",
   "only-nulls": "Invalid products",
 }
 
@@ -102,3 +66,16 @@ export const daysAmountInRange: {
 
 export const PRODUCT_PRIORITY_LEVELS = [0, 1, 2, 3, 4, 5] as const
 export type ProductPriorityLevel = (typeof PRODUCT_PRIORITY_LEVELS)[number]
+
+export const STORE_PRODUCT_FILTER_DEFAULTS_MAP = {
+  sort: "updated-newest",
+  origin: [],
+  priority: [],
+  categories: [],
+  category: null,
+  category2: null,
+  category3: null,
+  onlyDiscounted: false,
+  orderByPriority: false,
+  source: [],
+}

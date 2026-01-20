@@ -8,6 +8,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function serializeArray(arr: number[]): string | null {
+  if (arr.length === 0) return null
+  return arr.join(",")
+}
+
 /**
  * Generates a URL-safe slug from a store product
  * Format: {brand}-{name_shorthand}-{origin_id}

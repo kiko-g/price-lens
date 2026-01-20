@@ -272,6 +272,14 @@ function applySorting<Q extends { [key: string]: any }>(query: Q, sortBy: string
       return query.order("price", { ascending: true })
     case "price-high-low":
       return query.order("price", { ascending: false })
+    case "created-newest":
+      return query.order("created_at", { ascending: false })
+    case "created-oldest":
+      return query.order("created_at", { ascending: true })
+    case "updated-newest":
+      return query.order("updated_at", { ascending: false, nullsFirst: false })
+    case "updated-oldest":
+      return query.order("updated_at", { ascending: true, nullsFirst: true })
     case "only-nulls":
       // Special sort for invalid products
       return query.is("name", null).order("url", { ascending: true })
