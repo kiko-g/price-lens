@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { jobId, batchSize = DIRECT_BATCH_SIZE } = body
+    const { jobId, batchSize = DIRECT_BATCH_SIZE, useAntiBlock = true } = body
 
     // Get or create job
     let job = jobId ? await getBulkScrapeJob(jobId) : null
@@ -289,12 +289,12 @@ export async function PATCH(req: NextRequest) {
             .eq("id", product.id)
             .single()
 
-          // Scrape with anti-blocking enabled for bulk operations
+          // Scrape with configurable anti-blocking
           const response = await scrapeAndReplaceProduct(
             product.url,
             product.origin_id,
             existingProduct as StoreProduct | undefined,
-            true, // useAntiBlock - enable delays and rotating UA
+            useAntiBlock,
           )
           const json = await response.json()
 

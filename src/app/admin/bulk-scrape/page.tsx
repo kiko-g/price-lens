@@ -140,6 +140,7 @@ export default function BulkScrapePage() {
   const [useDirectMode, setUseDirectMode] = useState(true)
   const [isDirectProcessing, setIsDirectProcessing] = useState(false)
   const [batchSize, setBatchSize] = useState(5)
+  const [useAntiBlock, setUseAntiBlock] = useState(true) // Anti-blocking measures (delays, rotating UA)
 
   // Active job tracking
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
@@ -324,7 +325,7 @@ export default function BulkScrapePage() {
   const processDirectBatch = useCallback<(jobId: string | null) => Promise<BulkScrapeResult>>(
     async (jobId: string | null) => {
       const payload = jobId
-        ? { jobId, batchSize }
+        ? { jobId, batchSize, useAntiBlock }
         : {
             origins: filters.origins,
             priorities: filters.priorities.length > 0 ? filters.priorities : undefined,
@@ -332,6 +333,7 @@ export default function BulkScrapePage() {
             available: filters.available,
             onlyUrl: filters.onlyUrl,
             batchSize,
+            useAntiBlock,
           }
 
       return await withRetry(
@@ -343,7 +345,7 @@ export default function BulkScrapePage() {
         "Batch processing",
       )
     },
-    [filters, batchSize, withRetry],
+    [filters, batchSize, useAntiBlock, withRetry],
   )
 
   // Update enhanced stats
@@ -653,6 +655,16 @@ export default function BulkScrapePage() {
                     <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
                     <span className="text-sm">Only products missing barcode</span>
                   </label>
+                  <div className="border-t pt-3">
+                    <label className="flex cursor-pointer items-center gap-2">
+                      <Checkbox checked={useAntiBlock} onCheckedChange={() => setUseAntiBlock(!useAntiBlock)} />
+                      <span className="text-sm">Anti-blocking (slower but safer)</span>
+                    </label>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      Adds random delays and rotates User-Agent to avoid IP blocks. Disable for faster scraping if not
+                      getting blocked.
+                    </p>
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -1092,53 +1104,58 @@ export default function BulkScrapePage() {
 
           {/* Recent Jobs */}
           {jobsData?.jobs && jobsData.jobs.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Recent Jobs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {jobsData.jobs.slice(0, 5).map((job) => (
-                    <div
-                      key={job.id}
-                      className={cn(
-                        "flex flex-col gap-2 rounded-md border p-3 xl:flex-row xl:items-center xl:justify-between",
-                        activeJobId === job.id && "border-primary bg-primary/5",
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant={
-                            job.status === "running"
-                              ? "default"
-                              : job.status === "completed"
-                                ? "secondary"
-                                : "destructive"
-                          }
-                          className="w-20 justify-center"
-                        >
-                          {job.status}
-                        </Badge>
-                        <span className="font-mono text-sm">{job.id}</span>
-                        <span className="text-muted-foreground text-sm">
-                          {job.processed.toLocaleString()} / {job.total.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-muted-foreground text-xs">
-                          {new Date(job.startedAt).toLocaleString()}
-                        </span>
-                        {job.status === "running" && activeJobId !== job.id && (
-                          <Button variant="ghost" size="sm" onClick={() => setActiveJobId(job.id)}>
-                            View
-                          </Button>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="recent-jobs">
+                <AccordionTrigger className="bg-accent mb-2 cursor-pointer justify-between gap-2 rounded-lg px-4 py-3 text-sm font-medium hover:no-underline">
+                  <span className="flex items-center gap-2">
+                    <ActivityIcon className="h-5 w-5" />
+                    Recent Jobs
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="pb-3">
+                  <div className="space-y-2">
+                    {jobsData.jobs.slice(0, 5).map((job) => (
+                      <div
+                        key={job.id}
+                        className={cn(
+                          "flex flex-col gap-2 rounded-md border p-3 xl:flex-row xl:items-center xl:justify-between",
+                          activeJobId === job.id && "border-primary bg-primary/5",
                         )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant={
+                              job.status === "running"
+                                ? "default"
+                                : job.status === "completed"
+                                  ? "secondary"
+                                  : "destructive"
+                            }
+                            className="w-20 justify-center"
+                          >
+                            {job.status}
+                          </Badge>
+                          <span className="font-mono text-sm">{job.id}</span>
+                          <span className="text-muted-foreground text-sm">
+                            {job.processed.toLocaleString()} / {job.total.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-muted-foreground text-xs">
+                            {new Date(job.startedAt).toLocaleString()}
+                          </span>
+                          {job.status === "running" && activeJobId !== job.id && (
+                            <Button variant="ghost" size="sm" onClick={() => setActiveJobId(job.id)}>
+                              View
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
         </div>
       </main>

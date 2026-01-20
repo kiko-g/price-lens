@@ -19,9 +19,17 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Orchestate a job in admin page that efficiently updates every store product by visiting every url.
 - [x] Review product scheduling. Visualization of the schedule in admin page.
 - [x] Scraping should include a column `store_products.available` so we can tell wether products became unavaible.
-- [ ] Crawl store origins for new product discovery.
-- [ ] Add store_products.sku
+- [x] Crawl store origins for new product discovery.
+
+- [ ] Add supermarket SuperCor
+- [ ] Add store_products column better than available that sets the status according to the last scrape http response status
+- [ ] Radically improve home page and think of marketing/sales/promoting the product via the homepage and its branding
 - [ ] Investigate our design system and app feel to be like Polymarket
+- [ ] Think about and plan product groups e.g. all coffee capsules store_products should be loosely associated
+- [ ] Add list feature (more than just favorites)
+- [ ] Add side by side comparer and possibly N-way product comparer. Should work for identical products but also more.
+
+- [ ] Add store_products.sku
 - [ ] Update page title dynamically. Price Lens | Products is insufficient when we have search filters active.
 - [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Chart should have refined data points for each range: update x scale (font size and more) and update number of data points for 5Y and MAX. Should never plot more than 500 points probably!
