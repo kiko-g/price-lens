@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { jobId, batchSize = DIRECT_BATCH_SIZE, useAntiBlock = true } = body
+    const { jobId, batchSize = DIRECT_BATCH_SIZE, useAntiBlock = true, limit } = body
 
     // Get or create job
     let job = jobId ? await getBulkScrapeJob(jobId) : null
@@ -207,12 +207,16 @@ export async function PATCH(req: NextRequest) {
       countQuery = applyFilters(countQuery, filters)
       const { count } = await countQuery
 
+      // Apply job limit if specified (cap total products to process)
+      const matchingCount = count ?? 0
+      const jobTotal = limit ? Math.min(matchingCount, limit) : matchingCount
+
       const newJobId = crypto.randomUUID().slice(0, 10)
       job = {
         id: newJobId,
         status: "running",
         filters,
-        total: count ?? 0,
+        total: jobTotal,
         processed: 0,
         failed: 0,
         barcodesFound: 0,
@@ -224,9 +228,10 @@ export async function PATCH(req: NextRequest) {
 
       return NextResponse.json({
         jobId: newJobId,
-        total: count ?? 0,
+        total: jobTotal,
+        matching: matchingCount, // Include total matching for reference
         processed: 0,
-        message: "Direct mode job created. Call PATCH again to process batches.",
+        message: limit ? `Direct mode job created with limit of ${jobTotal} products.` : "Direct mode job created. Call PATCH again to process batches.",
         mode: "direct",
       })
     }
