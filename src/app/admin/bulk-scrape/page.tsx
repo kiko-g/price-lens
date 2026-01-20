@@ -46,6 +46,17 @@ import {
   StoreIcon,
   MicroscopeIcon,
 } from "lucide-react"
+import type {
+  BulkScrapeResult,
+  BulkScrapeJobCreated,
+  BulkScrapeBatchResult,
+  BulkScrapeError,
+} from "@/lib/scrapers/types"
+
+/** Type guard to check if result is a batch result (not job creation) */
+function isBatchResult(result: BulkScrapeResult): result is BulkScrapeBatchResult {
+  return "batchSuccess" in result
+}
 
 // Store origin mapping for SVG logos
 const STORE_ORIGINS = [
@@ -310,7 +321,7 @@ export default function BulkScrapePage() {
   )
 
   // Direct mode: process batches continuously
-  const processDirectBatch = useCallback(
+  const processDirectBatch = useCallback<(jobId: string | null) => Promise<BulkScrapeResult>>(
     async (jobId: string | null) => {
       const payload = jobId
         ? { jobId, batchSize }
@@ -388,7 +399,7 @@ export default function BulkScrapePage() {
       // Use Web Locks API to maintain execution priority
       await navigator.locks.request("bulk-scrape-lock", async () => {
         // First call creates the job
-        const firstResult = await processDirectBatch(null)
+        const firstResult = (await processDirectBatch(null)) as BulkScrapeJobCreated
         currentJobId = firstResult.jobId
         setActiveJobId(currentJobId)
         addLog("success", `Job ${currentJobId} created with ${firstResult.total} products`)
@@ -416,19 +427,20 @@ export default function BulkScrapePage() {
             const result = await processDirectBatch(currentJobId)
             const batchDuration = Date.now() - batchStartTime
 
+            // Type guard: ensure this is a batch result (not job creation)
+            if (!isBatchResult(result)) {
+              addLog("error", "Unexpected response type from batch processing")
+              continue
+            }
+
             // Log batch results with detailed breakdown
-            const success = result.batchSuccess ?? 0
-            const unavailable = result.batchUnavailable ?? 0
-            const errors = result.batchErrors ?? 0
-            const barcodes = result.batchBarcodesFound ?? 0
-            const errorDetails = result.errors as
-              | Array<{
-                  productId: number
-                  status: string
-                  statusCode?: number
-                  error?: string
-                }>
-              | undefined
+            const {
+              batchSuccess: success,
+              batchUnavailable: unavailable,
+              batchErrors: errors,
+              batchBarcodesFound: barcodes,
+              errors: errorDetails,
+            } = result
 
             // Build detailed log message
             const parts = [`${success} ok`]
@@ -436,16 +448,16 @@ export default function BulkScrapePage() {
             if (errors > 0) parts.push(`${errors} errors`)
             if (barcodes > 0) parts.push(`${barcodes} barcodes`)
 
-            const hasProblems = unavailable > 0 || errors > 0
+            const hasProblems = errors > 0 || unavailable === batchSize
             addLog(
               hasProblems ? "warning" : "success",
               `Batch #${batchNumber}: ${parts.join(", ")} (${batchDuration}ms)`,
             )
 
             // Log details for unavailable (warning) and errors (error) separately
-            if (errorDetails && errorDetails.length > 0) {
-              const unavailableItems = errorDetails.filter((e) => e.status === "unavailable")
-              const errorItems = errorDetails.filter((e) => e.status === "error")
+            if (errorDetails.length > 0) {
+              const unavailableItems = errorDetails.filter((e: BulkScrapeError) => e.status === "unavailable")
+              const errorItems = errorDetails.filter((e: BulkScrapeError) => e.status === "error")
 
               // Log unavailable as warning (expected - products removed from store)
               if (unavailableItems.length > 0) {
@@ -556,7 +568,7 @@ export default function BulkScrapePage() {
                       <span className="text-sm font-medium">Direct Mode</span>
                       <p className="text-muted-foreground text-xs">Processes in browser. Best for local development.</p>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs" size="xs">
                       Local Dev
                     </Badge>
                   </div>
@@ -572,7 +584,7 @@ export default function BulkScrapePage() {
                       <span className="text-sm font-medium">QStash Mode</span>
                       <p className="text-muted-foreground text-xs">Async queue processing. Requires public URL.</p>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs" size="xs">
                       Production
                     </Badge>
                   </div>
@@ -601,7 +613,7 @@ export default function BulkScrapePage() {
                       disabled={isJobRunning}
                     />
                     <div className="flex gap-1">
-                      {[1, 3, 5, 8].map((size) => (
+                      {[1, 2, 3, 5, 8, 10, 15].map((size) => (
                         <Button
                           key={size}
                           variant={batchSize === size ? "default" : "outline"}
@@ -626,7 +638,7 @@ export default function BulkScrapePage() {
                   More Options
                 </div>
                 {(missingBarcode || onlyUrl) && (
-                  <Badge variant="secondary" className="mr-2 text-xs">
+                  <Badge variant="secondary" className="text-xs" size="xs">
                     {[missingBarcode && "No barcode", onlyUrl && "Only URL"].filter(Boolean).join(", ")}
                   </Badge>
                 )}
@@ -653,7 +665,7 @@ export default function BulkScrapePage() {
                   Availability
                 </div>
                 {available !== null && (
-                  <Badge variant="secondary" className="mr-2 text-xs">
+                  <Badge variant="secondary" className="text-xs" size="xs">
                     {available ? "Available" : "Unavailable"}
                   </Badge>
                 )}
@@ -861,6 +873,7 @@ export default function BulkScrapePage() {
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge
+                      size="xs"
                       variant={
                         jobProgress?.status === "running" || isDirectProcessing
                           ? "default"

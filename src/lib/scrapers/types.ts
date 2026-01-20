@@ -85,3 +85,38 @@ export interface PriorityInfo {
   prioritySource: PrioritySource | null
   priorityUpdatedAt: string | null
 }
+
+/** Error detail from a failed scrape in bulk operations */
+export interface BulkScrapeError {
+  productId: number
+  status: "unavailable" | "error"
+  statusCode?: number
+  error?: string
+}
+
+/** Response when creating a new bulk scrape job (first PATCH call) */
+export interface BulkScrapeJobCreated {
+  jobId: string
+  total: number
+  processed: number
+  message: string
+  mode: "direct"
+}
+
+/** Response when processing a batch (subsequent PATCH calls) */
+export interface BulkScrapeBatchResult {
+  jobId: string
+  status: "running" | "completed"
+  batchProcessed: number
+  batchSuccess: number
+  batchUnavailable: number
+  batchErrors: number
+  batchBarcodesFound: number
+  errors: BulkScrapeError[]
+  totalProcessed: number
+  totalRemaining: number
+  mode: "direct"
+}
+
+/** Combined type for PATCH /api/admin/bulk-scrape response */
+export type BulkScrapeResult = BulkScrapeJobCreated | BulkScrapeBatchResult
