@@ -434,7 +434,22 @@ export default function BulkScrapePage() {
 
             // Type guard: ensure this is a batch result (not job creation)
             if (!isBatchResult(result)) {
-              addLog("error", "Unexpected response type from batch processing")
+              // Cast to generic to access potential status/message fields
+              const response = result as unknown as Record<string, unknown>
+              const status = response.status as string | undefined
+              const message = response.message as string | undefined
+
+              // Log the actual response for debugging
+              const info = status
+                ? `status: ${status}, message: ${message || "none"}`
+                : `keys: ${Object.keys(result).join(", ")}`
+              addLog("error", `Unexpected response type from batch processing (${info})`)
+
+              // If job is finished, break the loop
+              if (status === "completed" || status === "cancelled") {
+                addLog("info", `Job ${status} on server`)
+                break
+              }
               continue
             }
 

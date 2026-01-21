@@ -247,18 +247,19 @@ export async function PATCH(req: NextRequest) {
 
     const supabase = createClient()
 
-    // Fetch next batch of products to process
+    // Fetch next batch of products to process using cursor-based pagination
+    // This ensures we don't skip products when the filtered result set changes
     let query = supabase
       .from("store_products")
       .select("id, url, name, origin_id, priority, barcode")
       .not("url", "is", null)
+      .gt("id", job.lastProcessedId ?? 0) // Cursor: fetch products with ID > last processed
 
     query = applyFilters(query, { ...job.filters, onlyUrl: job.filters.onlyUrl ?? false })
 
-    // Skip already processed products by using offset
     const { data: products, error } = await query
       .order("id", { ascending: true })
-      .range(job.processed, job.processed + batchSize - 1)
+      .limit(batchSize)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -353,14 +354,16 @@ export async function PATCH(req: NextRequest) {
         error: (r as { error?: string }).error,
       }))
 
-    // Update job progress
+    // Update job progress with cursor for next batch
     const newProcessed = job.processed + products.length
+    const lastId = products[products.length - 1]?.id ?? job.lastProcessedId
     const isComplete = newProcessed >= job.total
 
     await updateBulkScrapeJob(job.id, {
       processed: newProcessed,
       failed: job.failed + errorCount + unavailableCount,
       barcodesFound: job.barcodesFound + barcodesFound,
+      lastProcessedId: lastId, // Store cursor for ID-based pagination
       status: isComplete ? "completed" : "running",
       completedAt: isComplete ? new Date().toISOString() : undefined,
     })

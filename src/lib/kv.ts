@@ -109,6 +109,7 @@ export interface BulkScrapeJob {
   processed: number
   failed: number
   barcodesFound: number
+  lastProcessedId?: number // Cursor for ID-based pagination
   startedAt: string
   updatedAt: string
   completedAt?: string
