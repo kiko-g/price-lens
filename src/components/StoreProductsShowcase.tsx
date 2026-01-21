@@ -571,7 +571,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
                 <span className="flex flex-1 items-center gap-1">
                   <span>Sort By</span>
-                  {urlState.sortBy && <span className="text-muted-foreground text-xs">({urlState.sortBy})</span>}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="p-px pb-3">

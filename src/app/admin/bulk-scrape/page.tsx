@@ -612,30 +612,28 @@ export default function BulkScrapePage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pb-3">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={20}
-                      value={batchSize}
-                      onChange={(e) => setBatchSize(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
-                      className="w-20"
-                      disabled={isJobRunning}
-                    />
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 5, 8, 10, 15].map((size) => (
-                        <Button
-                          key={size}
-                          variant={batchSize === size ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setBatchSize(size)}
-                          disabled={isJobRunning}
-                        >
-                          {size}
-                        </Button>
-                      ))}
-                    </div>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={batchSize}
+                    onChange={(e) => setBatchSize(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                    className="w-20"
+                    disabled={isJobRunning}
+                  />
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 5, 8, 10, 15].map((size) => (
+                      <Button
+                        key={size}
+                        variant={batchSize === size ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setBatchSize(size)}
+                        disabled={isJobRunning}
+                      >
+                        {size}
+                      </Button>
+                    ))}
                   </div>
                 </div>
               </AccordionContent>
@@ -655,8 +653,8 @@ export default function BulkScrapePage() {
                 )}
               </AccordionTrigger>
               <AccordionContent className="pb-3">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-px">
                     <Input
                       type="number"
                       min={1}
@@ -670,16 +668,13 @@ export default function BulkScrapePage() {
                       disabled={isJobRunning}
                     />
                     <div className="flex flex-wrap gap-1">
-                      <Button
-                        variant={jobLimit === null ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setJobLimit(null)}
-                        disabled={isJobRunning}
-                      >
-                        All
-                      </Button>
-
-                      {[100, 500, 1000, 2000].map((limit) => (
+                      {[
+                        { value: null, label: "All" },
+                        { value: 100, label: "100" },
+                        { value: 500, label: "500" },
+                        { value: 1000, label: "1k" },
+                        { value: 2000, label: "2k" },
+                      ].map(({ value: limit, label }) => (
                         <Button
                           key={limit}
                           variant={jobLimit === limit ? "default" : "outline"}
@@ -687,7 +682,7 @@ export default function BulkScrapePage() {
                           onClick={() => setJobLimit(limit)}
                           disabled={isJobRunning}
                         >
-                          {limit >= 1000 ? `${limit / 1000}k` : limit}
+                          {label}
                         </Button>
                       ))}
                     </div>
