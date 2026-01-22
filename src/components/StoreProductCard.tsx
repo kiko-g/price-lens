@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ShareButton } from "@/components/ui/combo/share-button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -339,10 +340,17 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     onClick={() => navigator.clipboard.writeText(sp.url || "")}
                     title={sp.url || ""}
                   >
-                    Copy URL
+                    Copy {supermarketChain?.name} URL
                     <CopyIcon />
                   </Button>
                 </DropdownMenuItem>
+
+                <ShareButton
+                  url={`${typeof window !== "undefined" ? window.location.origin : ""}${generateProductPath(sp)}`}
+                  title={sp.name}
+                  description={`Check out ${sp.name} on Price Lens`}
+                  appearAs="dropdown-menu-item"
+                />
 
                 {user ? (
                   <DropdownMenuItem variant="love" asChild>

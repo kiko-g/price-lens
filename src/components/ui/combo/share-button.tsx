@@ -22,28 +22,35 @@ interface ShareButtonProps {
   description?: string
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg" | "icon"
+  appearAs?: "button" | "dropdown-menu-item"
 }
 
-export function ShareButton({ url, title, description = "", variant = "outline", size = "sm" }: ShareButtonProps) {
+export function ShareButton({
+  url,
+  title,
+  description = "",
+  variant = "outline",
+  size = "sm",
+  appearAs = "button",
+}: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : url
+  const shareUrl = url
 
   const handleShare = async () => {
-    if (navigator.share) {
+    const shareData = { title, text: description, url: shareUrl }
+
+    if (navigator.share && navigator.canShare?.(shareData)) {
       try {
-        await navigator.share({
-          title,
-          text: description,
-          url: shareUrl,
-        })
+        await navigator.share(shareData)
         toast.success("Shared successfully")
       } catch (error) {
-        console.error("Error sharing:", error)
         if (error instanceof Error && error.name !== "AbortError") {
-          toast.error("Failed to share")
+          copyToClipboard()
         }
       }
+    } else {
+      copyToClipboard()
     }
   }
 
@@ -93,6 +100,17 @@ export function ShareButton({ url, title, description = "", variant = "outline",
 
   const isWebShareAvailable = typeof navigator !== "undefined" && !!navigator.share
 
+  if (appearAs === "dropdown-menu-item") {
+    return (
+      <DropdownMenuItem asChild>
+        <Button variant="dropdown-item" onClick={handleShare}>
+          Share product
+          <Share2Icon />
+        </Button>
+      </DropdownMenuItem>
+    )
+  }
+
   return (
     <TooltipProvider>
       {isWebShareAvailable ? (
@@ -100,7 +118,7 @@ export function ShareButton({ url, title, description = "", variant = "outline",
           <TooltipTrigger asChild>
             <Button variant={variant} size={size} onClick={handleShare}>
               <Share2Icon className="h-4 w-4" />
-              Share
+              Share product
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -112,7 +130,7 @@ export function ShareButton({ url, title, description = "", variant = "outline",
           <DropdownMenuTrigger asChild>
             <Button variant={variant} size={size}>
               <Share2Icon className="h-4 w-4" />
-              Share
+              Share product
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
