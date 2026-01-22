@@ -88,6 +88,7 @@ export interface StoreProduct {
   available: boolean
   created_at: string
   updated_at: string
+  scraped_at?: string | null
   is_favorited?: boolean
 }
 

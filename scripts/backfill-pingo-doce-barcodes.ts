@@ -135,39 +135,41 @@ async function fetchProductsWithoutBarcodes(): Promise<StoreProduct[]> {
     console.log(`   Skipping ${failedIds.size} previously failed products`)
   }
 
-  // Build query
-  let query = supabase
+  // Fetch more than needed to account for filtering
+  // Using simple query to avoid timeout issues with NOT IN clauses
+  const fetchLimit = limit ? limit + failedIds.size + offset : 1000
+
+  const { data, error } = await supabase
     .from("store_products")
     .select("id, url, name, barcode")
     .eq("origin_id", PINGO_DOCE_ORIGIN_ID)
     .is("barcode", null)
     .eq("available", true)
-
-  // Exclude failed IDs directly in the query (more efficient than filtering after)
-  if (skipFailed && failedIds.size > 0) {
-    const failedIdsArray = [...failedIds]
-    query = query.not("id", "in", `(${failedIdsArray.join(",")})`)
-  }
-
-  // Apply offset and limit
-  if (offset > 0) {
-    query = query.range(offset, offset + (limit || 1000) - 1)
-  } else if (limit) {
-    query = query.limit(limit)
-  } else {
-    query = query.limit(1000)
-  }
-
-  query = query.order("id", { ascending: true })
-
-  const { data, error } = await query
+    .order("id", { ascending: true })
+    .limit(fetchLimit)
 
   if (error) {
     throw new Error(`Failed to fetch products: ${error.message}`)
   }
 
-  console.log(`   Found ${data?.length || 0} products to process`)
-  return data || []
+  // Filter out failed IDs and apply offset in JavaScript
+  // (NOT IN queries were causing timeouts on Supabase)
+  let filteredData = data || []
+
+  if (skipFailed && failedIds.size > 0) {
+    filteredData = filteredData.filter((p) => !failedIds.has(p.id))
+  }
+
+  if (offset > 0) {
+    filteredData = filteredData.slice(offset)
+  }
+
+  if (limit) {
+    filteredData = filteredData.slice(0, limit)
+  }
+
+  console.log(`   Found ${filteredData.length} products to process`)
+  return filteredData
 }
 
 interface BVDebugInfo {

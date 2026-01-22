@@ -31,6 +31,7 @@ import {
   ClockIcon,
   LayoutDashboardIcon,
   MapIcon,
+  GaugeIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -72,6 +73,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    title: "Overview",
+    href: "/admin/overview",
+    icon: GaugeIcon,
+  },
   {
     title: "Schedule",
     href: "/admin/schedule",

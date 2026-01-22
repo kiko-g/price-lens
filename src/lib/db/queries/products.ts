@@ -397,25 +397,40 @@ export const storeProductQueries = {
     })
   },
 
+  /**
+   * Records a scrape attempt for a URL (typically after a non-404 error like 500)
+   * - For existing records: only updates scraped_at
+   * - For new records: creates with url, created_at, and scraped_at
+   * Note: Does NOT update updated_at - we want that to reflect last successful scrape
+   */
   async upsertBlank({ url }: { url: string }) {
     const supabase = createClient()
-    // Only set created_at, NOT updated_at - we want updated_at to reflect
-    // when a product was last successfully scraped with valid price data
-    return supabase.from("store_products").upsert(
-      {
-        url,
-        created_at: now(),
-      },
-      {
-        onConflict: "url",
-        ignoreDuplicates: true, // Don't overwrite existing records
-      },
-    )
+    const timestamp = now()
+
+    // First try to update scraped_at on existing record
+    const { data: existingProduct } = await supabase
+      .from("store_products")
+      .update({ scraped_at: timestamp })
+      .eq("url", url)
+      .select("id")
+      .maybeSingle()
+
+    // If record exists, we're done (only updated scraped_at)
+    if (existingProduct) {
+      return { data: existingProduct, error: null }
+    }
+
+    // Record doesn't exist - create a new blank one
+    return supabase.from("store_products").insert({
+      url,
+      created_at: timestamp,
+      scraped_at: timestamp,
+    })
   },
 
   /**
    * Marks a product as unavailable (typically after receiving a 404)
-   * Sets available = false and returns the product ID for further processing
+   * Sets available = false and scraped_at = now, returns the product ID for further processing
    * Note: Does NOT update updated_at - we want that to reflect last successful scrape
    * Note: Caller should close the price point separately using priceQueries.closeLatestPricePoint
    */
@@ -425,11 +440,12 @@ export const storeProductQueries = {
     // First, get the product to find its ID
     const { data: existingProduct } = await supabase.from("store_products").select("id").eq("url", url).maybeSingle()
 
-    // Mark as unavailable
+    // Mark as unavailable and update scraped_at
     await supabase.from("store_products").upsert(
       {
         url,
         available: false,
+        scraped_at: now(), // Track when we last attempted to scrape (404 case)
       },
       {
         onConflict: "url",
@@ -525,6 +541,7 @@ export const storeProductQueries = {
       priority: sp.priority || 1,
       created_at: sp.created_at || existingProduct?.created_at || new Date().toISOString(),
       updated_at: existingProduct?.updated_at ?? null,
+      scraped_at: now(), // Track when we last attempted to scrape (success case)
       // Conservative fields - preserve existing if new is null
       barcode: sp.barcode || existingProduct?.barcode || null,
       brand: sp.brand || existingProduct?.brand || null,
@@ -1126,6 +1143,148 @@ export const storeProductQueries = {
     return {
       data: filteredCandidates,
       error: null,
+    }
+  },
+
+  // ============================================================================
+  // Scrape Status Queries
+  // ============================================================================
+  // These queries help understand and manage product scraping status.
+  //
+  // Key columns:
+  // - `updated_at`: Last SUCCESSFUL scrape with valid price data
+  // - `scraped_at`: Last scrape ATTEMPT (success, 404, or error)
+  // - `available`: Current availability status (false = 404/removed)
+  //
+  // Derived states:
+  // - Never scraped: scraped_at IS NULL
+  // - Last scrape failed: scraped_at > updated_at (attempted but didn't succeed)
+  // - Unavailable: available = false (product 404'd / removed from store)
+  // - Stale: available = true but updated_at is old (needs refresh)
+  // ============================================================================
+
+  /**
+   * Get unavailable products that haven't been checked recently
+   * Use case: Retry 404'd products to see if they're back in stock
+   *
+   * @param daysAgo - Only include products not scraped in this many days
+   * @param limit - Maximum number of products to return
+   */
+  async getUnavailableForRetry({ daysAgo = 7, limit = 100 }: { daysAgo?: number; limit?: number } = {}) {
+    const supabase = createClient()
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - daysAgo)
+
+    return supabase
+      .from("store_products")
+      .select("id, url, origin_id, name, scraped_at, updated_at")
+      .eq("available", false)
+      .lt("scraped_at", cutoffDate.toISOString())
+      .order("scraped_at", { ascending: true }) // Oldest first
+      .limit(limit)
+  },
+
+  /**
+   * Get products that have never been scraped
+   * Use case: Find products added via discovery that need initial scraping
+   *
+   * @param limit - Maximum number of products to return
+   */
+  async getNeverScraped({ limit = 100 }: { limit?: number } = {}) {
+    const supabase = createClient()
+
+    return supabase
+      .from("store_products")
+      .select("id, url, origin_id, created_at")
+      .is("scraped_at", null)
+      .not("url", "is", null) // Must have a URL to scrape
+      .order("created_at", { ascending: true }) // Oldest first
+      .limit(limit)
+  },
+
+  /**
+   * Get products where the last scrape failed (but product is still marked available)
+   * Use case: Identify products with temporary failures (500, timeout) that need retry
+   *
+   * Logic: scraped_at > updated_at means we attempted to scrape more recently
+   * than we last succeeded, indicating the last attempt failed
+   *
+   * Note: Supabase JS client doesn't support column-to-column comparisons directly,
+   * so we fetch candidates and filter in JS. For large datasets, consider creating
+   * a database view or RPC function.
+   *
+   * @param limit - Maximum number of products to return
+   */
+  async getFailedLastScrape({ limit = 100 }: { limit?: number } = {}) {
+    const supabase = createClient()
+
+    // Fetch products that have both timestamps set (potential candidates)
+    const { data, error } = await supabase
+      .from("store_products")
+      .select("id, url, origin_id, name, scraped_at, updated_at")
+      .eq("available", true)
+      .not("scraped_at", "is", null)
+      .not("updated_at", "is", null)
+      .order("scraped_at", { ascending: true })
+      .limit(limit * 3) // Fetch extra since we'll filter some out
+
+    if (error || !data) {
+      return { data: null, error }
+    }
+
+    // Filter: scraped_at > updated_at (last scrape attempt was after last success)
+    const filtered = data.filter((p) => new Date(p.scraped_at!) > new Date(p.updated_at!)).slice(0, limit)
+
+    return { data: filtered, error: null }
+  },
+
+  /**
+   * Get available products with stale data (not updated recently)
+   * Use case: Schedule re-scraping for products that might have price changes
+   *
+   * @param daysAgo - Only include products not updated in this many days
+   * @param limit - Maximum number of products to return
+   */
+  async getStaleProducts({ daysAgo = 30, limit = 100 }: { daysAgo?: number; limit?: number } = {}) {
+    const supabase = createClient()
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - daysAgo)
+
+    return supabase
+      .from("store_products")
+      .select("id, url, origin_id, name, updated_at, scraped_at, priority")
+      .eq("available", true)
+      .lt("updated_at", cutoffDate.toISOString())
+      .order("priority", { ascending: false, nullsFirst: false }) // High priority first
+      .order("updated_at", { ascending: true }) // Then oldest first
+      .limit(limit)
+  },
+
+  /**
+   * Get count of products by scrape status
+   * Use case: Dashboard metrics, monitoring scrape health
+   */
+  async getScrapeStatusCounts() {
+    const supabase = createClient()
+
+    const [neverScraped, unavailable, available] = await Promise.all([
+      // Never scraped
+      supabase
+        .from("store_products")
+        .select("id", { count: "exact", head: true })
+        .is("scraped_at", null)
+        .not("url", "is", null),
+      // Unavailable (404'd)
+      supabase.from("store_products").select("id", { count: "exact", head: true }).eq("available", false),
+      // Available
+      supabase.from("store_products").select("id", { count: "exact", head: true }).eq("available", true),
+    ])
+
+    return {
+      neverScraped: neverScraped.count ?? 0,
+      unavailable: unavailable.count ?? 0,
+      available: available.count ?? 0,
+      total: (neverScraped.count ?? 0) + (unavailable.count ?? 0) + (available.count ?? 0),
     }
   },
 }

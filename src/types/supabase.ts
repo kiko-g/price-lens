@@ -135,6 +135,7 @@ export type Database = {
           priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           product_id: number | null
+          scraped_at: string | null
           updated_at: string | null
           url: string | null
         }
@@ -160,6 +161,7 @@ export type Database = {
           priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           product_id?: number | null
+          scraped_at?: string | null
           updated_at?: string | null
           url?: string | null
         }
@@ -185,6 +187,7 @@ export type Database = {
           priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           product_id?: number | null
+          scraped_at?: string | null
           updated_at?: string | null
           url?: string | null
         }
