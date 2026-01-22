@@ -17,7 +17,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex w-full flex-grow flex-col items-center justify-center">
+    <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
         variant="grid"
         className="mask-[linear-gradient(to_top_left,rgba(255,255,255,0.4))]"

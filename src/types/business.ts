@@ -4,6 +4,23 @@ export enum SupermarketChain {
   PingoDoce = 3,
 }
 
+export const STORE_NAMES: Record<number, string> = {
+  [SupermarketChain.Continente]: "Continente",
+  [SupermarketChain.Auchan]: "Auchan",
+  [SupermarketChain.PingoDoce]: "Pingo Doce",
+}
+
+export const SORT_LABELS: Record<string, string> = {
+  "a-z": "A-Z",
+  "z-a": "Z-A",
+  "price-low-high": "Cheapest",
+  "price-high-low": "Expensive",
+  "created-newest": "Newest",
+  "created-oldest": "Oldest",
+  "updated-newest": "Recently Updated",
+  "updated-oldest": "Least Updated",
+}
+
 export const searchTypes = ["any", "name", "brand", "url", "category"] as const
 
 export function getSearchType(searchType: string): SearchType {

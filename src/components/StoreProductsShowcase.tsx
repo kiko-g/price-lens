@@ -9,6 +9,7 @@ import { PrioritySource } from "@/types"
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
 import { searchTypes, type SearchType, type SortByType, PRODUCT_PRIORITY_LEVELS } from "@/types/business"
 import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
+import { buildPageTitle } from "@/lib/utils/page-title"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { Button } from "@/components/ui/button"
@@ -145,7 +146,19 @@ function useUrlState() {
     [searchParams, router],
   )
 
-  return { urlState, updateUrl }
+  const pageTitle = useMemo(
+    () =>
+      buildPageTitle({
+        query: urlState.query,
+        sortBy: urlState.sortBy,
+        origins: parseArrayParam(urlState.origin),
+        category: urlState.category,
+        onlyDiscounted: urlState.onlyDiscounted,
+      }),
+    [urlState.query, urlState.sortBy, urlState.origin, urlState.category, urlState.onlyDiscounted],
+  )
+
+  return { urlState, updateUrl, pageTitle }
 }
 
 function buildQueryParams(
@@ -257,7 +270,7 @@ interface StoreProductsShowcaseProps {
 
 export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
-  const { urlState, updateUrl } = useUrlState()
+  const { urlState, updateUrl, pageTitle } = useUrlState()
 
   // Local input state (for search)
   const [queryInput, setQueryInput] = useState(urlState.query)
@@ -291,6 +304,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       setIsSearching(false)
     }
   }, [isFetching])
+
+  // Update document title based on active filters
+  useEffect(() => {
+    document.title = `Price Lens | ${pageTitle}`
+  }, [pageTitle])
 
   // ============================================================================
   // Handlers

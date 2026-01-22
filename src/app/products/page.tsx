@@ -1,12 +1,48 @@
 import { Suspense } from "react"
+import { Metadata } from "next"
 import { StoreProductsShowcase } from "@/components/StoreProductsShowcase"
+import { buildPageTitle } from "@/lib/utils/page-title"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Footer } from "@/components/layout/Footer"
 import { HideFooter } from "@/contexts/FooterContext"
+import { siteConfig } from "@/lib/config"
 
-export const metadata = {
-  title: "Products",
-  description: "Browse and compare prices across supermarkets",
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | undefined }>
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams
+  const title = buildPageTitle({
+    query: params.q,
+    sortBy: params.sort,
+    origins: params.origin
+      ?.split(",")
+      .map(Number)
+      .filter((n) => !isNaN(n)),
+    category: params.cat,
+    onlyDiscounted: params.discounted === "true",
+  })
+
+  // Build OG image URL with filters
+  const ogParams = new URLSearchParams()
+  if (params.q) ogParams.set("q", params.q)
+  if (params.sort) ogParams.set("sort", params.sort)
+  if (params.origin) ogParams.set("origin", params.origin)
+  if (params.cat) ogParams.set("category", params.cat)
+  if (params.discounted) ogParams.set("discounted", params.discounted)
+
+  const ogImageUrl = `${siteConfig.url}/api/og/products${ogParams.toString() ? `?${ogParams}` : ""}`
+
+  return {
+    title,
+    description: `Browse and compare prices${params.q ? ` for "${params.q}"` : ""} across supermarkets`,
+    openGraph: {
+      title: `Price Lens | ${title}`,
+      description: `Browse and compare prices${params.q ? ` for "${params.q}"` : ""} across supermarkets`,
+      images: [ogImageUrl],
+    },
+  }
 }
 
 const LIMIT = 40
