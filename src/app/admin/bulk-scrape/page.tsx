@@ -134,7 +134,7 @@ export default function BulkScrapePage() {
     priorityLevels,
   } = useAdminStoreProductFilters({
     initialFilters: {
-      origins: [],
+      origins: [3],
       priorities: [],
       missingBarcode: true,
       available: null,
@@ -400,7 +400,7 @@ export default function BulkScrapePage() {
     // Request wake lock
     await requestWakeLock()
 
-    addLog("info", `Starting bulk re-scrape with batch size ${batchSize}...`)
+    addLog("info", `Starting bulk scrape with batch size ${batchSize}...`)
 
     try {
       // Use Web Locks API to maintain execution priority
@@ -569,11 +569,11 @@ export default function BulkScrapePage() {
       {/* Sidebar - Filters */}
       <aside className="flex h-auto min-h-0 flex-col border-b xl:h-full xl:w-[400px] xl:min-w-[400px] xl:shrink-0 xl:overflow-hidden xl:border-r xl:border-b-0">
         {/* Scrollable filters section */}
-        <ScrollArea className="h-0 flex-1 p-4 xl:pb-40">
+        <ScrollArea className="h-0 flex-1 p-4 xl:pb-36">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PickaxeIcon className="text-primary size-5" />
-              <h2 className="text-lg font-bold">Bulk Re-Scrape</h2>
+              <h2 className="text-lg font-bold">Bulk Scrape</h2>
             </div>
 
             <Button variant="outline" size="icon" onClick={() => refetchCount()}>
@@ -909,7 +909,7 @@ export default function BulkScrapePage() {
         </ScrollArea>
 
         {/* Fixed Count & Start Button */}
-        <div className="bg-accent bottom-0 flex shrink-0 flex-col border-t p-4 xl:fixed xl:bottom-0 xl:left-0 xl:ml-(--sidebar-width) xl:w-[400px] xl:border-t-0 xl:border-r">
+        <div className="bg-accent bottom-0 z-50 flex shrink-0 flex-col border-t! p-4 xl:fixed xl:bottom-0 xl:left-0 xl:ml-(--sidebar-width) xl:w-[400px] xl:border-t-0 xl:border-r">
           <div className="bg-background flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2">
             <div className="flex items-center gap-2">
               <PackageIcon className="text-muted-foreground h-4 w-4" />
@@ -940,7 +940,7 @@ export default function BulkScrapePage() {
             ) : (
               <>
                 <PlayIcon className="h-4 w-4" />
-                Start Re-Scrape
+                Start Scrape
               </>
             )}
           </Button>
@@ -1175,8 +1175,7 @@ export default function BulkScrapePage() {
                 <PackageIcon className="text-muted-foreground mb-4 h-12 w-12" />
                 <h3 className="text-lg font-medium">No Active Job</h3>
                 <p className="text-muted-foreground mt-1 max-w-sm text-sm">
-                  Configure your filters in the sidebar and click &quot;Start Re-Scrape&quot; to begin processing
-                  products.
+                  Configure your filters in the sidebar and click &quot;Start Scrape&quot; to begin processing products.
                 </p>
               </CardContent>
             </Card>

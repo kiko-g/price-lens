@@ -9,7 +9,7 @@ export const maxDuration = 60
  *
  * This endpoint is NOT the automatic scheduler.
  * It is a utility to manually force a scrape for:
- * 1. A specific priority level (e.g., re-scrape all priority 5s now)
+ * 1. A specific priority level (e.g., scrape all priority 5s now)
  * 2. Specific product IDs (e.g., debugging a product)
  *
  * The main scheduler is located at /api/scrape/scheduler

@@ -7,7 +7,6 @@ import type { LucideIcon } from "lucide-react"
 import {
   DatabaseIcon,
   CrownIcon,
-  RefreshCwIcon,
   SparklesIcon,
   FlaskConicalIcon,
   CalendarClockIcon,
@@ -32,6 +31,7 @@ import {
   LayoutDashboardIcon,
   MapIcon,
   GaugeIcon,
+  PickaxeIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -80,20 +80,15 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Schedule",
-    href: "/admin/schedule",
+    href: "admin/schedule",
     icon: CalendarClockIcon,
     items: [
-      { title: "Overview", href: "/admin/schedule", icon: LayoutDashboardIcon },
+      { title: "Overview", href: "/admin/schedule/overview", icon: LayoutDashboardIcon },
       { title: "Activity", href: "/admin/schedule/activity", icon: ActivityIcon },
       { title: "Distribution", href: "/admin/schedule/distribution", icon: PieChartIcon },
       { title: "Timeline", href: "/admin/schedule/timeline", icon: ClockIcon },
       { title: "Test", href: "/admin/schedule/test", icon: TestTube2Icon },
     ],
-  },
-  {
-    title: "Discovery",
-    href: "/admin/discovery",
-    icon: MapIcon,
   },
   {
     title: "Database",
@@ -106,14 +101,19 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    title: "Discovery",
+    href: "/admin/discovery",
+    icon: MapIcon,
+  },
+  {
     title: "Priorities",
     href: "/admin/priorities",
     icon: CrownIcon,
   },
   {
-    title: "Bulk Re-Scrape",
+    title: "Bulk Scrape",
     href: "/admin/bulk-scrape",
-    icon: RefreshCwIcon,
+    icon: PickaxeIcon,
   },
   {
     title: "AI Classifier",
