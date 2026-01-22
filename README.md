@@ -21,6 +21,7 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Scraping should include a column `store_products.available` so we can tell wether products became unavaible.
 - [x] Crawl store origins for new product discovery.
 
+- [ ] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [ ] Add supermarket SuperCor and Lidl
 - [ ] Add store_products column better than available that sets the status according to the last scrape http response status
 - [ ] Radically improve home page and think of marketing/sales/promoting the product via the homepage and its branding

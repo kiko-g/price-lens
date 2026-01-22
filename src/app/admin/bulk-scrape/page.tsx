@@ -133,26 +133,28 @@ export default function BulkScrapePage() {
     invalidateCount,
     priorityLevels,
   } = useAdminStoreProductFilters({
-    initialFilters: {},
+    initialFilters: {
+      origins: [],
+      priorities: [],
+      missingBarcode: true,
+      available: null,
+      onlyUrl: false,
+    },
     queryKeyPrefix: "bulk-scrape",
   })
 
-  // Mode: "qstash" for production, "direct" for local development
-  const [useDirectMode, setUseDirectMode] = useState(true)
+  const [useDirectMode, setUseDirectMode] = useState(true) // "direct" for local development
   const [isDirectProcessing, setIsDirectProcessing] = useState(false)
+  const [useAntiBlock, setUseAntiBlock] = useState(false) // Anti-blocking measures (delays, rotating UA)
   const [batchSize, setBatchSize] = useState(5)
   const [jobLimit, setJobLimit] = useState<number | null>(null) // null = no limit, process all matching
-  const [useAntiBlock, setUseAntiBlock] = useState(true) // Anti-blocking measures (delays, rotating UA)
-
-  // Active job tracking
-  const [activeJobId, setActiveJobId] = useState<string | null>(null)
+  const [activeJobId, setActiveJobId] = useState<string | null>(null) // Active job tracking
 
   // Cancel state
   const cancelRequestedRef = useRef(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [inFlightCount, setInFlightCount] = useState(0)
 
-  // Wake Lock
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
   // Logs
