@@ -552,14 +552,22 @@ export default function BulkScrapePage() {
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   // Accordion default open values
-  const defaultAccordionValues = ["job-limit", "more-options", "availability"]
+  const defaultAccordionValues = [
+    "batch-size",
+    "job-limit",
+    "more-options",
+    "availability",
+    "store-origin",
+    "priority",
+    "processing-mode",
+  ]
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden xl:flex-row">
       {/* Sidebar - Filters */}
-      <aside className="flex h-auto min-h-0 flex-col border-b xl:w-[400px] xl:min-w-[400px] xl:shrink-0 xl:border-r xl:border-b-0">
+      <aside className="flex h-auto min-h-0 flex-col border-b xl:h-full xl:w-[400px] xl:min-w-[400px] xl:shrink-0 xl:overflow-hidden xl:border-r xl:border-b-0">
         {/* Scrollable filters section */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <ScrollArea className="h-0 flex-1 p-4 xl:pb-40">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PickaxeIcon className="text-primary size-5" />
@@ -572,52 +580,6 @@ export default function BulkScrapePage() {
           </div>
 
           <Accordion type="multiple" defaultValue={defaultAccordionValues} className="w-full">
-            {/* Processing Mode - Always at top */}
-            <AccordionItem value="processing-mode">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <SettingsIcon className="h-4 w-4" />
-                  Processing Mode
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
-                      useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setUseDirectMode(true)}
-                  >
-                    <MonitorIcon className="h-4 w-4" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium">Direct Mode</span>
-                      <p className="text-muted-foreground text-xs">Processes in browser. Best for local development.</p>
-                    </div>
-                    <Badge variant="secondary" className="text-xs" size="2xs">
-                      Local Dev
-                    </Badge>
-                  </div>
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
-                      !useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setUseDirectMode(false)}
-                  >
-                    <ServerIcon className="h-4 w-4" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium">QStash Mode</span>
-                      <p className="text-muted-foreground text-xs">Async queue processing. Requires public URL.</p>
-                    </div>
-                    <Badge variant="secondary" className="text-xs" size="2xs">
-                      Production
-                    </Badge>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
             {/* Batch Size */}
             <AccordionItem value="batch-size">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -895,12 +857,58 @@ export default function BulkScrapePage() {
                 )}
               </AccordionContent>
             </AccordionItem>
+
+            {/* Processing Mode - Always at top */}
+            <AccordionItem value="processing-mode">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <SettingsIcon className="h-4 w-4" />
+                  Processing Mode
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setUseDirectMode(true)}
+                  >
+                    <MonitorIcon className="h-4 w-4" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">Direct Mode</span>
+                      <p className="text-muted-foreground text-xs">Processes in browser. Best for local development.</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs" size="2xs">
+                      Local Dev
+                    </Badge>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      !useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setUseDirectMode(false)}
+                  >
+                    <ServerIcon className="h-4 w-4" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">QStash Mode</span>
+                      <p className="text-muted-foreground text-xs">Async queue processing. Requires public URL.</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs" size="2xs">
+                      Production
+                    </Badge>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
-        </div>
+        </ScrollArea>
 
         {/* Fixed Count & Start Button */}
-        <div className="bg-background shrink-0 border-t p-4">
-          <div className="flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2">
+        <div className="bg-accent bottom-0 flex shrink-0 flex-col border-t p-4 xl:fixed xl:bottom-0 xl:left-0 xl:ml-(--sidebar-width) xl:w-[400px] xl:border-t-0 xl:border-r">
+          <div className="bg-background flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2">
             <div className="flex items-center gap-2">
               <PackageIcon className="text-muted-foreground h-4 w-4" />
               <span className="text-muted-foreground text-sm">Matching</span>
@@ -938,7 +946,7 @@ export default function BulkScrapePage() {
       </aside>
 
       {/* Main Content */}
-      <main className="min-h-0 flex-1 overflow-y-auto p-4 xl:p-6">
+      <main className="min-h-96 flex-1 overflow-y-auto p-4 xl:min-h-0 xl:p-6">
         <div className="mx-auto max-w-5xl space-y-6">
           {/* Live Progress */}
           {(jobProgress || isDirectProcessing) && (
