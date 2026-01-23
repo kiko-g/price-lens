@@ -6,6 +6,7 @@ import { storeProductQueries } from "@/lib/db/queries/products"
 import { createClient } from "@/lib/supabase/server"
 import { extractProductIdFromSlug, generateProductSlug } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
+import { STORE_NAMES } from "@/types/business"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -39,19 +40,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonicalSlug = generateProductSlug(storeProduct)
   const canonicalUrl = `${siteConfig.url}/products/${storeProduct.id}-${canonicalSlug}`
 
-  const imageUrl = storeProduct.image ? new URL(storeProduct.image) : null
-  if (imageUrl) {
-    const p = imageUrl.searchParams
-    const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
-    fieldsToDelete.forEach((k) => p.delete(k))
-    p.set("sw", "1200")
-    p.set("sh", "630")
-    p.set("sm", "fit")
-    p.set("fit", "crop")
-  }
+  // Build OG title and description
+  const storeName = storeProduct.origin_id ? STORE_NAMES[storeProduct.origin_id] : null
+  const brandText = storeProduct.brand ? `${storeProduct.brand} ` : ""
+  const title = `${brandText}${storeProduct.name}${storeName ? ` @ ${storeName}` : ""}`
 
-  const title = `${storeProduct.name} - ${storeProduct.brand || "Unknown Brand"}`
-  const description = `${storeProduct.name}${storeProduct.pack ? ` - ${storeProduct.pack}` : ""}${storeProduct.price ? ` - ${storeProduct.price}€` : ""}`
+  // Build rich description
+  const descParts: string[] = []
+  if (storeProduct.price) {
+    const priceText = storeProduct.discount
+      ? `${storeProduct.price.toFixed(2)}€ (-${storeProduct.discount}%)`
+      : `${storeProduct.price.toFixed(2)}€`
+    descParts.push(priceText)
+  }
+  if (storeProduct.pack) descParts.push(storeProduct.pack)
+  if (storeProduct.category) descParts.push(storeProduct.category)
+  const description = descParts.length > 0 ? descParts.join(" · ") : `View product details on ${siteConfig.name}`
+
+  // Use product-specific OG image route with product image, prices, etc.
+  const ogImageUrl = `${siteConfig.url}/products/${storeProduct.id}/og`
 
   return {
     title,
@@ -63,14 +70,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       url: canonicalUrl,
-      images: imageUrl ? [{ url: imageUrl.toString() }] : [],
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: imageUrl ? [imageUrl.toString()] : [],
+      images: [ogImageUrl],
     },
   }
 }

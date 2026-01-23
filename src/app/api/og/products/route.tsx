@@ -4,7 +4,7 @@ import { queryStoreProducts, SupermarketChain } from "@/lib/db/queries/store-pro
 import { buildPageTitle } from "@/lib/utils/page-title"
 import { STORE_COLORS, STORE_NAMES, type SortByType } from "@/types/business"
 
-const PRODUCTS_AMOUNT = 9
+const PRODUCTS_AMOUNT = 4
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -74,13 +74,13 @@ export async function GET(request: Request) {
         {products.length > 0 ? (
           <div tw="flex items-start justify-start flex-wrap w-full">
             {products.slice(0, PRODUCTS_AMOUNT).map((product, i) => (
-              <div key={i} tw="flex w-1/3 p-2">
+              <div key={i} tw="flex w-1/2 p-2">
                 <div
                   tw="flex w-full bg-white rounded-xl border border-zinc-200"
                   style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
                 >
                   {/* Product image */}
-                  <div tw="flex w-36 h-36 items-center justify-center p-4 bg-white rounded-l-xl">
+                  <div tw="flex w-48 h-48 items-center justify-center p-4 bg-white rounded-l-xl">
                     {product.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -97,7 +97,7 @@ export async function GET(request: Request) {
                   </div>
 
                   {/* Product info - fixed height with consistent alignment */}
-                  <div tw="flex flex-col h-full self-stretch flex-1 py-2 pr-3 h-32">
+                  <div tw="flex flex-col h-full self-stretch flex-1 py-4 pr-3 h-48">
                     {/* Top: Brand */}
                     <span
                       tw="text-sm font-semibold text-blue-600"
