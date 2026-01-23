@@ -1,9 +1,19 @@
 ---
-description: always try to import components with @/components/
-globs: **/*.tsx
+description: Import conventions
+globs: **/*.tsx, **/*.ts
+alwaysApply: true
 ---
 
-# Your rule content
+## Import Paths
 
-- You can @ files here
-- You can use markdown but dont have to
+Always use the `@/` alias for absolute imports:
+
+```tsx
+// correct
+import { Button } from "@/components/ui/button"
+import { useUser } from "@/hooks/useUser"
+import { cn } from "@/lib/utils"
+
+// wrong - no relative imports for project files
+import { Button } from "../../../components/ui/button"
+```
