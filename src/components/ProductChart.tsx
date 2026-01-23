@@ -30,6 +30,7 @@ import { PricesVariationCard } from "@/components/PricesVariationCard"
 
 import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
 
+const FALLBACK_ACTIVE_DOT_RADIUS = 5
 const CHART_TRANSITION_DURATION = 300 // ms for fade transition
 
 type Props = {
@@ -66,7 +67,7 @@ export function ProductChart({
 }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const showDots = options?.showDots ?? samplingMode === "efficient"
-  const baseDotRadius = options?.dotRadius ?? (isMobile ? 2 : 3)
+  const baseDotRadius = options?.dotRadius ?? (isMobile ? 2 : 0)
 
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>(defaultRange)
@@ -83,26 +84,28 @@ export function ProductChart({
   const pricePoints = analytics?.pricePoints || null
   const mostCommon = analytics?.mostCommon || null
 
-  // Calculate chart bounds with nice numbers for Y-axis
+  // Calculate chart bounds from VISIBLE chartData (respects selected time range)
   const chartBounds = useMemo(() => {
-    if (!analytics) return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
-
-    const allPrices = prices
-      .flatMap((p) => [
-        activeAxis.includes("price") ? (p.price ?? -Infinity) : -Infinity,
-        activeAxis.includes("price-recommended") ? (p.price_recommended ?? -Infinity) : -Infinity,
-        activeAxis.includes("price-per-major-unit") ? (p.price_per_major_unit ?? -Infinity) : -Infinity,
-      ])
-      .filter((price) => price !== -Infinity && price !== null)
-
-    if (allPrices.length === 0) {
-      return calculateChartBounds(analytics.floor, analytics.ceiling)
+    if (chartData.length === 0) {
+      return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
     }
 
-    const min = Math.min(...allPrices)
-    const max = Math.max(...allPrices)
+    const visiblePrices = chartData
+      .flatMap((p) => [
+        activeAxis.includes("price") ? p.price : -Infinity,
+        activeAxis.includes("price-recommended") ? p["price-recommended"] : -Infinity,
+        activeAxis.includes("price-per-major-unit") ? p["price-per-major-unit"] : -Infinity,
+      ])
+      .filter((price) => price !== -Infinity && price > 0)
+
+    if (visiblePrices.length === 0) {
+      return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
+    }
+
+    const min = Math.min(...visiblePrices)
+    const max = Math.max(...visiblePrices)
     return calculateChartBounds(min, max)
-  }, [prices, activeAxis, analytics])
+  }, [chartData, activeAxis])
 
   const priceVariation = analytics?.variations.price || 0
   const priceRecommendedVariation = analytics?.variations.priceRecommended || 0
@@ -176,8 +179,17 @@ export function ProductChart({
     const color = chartConfig[axis as keyof typeof chartConfig]?.color ?? "var(--chart-1)"
 
     // Solid filled dots that grow by 1 on hover
-    const dotConfig = { r: dotRadius, fill: color, strokeWidth: 0 }
-    const activeDotConfig = { r: dotRadius + 1, fill: color, strokeWidth: 0 }
+    const dotConfig = {
+      r: dotRadius,
+      fill: color,
+      strokeWidth: 0,
+    }
+
+    const activeDotConfig = {
+      r: dotRadius >= 2 ? dotRadius + 1 : FALLBACK_ACTIVE_DOT_RADIUS,
+      fill: color,
+      strokeWidth: 0,
+    }
 
     switch (axis) {
       case "price-recommended":
