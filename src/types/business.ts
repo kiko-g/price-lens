@@ -10,6 +10,12 @@ export const STORE_NAMES: Record<number, string> = {
   [SupermarketChain.PingoDoce]: "Pingo Doce",
 }
 
+export const STORE_COLORS: Record<number, string> = {
+  [SupermarketChain.Continente]: "#e3001b",
+  [SupermarketChain.Auchan]: "#e30713",
+  [SupermarketChain.PingoDoce]: "#71a82b",
+}
+
 export const SORT_LABELS: Record<string, string> = {
   "a-z": "A-Z",
   "z-a": "Z-A",

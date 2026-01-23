@@ -333,7 +333,6 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     </Link>
                   </Button>
                 </DropdownMenuItem>
-
                 <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"
@@ -344,14 +343,12 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     <CopyIcon />
                   </Button>
                 </DropdownMenuItem>
-
                 <ShareButton
                   url={`${typeof window !== "undefined" ? window.location.origin : ""}${generateProductPath(sp)}`}
                   title={sp.name}
                   description={`Check out ${sp.name} on Price Lens`}
                   appearAs="dropdown-menu-item"
                 />
-
                 {user ? (
                   <DropdownMenuItem variant="love" asChild>
                     <Button variant="dropdown-item" onClick={toggleFavorite} disabled={isFavoritePending}>
