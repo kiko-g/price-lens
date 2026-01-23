@@ -53,6 +53,11 @@ const badgeVariants = cva(
         md: `px-3 py-1.5 [&_span.bubble]:size-2 [&_svg]:size-3.5`,
         lg: `px-3.5 py-2 [&_span.bubble]:size-2.5 [&_svg]:size-4`,
         xl: `px-6 py-4 [&_span.bubble]:size-3 [&_svg]:size-4`,
+        icon: `p-2`,
+        "icon-xl": `p-4 [&_svg]:size-5`,
+        "icon-lg": `p-3 [&_svg]:size-5`,
+        "icon-sm": `p-1.5`,
+        "icon-xs": `p-0.5 [&_svg]:size-3.5`,
       },
       roundedness: {
         default: `rounded-xl`,

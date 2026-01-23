@@ -60,6 +60,7 @@ import {
   BotIcon,
   CalendarArrowDown,
   CalendarArrowUp,
+  CircleCheckIcon,
   CircleOffIcon,
   ClockArrowDown,
   ClockArrowUp,
@@ -87,6 +88,7 @@ const FILTER_CONFIG = {
   searchType: { key: "t", default: "any" },
   query: { key: "q", default: "" },
   orderByPriority: { key: "priority_order", default: false },
+  onlyAvailable: { key: "available", default: true },
   onlyDiscounted: { key: "discounted", default: false },
   priority: { key: "priority", default: "" },
   source: { key: "source", default: "" },
@@ -113,6 +115,7 @@ function useUrlState() {
       searchType: (searchParams.get(FILTER_CONFIG.searchType.key) ?? FILTER_CONFIG.searchType.default) as SearchType,
       query: searchParams.get(FILTER_CONFIG.query.key) ?? FILTER_CONFIG.query.default,
       orderByPriority: searchParams.get(FILTER_CONFIG.orderByPriority.key) === "true",
+      onlyAvailable: searchParams.get(FILTER_CONFIG.onlyAvailable.key) !== "false",
       onlyDiscounted: searchParams.get(FILTER_CONFIG.onlyDiscounted.key) === "true",
       priority: searchParams.get(FILTER_CONFIG.priority.key) ?? FILTER_CONFIG.priority.default,
       source: searchParams.get(FILTER_CONFIG.source.key) ?? FILTER_CONFIG.source.default,
@@ -173,6 +176,7 @@ function buildQueryParams(
     },
     flags: {
       excludeEmptyNames: true,
+      onlyAvailable: urlState.onlyAvailable,
       onlyDiscounted: urlState.onlyDiscounted,
     },
   }
@@ -339,6 +343,10 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
   const handleToggleDiscounted = () => {
     updateUrl({ discounted: !urlState.onlyDiscounted, page: 1 })
+  }
+
+  const handleToggleAvailable = () => {
+    updateUrl({ available: !urlState.onlyAvailable, page: 1 })
   }
 
   // Origin multi-select handlers
@@ -674,21 +682,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id="only-discounted"
-                      checked={urlState.onlyDiscounted}
-                      onCheckedChange={handleToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
                       id="order-by-priority"
                       checked={urlState.orderByPriority}
                       onCheckedChange={handleTogglePriorityOrder}
@@ -699,6 +692,36 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                     >
                       <CrownIcon className="h-4 w-4" />
                       Order by priority
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-available"
+                      checked={urlState.onlyAvailable}
+                      onCheckedChange={handleToggleAvailable}
+                    />
+                    <Label
+                      htmlFor="only-available"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CircleCheckIcon className="h-4 w-4" />
+                      <span>Only available</span>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-discounted"
+                      checked={urlState.onlyDiscounted}
+                      onCheckedChange={handleToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
                     </Label>
                   </div>
                 </div>

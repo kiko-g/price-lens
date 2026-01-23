@@ -116,6 +116,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
     ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
     : null
 
+  const isError = hasUpdateError || !sp.available
+
   return (
     <div className="flex w-full flex-col rounded-lg bg-transparent">
       <div
@@ -134,8 +136,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 width={500}
                 height={500}
                 className={cn(
-                  "aspect-square h-full w-full bg-white object-contain object-center transition duration-300",
-                  sp.available ? "opacity-100 hover:scale-105" : "cursor-not-allowed grayscale",
+                  "aspect-square h-full w-full bg-white object-cover object-center transition duration-300",
+                  sp.available ? "opacity-100" : "",
                 )}
                 {...(imagePriority && {
                   placeholder: "blur" as const,
@@ -152,52 +154,70 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
         <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
-            <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
+            <Badge
+              variant="price-per-unit"
+              size="xs"
+              roundedness="sm"
+              className="w-fit opacity-100 transition-opacity duration-300 group-hover:opacity-0"
+            >
               {sp.price_per_major_unit}€{sp.major_unit}
             </Badge>
           ) : null}
 
           {sp.discount ? (
-            <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
+            <Badge
+              variant="destructive"
+              size="xs"
+              roundedness="sm"
+              className="w-fit opacity-100 transition-opacity duration-300 group-hover:opacity-0"
+            >
               -{discountValueToPercentage(sp.discount)}
             </Badge>
           ) : null}
         </div>
 
         <div className="absolute top-2 right-2 flex flex-col items-end gap-0">
-          {sp.pack && (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge
-                    variant="unit"
-                    size="2xs"
-                    roundedness="sm"
-                    className="line-clamp-3 w-fit max-w-20 text-left tracking-tighter md:line-clamp-1 md:max-w-20"
-                  >
-                    {sp.pack}
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="start"
-                  sideOffset={6}
-                  alignOffset={-6}
-                  size="xs"
-                  variant="glass"
-                  className="max-w-60"
-                >
-                  {sp.pack}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          {isError ? (
+            <span className="bg-destructive flex items-center justify-center rounded p-1">
+              <WifiOffIcon className="size-3 text-white" />
+            </span>
+          ) : (
+            <>
+              {sp.pack && (
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge
+                        variant="unit"
+                        size="2xs"
+                        roundedness="sm"
+                        className="line-clamp-3 w-fit max-w-20 text-left tracking-tighter opacity-100 transition-opacity duration-300 group-hover:opacity-50 hover:opacity-100 md:line-clamp-1 md:max-w-20"
+                      >
+                        {sp.pack}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="start"
+                      sideOffset={6}
+                      alignOffset={-6}
+                      size="xs"
+                      variant="glass"
+                      className="max-w-60"
+                    >
+                      {sp.pack}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
 
-          <PriorityBadge priority={priority} />
+              <PriorityBadge priority={priority} variant="compact" />
+            </>
+          )}
         </div>
 
         {user ? (
-          <div className="absolute bottom-2 left-2 z-5 flex flex-col items-end gap-0 md:gap-0.5">
+          <div className="absolute bottom-2 left-2 z-5 flex items-end gap-0 md:gap-1">
             <Button
               variant="outline"
               size="icon-sm"
@@ -241,7 +261,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           <Badge
             size="xs"
             variant="outline-white"
-            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-100"
+            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-0"
           >
             {supermarketChain ? supermarketChain.logoSmall : null}
           </Badge>
@@ -283,8 +303,6 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <span className="w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-500">
               {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
             </span>
-
-            {hasUpdateError || !sp.available ? <WifiOffIcon className="text-destructive size-4" /> : null}
           </div>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
@@ -394,7 +412,19 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <DrawerSheet title={sp.name}>
               <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-start justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <PriorityBadge priority={sp.priority} size="xs" variant="compact" className="text-xs font-semibold" />
+                  {/* Priority Badge unless unavailable */}
+                  {isError ? (
+                    <span className="bg-destructive flex items-center justify-center rounded-full p-1">
+                      <WifiOffIcon className="size-3 text-white" />
+                    </span>
+                  ) : (
+                    <PriorityBadge
+                      priority={sp.priority}
+                      size="xs"
+                      variant="compact"
+                      className="text-xs font-semibold"
+                    />
+                  )}
 
                   {sp.brand && (
                     <Badge variant="blue" size="xs">

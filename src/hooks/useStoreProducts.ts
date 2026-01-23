@@ -75,6 +75,9 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
   if (params.flags?.onlyTracked) {
     searchParams.tracked = "true"
   }
+  if (params.flags?.onlyAvailable === false) {
+    searchParams.onlyAvailable = "false"
+  }
 
   return searchParams
 }

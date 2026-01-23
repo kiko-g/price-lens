@@ -197,11 +197,13 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
   // Flags
   const onlyDiscounted = params.get("onlyDiscounted") === "true"
   const tracked = params.get("tracked") === "true"
-  if (onlyDiscounted || tracked) {
-    queryParams.flags = {
-      onlyDiscounted,
-      onlyTracked: tracked,
-    }
+  const onlyAvailableParam = params.get("onlyAvailable")
+  const onlyAvailable = onlyAvailableParam === null ? true : onlyAvailableParam !== "false"
+
+  queryParams.flags = {
+    onlyDiscounted,
+    onlyTracked: tracked,
+    onlyAvailable,
   }
 
   return queryParams

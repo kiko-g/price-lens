@@ -45,7 +45,12 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
     query = query.gt("discount", 0)
   }
 
-  // 7. Source filter (priority_source)
+  // 7. Availability filter
+  if (flags.onlyAvailable) {
+    query = query.eq("available", true)
+  }
+
+  // 8. Source filter (priority_source)
   query = applySourceFilter(query, params)
 
   // ============================================================================
@@ -375,6 +380,10 @@ export async function getMatchingProductsCount(
     query = query.gt("discount", 0)
   }
 
+  if (flags.onlyAvailable) {
+    query = query.eq("available", true)
+  }
+
   const { count, error } = await query
 
   if (error) {
@@ -407,6 +416,10 @@ export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Prom
 
   if (flags.onlyDiscounted) {
     selectQuery = selectQuery.gt("discount", 0)
+  }
+
+  if (flags.onlyAvailable) {
+    selectQuery = selectQuery.eq("available", true)
   }
 
   const { data: matchingProducts, error: selectError } = await selectQuery

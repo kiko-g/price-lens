@@ -142,6 +142,8 @@ export interface FilterFlags {
   onlyDiscounted?: boolean
   /** Only include tracked products (priority 1-5) */
   onlyTracked?: boolean
+  /** Only include available products (available = true) */
+  onlyAvailable?: boolean
 }
 
 // ============================================================================
@@ -241,6 +243,7 @@ export const DEFAULT_FLAGS: FilterFlags = {
   excludeEmptyNames: true,
   onlyDiscounted: false,
   onlyTracked: false,
+  onlyAvailable: true,
 }
 
 // ============================================================================
@@ -323,6 +326,7 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     params.flags?.excludeEmptyNames ?? true,
     params.flags?.onlyDiscounted ?? false,
     params.flags?.onlyTracked ?? false,
+    params.flags?.onlyAvailable ?? true,
     // User
     params.userId ?? null,
   ]

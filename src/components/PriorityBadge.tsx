@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { cn } from "@/lib/utils"
-import { MicroscopeIcon } from "lucide-react"
 
 interface PriorityBadgeProps {
   priority: number | null
@@ -72,18 +71,16 @@ export function PriorityBadge({ priority, size = "2xs", variant = "compact", cla
         <TooltipTrigger>
           <Badge
             size={size}
+            roundedness="xs"
             variant="outline"
             className={cn(
-              "gap-0.5 border-transparent text-white opacity-100 transition-all duration-300 group-hover:opacity-50 dark:border-transparent",
+              "gap-0.5 border-transparent text-white opacity-100 transition-all duration-300 group-hover:opacity-20 hover:opacity-100 dark:border-transparent",
               config.className,
               className,
             )}
           >
             {variant === "compact" ? (
-              <>
-                <MicroscopeIcon className="size-3" />
-                <span>{config.label}</span>
-              </>
+              <span>{config.label}</span>
             ) : (
               <>
                 Priority
