@@ -64,6 +64,11 @@ export function extractProductIdFromSlug(slug: string): number | null {
   return isNaN(id) ? null : id
 }
 
+export function generateNativeShareUrl(product: StoreProduct): string {
+  if (typeof window === "undefined") return ""
+  return `${window.location.origin}${generateProductPath(product)}`
+}
+
 export function resizeImgSrc(src: string, width: number, height: number) {
   if (!src) return ""
 

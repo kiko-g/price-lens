@@ -320,7 +320,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
           <div className="flex flex-wrap items-center gap-2">
             <FavoriteButton storeProduct={sp} />
-            <ShareButton url={sp.url} title={sp.name} description={sp.name} />
+            <ShareButton sp={sp} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon-sm">

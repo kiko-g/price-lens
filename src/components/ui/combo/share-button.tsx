@@ -15,27 +15,31 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { XTwitterIcon } from "@/components/icons"
 import { CheckIcon, CopyIcon, MailIcon, Share2Icon, TwitterIcon } from "lucide-react"
+import { generateNativeShareUrl } from "@/lib/utils"
+import { StoreProduct } from "@/types"
 
 interface ShareButtonProps {
-  url: string
-  title: string
+  sp: StoreProduct
   description?: string
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg" | "icon"
   appearAs?: "button" | "dropdown-menu-item"
+  useExternalUrl?: boolean // share from the origin supermarket url
 }
 
 export function ShareButton({
-  url,
-  title,
-  description = "",
+  sp,
   variant = "outline",
   size = "sm",
   appearAs = "button",
+  useExternalUrl = false,
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
 
-  const shareUrl = url
+  const title = sp?.name
+  const originUrl = sp?.url
+  const description = `Check out ${title} on Price Lens`
+  const shareUrl = useExternalUrl ? originUrl : generateNativeShareUrl(sp)
 
   const handleShare = async () => {
     const shareData = { title, text: description, url: shareUrl }
