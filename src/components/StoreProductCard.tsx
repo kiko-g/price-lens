@@ -410,22 +410,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             </DropdownMenu>
 
             <DrawerSheet title={sp.name}>
-              <div className="text-muted-foreground -mt-2 mb-2 flex w-full flex-wrap items-start justify-between gap-1.5 space-x-2 border-b pb-2 text-xs">
+              <div className="text-muted-foreground -mt-1 mb-2 flex w-full items-start justify-between gap-1.5 border-b pb-2 text-xs">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {/* Priority Badge unless unavailable */}
-                  {isError ? (
-                    <span className="bg-destructive flex items-center justify-center rounded-full p-1">
-                      <WifiOffIcon className="size-3 text-white" />
-                    </span>
-                  ) : (
-                    <PriorityBadge
-                      priority={sp.priority}
-                      size="xs"
-                      variant="compact"
-                      className="text-xs font-semibold"
-                    />
-                  )}
-
                   {sp.brand && (
                     <Badge variant="blue" size="xs">
                       {sp.brand}
@@ -475,10 +461,26 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     </TooltipProvider>
                   )}
                 </div>
+
+                <div className="flex flex-1 items-center justify-end">
+                  {/* Priority Badge unless unavailable */}
+                  {isError ? (
+                    <span className="bg-destructive flex items-center justify-center rounded-full p-1">
+                      <WifiOffIcon className="size-3 text-white" />
+                    </span>
+                  ) : (
+                    <PriorityBadge
+                      priority={sp.priority}
+                      size="xs"
+                      variant="compact"
+                      className="text-xs font-semibold"
+                    />
+                  )}
+                </div>
               </div>
 
               <Suspense fallback={<div>Loading...</div>}>
-                <ProductChart sp={sp} />
+                <ProductChart sp={sp} samplingMode="efficient" />
               </Suspense>
 
               {/* Drawer Footer */}

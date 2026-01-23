@@ -4,9 +4,16 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
-import { cn, buildChartData, chartConfig, generateProductPath, calculateChartBounds } from "@/lib/utils"
+import {
+  cn,
+  buildChartData,
+  chartConfig,
+  generateProductPath,
+  calculateChartBounds,
+  type ChartSamplingMode,
+} from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/data/business"
 
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -30,21 +37,37 @@ type Props = {
   className?: string
   defaultRange?: DateRange
   onRangeChange?: (range: DateRange) => void
+  /** Chart data sampling mode: 'raw' (1 point/day), 'hybrid' (boundaries + samples), 'efficient' (boundaries only) */
+  samplingMode?: ChartSamplingMode
   options?: {
-    showPricesVariationCard: boolean
-    showImage: boolean
-    showBarcode: boolean
+    showPricesVariationCard?: boolean
+    showImage?: boolean
+    showBarcode?: boolean
+    showDots?: boolean
+    dotRadius?: number
   }
 }
 
-const defaultOptions: Props["options"] = {
+const defaultOptions: NonNullable<Props["options"]> = {
   showPricesVariationCard: true,
   showImage: true,
   showBarcode: true,
+  showDots: undefined, // Will be determined by samplingMode
+  dotRadius: undefined, // Will be determined by samplingMode
 }
 
-export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange, options = defaultOptions }: Props) {
+export function ProductChart({
+  sp,
+  className,
+  defaultRange = "1W",
+  onRangeChange,
+  samplingMode = "hybrid",
+  options = defaultOptions,
+}: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)")
+  const showDots = options?.showDots ?? samplingMode === "efficient"
+  const baseDotRadius = options?.dotRadius ?? (isMobile ? 2 : 3)
+
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>(defaultRange)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -88,14 +111,21 @@ export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange
 
   const daysBetweenDates = analytics?.dateRange.daysBetween || 0
 
+  // Calculate X-axis tick interval to show ~8 ticks max
+  const xAxisTickInterval = useMemo(() => {
+    const dataLength = chartData.length
+    if (dataLength <= 8) return 0 // Show all ticks
+    return Math.floor(dataLength / 8)
+  }, [chartData.length])
+
   // Build chart data with smooth transition
   const updateChartData = useCallback(
     (range: DateRange) => {
       if (!prices || prices.length === 0) return
-      const pricePoints = buildChartData(prices, range)
+      const pricePoints = buildChartData(prices, { range, samplingMode })
       setChartData(pricePoints)
     },
-    [prices],
+    [prices, samplingMode],
   )
 
   // Initial data load (no transition)
@@ -140,35 +170,43 @@ export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange
 
   function getLineChartConfig(axis: string, chartDataLength: number) {
     const isSinglePoint = chartDataLength === 1
+    const dotRadius = showDots || isSinglePoint ? baseDotRadius : 0
+
+    // Get the color for this axis from chartConfig
+    const color = chartConfig[axis as keyof typeof chartConfig]?.color ?? "var(--chart-1)"
+
+    // Solid filled dots that grow by 1 on hover
+    const dotConfig = { r: dotRadius, fill: color, strokeWidth: 0 }
+    const activeDotConfig = { r: dotRadius + 1, fill: color, strokeWidth: 0 }
 
     switch (axis) {
       case "price-recommended":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "8 8",
-          dot: isSinglePoint ? { r: 2 } : { r: 0 },
-          activeDot: { r: 5 },
+          dot: dotConfig,
+          activeDot: activeDotConfig,
           strokeWidth: isMobile ? 2 : 3,
         }
       case "price-per-major-unit":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "4 4",
-          dot: isSinglePoint ? { r: 2 } : { r: 0 },
-          activeDot: { r: 5 },
+          dot: dotConfig,
+          activeDot: activeDotConfig,
           strokeWidth: isMobile ? 2 : 3,
         }
       case "discount":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "5 5",
-          dot: isSinglePoint ? { r: 2 } : { r: 0 },
-          activeDot: { r: 5 },
+          dot: dotConfig,
+          activeDot: activeDotConfig,
           strokeWidth: isMobile ? 2 : 2,
         }
       case "price":
       default:
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "0 0",
-          dot: isSinglePoint ? { r: 2 } : { r: 0 },
-          activeDot: { r: 5 },
+          dot: dotConfig,
+          activeDot: activeDotConfig,
           strokeWidth: isMobile ? 2 : 4,
         }
     }
@@ -313,10 +351,9 @@ export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange
               dataKey="date"
               tickLine={false}
               axisLine={false}
-              tickMargin={10}
-              interval="preserveEnd"
+              tickMargin={8}
+              interval={xAxisTickInterval}
               tick={{ fontSize: 10 }}
-              tickFormatter={(value) => value.slice(0, 10)}
             />
             <YAxis
               dataKey="price"

@@ -135,7 +135,25 @@ export function now() {
   return new Date().toISOString().replace("Z", "+00:00")
 }
 
-export function buildChartData(prices: Price[], range: DateRange = "1M"): ProductChartEntry[] {
+const MAX_CHART_POINTS = 200
+
+export type ChartSamplingMode = "raw" | "hybrid" | "efficient"
+
+type BuildChartDataOptions = {
+  range?: DateRange
+  samplingMode?: ChartSamplingMode
+}
+
+export function buildChartData(
+  prices: Price[],
+  options: BuildChartDataOptions | DateRange = "1M",
+): ProductChartEntry[] {
+  // Support both old signature (just range) and new signature (options object)
+  const { range, samplingMode } =
+    typeof options === "string"
+      ? { range: options, samplingMode: "hybrid" as const }
+      : { range: options.range ?? "1M", samplingMode: options.samplingMode ?? "hybrid" }
+
   const parseUTCDate = (dateStr: string): Date => {
     const date = new Date(dateStr)
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -201,65 +219,131 @@ export function buildChartData(prices: Price[], range: DateRange = "1M"): Produc
     start.setUTCDate(end.getUTCDate() - (daysMap[range] || 30))
   }
 
-  const daysBetweenDates = getDaysBetweenDates(start, end)
+  const totalDays = getDaysBetweenDates(start, end)
   const entries: ProductChartEntry[] = []
+  const addedDates = new Set<string>()
 
-  // Create one data point for each day in the range
-  const current = new Date(start)
-  let priceIndex = 0
+  const addEntry = (date: Date, price: ProcessedPrice) => {
+    const dateKey = date.toISOString().split("T")[0]
+    if (addedDates.has(dateKey)) return
+    addedDates.add(dateKey)
 
-  while (current <= end) {
-    const dateStr = formatDateForChart(current.toISOString(), daysBetweenDates > 30 ? range : "1M")
+    entries.push({
+      date: date.toISOString(),
+      price: price.price ?? 0,
+      "price-per-major-unit": price.price_per_major_unit ?? 0,
+      "price-recommended": price.price_recommended ?? 0,
+      discount: price.discount ? price.discount * 100 : 0,
+    })
+  }
 
-    // Find the applicable price for this date
-    while (priceIndex < processedPrices.length) {
-      const price = processedPrices[priceIndex]
-      if (current < price.validFrom) break
-
-      if (price.validTo !== null && current > price.validTo) {
-        priceIndex++
-      } else {
-        entries.push({
-          date: dateStr,
-          price: price.price ?? 0,
-          "price-per-major-unit": price.price_per_major_unit ?? 0,
-          "price-recommended": price.price_recommended ?? 0,
-          discount: price.discount ? price.discount * 100 : 0,
-        })
-        break
+  // Find price at a given date
+  const findPriceAtDate = (date: Date): ProcessedPrice | null => {
+    for (let i = processedPrices.length - 1; i >= 0; i--) {
+      const p = processedPrices[i]
+      if (date >= p.validFrom && (p.validTo === null || date <= p.validTo)) {
+        return p
       }
     }
-
-    current.setUTCDate(current.getUTCDate() + 1)
+    return null
   }
 
-  return entries
+  // Add price change boundary points (used by both 'efficient' and 'hybrid' modes)
+  const addPriceChangeBoundaries = () => {
+    for (const price of processedPrices) {
+      if (price.validFrom >= start && price.validFrom <= end) addEntry(price.validFrom, price)
+      if (price.validTo && price.validTo >= start && price.validTo <= end) addEntry(price.validTo, price)
+    }
+
+    // Always include start and end dates
+    const startPrice = findPriceAtDate(start)
+    if (startPrice) addEntry(start, startPrice)
+
+    const endPrice = findPriceAtDate(end)
+    if (endPrice) addEntry(end, endPrice)
+  }
+
+  // Build entries based on sampling mode
+  switch (samplingMode) {
+    case "raw": {
+      // 1 point per day (original behavior)
+      const current = new Date(start)
+      let priceIndex = 0
+      while (current <= end) {
+        while (priceIndex < processedPrices.length) {
+          const price = processedPrices[priceIndex]
+          if (current < price.validFrom) break
+          if (price.validTo !== null && current > price.validTo) {
+            priceIndex++
+          } else {
+            addEntry(new Date(current), price)
+            break
+          }
+        }
+        current.setUTCDate(current.getUTCDate() + 1)
+      }
+      break
+    }
+
+    case "efficient": {
+      // Only price change boundaries (most resource-saving)
+      addPriceChangeBoundaries()
+      break
+    }
+
+    case "hybrid":
+    default: {
+      // Price change boundaries + interval samples
+      addPriceChangeBoundaries()
+
+      // Add interval samples for smoother appearance
+      const samplingInterval = Math.max(1, Math.ceil(totalDays / MAX_CHART_POINTS))
+      const current = new Date(start)
+      while (current <= end) {
+        const price = findPriceAtDate(current)
+        if (price) {
+          addEntry(new Date(current), price)
+        }
+        current.setUTCDate(current.getUTCDate() + samplingInterval)
+      }
+      break
+    }
+  }
+
+  // Sort entries by date
+  entries.sort((a, b) => a.date.localeCompare(b.date))
+
+  // Format dates for display
+  return entries.map((entry) => ({
+    ...entry,
+    date: formatDateForChart(entry.date, totalDays),
+  }))
 }
 
-// FIXME: review
-function formatDateForChart(dateString: string, range: DateRange = "1M"): string {
+function formatDateForChart(dateString: string, totalDays: number = 30): string {
   const date = new Date(dateString)
 
-  switch (range) {
-    case "3M":
-    case "6M":
-    case "1Y":
-    case "5Y":
-    case "Max":
-      return date.toLocaleString(undefined, {
-        day: "2-digit",
-        month: "short",
-      })
-
-    case "1W":
-    case "2W":
-    case "1M":
-    default:
-      return date.toLocaleString(undefined, {
-        day: "numeric",
-        month: "short",
-      })
+  // For very long ranges (> 1 year), show month + year
+  if (totalDays > 365) {
+    return date.toLocaleString(undefined, {
+      month: "short",
+      year: "2-digit",
+    })
   }
+
+  // For medium ranges (> 2 months), show day + month
+  if (totalDays > 60) {
+    return date.toLocaleString(undefined, {
+      day: "2-digit",
+      month: "short",
+    })
+  }
+
+  // For short ranges, show day + month
+  return date.toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+  })
 }
 
 export function getDaysBetweenDates(startDate: Date, endDate: Date) {
@@ -330,11 +414,7 @@ export type ChartBounds = {
  * Calculate chart bounds with nice numbers for Y-axis
  * Uses a hybrid approach: nice numbers with guaranteed minimum padding
  */
-export function calculateChartBounds(
-  min: number,
-  max: number,
-  targetTicks: number = 5,
-): ChartBounds {
+export function calculateChartBounds(min: number, max: number, targetTicks: number = 5): ChartBounds {
   // Handle edge cases
   if (min === max) {
     const padding = min === 0 ? 1 : min * 0.2

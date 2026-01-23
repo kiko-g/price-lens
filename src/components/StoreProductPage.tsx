@@ -426,6 +426,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div className="flex-1">
             <ProductChart
               className="max-w-xl"
+              samplingMode="efficient"
               sp={sp}
               defaultRange={rangeFromUrl}
               onRangeChange={handleRangeChange}
