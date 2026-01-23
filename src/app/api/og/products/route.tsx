@@ -2,12 +2,15 @@ import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { queryStoreProducts, SupermarketChain } from "@/lib/db/queries/store-products"
 import { buildPageTitle } from "@/lib/utils/page-title"
-import { STORE_COLORS, STORE_NAMES } from "@/types/business"
+import { STORE_COLORS, STORE_NAMES, type SortByType } from "@/types/business"
+
+const PRODUCTS_AMOUNT = 9
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get("q") || undefined
   const sortBy = searchParams.get("sort") || undefined
+  const priorityOrder = searchParams.get("priority_order") === "true"
   const originParam = searchParams.get("origin")
   const category = searchParams.get("category") || undefined
   const onlyDiscounted = searchParams.get("discounted") === "true"
@@ -19,14 +22,14 @@ export async function GET(request: Request) {
 
   const title = buildPageTitle({ query, sortBy, origins, category, onlyDiscounted })
 
-  // Fetch 6 products for 3x2 grid (faster)
+  // Fetch 9 products for 3x3 grid
   const result = await queryStoreProducts({
     search: query ? { query, searchIn: "any" } : undefined,
     origin: origins?.length ? { originIds: origins.length === 1 ? origins[0] : origins } : undefined,
     categories: category ? { hierarchy: { category1: category } } : undefined,
     flags: { onlyDiscounted, excludeEmptyNames: true },
-    pagination: { page: 1, limit: 6 },
-    sort: { sortBy: "a-z" },
+    pagination: { page: 1, limit: PRODUCTS_AMOUNT },
+    sort: { sortBy: (sortBy as SortByType) || "a-z", prioritizeByPriority: priorityOrder },
   })
 
   const products = result.data ?? []
@@ -45,10 +48,10 @@ export async function GET(request: Request) {
 
         {/* Logo Badge */}
         <div
-          tw="flex items-center px-3 py-2 rounded-xl border border-zinc-200 bg-white"
+          tw="flex items-center px-4 py-2.5 rounded-xl border border-zinc-200 bg-white"
           style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
         >
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
             <defs>
               <linearGradient id="grad" x1="26.5" y1="4" x2="7.5" y2="29.5" gradientUnits="userSpaceOnUse">
                 <stop stopColor="#688EEF" />
@@ -60,27 +63,32 @@ export async function GET(request: Request) {
             <rect x="12" y="12" width="8" height="8" rx="2" fill="white" fillOpacity="0.5" />
             <rect x="8" y="8" width="8" height="8" rx="2" fill="white" />
           </svg>
-          <span tw="ml-2 text-lg font-semibold text-zinc-700" style={{ letterSpacing: "-0.02em" }}>
+          <span tw="ml-2.5 text-xl font-semibold text-zinc-700" style={{ letterSpacing: "-0.02em" }}>
             Price Lens
           </span>
         </div>
       </div>
 
-      {/* Products Grid - 3x2 */}
-      <div tw="flex flex-1 px-8 pb-6">
+      {/* Products Grid - 3x3 */}
+      <div tw="flex flex-1 px-10 pb-4">
         {products.length > 0 ? (
-          <div tw="flex flex-wrap w-full">
-            {products.slice(0, 6).map((product, i) => (
+          <div tw="flex items-start justify-start flex-wrap w-full">
+            {products.slice(0, PRODUCTS_AMOUNT).map((product, i) => (
               <div key={i} tw="flex w-1/3 p-2">
                 <div
-                  tw="flex w-full h-full bg-white rounded-xl border border-zinc-200"
+                  tw="flex w-full bg-white rounded-xl border border-zinc-200"
                   style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
                 >
                   {/* Product image */}
-                  <div tw="flex w-24 h-24 items-center justify-center p-1.5 bg-white rounded-l-xl">
+                  <div tw="flex w-36 h-36 items-center justify-center p-4 bg-white rounded-l-xl">
                     {product.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={product.image} alt="" tw="w-full h-full" style={{ objectFit: "contain" }} />
+                      <img
+                        src={product.image}
+                        alt=""
+                        tw="w-full h-full border border-zinc-200 rounded-lg p-1"
+                        style={{ objectFit: "contain" }}
+                      />
                     ) : (
                       <div tw="flex w-full h-full bg-zinc-100 rounded items-center justify-center">
                         <span tw="text-zinc-300 text-xs">No img</span>
@@ -89,25 +97,25 @@ export async function GET(request: Request) {
                   </div>
 
                   {/* Product info - fixed height with consistent alignment */}
-                  <div tw="flex flex-col flex-1 py-2 pr-2 h-24">
+                  <div tw="flex flex-col h-full self-stretch flex-1 py-2 pr-3 h-32">
                     {/* Top: Brand */}
                     <span
-                      tw="text-xs font-semibold text-blue-600"
-                      style={{ lineHeight: "14px", letterSpacing: "-0.01em" }}
+                      tw="text-sm font-semibold text-blue-600"
+                      style={{ lineHeight: "16px", letterSpacing: "-0.01em" }}
                     >
                       {product.brand
-                        ? product.brand.length > 16
-                          ? product.brand.slice(0, 14) + "..."
+                        ? product.brand.length > 22
+                          ? product.brand.slice(0, 20) + "..."
                           : product.brand
                         : " "}
                     </span>
 
                     {/* Middle: Name (flex-1 to take remaining space) */}
-                    <div tw="flex flex-1 items-start">
+                    <div tw="flex flex-1 items-start mt-0.5">
                       <span
-                        tw="text-sm font-medium text-zinc-800"
+                        tw="text-sm font-medium text-zinc-700"
                         style={{
-                          lineHeight: "16px",
+                          lineHeight: "18px",
                           letterSpacing: "-0.01em",
                           display: "-webkit-box",
                           WebkitLineClamp: 2,
@@ -120,9 +128,9 @@ export async function GET(request: Request) {
                     </div>
 
                     {/* Bottom: Price + Store - always at bottom */}
-                    <div tw="flex items-center justify-between">
+                    <div tw="flex items-center justify-between mt-auto">
                       <span
-                        tw="text-base font-bold"
+                        tw="text-lg font-bold"
                         style={{ color: product.discount ? "#16a34a" : "#18181b", letterSpacing: "-0.02em" }}
                       >
                         {product.price != null ? `${product.price.toFixed(2)}€` : "—"}
@@ -130,10 +138,10 @@ export async function GET(request: Request) {
 
                       {product.origin_id && (
                         <span
-                          tw="text-xs font-semibold px-1.5 py-0.5 rounded text-white"
+                          tw="text-xs font-semibold px-2 py-1 rounded-xl text-white"
                           style={{ backgroundColor: STORE_COLORS[product.origin_id] || "#71717a" }}
                         >
-                          {STORE_NAMES[product.origin_id]?.charAt(0) || "?"}
+                          {STORE_NAMES[product.origin_id]}
                         </span>
                       )}
                     </div>
@@ -144,14 +152,14 @@ export async function GET(request: Request) {
           </div>
         ) : (
           <div tw="flex flex-1 items-center justify-center">
-            <p tw="text-xl text-zinc-400">No products found</p>
+            <p tw="text-xl text-zinc-500">No products found</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div tw="flex items-center justify-center px-10 pb-4">
-        <span tw="text-sm text-zinc-400">Compare prices across Portuguese supermarkets</span>
+      <div tw="flex items-center justify-end px-10 pb-4">
+        <span tw="text-sm font-medium text-zinc-500">Compare prices across Portuguese supermarkets</span>
       </div>
     </div>,
     {

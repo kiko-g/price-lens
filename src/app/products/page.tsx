@@ -28,6 +28,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const ogParams = new URLSearchParams()
   if (params.q) ogParams.set("q", params.q)
   if (params.sort) ogParams.set("sort", params.sort)
+  if (params.priority_order) ogParams.set("priority_order", params.priority_order)
   if (params.origin) ogParams.set("origin", params.origin)
   if (params.cat) ogParams.set("category", params.cat)
   if (params.discounted) ogParams.set("discounted", params.discounted)

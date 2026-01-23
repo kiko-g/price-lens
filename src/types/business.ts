@@ -17,8 +17,8 @@ export const STORE_COLORS: Record<number, string> = {
 }
 
 export const SORT_LABELS: Record<string, string> = {
-  "a-z": "A-Z",
-  "z-a": "Z-A",
+  "a-z": "A to Z",
+  "z-a": "Z to A",
   "price-low-high": "Cheapest",
   "price-high-low": "Expensive",
   "created-newest": "Newest",

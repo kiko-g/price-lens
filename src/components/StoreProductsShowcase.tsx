@@ -1346,14 +1346,14 @@ function MobileFiltersDrawer({
               <Label className="text-base font-semibold">Sort By</Label>
               <div className="grid grid-cols-1 gap-2">
                 <SortButton
-                  label="Name A-Z"
+                  label="Name (A to Z)"
                   value="a-z"
                   current={urlState.sortBy}
                   onChange={onSortChange}
                   icon={<ArrowDownAZ className="h-4 w-4" />}
                 />
                 <SortButton
-                  label="Name Z-A"
+                  label="Name (Z to A)"
                   value="z-a"
                   current={urlState.sortBy}
                   onChange={onSortChange}

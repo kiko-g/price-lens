@@ -463,14 +463,14 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
                     icon={<ClockIcon className="h-4 w-4" />}
                   />
                   <SortOption
-                    label="Name A-Z"
+                    label="Name (A to Z)"
                     value="a-z"
                     current={urlState.sortBy}
                     onChange={handleSortChange}
                     icon={<ArrowDownAZ className="h-4 w-4" />}
                   />
                   <SortOption
-                    label="Name Z-A"
+                    label="Name (Z to A)"
                     value="z-a"
                     current={urlState.sortBy}
                     onChange={handleSortChange}
