@@ -20,7 +20,12 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Review product scheduling. Visualization of the schedule in admin page.
 - [x] Scraping should include a column `store_products.available` so we can tell wether products became unavaible.
 - [x] Crawl store origins for new product discovery.
-
+- [x] Update page title dynamically. Price Lens | Products is insufficient when we have search filters active.
+- [ ] Product filter options: show only available, missing barcode, must have barcode
+- [ ] Badass smoke test
+  - [ ] Product cards on mobile should be much more compact.
+  - [ ] Example spotify for searching when adding a song to a playlist
+- [ ] Chart floor and ceiling planning
 - [ ] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [ ] Add supermarket SuperCor and Lidl
 - [ ] Add store_products column better than available that sets the status according to the last scrape http response status
@@ -30,13 +35,11 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [ ] Add list feature (more than just favorites)
 - [ ] Add side by side comparer and possibly N-way product comparer. Should work for identical products but also more.
 
-- [ ] Add store_products.sku
-- [ ] Update page title dynamically. Price Lens | Products is insufficient when we have search filters active.
-- [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Chart should have refined data points for each range: update x scale (font size and more) and update number of data points for 5Y and MAX. Should never plot more than 500 points probably!
 - [ ] Organize types
 - [ ] Investigate if more things can be scraped and what new columns can be used for `store_products`.
 - [ ] Chart error
+- [ ] Add store_products.sku
 
 ```
 The width(-1) and height(-1) of chart should be greater than 0,

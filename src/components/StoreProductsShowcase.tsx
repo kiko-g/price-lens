@@ -531,7 +531,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         </div>
 
         <p className="text-muted-foreground mb-4 text-sm">
-          Priority affects how often prices are updated. Favorited products are assigned max priority.
+          Procuts have a priority level, from 0 to 5. When favorited, products are assigned 5.
         </p>
 
         <div className="flex items-center gap-2">
@@ -862,6 +862,14 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 )}
               </AccordionTrigger>
               <AccordionContent className="pb-3">
+                <div className="mb-2 border-b pb-2">
+                  <CategoryTupleSheet
+                    selectedTuples={urlState.catTuples}
+                    onApply={(tuples) => updateUrl({ catTuples: tuples || null, page: 1 })}
+                    onClear={handleClearCatTuples}
+                    className="bg-primary/10 dark:bg-primary/20"
+                  />
+                </div>
                 <CategoryCascadeFilter
                   category={urlState.category}
                   category2={urlState.category2}
@@ -873,26 +881,12 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
-            {/* Category Tuples Multi-Select - Opens Sheet */}
-            <AccordionItem value="extra">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Extra
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <CategoryTupleSheet
-                  selectedTuples={urlState.catTuples}
-                  onApply={(tuples) => updateUrl({ catTuples: tuples || null, page: 1 })}
-                  onClear={handleClearCatTuples}
-                />
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Source Filter (Dev Only) */}
+            {/* Dev Filters */}
             {process.env.NODE_ENV === "development" && (
               <AccordionItem value="source">
                 <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                   <span className="flex flex-1 items-center gap-1">
-                    Source
+                    Insiders
                     <DevBadge />
                   </span>
                   {selectedSources.length > 0 && (
@@ -925,7 +919,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                         className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                       >
                         <BotIcon className="h-4 w-4" />
-                        AI
+                        Priority Source AI
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -939,7 +933,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                         className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                       >
                         <HandIcon className="h-4 w-4" />
-                        Manual
+                        Priority Source Manual
                       </Label>
                     </div>
                   </div>
@@ -1526,8 +1520,8 @@ function CategoryCascadeFilter({
   return (
     <div className="flex flex-col gap-3">
       {/* Level 1: Category */}
-      <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Category</Label>
+      <div className="p-px">
+        <Label className="text-muted-foreground mb-1 block text-xs">Category 1</Label>
         <Select value={category || "_all"} onValueChange={(v) => onCategoryChange(v === "_all" ? "" : v)}>
           <SelectTrigger className="h-8 w-full text-sm">
             <SelectValue placeholder="All categories" />
@@ -1546,7 +1540,7 @@ function CategoryCascadeFilter({
 
       {/* Level 2: Subcategory */}
       <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Subcategory</Label>
+        <Label className="text-muted-foreground mb-1 block text-xs">Category #2</Label>
         <Select
           value={category2 || "_all"}
           onValueChange={(v) => onCategory2Change(v === "_all" ? "" : v)}
@@ -1569,7 +1563,7 @@ function CategoryCascadeFilter({
 
       {/* Level 3: Sub-subcategory */}
       <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Sub-subcategory</Label>
+        <Label className="text-muted-foreground mb-1 block text-xs">Category #3</Label>
         <Select
           value={category3 || "_all"}
           onValueChange={(v) => onCategory3Change(v === "_all" ? "" : v)}
@@ -1607,6 +1601,7 @@ interface CategoryTupleSheetProps {
   selectedTuples: string // URL-encoded string: "cat|cat2|cat3;cat|cat2|cat3"
   onApply: (tuples: string) => void
   onClear: () => void
+  className?: string
 }
 
 function useCategoryTuples() {
@@ -1627,7 +1622,7 @@ function useCategoryTuples() {
   return { tuples: data?.tuples ?? [], isLoading }
 }
 
-function CategoryTupleSheet({ selectedTuples, onApply, onClear }: CategoryTupleSheetProps) {
+function CategoryTupleSheet({ selectedTuples, onApply, onClear, className }: CategoryTupleSheetProps) {
   const [open, setOpen] = useState(false)
   const [localTuples, setLocalTuples] = useState(selectedTuples)
   const { tuples, isLoading } = useCategoryTuples()
@@ -1785,7 +1780,12 @@ function CategoryTupleSheet({ selectedTuples, onApply, onClear }: CategoryTupleS
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <button className="hover:bg-muted flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-medium transition-colors">
+        <button
+          className={cn(
+            "hover:bg-muted flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-medium transition-colors",
+            className,
+          )}
+        >
           <div className="flex items-center gap-2">
             <LayersIcon className="h-4 w-4" />
             <span>Category Multi-Select</span>
