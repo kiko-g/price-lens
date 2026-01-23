@@ -57,8 +57,6 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   const id = storeProduct.id
   if (!id) throw new Error("Cannot update a store product without an ID")
 
-  console.info("Updating product:", storeProduct)
-
   const response = await axios.post(`/api/products/store`, { storeProduct })
   if (response.status !== 200) throw new Error("Failed to update store product")
   return response.data as StoreProduct
@@ -169,7 +167,6 @@ export function useUpdateStoreProduct() {
     mutationFn: scrapeAndUpdateStoreProduct,
     onSuccess: (data) => {
       const id = data.id?.toString()
-      console.info(data)
       toast.success("Product updated", {
         description: `Product ${id} has been updated successfully.`,
       })

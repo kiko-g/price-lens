@@ -294,6 +294,95 @@ export const chartConfig = {
 } satisfies ChartConfig
 
 /**
+ * Calculate a "nice" number for axis intervals
+ * Based on the "Nice Numbers for Graph Labels" algorithm by Paul Heckbert
+ */
+function getNiceNumber(value: number, round: boolean): number {
+  if (value === 0) return 0
+
+  const exponent = Math.floor(Math.log10(value))
+  const fraction = value / Math.pow(10, exponent)
+
+  let niceFraction: number
+  if (round) {
+    if (fraction < 1.5) niceFraction = 1
+    else if (fraction < 3) niceFraction = 2
+    else if (fraction < 7) niceFraction = 5
+    else niceFraction = 10
+  } else {
+    if (fraction <= 1) niceFraction = 1
+    else if (fraction <= 2) niceFraction = 2
+    else if (fraction <= 5) niceFraction = 5
+    else niceFraction = 10
+  }
+
+  return niceFraction * Math.pow(10, exponent)
+}
+
+export type ChartBounds = {
+  floor: number
+  ceiling: number
+  tickInterval: number
+  ticks: number[]
+}
+
+/**
+ * Calculate chart bounds with nice numbers for Y-axis
+ * Uses a hybrid approach: nice numbers with guaranteed minimum padding
+ */
+export function calculateChartBounds(
+  min: number,
+  max: number,
+  targetTicks: number = 5,
+): ChartBounds {
+  // Handle edge cases
+  if (min === max) {
+    const padding = min === 0 ? 1 : min * 0.2
+    min = min - padding
+    max = max + padding
+  }
+
+  // Ensure min is never negative for price data
+  const safeMin = Math.max(0, min)
+
+  // Calculate raw range with padding (15% on each side, minimum)
+  const rawRange = max - safeMin
+  const paddingRatio = 0.15
+  const paddedMin = Math.max(0, safeMin - rawRange * paddingRatio)
+  const paddedMax = max + rawRange * paddingRatio
+
+  // Calculate nice tick interval
+  const paddedRange = paddedMax - paddedMin
+  const roughTickInterval = paddedRange / (targetTicks - 1)
+  const tickInterval = getNiceNumber(roughTickInterval, true)
+
+  // Calculate nice floor and ceiling aligned to tick interval
+  const floor = Math.floor(paddedMin / tickInterval) * tickInterval
+  const ceiling = Math.ceil(paddedMax / tickInterval) * tickInterval
+
+  // Ensure floor is never negative for prices
+  const safeFloor = Math.max(0, floor)
+
+  // Generate tick values
+  const ticks: number[] = []
+  for (let tick = safeFloor; tick <= ceiling + tickInterval * 0.001; tick += tickInterval) {
+    ticks.push(Math.round(tick * 1000) / 1000) // Round to avoid floating point issues
+  }
+
+  // Ensure we have at least 2 ticks
+  if (ticks.length < 2) {
+    ticks.push(ticks[0] + tickInterval)
+  }
+
+  return {
+    floor: safeFloor,
+    ceiling: ticks[ticks.length - 1],
+    tickInterval,
+    ticks,
+  }
+}
+
+/**
  * Get a short version of relative time for compact displays
  */
 export function getShortRelativeTime(date: Date): string {

@@ -44,7 +44,7 @@ async function handler(req: NextRequest) {
       }
     }
 
-    console.info(`[Worker] Scraping: ${name} (ID: ${productId})`)
+    console.info(`🛜 [Worker] Scraping: ${name} (ID: ${productId})`)
 
     // Fetch existing product for comparison
     const supabase = createClient()
@@ -74,7 +74,7 @@ async function handler(req: NextRequest) {
     })
 
     const duration = Date.now() - startTime
-    console.info(`[Worker] ✓ Scraped: ${name} (${duration}ms)`)
+    console.info(`🛜 [Worker] ✓ Scraped: ${name} (${duration}ms)`)
 
     // Track success in bulk job
     const newBarcode = json.data?.barcode

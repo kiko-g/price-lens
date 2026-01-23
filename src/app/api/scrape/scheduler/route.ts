@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!products || products.length === 0) {
-      console.info("[Scheduler] No overdue products found")
+      console.info("🛜 [Scheduler] No overdue products found")
       return NextResponse.json({
         message: "No overdue products",
         scheduled: 0,
@@ -159,7 +159,7 @@ export async function GET(req: NextRequest) {
 
     // Dry run mode - just return what would be scheduled
     if (dryRun) {
-      console.info(`[Scheduler] Dry run - would send ${qstashMessages.length} batches to ${batchWorkerUrl}`)
+      console.info(`🛜 [Scheduler] Dry run - would send ${qstashMessages.length} batches to ${batchWorkerUrl}`)
       return NextResponse.json({
         dryRun: true,
         message: `Would schedule ${productsWithUrgency.length} products in ${batchesToSend.length} batches`,

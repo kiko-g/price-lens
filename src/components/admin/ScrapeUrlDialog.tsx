@@ -39,7 +39,6 @@ export function ScrapeUrlDialog() {
   const handleScrape = () => {
     scrapeMutation.mutate(url, {
       onSuccess: (data) => {
-        console.info(data)
         setScrapedData(data)
       },
       onError: (error) => {

@@ -181,7 +181,6 @@ export async function continenteCategoryPageScraper(url: string): Promise<string
 
   while (hasMorePages) {
     const paginatedUrl = getPaginatedUrl(url, start)
-    console.log(`Fetching: ${paginatedUrl}`)
 
     const result = await fetchHtml(paginatedUrl)
     if (!result.html) {
@@ -205,16 +204,10 @@ export async function continenteCategoryPageScraper(url: string): Promise<string
 
 export async function crawlContinenteCategoryPages() {
   for (const category of Object.values(categories)) {
-    console.info("Crawling", category.url)
-    const start = performance.now()
     const links = await continenteCategoryPageScraper(category.url)
-    console.info("Finished scraping", category.name, links.length)
-
     for (const link of links) {
       await storeProductQueries.upsertBlank({ url: link })
     }
-
-    console.log("Finished storing", category.name, links.length, performance.now() - start)
   }
 }
 

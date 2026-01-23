@@ -311,7 +311,7 @@ export const priceQueries = {
     }
 
     console.info(
-      `[Prices] Closed ${closedCount} price point(s) and created new one for product ${newPrice.store_product_id}`,
+      `🛜 [Prices] Closed ${closedCount} price point(s) and created new one for product ${newPrice.store_product_id}`,
     )
     return { success: true, closedCount }
   },
@@ -398,7 +398,7 @@ export const priceQueries = {
       return { closed: false, error: updateError.message }
     }
 
-    console.info(`[Prices] Closed price point ${latestPrice.id} for store product ${storeProductId}`)
+    console.info(`🛜 [Prices] Closed price point ${latestPrice.id} for store product ${storeProductId}`)
     return { closed: true }
   },
 

@@ -76,7 +76,7 @@ async function handler(req: NextRequest) {
       return NextResponse.json({ error: "No products in batch" }, { status: 400 })
     }
 
-    console.info(`[BatchWorker] Starting batch ${batchId} with ${products.length} products`)
+    console.info(`🛜 [BatchWorker] Starting batch ${batchId} with ${products.length} products`)
 
     const supabase = createClient()
     const results: ProductResult[] = []
@@ -129,7 +129,7 @@ async function handler(req: NextRequest) {
           duration: Date.now() - productStartTime,
         })
 
-        console.info(`[BatchWorker] ✓ Scraped: ${product.name} (${Date.now() - productStartTime}ms)`)
+        console.info(`🛜 [BatchWorker] ✓ Scraped: ${product.name} (${Date.now() - productStartTime}ms)`)
       } catch (error) {
         failCount++
         results.push({
@@ -138,7 +138,7 @@ async function handler(req: NextRequest) {
           duration: Date.now() - productStartTime,
           error: error instanceof Error ? error.message : "Unknown error",
         })
-        console.error(`[BatchWorker] ✗ Error for ${product.name}:`, error)
+        console.error(`🛜 [BatchWorker] ✗ Error for ${product.name}:`, error)
       }
 
       // Small delay between products to avoid hammering stores
@@ -149,6 +149,7 @@ async function handler(req: NextRequest) {
     const avgDuration = Math.round(totalDuration / products.length)
 
     console.info(
+      `🛜 [BatchWorker] Completed batch ${batchId}: ${successCount}/${products.length} success in ${totalDuration}ms (avg ${avgDuration}ms/product)`,
       `[BatchWorker] Completed batch ${batchId}: ${successCount}/${products.length} success in ${totalDuration}ms (avg ${avgDuration}ms/product)`,
     )
 

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient()
     const { data: existingProduct } = await supabase.from("store_products").select("*").eq("url", url).maybeSingle()
 
-    console.info(`[Test Scraper] Scraping: ${url}`)
+    console.info(`🛜 [Test Scraper] Scraping: ${url}`)
 
     // Scrape the product
     const response = await scrapeAndReplaceProduct(url, originId, existingProduct as StoreProduct | undefined)
@@ -85,14 +85,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Update price point - THIS IS THE CRITICAL PART
-    console.info(`[Test Scraper] Updating price point for product ${updatedProduct.id}`)
+    console.info(`🛜 [Test Scraper] Updating price point for product ${updatedProduct.id}`)
     await updatePricePoint({
       ...json.data,
       id: updatedProduct.id,
     })
 
     const duration = Date.now() - startTime
-    console.info(`[Test Scraper] ✓ Complete: ${url} (${duration}ms)`)
+    console.info(`🛜 [Test Scraper] ✓ Complete: ${url} (${duration}ms)`)
 
     // Fetch the latest price point to show in response
     const { data: latestPrice } = await supabase

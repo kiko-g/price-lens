@@ -151,7 +151,7 @@ export async function updatePricePoint(sp: StoreProduct) {
 
   // Price unchanged - just update the timestamp to show it was checked
   if (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint)) {
-    console.info("Price point already exists and is up to date.", existingPricePoint)
+    console.info(`🛜 [Pricing] Price point already exists and is up to date.`, existingPricePoint)
     await priceQueries.updatePricePointUpdatedAt(existingPricePoint.id)
     // Update store product's updated_at to mark successful price check
     await storeProductQueries.touchUpdatedAt(sp.id)
@@ -160,7 +160,7 @@ export async function updatePricePoint(sp: StoreProduct) {
 
   // Price changed - close old price point and insert new one
   if (existingPricePoint) {
-    console.info(`[Pricing] Price changed for product ${sp.id}:`, {
+    console.info(`🛜 [Pricing] Price changed for product ${sp.id}:`, {
       old: {
         price: existingPricePoint.price,
         price_recommended: existingPricePoint.price_recommended,

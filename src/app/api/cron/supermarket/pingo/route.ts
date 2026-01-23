@@ -22,10 +22,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `No ${ORIGIN_STORE.name} products found` }, { status: 404 })
     }
 
-    console.info(`Found empty products for ${ORIGIN_STORE.name}: ${data.length}`)
+    console.info(`🛜 [Cron] Found empty products for ${ORIGIN_STORE.name}: ${data.length}`)
     const start = performance.now()
     const startTime = new Date().toLocaleTimeString("en-US", { hour12: false })
-    console.info(`Starting to scrape empty products for ${ORIGIN_STORE.name} at ${startTime}`)
+    console.info(`🛜 [Cron] Starting to scrape empty products for ${ORIGIN_STORE.name} at ${startTime}`)
 
     let failedScrapes = 0
     const batchSize = 5
@@ -39,10 +39,10 @@ export async function GET(req: NextRequest) {
           const percent = ((index + 1) / data.length) * 100
           const elapsedMs = performance.now() - start
           const timeStr = elapsedMsToTimeStr(elapsedMs)
-          console.info(`[${index + 1}/${data.length}] [${percent.toFixed(1)}%] [${timeStr}] ${url}`)
+          console.info(`🛜 [Cron] [${index + 1}/${data.length}] [${percent.toFixed(1)}%] [${timeStr}] ${url}`)
           await scrapeAndReplaceProduct(url, ORIGIN_STORE.id, product)
         } catch (error) {
-          console.warn(`Failed to scrape product ${url}:`, error)
+          console.warn(`🛜 [Cron] Failed to scrape product ${url}:`, error)
           failedScrapes++
         }
       })
@@ -50,12 +50,12 @@ export async function GET(req: NextRequest) {
       await Promise.all(promises)
     }
 
-    const message = `Scraped selected products for ${ORIGIN_STORE.name} (processed ${data.length} products, failed ${failedScrapes}).`
-    console.info(message)
+    const message = `🛜 [Cron] Scraped selected products for ${ORIGIN_STORE.name} (processed ${data.length} products, failed ${failedScrapes}).`
+    console.info(`🛜 [Cron] ${message}`)
 
     return NextResponse.json({ message }, { status: 200 })
   } catch (err) {
-    console.error("Unexpected error in scraping batch:", err)
+    console.error(`🛜 [Cron] Unexpected error in scraping batch:`, err)
     return NextResponse.json({ error: "Unexpected server error" }, { status: 500 })
   }
 }

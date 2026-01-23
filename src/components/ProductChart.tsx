@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
-import { cn, buildChartData, chartConfig, generateProductPath } from "@/lib/utils"
+import { cn, buildChartData, chartConfig, generateProductPath, calculateChartBounds } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/data/business"
 
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -60,9 +60,9 @@ export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange
   const pricePoints = analytics?.pricePoints || null
   const mostCommon = analytics?.mostCommon || null
 
-  // Get computed floor/ceiling from backend (filtered by activeAxis on client for chart display)
-  const { floor, ceiling } = useMemo(() => {
-    if (!analytics) return { floor: 0, ceiling: 0 }
+  // Calculate chart bounds with nice numbers for Y-axis
+  const chartBounds = useMemo(() => {
+    if (!analytics) return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
 
     const allPrices = prices
       .flatMap((p) => [
@@ -72,12 +72,13 @@ export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange
       ])
       .filter((price) => price !== -Infinity && price !== null)
 
-    if (allPrices.length === 0) return { floor: analytics.floor, ceiling: analytics.ceiling }
-
-    return {
-      floor: Math.floor(Math.min(...allPrices)),
-      ceiling: Math.ceil(Math.max(...allPrices)),
+    if (allPrices.length === 0) {
+      return calculateChartBounds(analytics.floor, analytics.ceiling)
     }
+
+    const min = Math.min(...allPrices)
+    const max = Math.max(...allPrices)
+    return calculateChartBounds(min, max)
   }, [prices, activeAxis, analytics])
 
   const priceVariation = analytics?.variations.price || 0
@@ -324,10 +325,8 @@ export function ProductChart({ sp, className, defaultRange = "1W", onRangeChange
               tickLine={false}
               axisLine={false}
               width={40}
-              domain={[floor * 0.75, ceiling * 1.05]}
-              ticks={Array.from({ length: 5 }, (_, i) => floor / 2 + ((ceiling - floor / 2) * i) / 4).map(
-                (tick, index) => tick + index * 0.0001,
-              )}
+              domain={[chartBounds.floor, chartBounds.ceiling]}
+              ticks={chartBounds.ticks}
               tickFormatter={(value) => `€${value.toFixed(0)}`}
               tick={(props) => <CustomTick {...props} yAxisId="price" />}
             />
