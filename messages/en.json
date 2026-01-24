@@ -1,0 +1,95 @@
+{
+  "common": {
+    "home": "Home",
+    "products": "Products",
+    "favorites": "Favorites",
+    "admin": "Admin",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "tryAgain": "Try again",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "clear": "Clear",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "prev": "Prev",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "returnHome": "Return home"
+  },
+  "hero": {
+    "title": "Price Lens",
+    "subtitle": "See through prices",
+    "description": "Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware of how supermarket prices change. See beyond the headlines and tags. Data focused on Portugal-available supermarket chains.",
+    "exploreSupermarket": "Explore Supermarket",
+    "trackedProducts": "Tracked Products"
+  },
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "favorites": "Favorites",
+    "admin": "Admin"
+  },
+  "footer": {
+    "builtBy": "Built by",
+    "codeOpenSource": "Code is open source and available on",
+    "termsOfService": "Terms of Service",
+    "privacy": "Privacy"
+  },
+  "login": {
+    "title": "Login to",
+    "noSpam": "We'll never use your email for spam",
+    "continueWithGoogle": "Continue with Google"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "description": "Products you've saved for easy access and price tracking",
+    "signInTitle": "Sign in to view your favorites",
+    "signInDescription": "Create an account or sign in to save your favorite products and track their prices over time.",
+    "browseProducts": "Browse Products",
+    "searchPlaceholder": "Search favorites...",
+    "loadingFavorites": "Loading favorites...",
+    "count": "{count} favorites",
+    "matching": "matching \"{query}\"",
+    "noFavoritesMatch": "No favorites match your search",
+    "noFavoritesYet": "No favorites yet",
+    "startAdding": "Start adding products to your favorites to see them here",
+    "clearFilters": "Clear filters",
+    "findProducts": "Find Products"
+  },
+  "filters": {
+    "title": "Filters & Sort",
+    "storeOrigin": "Store Origin",
+    "sortBy": "Sort By",
+    "options": "Options",
+    "searchBy": "Search by",
+    "applyFilters": "Apply Filters"
+  },
+  "sort": {
+    "recentlyAdded": "Recently Added",
+    "oldestFirst": "Oldest First",
+    "nameAZ": "Name (A to Z)",
+    "nameZA": "Name (Z to A)",
+    "priceHighLow": "Price: High to Low",
+    "priceLowHigh": "Price: Low to High"
+  },
+  "products": {
+    "searchPlaceholder": "Search products...",
+    "noResults": "No results found",
+    "onlyDiscounted": "Only discounted"
+  },
+  "errors": {
+    "pageNotFound": "Page not found",
+    "errorFetching": "Error fetching data. Please try again.",
+    "unknownDigitalRealm": "Looks like you've ventured into the unknown digital realm."
+  }
+}

@@ -43,28 +43,30 @@ export const defaultMetadata: Metadata = {
   },
 }
 
+// Navigation items use translation keys from "navigation" namespace
+// Labels are resolved at render time using useTranslations("navigation")
 export const navigation = [
   {
     icon: HomeIcon,
-    label: "Home",
+    labelKey: "home",
     href: "/",
     shown: true,
   },
   {
     icon: ShoppingBasketIcon,
-    label: "Products",
+    labelKey: "products",
     href: "/products?priority_order=true",
     shown: true,
   },
   {
     icon: HeartIcon,
-    label: "Favorites",
+    labelKey: "favorites",
     href: "/favorites",
     shown: true,
   },
   {
     icon: WorkflowIcon,
-    label: "Admin",
+    labelKey: "admin",
     href: "/admin",
     shown: true,
   },

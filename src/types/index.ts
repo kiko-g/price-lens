@@ -30,7 +30,7 @@ export interface ProductChartEntry {
 
 export interface NavigationItem {
   href: string
-  label: string
+  labelKey: string // Translation key from "navigation" namespace
   shown?: boolean
   icon?: React.ElementType
 }

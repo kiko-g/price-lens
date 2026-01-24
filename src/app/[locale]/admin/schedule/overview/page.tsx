@@ -24,8 +24,8 @@ import {
   ActivityIcon,
 } from "lucide-react"
 
-import type { ScheduleOverview } from "@/app/admin/schedule/types"
-import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
+import type { ScheduleOverview } from "@/app/[locale]/admin/schedule/types"
+import { PRIORITY_CONFIG } from "@/app/[locale]/admin/schedule/constants"
 
 export default function ScheduleOverviewPage() {
   const {

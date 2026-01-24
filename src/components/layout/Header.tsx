@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { navigation } from "@/lib/config"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 
@@ -13,6 +14,7 @@ import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { SearchDialog } from "@/components/layout/SearchDialog"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
+import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher"
 
 import { SearchIcon } from "lucide-react"
 
@@ -20,6 +22,7 @@ export function Header() {
   const pathname = usePathname()
   const isMobile = useMediaQuery("(max-width: 768px)")
   const isEarlyAccess = false
+  const t = useTranslations("navigation")
 
   return (
     <header className="bg-opacity-80 dark:bg-opacity-80 bg-background/90 sticky top-0 z-50 mx-auto h-[54px] w-full border-b backdrop-blur backdrop-filter xl:px-4">
@@ -41,7 +44,7 @@ export function Header() {
                     className={cn("", pathname === hrefSanitized && "bg-zinc-200 dark:bg-zinc-100/20")}
                     key={item.href}
                   >
-                    <Link href={item.href}>{item.label}</Link>
+                    <Link href={item.href}>{t(item.labelKey)}</Link>
                   </Button>
                 )
               })}
@@ -56,6 +59,7 @@ export function Header() {
               </Button>
             </SearchDialog>
           )}
+          <LocaleSwitcher />
           <UserDropdownMenu />
           <NavigationMenu />
         </div>

@@ -1,0 +1,95 @@
+{
+  "common": {
+    "home": "Início",
+    "products": "Produtos",
+    "favorites": "Favoritos",
+    "admin": "Admin",
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "search": "Pesquisar",
+    "loading": "A carregar...",
+    "error": "Erro",
+    "tryAgain": "Tentar novamente",
+    "cancel": "Cancelar",
+    "apply": "Aplicar",
+    "clear": "Limpar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "prev": "Anterior",
+    "page": "Página",
+    "of": "de",
+    "showing": "A mostrar",
+    "to": "a",
+    "returnHome": "Voltar ao início"
+  },
+  "hero": {
+    "title": "Price Lens",
+    "subtitle": "Veja através dos preços",
+    "description": "Acompanhe as alterações diárias de preços em bens de consumo essenciais que afetam as métricas de inflação. Mantenha-se informado sobre como os preços dos supermercados mudam. Veja além das manchetes e promoções. Dados focados em cadeias de supermercados disponíveis em Portugal.",
+    "exploreSupermarket": "Explorar Supermercado",
+    "trackedProducts": "Produtos Monitorizados"
+  },
+  "navigation": {
+    "home": "Início",
+    "products": "Produtos",
+    "favorites": "Favoritos",
+    "admin": "Admin"
+  },
+  "footer": {
+    "builtBy": "Desenvolvido por",
+    "codeOpenSource": "O código é open source e está disponível no",
+    "termsOfService": "Termos de Serviço",
+    "privacy": "Privacidade"
+  },
+  "login": {
+    "title": "Entrar no",
+    "noSpam": "Nunca usaremos o seu email para spam",
+    "continueWithGoogle": "Continuar com Google"
+  },
+  "favorites": {
+    "title": "Os Meus Favoritos",
+    "description": "Produtos que guardou para acesso fácil e monitorização de preços",
+    "signInTitle": "Entre para ver os seus favoritos",
+    "signInDescription": "Crie uma conta ou entre para guardar os seus produtos favoritos e acompanhar os seus preços ao longo do tempo.",
+    "browseProducts": "Ver Produtos",
+    "searchPlaceholder": "Pesquisar favoritos...",
+    "loadingFavorites": "A carregar favoritos...",
+    "count": "{count} favoritos",
+    "matching": "correspondentes a \"{query}\"",
+    "noFavoritesMatch": "Nenhum favorito corresponde à sua pesquisa",
+    "noFavoritesYet": "Ainda não tem favoritos",
+    "startAdding": "Comece a adicionar produtos aos seus favoritos para os ver aqui",
+    "clearFilters": "Limpar filtros",
+    "findProducts": "Encontrar Produtos"
+  },
+  "filters": {
+    "title": "Filtros e Ordenação",
+    "storeOrigin": "Origem da Loja",
+    "sortBy": "Ordenar Por",
+    "options": "Opções",
+    "searchBy": "Pesquisar por",
+    "applyFilters": "Aplicar Filtros"
+  },
+  "sort": {
+    "recentlyAdded": "Adicionados Recentemente",
+    "oldestFirst": "Mais Antigos Primeiro",
+    "nameAZ": "Nome (A a Z)",
+    "nameZA": "Nome (Z a A)",
+    "priceHighLow": "Preço: Maior para Menor",
+    "priceLowHigh": "Preço: Menor para Maior"
+  },
+  "products": {
+    "searchPlaceholder": "Pesquisar produtos...",
+    "noResults": "Nenhum resultado encontrado",
+    "onlyDiscounted": "Apenas com desconto"
+  },
+  "errors": {
+    "pageNotFound": "Página não encontrada",
+    "errorFetching": "Erro ao obter dados. Por favor, tente novamente.",
+    "unknownDigitalRealm": "Parece que se aventurou no desconhecido digital."
+  }
+}

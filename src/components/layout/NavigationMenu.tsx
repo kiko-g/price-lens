@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import type { NavigationItem } from "@/types"
 import { GithubIcon } from "@/components/icons"
-import { LogInIcon, MenuIcon, SearchIcon } from "lucide-react"
+import { MenuIcon, SearchIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { useUser } from "@/hooks/useUser"
 import { navigation, siteConfig } from "@/lib/config"
@@ -31,6 +32,8 @@ import { SearchDialog } from "@/components/layout/SearchDialog"
 
 export function NavigationMenu() {
   const pathname = usePathname()
+  const t = useTranslations("navigation")
+  const tCommon = useTranslations("common")
 
   const { user, isLoading } = useUser()
   const profileImage = user?.user_metadata.avatar_url
@@ -61,7 +64,13 @@ export function NavigationMenu() {
         <ScrollArea className="mt-4 w-full flex-1">
           <div className="flex w-full max-w-80 flex-1 flex-col items-start gap-2">
             {navigation.map((item) => (
-              <Entry key={item.href} item={item} isActive={pathname === item.href} onClose={handleClose} />
+              <Entry
+                key={item.href}
+                item={item}
+                label={t(item.labelKey)}
+                isActive={pathname === item.href}
+                onClose={handleClose}
+              />
             ))}
           </div>
         </ScrollArea>
@@ -70,7 +79,7 @@ export function NavigationMenu() {
           <SearchDialog>
             <Button variant="outline" className="w-full">
               <SearchIcon className="h-4 w-4" />
-              <span>Search products</span>
+              <span>{tCommon("search")}</span>
             </Button>
           </SearchDialog>
 
@@ -81,7 +90,7 @@ export function NavigationMenu() {
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/login" onClick={handleClose}>
                   <GoogleIcon />
-                  Sign in
+                  {tCommon("signIn")}
                 </Link>
               </Button>
             ) : (
@@ -110,14 +119,24 @@ export function NavigationMenu() {
   )
 }
 
-function Entry({ item, isActive, onClose }: { item: NavigationItem; isActive: boolean; onClose: () => void }) {
+function Entry({
+  item,
+  label,
+  isActive,
+  onClose,
+}: {
+  item: NavigationItem
+  label: string
+  isActive: boolean
+  onClose: () => void
+}) {
   if (!item.shown) return null
 
   return (
-    <Link title={item.label} href={item.href} className="w-full" onClick={onClose}>
+    <Link title={label} href={item.href} className="w-full" onClick={onClose}>
       <Button variant={isActive ? "default" : "outline"} className="w-full justify-start pr-4">
         {item.icon && <item.icon className="size-4" />}
-        <span>{item.label}</span>
+        <span>{label}</span>
       </Button>
     </Link>
   )

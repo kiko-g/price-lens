@@ -1,6 +1,6 @@
 "use client"
 
-import { deleteAccount, signOut } from "@/app/login/actions"
+import { deleteAccount, signOut } from "@/app/[locale]/login/actions"
 import { useUser } from "@/hooks/useUser"
 import Link from "next/link"
 import { useRouter } from "next/navigation"

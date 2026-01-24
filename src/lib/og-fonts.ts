@@ -11,9 +11,9 @@ export type FontAsset = {
 
 export async function loadGeistFonts(): Promise<FontAsset[]> {
   const [{ base64Font: normal }, { base64Font: mono }, { base64Font: semibold }] = await Promise.all([
-    import("@/app/(app)/og/geist-regular-otf.json").then((mod) => mod.default || mod),
-    import("@/app/(app)/og/geistmono-regular-otf.json").then((mod) => mod.default || mod),
-    import("@/app/(app)/og/geist-semibold-otf.json").then((mod) => mod.default || mod),
+    import("@/app/[locale]/(app)/og/geist-regular-otf.json").then((mod) => mod.default || mod),
+    import("@/app/[locale]/(app)/og/geistmono-regular-otf.json").then((mod) => mod.default || mod),
+    import("@/app/[locale]/(app)/og/geist-semibold-otf.json").then((mod) => mod.default || mod),
   ])
 
   return [
@@ -40,8 +40,8 @@ export async function loadGeistFonts(): Promise<FontAsset[]> {
 
 export async function loadGeistFontsLight(): Promise<FontAsset[]> {
   const [{ base64Font: normal }, { base64Font: semibold }] = await Promise.all([
-    import("@/app/(app)/og/geist-regular-otf.json").then((mod) => mod.default || mod),
-    import("@/app/(app)/og/geist-semibold-otf.json").then((mod) => mod.default || mod),
+    import("@/app/[locale]/(app)/og/geist-regular-otf.json").then((mod) => mod.default || mod),
+    import("@/app/[locale]/(app)/og/geist-semibold-otf.json").then((mod) => mod.default || mod),
   ])
 
   return [
