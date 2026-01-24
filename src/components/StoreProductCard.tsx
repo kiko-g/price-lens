@@ -5,7 +5,6 @@ import Image from "next/image"
 import { Suspense, useState } from "react"
 import { type StoreProduct } from "@/types"
 import { useUser } from "@/hooks/useUser"
-import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useStoreProductCard } from "@/hooks/useStoreProductCard"
 
 import { cn } from "@/lib/utils"
@@ -19,14 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { DevBadge } from "@/components/ui/combo/dev-badge"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ShareButton } from "@/components/ui/combo/share-button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { ProductChart } from "@/components/ProductChart"
@@ -50,7 +41,6 @@ import {
   CopyIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
-  ChartSplineIcon,
   WifiOffIcon,
   CircleIcon,
   MicroscopeIcon,
@@ -536,56 +526,5 @@ export function ProductCardSkeleton() {
         </div>
       </div>
     </div>
-  )
-}
-
-function DrawerSheet({
-  children,
-  title,
-  description,
-}: {
-  children: React.ReactNode
-  title?: string
-  description?: string
-}) {
-  const [open, setOpen] = useState(false)
-  const isDesktop = useMediaQuery("(min-width: 768px)")
-
-  if (isDesktop) {
-    return (
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild className="top-4">
-          <Button size="icon-sm">
-            <ChartSplineIcon />
-          </Button>
-        </SheetTrigger>
-        <SheetContent className="overflow-x-hidden overflow-y-scroll">
-          <SheetHeader>
-            <SheetTitle className="text-left">{title}</SheetTitle>
-            {description ? <SheetDescription>{description}</SheetDescription> : null}
-          </SheetHeader>
-
-          <div className="pt-2 pb-4">{children}</div>
-        </SheetContent>
-      </Sheet>
-    )
-  }
-
-  return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild className="top-4">
-        <Button size="icon-sm">
-          <ChartSplineIcon />
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="overflow-x-hidden overflow-y-scroll">
-        <DrawerHeader>
-          <DrawerTitle className="text-left">{title}</DrawerTitle>
-          {description ? <DrawerDescription>{description}</DrawerDescription> : null}
-        </DrawerHeader>
-
-        <div className="max-h-[80vh] px-4 pt-2 pb-4">{children}</div>
-      </DrawerContent>
-    </Drawer>
   )
 }

@@ -1,5 +1,19 @@
 import type { StoreProduct } from "@/types"
 
+export const popularProducts = [
+  { label: "Cápsulas de Café", value: "capsulas de cafe" },
+  { label: "Leite", value: "leite" },
+  { label: "Atum", value: "atum" },
+  { label: "Iogurte Grego", value: "iogurte grego" },
+  { label: "Cereais", value: "cereais" },
+  { label: "Fiambre", value: "fiambre" },
+  { label: "Häagen-Dazs", value: "haagen dazs" },
+  { label: "Salmão", value: "salmao" },
+  { label: "Chocolate", value: "chocolate" },
+  { label: "Biscoitos", value: "biscoitos" },
+  { label: "Bolachas", value: "bolachas" },
+]
+
 /**
  * Generates a URL-safe slug from a store product
  * Format: {brand}-{name_shorthand}-{origin_id}

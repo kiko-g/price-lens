@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 
 import { LogoLink } from "@/components/layout/LogoLink"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
-import { SearchDialog } from "@/components/layout/SearchDialog"
+import { SearchContainer } from "@/components/layout/search"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
 
@@ -50,11 +50,11 @@ export function Header() {
 
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && (
-            <SearchDialog>
+            <SearchContainer>
               <Button variant="outline" size="icon" className="relative hidden bg-transparent md:inline-flex">
                 <SearchIcon className="h-4 w-4" />
               </Button>
-            </SearchDialog>
+            </SearchContainer>
           )}
           <UserDropdownMenu />
           <NavigationMenu />
