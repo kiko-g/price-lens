@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
+import { priceQueries } from "@/lib/queries/prices"
 import { createMockPrice } from "./mocks/supabase"
 
 // Create chainable query mock that properly chains all methods
@@ -41,8 +42,6 @@ vi.mock("@/lib/pricing", () => ({
 vi.mock("@/lib/utils", () => ({
   now: () => "2024-01-15T12:00:00Z",
 }))
-
-import { priceQueries } from "../prices"
 
 describe("priceQueries", () => {
   beforeEach(() => {

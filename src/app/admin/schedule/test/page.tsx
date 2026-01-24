@@ -22,8 +22,8 @@ import {
   InfoIcon,
 } from "lucide-react"
 
-import type { SchedulerTestResult } from "../types"
-import { PRIORITY_CONFIG } from "../constants"
+import type { SchedulerTestResult } from "@/app/admin/schedule/types"
+import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
 
 export default function ScheduleTestPage() {
   const [schedulerTestResult, setSchedulerTestResult] = useState<SchedulerTestResult | null>(null)

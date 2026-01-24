@@ -1,7 +1,7 @@
 import { StoreOrigin } from "@/lib/scrapers/types"
-import type { StoreDiscoveryConfig } from "../types"
-import { continenteConfig } from "./continente"
-import { auchanConfig } from "./auchan"
+import { auchanConfig } from "@/lib/discovery/stores/auchan"
+import { continenteConfig } from "@/lib/discovery/stores/continente"
+import type { StoreDiscoveryConfig } from "@/lib/discovery/types"
 
 /**
  * Map of origin IDs to discovery configurations

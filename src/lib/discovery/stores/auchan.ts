@@ -1,5 +1,5 @@
 import { StoreOrigin } from "@/lib/scrapers/types"
-import type { StoreDiscoveryConfig } from "../types"
+import type { StoreDiscoveryConfig } from "@/lib/discovery/types"
 
 /**
  * URL patterns for Auchan product pages:

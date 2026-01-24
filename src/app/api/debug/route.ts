@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 
 export async function GET() {
   const priority = 0

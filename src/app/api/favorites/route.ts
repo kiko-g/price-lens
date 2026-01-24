@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { favoriteQueries, type FavoritesQueryParams, type FavoritesSortType } from "@/lib/db/queries/favorites"
-import { userQueries } from "@/lib/db/queries/user"
+import { favoriteQueries, type FavoritesQueryParams, type FavoritesSortType } from "@/lib/queries/favorites"
+import { userQueries } from "@/lib/queries/user"
 import type { SearchType } from "@/types/business"
 import { SupermarketChain } from "@/types/business"
 

@@ -13,8 +13,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
-import type { TimelineData, StaleBreakdown } from "../types"
-import { PRIORITY_CONFIG } from "../constants"
+import type { TimelineData, StaleBreakdown } from "@/app/admin/schedule/types"
+import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
 
 function formatDateLabel(date: Date): string {
   if (isToday(date)) return "Today"

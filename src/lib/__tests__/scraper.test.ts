@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as fs from "fs"
 import * as path from "path"
+import * as scraper from "@/lib/scrapers"
 import { fileURLToPath } from "url"
-import type { ScrapedProduct } from "../scrapers/types"
+import type { ScrapedProduct } from "@/lib/scrapers/types"
 
 // ============================================================================
 // Mocks - Must be before imports (mock axios to intercept HTTP calls)
@@ -25,7 +26,6 @@ vi.mock("axios", async (importOriginal) => {
 })
 
 // Import the scraper module AFTER mocking
-import * as scraper from "../scrapers"
 
 // ============================================================================
 // Test Fixtures

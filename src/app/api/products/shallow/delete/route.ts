@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { productQueries } from "@/lib/db/queries/products"
+import { productQueries } from "@/lib/queries/products"
 
 export async function DELETE(request: Request) {
   const body = await request.json()

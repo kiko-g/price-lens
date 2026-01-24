@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { StoreProductPage } from "@/components/StoreProductPage"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import { createClient } from "@/lib/supabase/server"
 import { extractProductIdFromSlug, generateProductSlug } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"

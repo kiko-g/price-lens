@@ -1,7 +1,7 @@
 import type * as cheerio from "cheerio"
-import { BaseProductScraper } from "../base"
-import { StoreOrigin, type RawProduct } from "../types"
-import { formatProductName, priceToNumber, resizeImgSrc } from "../utils"
+import { BaseProductScraper } from "@/lib/scrapers/base"
+import { StoreOrigin, type RawProduct } from "@/lib/scrapers/types"
+import { formatProductName, priceToNumber, resizeImgSrc } from "@/lib/scrapers/utils"
 
 export type ScrapedSchemaAuchan = {
   "@context": string

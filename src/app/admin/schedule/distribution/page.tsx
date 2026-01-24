@@ -26,8 +26,8 @@ import {
   BanIcon,
 } from "lucide-react"
 
-import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "../types"
-import { PRIORITY_CONFIG, formatThreshold } from "../constants"
+import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "@/app/admin/schedule/types"
+import { PRIORITY_CONFIG, formatThreshold } from "@/app/admin/schedule/constants"
 
 export default function ScheduleDistributionPage() {
   const queryClient = useQueryClient()

@@ -1,6 +1,6 @@
 import { Price } from "@/types"
 import { NextRequest, NextResponse } from "next/server"
-import { priceQueries } from "@/lib/db/queries/prices"
+import { priceQueries } from "@/lib/queries/prices"
 
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams

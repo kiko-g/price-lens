@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { favoriteQueries } from "@/lib/db/queries/favorites"
-import { userQueries } from "@/lib/db/queries/user"
+import { favoriteQueries } from "@/lib/queries/favorites"
+import { userQueries } from "@/lib/queries/user"
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ user_id: string }> }) {
   try {

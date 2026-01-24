@@ -6,8 +6,8 @@ import type {
   StoreProductsQueryParams,
   StoreProductsQueryResult,
   StoreProductWithMeta,
-} from "@/lib/db/queries/store-products/types"
-import { generateQueryKey, DEFAULT_PAGINATION } from "@/lib/db/queries/store-products/types"
+} from "@/lib/queries/store-products/types"
+import { generateQueryKey, DEFAULT_PAGINATION } from "@/lib/queries/store-products/types"
 
 // ============================================================================
 // API Functions
@@ -210,7 +210,7 @@ export type UseStoreProductsReturn = ReturnType<typeof useStoreProducts>
 // Re-exports for convenience
 // ============================================================================
 
-export { SupermarketChain, generateQueryKey } from "@/lib/db/queries/store-products/types"
+export { SupermarketChain, generateQueryKey } from "@/lib/queries/store-products/types"
 export type {
   StoreProductsQueryParams,
   StoreProductWithMeta,
@@ -221,7 +221,7 @@ export type {
   PriorityFilter,
   SortOptions,
   FilterFlags,
-} from "@/lib/db/queries/store-products/types"
+} from "@/lib/queries/store-products/types"
 
 // ============================================================================
 // Additional Utility Hooks

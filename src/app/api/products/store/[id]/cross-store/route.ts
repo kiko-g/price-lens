@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { findIdenticalProducts } from "@/lib/db/queries/product-matching"
+import { findIdenticalProducts } from "@/lib/queries/product-matching"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

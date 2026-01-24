@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -12,7 +12,7 @@
  *
  * @example
  * ```ts
- * import { queryStoreProducts, SupermarketChain } from "@/lib/db/queries/store-products"
+ * import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
  *
  * const result = await queryStoreProducts({
  *   search: { query: "leite", searchIn: "any" },

@@ -1,6 +1,6 @@
 "use server"
 
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import { revalidatePath } from "next/cache"
 
 export async function updateProductPriority(productId: number, priority: number) {

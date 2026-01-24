@@ -1,4 +1,4 @@
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import { AdminPrioritiesGrid } from "@/components/admin/AdminPrioritiesGrid"
 
 type Props = {

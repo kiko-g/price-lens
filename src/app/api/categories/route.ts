@@ -1,4 +1,4 @@
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import { getCachedCategories, setCachedCategories } from "@/lib/kv"
 import { NextRequest, NextResponse } from "next/server"
 import { createHash } from "crypto"

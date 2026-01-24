@@ -3,12 +3,15 @@
 import { type StoreProduct } from "@/types"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AdminProductPriorityCard } from "./AdminProductPriorityCard"
+
+import { ProductGridWrapper } from "@/components/ProductGridWrapper"
+import { AdminProductPriorityCard } from "@/components/admin/AdminProductPriorityCard"
+
 import { SearchIcon } from "lucide-react"
-import { ProductGridWrapper } from "../ProductGridWrapper"
 
 type Props = {
   initialData: {

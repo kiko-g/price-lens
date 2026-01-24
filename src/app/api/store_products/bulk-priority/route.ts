@@ -4,7 +4,7 @@ import {
   bulkUpdatePriority,
   type StoreProductsQueryParams,
   SupermarketChain,
-} from "@/lib/db/queries/store-products"
+} from "@/lib/queries/store-products"
 import type { SearchType } from "@/types/business"
 import { PrioritySource } from "@/types"
 

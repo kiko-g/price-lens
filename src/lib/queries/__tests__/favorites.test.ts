@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
+import { favoriteQueries } from "@/lib/queries/favorites"
 import { createMockFavorite, createMockStoreProduct } from "./mocks/supabase"
 
 // Create chainable query mock that properly chains all methods
@@ -31,8 +32,6 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => mockSupabase,
 }))
-
-import { favoriteQueries } from "../favorites"
 
 describe("favoriteQueries", () => {
   beforeEach(() => {

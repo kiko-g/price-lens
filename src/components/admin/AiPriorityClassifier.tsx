@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useAiPriorityClassification } from "@/hooks/useAdmin"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -8,8 +10,7 @@ import { AsyncTimerLoader } from "@/components/ui/combo/async-timer-loader"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { useAiPriorityClassification } from "@/hooks/useAdmin"
-import { Code } from "../ui/combo/code"
+import { Code } from "@/components/ui/combo/code"
 
 type CumulativeResults = {
   totalProcessed: number

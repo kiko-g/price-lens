@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { priceQueries } from "@/lib/db/queries/prices"
+import { priceQueries } from "@/lib/queries/prices"
 import { mergeAndSanitize } from "@/lib/pricing"
 
 export async function GET(_req: Request, { params }: { params: Promise<{ store_product_id: string }> }) {

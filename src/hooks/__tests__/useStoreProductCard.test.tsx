@@ -2,10 +2,13 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import type { ReactNode } from "react"
+import { toast } from "sonner"
 import { renderHook, act, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
 import type { StoreProduct } from "@/types"
-import type { ReactNode } from "react"
+import { useStoreProductCard } from "@/hooks/useStoreProductCard"
 
 // ============================================================================
 // Mocks
@@ -55,10 +58,6 @@ vi.mock("sonner", () => ({
     error: vi.fn(),
   },
 }))
-
-// Import after mocks
-import { useStoreProductCard } from "../useStoreProductCard"
-import { toast } from "sonner"
 
 // ============================================================================
 // Test Utilities

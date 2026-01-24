@@ -1,4 +1,4 @@
-import { priceQueries } from "@/lib/db/queries/prices"
+import { priceQueries } from "@/lib/queries/prices"
 import { NextResponse } from "next/server"
 
 export async function GET() {

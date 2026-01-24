@@ -6,7 +6,7 @@ import { GeistMono } from "geist/font/mono"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { coldarkDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { CheckIcon, ClipboardIcon, DownloadIcon } from "lucide-react"
-import { Button } from "../button"
+import { Button } from "@/components/ui/button"
 
 type Props = {
   className?: string

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { StoreProduct } from "@/types"
-import { storeProductQueries } from "@/lib/db/queries/products"
-import { priceQueries } from "@/lib/db/queries/prices"
+import { storeProductQueries } from "@/lib/queries/products"
+import { priceQueries } from "@/lib/queries/prices"
 
 import { StoreOrigin, type StoreScraper, type ScrapedProduct } from "./types"
 import { fetchHtml } from "./utils"
@@ -152,7 +152,7 @@ export async function scrapeAndReplaceProduct(
 // Category Crawling (Continente-specific, kept for backwards compatibility)
 // ============================================================================
 
-import { categories } from "@/lib/mock/continente"
+import { categories } from "@/lib/business/data"
 import * as cheerio from "cheerio"
 
 export async function continenteCategoryPageScraper(url: string): Promise<string[]> {
@@ -221,13 +221,4 @@ export function batchUrls(urls: string[], batchSize: number): string[][] {
     batches.push(urls.slice(i, i + batchSize))
   }
   return batches
-}
-
-export async function processBatch(urls: string[]): Promise<(ScrapedProduct | { url: string; error: unknown })[]> {
-  const products = await Promise.all(
-    urls.map((url) =>
-      continenteScraper.scrape({ url }).then((result) => result.product || { url, error: "Failed to scrape" }),
-    ),
-  )
-  return products
 }

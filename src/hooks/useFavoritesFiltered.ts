@@ -5,7 +5,7 @@ import type {
   FavoriteWithProduct,
   FavoritesQueryResult,
   FavoritesSortType,
-} from "@/lib/db/queries/favorites"
+} from "@/lib/queries/favorites"
 import { SupermarketChain } from "@/types/business"
 
 // ============================================================================

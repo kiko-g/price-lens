@@ -14,7 +14,7 @@ import {
   calculateChartBounds,
   type ChartSamplingMode,
 } from "@/lib/utils"
-import { imagePlaceholder } from "@/lib/data/business"
+import { imagePlaceholder } from "@/lib/business/data"
 
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"

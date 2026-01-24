@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getScraper } from "@/lib/scrapers"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import { StoreProduct } from "@/types"
 
 export async function POST(req: NextRequest) {

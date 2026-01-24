@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { openai } from "@ai-sdk/openai"
 import { generateText } from "ai"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import type { StoreProduct } from "@/types"
 
 export const maxDuration = 60

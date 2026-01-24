@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
+import { productQueries, storeProductQueries } from "@/lib/queries/products"
 import { createMockStoreProduct, createMockProduct } from "./mocks/supabase"
 
 // Create chainable query mock that properly chains all methods
@@ -67,8 +68,6 @@ vi.mock("@/lib/utils", () => ({
 vi.mock("@/lib/kv", () => ({
   clearCategoriesCache: vi.fn().mockResolvedValue(undefined),
 }))
-
-import { productQueries, storeProductQueries } from "../products"
 
 describe("productQueries", () => {
   beforeEach(() => {

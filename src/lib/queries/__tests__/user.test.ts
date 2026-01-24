@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
+import { userQueries } from "@/lib/queries/user"
 import { createMockUser } from "./mocks/supabase"
 
 // Mock Supabase clients
@@ -15,8 +16,6 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => mockSupabase,
 }))
-
-import { userQueries } from "../user"
 
 describe("userQueries", () => {
   beforeEach(() => {

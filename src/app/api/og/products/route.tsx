@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
-import { queryStoreProducts, SupermarketChain } from "@/lib/db/queries/store-products"
+import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
 import { buildPageTitle } from "@/lib/utils/page-title"
 import { STORE_COLORS, STORE_NAMES, type SortByType } from "@/types/business"
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { elapsedMsToTimeStr } from "@/lib/utils"
 
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 
 export async function GET(req: NextRequest) {
   try {

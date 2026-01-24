@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 
 export const dynamic = "force-dynamic"
 
@@ -13,37 +13,26 @@ export async function GET() {
     const supabase = createClient()
 
     // Run all queries in parallel for speed
-    const [
-      scrapeStatusCounts,
-      recentlyScraped,
-      pricePointsCount,
-      productsWithBarcode,
-      highPriorityCount,
-    ] = await Promise.all([
-      // Scrape status counts
-      storeProductQueries.getScrapeStatusCounts(),
+    const [scrapeStatusCounts, recentlyScraped, pricePointsCount, productsWithBarcode, highPriorityCount] =
+      await Promise.all([
+        // Scrape status counts
+        storeProductQueries.getScrapeStatusCounts(),
 
-      // Recently scraped (last 24h)
-      supabase
-        .from("store_products")
-        .select("id", { count: "exact", head: true })
-        .gte("scraped_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+        // Recently scraped (last 24h)
+        supabase
+          .from("store_products")
+          .select("id", { count: "exact", head: true })
+          .gte("scraped_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
 
-      // Total price points
-      supabase.from("prices").select("id", { count: "exact", head: true }),
+        // Total price points
+        supabase.from("prices").select("id", { count: "exact", head: true }),
 
-      // Products with barcode
-      supabase
-        .from("store_products")
-        .select("id", { count: "exact", head: true })
-        .not("barcode", "is", null),
+        // Products with barcode
+        supabase.from("store_products").select("id", { count: "exact", head: true }).not("barcode", "is", null),
 
-      // High priority products (P3-P5)
-      supabase
-        .from("store_products")
-        .select("id", { count: "exact", head: true })
-        .gte("priority", 3),
-    ])
+        // High priority products (P3-P5)
+        supabase.from("store_products").select("id", { count: "exact", head: true }).gte("priority", 3),
+      ])
 
     // Get detailed counts per origin (total, available, unavailable)
     const origins = [
@@ -55,10 +44,7 @@ export async function GET() {
     const originDetailedCounts = await Promise.all(
       origins.map(async (origin) => {
         const [total, available, unavailable] = await Promise.all([
-          supabase
-            .from("store_products")
-            .select("id", { count: "exact", head: true })
-            .eq("origin_id", origin.id),
+          supabase.from("store_products").select("id", { count: "exact", head: true }).eq("origin_id", origin.id),
           supabase
             .from("store_products")
             .select("id", { count: "exact", head: true })
@@ -91,9 +77,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Overview API error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 })
   }
 }

@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { GetAllQuery } from "@/lib/db/queries/types"
+import type { GetAllQuery } from "@/lib/queries/types"
 import type { ProductWithListings, StoreProduct, Price } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"

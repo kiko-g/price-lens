@@ -3,7 +3,7 @@ import { type SearchType, type SortByType } from "@/types/business"
 
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { updatePricePoint } from "@/lib/pricing"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { storeProductQueries } from "@/lib/queries/products"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET(req: NextRequest) {

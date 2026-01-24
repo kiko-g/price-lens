@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/drawer"
 
 import { cn, discountValueToPercentage, generateProductPath, getShortRelativeTime } from "@/lib/utils"
-import { imagePlaceholder } from "@/lib/data/business"
+import { imagePlaceholder } from "@/lib/business/data"
 import {
   ArrowUpRightIcon,
   CopyIcon,

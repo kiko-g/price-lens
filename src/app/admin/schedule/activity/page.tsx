@@ -6,10 +6,12 @@ import axios from "axios"
 import { format, formatDistanceToNow } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useActivityLog } from "@/hooks/useActivityLog"
+import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
+import type { ActivityData } from "@/app/admin/schedule/types"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PriorityBubble } from "@/components/PriorityBubble"
@@ -23,9 +25,6 @@ import {
   ActivityIcon,
   PlayCircleIcon,
 } from "lucide-react"
-
-import type { ActivityData } from "../types"
-import { PRIORITY_CONFIG } from "../constants"
 
 const ACTIVITY_LOG_LIMIT = 25
 

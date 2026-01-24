@@ -1,8 +1,8 @@
 import type { StoreProduct, Price } from "@/types"
 
 import { now } from "@/lib/utils"
-import { priceQueries } from "@/lib/db/queries/prices"
-import { storeProductQueries } from "@/lib/db/queries/products"
+import { priceQueries } from "@/lib/queries/prices"
+import { storeProductQueries } from "@/lib/queries/products"
 
 export function isValidPriceValue(value: number | null): boolean {
   return typeof value === "number" && !isNaN(value)
