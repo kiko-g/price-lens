@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/utils"
+import { formatHoursDuration, PRIORITY_CONFIG, PRIORITY_REFRESH_HOURS } from "@/lib/business/priorities"
 import type { StoreProduct } from "@/types"
 import { RANGES, DateRange } from "@/types/business"
 import { useUser } from "@/hooks/useUser"
@@ -51,11 +52,9 @@ import {
   Undo2Icon,
   HeartIcon,
   InfoIcon,
-  NavigationIcon,
   NavigationOffIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
-  RadarIcon,
   MicroscopeIcon,
   CircleIcon,
   AlertTriangleIcon,
@@ -118,13 +117,6 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   )
 }
 
-function parseRange(value: string | null): DateRange {
-  if (value && RANGES.includes(value as DateRange)) {
-    return value as DateRange
-  }
-  return "1M"
-}
-
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -132,14 +124,19 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const { profile } = useUser()
   const updateStoreProduct = useUpdateStoreProduct()
   const updatePriority = useUpdateStoreProductPriority()
-  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
-  const rangeFromUrl = parseRange(searchParams.get("range"))
+  const parseRange = (value: string | null): DateRange => {
+    if (value && RANGES.includes(value as DateRange)) return value as DateRange
+    return "1M"
+  }
 
   const handleRangeChange = (range: DateRange) => {
     updateParams({ range: range === "1M" ? null : range })
   }
 
+  const refreshHours = sp.priority !== null ? PRIORITY_REFRESH_HOURS[sp.priority] : null
+  const refreshLabel = refreshHours ? formatHoursDuration(refreshHours) : null
+  const rangeFromUrl = parseRange(searchParams.get("range"))
   const supermarketChain = resolveSupermarketChain(sp?.origin_id)
   const storeProductId = sp.id?.toString() || ""
   const isPriceNotSet = !sp.price_recommended && !sp.price
@@ -147,6 +144,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const isPriceRecommendedNotSet = !sp.price_recommended && sp.price
   const isPriceEqualToRecommended = sp.price_recommended && sp.price && sp.price_recommended === sp.price
   const isNormalPrice = isPriceRecommendedNotSet || isPriceEqualToRecommended
+
+  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
@@ -205,10 +204,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.brand && (
                 <Link href={`/products?q=${encodeURIComponent(sp.brand)}`} target="_blank">
-                  <Badge variant="blue">
-                    <RadarIcon />
-                    {sp.brand}
-                  </Badge>
+                  <Badge variant="blue">{sp.brand}</Badge>
                 </Link>
               )}
 
@@ -216,10 +212,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Badge variant="success">
-                        <NavigationIcon className="h-4 w-4" />
-                        Priority {sp.priority}
-                      </Badge>
+                      <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind}>Priority {sp.priority}</Badge>
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
@@ -230,7 +223,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       variant="glass"
                       className="max-w-60"
                     >
-                      This product has high tracking priority ({sp.priority}/5) and is being actively tracked.
+                      This product has priority {sp.priority} is checked every {refreshLabel}.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

@@ -40,13 +40,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-import {
-  cn,
-  discountValueToPercentage,
-  formatTimestamptz,
-  generateProductPath,
-  getShortRelativeTime,
-} from "@/lib/utils"
+import { cn, discountValueToPercentage, generateProductPath, getShortRelativeTime } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/data/business"
 import {
   ArrowUpRightIcon,
@@ -475,32 +469,11 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 </div>
               </div>
 
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
-              </div>
+              <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} className="mb-1" />
 
               <Suspense fallback={<div>Loading...</div>}>
                 <ProductChart sp={sp} samplingMode="efficient" />
               </Suspense>
-
-              {/* Drawer Footer */}
-              <div className="mt-1 flex w-full pt-2 text-sm">
-                <div className="flex w-full flex-col items-end justify-end gap-1">
-                  <div className="flex w-full justify-between">
-                    <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Created:</span>
-                    <span className="text-foreground block text-right font-mono text-xs tracking-tight">
-                      {sp.created_at ? formatTimestamptz(sp.created_at) : "No creation record"}
-                    </span>
-                  </div>
-
-                  <div className="flex w-full justify-between">
-                    <span className="text-muted-foreground block min-w-[110px] text-left text-xs">Last updated:</span>
-                    <span className="text-foreground block text-right font-mono text-xs tracking-tight">
-                      {sp.created_at || sp.updated_at ? formatTimestamptz(sp.updated_at) : "No update record"}
-                    </span>
-                  </div>
-                </div>
-              </div>
 
               <Accordion type="single" collapsible className="mt-2 hidden w-full border-t md:flex">
                 <AccordionItem value="item-1" className="w-full border-0">

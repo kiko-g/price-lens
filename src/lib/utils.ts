@@ -482,9 +482,8 @@ export function getShortRelativeTime(date: Date): string {
   if (diffDays === 1) return "1d"
   if (diffDays < 7) return `${diffDays}d`
   if (diffWeeks === 1) return "1w"
-  if (diffWeeks < 4) return `${diffWeeks}w`
-  if (diffMonths === 1) return "1mo"
-  if (diffMonths < 12) return `${diffMonths}mo`
+  if (diffWeeks < 12) return `${diffWeeks}w`
+  if (diffMonths < 12 && diffMonths > 0) return `${diffMonths}mo`
   if (diffYears === 1) return "1y"
   return `${diffYears}y`
 }

@@ -20,6 +20,7 @@ const badgeVariants = cva(
           "border-transparent bg-gray-900 text-white hover:opacity-80 dark:border-transparent dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/80 [&_span.bubble]:bg-gray-700 dark:[&_span.bubble]:bg-gray-800",
         destructive:
           "border-transparent bg-destructive text-white hover:bg-destructive/80 dark:border-transparent dark:bg-destructive dark:text-white dark:hover:bg-destructive/80 [&_span.bubble]:bg-destructive",
+        gray: "border-transparent bg-gray-500 text-white hover:bg-gray-500/80 dark:border-transparent dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/80 [&_span.bubble]:bg-gray-500 dark:[&_span.bubble]:bg-gray-800",
         success:
           "border-transparent bg-emerald-600 text-zinc-50 hover:bg-emerald-600/80 dark:border-transparent dark:bg-emerald-800 dark:text-zinc-50 dark:hover:bg-emerald-800/80 [&_span.bubble]:bg-emerald-600",
         warning:

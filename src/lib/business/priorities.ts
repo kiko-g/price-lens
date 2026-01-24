@@ -27,6 +27,58 @@ export const PRIORITY_REFRESH_HOURS: Record<number, number | null> = {
   0: null, // Never scheduled
 }
 
+type PriorityConfig = {
+  label: string
+  description: string
+  badgeKind: "gray" | "success" | "warning" | "retail" | "destructive"
+  bgClass: string
+}
+
+export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
+  null: {
+    label: "?",
+    description: "Unset",
+    badgeKind: "gray",
+    bgClass: "bg-neutral-500/70 border-neutral-500",
+  },
+  "0": {
+    label: "0",
+    description: "Useless",
+    badgeKind: "gray",
+    bgClass: "bg-gray-800/70  border-gray-800",
+  },
+  "1": {
+    label: "1",
+    description: "Minor",
+    badgeKind: "destructive",
+    bgClass: "bg-rose-600/70 border-rose-600",
+  },
+  "2": {
+    label: "2",
+    description: "Low",
+    badgeKind: "retail",
+    bgClass: "bg-orange-600/70 border-orange-600",
+  },
+  "3": {
+    label: "3",
+    description: "Medium",
+    badgeKind: "warning",
+    bgClass: "bg-amber-600/70 border-amber-600",
+  },
+  "4": {
+    label: "4",
+    description: "Important",
+    badgeKind: "success",
+    bgClass: "bg-sky-600/70 border-sky-600",
+  },
+  "5": {
+    label: "5",
+    description: "Essential",
+    badgeKind: "success",
+    bgClass: "bg-emerald-700/70 border-emerald-700",
+  },
+}
+
 /** Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS) */
 export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
 
