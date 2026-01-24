@@ -1,15 +1,14 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+
 import { Button } from "@/components/ui/button"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 import { SearchIcon, PackageIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 const popularProducts = [
   {
@@ -64,7 +63,7 @@ const popularProducts = [
 
 type Props = {
   forceRefresh?: boolean
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 export function SearchDialog({ children, forceRefresh = true }: Props) {

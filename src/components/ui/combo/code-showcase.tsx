@@ -12,11 +12,10 @@ type Props = {
   className?: string
   code: string
   language: string
-  options?: any
   allowDownload?: boolean
 }
 
-export function CodeShowcase({ className, code, language, options, allowDownload = true }: Props) {
+export function CodeShowcase({ className, code, language, allowDownload = true }: Props) {
   const canCopy = useMemo(() => code !== "", [code])
   const canDownload = useMemo(() => allowDownload && code !== "", [allowDownload, code])
 
@@ -86,7 +85,7 @@ function DownloadButton({ text, filename }: { text: string; filename: string }) 
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (error) {
-      console.error("Failed to download code.")
+      console.warn("Failed to download code.", error)
     } finally {
       setIsDownloading(false)
     }

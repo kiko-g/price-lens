@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils"
 import { MoonIcon, SunIcon } from "lucide-react"
 
 export function ThemeToggle({ className }: { className?: string }) {
-  let { resolvedTheme, setTheme } = useTheme()
-  let otherTheme = resolvedTheme === "dark" ? "light" : "dark"
-  let [mounted, setMounted] = useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
+  const otherTheme = resolvedTheme === "dark" ? "light" : "dark"
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
