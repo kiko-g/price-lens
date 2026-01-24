@@ -5,7 +5,7 @@ import { updateSession } from "@/lib/supabase/middleware"
 
 const intlMiddleware = createMiddleware(routing)
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip middleware for API routes, static files, and Next.js internals
