@@ -1,16 +1,19 @@
-"use client"
-
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Brands } from "@/components/home/showcase/Brands"
 import { ProductShowcaseCarousel } from "@/components/home/showcase/ProductShowcaseCarousel"
+import { SHOWCASE_PRODUCT_IDS } from "@/lib/business/showcase"
+import { getShowcaseProducts } from "@/lib/business/showcase/queries"
 
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 
-export function Hero() {
+export async function Hero() {
   const supermarketProductsLink = "/products?priority_order=true"
   const trackedProductsLink = "/products?priority=2,3,4,5"
+
+  // Fetch showcase data server-side
+  const showcaseData = await getShowcaseProducts(SHOWCASE_PRODUCT_IDS)
 
   return (
     <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">
@@ -46,7 +49,10 @@ export function Hero() {
       </div>
 
       <div className="my-8 w-full max-w-full flex-1 self-start overflow-hidden lg:my-0 lg:w-auto lg:max-w-md">
-        <ProductShowcaseCarousel className="border-border w-full bg-linear-to-br shadow-none" />
+        <ProductShowcaseCarousel
+          className="border-border w-full bg-linear-to-br shadow-none"
+          initialData={showcaseData}
+        />
       </div>
     </div>
   )

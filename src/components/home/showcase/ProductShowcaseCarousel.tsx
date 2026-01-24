@@ -1,51 +1,60 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
-import { memo, useState, useEffect, useRef, useMemo, useCallback } from "react"
-import { cn, buildChartData, chartConfig, generateProductPath } from "@/lib/utils"
-import { useAllProductsWithPrices } from "@/hooks/useProducts"
-import { productsWithPrices } from "@/lib/data/products"
+import { memo, useState, useEffect, useRef, useCallback } from "react"
+import { cn, chartConfig, generateProductPath } from "@/lib/utils"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import type { StoreProduct, Price } from "@/types"
+import {
+  SHOWCASE_PRODUCT_IDS,
+  type ShowcaseData,
+  type ShowcaseProduct,
+  type ShowcaseTrendStats,
+} from "@/lib/business/showcase"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { ChevronLeft, ChevronRight, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 
 const CAROUSEL_INTERVAL = 4000
-const PRODUCT_IDS = [
-  "18543", // buondi (continente)
-  "4893", // m&ms (continente)
-  "3519", // ben and jerry  (continente)
-  "2558", // leite uht meio gordo mimosa (continente)
-  "16258", // monster white (continente)
-  "3807", // atum lata (continente)
-  "18728", // cereais fitness (continente)
-]
+const PAUSE_RESUME_DELAY = 3000
 
-export function ProductShowcaseCarousel({ className }: { className?: string }) {
+interface ProductShowcaseCarouselProps {
+  className?: string
+  initialData?: ShowcaseData
+}
+
+export function ProductShowcaseCarousel({ className, initialData }: ProductShowcaseCarouselProps) {
   const [api, setApi] = useState<any>(null)
-  const [current, setCurrent] = useState(0)
+  const [current, setCurrent] = useState<number>(0)
+  const [isPaused, setIsPaused] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const { data: allProductsData, isLoading } = useAllProductsWithPrices(PRODUCT_IDS)
+  // Handle auto-scroll with pause support
+  useEffect(() => {
+    if (!api || isPaused) {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      return
+    }
 
-  const displayData = useMemo(() => allProductsData || productsWithPrices, [allProductsData])
+    intervalRef.current = setInterval(() => api.scrollNext(), CAROUSEL_INTERVAL)
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [api, isPaused])
 
-  const resetAutoScroll = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    if (api) intervalRef.current = setInterval(() => api.scrollNext(), CAROUSEL_INTERVAL)
-  }, [api])
-
+  // Track current slide
   useEffect(() => {
     if (!api) return
 
     const onSelect = () => setCurrent(api.selectedScrollSnap())
-
     api.on("select", onSelect)
     onSelect()
 
@@ -54,39 +63,51 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
     }
   }, [api])
 
+  // Cleanup on unmount
   useEffect(() => {
-    resetAutoScroll()
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
+      if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current)
     }
-  }, [resetAutoScroll])
+  }, [])
 
-  const loadedProducts = useMemo(() => Object.keys(displayData), [displayData])
+  const handleInteractionStart = useCallback(() => {
+    setIsPaused(true)
+    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current)
+  }, [])
+
+  const handleInteractionEnd = useCallback(() => {
+    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current)
+    pauseTimeoutRef.current = setTimeout(() => setIsPaused(false), PAUSE_RESUME_DELAY)
+  }, [])
 
   const handlePrevClick = useCallback(() => {
     api?.scrollPrev()
-    resetAutoScroll()
-  }, [api, resetAutoScroll])
+    handleInteractionStart()
+    handleInteractionEnd()
+  }, [api, handleInteractionStart, handleInteractionEnd])
 
   const handleNextClick = useCallback(() => {
     api?.scrollNext()
-    resetAutoScroll()
-  }, [api, resetAutoScroll])
+    handleInteractionStart()
+    handleInteractionEnd()
+  }, [api, handleInteractionStart, handleInteractionEnd])
 
   const handleDotClick = useCallback(
     (index: number) => {
       api?.scrollTo(index)
-      resetAutoScroll()
+      handleInteractionStart()
+      handleInteractionEnd()
     },
-    [api, resetAutoScroll],
+    [api, handleInteractionStart, handleInteractionEnd],
   )
 
-  if (loadedProducts.length === 0) {
+  const hasData = initialData && Object.keys(initialData).length > 0
+
+  if (!hasData) {
     return (
       <div className={cn("relative rounded-lg border", className)}>
-        <div className="p-4 text-center">
-          <p className="text-muted-foreground">Unable to load product data</p>
-        </div>
+        <ShowcaseCardSkeleton />
       </div>
     )
   }
@@ -101,14 +122,20 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
           loop: true,
         }}
       >
-        <CarouselContent className="ml-0 border-0 shadow-none">
-          {PRODUCT_IDS.map((productId, index) => (
+        <CarouselContent
+          className="ml-0 border-0 shadow-none"
+          onMouseEnter={handleInteractionStart}
+          onMouseLeave={handleInteractionEnd}
+          onTouchStart={handleInteractionStart}
+          onTouchEnd={handleInteractionEnd}
+        >
+          {SHOWCASE_PRODUCT_IDS.map((productId) => (
             <CarouselItem key={productId} className="border-0 pl-0 shadow-none">
-              <HandpickedShowcaseChart
-                storeProductId={productId}
-                className="border-0 shadow-none"
-                productData={displayData[productId as keyof typeof displayData]}
-              />
+              {initialData[productId] ? (
+                <ShowcaseChart productData={initialData[productId]} className="border-0 shadow-none" />
+              ) : (
+                <ShowcaseCardSkeleton />
+              )}
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -127,8 +154,14 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
         </Button>
 
         <div className="flex flex-1 justify-center gap-2.5">
-          {PRODUCT_IDS.map((_, index) => (
-            <CarouselDot key={index} active={current === index} ringOffset={2} onClick={() => handleDotClick(index)} />
+          {SHOWCASE_PRODUCT_IDS.map((_, index) => (
+            <CarouselDot
+              key={index}
+              active={current === index}
+              isPaused={isPaused}
+              ringOffset={2}
+              onClick={() => handleDotClick(index)}
+            />
           ))}
         </div>
 
@@ -140,79 +173,54 @@ export function ProductShowcaseCarousel({ className }: { className?: string }) {
   )
 }
 
-const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
-  storeProductId,
-  className,
+function ShowcaseCardSkeleton() {
+  return (
+    <Card className="border-0 shadow-none">
+      <CardHeader className="flex flex-col gap-3">
+        <div className="flex items-start justify-start gap-2">
+          <Skeleton className="size-20 shrink-0 rounded-lg" />
+          <div className="flex flex-1 flex-col gap-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-12 rounded-full" />
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-2 pt-0 sm:p-4 sm:pt-2">
+        <Skeleton className="h-[200px] w-full rounded-lg" />
+      </CardContent>
+      <CardFooter className="pt-0">
+        <div className="flex w-full flex-col gap-2">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-3 w-40" />
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
+
+const ShowcaseChart = memo(function ShowcaseChart({
   productData,
+  className,
 }: {
-  storeProductId: string
+  productData: ShowcaseProduct
   className?: string
-  productData?: { storeProduct: StoreProduct; prices: Price[] }
 }) {
   const [imageLoaded, setImageLoaded] = useState(false)
+  const { storeProduct, chartData, trendStats } = productData
 
-  useEffect(() => {
-    setImageLoaded(false)
-  }, [storeProductId])
-
-  const priceStats = useMemo(() => {
-    if (!productData?.prices || productData.prices.length < 2) return null
-
-    const sortedPrices = [...productData.prices].sort(
-      (a, b) => new Date(a.valid_from || "").getTime() - new Date(b.valid_from || "").getTime(),
-    )
-
-    const firstPrice = sortedPrices[0].price || 0
-    const lastPrice = sortedPrices[sortedPrices.length - 1].price || 0
-    const priceChange = lastPrice - firstPrice
-    const priceChangePercent = firstPrice > 0 ? (priceChange / firstPrice) * 100 : 0
-
-    const avgPrice = productData.prices.reduce((sum, p) => sum + (p.price || 0), 0) / productData.prices.length
-    const maxPrice = Math.max(...productData.prices.map((p) => p.price || 0))
-    const minPrice = Math.min(...productData.prices.map((p) => p.price || 0))
-
-    const allPriceValues = productData.prices
-      .flatMap((p) => [p.price || 0, p.price_recommended || 0, p.price_per_major_unit || 0])
-      .filter((value) => value > 0)
-
-    const outstandingMinPriceValue = allPriceValues.length > 0 ? Math.min(...allPriceValues) : 0
-    const outstandingMaxPriceValue = allPriceValues.length > 0 ? Math.max(...allPriceValues) : 0
-
-    return {
-      priceChange,
-      priceChangePercent,
-      avgPrice,
-      maxPrice,
-      minPrice,
-      outstandingMinPriceValue,
-      outstandingMaxPriceValue,
-      isIncrease: priceChange > 0,
-      isDecrease: priceChange < 0,
-      isStable: priceChange === 0,
-    }
-  }, [productData?.prices])
-
-  const chartData = useMemo(() => {
-    if (!productData?.prices) return []
-    return buildChartData(productData.prices, "1M")
-  }, [productData?.prices])
-
-  if (!productData) {
-    return (
-      <Card className={cn("relative", className)}>
-        <CardHeader>
-          <CardTitle>Loading...</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-32 items-center justify-center">
-            <div className="text-muted-foreground animate-pulse">Loading product data...</div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const { storeProduct, prices } = productData
+  // Calculate max price for Y-axis domain
+  const maxPriceValue =
+    chartData.length > 0
+      ? Math.max(
+          ...chartData.flatMap((d) =>
+            [d.price, d["price-recommended"], d["price-per-major-unit"]].filter((v) => v > 0),
+          ),
+        )
+      : 15
 
   return (
     <Card className={cn("relative", className)}>
@@ -281,16 +289,7 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
 
       <CardContent className="p-2 pt-0 sm:p-4 sm:pt-2">
         <ChartContainer config={chartConfig}>
-          <LineChart
-            data={chartData}
-            accessibilityLayer
-            margin={{
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-            }}
-          >
+          <LineChart data={chartData} accessibilityLayer margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="4 4" />
             <XAxis
               dataKey="date"
@@ -308,7 +307,7 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
               tickLine={false}
               axisLine={false}
               width={40}
-              domain={[0, priceStats?.outstandingMaxPriceValue ? priceStats.outstandingMaxPriceValue * 1.05 : 15]}
+              domain={[0, maxPriceValue * 1.05]}
               tickFormatter={(value) => `€${value.toFixed(1)}`}
             />
             <YAxis
@@ -354,55 +353,55 @@ const HandpickedShowcaseChart = memo(function HandpickedShowcaseChart({
         </ChartContainer>
       </CardContent>
 
-      {priceStats && (
-        <CardFooter className="pt-0">
-          <div className="flex w-full items-start gap-2 text-sm">
-            <div className="grid gap-2">
-              <div className="flex items-center gap-2 leading-none font-medium">
-                {priceStats.isIncrease ? (
-                  <>
-                    Trending up by {priceStats.priceChangePercent.toFixed(1)}% this month{" "}
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                  </>
-                ) : priceStats.isDecrease ? (
-                  <>
-                    Trending down by {Math.abs(priceStats.priceChangePercent).toFixed(1)}% this month{" "}
-                    <TrendingUp className="h-4 w-4 rotate-180 text-red-500" />
-                  </>
-                ) : (
-                  <>
-                    Price is relatively stable this month <TrendingUp className="h-4 w-4 text-blue-500" />
-                  </>
-                )}
-              </div>
-              <div className="text-muted-foreground flex items-center gap-2 leading-none">
-                Showing price points for the last month
-              </div>
-            </div>
-          </div>
-        </CardFooter>
-      )}
+      <TrendFooter trendStats={trendStats} />
     </Card>
   )
 })
 
+function TrendFooter({ trendStats }: { trendStats: ShowcaseTrendStats }) {
+  return (
+    <CardFooter className="pt-0">
+      <div className="flex w-full items-start gap-2 text-sm">
+        <div className="grid gap-2">
+          <div className="flex items-center gap-2 leading-none font-medium">
+            {trendStats.direction === "up" ? (
+              <>
+                Trending up by {trendStats.percent.toFixed(1)}% this month{" "}
+                <TrendingUp className="h-4 w-4 text-red-500" />
+              </>
+            ) : trendStats.direction === "down" ? (
+              <>
+                Trending down by {trendStats.percent.toFixed(1)}% this month{" "}
+                <TrendingUp className="h-4 w-4 rotate-180 text-green-500" />
+              </>
+            ) : (
+              <>
+                Price is relatively stable this month <TrendingUp className="h-4 w-4 text-blue-500" />
+              </>
+            )}
+          </div>
+          <div className="text-muted-foreground flex items-center gap-2 leading-none">
+            Showing price points for the last month
+          </div>
+        </div>
+      </div>
+    </CardFooter>
+  )
+}
+
 interface CarouselDotProps {
   active: boolean
-  ringOffset?: number // Distance from dot edge to ring (in pixels)
+  isPaused: boolean
+  ringOffset?: number
   onClick: () => void
 }
 
-const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick }: CarouselDotProps) {
-  // Use precise pixel values to avoid sub-pixel rendering issues
-  const dotRadius = 5 // 10px diameter (size-2.5 = 10px)
+const CarouselDot = memo(function CarouselDot({ active, isPaused, ringOffset = 2, onClick }: CarouselDotProps) {
+  const dotRadius = 5
   const strokeWidth = 2
-  const ringRadius = dotRadius + ringOffset + 3 // Ensure adequate spacing
-
-  // Ensure all calculations result in whole pixel values
+  const ringRadius = dotRadius + ringOffset + 3
   const svgSize = Math.ceil((ringRadius + strokeWidth / 2) * 2)
   const center = svgSize / 2
-
-  // Use the ring radius directly for the circle, accounting for stroke width
   const circleRadius = ringRadius
   const circumference = circleRadius * 2 * Math.PI
 
@@ -412,7 +411,6 @@ const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick 
       onClick={onClick}
       style={{ width: svgSize, height: svgSize }}
     >
-      {/* Background dot */}
       <div
         className={cn(
           "size-2.5 rounded-full transition-all duration-200",
@@ -420,19 +418,14 @@ const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick 
         )}
       />
 
-      {/* Ring around active dot */}
       {active && (
         <svg
           className="absolute inset-0 -rotate-90"
           width={svgSize}
           height={svgSize}
           viewBox={`0 0 ${svgSize} ${svgSize}`}
-          style={{
-            // Optimize rendering for crisp circles
-            shapeRendering: "geometricPrecision",
-          }}
+          style={{ shapeRendering: "geometricPrecision" }}
         >
-          {/* Actual ring with CSS animation */}
           <circle
             stroke="currentColor"
             strokeWidth={strokeWidth}
@@ -443,27 +436,18 @@ const CarouselDot = memo(function CarouselDot({ active, ringOffset = 2, onClick 
             r={circleRadius}
             cx={center}
             cy={center}
-            className="text-foreground opacity-80"
-            style={{
-              animation: `carousel-progress ${CAROUSEL_INTERVAL}ms linear infinite`,
-              // Ensure pixel-perfect rendering
-              vectorEffect: "non-scaling-stroke",
-            }}
+            className="text-foreground carousel-progress-ring opacity-80"
+            style={
+              {
+                "--circumference": circumference,
+                "--duration": `${CAROUSEL_INTERVAL}ms`,
+                animationPlayState: isPaused ? "paused" : "running",
+                vectorEffect: "non-scaling-stroke",
+              } as React.CSSProperties
+            }
           />
         </svg>
       )}
-
-      {/* CSS keyframes */}
-      <style jsx>{`
-        @keyframes carousel-progress {
-          from {
-            stroke-dashoffset: ${circumference};
-          }
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-      `}</style>
     </button>
   )
 })

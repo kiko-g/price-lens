@@ -331,6 +331,19 @@
       transform: translate(0, 0) scale(1);
     }
   }
+
+  @keyframes carousel-progress {
+    from {
+      stroke-dashoffset: var(--circumference);
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+.carousel-progress-ring {
+  animation: carousel-progress var(--duration, 4000ms) linear infinite;
 }
 
 @layer base {
