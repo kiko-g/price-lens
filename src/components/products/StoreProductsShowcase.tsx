@@ -77,6 +77,7 @@ import {
   PackageIcon,
   RefreshCcwIcon,
   SearchIcon,
+  InfoIcon,
 } from "lucide-react"
 
 /**
@@ -656,18 +657,13 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 <ScrapeUrlDialog />
               </DropdownMenuItem>
 
-              <DropdownMenuLabel>More</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <TrackingInformationDialog />
-              </DropdownMenuItem>
-
               {/* Bulk Set Priority (dev only) */}
               {process.env.NODE_ENV === "development" && (
                 <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
                   <BulkPriorityDialog filterParams={bulkPriorityFilterParams} filterSummary={filterSummary}>
-                    <button className="flex w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-sm">
-                      <DevBadge />
+                    <button className="flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1.5 text-sm">
                       Bulk Set Priority
+                      <DevBadge />
                     </button>
                   </BulkPriorityDialog>
                 </DropdownMenuItem>
@@ -676,9 +672,12 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           </DropdownMenu>
         </div>
 
-        <p className="text-muted-foreground mb-4 text-sm">
-          Procuts have a priority level, from 0 to 5. When favorited, products are assigned 5.
-        </p>
+        <TrackingInformationDialog>
+          <button className="text-muted-foreground mb-4 text-left text-sm hover:opacity-80">
+            Procuts have a priority level, from 0 to 5. When favorited, products are assigned 5{" "}
+            <InfoIcon className="inline-block size-3" />
+          </button>
+        </TrackingInformationDialog>
 
         {/* Search Input (debounced, no button on desktop) */}
         <div className="relative w-full">

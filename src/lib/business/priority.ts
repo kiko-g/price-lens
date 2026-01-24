@@ -32,6 +32,7 @@ export const PRIORITY_REFRESH_HOURS: Record<number, number | null> = {
 type PriorityConfig = {
   label: string
   description: string
+  explanation: string
   badgeKind: BadgeKind
   bgClass: string
 }
@@ -39,43 +40,50 @@ type PriorityConfig = {
 export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
   null: {
     label: "?",
-    description: "Unset",
+    description: "Unclassified",
+    explanation: "Products that have not been classified yet",
     badgeKind: "gray",
     bgClass: "bg-neutral-500/70 border-neutral-500",
   },
   "0": {
     label: "0",
-    description: "Useless",
+    description: "Niche",
+    explanation: `Not tracked`,
     badgeKind: "gray",
     bgClass: "bg-gray-800/70  border-gray-800",
   },
   "1": {
     label: "1",
     description: "Minor",
+    explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[1] ?? 0)}`,
     badgeKind: "destructive",
     bgClass: "bg-rose-600/70 border-rose-600",
   },
   "2": {
     label: "2",
     description: "Low",
+    explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[2] ?? 0)}`,
     badgeKind: "retail",
     bgClass: "bg-orange-600/70 border-orange-600",
   },
   "3": {
     label: "3",
     description: "Medium",
+    explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[3] ?? 0)}`,
     badgeKind: "warning",
     bgClass: "bg-amber-600/70 border-amber-600",
   },
   "4": {
     label: "4",
     description: "Important",
+    explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[4] ?? 0)}`,
     badgeKind: "sky",
     bgClass: "bg-sky-600/70 border-sky-600",
   },
   "5": {
     label: "5",
     description: "Essential",
+    explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[5] ?? 0)}`,
     badgeKind: "success",
     bgClass: "bg-emerald-700/70 border-emerald-700",
   },

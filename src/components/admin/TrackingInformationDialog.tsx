@@ -1,6 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import { PRIORITY_CONFIG } from "@/lib/business/priority"
+import { useUser } from "@/hooks/useUser"
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,18 +14,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
+import { CheckIcon } from "lucide-react"
 
-import { InfoIcon } from "lucide-react"
+export function TrackingInformationDialog({ children }: { children: React.ReactNode }) {
+  const { user } = useUser()
 
-export function TrackingInformationDialog() {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button className="hover:bg-accent cursor-pointer px-2" variant="dropdown-item">
-          Learn more about tracking
-          <InfoIcon className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
 
       <DialogContent className="max-w-2xl">
         <DialogHeader>
@@ -30,21 +30,26 @@ export function TrackingInformationDialog() {
 
           <div className="prose space-y-2 text-left text-sm">
             <p>
-              Price Lens collects price information across time and finds prices of store products on their store
-              origins. Given that there are so many products out there, with varying relevancy of price tracking, we
-              employed a simple priority tracking system. Each store product has a priority level, from 0 to 5.
+              Price Lens collects price information across time and finds prices of <strong>store products</strong> on
+              their store origins. Given that there are so many products out there, with varying relevancy of price
+              tracking, we employed a simple priority tracking system. Each store product has a priority level, from 0
+              to 5 which determines how often the prices are scheduled to be checked.
             </p>
 
-            <p>
-              The higher the priority, the more often the prices are updated. As of September 2025,{" "}
-              <strong>only products with a priority of at least 3 are being tracked</strong>. We are working on ways to
-              improve this system to make it smarter and feel more natural. Until then you may see relevant products
-              that have no price history.
-            </p>
+            <div className="flex flex-col gap-1">
+              {Object.values(PRIORITY_CONFIG)
+                .filter((priority) => priority.label !== "?")
+                .map((priority) => (
+                  <span key={priority.label} className="flex items-center gap-2">
+                    <PriorityBubble priority={Number(priority.label)} size="xs" />
+                    <span className="text-sm">{priority.explanation}</span>
+                  </span>
+                ))}
+            </div>
 
             <p>
-              To combat this, you can{" "}
-              <strong>add a product to your favorites to increase its priority to 5/5 automatically</strong>. To have
+              If products have no price history, you can{" "}
+              <strong>add a product to your favorites to increase its priority to 5 automatically</strong>. To have
               favorites, you need to be logged in.
             </p>
           </div>
@@ -53,12 +58,17 @@ export function TrackingInformationDialog() {
         <DialogFooter>
           <div className="flex items-center justify-end gap-2">
             <DialogClose asChild>
-              <Button variant="outline">Got it, thanks.</Button>
+              <Button variant="outline">
+                Acknowledge
+                <CheckIcon className="mt-px" />
+              </Button>
             </DialogClose>
 
-            <Button variant="primary" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
+            {!user ? (
+              <Button variant="primary" asChild>
+                <Link href="/login">Sign in</Link>
+              </Button>
+            ) : null}
           </div>
         </DialogFooter>
       </DialogContent>
