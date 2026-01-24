@@ -445,14 +445,43 @@ function scoreRelatedMatch(source: StoreProduct, candidate: StoreProduct): Produ
 }
 
 /**
+ * Augments products with is_favorited field based on user's favorites
+ */
+async function augmentWithFavorites<T extends { id: number }>(
+  supabase: ReturnType<typeof createClient>,
+  products: T[],
+  userId: string | null,
+): Promise<(T & { is_favorited: boolean })[]> {
+  if (!userId || products.length === 0) {
+    return products.map((p) => ({ ...p, is_favorited: false }))
+  }
+
+  const productIds = products.map((p) => p.id).filter(Boolean)
+
+  const { data: favorites } = await supabase
+    .from("user_favorites")
+    .select("store_product_id")
+    .eq("user_id", userId)
+    .in("store_product_id", productIds)
+
+  const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) ?? [])
+
+  return products.map((p) => ({
+    ...p,
+    is_favorited: favoriteIds.has(p.id),
+  }))
+}
+
+/**
  * Finds identical products from different stores
  * Priority: 1) Exact barcode match  2) Fuzzy matching (brand + size + name)
  */
 export async function findIdenticalProducts(
   productId: string,
   limit: number = 10,
+  userId: string | null = null,
 ): Promise<{
-  data: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] | null
+  data: (StoreProduct & { similarity_score: number; similarity_factors: string[]; is_favorited: boolean })[] | null
   error: unknown
 }> {
   const supabase = createClient()
@@ -546,7 +575,10 @@ export async function findIdenticalProducts(
   // Sort final results by score (barcode matches first, then fuzzy matches)
   results.sort((a, b) => b.similarity_score - a.similarity_score)
 
-  return { data: results, error: null }
+  // Augment with favorites
+  const augmented = await augmentWithFavorites(supabase, results, userId)
+
+  return { data: augmented, error: null }
 }
 
 /**
@@ -555,8 +587,9 @@ export async function findIdenticalProducts(
 export async function findRelatedProducts(
   productId: string,
   limit: number = 10,
+  userId: string | null = null,
 ): Promise<{
-  data: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] | null
+  data: (StoreProduct & { similarity_score: number; similarity_factors: string[]; is_favorited: boolean })[] | null
   error: unknown
 }> {
   const supabase = createClient()
@@ -616,5 +649,8 @@ export async function findRelatedProducts(
     similarity_factors: m.factors,
   }))
 
-  return { data: final, error: null }
+  // Augment with favorites
+  const augmented = await augmentWithFavorites(supabase, final, userId)
+
+  return { data: augmented, error: null }
 }

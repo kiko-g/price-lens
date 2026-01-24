@@ -3,11 +3,20 @@
 import { useCallback } from "react"
 import { toast } from "sonner"
 import { useUser } from "@/hooks/useUser"
-import { TriangleIcon, BanIcon } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 
-async function addFavorite(storeProductId: number) {
+interface MutationVariables {
+  storeProductId: number
+  productName?: string
+}
+
+function truncateName(name: string, maxLength: number): string {
+  if (name.length <= maxLength) return name
+  return name.slice(0, maxLength - 1) + "…"
+}
+
+async function addFavorite({ storeProductId }: MutationVariables) {
   const response = await axios.post("/api/favorites", { store_product_id: storeProductId })
   if (response.status !== 200 && response.status !== 201) {
     throw new Error(response.data?.error || "Failed to add to favorites")
@@ -15,7 +24,7 @@ async function addFavorite(storeProductId: number) {
   return response.data
 }
 
-async function removeFavorite(storeProductId: number) {
+async function removeFavorite({ storeProductId }: MutationVariables) {
   const response = await axios.delete("/api/favorites", {
     data: { store_product_id: storeProductId },
   })
@@ -31,69 +40,52 @@ export function useFavoriteToggle() {
 
   const addMutation = useMutation({
     mutationFn: addFavorite,
-    onSuccess: () => {
-      toast.success(
-        <div className="flex items-center gap-2">
-          Added to favorites
-          <TriangleIcon className="size-3 fill-green-500 stroke-green-500" />
-        </div>,
-      )
+    onSuccess: (_, variables) => {
+      toast.success("Added to favorites", {
+        description: variables.productName ? truncateName(variables.productName, 50) : undefined,
+      })
       queryClient.invalidateQueries({ queryKey: ["favorites"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
     },
     onError: (error) => {
-      toast.error(
-        <div className="flex items-center gap-2">
-          {error instanceof Error ? error.message : "Failed to update favorites"}
-          <BanIcon className="size-3 rotate-180 stroke-red-500" />
-        </div>,
-      )
+      toast.error("Failed to add to favorites", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      })
     },
   })
 
   const removeMutation = useMutation({
     mutationFn: removeFavorite,
-    onSuccess: () => {
-      toast.success(
-        <div className="flex items-center gap-2">
-          Removed from favorites
-          <TriangleIcon className="size-3 rotate-180 fill-red-500 stroke-red-500" />
-        </div>,
-      )
+    onSuccess: (_, variables) => {
+      toast.success("Removed from favorites", {
+        description: variables.productName ? truncateName(variables.productName, 50) : undefined,
+      })
       queryClient.invalidateQueries({ queryKey: ["favorites"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
     },
     onError: (error) => {
-      toast.error(
-        <div className="flex items-center gap-2">
-          {error instanceof Error ? error.message : "Failed to update favorites"}
-          <BanIcon className="size-3 rotate-180 stroke-red-500" />
-        </div>,
-      )
+      toast.error("Failed to remove from favorites", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      })
     },
   })
 
   const toggleFavorite = useCallback(
-    async (storeProductId: number, currentState: boolean) => {
+    async (storeProductId: number, currentState: boolean, productName?: string) => {
       if (!user) {
-        toast.error(
-          <div className="flex items-center gap-2">
-            Please log in to manage favorites
-            <BanIcon className="size-3 stroke-red-500" />
-          </div>,
-        )
+        toast.error("Please log in to manage favorites")
         return { success: false, newState: currentState }
       }
 
       try {
         if (currentState) {
-          await removeMutation.mutateAsync(storeProductId)
+          await removeMutation.mutateAsync({ storeProductId, productName })
         } else {
-          await addMutation.mutateAsync(storeProductId)
+          await addMutation.mutateAsync({ storeProductId, productName })
         }
         return { success: true, newState: !currentState }
       } catch {
@@ -106,8 +98,8 @@ export function useFavoriteToggle() {
   const isLoading = useCallback(
     (storeProductId: number) => {
       return (
-        (addMutation.isPending && addMutation.variables === storeProductId) ||
-        (removeMutation.isPending && removeMutation.variables === storeProductId)
+        (addMutation.isPending && addMutation.variables?.storeProductId === storeProductId) ||
+        (removeMutation.isPending && removeMutation.variables?.storeProductId === storeProductId)
       )
     },
     [addMutation, removeMutation],

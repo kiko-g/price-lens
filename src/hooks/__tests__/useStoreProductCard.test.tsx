@@ -15,19 +15,21 @@ const mockAxiosPost = vi.hoisted(() => vi.fn())
 const mockAxiosPut = vi.hoisted(() => vi.fn())
 const mockAxiosDelete = vi.hoisted(() => vi.fn())
 
-// Create a mock AxiosError class for testing
-class MockAxiosError extends Error {
-  isAxiosError = true
-  response?: { status: number; data?: unknown }
+// Create a mock AxiosError class for testing - must be hoisted for vi.mock factory
+const MockAxiosError = vi.hoisted(() => {
+  return class MockAxiosError extends Error {
+    isAxiosError = true
+    response?: { status: number; data?: unknown }
 
-  constructor(message: string, status?: number, data?: unknown) {
-    super(message)
-    this.name = "AxiosError"
-    if (status !== undefined) {
-      this.response = { status, data }
+    constructor(message: string, status?: number, data?: unknown) {
+      super(message)
+      this.name = "AxiosError"
+      if (status !== undefined) {
+        this.response = { status, data }
+      }
     }
   }
-}
+})
 
 vi.mock("axios", () => ({
   default: {
@@ -210,7 +212,9 @@ describe("useStoreProductCard", () => {
         expect(result.current.isFavorited).toBe(true)
       })
 
-      expect(toast.success).toHaveBeenCalledWith("Added to favorites")
+      expect(toast.success).toHaveBeenCalledWith("Added to favorites", {
+        description: "Test Product",
+      })
     })
 
     it("should show error toast when mutation fails", async () => {

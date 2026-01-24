@@ -488,14 +488,14 @@ describe("Scraper ScrapeResult", () => {
     expect(result.product).toBeNull()
   })
 
-  it("should return error type when product data cannot be extracted", async () => {
-    // HTML that doesn't contain product data
+  it("should return not_found type when product data cannot be extracted (soft 404)", async () => {
+    // HTML that doesn't contain product data - treated as "not found" since the page exists but has no product
     mockAxiosGet.mockResolvedValue({ data: "<html><body>No product here</body></html>" })
 
     const scraperObj = scraper.getScraper(1)
     const result = await scraperObj.scrape({ url: "https://www.continente.pt/produto/test.html" })
 
-    expect(result.type).toBe("error")
+    expect(result.type).toBe("not_found")
     expect(result.product).toBeNull()
   })
 })
@@ -572,6 +572,8 @@ describe("getScraper", () => {
 // ============================================================================
 
 describe("Output Schema Consistency", () => {
+  // Note: updated_at and created_at are database-level fields set by Supabase,
+  // not returned by scrapers which only extract data from HTML
   const expectedFields = [
     "url",
     "name",
@@ -588,8 +590,6 @@ describe("Output Schema Consistency", () => {
     "category_2",
     "category_3",
     "origin_id",
-    "updated_at",
-    "created_at",
     "priority",
     "available",
   ]

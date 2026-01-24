@@ -82,7 +82,7 @@ function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   const handleToggleFavorite = async () => {
     if (!storeProduct.id) return
 
-    const result = await toggleFavorite(storeProduct.id, isFavorited)
+    const result = await toggleFavorite(storeProduct.id, isFavorited, storeProduct.name)
     if (result.success) {
       setIsFavorited(result.newState)
     }

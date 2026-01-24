@@ -14,6 +14,11 @@ export class ProductUnavailableError extends Error {
   }
 }
 
+function truncateName(name: string, maxLength: number): string {
+  if (name.length <= maxLength) return name
+  return name.slice(0, maxLength - 1) + "…"
+}
+
 async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   if (!storeProduct.id) throw new Error("Cannot update a store product without an ID")
   try {
@@ -101,7 +106,9 @@ export function useStoreProductCard(sp: StoreProduct) {
     mutationFn: () => addFavorite(sp.id!),
     onSuccess: () => {
       lastSuccessfulFavorite.current = true
-      toast.success("Added to favorites")
+      toast.success("Added to favorites", {
+        description: sp.name ? truncateName(sp.name, 50) : undefined,
+      })
       invalidateFavoriteQueries(queryClient)
       invalidateProductQueries(queryClient, sp.id)
     },
@@ -117,7 +124,9 @@ export function useStoreProductCard(sp: StoreProduct) {
     mutationFn: () => removeFavorite(sp.id!),
     onSuccess: () => {
       lastSuccessfulFavorite.current = false
-      toast.success("Removed from favorites")
+      toast.success("Removed from favorites", {
+        description: sp.name ? truncateName(sp.name, 50) : undefined,
+      })
       invalidateFavoriteQueries(queryClient)
       invalidateProductQueries(queryClient, sp.id)
     },
