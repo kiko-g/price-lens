@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio"
 import type { SitemapUrl, SitemapParseResult, SitemapIndexResult } from "./types"
 
-const USER_AGENT = "PriceLens-Discovery/1.0 (+https://pricelens.pt)"
+const USER_AGENT = "Price Lens-Discovery/1.0 (+https://pricelens.pt)"
 const FETCH_TIMEOUT = 30000
 
 /**

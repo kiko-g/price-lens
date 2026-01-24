@@ -1,3 +1,5 @@
+import { type BadgeKind } from "@/components/ui/badge"
+
 /**
  * PRIORITY CONFIGURATION
  *
@@ -30,7 +32,7 @@ export const PRIORITY_REFRESH_HOURS: Record<number, number | null> = {
 type PriorityConfig = {
   label: string
   description: string
-  badgeKind: "gray" | "success" | "warning" | "retail" | "destructive"
+  badgeKind: BadgeKind
   bgClass: string
 }
 
@@ -68,7 +70,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
   "4": {
     label: "4",
     description: "Important",
-    badgeKind: "success",
+    badgeKind: "sky",
     bgClass: "bg-sky-600/70 border-sky-600",
   },
   "5": {

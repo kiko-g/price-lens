@@ -151,7 +151,7 @@ function ProfileContent({ user, profile }: { user: any; profile: any }) {
       title: "Questions?",
       description: (
         <p className="text-muted-foreground text-sm">
-          Email PriceLens developer directly at{" "}
+          Email Price Lens developer directly at{" "}
           <span className="text-primary group-hover:underline">kikojpgoncalves@gmail.com</span>
         </p>
       ),

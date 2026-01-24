@@ -276,7 +276,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div className="flex flex-wrap items-center gap-2">
             {hasDiscount ? (
               <>
-                <span className="text-xl font-bold text-green-800 dark:text-green-600">{sp.price}€</span>
+                <span className="text-xl font-bold text-green-700 dark:text-green-600">{sp.price}€</span>
                 <span className="text-muted-foreground text-base line-through">{sp.price_recommended}€</span>
               </>
             ) : null}

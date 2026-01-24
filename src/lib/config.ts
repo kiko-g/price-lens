@@ -3,7 +3,7 @@ import { HomeIcon, WorkflowIcon, HeartIcon, ShoppingBasketIcon } from "lucide-re
 
 export const siteConfig = {
   name: "Price Lens",
-  title: "PriceLens",
+  title: "Price Lens",
   author: "Francisco Goncalves",
   url: "https://price-lens.vercel.app",
   ogImage: "https://price-lens.vercel.app/og.jpg",

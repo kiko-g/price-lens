@@ -42,6 +42,7 @@ const badgeVariants = cva(
           "border-transparent bg-amber-500 text-white hover:bg-amber-500/80 dark:border-transparent dark:bg-amber-600 dark:text-white dark:hover:bg-amber-600/80 [&_span.bubble]:bg-amber-600 dark:[&_span.bubble]:bg-amber-600",
         unit: "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
         blue: "border-transparent bg-blue-600 text-zinc-50 hover:bg-blue-600/80 dark:border-transparent dark:bg-blue-800 dark:text-zinc-50 dark:hover:bg-blue-800/80 [&_span.bubble]:bg-blue-600 dark:[&_span.bubble]:bg-blue-800",
+        sky: "border-transparent bg-sky-600 text-zinc-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-zinc-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
         white:
           "border-transparent bg-white text-zinc-900 hover:bg-white/80 dark:border-transparent dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-zinc-900",
       },
@@ -78,6 +79,8 @@ const badgeVariants = cva(
     },
   },
 )
+
+export type BadgeKind = VariantProps<typeof badgeVariants>["variant"]
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
   bubble?: boolean

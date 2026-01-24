@@ -1,4 +1,4 @@
-# PriceLens
+# Price Lens
 
 Price tracking app for Portuguese supermarkets built with Next.js 16, React 19, Supabase, and TailwindCSS.
 
@@ -12,4 +12,5 @@ Price tracking app for Portuguese supermarkets built with Next.js 16, React 19, 
 ## Detailed Guidelines
 
 See `.cursor/rules/` for context-specific rules:
+
 - [Front-end conventions](.cursor/rules/front-end-cursor-rules.mdc) - React/Next.js patterns, naming, accessibility
