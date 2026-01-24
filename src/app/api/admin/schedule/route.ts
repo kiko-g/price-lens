@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { PRIORITY_REFRESH_HOURS, ACTIVE_PRIORITIES, ESTIMATED_COST_PER_SCRAPE } from "@/lib/qstash"
+import { ACTIVE_PRIORITIES, ESTIMATED_COST_PER_SCRAPE } from "@/lib/qstash"
+import { PRIORITY_REFRESH_HOURS } from "@/lib/business/priorities"
 
 export const maxDuration = 30
 

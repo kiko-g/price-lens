@@ -43,6 +43,7 @@ import {
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { ProductChart } from "@/components/ProductChart"
 import { resolveSupermarketChain } from "@/components/Supermarket"
+import { PriceFreshnessInfo } from "@/components/PriceFreshnessInfo"
 import { RelatedStoreProducts } from "@/components/RelatedStoreProducts"
 import { IdenticalStoreProducts } from "@/components/IdenticalStoreProducts"
 
@@ -307,6 +308,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 -{discountValueToPercentage(sp.discount)}
               </Badge>
             ) : null}
+
+            <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
           </div>
 
           {/* Barcode */}

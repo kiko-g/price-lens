@@ -1,19 +1,16 @@
-import { StoreProduct, Price } from "@/types"
+import type { StoreProduct, Price } from "@/types"
 
-import { now } from "./utils"
-import { priceQueries } from "./db/queries/prices"
-import { storeProductQueries } from "./db/queries/products"
+import { now } from "@/lib/utils"
+import { priceQueries } from "@/lib/db/queries/prices"
+import { storeProductQueries } from "@/lib/db/queries/products"
 
 export function isValidPriceValue(value: number | null): boolean {
   return typeof value === "number" && !isNaN(value)
 }
 
 export function isValidPriceEntry(price: Price): boolean {
-  return (
-    isValidPriceValue(price.price) ||
-    isValidPriceValue(price.price_recommended) ||
-    isValidPriceValue(price.price_per_major_unit)
-  )
+  const priceValues = [price.price, price.price_recommended, price.price_per_major_unit]
+  return priceValues.some(isValidPriceValue)
 }
 
 export function mergePrices(a: Price, b: Price): Price {
@@ -69,6 +66,7 @@ export function mergeAndSanitize(prices: Price[]): Price[] {
     if (a.valid_from && b.valid_from) {
       return new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
     }
+
     return 0
   })
 

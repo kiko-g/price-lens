@@ -60,6 +60,7 @@ import {
   HeartIcon,
   CalendarPlusIcon,
 } from "lucide-react"
+import { PriceFreshnessInfo } from "./PriceFreshnessInfo"
 
 function resolveImageUrlForCard(image: string, size = 400) {
   const url = new URL(image)
@@ -472,6 +473,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     />
                   )}
                 </div>
+              </div>
+
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
               </div>
 
               <Suspense fallback={<div>Loading...</div>}>

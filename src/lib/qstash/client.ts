@@ -1,5 +1,8 @@
 import { Client } from "@upstash/qstash"
 
+// Re-export priority constants for convenience
+export { PRIORITY_REFRESH_HOURS, ACTIVE_PRIORITIES } from "@/lib/business/priorities"
+
 // QStash client for publishing messages
 // Requires QSTASH_TOKEN environment variable
 export const qstash = new Client({
@@ -10,40 +13,13 @@ export const qstash = new Client({
 // Use production domain for QStash callbacks (not deployment-specific preview URLs)
 export const getBaseUrl = () => {
   // Always prefer explicit site URL (your production domain)
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
-  }
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+
   // Fallback to Vercel URL
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
-  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+
   return "http://localhost:3000"
 }
-
-/**
- * SCHEDULE CONFIGURATION
- *
- * Defines how often each priority level should be scraped.
- * The scheduler uses these thresholds to determine which products are "stale".
- *
- * Priority 5 (Premium): Daily - high-value products users care most about
- * Priority 4 (High): Every 2 days - important but less critical
- * Priority 3 (Medium): Every 3 days - moderate importance
- * Priority 2 (Low): Weekly - low priority, minimal tracking (DISABLED)
- * Priority 1 (Minimal): Bi-weekly - rarely tracked (DISABLED)
- * Priority 0: Never scheduled - excluded from tracking
- */
-export const PRIORITY_REFRESH_HOURS: Record<number, number | null> = {
-  5: 24, // Premium: every 1 day
-  4: 48, // High: every 2 days
-  3: 72, // Medium: every 3 days
-  2: 168, // Low: every 7 days
-  1: 336, // Minimal: every 14 days
-  0: null, // Never scheduled
-}
-
-// Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS)
-export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
 
 // How many products to include in a single worker batch
 // Each worker has 300 seconds max, ~5 sec per scrape = ~50 products max
