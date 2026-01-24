@@ -4,8 +4,8 @@ import { discountValueToPercentage, generateProductPath } from "@/lib/business/p
 import { type StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"
-import { PriceChange } from "@/components/PriceChange"
-import { resolveSupermarketChain } from "@/components/Supermarket"
+import { PriceChange } from "@/components/products/PriceChange"
+import { resolveSupermarketChain } from "@/components/products/Supermarket"
 
 import { ChevronRightIcon, ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
 

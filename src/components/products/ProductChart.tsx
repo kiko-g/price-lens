@@ -22,7 +22,7 @@ import { Barcode } from "@/components/ui/combo/barcode"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { PricesVariationCard } from "@/components/PricesVariationCard"
+import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
 import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
 

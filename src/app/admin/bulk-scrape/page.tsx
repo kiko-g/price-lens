@@ -1,10 +1,17 @@
 "use client"
 
+import axios from "axios"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axios from "axios"
-import { cn } from "@/lib/utils"
 import { useAdminStoreProductFilters } from "@/hooks/useAdminStoreProductFilters"
+
+import { cn } from "@/lib/utils"
+import type {
+  BulkScrapeResult,
+  BulkScrapeJobCreated,
+  BulkScrapeBatchResult,
+  BulkScrapeError,
+} from "@/lib/scrapers/types"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,7 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { PriorityBubble } from "@/components/PriorityBubble"
+
+import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
 import {
@@ -47,12 +55,6 @@ import {
   MicroscopeIcon,
   PickaxeIcon,
 } from "lucide-react"
-import type {
-  BulkScrapeResult,
-  BulkScrapeJobCreated,
-  BulkScrapeBatchResult,
-  BulkScrapeError,
-} from "@/lib/scrapers/types"
 
 /** Type guard to check if result is a batch result (not job creation) */
 function isBatchResult(result: BulkScrapeResult): result is BulkScrapeBatchResult {

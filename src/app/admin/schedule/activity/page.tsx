@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { PriorityBubble } from "@/components/PriorityBubble"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
 
 import {
   RefreshCwIcon,

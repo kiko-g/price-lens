@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import { ProductGridWrapper } from "@/components/ProductGridWrapper"
+import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 import { AdminProductPriorityCard } from "@/components/admin/AdminProductPriorityCard"
 
 import { SearchIcon } from "lucide-react"

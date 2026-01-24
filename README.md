@@ -23,6 +23,7 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Update page title dynamically. Price Lens | Products is insufficient when we have search filters active.
 - [x] Chart floor and ceiling planning
 - [x] Chart should have refined data points for each range: update x scale (font size and more) and update number of data points for 5Y and MAX. Should never plot more than 500 points probably!
+- [ ] 4 second debounce on product search!
 - [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Badass smoke test
   - [ ] Product cards on mobile should be much more compact.

@@ -40,13 +40,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-import { StoreProductCard } from "@/components/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
+import { StoreProductCard } from "@/components/products/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
-import { PriorityBubble } from "@/components/PriorityBubble"
-import { ProductGridWrapper } from "@/components/ProductGridWrapper"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
+import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 import { BulkPriorityDialog } from "@/components/admin/BulkPriorityDialog"
 import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"

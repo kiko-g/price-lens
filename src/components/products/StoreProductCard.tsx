@@ -30,11 +30,11 @@ import {
 import { ShareButton } from "@/components/ui/combo/share-button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { ProductChart } from "@/components/ProductChart"
-import { resolveSupermarketChain } from "@/components/Supermarket"
-import { PriorityBadge } from "@/components/PriorityBadge"
-import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
-import { PriceFreshnessInfo } from "@/components/PriceFreshnessInfo"
+import { ProductChart } from "@/components/products/ProductChart"
+import { resolveSupermarketChain } from "@/components/products/Supermarket"
+import { PriorityBadge } from "@/components/products/PriorityBadge"
+import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
+import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 
 import {
   ArrowUpRightIcon,

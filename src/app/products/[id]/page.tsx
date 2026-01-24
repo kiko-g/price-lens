@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { extractProductIdFromSlug, generateProductSlug } from "@/lib/business/product"
 
-import { StoreProductPage } from "@/components/StoreProductPage"
+import { StoreProductPage } from "@/components/products/StoreProductPage"
 
 interface PageProps {
   params: Promise<{ id: string }>

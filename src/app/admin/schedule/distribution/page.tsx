@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PriorityBubble } from "@/components/PriorityBubble"
-import { StoreProductCard, ProductCardSkeleton } from "@/components/StoreProductCard"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
+import { StoreProductCard, ProductCardSkeleton } from "@/components/products/StoreProductCard"
 
 import {
   AlertTriangleIcon,

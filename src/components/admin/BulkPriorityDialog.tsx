@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { PriorityBubble } from "@/components/PriorityBubble"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
 
 import { AlertTriangleIcon, CheckCircle2Icon, Loader2Icon, SparklesIcon } from "lucide-react"
 

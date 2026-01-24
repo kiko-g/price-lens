@@ -43,11 +43,11 @@ import {
 } from "@/components/ui/drawer"
 
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
-import { ProductChart } from "@/components/ProductChart"
-import { resolveSupermarketChain } from "@/components/Supermarket"
-import { PriceFreshnessInfo } from "@/components/PriceFreshnessInfo"
-import { RelatedStoreProducts } from "@/components/RelatedStoreProducts"
-import { IdenticalStoreProducts } from "@/components/IdenticalStoreProducts"
+import { ProductChart } from "@/components/products/ProductChart"
+import { resolveSupermarketChain } from "@/components/products/Supermarket"
+import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
+import { RelatedStoreProducts } from "@/components/products/RelatedStoreProducts"
+import { IdenticalStoreProducts } from "@/components/products/IdenticalStoreProducts"
 
 import {
   Undo2Icon,

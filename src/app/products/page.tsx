@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { Metadata } from "next"
-import { StoreProductsShowcase } from "@/components/StoreProductsShowcase"
+import { StoreProductsShowcase } from "@/components/products/StoreProductsShowcase"
 import { buildPageTitle } from "@/lib/business/page-title"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Footer } from "@/components/layout/Footer"

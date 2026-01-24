@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/select"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
-import { StoreProductCard } from "@/components/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
+import { StoreProductCard } from "@/components/products/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
@@ -52,7 +52,7 @@ import {
 } from "lucide-react"
 import { HideFooter } from "@/contexts/FooterContext"
 import { Footer } from "@/components/layout/Footer"
-import { ProductGridWrapper } from "@/components/ProductGridWrapper"
+import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 
 // ============================================================================
 // URL State Management
