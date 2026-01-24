@@ -46,11 +46,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${brandText}${storeProduct.name}${storeName ? ` @ ${storeName}` : ""}`
 
   // Build rich description
+  const discountPercentage = storeProduct.discount ? Math.round(storeProduct.discount * 1000) / 10 : null
   const descParts: string[] = []
   if (storeProduct.price) {
-    const priceText = storeProduct.discount
-      ? `${storeProduct.price.toFixed(2)}€ (-${storeProduct.discount}%)`
-      : `${storeProduct.price.toFixed(2)}€`
+    const priceText = `${storeProduct.price.toFixed(2)}€${discountPercentage ? ` (-${discountPercentage}%)` : ""}`
     descParts.push(priceText)
   }
   if (storeProduct.pack) descParts.push(storeProduct.pack)
