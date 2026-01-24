@@ -8,6 +8,7 @@ import axios from "axios"
 import { PrioritySource } from "@/types"
 
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType, PRODUCT_PRIORITY_LEVELS } from "@/types/business"
 import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
 import { buildPageTitle } from "@/lib/business/page-title"
@@ -281,6 +282,9 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
 
+  // Desktop detection (lg breakpoint = 1024px) - debounce only applies on desktop
+  const isDesktop = useMediaQuery("(min-width: 1024px)")
+
   // Local input state (for search)
   const [queryInput, setQueryInput] = useState(urlState.query)
   const [isSearching, setIsSearching] = useState(false)
@@ -428,105 +432,105 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // Filter change: update local state and debounce URL sync
+  // Filter change: update local state (desktop: debounce URL sync, mobile: no auto-sync)
   const handleSortChange = (newSort: SortByType) => {
     setLocalFilters((prev) => ({ ...prev, sortBy: newSort }))
-    debouncedUpdateUrl({ sort: newSort, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ sort: newSort, page: 1 })
   }
 
-  // Filter change: update local state and debounce URL sync
+  // Filter change: update local state (desktop: debounce URL sync, mobile: no auto-sync)
   const handleSearchTypeChange = (newType: SearchType) => {
     setLocalFilters((prev) => ({ ...prev, searchType: newType }))
-    debouncedUpdateUrl({ t: newType })
+    if (isDesktop) debouncedUpdateUrl({ t: newType })
   }
 
-  // Filter change: update local state and debounce URL sync
+  // Filter change: update local state (desktop: debounce URL sync, mobile: no auto-sync)
   const handleTogglePriorityOrder = () => {
     const newValue = !localFilters.orderByPriority
     setLocalFilters((prev) => ({ ...prev, orderByPriority: newValue }))
-    debouncedUpdateUrl({ priority_order: newValue, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ priority_order: newValue, page: 1 })
   }
 
-  // Filter change: update local state and debounce URL sync
+  // Filter change: update local state (desktop: debounce URL sync, mobile: no auto-sync)
   const handleToggleDiscounted = () => {
     const newValue = !localFilters.onlyDiscounted
     setLocalFilters((prev) => ({ ...prev, onlyDiscounted: newValue }))
-    debouncedUpdateUrl({ discounted: newValue, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ discounted: newValue, page: 1 })
   }
 
-  // Filter change: update local state and debounce URL sync
+  // Filter change: update local state (desktop: debounce URL sync, mobile: no auto-sync)
   const handleToggleAvailable = () => {
     const newValue = !localFilters.onlyAvailable
     setLocalFilters((prev) => ({ ...prev, onlyAvailable: newValue }))
-    debouncedUpdateUrl({ available: newValue, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ available: newValue, page: 1 })
   }
 
-  // Origin multi-select handlers (filter change: update local state and debounce URL sync)
+  // Origin multi-select handlers (desktop: debounce URL sync, mobile: no auto-sync)
   const handleOriginToggle = (originId: number) => {
     const isSelected = selectedOrigins.includes(originId)
     const updated = isSelected ? selectedOrigins.filter((v) => v !== originId) : [...selectedOrigins, originId]
     const serialized = serializeArray(updated) ?? ""
     setLocalFilters((prev) => ({ ...prev, origin: serialized }))
-    debouncedUpdateUrl({ origin: serialized || null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ origin: serialized || null, page: 1 })
   }
 
   const handleClearOrigins = () => {
     setLocalFilters((prev) => ({ ...prev, origin: "" }))
-    debouncedUpdateUrl({ origin: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ origin: null, page: 1 })
   }
 
-  // Priority multi-select handlers (filter change: update local state and debounce URL sync)
+  // Priority multi-select handlers (desktop: debounce URL sync, mobile: no auto-sync)
   const handlePriorityToggle = (level: number) => {
     const isSelected = selectedPriorities.includes(level)
     const updated = isSelected ? selectedPriorities.filter((v) => v !== level) : [...selectedPriorities, level]
     const serialized = serializeArray(updated) ?? ""
     setLocalFilters((prev) => ({ ...prev, priority: serialized }))
-    debouncedUpdateUrl({ priority: serialized || null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ priority: serialized || null, page: 1 })
   }
 
   const handleClearPriority = () => {
     setLocalFilters((prev) => ({ ...prev, priority: "" }))
-    debouncedUpdateUrl({ priority: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ priority: null, page: 1 })
   }
 
-  // Source multi-select handlers (filter change: update local state and debounce URL sync)
+  // Source multi-select handlers (desktop: debounce URL sync, mobile: no auto-sync)
   const handleSourceToggle = (source: PrioritySource) => {
     const isSelected = selectedSources.includes(source)
     const updated = isSelected ? selectedSources.filter((v) => v !== source) : [...selectedSources, source]
     const serialized = updated.length > 0 ? updated.join(",") : ""
     setLocalFilters((prev) => ({ ...prev, source: serialized }))
-    debouncedUpdateUrl({ source: serialized || null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ source: serialized || null, page: 1 })
   }
 
   const handleClearSources = () => {
     setLocalFilters((prev) => ({ ...prev, source: "" }))
-    debouncedUpdateUrl({ source: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ source: null, page: 1 })
   }
 
-  // Category handlers (filter change: update local state and debounce URL sync)
+  // Category handlers (desktop: debounce URL sync, mobile: no auto-sync)
   const handleCategoryChange = (category: string) => {
     setLocalFilters((prev) => ({ ...prev, category, category2: "", category3: "" }))
-    debouncedUpdateUrl({ cat: category || null, cat2: null, cat3: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ cat: category || null, cat2: null, cat3: null, page: 1 })
   }
 
   const handleCategory2Change = (category2: string) => {
     setLocalFilters((prev) => ({ ...prev, category2, category3: "" }))
-    debouncedUpdateUrl({ cat2: category2 || null, cat3: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ cat2: category2 || null, cat3: null, page: 1 })
   }
 
   const handleCategory3Change = (category3: string) => {
     setLocalFilters((prev) => ({ ...prev, category3 }))
-    debouncedUpdateUrl({ cat3: category3 || null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ cat3: category3 || null, page: 1 })
   }
 
   const handleClearCategories = () => {
     setLocalFilters((prev) => ({ ...prev, category: "", category2: "", category3: "" }))
-    debouncedUpdateUrl({ cat: null, cat2: null, cat3: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ cat: null, cat2: null, cat3: null, page: 1 })
   }
 
   const handleClearCatTuples = () => {
     setLocalFilters((prev) => ({ ...prev, catTuples: "" }))
-    debouncedUpdateUrl({ catTuples: null, page: 1 })
+    if (isDesktop) debouncedUpdateUrl({ catTuples: null, page: 1 })
   }
 
   // Explicit action: flush debounce and clear everything
@@ -679,11 +683,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         {/* Search Input (debounced, no button on desktop) */}
         <div className="relative w-full">
           {isSearching ? (
-            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
+            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 animate-spin" />
           ) : hasPendingChanges ? (
-            <ClockIcon className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-pulse text-amber-600 dark:text-amber-500" />
+            <ClockIcon className="absolute top-1/2 left-2.5 hidden h-4 w-4 -translate-y-1/2 animate-pulse text-amber-600 md:block dark:text-amber-500" />
           ) : (
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
           )}
 
           <Input
@@ -1094,7 +1098,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         totalCount={totalCount}
         currentPage={currentPage}
         totalPages={totalPages}
-        hasPendingChanges={hasPendingChanges}
       />
 
       {/* Mobile Filters Drawer */}
@@ -1215,7 +1218,6 @@ interface MobileNavProps {
   totalCount: number
   currentPage: number
   totalPages: number
-  hasPendingChanges: boolean
 }
 
 function MobileNav({
@@ -1230,18 +1232,15 @@ function MobileNav({
   totalCount,
   currentPage,
   totalPages,
-  hasPendingChanges,
 }: MobileNavProps) {
   return (
     <nav className="sticky top-0 z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:top-[54px] lg:hidden dark:bg-zinc-950/95">
       <div className="flex w-full items-center gap-2">
         <div className="relative flex-1">
           {isSearching ? (
-            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
-          ) : hasPendingChanges ? (
-            <ClockIcon className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-pulse text-amber-600 dark:text-amber-500" />
+            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 animate-spin" />
           ) : (
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
           )}
           <Input
             type="text"
@@ -1276,20 +1275,13 @@ function MobileNav({
       {/* Status Bar */}
       {totalCount > 0 && (
         <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <span>
-              Showing{" "}
-              <span className="text-foreground font-semibold">
-                {showingFrom}-{showingTo}
-              </span>{" "}
-              of <span className="text-foreground font-semibold">{totalCount}</span>
-            </span>
-            {hasPendingChanges && (
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-500">
-                <ClockIcon className="h-3 w-3" />
-              </span>
-            )}
-          </div>
+          <span>
+            Showing{" "}
+            <span className="text-foreground font-semibold">
+              {showingFrom}-{showingTo}
+            </span>{" "}
+            of <span className="text-foreground font-semibold">{totalCount}</span>
+          </span>
           <span>
             Page <span className="text-foreground font-semibold">{currentPage}</span> of{" "}
             <span className="text-foreground font-semibold">{totalPages}</span>
