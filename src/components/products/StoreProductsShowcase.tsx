@@ -66,13 +66,13 @@ import {
   CircleOffIcon,
   ClockArrowDown,
   ClockArrowUp,
-  ClockIcon,
   CrownIcon,
   FilterIcon,
   HandIcon,
   HomeIcon,
   LayersIcon,
   Loader2Icon,
+  LoaderPinwheelIcon,
   MoreHorizontalIcon,
   PackageIcon,
   RefreshCcwIcon,
@@ -275,8 +275,8 @@ interface StoreProductsShowcaseProps {
   children?: React.ReactNode
 }
 
-// Debounce delay for filter changes (2 seconds)
-const FILTER_DEBOUNCE_MS = 2000
+// Debounce delay for filter changes (1.2 seconds)
+const FILTER_DEBOUNCE_MS = 1200
 
 export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
@@ -685,7 +685,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           {isSearching ? (
             <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 animate-spin" />
           ) : hasPendingChanges ? (
-            <ClockIcon className="absolute top-1/2 left-2.5 hidden h-4 w-4 -translate-y-1/2 animate-pulse text-amber-600 md:block dark:text-amber-500" />
+            <LoaderPinwheelIcon className="text-primary absolute top-1/2 left-2.5 hidden h-4 w-4 -translate-y-1/2 animate-spin duration-[50] md:block" />
           ) : (
             <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
           )}
@@ -2205,23 +2205,47 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
   const router = useRouter()
 
   return (
-    <SectionWrapper>
-      <CircleOffIcon className="h-8 w-8" />
-      <div className="flex flex-col items-start justify-start">
-        <p>No products found matching your search.</p>
-        {query && <p className="text-muted-foreground text-sm">Query: &quot;{query}&quot;</p>}
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center sm:py-24">
+      {/* Icon with gradient ring */}
+      <div className="relative mb-6">
+        <div className="from-primary/20 via-primary/5 absolute -inset-4 rounded-full bg-linear-to-b to-transparent blur-xl" />
+        <div className="bg-muted/50 relative flex h-20 w-20 items-center justify-center rounded-full ring-1 ring-white/10">
+          <SearchIcon className="text-muted-foreground h-9 w-9" />
+        </div>
       </div>
-      <div className="mt-2 flex w-full items-center justify-center gap-3">
-        <Button variant="outline" onClick={() => router.push("/")}>
-          <HomeIcon className="h-4 w-4" />
-          Return home
-        </Button>
-        <Button variant="default" onClick={onClearFilters}>
+
+      {/* Title */}
+      <h3 className="text-xl font-semibold tracking-tight">No results found</h3>
+
+      {/* Description */}
+      <p className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed">
+        {query ? (
+          <>
+            We couldn&apos;t find any products matching &quot;
+            <span className="text-foreground font-medium">{query}</span>&quot;. Try a different search term or clear
+            your filters.
+          </>
+        ) : (
+          "Try adjusting your filters to find what you're looking for."
+        )}
+      </p>
+
+      {/* Actions - stacked on mobile */}
+      <div className="mt-8 flex w-full max-w-xs flex-col gap-2 sm:max-w-none sm:flex-row sm:justify-center sm:gap-3">
+        <Button variant="outline" className="h-10 w-full px-5 sm:w-auto" onClick={onClearFilters}>
           <RefreshCcwIcon className="h-4 w-4" />
           Clear filters
         </Button>
+        <Button
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground h-10 w-full px-5 sm:w-auto"
+          onClick={() => router.push("/")}
+        >
+          <HomeIcon className="h-4 w-4" />
+          Return home
+        </Button>
       </div>
-    </SectionWrapper>
+    </div>
   )
 }
 

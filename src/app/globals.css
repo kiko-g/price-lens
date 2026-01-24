@@ -376,7 +376,7 @@
   }
 
   button {
-    @apply transition-all duration-150 active:scale-[0.97];
+    @apply transition-all duration-150 ease-out active:scale-[0.97] active:brightness-95;
   }
 
   code {
