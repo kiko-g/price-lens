@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
+import { useDebouncedCallback } from "use-debounce"
 import axios from "axios"
 import { PrioritySource } from "@/types"
 
@@ -64,6 +65,7 @@ import {
   CircleOffIcon,
   ClockArrowDown,
   ClockArrowUp,
+  ClockIcon,
   CrownIcon,
   FilterIcon,
   HandIcon,
@@ -272,6 +274,9 @@ interface StoreProductsShowcaseProps {
   children?: React.ReactNode
 }
 
+// Debounce delay for filter changes (2 seconds)
+const FILTER_DEBOUNCE_MS = 2000
+
 export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
@@ -281,13 +286,56 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   const [isSearching, setIsSearching] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-  // Parse origin, priority, and source from URL
-  const selectedOrigins = useMemo(() => parseArrayParam(urlState.origin), [urlState.origin])
-  const selectedPriorities = useMemo(() => parseArrayParam(urlState.priority), [urlState.priority])
+  // Local filter state (updates immediately, syncs to URL with debounce)
+  const [localFilters, setLocalFilters] = useState({
+    sortBy: urlState.sortBy,
+    origin: urlState.origin,
+    searchType: urlState.searchType,
+    orderByPriority: urlState.orderByPriority,
+    onlyAvailable: urlState.onlyAvailable,
+    onlyDiscounted: urlState.onlyDiscounted,
+    priority: urlState.priority,
+    source: urlState.source,
+    category: urlState.category,
+    category2: urlState.category2,
+    category3: urlState.category3,
+    catTuples: urlState.catTuples,
+  })
+
+  // Debounced URL sync for filter changes
+  const debouncedUpdateUrl = useDebouncedCallback(
+    (updates: Record<string, string | number | boolean | null | undefined>) => {
+      updateUrl(updates)
+    },
+    FILTER_DEBOUNCE_MS,
+  )
+
+  // Check if there are pending filter changes (local differs from URL)
+  const hasPendingChanges = useMemo(() => {
+    return (
+      queryInput !== urlState.query ||
+      localFilters.sortBy !== urlState.sortBy ||
+      localFilters.origin !== urlState.origin ||
+      localFilters.searchType !== urlState.searchType ||
+      localFilters.orderByPriority !== urlState.orderByPriority ||
+      localFilters.onlyAvailable !== urlState.onlyAvailable ||
+      localFilters.onlyDiscounted !== urlState.onlyDiscounted ||
+      localFilters.priority !== urlState.priority ||
+      localFilters.source !== urlState.source ||
+      localFilters.category !== urlState.category ||
+      localFilters.category2 !== urlState.category2 ||
+      localFilters.category3 !== urlState.category3 ||
+      localFilters.catTuples !== urlState.catTuples
+    )
+  }, [queryInput, localFilters, urlState])
+
+  // Parse origin, priority, and source from local filters (for UI)
+  const selectedOrigins = useMemo(() => parseArrayParam(localFilters.origin), [localFilters.origin])
+  const selectedPriorities = useMemo(() => parseArrayParam(localFilters.priority), [localFilters.priority])
   const selectedSources = useMemo(() => {
-    if (!urlState.source) return [] as PrioritySource[]
-    return urlState.source.split(",").filter((v): v is PrioritySource => v === "ai" || v === "manual")
-  }, [urlState.source])
+    if (!localFilters.source) return [] as PrioritySource[]
+    return localFilters.source.split(",").filter((v): v is PrioritySource => v === "ai" || v === "manual")
+  }, [localFilters.source])
 
   // Build query params from URL state
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
@@ -314,97 +362,191 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     document.title = `Price Lens | ${pageTitle}`
   }, [pageTitle])
 
+  // Sync URL state back to local state (e.g., browser back/forward navigation)
+  useEffect(() => {
+    setLocalFilters({
+      sortBy: urlState.sortBy,
+      origin: urlState.origin,
+      searchType: urlState.searchType,
+      orderByPriority: urlState.orderByPriority,
+      onlyAvailable: urlState.onlyAvailable,
+      onlyDiscounted: urlState.onlyDiscounted,
+      priority: urlState.priority,
+      source: urlState.source,
+      category: urlState.category,
+      category2: urlState.category2,
+      category3: urlState.category3,
+      catTuples: urlState.catTuples,
+    })
+  }, [urlState])
+
   // ============================================================================
   // Handlers
   // ============================================================================
 
+  // Explicit action: flush debounce and update URL immediately
   const handleSearch = () => {
     setMobileFiltersOpen(false)
-    updateUrl({ q: queryInput, page: 1 })
+    debouncedUpdateUrl.cancel()
+    updateUrl({
+      q: queryInput,
+      t: localFilters.searchType,
+      sort: localFilters.sortBy,
+      origin: localFilters.origin || null,
+      priority: localFilters.priority || null,
+      source: localFilters.source || null,
+      cat: localFilters.category || null,
+      cat2: localFilters.category2 || null,
+      cat3: localFilters.category3 || null,
+      catTuples: localFilters.catTuples || null,
+      priority_order: localFilters.orderByPriority,
+      available: localFilters.onlyAvailable,
+      discounted: localFilters.onlyDiscounted,
+      page: 1,
+    })
   }
 
+  // Explicit action: flush debounce and update URL immediately
   const handlePageChange = (newPage: number) => {
-    updateUrl({ page: newPage })
-    // Scroll to top of grid on page change
+    debouncedUpdateUrl.cancel()
+    updateUrl({
+      q: queryInput || null,
+      t: localFilters.searchType,
+      sort: localFilters.sortBy,
+      origin: localFilters.origin || null,
+      priority: localFilters.priority || null,
+      source: localFilters.source || null,
+      cat: localFilters.category || null,
+      cat2: localFilters.category2 || null,
+      cat3: localFilters.category3 || null,
+      catTuples: localFilters.catTuples || null,
+      priority_order: localFilters.orderByPriority,
+      available: localFilters.onlyAvailable,
+      discounted: localFilters.onlyDiscounted,
+      page: newPage,
+    })
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
+  // Filter change: update local state and debounce URL sync
   const handleSortChange = (newSort: SortByType) => {
-    updateUrl({ sort: newSort, page: 1 })
+    setLocalFilters((prev) => ({ ...prev, sortBy: newSort }))
+    debouncedUpdateUrl({ sort: newSort, page: 1 })
   }
 
+  // Filter change: update local state and debounce URL sync
   const handleSearchTypeChange = (newType: SearchType) => {
-    updateUrl({ t: newType })
+    setLocalFilters((prev) => ({ ...prev, searchType: newType }))
+    debouncedUpdateUrl({ t: newType })
   }
 
+  // Filter change: update local state and debounce URL sync
   const handleTogglePriorityOrder = () => {
-    updateUrl({ priority_order: !urlState.orderByPriority, page: 1 })
+    const newValue = !localFilters.orderByPriority
+    setLocalFilters((prev) => ({ ...prev, orderByPriority: newValue }))
+    debouncedUpdateUrl({ priority_order: newValue, page: 1 })
   }
 
+  // Filter change: update local state and debounce URL sync
   const handleToggleDiscounted = () => {
-    updateUrl({ discounted: !urlState.onlyDiscounted, page: 1 })
+    const newValue = !localFilters.onlyDiscounted
+    setLocalFilters((prev) => ({ ...prev, onlyDiscounted: newValue }))
+    debouncedUpdateUrl({ discounted: newValue, page: 1 })
   }
 
+  // Filter change: update local state and debounce URL sync
   const handleToggleAvailable = () => {
-    updateUrl({ available: !urlState.onlyAvailable, page: 1 })
+    const newValue = !localFilters.onlyAvailable
+    setLocalFilters((prev) => ({ ...prev, onlyAvailable: newValue }))
+    debouncedUpdateUrl({ available: newValue, page: 1 })
   }
 
-  // Origin multi-select handlers
+  // Origin multi-select handlers (filter change: update local state and debounce URL sync)
   const handleOriginToggle = (originId: number) => {
     const isSelected = selectedOrigins.includes(originId)
     const updated = isSelected ? selectedOrigins.filter((v) => v !== originId) : [...selectedOrigins, originId]
-    updateUrl({ origin: serializeArray(updated), page: 1 })
+    const serialized = serializeArray(updated) ?? ""
+    setLocalFilters((prev) => ({ ...prev, origin: serialized }))
+    debouncedUpdateUrl({ origin: serialized || null, page: 1 })
   }
 
   const handleClearOrigins = () => {
-    updateUrl({ origin: null, page: 1 })
+    setLocalFilters((prev) => ({ ...prev, origin: "" }))
+    debouncedUpdateUrl({ origin: null, page: 1 })
   }
 
-  // Priority multi-select handlers
+  // Priority multi-select handlers (filter change: update local state and debounce URL sync)
   const handlePriorityToggle = (level: number) => {
     const isSelected = selectedPriorities.includes(level)
     const updated = isSelected ? selectedPriorities.filter((v) => v !== level) : [...selectedPriorities, level]
-    updateUrl({ priority: serializeArray(updated), page: 1 })
+    const serialized = serializeArray(updated) ?? ""
+    setLocalFilters((prev) => ({ ...prev, priority: serialized }))
+    debouncedUpdateUrl({ priority: serialized || null, page: 1 })
   }
 
   const handleClearPriority = () => {
-    updateUrl({ priority: "", page: 1 })
+    setLocalFilters((prev) => ({ ...prev, priority: "" }))
+    debouncedUpdateUrl({ priority: null, page: 1 })
   }
 
-  // Source multi-select handlers
+  // Source multi-select handlers (filter change: update local state and debounce URL sync)
   const handleSourceToggle = (source: PrioritySource) => {
     const isSelected = selectedSources.includes(source)
     const updated = isSelected ? selectedSources.filter((v) => v !== source) : [...selectedSources, source]
-    updateUrl({ source: updated.length > 0 ? updated.join(",") : null, page: 1 })
+    const serialized = updated.length > 0 ? updated.join(",") : ""
+    setLocalFilters((prev) => ({ ...prev, source: serialized }))
+    debouncedUpdateUrl({ source: serialized || null, page: 1 })
   }
 
   const handleClearSources = () => {
-    updateUrl({ source: null, page: 1 })
+    setLocalFilters((prev) => ({ ...prev, source: "" }))
+    debouncedUpdateUrl({ source: null, page: 1 })
   }
 
-  // Category handlers
+  // Category handlers (filter change: update local state and debounce URL sync)
   const handleCategoryChange = (category: string) => {
-    updateUrl({ cat: category, cat2: "", cat3: "", page: 1 })
+    setLocalFilters((prev) => ({ ...prev, category, category2: "", category3: "" }))
+    debouncedUpdateUrl({ cat: category || null, cat2: null, cat3: null, page: 1 })
   }
 
   const handleCategory2Change = (category2: string) => {
-    updateUrl({ cat2: category2, cat3: "", page: 1 })
+    setLocalFilters((prev) => ({ ...prev, category2, category3: "" }))
+    debouncedUpdateUrl({ cat2: category2 || null, cat3: null, page: 1 })
   }
 
   const handleCategory3Change = (category3: string) => {
-    updateUrl({ cat3: category3, page: 1 })
+    setLocalFilters((prev) => ({ ...prev, category3 }))
+    debouncedUpdateUrl({ cat3: category3 || null, page: 1 })
   }
 
   const handleClearCategories = () => {
-    updateUrl({ cat: "", cat2: "", cat3: "", page: 1 })
+    setLocalFilters((prev) => ({ ...prev, category: "", category2: "", category3: "" }))
+    debouncedUpdateUrl({ cat: null, cat2: null, cat3: null, page: 1 })
   }
 
   const handleClearCatTuples = () => {
-    updateUrl({ catTuples: null, page: 1 })
+    setLocalFilters((prev) => ({ ...prev, catTuples: "" }))
+    debouncedUpdateUrl({ catTuples: null, page: 1 })
   }
 
+  // Explicit action: flush debounce and clear everything
   const handleClearFilters = () => {
+    debouncedUpdateUrl.cancel()
     setQueryInput("")
+    setLocalFilters({
+      sortBy: FILTER_CONFIG.sortBy.default as SortByType,
+      origin: FILTER_CONFIG.origin.default,
+      searchType: FILTER_CONFIG.searchType.default as SearchType,
+      orderByPriority: FILTER_CONFIG.orderByPriority.default,
+      onlyAvailable: FILTER_CONFIG.onlyAvailable.default,
+      onlyDiscounted: FILTER_CONFIG.onlyDiscounted.default,
+      priority: FILTER_CONFIG.priority.default,
+      source: FILTER_CONFIG.source.default,
+      category: FILTER_CONFIG.category.default,
+      category2: FILTER_CONFIG.category2.default,
+      category3: FILTER_CONFIG.category3.default,
+      catTuples: FILTER_CONFIG.catTuples.default,
+    })
     router.push(window.location.pathname)
   }
 
@@ -534,44 +676,43 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           Procuts have a priority level, from 0 to 5. When favorited, products are assigned 5.
         </p>
 
-        <div className="flex items-center gap-2">
-          {/* Search Input */}
-          <div className="relative w-full">
-            {isSearching ? (
-              <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
-            ) : (
-              <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
-            )}
-            <Input
-              type="text"
-              placeholder="Search products..."
-              className="pr-16 pl-8 text-base md:text-sm"
-              value={queryInput}
-              onChange={(e) => setQueryInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            />
-            <Select value={urlState.searchType} onValueChange={(v) => handleSearchTypeChange(v as SearchType)}>
-              <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
-                <SelectValue placeholder="Search by" />
-              </SelectTrigger>
-              <SelectContent align="start" className="w-[180px]">
-                <SelectGroup>
-                  <SelectLabel>Search by</SelectLabel>
-                  <SelectSeparator />
-                  {searchTypes.map((type) => (
-                    <SelectItem key={type} value={type} className="capitalize">
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Search Input (debounced, no button on desktop) */}
+        <div className="relative w-full">
+          {isSearching ? (
+            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
+          ) : hasPendingChanges ? (
+            <ClockIcon className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-pulse text-amber-600 dark:text-amber-500" />
+          ) : (
+            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
+          )}
 
-          {/* Search Button */}
-          <Button variant="primary" disabled={isLoading} onClick={handleSearch} className="h-full w-min px-2">
-            {isSearching ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <SearchIcon className="h-4 w-4" />}
-          </Button>
+          <Input
+            type="text"
+            placeholder="Search products..."
+            className="pr-16 pl-8 text-base md:text-sm"
+            value={queryInput}
+            onChange={(e) => {
+              setQueryInput(e.target.value)
+              debouncedUpdateUrl({ q: e.target.value || null, page: 1 })
+            }}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          />
+          <Select value={localFilters.searchType} onValueChange={(v) => handleSearchTypeChange(v as SearchType)}>
+            <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
+              <SelectValue placeholder="Search by" />
+            </SelectTrigger>
+            <SelectContent align="start" className="w-[180px]">
+              <SelectGroup>
+                <SelectLabel>Search by</SelectLabel>
+                <SelectSeparator />
+                {searchTypes.map((type) => (
+                  <SelectItem key={type} value={type} className="capitalize">
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Product Count */}
@@ -579,15 +720,17 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           {showSkeletons ? (
             <Skeleton className="h-4 w-full rounded-md" />
           ) : (
-            <p className="text-muted-foreground text-xs">
-              <strong className="text-foreground">{totalCount}</strong> products found
-              {urlState.query && ` matching "${urlState.query}"`}
-              {showOverlay && (
-                <span className="text-muted-foreground ml-2 inline-flex items-center gap-1">
-                  <Loader2Icon className="h-3 w-3 animate-spin" />
-                </span>
-              )}
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-muted-foreground text-xs">
+                <strong className="text-foreground">{totalCount}</strong> products found
+                {urlState.query && ` matching "${urlState.query}"`}
+                {showOverlay && (
+                  <span className="text-muted-foreground ml-2 inline-flex items-center gap-1">
+                    <Loader2Icon className="h-3 w-3 animate-spin" />
+                  </span>
+                )}
+              </p>
+            </div>
           )}
 
           {/* Filters Accordion */}
@@ -600,7 +743,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 </span>
               </AccordionTrigger>
               <AccordionContent className="p-px pb-3">
-                <Select value={urlState.sortBy} onValueChange={(v) => handleSortChange(v as SortByType)}>
+                <Select value={localFilters.sortBy} onValueChange={(v) => handleSortChange(v as SortByType)}>
                   <SelectTrigger className="h-8 w-full">
                     <SelectValue className="flex items-center gap-2 text-sm" />
                   </SelectTrigger>
@@ -683,7 +826,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="order-by-priority"
-                      checked={urlState.orderByPriority}
+                      checked={localFilters.orderByPriority}
                       onCheckedChange={handleTogglePriorityOrder}
                     />
                     <Label
@@ -698,7 +841,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="only-available"
-                      checked={urlState.onlyAvailable}
+                      checked={localFilters.onlyAvailable}
                       onCheckedChange={handleToggleAvailable}
                     />
                     <Label
@@ -713,7 +856,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="only-discounted"
-                      checked={urlState.onlyDiscounted}
+                      checked={localFilters.onlyDiscounted}
                       onCheckedChange={handleToggleDiscounted}
                     />
                     <Label
@@ -832,10 +975,10 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
             <AccordionItem value="categories">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                 Categories
-                {(urlState.category || urlState.category2 || urlState.category3) && (
+                {(localFilters.category || localFilters.category2 || localFilters.category3) && (
                   <>
                     <span className="text-muted-foreground text-xs">
-                      ({[urlState.category, urlState.category2, urlState.category3].filter(Boolean).length})
+                      ({[localFilters.category, localFilters.category2, localFilters.category3].filter(Boolean).length})
                     </span>
                     <span
                       role="button"
@@ -854,16 +997,19 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               <AccordionContent className="pb-3">
                 <div className="mb-2 border-b pb-2">
                   <CategoryTupleSheet
-                    selectedTuples={urlState.catTuples}
-                    onApply={(tuples) => updateUrl({ catTuples: tuples || null, page: 1 })}
+                    selectedTuples={localFilters.catTuples}
+                    onApply={(tuples) => {
+                      setLocalFilters((prev) => ({ ...prev, catTuples: tuples }))
+                      debouncedUpdateUrl({ catTuples: tuples || null, page: 1 })
+                    }}
                     onClear={handleClearCatTuples}
-                    className="bg-primary/10 dark:bg-primary/20"
+                    className="bg-primary/10 dark:bg-primary/15 hover:bg-primary/20 dark:hover:bg-primary/25"
                   />
                 </div>
                 <CategoryCascadeFilter
-                  category={urlState.category}
-                  category2={urlState.category2}
-                  category3={urlState.category3}
+                  category={localFilters.category}
+                  category2={localFilters.category2}
+                  category3={localFilters.category3}
                   onCategoryChange={handleCategoryChange}
                   onCategory2Change={handleCategory2Change}
                   onCategory3Change={handleCategory3Change}
@@ -936,7 +1082,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
       {/* Mobile Navigation */}
       <MobileNav
-        urlState={urlState}
+        localFilters={localFilters}
         queryInput={queryInput}
         setQueryInput={setQueryInput}
         onSearch={handleSearch}
@@ -948,13 +1094,14 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         totalCount={totalCount}
         currentPage={currentPage}
         totalPages={totalPages}
+        hasPendingChanges={hasPendingChanges}
       />
 
       {/* Mobile Filters Drawer */}
       <MobileFiltersDrawer
         open={mobileFiltersOpen}
         onOpenChange={setMobileFiltersOpen}
-        urlState={urlState}
+        localFilters={localFilters}
         selectedOrigins={selectedOrigins}
         selectedPriorities={selectedPriorities}
         selectedSources={selectedSources}
@@ -1043,7 +1190,20 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 // ============================================================================
 
 interface MobileNavProps {
-  urlState: ReturnType<typeof useUrlState>["urlState"]
+  localFilters: {
+    searchType: SearchType
+    sortBy: SortByType
+    origin: string
+    orderByPriority: boolean
+    onlyAvailable: boolean
+    onlyDiscounted: boolean
+    priority: string
+    source: string
+    category: string
+    category2: string
+    category3: string
+    catTuples: string
+  }
   queryInput: string
   setQueryInput: (value: string) => void
   onSearch: () => void
@@ -1055,10 +1215,11 @@ interface MobileNavProps {
   totalCount: number
   currentPage: number
   totalPages: number
+  hasPendingChanges: boolean
 }
 
 function MobileNav({
-  urlState,
+  localFilters,
   queryInput,
   setQueryInput,
   onSearch,
@@ -1069,6 +1230,7 @@ function MobileNav({
   totalCount,
   currentPage,
   totalPages,
+  hasPendingChanges,
 }: MobileNavProps) {
   return (
     <nav className="sticky top-0 z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:top-[54px] lg:hidden dark:bg-zinc-950/95">
@@ -1076,6 +1238,8 @@ function MobileNav({
         <div className="relative flex-1">
           {isSearching ? (
             <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-spin" />
+          ) : hasPendingChanges ? (
+            <ClockIcon className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 animate-pulse text-amber-600 dark:text-amber-500" />
           ) : (
             <SearchIcon className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
           )}
@@ -1087,7 +1251,7 @@ function MobileNav({
             onKeyDown={(e) => e.key === "Enter" && onSearch()}
             onChange={(e) => setQueryInput(e.target.value)}
           />
-          <Select value={urlState.searchType} onValueChange={(v) => onSearchTypeChange(v as SearchType)}>
+          <Select value={localFilters.searchType} onValueChange={(v) => onSearchTypeChange(v as SearchType)}>
             <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
               <SelectValue placeholder="Search by" />
             </SelectTrigger>
@@ -1112,13 +1276,20 @@ function MobileNav({
       {/* Status Bar */}
       {totalCount > 0 && (
         <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs">
-          <span>
-            Showing{" "}
-            <span className="text-foreground font-semibold">
-              {showingFrom}-{showingTo}
-            </span>{" "}
-            of <span className="text-foreground font-semibold">{totalCount}</span>
-          </span>
+          <div className="flex items-center gap-2">
+            <span>
+              Showing{" "}
+              <span className="text-foreground font-semibold">
+                {showingFrom}-{showingTo}
+              </span>{" "}
+              of <span className="text-foreground font-semibold">{totalCount}</span>
+            </span>
+            {hasPendingChanges && (
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-500">
+                <ClockIcon className="h-3 w-3" />
+              </span>
+            )}
+          </div>
           <span>
             Page <span className="text-foreground font-semibold">{currentPage}</span> of{" "}
             <span className="text-foreground font-semibold">{totalPages}</span>
@@ -1132,7 +1303,20 @@ function MobileNav({
 interface MobileFiltersDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  urlState: ReturnType<typeof useUrlState>["urlState"]
+  localFilters: {
+    searchType: SearchType
+    sortBy: SortByType
+    origin: string
+    orderByPriority: boolean
+    onlyAvailable: boolean
+    onlyDiscounted: boolean
+    priority: string
+    source: string
+    category: string
+    category2: string
+    category3: string
+    catTuples: string
+  }
   selectedOrigins: number[]
   selectedPriorities: number[]
   selectedSources: PrioritySource[]
@@ -1155,7 +1339,7 @@ interface MobileFiltersDrawerProps {
 function MobileFiltersDrawer({
   open,
   onOpenChange,
-  urlState,
+  localFilters,
   selectedOrigins,
   selectedPriorities,
   selectedSources,
@@ -1332,16 +1516,16 @@ function MobileFiltersDrawer({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Categories</Label>
-                {(urlState.category || urlState.category2 || urlState.category3) && (
+                {(localFilters.category || localFilters.category2 || localFilters.category3) && (
                   <button onClick={onClearCategories} className="text-muted-foreground text-xs hover:underline">
                     Clear
                   </button>
                 )}
               </div>
               <CategoryCascadeFilter
-                category={urlState.category}
-                category2={urlState.category2}
-                category3={urlState.category3}
+                category={localFilters.category}
+                category2={localFilters.category2}
+                category3={localFilters.category3}
                 onCategoryChange={onCategoryChange}
                 onCategory2Change={onCategory2Change}
                 onCategory3Change={onCategory3Change}
@@ -1355,28 +1539,28 @@ function MobileFiltersDrawer({
                 <SortButton
                   label="Name (A to Z)"
                   value="a-z"
-                  current={urlState.sortBy}
+                  current={localFilters.sortBy}
                   onChange={onSortChange}
                   icon={<ArrowDownAZ className="h-4 w-4" />}
                 />
                 <SortButton
                   label="Name (Z to A)"
                   value="z-a"
-                  current={urlState.sortBy}
+                  current={localFilters.sortBy}
                   onChange={onSortChange}
                   icon={<ArrowUpAZ className="h-4 w-4" />}
                 />
                 <SortButton
                   label="Price: High to Low"
                   value="price-high-low"
-                  current={urlState.sortBy}
+                  current={localFilters.sortBy}
                   onChange={onSortChange}
                   icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
                 />
                 <SortButton
                   label="Price: Low to High"
                   value="price-low-high"
-                  current={urlState.sortBy}
+                  current={localFilters.sortBy}
                   onChange={onSortChange}
                   icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
                 />
@@ -1390,7 +1574,7 @@ function MobileFiltersDrawer({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="mobile-only-discounted"
-                    checked={urlState.onlyDiscounted}
+                    checked={localFilters.onlyDiscounted}
                     onCheckedChange={onToggleDiscounted}
                   />
                   <Label
@@ -1405,7 +1589,7 @@ function MobileFiltersDrawer({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="mobile-order-by-priority"
-                    checked={urlState.orderByPriority}
+                    checked={localFilters.orderByPriority}
                     onCheckedChange={onTogglePriorityOrder}
                   />
                   <Label
@@ -1511,7 +1695,7 @@ function CategoryCascadeFilter({
     <div className="flex flex-col gap-3">
       {/* Level 1: Category */}
       <div className="p-px">
-        <Label className="text-muted-foreground mb-1 block text-xs">Category 1</Label>
+        <Label className="text-muted-foreground mb-1 block text-xs">Category #1</Label>
         <Select value={category || "_all"} onValueChange={(v) => onCategoryChange(v === "_all" ? "" : v)}>
           <SelectTrigger className="h-8 w-full text-sm">
             <SelectValue placeholder="All categories" />

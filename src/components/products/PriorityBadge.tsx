@@ -1,12 +1,11 @@
 import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { cn } from "@/lib/utils"
 
 interface PriorityBadgeProps {
   priority: number | null
   variant?: "default" | "compact"
-  size?: "default" | "3xs" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl"
+  size?: "default" | "3xs" | "2xs" | "xs" | "sm"
   className?: string
 }
 
@@ -66,41 +65,24 @@ export function PriorityBadge({ priority, size = "2xs", variant = "compact", cla
   const config = getPriorityConfig(priority)
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <Tooltip>
-        <TooltipTrigger>
-          <Badge
-            size={size}
-            roundedness="xs"
-            variant="outline"
-            className={cn(
-              "gap-0.5 border-transparent text-white opacity-100 transition-all duration-300 group-hover:opacity-20 hover:opacity-100 dark:border-transparent",
-              config.className,
-              className,
-            )}
-          >
-            {variant === "compact" ? (
-              <span>{config.label}</span>
-            ) : (
-              <>
-                Priority
-                <span>{config.label}</span>
-              </>
-            )}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          align="start"
-          sideOffset={6}
-          alignOffset={-6}
-          size="xs"
-          variant="glass"
-          className="max-w-60"
-        >
-          Priority: {config.tooltip}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Badge
+      size={size}
+      roundedness="xs"
+      variant="outline"
+      className={cn(
+        "gap-0.5 border-transparent text-white opacity-100 transition-all duration-300 group-hover:opacity-0 hover:opacity-100 dark:border-transparent",
+        config.className,
+        className,
+      )}
+    >
+      {variant === "compact" ? (
+        <span>{config.label}</span>
+      ) : (
+        <>
+          Priority
+          <span>{config.label}</span>
+        </>
+      )}
+    </Badge>
   )
 }

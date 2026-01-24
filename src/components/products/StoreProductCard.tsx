@@ -162,7 +162,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           ) : null}
         </div>
 
-        <div className="absolute top-2 right-2 flex flex-col items-end gap-0">
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {isError ? (
             <span className="bg-destructive flex items-center justify-center rounded p-1">
               <WifiOffIcon className="size-3 text-white" />
@@ -197,7 +197,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 </TooltipProvider>
               )}
 
-              <PriorityBadge priority={priority} variant="compact" />
+              <PriorityBadge priority={priority} variant="compact" size="2xs" />
             </>
           )}
         </div>
