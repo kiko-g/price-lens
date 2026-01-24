@@ -751,47 +751,37 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="origin-continente"
-                      checked={selectedOrigins.includes(1)}
-                      onCheckedChange={() => handleOriginToggle(1)}
-                    />
-                    <Label
-                      htmlFor="origin-continente"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <ContinenteSvg className="h-4 min-h-4 w-auto" />
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="origin-auchan"
-                      checked={selectedOrigins.includes(2)}
-                      onCheckedChange={() => handleOriginToggle(2)}
-                    />
-                    <Label
-                      htmlFor="origin-auchan"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <AuchanSvg className="h-4 min-h-4 w-auto" />
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="origin-pingo-doce"
-                      checked={selectedOrigins.includes(3)}
-                      onCheckedChange={() => handleOriginToggle(3)}
-                    />
-                    <Label
-                      htmlFor="origin-pingo-doce"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                    </Label>
-                  </div>
+                  {[
+                    {
+                      id: 1,
+                      name: "Continente",
+                      logo: <ContinenteSvg className="h-4 min-h-4 w-auto" />,
+                    },
+                    {
+                      id: 2,
+                      name: "Auchan",
+                      logo: <AuchanSvg className="h-4 min-h-4 w-auto" />,
+                    },
+                    {
+                      id: 3,
+                      name: "Pingo Doce",
+                      logo: <PingoDoceSvg className="h-4 min-h-4 w-auto" />,
+                    },
+                  ].map((origin) => (
+                    <div key={origin.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`origin-${origin.id}`}
+                        checked={selectedOrigins.includes(origin.id)}
+                        onCheckedChange={() => handleOriginToggle(origin.id)}
+                      />
+                      <Label
+                        htmlFor={`origin-${origin.id}`}
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        {origin.logo}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </AccordionContent>
             </AccordionItem>

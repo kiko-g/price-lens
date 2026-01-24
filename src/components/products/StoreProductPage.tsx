@@ -44,7 +44,7 @@ import {
 
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { ProductChart } from "@/components/products/ProductChart"
-import { resolveSupermarketChain } from "@/components/products/Supermarket"
+import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { RelatedStoreProducts } from "@/components/products/RelatedStoreProducts"
 import { IdenticalStoreProducts } from "@/components/products/IdenticalStoreProducts"
@@ -138,7 +138,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const refreshHours = sp.priority !== null ? PRIORITY_REFRESH_HOURS[sp.priority] : null
   const refreshLabel = refreshHours ? formatHoursDuration(refreshHours) : null
   const rangeFromUrl = parseRange(searchParams.get("range"))
-  const supermarketChain = resolveSupermarketChain(sp?.origin_id)
+  const supermarketName = getSupermarketChainName(sp?.origin_id)
   const storeProductId = sp.id?.toString() || ""
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
@@ -264,7 +264,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 className="dark:bg-white dark:hover:bg-white/90"
               >
                 <Link href={sp.url} target="_blank" rel="noreferrer noopener">
-                  {supermarketChain?.logo}
+                  <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
                 </Link>
               </Button>
             </div>
@@ -354,7 +354,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     onClick={() => updateStoreProduct.mutate(sp)}
                     disabled={updateStoreProduct.isPending}
                   >
-                    Update from origin ({supermarketChain?.name})
+                    Update from origin ({supermarketName})
                     {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon className="h-4 w-4" />}
                   </Button>
                 </DropdownMenuItem>

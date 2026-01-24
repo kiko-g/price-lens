@@ -5,7 +5,7 @@ import { type StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"
 import { PriceChange } from "@/components/products/PriceChange"
-import { resolveSupermarketChain } from "@/components/products/Supermarket"
+import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
 import { ChevronRightIcon, ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
 
@@ -107,7 +107,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
             className="max-w-28 gap-0.5 bg-white text-black hover:bg-white/90 dark:bg-white dark:hover:bg-white/90 [&_svg]:size-3"
           >
             <Link href={onlineUrl} target="_blank">
-              {resolveSupermarketChain(origin)?.logoSmall}
+              <SupermarketChainBadge originId={origin} variant="logoSmall" />
               <ExternalLinkIcon />
             </Link>
           </Button>

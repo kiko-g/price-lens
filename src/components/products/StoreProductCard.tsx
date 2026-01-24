@@ -31,7 +31,7 @@ import { ShareButton } from "@/components/ui/combo/share-button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { ProductChart } from "@/components/products/ProductChart"
-import { resolveSupermarketChain } from "@/components/products/Supermarket"
+import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
@@ -92,8 +92,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
     return <StoreProductCardSkeleton />
   }
 
-  const supermarketChain = resolveSupermarketChain(sp?.origin_id)
-
+  const supermarketName = getSupermarketChainName(sp?.origin_id)
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isNormalPrice =
@@ -250,7 +249,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             variant="outline-white"
             className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-0"
           >
-            {supermarketChain ? supermarketChain.logoSmall : null}
+            <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
           </Badge>
         </div>
       </div>
@@ -333,7 +332,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                       target="_blank"
                       className="flex w-full items-center justify-between gap-1"
                     >
-                      Open in {supermarketChain?.name}
+                      Open in {supermarketName}
                       <ArrowUpRightIcon />
                     </Link>
                   </Button>
@@ -344,7 +343,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     onClick={() => navigator.clipboard.writeText(sp.url || "")}
                     title={sp.url || ""}
                   >
-                    Copy {supermarketChain?.name} URL
+                    Copy {supermarketName} URL
                     <CopyIcon />
                   </Button>
                 </DropdownMenuItem>
@@ -368,7 +367,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
                     <DropdownMenuItem asChild>
                       <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
-                        Update from origin ({supermarketChain?.name})
+                        Update from origin ({supermarketName})
                         <RefreshCcwIcon />
                       </Button>
                     </DropdownMenuItem>

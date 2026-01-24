@@ -4,7 +4,7 @@ import { useState } from "react"
 import { type StoreProduct } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { resolveSupermarketChain } from "@/components/products/Supermarket"
+import { getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { updateProductPriority } from "@/app/admin/priorities/actions"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
@@ -46,7 +46,7 @@ function resolveImageUrlForCard(image: string, size = 400) {
 
 export function AdminProductPriorityCard({ product, onUpdate }: Props) {
   const [isUpdating, setIsUpdating] = useState(false)
-  const supermarket = resolveSupermarketChain(product.origin_id)
+  const supermarketName = getSupermarketChainName(product.origin_id)
 
   const handlePriorityChange = async (value: string) => {
     if (value === "null") return
@@ -90,10 +90,10 @@ export function AdminProductPriorityCard({ product, onUpdate }: Props) {
           )}
 
           {/* Supermarket Badge */}
-          {supermarket && (
+          {supermarketName && (
             <div className="absolute top-1 right-1">
               <Badge variant="secondary" className="text-xs">
-                {supermarket.name}
+                {supermarketName}
               </Badge>
             </div>
           )}
