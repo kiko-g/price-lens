@@ -1,4 +1,4 @@
-import { arePricePointsEqual } from "@/lib/pricing"
+import { arePricePointsEqual } from "@/lib/business/pricing"
 import { createClient } from "@/lib/supabase/server"
 import { now } from "@/lib/utils"
 import type { Price, PricesWithAnalytics, PricePoint } from "@/types"

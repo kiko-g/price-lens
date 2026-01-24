@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { qstash, getBaseUrl, BATCH_SIZE } from "@/lib/qstash"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
-import { updatePricePoint } from "@/lib/pricing"
+import { updatePricePoint } from "@/lib/business/pricing"
 import {
   createBulkScrapeJob,
   getActiveBulkScrapeJobs,
@@ -231,7 +231,9 @@ export async function PATCH(req: NextRequest) {
         total: jobTotal,
         matching: matchingCount, // Include total matching for reference
         processed: 0,
-        message: limit ? `Direct mode job created with limit of ${jobTotal} products.` : "Direct mode job created. Call PATCH again to process batches.",
+        message: limit
+          ? `Direct mode job created with limit of ${jobTotal} products.`
+          : "Direct mode job created. Call PATCH again to process batches.",
         mode: "direct",
       })
     }
@@ -257,9 +259,7 @@ export async function PATCH(req: NextRequest) {
 
     query = applyFilters(query, { ...job.filters, onlyUrl: job.filters.onlyUrl ?? false })
 
-    const { data: products, error } = await query
-      .order("id", { ascending: true })
-      .limit(batchSize)
+    const { data: products, error } = await query.order("id", { ascending: true }).limit(batchSize)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

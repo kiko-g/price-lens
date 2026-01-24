@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { Metadata } from "next"
 import { StoreProductsShowcase } from "@/components/StoreProductsShowcase"
-import { buildPageTitle } from "@/lib/utils/page-title"
+import { buildPageTitle } from "@/lib/business/page-title"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Footer } from "@/components/layout/Footer"
 import { HideFooter } from "@/contexts/FooterContext"

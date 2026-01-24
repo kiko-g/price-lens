@@ -9,7 +9,7 @@ import { PrioritySource } from "@/types"
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
 import { searchTypes, type SearchType, type SortByType, PRODUCT_PRIORITY_LEVELS } from "@/types/business"
 import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
-import { buildPageTitle } from "@/lib/utils/page-title"
+import { buildPageTitle } from "@/lib/business/page-title"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { Button } from "@/components/ui/button"

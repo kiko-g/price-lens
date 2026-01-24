@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { verifySignatureAppRouter } from "@upstash/qstash/nextjs"
 import { createClient } from "@/lib/supabase/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
-import { updatePricePoint } from "@/lib/pricing"
+import { updatePricePoint } from "@/lib/business/pricing"
 import { incrementBulkScrapeProgress, getBulkScrapeJob } from "@/lib/kv"
 import type { StoreProduct } from "@/types"
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
-import { updatePricePoint } from "@/lib/pricing"
+import { updatePricePoint } from "@/lib/business/pricing"
 import type { StoreProduct } from "@/types"
 
 // 5 minutes max for batch processing
