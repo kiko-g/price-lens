@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { PRIORITY_CONFIG } from "@/lib/business/priorities"
+import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
 type BubbleSize = "xs" | "sm" | "md" | "lg"
 

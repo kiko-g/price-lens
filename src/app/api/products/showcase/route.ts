@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { buildChartData } from "@/lib/utils"
+import { buildChartData } from "@/lib/business/chart"
 import type { Price, StoreProduct, ProductChartEntry } from "@/types"
 
 export type ShowcaseTrendStats = {
@@ -46,7 +46,7 @@ function calculateTrendStats(prices: Price[]): ShowcaseTrendStats {
 
   // Sort by date ascending
   const sortedPrices = [...recentPrices].sort(
-    (a, b) => new Date(a.valid_from || "").getTime() - new Date(b.valid_from || "").getTime()
+    (a, b) => new Date(a.valid_from || "").getTime() - new Date(b.valid_from || "").getTime(),
   )
 
   const firstPrice = sortedPrices[0].price || 0
@@ -72,7 +72,7 @@ function calculateTrendStats(prices: Price[]): ShowcaseTrendStats {
 
 /**
  * GET /api/products/showcase?ids=123,456,789
- * 
+ *
  * Batch fetch products with their prices, pre-computed chart data, and trend statistics.
  * Optimized for the home page carousel - single request instead of 14 separate calls.
  */
@@ -85,7 +85,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Missing 'ids' parameter" }, { status: 400 })
     }
 
-    const ids = idsParam.split(",").map((id) => id.trim()).filter(Boolean)
+    const ids = idsParam
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
 
     if (ids.length === 0) {
       return NextResponse.json({ error: "No valid IDs provided" }, { status: 400 })
@@ -98,10 +101,7 @@ export async function GET(req: NextRequest) {
     const supabase = createClient()
 
     // Batch fetch all products
-    const { data: products, error: productsError } = await supabase
-      .from("store_products")
-      .select("*")
-      .in("id", ids)
+    const { data: products, error: productsError } = await supabase.from("store_products").select("*").in("id", ids)
 
     if (productsError) {
       console.error("Error fetching showcase products:", productsError)
@@ -136,10 +136,10 @@ export async function GET(req: NextRequest) {
     for (const product of products || []) {
       const productId = String(product.id)
       const prices = pricesByProductId.get(productId) || []
-      
+
       // Pre-compute chart data using efficient sampling
       const chartData = buildChartData(prices, { range: "1M", samplingMode: "efficient" })
-      
+
       // Calculate trend stats for the displayed period
       const trendStats = calculateTrendStats(prices)
 

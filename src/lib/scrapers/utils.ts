@@ -1,9 +1,10 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
 import https from "https"
-import { formatProductName, now, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/utils"
-import type { RawProduct, ScrapedProduct, PriorityInfo, FetchResult } from "./types"
-import { StoreOrigin } from "./types"
+
+import type { StoreOrigin, RawProduct, ScrapedProduct, PriorityInfo, FetchResult } from "@/lib/scrapers/types"
+import { now } from "@/lib/utils"
+import { formatProductName, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/business/product"
 
 /**
  * Connection pooling agent - reuses TCP connections to reduce handshake overhead

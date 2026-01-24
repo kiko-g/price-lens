@@ -1,13 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { cn, discountValueToPercentage, formatTimestamptz } from "@/lib/utils"
-import type { Price } from "@/types"
-import { InsertPriceModal } from "./InsertPriceModal"
-import { AdminPagination, useAdminPagination } from "./AdminPagination"
 import { useAdminPrices, useSanitizePrices, useDuplicatePriceStats, useDeleteDuplicatePrices } from "@/hooks/useAdmin"
+import type { Price } from "@/types"
+
+import { cn, formatTimestamptz } from "@/lib/utils"
+import { discountValueToPercentage } from "@/lib/business/product"
 
 import { HideFooter } from "@/contexts/FooterContext"
+import { InsertPriceModal } from "@/components/admin/InsertPriceModal"
+import { AdminPagination, useAdminPagination } from "@/components/admin/AdminPagination"
 import { Button } from "@/components/ui/button"
 
 import {

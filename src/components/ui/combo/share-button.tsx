@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { generateNativeShareUrl } from "@/lib/business/product"
+import type { StoreProduct } from "@/types"
 
 import {
   DropdownMenu,
@@ -15,8 +17,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { XTwitterIcon } from "@/components/icons"
 import { CheckIcon, CopyIcon, MailIcon, Share2Icon, TwitterIcon } from "lucide-react"
-import { generateNativeShareUrl } from "@/lib/utils"
-import { StoreProduct } from "@/types"
 
 interface ShareButtonProps {
   sp: StoreProduct

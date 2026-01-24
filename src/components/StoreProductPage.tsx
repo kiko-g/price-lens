@@ -7,8 +7,9 @@ import { toast } from "sonner"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { cn } from "@/lib/utils"
-import { discountValueToPercentage } from "@/lib/utils"
-import { formatHoursDuration, PRIORITY_CONFIG, PRIORITY_REFRESH_HOURS } from "@/lib/business/priorities"
+import { discountValueToPercentage } from "@/lib/business/product"
+import { formatHoursDuration, PRIORITY_CONFIG, PRIORITY_REFRESH_HOURS } from "@/lib/business/priority"
+
 import type { StoreProduct } from "@/types"
 import { RANGES, DateRange } from "@/types/business"
 import { useUser } from "@/hooks/useUser"

@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { cn, discountValueToPercentage, generateProductPath } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 import { type StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"

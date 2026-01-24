@@ -3,29 +3,25 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useMemo, useRef, useState, useCallback } from "react"
-import { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
-import {
-  cn,
-  buildChartData,
-  chartConfig,
-  generateProductPath,
-  calculateChartBounds,
-  type ChartSamplingMode,
-} from "@/lib/utils"
-import { imagePlaceholder } from "@/lib/business/data"
-
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
 import { usePricesWithAnalytics } from "@/hooks/usePrices"
 
+import type { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
+import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
+
+import { cn } from "@/lib/utils"
+import { buildChartData, chartConfig, calculateChartBounds, type ChartSamplingMode } from "@/lib/business/chart"
+import { generateProductPath } from "@/lib/business/product"
+import { imagePlaceholder } from "@/lib/business/data"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Barcode } from "@/components/ui/combo/barcode"
-import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
+import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PricesVariationCard } from "@/components/PricesVariationCard"
 
 import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-react"

@@ -1,7 +1,7 @@
 import { Client } from "@upstash/qstash"
 
 // Re-export priority constants for convenience
-export { PRIORITY_REFRESH_HOURS, ACTIVE_PRIORITIES } from "@/lib/business/priorities"
+export { PRIORITY_REFRESH_HOURS, ACTIVE_PRIORITIES } from "@/lib/business/priority"
 
 // QStash client for publishing messages
 // Requires QSTASH_TOKEN environment variable

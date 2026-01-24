@@ -3,8 +3,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { memo, useState, useEffect, useRef, useCallback } from "react"
-import { cn, chartConfig, generateProductPath } from "@/lib/utils"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+
+import { cn } from "@/lib/utils"
+import { chartConfig } from "@/lib/business/chart"
+import { generateProductPath } from "@/lib/business/product"
 import {
   SHOWCASE_PRODUCT_IDS,
   type ShowcaseData,

@@ -1,7 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import { buildChartData } from "@/lib/utils"
+import { buildChartData } from "@/lib/business/chart"
 import type { Price } from "@/types"
 import { SHOWCASE_PRODUCT_IDS } from "./index"
 import type { ShowcaseData, ShowcaseTrendStats } from "./index"

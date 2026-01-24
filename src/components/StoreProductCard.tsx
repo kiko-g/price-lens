@@ -4,21 +4,29 @@ import Link from "next/link"
 import Image from "next/image"
 import { Suspense, useState } from "react"
 import { type StoreProduct } from "@/types"
-
 import { useUser } from "@/hooks/useUser"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useStoreProductCard } from "@/hooks/useStoreProductCard"
 
-import { CodeShowcase } from "@/components/ui/combo/code-showcase"
-import { ProductChart } from "@/components/ProductChart"
-import { resolveSupermarketChain } from "@/components/Supermarket"
-import { PriorityBadge } from "@/components/PriorityBadge"
-import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
+import { cn } from "@/lib/utils"
+import { imagePlaceholder } from "@/lib/business/data"
+import { getShortRelativeTime } from "@/lib/business/chart"
+import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Barcode } from "@/components/ui/combo/barcode"
+import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { DevBadge } from "@/components/ui/combo/dev-badge"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,20 +36,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ShareButton } from "@/components/ui/combo/share-button"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { cn, discountValueToPercentage, generateProductPath, getShortRelativeTime } from "@/lib/utils"
-import { imagePlaceholder } from "@/lib/business/data"
+import { ProductChart } from "@/components/ProductChart"
+import { resolveSupermarketChain } from "@/components/Supermarket"
+import { PriorityBadge } from "@/components/PriorityBadge"
+import { StoreProductCardSkeleton } from "@/components/StoreProductCardSkeleton"
+import { PriceFreshnessInfo } from "@/components/PriceFreshnessInfo"
+
 import {
   ArrowUpRightIcon,
   CopyIcon,
@@ -54,7 +57,6 @@ import {
   HeartIcon,
   CalendarPlusIcon,
 } from "lucide-react"
-import { PriceFreshnessInfo } from "./PriceFreshnessInfo"
 
 function resolveImageUrlForCard(image: string, size = 400) {
   const url = new URL(image)

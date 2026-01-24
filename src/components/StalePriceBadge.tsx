@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { getPriceStaleness, formatHoursDuration, DEFAULT_STALENESS_LENIENCE_HOURS } from "@/lib/business/priorities"
+import { getPriceStaleness, formatHoursDuration, DEFAULT_STALENESS_LENIENCE_HOURS } from "@/lib/business/priority"
 
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"

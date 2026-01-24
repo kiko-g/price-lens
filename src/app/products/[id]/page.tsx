@@ -1,12 +1,13 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { StoreProductPage } from "@/components/StoreProductPage"
-import { storeProductQueries } from "@/lib/queries/products"
-import { createClient } from "@/lib/supabase/server"
-import { extractProductIdFromSlug, generateProductSlug } from "@/lib/utils"
-import { siteConfig } from "@/lib/config"
 import { STORE_NAMES } from "@/types/business"
+import { siteConfig } from "@/lib/config"
+import { createClient } from "@/lib/supabase/server"
+import { storeProductQueries } from "@/lib/queries/products"
+import { extractProductIdFromSlug, generateProductSlug } from "@/lib/business/product"
+
+import { StoreProductPage } from "@/components/StoreProductPage"
 
 interface PageProps {
   params: Promise<{ id: string }>

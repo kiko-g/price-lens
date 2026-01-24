@@ -1,5 +1,6 @@
-import { cn, getShortRelativeTime } from "@/lib/utils"
-import { PRIORITY_REFRESH_HOURS, formatHoursDuration } from "@/lib/business/priorities"
+import { cn } from "@/lib/utils"
+import { getShortRelativeTime } from "@/lib/business/chart"
+import { PRIORITY_REFRESH_HOURS, formatHoursDuration } from "@/lib/business/priority"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ClockIcon } from "lucide-react"
