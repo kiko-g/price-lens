@@ -688,7 +688,7 @@ function MobileNav({
       </div>
 
       {totalCount > 0 && (
-        <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs">
+        <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs leading-none">
           <span>
             Showing{" "}
             <span className="text-foreground font-semibold">
