@@ -58,7 +58,7 @@ const DrawerOverlay = React.forwardRef<
   <DrawerPrimitive.Overlay
     ref={ref}
     // pointer/touch blocked here so the page underneath never scrolls
-    className={cn("pointer-events-auto fixed inset-0 z-50 touch-none bg-black/80", className)}
+    className={cn("pointer-events-auto fixed inset-0 z-50 touch-none bg-black/50", className)}
     {...props}
   />
 ))
@@ -74,12 +74,15 @@ const DrawerContent = React.forwardRef<
       ref={ref}
       // "transform-gpu will-change" keep animation smooth, touch-pan-y/overscroll-contain prevent scroll chaining/P2R.
       className={cn(
-        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto transform-gpu touch-pan-y flex-col overscroll-contain rounded-t-[10px] border will-change-transform",
+        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[92dvh] transform-gpu touch-pan-y flex-col overscroll-contain rounded-t-2xl border-t will-change-transform",
         className,
       )}
       {...props}
     >
-      <div className="bg-muted mx-auto mt-4 h-2 w-[100px] rounded-full" />
+      {/* Drag handle - larger touch target for better usability */}
+      <div className="flex w-full cursor-grab items-center justify-center py-4 active:cursor-grabbing">
+        <div className="bg-muted-foreground/40 h-1.5 w-12 rounded-full" />
+      </div>
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -87,7 +90,7 @@ const DrawerContent = React.forwardRef<
 DrawerContent.displayName = "DrawerContent"
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("grid gap-1.5 px-4 pt-4 pb-2 text-center sm:text-left md:p-4", className)} {...props} />
+  <div className={cn("grid gap-1.5 px-4 pb-2 text-center sm:text-left", className)} {...props} />
 )
 DrawerHeader.displayName = "DrawerHeader"
 

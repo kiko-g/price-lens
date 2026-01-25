@@ -1369,11 +1369,11 @@ function MobileFiltersDrawer({
             />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="h-[85vh] lg:hidden">
+        <DrawerContent className="lg:hidden">
           <DrawerHeader>
             <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
           </DrawerHeader>
-          <div className="mt-2 flex flex-col gap-6 overflow-y-auto border-t px-4 pt-2 pb-24">
+          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4 pb-24">
             {/* Store Origin Filter */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
