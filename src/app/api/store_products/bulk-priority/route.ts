@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import {
-  getMatchingProductsCount,
+  getMatchingProductsWithDistribution,
   bulkUpdatePriority,
   type StoreProductsQueryParams,
   SupermarketChain,
@@ -11,7 +11,12 @@ import { PrioritySource } from "@/types"
 /**
  * GET /api/store_products/bulk-priority
  *
- * Get count of products matching the filter criteria (for preview)
+ * Get count and priority distribution of products matching the filter criteria (for preview)
+ *
+ * Response:
+ * - count: total number of matching products
+ * - distribution: object mapping priority values to counts (e.g., { "0": 50, "1": 2850, "5": 100 })
+ *   - key "-1" represents products with null priority
  */
 export async function GET(req: NextRequest) {
   // Only allow in development
@@ -23,13 +28,13 @@ export async function GET(req: NextRequest) {
     const params = req.nextUrl.searchParams
     const queryParams = parseSearchParams(params)
 
-    const result = await getMatchingProductsCount(queryParams)
+    const result = await getMatchingProductsWithDistribution(queryParams)
 
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ count: result.count }, { status: 200 })
+    return NextResponse.json({ count: result.count, distribution: result.distribution }, { status: 200 })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error"
     console.error("[/api/store_products/bulk-priority GET] Error:", message)
@@ -63,11 +68,19 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Priority must be a number between 0 and 5" }, { status: 400 })
     }
 
+    // Parse excludePriorities from query params (priorities to preserve/skip)
+    const excludeParam = params.get("excludePriorities")
+    const excludePriorities = excludeParam
+      ?.split(",")
+      .map((v) => parseInt(v.trim(), 10))
+      .filter((v) => !isNaN(v) && v >= 0 && v <= 5)
+
     const queryParams = parseSearchParams(params)
 
     const result = await bulkUpdatePriority({
       filters: queryParams,
       priority,
+      excludePriorities: excludePriorities?.length ? excludePriorities : undefined,
     })
 
     if (result.error) {

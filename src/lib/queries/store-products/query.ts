@@ -344,6 +344,8 @@ export interface BulkPriorityUpdateParams {
   filters: StoreProductsQueryParams
   /** New priority value (0-5) */
   priority: number
+  /** Skip products with these existing priorities (0-5) */
+  excludePriorities?: number[]
 }
 
 export interface BulkPriorityUpdateResult {
@@ -393,6 +395,88 @@ export async function getMatchingProductsCount(
   return { count: count ?? 0, error: null }
 }
 
+export interface PriorityDistribution {
+  [priority: number]: number
+}
+
+export interface PriorityDistributionResult {
+  count: number
+  distribution: PriorityDistribution
+  error: { message: string } | null
+}
+
+/**
+ * Get count and priority distribution of products matching the filter criteria
+ * Uses parallel count queries for each priority level (fast, ~7 requests instead of N/1000)
+ */
+export async function getMatchingProductsWithDistribution(
+  params: StoreProductsQueryParams,
+): Promise<PriorityDistributionResult> {
+  const supabase = createClient()
+  const flags = { ...DEFAULT_FLAGS, ...params.flags }
+
+  // Helper to build base count query with all filters (without priority filter)
+  const buildBaseCountQuery = () => {
+    let query = supabase.from("store_products").select("id", { count: "exact", head: true })
+
+    if (flags.excludeEmptyNames) {
+      query = query.not("name", "eq", "").not("name", "is", null)
+    }
+
+    // Apply all filters EXCEPT priority (we want to see all priorities in the distribution)
+    query = applyOriginFilter(query, params)
+    query = applyCategoryFilter(query, params)
+    query = applySearchFilter(query, params)
+    query = applySourceFilter(query, params)
+
+    if (flags.onlyDiscounted) {
+      query = query.gt("discount", 0)
+    }
+
+    if (flags.onlyAvailable) {
+      query = query.eq("available", true)
+    }
+
+    return query
+  }
+
+  // Run parallel count queries for each priority level (0-5) plus null
+  const priorityLevels = [0, 1, 2, 3, 4, 5, null] as const
+
+  const countPromises = priorityLevels.map(async (priority) => {
+    const query = buildBaseCountQuery()
+    const filteredQuery = priority === null ? query.is("priority", null) : query.eq("priority", priority)
+    const { count, error } = await filteredQuery
+    return { priority, count: count ?? 0, error }
+  })
+
+  const results = await Promise.all(countPromises)
+
+  // Check for errors
+  const firstError = results.find((r) => r.error)
+  if (firstError?.error) {
+    return { count: 0, distribution: {}, error: { message: firstError.error.message } }
+  }
+
+  // Build distribution object
+  const distribution: PriorityDistribution = {}
+  let totalCount = 0
+
+  for (const result of results) {
+    if (result.count > 0) {
+      const key = result.priority ?? -1 // Use -1 for null priorities
+      distribution[key] = result.count
+      totalCount += result.count
+    }
+  }
+
+  return {
+    count: totalCount,
+    distribution,
+    error: null,
+  }
+}
+
 /**
  * Bulk update priority for all products matching the filter criteria
  */
@@ -400,49 +484,77 @@ export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Prom
   const supabase = createClient()
   const flags = { ...DEFAULT_FLAGS, ...params.filters.flags }
 
-  // First, get all matching product IDs
-  let selectQuery = supabase.from("store_products").select("id")
+  // Helper to build the base query with all filters
+  const buildFilteredQuery = () => {
+    let query = supabase.from("store_products").select("id")
 
-  // Apply all filters
-  if (flags.excludeEmptyNames) {
-    selectQuery = selectQuery.not("name", "eq", "").not("name", "is", null)
-  }
-
-  selectQuery = applyPriorityFilter(selectQuery, params.filters, flags)
-  selectQuery = applyOriginFilter(selectQuery, params.filters)
-  selectQuery = applyCategoryFilter(selectQuery, params.filters)
-  selectQuery = applySearchFilter(selectQuery, params.filters)
-  selectQuery = applySourceFilter(selectQuery, params.filters)
-
-  if (flags.onlyDiscounted) {
-    selectQuery = selectQuery.gt("discount", 0)
-  }
-
-  if (flags.onlyAvailable) {
-    selectQuery = selectQuery.eq("available", true)
-  }
-
-  const { data: matchingProducts, error: selectError } = await selectQuery
-
-  if (selectError) {
-    return {
-      updatedCount: 0,
-      error: { message: selectError.message, code: selectError.code },
+    // Apply all filters
+    if (flags.excludeEmptyNames) {
+      query = query.not("name", "eq", "").not("name", "is", null)
     }
+
+    query = applyPriorityFilter(query, params.filters, flags)
+    query = applyOriginFilter(query, params.filters)
+    query = applyCategoryFilter(query, params.filters)
+    query = applySearchFilter(query, params.filters)
+    query = applySourceFilter(query, params.filters)
+
+    if (flags.onlyDiscounted) {
+      query = query.gt("discount", 0)
+    }
+
+    if (flags.onlyAvailable) {
+      query = query.eq("available", true)
+    }
+
+    // Exclude products with specified priorities (for preserving existing priorities)
+    if (params.excludePriorities && params.excludePriorities.length > 0) {
+      query = query.not("priority", "in", `(${params.excludePriorities.join(",")})`)
+    }
+
+    // Order by id for consistent pagination results
+    query = query.order("id", { ascending: true })
+
+    return query
   }
 
-  if (!matchingProducts || matchingProducts.length === 0) {
+  // Fetch all matching IDs with pagination to avoid Supabase's default 1000 row limit
+  // Note: Supabase has a default server-side limit of 1000 rows per query
+  const PAGE_SIZE = 1000
+  const allIds: number[] = []
+  let offset = 0
+
+  while (true) {
+    // Build fresh query for each page (Supabase query builders are mutable)
+    const { data, error } = await buildFilteredQuery().range(offset, offset + PAGE_SIZE - 1)
+
+    if (error) {
+      return {
+        updatedCount: 0,
+        error: { message: error.message, code: error.code },
+      }
+    }
+
+    if (!data || data.length === 0) break
+
+    allIds.push(...data.map((p) => p.id))
+
+    // If we got fewer results than PAGE_SIZE, we've reached the end
+    if (data.length < PAGE_SIZE) break
+
+    offset += PAGE_SIZE
+  }
+
+  if (allIds.length === 0) {
     return { updatedCount: 0, error: null }
   }
 
-  const productIds = matchingProducts.map((p) => p.id)
-
   // Update in batches of 1000 to avoid query size limits
-  const batchSize = 1000
+  const UPDATE_BATCH_SIZE = 1000
   let totalUpdated = 0
 
-  for (let i = 0; i < productIds.length; i += batchSize) {
-    const batch = productIds.slice(i, i + batchSize)
+  for (let i = 0; i < allIds.length; i += UPDATE_BATCH_SIZE) {
+    const batch = allIds.slice(i, i + UPDATE_BATCH_SIZE)
 
     const { error: updateError, count } = await supabase
       .from("store_products")
