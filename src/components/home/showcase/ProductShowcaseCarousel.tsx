@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { memo, useState, useEffect, useRef, useCallback } from "react"
+import { memo, useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
 import { cn } from "@/lib/utils"
-import { chartConfig } from "@/lib/business/chart"
+import { chartConfig, calculateChartBounds } from "@/lib/business/chart"
 import { generateProductPath } from "@/lib/business/product"
 import {
   SHOWCASE_PRODUCT_IDS,
@@ -215,15 +215,24 @@ const ShowcaseChart = memo(function ShowcaseChart({
   const [imageLoaded, setImageLoaded] = useState(false)
   const { storeProduct, chartData, trendStats } = productData
 
-  // Calculate max price for Y-axis domain
-  const maxPriceValue =
-    chartData.length > 0
-      ? Math.max(
-          ...chartData.flatMap((d) =>
-            [d.price, d["price-recommended"], d["price-per-major-unit"]].filter((v) => v > 0),
-          ),
-        )
-      : 15
+  // Calculate chart bounds with nice numbers for Y-axis
+  const chartBounds = useMemo(() => {
+    if (chartData.length === 0) {
+      return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
+    }
+
+    const visiblePrices = chartData
+      .flatMap((d) => [d.price, d["price-recommended"], d["price-per-major-unit"]])
+      .filter((price) => price > 0)
+
+    if (visiblePrices.length === 0) {
+      return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
+    }
+
+    const min = Math.min(...visiblePrices)
+    const max = Math.max(...visiblePrices)
+    return calculateChartBounds(min, max)
+  }, [chartData])
 
   return (
     <Card className={cn("relative", className)}>
@@ -310,7 +319,8 @@ const ShowcaseChart = memo(function ShowcaseChart({
               tickLine={false}
               axisLine={false}
               width={40}
-              domain={[0, maxPriceValue * 1.05]}
+              domain={[chartBounds.floor, chartBounds.ceiling]}
+              ticks={chartBounds.ticks}
               tickFormatter={(value) => `€${value.toFixed(1)}`}
             />
             <YAxis
