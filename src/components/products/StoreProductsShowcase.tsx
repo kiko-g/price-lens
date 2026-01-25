@@ -1276,13 +1276,10 @@ function MobileFiltersDrawer({
   localFilters,
   selectedOrigins,
   selectedPriorities,
-  selectedSources,
   onOriginToggle,
   onClearOrigins,
   onPriorityToggle,
   onClearPriority,
-  onSourceToggle,
-  onClearSources,
   onCategoryChange,
   onCategory2Change,
   onCategory3Change,
@@ -2063,7 +2060,7 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
   const router = useRouter()
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center sm:py-24">
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 text-center sm:py-16">
       {/* Icon with gradient ring */}
       <div className="relative mb-6">
         <div className="from-primary/20 via-primary/5 absolute -inset-4 rounded-full bg-linear-to-b to-transparent blur-xl" />
