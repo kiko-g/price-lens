@@ -407,10 +407,6 @@
     @apply scroll-smooth;
   }
 
-  html:not(:has(body[style*="position: fixed"])) {
-    @apply scroll-smooth text-red-500;
-  }
-
   body.drawer-open {
     overflow: hidden;
     touch-action: none;

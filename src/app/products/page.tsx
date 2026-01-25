@@ -63,7 +63,7 @@ function LoadingFallback() {
 
 export default function StoreProductsPage() {
   return (
-    <main className="h-[calc(100vh-54px)] overflow-hidden">
+    <main className="lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
       <HideFooter />
       <Suspense fallback={<LoadingFallback />}>
         <StoreProductsShowcase limit={LIMIT}>

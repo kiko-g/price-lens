@@ -635,7 +635,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   }
 
   return (
-    <div className="flex h-full w-full flex-col lg:flex-row">
+    <div className="flex w-full flex-col lg:h-full lg:flex-row">
       {/* Desktop Sidebar */}
       <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:min-w-80">
         <div className="mb-2 flex items-center justify-between gap-2">
@@ -1124,7 +1124,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       />
 
       {/* Main Content Area */}
-      <div className="flex h-full w-full flex-1 flex-col overflow-y-auto p-4">
+      <div className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
         {/* Products Grid */}
         {showSkeletons ? (
           <LoadingGrid limit={limit} />
@@ -1233,7 +1233,7 @@ function MobileNav({
   totalPages,
 }: MobileNavProps) {
   return (
-    <nav className="sticky top-0 z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:top-[54px] lg:hidden dark:bg-zinc-950/95">
+    <nav className="sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
       <div className="flex w-full items-center gap-2">
         <div className="relative flex-1">
           {isSearching ? (

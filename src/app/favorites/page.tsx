@@ -161,7 +161,7 @@ export default function FavoritesPage() {
 
   if (isLoadingUser) {
     return (
-      <main className="h-[calc(100vh-54px)] overflow-hidden">
+      <main className="lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
         <HideFooter />
         <FavoritesPageSkeleton />
       </main>
@@ -170,7 +170,7 @@ export default function FavoritesPage() {
 
   if (!user) {
     return (
-      <main className="flex h-[calc(100vh-54px)] items-center justify-center overflow-hidden">
+      <main className="flex items-center justify-center lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
         <HideFooter />
         <div className="container mx-auto max-w-2xl px-4 py-6">
           <Card className="text-center">
@@ -198,7 +198,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <main className="h-[calc(100vh-54px)] overflow-hidden">
+    <main className="lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
       <HideFooter />
       <FavoritesShowcase limit={40}>
         <Footer className="bg-transparent px-0 pt-4 pb-0 sm:px-0 sm:pt-4 sm:pb-0 lg:px-0 lg:pt-4 lg:pb-0 dark:bg-transparent" />
@@ -306,7 +306,7 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
   }
 
   return (
-    <div className="flex h-full w-full flex-col lg:flex-row">
+    <div className="flex w-full flex-col lg:h-full lg:flex-row">
       {/* Desktop Sidebar */}
       <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:min-w-80">
         <div className="mb-2 flex items-center gap-2">
@@ -551,7 +551,7 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
       />
 
       {/* Main Content Area */}
-      <div className="flex h-full w-full flex-1 flex-col overflow-y-auto p-4">
+      <div className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
         {showSkeletons ? (
           <LoadingGrid limit={limit} />
         ) : favorites.length > 0 ? (
@@ -649,7 +649,7 @@ function MobileNav({
   totalPages,
 }: MobileNavProps) {
   return (
-    <nav className="sticky top-0 z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:top-[54px] lg:hidden dark:bg-zinc-950/95">
+    <nav className="sticky top-[54px] z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
       <div className="flex w-full items-center gap-2">
         <div className="relative flex-1">
           {isSearching ? (
