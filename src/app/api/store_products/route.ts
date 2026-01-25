@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { unstable_cache } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
-import {
-  queryStoreProducts,
-  type StoreProductsQueryParams,
-  type StoreProductWithMeta,
-  SupermarketChain,
-} from "@/lib/queries/store-products"
+import { queryStoreProducts, type StoreProductsQueryParams, SupermarketChain } from "@/lib/queries/store-products"
 import type { SearchType, SortByType } from "@/types/business"
 import { PrioritySource } from "@/types"
-import { cacheConfig } from "@/lib/config"
 
 /**
  * GET /api/store_products
  *
  * Fetches store products with filtering, sorting, and pagination.
- * Results are cached server-side when ENABLE_STORE_PRODUCTS_CACHE=true.
  *
  * Query Parameters:
  * - q: Search query string
@@ -36,7 +28,7 @@ export async function GET(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams
 
-    // Build structured query params (without userId for caching)
+    // Build structured query params
     const queryParams = parseSearchParams(params)
 
     // Get authenticated user for favorites augmentation
@@ -45,25 +37,21 @@ export async function GET(req: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    // Execute query (cached or uncached based on config)
-    const result = cacheConfig.storeProducts.enabled
-      ? await getCachedStoreProducts(queryParams)
-      : await queryStoreProducts(queryParams)
+    if (user?.id) {
+      queryParams.userId = user.id
+    }
+
+    // Execute query
+    const result = await queryStoreProducts(queryParams)
 
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
-    // Augment with user favorites if logged in (not cached, user-specific)
-    let data = result.data
-    if (user?.id && data.length > 0) {
-      data = await augmentWithUserFavorites(supabase, data, user.id)
-    }
-
     // Return response in the expected format
     return NextResponse.json(
       {
-        data,
+        data: result.data,
         pagination: {
           page: result.pagination.page,
           limit: result.pagination.limit,
@@ -80,53 +68,6 @@ export async function GET(req: NextRequest) {
     console.error("[/api/store_products] Error:", message)
     return NextResponse.json({ error: message }, { status: 500 })
   }
-}
-
-/**
- * Cached version of queryStoreProducts.
- * Cache key is derived from query params, shared across all users.
- */
-async function getCachedStoreProducts(queryParams: StoreProductsQueryParams) {
-  // Create a stable cache key from query params
-  const cacheKey = JSON.stringify(queryParams)
-
-  const cachedQuery = unstable_cache(
-    async () => queryStoreProducts(queryParams),
-    ["store-products", cacheKey],
-    {
-      revalidate: cacheConfig.storeProducts.ttlSeconds,
-      tags: ["store-products"],
-    },
-  )
-
-  return cachedQuery()
-}
-
-/**
- * Augments product data with user's favorites.
- * Called after cache to add user-specific data.
- */
-async function augmentWithUserFavorites(
-  supabase: ReturnType<typeof createClient>,
-  products: StoreProductWithMeta[],
-  userId: string,
-): Promise<StoreProductWithMeta[]> {
-  const storeProductIds = products.map((sp) => sp.id).filter(Boolean)
-
-  if (storeProductIds.length === 0) return products
-
-  const { data: favorites } = await supabase
-    .from("user_favorites")
-    .select("store_product_id")
-    .eq("user_id", userId)
-    .in("store_product_id", storeProductIds)
-
-  const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) ?? [])
-
-  return products.map((sp) => ({
-    ...sp,
-    is_favorited: favoriteIds.has(sp.id),
-  }))
 }
 
 /**
