@@ -630,7 +630,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   return (
     <div className="flex w-full flex-col lg:h-full lg:flex-row">
       {/* Desktop Sidebar */}
-      <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:min-w-80">
+      <aside className="hidden h-full flex-1 flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:max-w-80 lg:min-w-80">
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <PackageIcon className="size-5" />
@@ -1376,18 +1376,13 @@ function MobileFiltersDrawer({
                   <SelectValue className="flex items-center gap-2 text-sm" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SORT_OPTIONS_GROUPS.map((group) => (
-                    <SelectGroup key={group.label}>
-                      <SelectLabel>{group.label}</SelectLabel>
-                      {group.options.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex items-center gap-2">
-                            <option.icon className="h-4 w-4" />
-                            <span>{option.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
+                  {SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <option.icon className="h-4 w-4" />
+                        <span>{option.label}</span>
+                      </div>
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
