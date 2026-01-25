@@ -279,6 +279,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   // Desktop detection (lg breakpoint = 1024px) - debounce only applies on desktop
   const isDesktop = useMediaQuery("(min-width: 1024px)")
 
+  // Mobile detection for adaptive card layout (sm breakpoint = 640px)
+  const isMobile = useMediaQuery("(max-width: 639px)")
+  const cardVariant = isMobile ? "horizontal" : "vertical"
+  const gridVariant = isMobile ? "list" : "grid"
+
   // Local input state (for search)
   const [queryInput, setQueryInput] = useState(urlState.query)
   const [isSearching, setIsSearching] = useState(false)
@@ -1070,7 +1075,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       <div className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
         {/* Products Grid */}
         {showSkeletons ? (
-          <LoadingGrid limit={limit} />
+          <LoadingGrid limit={limit} gridVariant={gridVariant} cardVariant={cardVariant} />
         ) : products.length > 0 ? (
           <>
             {/* Status Bar - Desktop */}
@@ -1101,10 +1106,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               )}
 
               <ProductGridWrapper
+                variant={gridVariant}
                 className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
               >
                 {products.map((product, idx) => (
-                  <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} />
+                  <StoreProductCard key={product.id} sp={product} variant={cardVariant} imagePriority={idx < 15} />
                 ))}
               </ProductGridWrapper>
             </div>
@@ -2035,16 +2041,24 @@ function PaginationControls({ currentPage, totalPages, isLoading, onPageChange }
   )
 }
 
-function LoadingGrid({ limit }: { limit: number }) {
+function LoadingGrid({
+  limit,
+  gridVariant,
+  cardVariant,
+}: {
+  limit: number
+  gridVariant: "grid" | "list"
+  cardVariant: "vertical" | "horizontal"
+}) {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex w-full items-center justify-between">
         <Skeleton className="h-3 w-48 rounded" />
         <Skeleton className="h-3 w-24 rounded" />
       </div>
-      <ProductGridWrapper className="w-full">
+      <ProductGridWrapper variant={gridVariant} className="w-full">
         {Array.from({ length: limit }).map((_, i) => (
-          <StoreProductCardSkeleton key={i} />
+          <StoreProductCardSkeleton key={i} variant={cardVariant} />
         ))}
       </ProductGridWrapper>
     </div>

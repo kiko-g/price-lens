@@ -61,12 +61,19 @@ function resolveImageUrlForCard(image: string, size = 400) {
 
 type Props = {
   sp: StoreProduct
+  variant?: "vertical" | "horizontal"
   imagePriority?: boolean
   favoritedAt?: string /** When the product was added to favorites (only shown when favorited) */
   showBarcode?: boolean
 }
 
-export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showBarcode = false }: Props) {
+export function StoreProductCard({
+  sp,
+  variant = "vertical",
+  imagePriority = false,
+  favoritedAt,
+  showBarcode = false,
+}: Props) {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   const {
@@ -89,8 +96,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   }
 
   if (isUpdating) {
-    return <StoreProductCardSkeleton />
+    return <StoreProductCardSkeleton variant={variant} />
   }
+
+  const isHorizontal = variant === "horizontal"
 
   const supermarketName = getSupermarketChainName(sp?.origin_id)
   const isPriceNotSet = !sp.price_recommended && !sp.price
@@ -104,6 +113,323 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
   const isError = hasUpdateError || !sp.available
 
+  // Shared dropdown menu content (used in both variants)
+  const dropdownMenuContent = (
+    <DropdownMenuContent className="w-48" align="end">
+      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+      <DropdownMenuItem asChild>
+        <Button variant="dropdown-item" asChild>
+          <Link href={sp.url || "#"} target="_blank" className="flex w-full items-center justify-between gap-1">
+            Open in {supermarketName}
+            <ArrowUpRightIcon />
+          </Link>
+        </Button>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild>
+        <Button
+          variant="dropdown-item"
+          onClick={() => navigator.clipboard.writeText(sp.url || "")}
+          title={sp.url || ""}
+        >
+          Copy {supermarketName} URL
+          <CopyIcon />
+        </Button>
+      </DropdownMenuItem>
+      <ShareButton sp={sp} appearAs="dropdown-menu-item" />
+      {user ? (
+        <DropdownMenuItem variant="love" asChild>
+          <Button variant="dropdown-item" onClick={toggleFavorite} disabled={isFavoritePending}>
+            {isFavorited ? "Remove from favorites" : "Add to favorites"}
+            <HeartIcon />
+          </Button>
+        </DropdownMenuItem>
+      ) : null}
+
+      {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
+        <>
+          <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
+          <DropdownMenuLabel className="flex items-center gap-2">
+            Admin tools
+            <DevBadge />
+          </DropdownMenuLabel>
+
+          <DropdownMenuItem asChild>
+            <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
+              Update from origin ({supermarketName})
+              <RefreshCcwIcon />
+            </Button>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
+              Set priority
+              <MicroscopeIcon />
+            </Button>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
+              Clear priority
+              <CircleIcon />
+            </Button>
+          </DropdownMenuItem>
+        </>
+      )}
+    </DropdownMenuContent>
+  )
+
+  // Shared drawer sheet content (used in both variants)
+  const drawerSheetContent = (
+    <>
+      <div className="text-muted-foreground -mt-1 mb-2 flex w-full items-start justify-between gap-1.5 border-b pb-2 text-xs">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {sp.brand && (
+            <Badge variant="blue" size="xs">
+              {sp.brand}
+            </Badge>
+          )}
+
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge variant="boring" size="xs">
+                  {sp.category}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>
+                  {sp.category} {sp.category_2 ? `> ${sp.category_2}` : ""} {sp.category_3 ? `> ${sp.category_3}` : ""}
+                </span>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {sp.pack && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge variant="default" size="xs" className="line-clamp-1 w-fit max-w-36 text-left tracking-tight">
+                    {sp.pack}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="start"
+                  sideOffset={6}
+                  alignOffset={-6}
+                  size="xs"
+                  variant="glass"
+                  className="max-w-60"
+                >
+                  {sp.pack}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+
+        <div className="flex flex-1 items-center justify-end">
+          {isError ? (
+            <span className="bg-destructive flex items-center justify-center rounded-full p-1">
+              <WifiOffIcon className="size-3 text-white" />
+            </span>
+          ) : (
+            <PriorityBadge priority={sp.priority} size="xs" variant="compact" className="text-xs font-semibold" />
+          )}
+        </div>
+      </div>
+
+      <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} className="mb-1" />
+
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProductChart sp={sp} samplingMode="efficient" />
+      </Suspense>
+
+      <Accordion type="single" collapsible className="mt-2 hidden w-full border-t md:flex">
+        <AccordionItem value="item-1" className="w-full border-0">
+          <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-col gap-4">
+              <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
+  )
+
+  // Price display component (used in both variants)
+  const priceDisplay = (
+    <div className={cn("flex items-center gap-2", isHorizontal && "flex-row")}>
+      {hasDiscount ? (
+        <div className={cn("flex", isHorizontal ? "flex-row items-center gap-2" : "flex-col")}>
+          <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+          <span
+            className={cn(
+              "font-bold text-green-600 dark:text-green-500",
+              isHorizontal ? "text-base" : "text-lg",
+            )}
+          >
+            {sp.price.toFixed(2)}€
+          </span>
+        </div>
+      ) : null}
+
+      {isNormalPrice ? (
+        <span className={cn("font-bold text-zinc-700 dark:text-zinc-200", isHorizontal ? "text-base" : "text-lg")}>
+          {sp.price}€
+        </span>
+      ) : null}
+
+      {isPriceNotSet ? (
+        <span className={cn("font-bold text-zinc-700 dark:text-zinc-200", isHorizontal ? "text-base" : "text-lg")}>
+          €€€€
+        </span>
+      ) : null}
+    </div>
+  )
+
+  // Action buttons (used in both variants)
+  const actionButtons = (
+    <div className="flex items-center gap-1">
+      {user && (
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className={cn(
+            "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
+            isFavoritePending && "disabled:opacity-50",
+          )}
+          onClick={toggleFavorite}
+          disabled={isFavoritePending || !user}
+          title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Log in to add favorites"}
+        >
+          <HeartIcon
+            className={cn(
+              "h-4 w-4",
+              isFavorited ? "fill-destructive stroke-destructive" : "stroke-foreground fill-none",
+            )}
+          />
+        </Button>
+      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon-sm" className="bg-background">
+            <EllipsisVerticalIcon className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        {dropdownMenuContent}
+      </DropdownMenu>
+      <DrawerSheet title={sp.name}>{drawerSheetContent}</DrawerSheet>
+    </div>
+  )
+
+  // HORIZONTAL VARIANT
+  if (isHorizontal) {
+    return (
+      <div className="bg-background flex w-full flex-row items-start gap-3 rounded-lg border p-2">
+        {/* Compact image */}
+        <Link href={generateProductPath(sp)} className="relative h-20 w-20 shrink-0">
+          <div
+            className={cn(
+              "group relative h-full w-full overflow-hidden rounded-md border",
+              sp.image ? "border-border" : "border-transparent",
+            )}
+          >
+            {sp.image ? (
+              <>
+                {!imageLoaded && <div className="bg-background/10 absolute inset-0 z-10 animate-pulse" />}
+                <Image
+                  src={resolveImageUrlForCard(sp.image, 160)}
+                  alt={sp.name || "Product Image"}
+                  width={160}
+                  height={160}
+                  className={cn(
+                    "h-full w-full bg-white object-cover object-center",
+                    sp.available ? "opacity-100" : "opacity-60",
+                  )}
+                  priority={imagePriority}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              </>
+            ) : (
+              <div className="h-full w-full bg-zinc-100 dark:bg-zinc-800" />
+            )}
+
+            {/* Discount badge on image */}
+            {sp.discount && (
+              <Badge
+                variant="destructive"
+                size="2xs"
+                roundedness="sm"
+                className="absolute top-1 left-1 w-fit"
+              >
+                -{discountValueToPercentage(sp.discount)}
+              </Badge>
+            )}
+          </div>
+        </Link>
+
+        {/* Info section */}
+        <div className="flex min-w-0 flex-1 flex-col gap-1 py-0.5">
+          {/* Top row: brand + category + actions */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
+              <span className="truncate text-xs font-semibold text-blue-600 dark:text-blue-500">
+                {sp.brand || <span className="text-muted-foreground opacity-50">No Brand</span>}
+              </span>
+              <span className="text-muted-foreground text-xs">•</span>
+              <Badge variant="boring" size="2xs" roundedness="sm" className="shrink-0">
+                {sp.category || "No category"}
+              </Badge>
+            </div>
+            {actionButtons}
+          </div>
+
+          {/* Product name */}
+          <h2 className="line-clamp-1 text-sm font-medium tracking-tight">
+            <Link href={generateProductPath(sp)} className="hover:underline">
+              {sp.name || "Untitled"}
+            </Link>
+          </h2>
+
+          {/* Bottom row: price + pack + store */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {priceDisplay}
+              {sp.price_per_major_unit && sp.major_unit && (
+                <span className="text-muted-foreground text-xs">
+                  ({sp.price_per_major_unit}€{sp.major_unit})
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {sp.pack && (
+                <Badge variant="unit" size="2xs" className="max-w-16 truncate">
+                  {sp.pack}
+                </Badge>
+              )}
+              <PriorityBadge priority={priority} variant="compact" size="2xs" />
+              <Badge size="2xs" variant="outline-white" className="border-muted shrink-0">
+                <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
+              </Badge>
+            </div>
+          </div>
+
+          {/* Favorited at badge */}
+          {favoritedAt && (
+            <Badge size="2xs" variant="tertiary" className="mt-0.5 w-fit gap-1">
+              <CalendarPlusIcon className="h-3 w-3" />
+              Added {getShortRelativeTime(new Date(favoritedAt))}
+            </Badge>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // VERTICAL VARIANT (default - original layout)
   return (
     <div className="flex w-full flex-col rounded-lg bg-transparent">
       <div
@@ -300,20 +626,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
         {/* Prices and Actions */}
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            {hasDiscount ? (
-              <div className="flex flex-col">
-                <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
-                <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
-              </div>
-            ) : null}
-
-            {isNormalPrice ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
-            ) : null}
-
-            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
-          </div>
+          {priceDisplay}
 
           <div className="flex items-center gap-2">
             <DropdownMenu>
@@ -322,161 +635,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-
-              <DropdownMenuContent className="w-48" align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Button variant="dropdown-item" asChild>
-                    <Link
-                      href={sp.url || "#"}
-                      target="_blank"
-                      className="flex w-full items-center justify-between gap-1"
-                    >
-                      Open in {supermarketName}
-                      <ArrowUpRightIcon />
-                    </Link>
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button
-                    variant="dropdown-item"
-                    onClick={() => navigator.clipboard.writeText(sp.url || "")}
-                    title={sp.url || ""}
-                  >
-                    Copy {supermarketName} URL
-                    <CopyIcon />
-                  </Button>
-                </DropdownMenuItem>
-                <ShareButton sp={sp} appearAs="dropdown-menu-item" />
-                {user ? (
-                  <DropdownMenuItem variant="love" asChild>
-                    <Button variant="dropdown-item" onClick={toggleFavorite} disabled={isFavoritePending}>
-                      {isFavorited ? "Remove from favorites" : "Add to favorites"}
-                      <HeartIcon />
-                    </Button>
-                  </DropdownMenuItem>
-                ) : null}
-
-                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
-                  <>
-                    <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      Admin tools
-                      <DevBadge />
-                    </DropdownMenuLabel>
-
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
-                        Update from origin ({supermarketName})
-                        <RefreshCcwIcon />
-                      </Button>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
-                        Set priority
-                        <MicroscopeIcon />
-                      </Button>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
-                        Clear priority
-                        <CircleIcon />
-                      </Button>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
+              {dropdownMenuContent}
             </DropdownMenu>
 
-            <DrawerSheet title={sp.name}>
-              <div className="text-muted-foreground -mt-1 mb-2 flex w-full items-start justify-between gap-1.5 border-b pb-2 text-xs">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {sp.brand && (
-                    <Badge variant="blue" size="xs">
-                      {sp.brand}
-                    </Badge>
-                  )}
-
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge variant="boring" size="xs">
-                          {sp.category}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <span>
-                          {sp.category} {sp.category_2 ? `> ${sp.category_2}` : ""}{" "}
-                          {sp.category_3 ? `> ${sp.category_3}` : ""}
-                        </span>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  {sp.pack && (
-                    <TooltipProvider delayDuration={200}>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Badge
-                            variant="default"
-                            size="xs"
-                            className="line-clamp-1 w-fit max-w-36 text-left tracking-tight"
-                          >
-                            {sp.pack}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          align="start"
-                          sideOffset={6}
-                          alignOffset={-6}
-                          size="xs"
-                          variant="glass"
-                          className="max-w-60"
-                        >
-                          {sp.pack}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-
-                <div className="flex flex-1 items-center justify-end">
-                  {/* Priority Badge unless unavailable */}
-                  {isError ? (
-                    <span className="bg-destructive flex items-center justify-center rounded-full p-1">
-                      <WifiOffIcon className="size-3 text-white" />
-                    </span>
-                  ) : (
-                    <PriorityBadge
-                      priority={sp.priority}
-                      size="xs"
-                      variant="compact"
-                      className="text-xs font-semibold"
-                    />
-                  )}
-                </div>
-              </div>
-
-              <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} className="mb-1" />
-
-              <Suspense fallback={<div>Loading...</div>}>
-                <ProductChart sp={sp} samplingMode="efficient" />
-              </Suspense>
-
-              <Accordion type="single" collapsible className="mt-2 hidden w-full border-t md:flex">
-                <AccordionItem value="item-1" className="w-full border-0">
-                  <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="flex flex-col gap-4">
-                      <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </DrawerSheet>
+            <DrawerSheet title={sp.name}>{drawerSheetContent}</DrawerSheet>
           </div>
         </div>
 
