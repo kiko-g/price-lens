@@ -11,6 +11,7 @@ import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } fro
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType, PRODUCT_PRIORITY_LEVELS } from "@/types/business"
 import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
+import { SORT_OPTIONS_GROUPS } from "@/lib/business/filters"
 import { buildPageTitle } from "@/lib/business/page-title"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
@@ -54,18 +55,10 @@ import { BulkPriorityDialog } from "@/components/admin/BulkPriorityDialog"
 import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"
 
 import {
-  ArrowDownAZ,
-  ArrowDownWideNarrowIcon,
-  ArrowUpAZ,
-  ArrowUpWideNarrowIcon,
   BadgePercentIcon,
   BotIcon,
-  CalendarArrowDown,
-  CalendarArrowUp,
   CircleCheckIcon,
   CircleOffIcon,
-  ClockArrowDown,
-  ClockArrowUp,
   CrownIcon,
   FilterIcon,
   HandIcon,
@@ -751,69 +744,19 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                     <SelectValue className="flex items-center gap-2 text-sm" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Name</SelectLabel>
-                      <SelectItem value="a-z">
-                        <div className="flex items-center gap-2">
-                          <ArrowDownAZ className="h-4 w-4" />
-                          <span>A to Z</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="z-a">
-                        <div className="flex items-center gap-2">
-                          <ArrowUpAZ className="h-4 w-4" />
-                          <span>Z to A</span>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
-                    <SelectSeparator />
-                    <SelectGroup>
-                      <SelectLabel>Price</SelectLabel>
-                      <SelectItem value="price-high-low">
-                        <div className="flex items-center gap-2">
-                          <ArrowUpWideNarrowIcon className="h-4 w-4" />
-                          <span>High to Low</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="price-low-high">
-                        <div className="flex items-center gap-2">
-                          <ArrowDownWideNarrowIcon className="h-4 w-4" />
-                          <span>Low to High</span>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
-                    <SelectSeparator />
-                    <SelectGroup>
-                      <SelectLabel>Date Added</SelectLabel>
-                      <SelectItem value="created-newest">
-                        <div className="flex items-center gap-2">
-                          <CalendarArrowDown className="h-4 w-4" />
-                          <span>Newest First</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="created-oldest">
-                        <div className="flex items-center gap-2">
-                          <CalendarArrowUp className="h-4 w-4" />
-                          <span>Oldest First</span>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
-                    <SelectSeparator />
-                    <SelectGroup>
-                      <SelectLabel>Last Updated</SelectLabel>
-                      <SelectItem value="updated-newest">
-                        <div className="flex items-center gap-2">
-                          <ClockArrowDown className="h-4 w-4" />
-                          <span>Recently Updated</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="updated-oldest">
-                        <div className="flex items-center gap-2">
-                          <ClockArrowUp className="h-4 w-4" />
-                          <span>Least Recently</span>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
+                    {SORT_OPTIONS_GROUPS.map((group) => (
+                      <SelectGroup key={group.label}>
+                        <SelectLabel>{group.label}</SelectLabel>
+                        {group.options.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              <option.icon className="h-4 w-4" />
+                              <span>{option.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
                   </SelectContent>
                 </Select>
               </AccordionContent>
@@ -1375,7 +1318,7 @@ function MobileFiltersDrawer({
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4 pb-24">
             {/* Store Origin Filter */}
-            <div className="space-y-3">
+            <div>
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Store Origin</Label>
                 {selectedOrigins.length > 0 && (
@@ -1384,7 +1327,8 @@ function MobileFiltersDrawer({
                   </button>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
+
+              <div className="mt-1 flex flex-col gap-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="mobile-origin-continente"
@@ -1427,8 +1371,33 @@ function MobileFiltersDrawer({
               </div>
             </div>
 
+            {/* Sort Options */}
+            <div>
+              <Label className="text-base font-semibold">Sort By</Label>
+              <Select value={localFilters.sortBy} onValueChange={(v) => onSortChange(v as SortByType)}>
+                <SelectTrigger className="mt-1 h-8 w-full">
+                  <SelectValue className="flex items-center gap-2 text-sm" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS_GROUPS.map((group) => (
+                    <SelectGroup key={group.label}>
+                      <SelectLabel>{group.label}</SelectLabel>
+                      {group.options.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            <option.icon className="h-4 w-4" />
+                            <span>{option.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Priority Filter */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Priority</Label>
                 {selectedPriorities.length > 0 && (
@@ -1437,6 +1406,7 @@ function MobileFiltersDrawer({
                   </button>
                 )}
               </div>
+
               <div className="flex flex-col gap-2">
                 {PRODUCT_PRIORITY_LEVELS.map((level) => (
                   <div key={level} className="flex items-center space-x-2">
@@ -1456,55 +1426,8 @@ function MobileFiltersDrawer({
               </div>
             </div>
 
-            {/* Source Filter (Dev Only) */}
-            {process.env.NODE_ENV === "development" && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-1 text-base font-semibold">
-                    Source
-                    <DevBadge />
-                  </Label>
-                  {selectedSources.length > 0 && (
-                    <button onClick={onClearSources} className="text-muted-foreground text-xs hover:underline">
-                      Clear
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="mobile-source-ai"
-                      checked={selectedSources.includes("ai")}
-                      onCheckedChange={() => onSourceToggle("ai")}
-                    />
-                    <Label
-                      htmlFor="mobile-source-ai"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BotIcon className="h-4 w-4" />
-                      AI
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="mobile-source-manual"
-                      checked={selectedSources.includes("manual")}
-                      onCheckedChange={() => onSourceToggle("manual")}
-                    />
-                    <Label
-                      htmlFor="mobile-source-manual"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <HandIcon className="h-4 w-4" />
-                      Manual
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Categories Filter */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Categories</Label>
                 {(localFilters.category || localFilters.category2 || localFilters.category3) && (
@@ -1523,43 +1446,8 @@ function MobileFiltersDrawer({
               />
             </div>
 
-            {/* Sort Options */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Sort By</Label>
-              <div className="grid grid-cols-1 gap-2">
-                <SortButton
-                  label="Name (A to Z)"
-                  value="a-z"
-                  current={localFilters.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowDownAZ className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Name (Z to A)"
-                  value="z-a"
-                  current={localFilters.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowUpAZ className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Price: High to Low"
-                  value="price-high-low"
-                  current={localFilters.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Price: Low to High"
-                  value="price-low-high"
-                  current={localFilters.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
-                />
-              </div>
-            </div>
-
             {/* Filter Options */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-base font-semibold">Options</Label>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center space-x-2">
@@ -2110,35 +1998,6 @@ function CategoryTupleSheet({ selectedTuples, onApply, onClear, className }: Cat
         </div>
       </SheetContent>
     </Sheet>
-  )
-}
-
-// ============================================================================
-// Shared UI Components
-// ============================================================================
-
-function SortButton({
-  label,
-  value,
-  current,
-  onChange,
-  icon,
-}: {
-  label: string
-  value: SortByType
-  current: SortByType
-  onChange: (v: SortByType) => void
-  icon: React.ReactNode
-}) {
-  return (
-    <Button
-      variant={current === value ? "default" : "outline"}
-      className="justify-start"
-      onClick={() => onChange(value)}
-    >
-      {icon}
-      {label}
-    </Button>
   )
 }
 
