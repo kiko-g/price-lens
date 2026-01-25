@@ -23,7 +23,7 @@ interface SearchContentProps {
   autoFocus?: boolean
 }
 
-const MAX_LIVE_RESULTS = 6
+const MAX_LIVE_RESULTS = 7
 
 export function SearchContent({ onClose, autoFocus = true }: SearchContentProps) {
   const router = useRouter()
@@ -243,7 +243,7 @@ function ProductItem({ product, onClick }: ProductItemProps) {
         "focus-visible:bg-accent focus-visible:outline-none",
       )}
     >
-      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
+      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white">
         {product.image ? (
           <Image
             src={product.image}
