@@ -53,13 +53,16 @@ export function DrawerSheet({
           <ChartSplineIcon />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="overflow-x-hidden overflow-y-scroll">
+      <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="text-left">{title}</DrawerTitle>
           {description ? <DrawerDescription>{description}</DrawerDescription> : null}
         </DrawerHeader>
 
-        <div className="max-h-[80vh] px-4 pt-2 pb-4">{children}</div>
+        {/* Scrollable content area - touch-pan-y allows vertical scrolling while drawer handles dismiss */}
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pt-2 pb-8">
+          {children}
+        </div>
       </DrawerContent>
     </Drawer>
   )

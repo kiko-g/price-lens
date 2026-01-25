@@ -29,6 +29,47 @@ import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-reac
 const FALLBACK_ACTIVE_DOT_RADIUS = 5
 const CHART_TRANSITION_DURATION = 300 // ms for fade transition
 
+/**
+ * Custom hook to handle chart touch interactions for mobile.
+ * Provides touch-to-reveal tooltip behavior that dismisses on release (like Trade Republic).
+ */
+function useChartTouch() {
+  const [isActive, setIsActive] = useState(false)
+  const chartRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const element = chartRef.current
+    if (!element) return
+
+    const handleTouchStart = () => {
+      setIsActive(true)
+    }
+
+    const handleTouchEnd = () => {
+      // Small delay to allow the last tooltip position to render before hiding
+      setTimeout(() => setIsActive(false), 50)
+    }
+
+    const handleMouseLeave = () => {
+      setIsActive(false)
+    }
+
+    element.addEventListener("touchstart", handleTouchStart, { passive: true })
+    element.addEventListener("touchend", handleTouchEnd, { passive: true })
+    element.addEventListener("touchcancel", handleTouchEnd, { passive: true })
+    element.addEventListener("mouseleave", handleMouseLeave)
+
+    return () => {
+      element.removeEventListener("touchstart", handleTouchStart)
+      element.removeEventListener("touchend", handleTouchEnd)
+      element.removeEventListener("touchcancel", handleTouchEnd)
+      element.removeEventListener("mouseleave", handleMouseLeave)
+    }
+  }, [])
+
+  return { chartRef, isActive }
+}
+
 type Props = {
   sp: StoreProduct
   className?: string
@@ -70,6 +111,7 @@ export function ProductChart({
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [activeAxis, updateActiveAxis] = useActiveAxis()
   const pendingRangeRef = useRef<DateRange | null>(null)
+  const { chartRef, isActive: isTooltipActive } = useChartTouch()
   const id = sp.id?.toString() || ""
   const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
 
@@ -335,7 +377,8 @@ export function ProductChart({
         {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
       </div>
 
-      <div className="max-w-lg md:max-w-full">
+      {/* Chart container with touch handling for mobile tooltip dismiss */}
+      <div ref={chartRef} className="max-w-lg touch-pan-y md:max-w-full">
         <ChartContainer
           config={chartConfig}
           className={cn(isLoading ? "" : "animate-fade-in")}
@@ -387,7 +430,13 @@ export function ProductChart({
               tickFormatter={(value) => `${value}%`}
               tick={(props) => <CustomTick {...props} yAxisId="discount" />}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent />}
+              // On mobile, only show tooltip while finger is touching (Trade Republic style)
+              // On desktop, use default hover behavior
+              {...(isMobile ? { active: isTooltipActive } : {})}
+            />
             {chartData.length > 0 &&
               Object.entries(chartConfig)
                 .filter(([key]) => activeAxis.includes(key))
