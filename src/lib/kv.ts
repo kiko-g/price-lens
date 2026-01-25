@@ -3,6 +3,10 @@ import { createClient } from "redis"
 // Check if Redis is available
 const isRedisAvailable = !!process.env.REDIS_URL
 
+// Store Products Cache Configuration
+const STORE_PRODUCTS_CACHE_PREFIX = "store-products:"
+const STORE_PRODUCTS_CACHE_TTL = parseInt(process.env.STORE_PRODUCTS_CACHE_TTL_SECONDS || "120", 10)
+
 // Create Redis client
 const redis = isRedisAvailable
   ? createClient({
@@ -87,6 +91,77 @@ export async function setCachedCategories(cacheKey: string, data: any, ttl: numb
     await redis.setEx(cacheKey, ttl, JSON.stringify(data))
   } catch (error) {
     console.error("Error setting cache:", error)
+  }
+}
+
+// ============================================================================
+// Store Products Cache
+// ============================================================================
+
+/**
+ * Check if store products caching is enabled.
+ * Requires Redis to be available and ENABLE_STORE_PRODUCTS_CACHE !== "false"
+ */
+export function isStoreProductsCacheEnabled(): boolean {
+  return isRedisAvailable && process.env.ENABLE_STORE_PRODUCTS_CACHE !== "false"
+}
+
+/**
+ * Get cached store products query result.
+ * @param cacheKey - Unique key for the query (typically JSON.stringify of query params)
+ * @returns Cached data or null if not found/expired
+ */
+export async function getCachedStoreProducts<T>(cacheKey: string): Promise<T | null> {
+  if (!isRedisAvailable || !redis) {
+    return null
+  }
+
+  try {
+    const fullKey = `${STORE_PRODUCTS_CACHE_PREFIX}${cacheKey}`
+    const data = await redis.get(fullKey)
+    return data ? JSON.parse(data) : null
+  } catch (error) {
+    console.error("Error fetching store products from cache:", error)
+    return null
+  }
+}
+
+/**
+ * Cache store products query result.
+ * @param cacheKey - Unique key for the query
+ * @param data - Query result to cache
+ */
+export async function setCachedStoreProducts(cacheKey: string, data: any): Promise<void> {
+  if (!isRedisAvailable || !redis) {
+    return
+  }
+
+  try {
+    const fullKey = `${STORE_PRODUCTS_CACHE_PREFIX}${cacheKey}`
+    await redis.setEx(fullKey, STORE_PRODUCTS_CACHE_TTL, JSON.stringify(data))
+  } catch (error) {
+    console.error("Error caching store products:", error)
+  }
+}
+
+/**
+ * Clear all store products cache entries.
+ * Useful after bulk updates or when you need to force fresh data.
+ */
+export async function clearStoreProductsCache(): Promise<void> {
+  if (!isRedisAvailable || !redis) {
+    console.log("Redis not available, skipping cache clear")
+    return
+  }
+
+  try {
+    const keys = await redis.keys(`${STORE_PRODUCTS_CACHE_PREFIX}*`)
+    if (keys.length > 0) {
+      await redis.del(keys)
+      console.log(`Cleared ${keys.length} store products cache entries`)
+    }
+  } catch (error) {
+    console.error("Error clearing store products cache:", error)
   }
 }
 

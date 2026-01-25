@@ -1,17 +1,6 @@
 import { Metadata } from "next"
 import { HomeIcon, WorkflowIcon, HeartIcon, ShoppingBasketIcon } from "lucide-react"
 
-/**
- * Cache configuration for API routes.
- * Toggle and TTL can be controlled via environment variables.
- */
-export const cacheConfig = {
-  storeProducts: {
-    enabled: process.env.ENABLE_STORE_PRODUCTS_CACHE !== "false",
-    ttlSeconds: parseInt(process.env.STORE_PRODUCTS_CACHE_TTL_SECONDS || "120", 10),
-  },
-}
-
 export const siteConfig = {
   name: "Price Lens",
   title: "Price Lens",

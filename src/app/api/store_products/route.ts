@@ -1,13 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { queryStoreProducts, type StoreProductsQueryParams, SupermarketChain } from "@/lib/queries/store-products"
+import {
+  queryStoreProducts,
+  type StoreProductsQueryParams,
+  type StoreProductWithMeta,
+  type StoreProductsQueryResult,
+  SupermarketChain,
+} from "@/lib/queries/store-products"
 import type { SearchType, SortByType } from "@/types/business"
 import { PrioritySource } from "@/types"
+import {
+  isStoreProductsCacheEnabled,
+  getCachedStoreProducts,
+  setCachedStoreProducts,
+} from "@/lib/kv"
 
 /**
  * GET /api/store_products
  *
  * Fetches store products with filtering, sorting, and pagination.
+ * Results are cached in Redis when ENABLE_STORE_PRODUCTS_CACHE is enabled.
  *
  * Query Parameters:
  * - q: Search query string
@@ -28,7 +40,7 @@ export async function GET(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams
 
-    // Build structured query params
+    // Build structured query params (without userId for caching)
     const queryParams = parseSearchParams(params)
 
     // Get authenticated user for favorites augmentation
@@ -37,21 +49,43 @@ export async function GET(req: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (user?.id) {
-      queryParams.userId = user.id
-    }
+    // Generate cache key from query params (excludes userId since favorites are fetched separately)
+    const cacheKey = JSON.stringify(queryParams)
+    const cacheEnabled = isStoreProductsCacheEnabled()
 
-    // Execute query
-    const result = await queryStoreProducts(queryParams)
+    let result: StoreProductsQueryResult
+
+    // Try to get from cache first
+    if (cacheEnabled) {
+      const cached = await getCachedStoreProducts<StoreProductsQueryResult>(cacheKey)
+      if (cached) {
+        result = cached
+      } else {
+        // Cache miss - query database and cache result
+        result = await queryStoreProducts(queryParams)
+        if (!result.error) {
+          await setCachedStoreProducts(cacheKey, result)
+        }
+      }
+    } else {
+      // Caching disabled - query database directly
+      result = await queryStoreProducts(queryParams)
+    }
 
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
+    // Augment with user favorites if logged in (not cached, user-specific)
+    let data = result.data
+    if (user?.id && data.length > 0) {
+      data = await augmentWithUserFavorites(supabase, data, user.id)
+    }
+
     // Return response in the expected format
     return NextResponse.json(
       {
-        data: result.data,
+        data,
         pagination: {
           page: result.pagination.page,
           limit: result.pagination.limit,
@@ -68,6 +102,33 @@ export async function GET(req: NextRequest) {
     console.error("[/api/store_products] Error:", message)
     return NextResponse.json({ error: message }, { status: 500 })
   }
+}
+
+/**
+ * Augments product data with user's favorites.
+ * Called after cache to add user-specific data.
+ */
+async function augmentWithUserFavorites(
+  supabase: ReturnType<typeof createClient>,
+  products: StoreProductWithMeta[],
+  userId: string,
+): Promise<StoreProductWithMeta[]> {
+  const storeProductIds = products.map((sp) => sp.id).filter(Boolean)
+
+  if (storeProductIds.length === 0) return products
+
+  const { data: favorites } = await supabase
+    .from("user_favorites")
+    .select("store_product_id")
+    .eq("user_id", userId)
+    .in("store_product_id", storeProductIds)
+
+  const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) ?? [])
+
+  return products.map((sp) => ({
+    ...sp,
+    is_favorited: favoriteIds.has(sp.id),
+  }))
 }
 
 /**
