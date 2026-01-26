@@ -80,7 +80,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       {/* Drag handle - larger touch target for better usability */}
-      <div className="flex w-full cursor-grab items-center justify-center py-4 active:cursor-grabbing">
+      <div className="flex w-full cursor-grab items-center justify-center py-5 active:cursor-grabbing md:py-4">
         <div className="bg-muted-foreground/40 h-1.5 w-12 rounded-full" />
       </div>
       {children}

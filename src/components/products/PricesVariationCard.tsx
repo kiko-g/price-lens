@@ -57,7 +57,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
   const isDiscountActive = activeAxis.includes("discount")
 
   return (
-    <div>
+    <div className="flex flex-1 flex-col">
       <div className={cn("flex flex-1 flex-col items-center gap-1 py-0.5", className)}>
         <PriceAxisButton
           isActive={isPriceActive}

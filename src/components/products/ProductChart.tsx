@@ -290,7 +290,7 @@ export function ProductChart({
   return (
     <div className={cn("flex w-full flex-col", className)}>
       {(options?.showPricesVariationCard || options?.showImage) && (
-        <header className="mb-2.5 flex items-start justify-between gap-3">
+        <header className="mb-2 flex items-start justify-between gap-3">
           {options?.showPricesVariationCard && (
             <PricesVariationCard
               state={{ activeAxis }}
@@ -314,7 +314,7 @@ export function ProductChart({
             />
           )}
 
-          <div className="flex flex-1 flex-col items-end justify-center gap-3">
+          <div className="flex w-28 flex-col items-center justify-center gap-3 md:w-30">
             {options?.showImage &&
               (sp.image ? (
                 <div className="relative overflow-hidden">
@@ -325,7 +325,7 @@ export function ProductChart({
                       width={400}
                       height={400}
                       className={cn(
-                        "aspect-square size-24 rounded-md border bg-white object-contain p-1 transition-all duration-300 md:size-28",
+                        "aspect-square size-28 rounded-md border bg-white object-contain p-0.5 transition-all duration-300 md:size-30",
                         sp.available ? "opacity-100 hover:scale-105" : "grayscale hover:scale-105",
                       )}
                       placeholder="empty"
