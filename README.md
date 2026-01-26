@@ -26,11 +26,10 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] 1200 ms debounce on product search
 - [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Badass smoke test
-  - [ ] Product cards on mobile should be much more compact.
   - [x] Example spotify for searching when adding a song to a playlist
-- [ ] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
+- [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [ ] Add supermarket SuperCor and Lidl
-- [ ] Add store_products column better than available that sets the status according to the last scrape http response status
+- [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
 - [ ] Radically improve home page and think of marketing/sales/promoting the product via the homepage and its branding
 - [ ] Investigate our design system and app feel to be like Polymarket
 - [ ] Think about and plan product groups e.g. all coffee capsules store_products should be loosely associated

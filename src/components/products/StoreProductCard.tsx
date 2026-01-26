@@ -138,7 +138,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           )}
         </Link>
 
-        <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
+        <div className="absolute top-1.5 left-1.5 flex flex-col items-start gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
             <Badge
               variant="price-per-unit"
@@ -162,7 +162,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           ) : null}
         </div>
 
-        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+        <div className="absolute top-1.5 right-1.5 flex flex-col items-end gap-1">
           {isError ? (
             <span className="bg-destructive flex items-center justify-center rounded p-1">
               <WifiOffIcon className="size-3 text-white" />
@@ -203,7 +203,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
         </div>
 
         {user ? (
-          <div className="absolute bottom-2 left-2 z-5 flex items-end gap-0 md:gap-1">
+          <div className="absolute bottom-1.5 left-1.5 z-5 flex items-end gap-0 md:gap-1">
             <Button
               variant="outline"
               size="icon-sm"
@@ -225,7 +225,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           </div>
         ) : null}
 
-        <div className="absolute right-2 bottom-2 flex flex-col items-end">
+        <div className="absolute right-1.5 bottom-1.5 flex flex-col items-end">
           {favoritedAt && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
