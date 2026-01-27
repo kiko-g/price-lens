@@ -134,11 +134,7 @@ export function CanonicalCategoryTree({ categories, isLoading }: CanonicalCatego
           </div>
         )}
 
-        <CreateCategoryDialog
-          open={createDialogOpen}
-          onOpenChange={setCreateDialogOpen}
-          parent={selectedParent}
-        />
+        <CreateCategoryDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} parent={selectedParent} />
       </CardContent>
     </Card>
   )
@@ -446,11 +442,7 @@ function DeleteCategoryDialog({ open, onOpenChange, category }: DeleteCategoryDi
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            variant="destructive"
-            onClick={() => mutation.mutate()}
-            disabled={mutation.isPending}
-          >
+          <Button variant="destructive" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
             {mutation.isPending ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>

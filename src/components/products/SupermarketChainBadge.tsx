@@ -36,11 +36,7 @@ type SupermarketChainBadgeProps = {
   className?: string
 }
 
-export function SupermarketChainBadge({
-  originId,
-  variant = "badge",
-  className,
-}: SupermarketChainBadgeProps) {
+export function SupermarketChainBadge({ originId, variant = "badge", className }: SupermarketChainBadgeProps) {
   const info = getSupermarketInfo(originId)
 
   if (!info) return null

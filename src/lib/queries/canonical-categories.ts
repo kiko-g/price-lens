@@ -422,12 +422,32 @@ export const categoryMappingQueries = {
 
     const tuples = allTuples
 
-    // Get all mappings (small table, no row limit concern)
-    const { data: mappings, error: mappingsError } = await supabase.from("category_mappings").select("*")
+    // Get all mappings with pagination (Supabase has 1000 row default limit)
+    const MAPPING_PAGE_SIZE = 1000
+    const allMappings: any[] = []
+    let mappingPage = 0
+    let hasMoreMappings = true
 
-    if (mappingsError) {
-      return { data: null, count: 0, error: mappingsError }
+    while (hasMoreMappings) {
+      const from = mappingPage * MAPPING_PAGE_SIZE
+      const to = from + MAPPING_PAGE_SIZE - 1
+
+      const { data: batch, error: batchError } = await supabase.from("category_mappings").select("*").range(from, to)
+
+      if (batchError) {
+        return { data: null, count: 0, error: batchError }
+      }
+
+      if (!batch || batch.length === 0) {
+        hasMoreMappings = false
+      } else {
+        allMappings.push(...batch)
+        hasMoreMappings = batch.length === MAPPING_PAGE_SIZE
+        mappingPage++
+      }
     }
+
+    const mappings = allMappings
 
     // Get supermarket names
     const { data: supermarkets } = await supabase.from("supermarkets").select("id, name")
@@ -567,12 +587,32 @@ export const categoryMappingQueries = {
       }
     }
 
-    // Get all mappings
-    const { data: mappings, error: mappingsError } = await supabase.from("category_mappings").select("*")
+    // Get all mappings with pagination (Supabase has 1000 row default limit)
+    const MAPPING_PAGE_SIZE = 1000
+    const allMappings: any[] = []
+    let mappingPage = 0
+    let hasMoreMappings = true
 
-    if (mappingsError) {
-      return { data: null, count: 0, error: mappingsError }
+    while (hasMoreMappings) {
+      const from = mappingPage * MAPPING_PAGE_SIZE
+      const to = from + MAPPING_PAGE_SIZE - 1
+
+      const { data: batch, error: batchError } = await supabase.from("category_mappings").select("*").range(from, to)
+
+      if (batchError) {
+        return { data: null, count: 0, error: batchError }
+      }
+
+      if (!batch || batch.length === 0) {
+        hasMoreMappings = false
+      } else {
+        allMappings.push(...batch)
+        hasMoreMappings = batch.length === MAPPING_PAGE_SIZE
+        mappingPage++
+      }
     }
+
+    const mappings = allMappings
 
     // Get supermarket names
     const { data: supermarkets } = await supabase.from("supermarkets").select("id, name")
@@ -652,13 +692,17 @@ export const categoryMappingQueries = {
 
     // Try RPC function first (aggregates at database level)
     // Note: Supabase still applies default row limit to RPC calls, so we override it
-    const { data: stats, error: statsError } = await supabase
-      .rpc("get_category_mapping_stats")
-      .limit(100)
+    const { data: stats, error: statsError } = await supabase.rpc("get_category_mapping_stats").limit(100)
 
-    // If RPC fails, fall back to paginated direct queries
+    // If RPC fails or returns empty, fall back to paginated direct queries
     if (statsError) {
       console.warn("RPC get_category_mapping_stats failed, using fallback:", statsError.message)
+      return this.getStatsFallback()
+    }
+
+    // If RPC returns empty array, use fallback (RPC might have issues)
+    if (!stats || (Array.isArray(stats) && stats.length === 0)) {
+      console.warn("RPC get_category_mapping_stats returned empty, using fallback")
       return this.getStatsFallback()
     }
 
@@ -731,12 +775,32 @@ export const categoryMappingQueries = {
       page++
     }
 
-    // Get all mappings
-    const { data: mappings, error: mappingsError } = await supabase.from("category_mappings").select("*")
+    // Get all mappings with pagination (Supabase has 1000 row default limit)
+    const MAPPING_PAGE_SIZE = 1000
+    const allMappings: any[] = []
+    let mappingPage = 0
+    let hasMoreMappings = true
 
-    if (mappingsError) {
-      return { data: null, error: mappingsError }
+    while (hasMoreMappings) {
+      const from = mappingPage * MAPPING_PAGE_SIZE
+      const to = from + MAPPING_PAGE_SIZE - 1
+
+      const { data: batch, error: batchError } = await supabase.from("category_mappings").select("*").range(from, to)
+
+      if (batchError) {
+        return { data: null, error: batchError }
+      }
+
+      if (!batch || batch.length === 0) {
+        hasMoreMappings = false
+      } else {
+        allMappings.push(...batch)
+        hasMoreMappings = batch.length === MAPPING_PAGE_SIZE
+        mappingPage++
+      }
     }
+
+    const mappings = allMappings
 
     // Get supermarket names
     const { data: supermarkets } = await supabase.from("supermarkets").select("id, name")

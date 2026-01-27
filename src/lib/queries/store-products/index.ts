@@ -24,8 +24,18 @@
  */
 
 // Query functions
-export { queryStoreProducts, getMatchingProductsCount, getMatchingProductsWithDistribution, bulkUpdatePriority } from "./query"
-export type { BulkPriorityUpdateParams, BulkPriorityUpdateResult, PriorityDistribution, PriorityDistributionResult } from "./query"
+export {
+  queryStoreProducts,
+  getMatchingProductsCount,
+  getMatchingProductsWithDistribution,
+  bulkUpdatePriority,
+} from "./query"
+export type {
+  BulkPriorityUpdateParams,
+  BulkPriorityUpdateResult,
+  PriorityDistribution,
+  PriorityDistributionResult,
+} from "./query"
 
 // Types
 export type {

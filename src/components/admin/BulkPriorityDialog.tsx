@@ -110,7 +110,7 @@ export function BulkPriorityDialog({ filterParams, filterSummary, children }: Bu
 
   const handlePreserveToggle = (priority: number) => {
     setPreservePriorities((prev) =>
-      prev.includes(priority) ? prev.filter((p) => p !== priority) : [...prev, priority]
+      prev.includes(priority) ? prev.filter((p) => p !== priority) : [...prev, priority],
     )
   }
 
@@ -230,7 +230,7 @@ export function BulkPriorityDialog({ filterParams, filterSummary, children }: Bu
                       className={`flex cursor-pointer items-center gap-2 rounded-md border p-2 transition-colors ${
                         isPreserved
                           ? "border-blue-500/50 bg-blue-500/10"
-                          : "border-border hover:border-blue-500/30 hover:bg-muted/50"
+                          : "border-border hover:bg-muted/50 hover:border-blue-500/30"
                       } ${isTargetPriority ? "opacity-50" : ""}`}
                     >
                       <Checkbox
@@ -257,7 +257,7 @@ export function BulkPriorityDialog({ filterParams, filterSummary, children }: Bu
                 This will update <strong>{actualUpdateCount.toLocaleString()}</strong> products to priority{" "}
                 <strong>{selectedPriority}</strong> and mark them as manually reviewed.
                 {preservePriorities.length > 0 && (
-                  <span className="block mt-1 text-xs opacity-80">
+                  <span className="mt-1 block text-xs opacity-80">
                     ({totalCount - actualUpdateCount} products will be preserved)
                   </span>
                 )}

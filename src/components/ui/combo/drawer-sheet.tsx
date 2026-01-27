@@ -40,7 +40,7 @@ export function DrawerSheet({
             {description ? <SheetDescription>{description}</SheetDescription> : null}
           </SheetHeader>
 
-          <div className="pt-2 pb-4">{children}</div>
+          <div className="pt-2 pb-8">{children}</div>
         </SheetContent>
       </Sheet>
     )
@@ -60,9 +60,7 @@ export function DrawerSheet({
         </DrawerHeader>
 
         {/* Scrollable content area - touch-pan-y allows vertical scrolling while drawer handles dismiss */}
-        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pt-2 pb-8">
-          {children}
-        </div>
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pt-2 pb-8">{children}</div>
       </DrawerContent>
     </Drawer>
   )

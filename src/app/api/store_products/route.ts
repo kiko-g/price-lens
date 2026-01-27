@@ -9,11 +9,7 @@ import {
 } from "@/lib/queries/store-products"
 import type { SearchType, SortByType } from "@/types/business"
 import { PrioritySource } from "@/types"
-import {
-  isStoreProductsCacheEnabled,
-  getCachedStoreProducts,
-  setCachedStoreProducts,
-} from "@/lib/kv"
+import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProducts } from "@/lib/kv"
 
 /**
  * GET /api/store_products

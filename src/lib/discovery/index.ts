@@ -71,10 +71,7 @@ async function fetchAllExistingSkus(
  * Runs sitemap discovery for a specific store
  * Uses SKU-based comparison for accurate deduplication
  */
-export async function runSitemapDiscovery(
-  originId: number,
-  options: DiscoveryOptions = {},
-): Promise<DiscoveryResult> {
+export async function runSitemapDiscovery(originId: number, options: DiscoveryOptions = {}): Promise<DiscoveryResult> {
   const startTime = Date.now()
   const config = getStoreConfig(originId)
 
@@ -118,11 +115,9 @@ export async function runSitemapDiscovery(
       console.log(`[Discovery] Fetching sitemap URLs...`)
     }
 
-    const sitemapResult = await fetchProductUrlsFromSitemaps(
-      config.sitemapIndexUrl,
-      config.productSitemapPatterns,
-      { verbose: options.verbose },
-    )
+    const sitemapResult = await fetchProductUrlsFromSitemaps(config.sitemapIndexUrl, config.productSitemapPatterns, {
+      verbose: options.verbose,
+    })
 
     errors.push(...sitemapResult.errors)
     urlsFound = sitemapResult.urls.length
@@ -154,7 +149,9 @@ export async function runSitemapDiscovery(
     }
 
     if (options.verbose) {
-      console.log(`[Discovery] ${validUrls.length} valid URLs with SKUs, ${urlsInvalid} invalid (${skuExtractionFailed} SKU extraction failed)`)
+      console.log(
+        `[Discovery] ${validUrls.length} valid URLs with SKUs, ${urlsInvalid} invalid (${skuExtractionFailed} SKU extraction failed)`,
+      )
     }
 
     // Step 4: Compare by SKU and identify new products
@@ -187,7 +184,9 @@ export async function runSitemapDiscovery(
       const batch = productsToInsert.slice(i, i + BATCH_SIZE)
 
       if (options.verbose) {
-        console.log(`[Discovery] Inserting batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(productsToInsert.length / BATCH_SIZE)}`)
+        console.log(
+          `[Discovery] Inserting batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(productsToInsert.length / BATCH_SIZE)}`,
+        )
       }
 
       if (!options.dryRun) {
@@ -238,9 +237,7 @@ export async function runSitemapDiscovery(
 /**
  * Runs sitemap discovery for all configured stores
  */
-export async function runAllSitemapDiscovery(
-  options: DiscoveryOptions = {},
-): Promise<DiscoveryResult[]> {
+export async function runAllSitemapDiscovery(options: DiscoveryOptions = {}): Promise<DiscoveryResult[]> {
   const configs = getAllStoreConfigs()
   const results: DiscoveryResult[] = []
 

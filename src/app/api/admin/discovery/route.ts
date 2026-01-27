@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { runSitemapDiscovery, runAllSitemapDiscovery, getDiscoveryCoverage, getAllStoreConfigs, saveDiscoveryRun } from "@/lib/discovery"
+import {
+  runSitemapDiscovery,
+  runAllSitemapDiscovery,
+  getDiscoveryCoverage,
+  getAllStoreConfigs,
+  saveDiscoveryRun,
+} from "@/lib/discovery"
 import { now } from "@/lib/utils"
 import type { DiscoveryRun } from "@/lib/discovery/types"
 
@@ -208,5 +214,5 @@ export async function POST(req: NextRequest) {
       { error: "Discovery failed", details: error instanceof Error ? error.message : "Unknown" },
       { status: 500 },
     )
-    }
+  }
 }
