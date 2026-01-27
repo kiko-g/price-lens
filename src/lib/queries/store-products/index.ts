@@ -43,6 +43,7 @@ export type {
   TextSearchFilter,
   CategoryFilter,
   CategoryTuple,
+  CanonicalCategoryFilter,
   OriginFilter,
   PriorityFilter,
   SourceFilter,

@@ -113,6 +113,16 @@ export interface SourceFilter {
 }
 
 /**
+ * Canonical category filter options
+ * Filters products by their mapped canonical category
+ * Selecting a parent category includes all products from its children
+ */
+export interface CanonicalCategoryFilter {
+  /** The canonical category ID to filter by */
+  categoryId: number
+}
+
+/**
  * Sorting options
  */
 export interface SortOptions {
@@ -158,8 +168,11 @@ export interface StoreProductsQueryParams {
   /** Text search filter */
   search?: TextSearchFilter
 
-  /** Category filter */
+  /** Category filter (store-specific categories) */
   categories?: CategoryFilter
+
+  /** Canonical category filter (unified categories across stores) */
+  canonicalCategory?: CanonicalCategoryFilter
 
   /** Origin/store filter */
   origin?: OriginFilter
@@ -310,6 +323,8 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     params.categories?.hierarchy?.category3 ?? null,
     // Categories (tuples)
     getTuplesKey(),
+    // Canonical category
+    params.canonicalCategory?.categoryId ?? null,
     // Origin
     getOriginKey(),
     // Priority

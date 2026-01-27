@@ -56,6 +56,11 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
     searchParams.source = params.source.values.join(",")
   }
 
+  // Canonical category
+  if (params.canonicalCategory?.categoryId) {
+    searchParams.canonicalCat = String(params.canonicalCategory.categoryId)
+  }
+
   // Sort
   if (params.sort?.sortBy) {
     searchParams.sort = params.sort.sortBy
@@ -214,6 +219,7 @@ export type {
   PaginationMeta,
   TextSearchFilter,
   CategoryFilter,
+  CanonicalCategoryFilter,
   OriginFilter,
   PriorityFilter,
   SortOptions,

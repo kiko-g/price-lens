@@ -23,8 +23,9 @@ import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProd
  * - origin: Comma-separated origin IDs (e.g., "1,2,3")
  * - priority: Comma-separated priorities (e.g., "1,2,3,none")
  * - source: Comma-separated priority source values (e.g., "ai,manual")
- * - category, category_2, category_3: Hierarchical category filter
+ * - category, category_2, category_3: Hierarchical category filter (store-specific)
  * - categories: Semicolon-separated main categories (e.g., "Laticínios;Bebidas")
+ * - canonicalCat: Canonical category ID (includes all descendants)
  * - sort: "a-z" | "z-a" | "price-low-high" | "price-high-low" | "only-nulls"
  * - orderByPriority: "true" to order by priority first
  * - page: Page number (1-indexed)
@@ -185,6 +186,15 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
 
     if (sourceValues.length > 0) {
       queryParams.source = { values: sourceValues }
+    }
+  }
+
+  // Canonical category filter (unified categories across stores)
+  const canonicalCatParam = params.get("canonicalCat")
+  if (canonicalCatParam) {
+    const categoryId = parseInt(canonicalCatParam, 10)
+    if (!isNaN(categoryId) && categoryId > 0) {
+      queryParams.canonicalCategory = { categoryId }
     }
   }
 

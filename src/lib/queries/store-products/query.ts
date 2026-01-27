@@ -2,6 +2,53 @@ import { createClient } from "@/lib/supabase/server"
 import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
 
+// ============================================================================
+// Canonical Category Helpers
+// ============================================================================
+
+/**
+ * Get all descendant category IDs for a given canonical category (including itself)
+ * This recursively fetches children at all levels
+ */
+async function getDescendantCategoryIds(
+  supabase: ReturnType<typeof createClient>,
+  categoryId: number,
+): Promise<number[]> {
+  const ids: number[] = [categoryId]
+
+  // Fetch all canonical categories at once (they're cached and there are only ~350)
+  const { data: allCategories, error } = await supabase
+    .from("canonical_categories")
+    .select("id, parent_id")
+
+  if (error || !allCategories) {
+    return ids
+  }
+
+  // Build parent->children map for fast lookup
+  const childrenMap = new Map<number, number[]>()
+  for (const cat of allCategories) {
+    if (cat.parent_id !== null) {
+      const children = childrenMap.get(cat.parent_id) || []
+      children.push(cat.id)
+      childrenMap.set(cat.parent_id, children)
+    }
+  }
+
+  // BFS to collect all descendants
+  const queue = [categoryId]
+  while (queue.length > 0) {
+    const currentId = queue.shift()!
+    const children = childrenMap.get(currentId) || []
+    for (const childId of children) {
+      ids.push(childId)
+      queue.push(childId)
+    }
+  }
+
+  return ids
+}
+
 /**
  * Main query function for fetching store products
  * Handles all filtering, sorting, pagination, and user-specific augmentation
@@ -16,8 +63,23 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
 
   const offset = (pagination.page - 1) * pagination.limit
 
+  // Determine which table/view to use based on canonical category filter
+  const useCanonicalView = !!params.canonicalCategory?.categoryId
+  const tableName = useCanonicalView ? "store_products_with_canonical" : "store_products"
+
+  // If using canonical category filter, get all descendant IDs
+  let canonicalCategoryIds: number[] = []
+  if (params.canonicalCategory?.categoryId) {
+    canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.canonicalCategory.categoryId)
+  }
+
   // Build the base query
-  let query = supabase.from("store_products").select("*", { count: "exact" })
+  let query = supabase.from(tableName).select("*", { count: "exact" })
+
+  // Apply canonical category filter if present (must use the view)
+  if (canonicalCategoryIds.length > 0) {
+    query = query.in("canonical_category_id", canonicalCategoryIds)
+  }
 
   // ============================================================================
   // Apply Filters
@@ -364,8 +426,23 @@ export async function getMatchingProductsCount(
   const supabase = createClient()
   const flags = { ...DEFAULT_FLAGS, ...params.flags }
 
+  // Determine which table/view to use based on canonical category filter
+  const useCanonicalView = !!params.canonicalCategory?.categoryId
+  const tableName = useCanonicalView ? "store_products_with_canonical" : "store_products"
+
+  // If using canonical category filter, get all descendant IDs
+  let canonicalCategoryIds: number[] = []
+  if (params.canonicalCategory?.categoryId) {
+    canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.canonicalCategory.categoryId)
+  }
+
   // Build query with just count
-  let query = supabase.from("store_products").select("id", { count: "exact", head: true })
+  let query = supabase.from(tableName).select("id", { count: "exact", head: true })
+
+  // Apply canonical category filter if present
+  if (canonicalCategoryIds.length > 0) {
+    query = query.in("canonical_category_id", canonicalCategoryIds)
+  }
 
   // Apply all filters (same as queryStoreProducts but without pagination/sorting)
   if (flags.excludeEmptyNames) {
@@ -415,9 +492,24 @@ export async function getMatchingProductsWithDistribution(
   const supabase = createClient()
   const flags = { ...DEFAULT_FLAGS, ...params.flags }
 
+  // Determine which table/view to use based on canonical category filter
+  const useCanonicalView = !!params.canonicalCategory?.categoryId
+  const tableName = useCanonicalView ? "store_products_with_canonical" : "store_products"
+
+  // If using canonical category filter, get all descendant IDs
+  let canonicalCategoryIds: number[] = []
+  if (params.canonicalCategory?.categoryId) {
+    canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.canonicalCategory.categoryId)
+  }
+
   // Helper to build base count query with all filters (without priority filter)
   const buildBaseCountQuery = () => {
-    let query = supabase.from("store_products").select("id", { count: "exact", head: true })
+    let query = supabase.from(tableName).select("id", { count: "exact", head: true })
+
+    // Apply canonical category filter if present
+    if (canonicalCategoryIds.length > 0) {
+      query = query.in("canonical_category_id", canonicalCategoryIds)
+    }
 
     if (flags.excludeEmptyNames) {
       query = query.not("name", "eq", "").not("name", "is", null)
@@ -484,9 +576,24 @@ export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Prom
   const supabase = createClient()
   const flags = { ...DEFAULT_FLAGS, ...params.filters.flags }
 
+  // Determine which table/view to use based on canonical category filter
+  const useCanonicalView = !!params.filters.canonicalCategory?.categoryId
+  const tableName = useCanonicalView ? "store_products_with_canonical" : "store_products"
+
+  // If using canonical category filter, get all descendant IDs
+  let canonicalCategoryIds: number[] = []
+  if (params.filters.canonicalCategory?.categoryId) {
+    canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.filters.canonicalCategory.categoryId)
+  }
+
   // Helper to build the base query with all filters
   const buildFilteredQuery = () => {
-    let query = supabase.from("store_products").select("id")
+    let query = supabase.from(tableName).select("id")
+
+    // Apply canonical category filter if present
+    if (canonicalCategoryIds.length > 0) {
+      query = query.in("canonical_category_id", canonicalCategoryIds)
+    }
 
     // Apply all filters
     if (flags.excludeEmptyNames) {

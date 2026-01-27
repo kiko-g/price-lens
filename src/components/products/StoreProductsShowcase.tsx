@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { useDebouncedCallback } from "use-debounce"
 import axios from "axios"
-import { PrioritySource } from "@/types"
+import { PrioritySource, CanonicalCategory } from "@/types"
 
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -28,7 +28,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +40,6 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
@@ -63,7 +61,6 @@ import {
   FilterIcon,
   HandIcon,
   HomeIcon,
-  LayersIcon,
   Loader2Icon,
   LoaderPinwheelIcon,
   MoreHorizontalIcon,
@@ -72,6 +69,9 @@ import {
   SearchIcon,
   InfoIcon,
 } from "lucide-react"
+
+// Debounce delay for filter changes
+const FILTER_DEBOUNCE_MS = 800
 
 /**
  * Single source of truth for URL filter parameters.
@@ -89,11 +89,37 @@ const FILTER_CONFIG = {
   onlyDiscounted: { key: "discounted", default: false },
   priority: { key: "priority", default: "" },
   source: { key: "source", default: "" },
-  category: { key: "cat", default: "" },
-  category2: { key: "cat2", default: "" },
-  category3: { key: "cat3", default: "" },
-  catTuples: { key: "catTuples", default: "" },
+  category: { key: "category", default: "" },
 } as const
+
+/**
+ * Converts a category name to a URL-friendly slug
+ * e.g., "Vinhos Tintos" -> "vinhos-tintos"
+ */
+function toSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
+    .replace(/^-|-$/g, "") // Remove leading/trailing hyphens
+}
+
+/**
+ * Creates an ID-slug format for URL (e.g., "72-vinhos-tintos")
+ */
+function toCategorySlug(id: number, name: string): string {
+  return `${id}-${toSlug(name)}`
+}
+
+/**
+ * Parses the category ID from an ID-slug format (e.g., "72-vinhos-tintos" -> 72)
+ */
+function parseCategoryId(slug: string): number | null {
+  if (!slug) return null
+  const match = slug.match(/^(\d+)/)
+  return match ? parseInt(match[1], 10) : null
+}
 
 // Build a reverse lookup: URL key -> default value
 const URL_KEY_DEFAULTS = Object.fromEntries(
@@ -117,9 +143,6 @@ function useUrlState() {
       priority: searchParams.get(FILTER_CONFIG.priority.key) ?? FILTER_CONFIG.priority.default,
       source: searchParams.get(FILTER_CONFIG.source.key) ?? FILTER_CONFIG.source.default,
       category: searchParams.get(FILTER_CONFIG.category.key) ?? FILTER_CONFIG.category.default,
-      category2: searchParams.get(FILTER_CONFIG.category2.key) ?? FILTER_CONFIG.category2.default,
-      category3: searchParams.get(FILTER_CONFIG.category3.key) ?? FILTER_CONFIG.category3.default,
-      catTuples: searchParams.get(FILTER_CONFIG.catTuples.key) ?? FILTER_CONFIG.catTuples.default,
     }),
     [searchParams],
   )
@@ -152,10 +175,9 @@ function useUrlState() {
         query: urlState.query,
         sortBy: urlState.sortBy,
         origins: parseArrayParam(urlState.origin),
-        category: urlState.category,
         onlyDiscounted: urlState.onlyDiscounted,
       }),
-    [urlState.query, urlState.sortBy, urlState.origin, urlState.category, urlState.onlyDiscounted],
+    [urlState.query, urlState.sortBy, urlState.origin, urlState.onlyDiscounted],
   )
 
   return { urlState, updateUrl, pageTitle }
@@ -221,32 +243,11 @@ function buildQueryParams(
     }
   }
 
-  // Category tuple filter (takes precedence over hierarchy)
-  if (urlState.catTuples) {
-    const tuples = urlState.catTuples
-      .split(";")
-      .filter(Boolean)
-      .map((tupleStr) => {
-        const [category, category_2, category_3] = tupleStr.split("|")
-        return {
-          category: category || "",
-          category_2: category_2 || "",
-          category_3: category_3 || undefined,
-        }
-      })
-      .filter((t) => t.category && t.category_2)
-
-    if (tuples.length > 0) {
-      params.categories = { tuples }
-    }
-  } else if (urlState.category || urlState.category2 || urlState.category3) {
-    // Category hierarchy filter (fallback)
-    params.categories = {
-      hierarchy: {
-        category1: urlState.category || undefined,
-        category2: urlState.category2 || undefined,
-        category3: urlState.category3 || undefined,
-      },
+  // Canonical category filter (parse ID from slug format: "72-vinhos-tintos")
+  if (urlState.category) {
+    const categoryId = parseCategoryId(urlState.category)
+    if (categoryId && categoryId > 0) {
+      params.canonicalCategory = { categoryId }
     }
   }
 
@@ -268,9 +269,6 @@ interface StoreProductsShowcaseProps {
   limit?: number
   children?: React.ReactNode
 }
-
-// Debounce delay for filter changes (1.2 seconds)
-const FILTER_DEBOUNCE_MS = 1200
 
 export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
@@ -295,9 +293,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     priority: urlState.priority,
     source: urlState.source,
     category: urlState.category,
-    category2: urlState.category2,
-    category3: urlState.category3,
-    catTuples: urlState.catTuples,
   })
 
   // Debounced URL sync for filter changes
@@ -320,10 +315,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       localFilters.onlyDiscounted !== urlState.onlyDiscounted ||
       localFilters.priority !== urlState.priority ||
       localFilters.source !== urlState.source ||
-      localFilters.category !== urlState.category ||
-      localFilters.category2 !== urlState.category2 ||
-      localFilters.category3 !== urlState.category3 ||
-      localFilters.catTuples !== urlState.catTuples
+      localFilters.category !== urlState.category
     )
   }, [queryInput, localFilters, urlState])
 
@@ -372,9 +364,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       priority: urlState.priority,
       source: urlState.source,
       category: urlState.category,
-      category2: urlState.category2,
-      category3: urlState.category3,
-      catTuples: urlState.catTuples,
     })
   }, [urlState])
 
@@ -393,10 +382,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       origin: localFilters.origin || null,
       priority: localFilters.priority || null,
       source: localFilters.source || null,
-      cat: localFilters.category || null,
-      cat2: localFilters.category2 || null,
-      cat3: localFilters.category3 || null,
-      catTuples: localFilters.catTuples || null,
+      category: localFilters.category || null,
       priority_order: localFilters.orderByPriority,
       available: localFilters.onlyAvailable,
       discounted: localFilters.onlyDiscounted,
@@ -414,10 +400,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       origin: localFilters.origin || null,
       priority: localFilters.priority || null,
       source: localFilters.source || null,
-      cat: localFilters.category || null,
-      cat2: localFilters.category2 || null,
-      cat3: localFilters.category3 || null,
-      catTuples: localFilters.catTuples || null,
+      category: localFilters.category || null,
       priority_order: localFilters.orderByPriority,
       available: localFilters.onlyAvailable,
       discounted: localFilters.onlyDiscounted,
@@ -501,30 +484,16 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     if (isDesktop) debouncedUpdateUrl({ source: null, page: 1 })
   }
 
-  // Category handlers (desktop: debounce URL sync, mobile: no auto-sync)
-  const handleCategoryChange = (category: string) => {
-    setLocalFilters((prev) => ({ ...prev, category, category2: "", category3: "" }))
-    if (isDesktop) debouncedUpdateUrl({ cat: category || null, cat2: null, cat3: null, page: 1 })
+  // Canonical category handler (desktop: debounce URL sync, mobile: no auto-sync)
+  // categorySlug is in ID-slug format (e.g., "72-vinhos-tintos")
+  const handleCategoryChange = (categorySlug: string) => {
+    setLocalFilters((prev) => ({ ...prev, category: categorySlug }))
+    if (isDesktop) debouncedUpdateUrl({ category: categorySlug || null, page: 1 })
   }
 
-  const handleCategory2Change = (category2: string) => {
-    setLocalFilters((prev) => ({ ...prev, category2, category3: "" }))
-    if (isDesktop) debouncedUpdateUrl({ cat2: category2 || null, cat3: null, page: 1 })
-  }
-
-  const handleCategory3Change = (category3: string) => {
-    setLocalFilters((prev) => ({ ...prev, category3 }))
-    if (isDesktop) debouncedUpdateUrl({ cat3: category3 || null, page: 1 })
-  }
-
-  const handleClearCategories = () => {
-    setLocalFilters((prev) => ({ ...prev, category: "", category2: "", category3: "" }))
-    if (isDesktop) debouncedUpdateUrl({ cat: null, cat2: null, cat3: null, page: 1 })
-  }
-
-  const handleClearCatTuples = () => {
-    setLocalFilters((prev) => ({ ...prev, catTuples: "" }))
-    if (isDesktop) debouncedUpdateUrl({ catTuples: null, page: 1 })
+  const handleClearCategory = () => {
+    setLocalFilters((prev) => ({ ...prev, category: "" }))
+    if (isDesktop) debouncedUpdateUrl({ category: null, page: 1 })
   }
 
   // Explicit action: flush debounce and clear everything
@@ -541,9 +510,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
       priority: FILTER_CONFIG.priority.default,
       source: FILTER_CONFIG.source.default,
       category: FILTER_CONFIG.category.default,
-      category2: FILTER_CONFIG.category2.default,
-      category3: FILTER_CONFIG.category3.default,
-      catTuples: FILTER_CONFIG.catTuples.default,
     })
     router.push(window.location.pathname)
   }
@@ -574,14 +540,9 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     if (urlState.origin) params.set("origin", urlState.origin)
     if (urlState.priority) params.set("priority", urlState.priority)
     if (urlState.source) params.set("source", urlState.source)
-    // Category tuples take precedence over hierarchy
-    if (urlState.catTuples) {
-      params.set("catTuples", urlState.catTuples)
-    } else {
-      if (urlState.category) params.set("category", urlState.category)
-      if (urlState.category2) params.set("category_2", urlState.category2)
-      if (urlState.category3) params.set("category_3", urlState.category3)
-    }
+    // Parse canonical category ID from slug for API
+    const catId = parseCategoryId(urlState.category)
+    if (catId) params.set("canonicalCat", String(catId))
     if (urlState.onlyDiscounted) params.set("onlyDiscounted", "true")
     return params.toString()
   }, [urlState])
@@ -601,15 +562,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     }
     if (selectedPriorities.length > 0) parts.push(`Priority: ${selectedPriorities.join(", ")}`)
     if (selectedSources.length > 0) parts.push(`Source: ${selectedSources.join(", ")}`)
-    // Category tuples take precedence
-    if (urlState.catTuples) {
-      const tupleCount = urlState.catTuples.split(";").filter(Boolean).length
-      parts.push(`Category tuples: ${tupleCount} selected`)
-    } else {
-      if (urlState.category) parts.push(`Category: ${urlState.category}`)
-      if (urlState.category2) parts.push(`Subcategory: ${urlState.category2}`)
-      if (urlState.category3) parts.push(`Sub-subcategory: ${urlState.category3}`)
-    }
+    if (urlState.category) parts.push(`Category: ${urlState.category}`)
     if (urlState.onlyDiscounted) parts.push("Only discounted")
     return parts.length > 0 ? parts.join(" • ") : "No filters applied (all products)"
   }, [urlState, selectedOrigins, selectedPriorities, selectedSources])
@@ -921,17 +874,15 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
             <AccordionItem value="categories">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                 Categories
-                {(localFilters.category || localFilters.category2 || localFilters.category3) && (
+                {localFilters.category && (
                   <>
-                    <span className="text-muted-foreground text-xs">
-                      ({[localFilters.category, localFilters.category2, localFilters.category3].filter(Boolean).length})
-                    </span>
+                    <span className="text-muted-foreground text-xs">(1)</span>
                     <span
                       role="button"
                       tabIndex={0}
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleClearCategories()
+                        handleClearCategory()
                       }}
                       className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
                     >
@@ -941,24 +892,9 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 )}
               </AccordionTrigger>
               <AccordionContent className="pb-3">
-                <div className="mb-2 border-b pb-2">
-                  <CategoryTupleSheet
-                    selectedTuples={localFilters.catTuples}
-                    onApply={(tuples) => {
-                      setLocalFilters((prev) => ({ ...prev, catTuples: tuples }))
-                      debouncedUpdateUrl({ catTuples: tuples || null, page: 1 })
-                    }}
-                    onClear={handleClearCatTuples}
-                    className="bg-primary/10 dark:bg-primary/15 hover:bg-primary/20 dark:hover:bg-primary/25"
-                  />
-                </div>
-                <CategoryCascadeFilter
-                  category={localFilters.category}
-                  category2={localFilters.category2}
-                  category3={localFilters.category3}
+                <CanonicalCategoryCascade
+                  selectedCategorySlug={localFilters.category}
                   onCategoryChange={handleCategoryChange}
-                  onCategory2Change={handleCategory2Change}
-                  onCategory3Change={handleCategory3Change}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -1057,9 +993,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         onSourceToggle={handleSourceToggle}
         onClearSources={handleClearSources}
         onCategoryChange={handleCategoryChange}
-        onCategory2Change={handleCategory2Change}
-        onCategory3Change={handleCategory3Change}
-        onClearCategories={handleClearCategories}
+        onClearCategory={handleClearCategory}
         onSortChange={handleSortChange}
         onTogglePriorityOrder={handleTogglePriorityOrder}
         onToggleDiscounted={handleToggleDiscounted}
@@ -1145,9 +1079,6 @@ interface MobileNavProps {
     priority: string
     source: string
     category: string
-    category2: string
-    category3: string
-    catTuples: string
   }
   queryInput: string
   setQueryInput: (value: string) => void
@@ -1247,9 +1178,6 @@ interface MobileFiltersDrawerProps {
     priority: string
     source: string
     category: string
-    category2: string
-    category3: string
-    catTuples: string
   }
   selectedOrigins: number[]
   selectedPriorities: number[]
@@ -1260,10 +1188,8 @@ interface MobileFiltersDrawerProps {
   onClearPriority: () => void
   onSourceToggle: (source: PrioritySource) => void
   onClearSources: () => void
-  onCategoryChange: (category: string) => void
-  onCategory2Change: (category2: string) => void
-  onCategory3Change: (category3: string) => void
-  onClearCategories: () => void
+  onCategoryChange: (categorySlug: string) => void
+  onClearCategory: () => void
   onSortChange: (sort: SortByType) => void
   onTogglePriorityOrder: () => void
   onToggleDiscounted: () => void
@@ -1281,9 +1207,7 @@ function MobileFiltersDrawer({
   onPriorityToggle,
   onClearPriority,
   onCategoryChange,
-  onCategory2Change,
-  onCategory3Change,
-  onClearCategories,
+  onClearCategory,
   onSortChange,
   onTogglePriorityOrder,
   onToggleDiscounted,
@@ -1422,19 +1346,15 @@ function MobileFiltersDrawer({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Categories</Label>
-                {(localFilters.category || localFilters.category2 || localFilters.category3) && (
-                  <button onClick={onClearCategories} className="text-muted-foreground text-xs hover:underline">
+                {localFilters.category && (
+                  <button onClick={onClearCategory} className="text-muted-foreground text-xs hover:underline">
                     Clear
                   </button>
                 )}
               </div>
-              <CategoryCascadeFilter
-                category={localFilters.category}
-                category2={localFilters.category2}
-                category3={localFilters.category3}
+              <CanonicalCategoryCascade
+                selectedCategorySlug={localFilters.category}
                 onCategoryChange={onCategoryChange}
-                onCategory2Change={onCategory2Change}
-                onCategory3Change={onCategory3Change}
               />
             </div>
 
@@ -1493,90 +1413,148 @@ function MobileFiltersDrawer({
 }
 
 // ============================================================================
-// Category Cascade Filter
+// Canonical Category Cascade Filter
 // ============================================================================
 
-interface CategoryCascadeFilterProps {
-  category: string
-  category2: string
-  category3: string
-  onCategoryChange: (category: string) => void
-  onCategory2Change: (category2: string) => void
-  onCategory3Change: (category3: string) => void
+interface CanonicalCategoryCascadeProps {
+  /** Category slug in ID-slug format (e.g., "72-vinhos-tintos") */
+  selectedCategorySlug: string
+  /** Called with the new slug when category changes */
+  onCategoryChange: (categorySlug: string) => void
 }
 
-function useCategoryOptions(category?: string, category2?: string) {
-  // Fetch level 1 categories
-  const { data: level1Data } = useQuery({
-    queryKey: ["categories", "hierarchy", "level1"],
+function useCanonicalCategories() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["canonicalCategories", "tree"],
     queryFn: async () => {
-      const res = await axios.get("/api/categories/hierarchy")
-      return res.data.options as string[]
+      const res = await axios.get("/api/categories/canonical")
+      return res.data.data as CanonicalCategory[]
     },
     staleTime: 1000 * 60 * 60, // 1 hour
   })
 
-  // Fetch level 2 categories (based on category)
-  const { data: level2Data } = useQuery({
-    queryKey: ["categories", "hierarchy", "level2", category],
-    queryFn: async () => {
-      const res = await axios.get("/api/categories/hierarchy", {
-        params: { category },
-      })
-      return res.data.options as string[]
-    },
-    enabled: !!category,
-    staleTime: 1000 * 60 * 60,
-  })
-
-  // Fetch level 3 categories (based on category + category2)
-  const { data: level3Data } = useQuery({
-    queryKey: ["categories", "hierarchy", "level3", category, category2],
-    queryFn: async () => {
-      const res = await axios.get("/api/categories/hierarchy", {
-        params: { category, category_2: category2 },
-      })
-      return res.data.options as string[]
-    },
-    enabled: !!category && !!category2,
-    staleTime: 1000 * 60 * 60,
-  })
-
-  return {
-    level1Options: level1Data ?? [],
-    level2Options: level2Data ?? [],
-    level3Options: level3Data ?? [],
-  }
+  return { categories: data ?? [], isLoading }
 }
 
-function CategoryCascadeFilter({
-  category,
-  category2,
-  category3,
-  onCategoryChange,
-  onCategory2Change,
-  onCategory3Change,
-}: CategoryCascadeFilterProps) {
-  const { level1Options, level2Options, level3Options } = useCategoryOptions(
-    category || undefined,
-    category2 || undefined,
-  )
+function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: CanonicalCategoryCascadeProps) {
+  const { categories, isLoading } = useCanonicalCategories()
+
+  // Parse the category ID from the slug (e.g., "72-vinhos-tintos" -> 72)
+  const selectedId = parseCategoryId(selectedCategorySlug)
+
+  // Find the selected category and its ancestors
+  const findCategoryPath = useMemo(() => {
+    if (!selectedId || !categories.length) return { level1: null, level2: null, level3: null }
+
+    // Build a flat map for quick lookup
+    const flatMap = new Map<number, CanonicalCategory>()
+    const addToMap = (cats: CanonicalCategory[]) => {
+      for (const cat of cats) {
+        flatMap.set(cat.id, cat)
+        if (cat.children?.length) addToMap(cat.children)
+      }
+    }
+    addToMap(categories)
+
+    const selected = flatMap.get(selectedId)
+    if (!selected) return { level1: null, level2: null, level3: null }
+
+    // Walk up the tree to find ancestors
+    if (selected.level === 1) {
+      return { level1: selected, level2: null, level3: null }
+    } else if (selected.level === 2) {
+      const parent = selected.parent_id ? flatMap.get(selected.parent_id) : null
+      return { level1: parent ?? null, level2: selected, level3: null }
+    } else if (selected.level === 3) {
+      const parent = selected.parent_id ? flatMap.get(selected.parent_id) : null
+      const grandparent = parent?.parent_id ? flatMap.get(parent.parent_id) : null
+      return { level1: grandparent ?? null, level2: parent ?? null, level3: selected }
+    }
+
+    return { level1: null, level2: null, level3: null }
+  }, [selectedId, categories])
+
+  // Get level 1 options (root categories)
+  const level1Options = categories
+
+  // Get level 2 options (children of selected level 1)
+  const level2Options = useMemo(() => {
+    if (!findCategoryPath.level1) return []
+    return findCategoryPath.level1.children ?? []
+  }, [findCategoryPath.level1])
+
+  // Get level 3 options (children of selected level 2)
+  const level3Options = useMemo(() => {
+    if (!findCategoryPath.level2) return []
+    return findCategoryPath.level2.children ?? []
+  }, [findCategoryPath.level2])
+
+  // Helper to create slug from category
+  const getCategorySlug = (cat: CanonicalCategory) => toCategorySlug(cat.id, cat.name)
+
+  // Handler for level 1 change - resets level 2 and 3
+  const handleLevel1Change = (value: string) => {
+    if (value === "_all") {
+      onCategoryChange("")
+    } else {
+      // Find the category to get its name for the slug
+      const cat = level1Options.find((c) => String(c.id) === value)
+      onCategoryChange(cat ? getCategorySlug(cat) : "")
+    }
+  }
+
+  // Handler for level 2 change - resets level 3
+  const handleLevel2Change = (value: string) => {
+    if (value === "_all" && findCategoryPath.level1) {
+      // Go back to level 1 selection
+      onCategoryChange(getCategorySlug(findCategoryPath.level1))
+    } else {
+      const cat = level2Options.find((c) => String(c.id) === value)
+      onCategoryChange(cat ? getCategorySlug(cat) : "")
+    }
+  }
+
+  // Handler for level 3 change
+  const handleLevel3Change = (value: string) => {
+    if (value === "_all" && findCategoryPath.level2) {
+      // Go back to level 2 selection
+      onCategoryChange(getCategorySlug(findCategoryPath.level2))
+    } else {
+      const cat = level3Options.find((c) => String(c.id) === value)
+      onCategoryChange(cat ? getCategorySlug(cat) : "")
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3 p-px">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Level 1: Category */}
+    <div className="flex flex-col gap-3 p-px">
+      {/* Level 1: Main Category */}
       <div className="p-px">
-        <Label className="text-muted-foreground mb-1 block text-xs">Category #1</Label>
-        <Select value={category || "_all"} onValueChange={(v) => onCategoryChange(v === "_all" ? "" : v)}>
-          <SelectTrigger className="h-8 w-full text-sm">
+        <Label className="text-muted-foreground mb-1 block text-xs">Category</Label>
+        <Select
+          value={findCategoryPath.level1 ? String(findCategoryPath.level1.id) : "_all"}
+          onValueChange={handleLevel1Change}
+        >
+          <SelectTrigger
+            className={cn("h-8 w-full text-sm", findCategoryPath.level1 && "border-primary/20 bg-primary/10")}
+          >
             <SelectValue placeholder="All categories" />
           </SelectTrigger>
           <SelectContent className="max-h-[300px]">
             <SelectItem value="_all">All categories</SelectItem>
             <SelectSeparator />
             {level1Options.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -1585,21 +1563,23 @@ function CategoryCascadeFilter({
 
       {/* Level 2: Subcategory */}
       <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Category #2</Label>
+        <Label className="text-muted-foreground mb-1 block text-xs">Subcategory</Label>
         <Select
-          value={category2 || "_all"}
-          onValueChange={(v) => onCategory2Change(v === "_all" ? "" : v)}
-          disabled={!category}
+          value={findCategoryPath.level2 ? String(findCategoryPath.level2.id) : "_all"}
+          onValueChange={handleLevel2Change}
+          disabled={!findCategoryPath.level1}
         >
-          <SelectTrigger className="h-8 w-full text-sm">
-            <SelectValue placeholder={category ? "All subcategories" : "Select category first"} />
+          <SelectTrigger
+            className={cn("h-8 w-full text-sm", findCategoryPath.level2 && "border-primary/20 bg-primary/10")}
+          >
+            <SelectValue placeholder={findCategoryPath.level1 ? "All subcategories" : "Select category first"} />
           </SelectTrigger>
           <SelectContent className="max-h-[200px]">
             <SelectItem value="_all">All subcategories</SelectItem>
             {level2Options.length > 0 && <SelectSeparator />}
             {level2Options.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -1608,388 +1588,37 @@ function CategoryCascadeFilter({
 
       {/* Level 3: Sub-subcategory */}
       <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Category #3</Label>
+        <Label className="text-muted-foreground mb-1 block text-xs">Sub-subcategory</Label>
         <Select
-          value={category3 || "_all"}
-          onValueChange={(v) => onCategory3Change(v === "_all" ? "" : v)}
-          disabled={!category2}
+          value={findCategoryPath.level3 ? String(findCategoryPath.level3.id) : "_all"}
+          onValueChange={handleLevel3Change}
+          disabled={!findCategoryPath.level2 || level3Options.length === 0}
         >
-          <SelectTrigger className="h-8 w-full text-sm">
-            <SelectValue placeholder={category2 ? "All sub-subcategories" : "Select subcategory first"} />
+          <SelectTrigger
+            className={cn("h-8 w-full text-sm", findCategoryPath.level3 && "border-primary/20 bg-primary/10")}
+          >
+            <SelectValue
+              placeholder={
+                !findCategoryPath.level2
+                  ? "Select subcategory first"
+                  : level3Options.length === 0
+                    ? "No sub-subcategories"
+                    : "All sub-subcategories"
+              }
+            />
           </SelectTrigger>
           <SelectContent className="max-h-[200px]">
             <SelectItem value="_all">All sub-subcategories</SelectItem>
             {level3Options.length > 0 && <SelectSeparator />}
             {level3Options.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+              <SelectItem key={cat.id} value={String(cat.id)}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
     </div>
-  )
-}
-
-// ============================================================================
-// Category Tuple Multi-Select (Sheet with Apply Button)
-// ============================================================================
-
-interface CategoryTuple {
-  category: string
-  category_2: string
-  category_3?: string
-}
-
-interface CategoryTupleSheetProps {
-  selectedTuples: string // URL-encoded string: "cat|cat2|cat3;cat|cat2|cat3"
-  onApply: (tuples: string) => void
-  onClear: () => void
-  className?: string
-}
-
-function useCategoryTuples() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["categories", "tuples"],
-    queryFn: async () => {
-      const res = await axios.get("/api/categories")
-      return res.data.data as {
-        category: string[]
-        category_2: string[]
-        category_3: string[]
-        tuples: CategoryTuple[]
-      }
-    },
-    staleTime: 1000 * 60 * 60, // 1 hour
-  })
-
-  return { tuples: data?.tuples ?? [], isLoading }
-}
-
-function CategoryTupleSheet({ selectedTuples, onApply, onClear, className }: CategoryTupleSheetProps) {
-  const [open, setOpen] = useState(false)
-  const [localTuples, setLocalTuples] = useState(selectedTuples)
-  const { tuples, isLoading } = useCategoryTuples()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
-
-  // Sync local state when URL changes (e.g., when cleared externally)
-  useEffect(() => {
-    setLocalTuples(selectedTuples)
-  }, [selectedTuples])
-
-  // Reset local state when sheet opens
-  const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen) {
-      setLocalTuples(selectedTuples)
-      setSearchQuery("")
-    }
-    setOpen(newOpen)
-  }
-
-  // Parse local tuples
-  const selectedSet = useMemo(() => {
-    if (!localTuples) return new Set<string>()
-    return new Set(localTuples.split(";").filter(Boolean))
-  }, [localTuples])
-
-  // Check if a tuple is selected
-  const isTupleSelected = useCallback(
-    (tuple: CategoryTuple) => {
-      const tupleKey = `${tuple.category}|${tuple.category_2}|${tuple.category_3 ?? ""}`
-      if (selectedSet.has(tupleKey)) return true
-
-      if (tuple.category_3) {
-        const parent2Way = `${tuple.category}|${tuple.category_2}|`
-        return selectedSet.has(parent2Way)
-      }
-
-      return false
-    },
-    [selectedSet],
-  )
-
-  // Handle local tuple toggle
-  const handleLocalTupleToggle = (tuple: CategoryTuple) => {
-    const tupleKey = `${tuple.category}|${tuple.category_2}|${tuple.category_3 ?? ""}`
-    const currentTuples = localTuples ? localTuples.split(";").filter(Boolean) : []
-    const is2WayTuple = !tuple.category_3
-
-    if (is2WayTuple) {
-      const prefix = `${tuple.category}|${tuple.category_2}|`
-      const hasBase = currentTuples.includes(tupleKey)
-
-      if (hasBase) {
-        const updated = currentTuples.filter((t) => !t.startsWith(prefix) && t !== tupleKey)
-        setLocalTuples(updated.join(";"))
-      } else {
-        const filtered = currentTuples.filter((t) => !t.startsWith(prefix))
-        const updated = [...filtered, tupleKey]
-        setLocalTuples(updated.join(";"))
-      }
-    } else {
-      const isSelected = currentTuples.includes(tupleKey)
-
-      if (isSelected) {
-        const updated = currentTuples.filter((t) => t !== tupleKey)
-        setLocalTuples(updated.join(";"))
-      } else {
-        const parent2Way = `${tuple.category}|${tuple.category_2}|`
-        const parentSelected = currentTuples.some((t) => t === parent2Way)
-        if (!parentSelected) {
-          const updated = [...currentTuples, tupleKey]
-          setLocalTuples(updated.join(";"))
-        }
-      }
-    }
-  }
-
-  // Group tuples by category
-  const groupedTuples = useMemo(() => {
-    const groups: Record<string, Record<string, CategoryTuple[]>> = {}
-    for (const tuple of tuples) {
-      if (!groups[tuple.category]) groups[tuple.category] = {}
-      if (!groups[tuple.category][tuple.category_2]) groups[tuple.category][tuple.category_2] = []
-      groups[tuple.category][tuple.category_2].push(tuple)
-    }
-    return groups
-  }, [tuples])
-
-  // Filter tuples based on search
-  const filteredGroups = useMemo(() => {
-    if (!searchQuery.trim()) return groupedTuples
-    const query = searchQuery.toLowerCase()
-    const filtered: Record<string, Record<string, CategoryTuple[]>> = {}
-
-    for (const [cat1, cat2Groups] of Object.entries(groupedTuples)) {
-      for (const [cat2, tuplesInGroup] of Object.entries(cat2Groups)) {
-        const matchingTuples = tuplesInGroup.filter(
-          (t) =>
-            t.category.toLowerCase().includes(query) ||
-            t.category_2.toLowerCase().includes(query) ||
-            (t.category_3 && t.category_3.toLowerCase().includes(query)),
-        )
-        if (matchingTuples.length > 0) {
-          if (!filtered[cat1]) filtered[cat1] = {}
-          filtered[cat1][cat2] = matchingTuples
-        }
-      }
-    }
-    return filtered
-  }, [groupedTuples, searchQuery])
-
-  const toggleCategory = (category: string) => {
-    setExpandedCategories((prev) => {
-      const next = new Set(prev)
-      if (next.has(category)) next.delete(category)
-      else next.add(category)
-      return next
-    })
-  }
-
-  const getSelectedCount = useCallback(
-    (category: string) => {
-      let count = 0
-      const cat2Groups = groupedTuples[category] || {}
-      for (const [cat2, tuplesInGroup] of Object.entries(cat2Groups)) {
-        const twoWayKey = `${category}|${cat2}|`
-        if (selectedSet.has(twoWayKey)) {
-          count++
-          continue
-        }
-        for (const tuple of tuplesInGroup) {
-          if (tuple.category_3 && isTupleSelected(tuple)) count++
-        }
-      }
-      return count
-    },
-    [groupedTuples, selectedSet, isTupleSelected],
-  )
-
-  const handleApply = () => {
-    onApply(localTuples)
-    setOpen(false)
-  }
-
-  const handleClear = () => {
-    setLocalTuples("")
-    onClear()
-    setOpen(false)
-  }
-
-  const totalSelected = localTuples ? localTuples.split(";").filter(Boolean).length : 0
-  const hasChanges = localTuples !== selectedTuples
-  const categories = Object.keys(filteredGroups).sort()
-
-  return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
-        <button
-          className={cn(
-            "hover:bg-muted flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-medium transition-colors",
-            className,
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <LayersIcon className="h-4 w-4" />
-            <span>Category Multi-Select</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {selectedTuples && (
-              <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-xs">
-                {selectedTuples.split(";").filter(Boolean).length}
-              </span>
-            )}
-            <span className="text-muted-foreground text-xs">→</span>
-          </div>
-        </button>
-      </SheetTrigger>
-      <SheetContent side="left" className="flex w-full flex-col sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            <LayersIcon className="h-5 w-5" />
-            Category Multi-Select
-          </SheetTitle>
-        </SheetHeader>
-
-        <div className="flex flex-1 flex-col gap-4 overflow-hidden py-4">
-          {/* Search */}
-          <div className="relative">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-            <Input
-              type="text"
-              placeholder="Search categories..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-
-          {/* Selection count */}
-          {totalSelected > 0 && (
-            <div className="text-muted-foreground flex items-center justify-between text-sm">
-              <span>
-                <span className="text-foreground font-medium">{totalSelected}</span> categories selected
-              </span>
-              {hasChanges && <span className="text-xs text-amber-600">• Unsaved changes</span>}
-            </div>
-          )}
-
-          {/* Categories list */}
-          <ScrollArea>
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : categories.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center text-sm">No categories found</p>
-            ) : (
-              <div className="space-y-2">
-                {categories.map((cat1) => {
-                  const isExpanded = expandedCategories.has(cat1)
-                  const selectedCount = getSelectedCount(cat1)
-                  const cat2Groups = filteredGroups[cat1]
-
-                  return (
-                    <div key={cat1} className="overflow-hidden rounded-lg border">
-                      <button
-                        onClick={() => toggleCategory(cat1)}
-                        className="hover:bg-muted flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium"
-                      >
-                        <span className="truncate">{cat1}</span>
-                        <div className="flex items-center gap-2">
-                          {selectedCount > 0 && (
-                            <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
-                              {selectedCount}
-                            </span>
-                          )}
-                          <span className="text-muted-foreground">{isExpanded ? "−" : "+"}</span>
-                        </div>
-                      </button>
-
-                      {isExpanded && (
-                        <div className="border-t px-3 py-2">
-                          {Object.entries(cat2Groups)
-                            .sort(([a], [b]) => a.localeCompare(b))
-                            .map(([cat2, tuplesInGroup]) => {
-                              const threeWayTuples = tuplesInGroup
-                                .filter((t) => t.category_3)
-                                .sort((a, b) => (a.category_3 ?? "").localeCompare(b.category_3 ?? ""))
-
-                              const is2WaySelected = selectedSet.has(`${cat1}|${cat2}|`)
-
-                              return (
-                                <div key={cat2} className="py-1.5">
-                                  <div className="flex items-center gap-2">
-                                    <Checkbox
-                                      id={`sheet-${cat1}-${cat2}`}
-                                      checked={is2WaySelected}
-                                      onCheckedChange={() =>
-                                        handleLocalTupleToggle({ category: cat1, category_2: cat2 })
-                                      }
-                                    />
-                                    <Label
-                                      htmlFor={`sheet-${cat1}-${cat2}`}
-                                      className="cursor-pointer text-sm font-medium"
-                                    >
-                                      {cat2}
-                                      {is2WaySelected && threeWayTuples.length > 0 && (
-                                        <span className="text-muted-foreground ml-1 text-xs">
-                                          (all {threeWayTuples.length})
-                                        </span>
-                                      )}
-                                    </Label>
-                                  </div>
-
-                                  {!is2WaySelected && threeWayTuples.length > 0 && (
-                                    <div className="mt-1 ml-6 space-y-1">
-                                      {threeWayTuples.map((tuple) => {
-                                        const tupleKey = `${tuple.category}|${tuple.category_2}|${tuple.category_3}`
-                                        return (
-                                          <div key={tupleKey} className="flex items-center gap-2">
-                                            <Checkbox
-                                              id={`sheet-${tupleKey}`}
-                                              checked={selectedSet.has(tupleKey)}
-                                              onCheckedChange={() => handleLocalTupleToggle(tuple)}
-                                            />
-                                            <Label
-                                              htmlFor={`sheet-${tupleKey}`}
-                                              className="text-muted-foreground cursor-pointer text-xs"
-                                            >
-                                              {tuple.category_3}
-                                            </Label>
-                                          </div>
-                                        )
-                                      })}
-                                    </div>
-                                  )}
-                                </div>
-                              )
-                            })}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </ScrollArea>
-        </div>
-
-        {/* Footer with buttons */}
-        <div className="flex gap-2 border-t pt-4">
-          <Button variant="outline" className="flex-1" onClick={handleClear} disabled={!selectedTuples && !localTuples}>
-            Clear All
-          </Button>
-          <Button className="flex-1" onClick={handleApply}>
-            Apply{totalSelected > 0 && ` (${totalSelected})`}
-          </Button>
-        </div>
-      </SheetContent>
-    </Sheet>
   )
 }
 

@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -8,6 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
+      canonical_categories: {
+        Row: {
+          created_at: string | null
+          id: number
+          level: number
+          name: string
+          parent_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          level: number
+          name: string
+          parent_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          level?: number
+          name?: string
+          parent_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canonical_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      category_mappings: {
+        Row: {
+          canonical_category_id: number
+          created_at: string | null
+          id: number
+          origin_id: number
+          store_category: string
+          store_category_2: string | null
+          store_category_3: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_category_id: number
+          created_at?: string | null
+          id?: number
+          origin_id: number
+          store_category: string
+          store_category_2?: string | null
+          store_category_3?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_category_id?: number
+          created_at?: string | null
+          id?: number
+          origin_id?: number
+          store_category?: string
+          store_category_2?: string | null
+          store_category_3?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_mappings_canonical_category_id_fkey"
+            columns: ["canonical_category_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_mappings_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "supermarkets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          discovery_source: string
+          errors: Json | null
+          id: number
+          metadata: Json | null
+          origin_id: number
+          started_at: string
+          status: string
+          urls_existing: number
+          urls_found: number
+          urls_invalid: number
+          urls_new: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          discovery_source: string
+          errors?: Json | null
+          id?: number
+          metadata?: Json | null
+          origin_id: number
+          started_at?: string
+          status: string
+          urls_existing?: number
+          urls_found?: number
+          urls_invalid?: number
+          urls_new?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          discovery_source?: string
+          errors?: Json | null
+          id?: number
+          metadata?: Json | null
+          origin_id?: number
+          started_at?: string
+          status?: string
+          urls_existing?: number
+          urls_found?: number
+          urls_invalid?: number
+          urls_new?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_runs_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "supermarkets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prices: {
         Row: {
           created_at: string
@@ -51,6 +196,13 @@ export type Database = {
             columns: ["store_product_id"]
             isOneToOne: false
             referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prices_supermarket_product_id_fkey"
+            columns: ["store_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products_with_canonical"
             referencedColumns: ["id"]
           },
         ]
@@ -132,7 +284,9 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at: string | null
           product_id: number | null
           scraped_at: string | null
@@ -158,7 +312,9 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
-          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source?:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at?: string | null
           product_id?: number | null
           scraped_at?: string | null
@@ -184,7 +340,9 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
-          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source?:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at?: string | null
           product_id?: number | null
           scraped_at?: string | null
@@ -250,13 +408,127 @@ export type Database = {
             referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_favorites_store_product_id_fkey"
+            columns: ["store_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products_with_canonical"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      store_products_with_canonical: {
+        Row: {
+          available: boolean | null
+          barcode: string | null
+          brand: string | null
+          canonical_category_id: number | null
+          canonical_category_name: string | null
+          canonical_level: number | null
+          canonical_parent_id: number | null
+          category: string | null
+          category_2: string | null
+          category_3: string | null
+          created_at: string | null
+          discount: number | null
+          id: number | null
+          image: string | null
+          major_unit: string | null
+          name: string | null
+          origin_id: number | null
+          pack: string | null
+          price: number | null
+          price_per_major_unit: number | null
+          price_recommended: number | null
+          priority: number | null
+          priority_source:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
+          priority_updated_at: string | null
+          product_id: number | null
+          scraped_at: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canonical_categories_parent_id_fkey"
+            columns: ["canonical_parent_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_mappings_canonical_category_id_fkey"
+            columns: ["canonical_category_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "supermarkets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      count_phantom_scraped_products: {
+        Args: { active_priorities: number[] }
+        Returns: number
+      }
+      get_category_mapping_stats: {
+        Args: never
+        Returns: {
+          coverage_percentage: number
+          mapped_products: number
+          mapped_tuples: number
+          origin_id: number
+          origin_name: string
+          total_products: number
+          total_tuples: number
+          unmapped_tuples: number
+        }[]
+      }
+      get_distinct_categories: {
+        Args: never
+        Returns: {
+          category: string
+          category_2: string
+          category_3: string
+        }[]
+      }
+      get_distinct_store_category_tuples: {
+        Args: never
+        Returns: {
+          origin_id: number
+          product_count: number
+          store_category: string
+          store_category_2: string
+          store_category_3: string
+        }[]
+      }
+      get_phantom_scraped_products: {
+        Args: { active_priorities: number[]; max_results?: number }
+        Returns: {
+          id: number
+          name: string
+          priority: number
+          updated_at: string
+        }[]
+      }
       get_unsynced_high_priority_products: {
         Args: never
         Returns: {
@@ -278,9 +550,12 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_source:
+            | Database["public"]["Enums"]["priority_source_type"]
+            | null
           priority_updated_at: string | null
           product_id: number | null
+          scraped_at: string | null
           updated_at: string | null
           url: string | null
         }[]
@@ -329,8 +604,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -338,7 +615,9 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -361,7 +640,9 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -384,7 +665,9 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
