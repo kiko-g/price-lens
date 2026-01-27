@@ -1238,8 +1238,44 @@ function MobileFiltersDrawer({
             <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4 pb-24">
-            {/* Store Origin Filter */}
+            {/* Categories Filter */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Categories</Label>
+                {localFilters.category && (
+                  <button onClick={onClearCategory} className="text-muted-foreground text-xs hover:underline">
+                    Clear
+                  </button>
+                )}
+              </div>
+              <CanonicalCategoryCascade
+                selectedCategorySlug={localFilters.category}
+                onCategoryChange={onCategoryChange}
+              />
+            </div>
+
+            {/* Sort Options */}
             <div>
+              <Label className="text-base font-semibold">Sort By</Label>
+              <Select value={localFilters.sortBy} onValueChange={(v) => onSortChange(v as SortByType)}>
+                <SelectTrigger className="mt-1 h-8 w-full">
+                  <SelectValue className="flex items-center gap-2 text-sm" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <option.icon className="h-4 w-4" />
+                        <span>{option.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Store Origin Filter */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Store Origin</Label>
                 {selectedOrigins.length > 0 && (
@@ -1292,26 +1328,6 @@ function MobileFiltersDrawer({
               </div>
             </div>
 
-            {/* Sort Options */}
-            <div>
-              <Label className="text-base font-semibold">Sort By</Label>
-              <Select value={localFilters.sortBy} onValueChange={(v) => onSortChange(v as SortByType)}>
-                <SelectTrigger className="mt-1 h-8 w-full">
-                  <SelectValue className="flex items-center gap-2 text-sm" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex items-center gap-2">
-                        <option.icon className="h-4 w-4" />
-                        <span>{option.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Priority Filter */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -1340,22 +1356,6 @@ function MobileFiltersDrawer({
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Categories Filter */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Categories</Label>
-                {localFilters.category && (
-                  <button onClick={onClearCategory} className="text-muted-foreground text-xs hover:underline">
-                    Clear
-                  </button>
-                )}
-              </div>
-              <CanonicalCategoryCascade
-                selectedCategorySlug={localFilters.category}
-                onCategoryChange={onCategoryChange}
-              />
             </div>
 
             {/* Filter Options */}

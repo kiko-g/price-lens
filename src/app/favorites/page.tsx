@@ -35,12 +35,7 @@ import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
 import {
-  ArrowDownAZ,
-  ArrowDownWideNarrowIcon,
-  ArrowUpAZ,
-  ArrowUpWideNarrowIcon,
   BadgePercentIcon,
-  CalendarIcon,
   CircleOffIcon,
   FilterIcon,
   HeartIcon,
@@ -48,11 +43,11 @@ import {
   LogInIcon,
   RefreshCcwIcon,
   SearchIcon,
-  ClockIcon,
 } from "lucide-react"
 import { HideFooter } from "@/contexts/FooterContext"
 import { Footer } from "@/components/layout/Footer"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
+import { FAVORITES_SORT_OPTIONS_GROUPS } from "@/lib/business/filters"
 
 // ============================================================================
 // URL State Management
@@ -374,11 +369,67 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
           )}
 
           {/* Filters Accordion */}
-          <Accordion type="multiple" className="w-full border-t" defaultValue={["store-origin", "sort", "options"]}>
+          <Accordion type="multiple" className="w-full border-t" defaultValue={["sort", "options", "store-origin"]}>
+            {/* Sort Options */}
+            <AccordionItem value="sort">
+              <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
+                <span className="flex flex-1 items-center gap-1">
+                  <span>Sort By</span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="p-px pb-3">
+                <Select value={urlState.sortBy} onValueChange={(v) => handleSortChange(v as FavoritesSortType)}>
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue className="flex items-center gap-2 text-sm" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FAVORITES_SORT_OPTIONS_GROUPS.map((group) => (
+                      <SelectGroup key={group.label}>
+                        <SelectLabel>{group.label}</SelectLabel>
+                        {group.options.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              <option.icon className="h-4 w-4" />
+                              <span>{option.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Filter Options */}
+            <AccordionItem value="options">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Options
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-discounted"
+                      checked={urlState.onlyDiscounted}
+                      onCheckedChange={handleToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Store Origin
+                <span>Store Origin</span>
                 {selectedOrigins.length > 0 && (
                   <>
                     <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
@@ -435,84 +486,6 @@ function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
                       <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                    </Label>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Sort Options */}
-            <AccordionItem value="sort">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Sort By
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-1">
-                  <SortOption
-                    label="Recently Added"
-                    value="recently-added"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<CalendarIcon className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Oldest First"
-                    value="oldest-first"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ClockIcon className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Name (A to Z)"
-                    value="a-z"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowDownAZ className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Name (Z to A)"
-                    value="z-a"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowUpAZ className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Price: High to Low"
-                    value="price-high-low"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
-                  />
-                  <SortOption
-                    label="Price: Low to High"
-                    value="price-low-high"
-                    current={urlState.sortBy}
-                    onChange={handleSortChange}
-                    icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Filter Options */}
-            <AccordionItem value="options">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Options
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-discounted"
-                      checked={urlState.onlyDiscounted}
-                      onCheckedChange={handleToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
                     </Label>
                   </div>
                 </div>
@@ -753,8 +726,28 @@ function MobileFiltersDrawer({
             <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
           </DrawerHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4 pb-24">
+            {/* Sort Options */}
+            <div>
+              <Label className="text-base font-semibold">Sort By</Label>
+              <Select value={urlState.sortBy} onValueChange={(v) => onSortChange(v as FavoritesSortType)}>
+                <SelectTrigger className="mt-1 h-8 w-full">
+                  <SelectValue className="flex items-center gap-2 text-sm" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FAVORITES_SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <option.icon className="h-4 w-4" />
+                        <span>{option.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Store Origin Filter */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Store Origin</Label>
                 {selectedOrigins.length > 0 && (
@@ -763,7 +756,7 @@ function MobileFiltersDrawer({
                   </button>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="mt-1 flex flex-col gap-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="mobile-origin-continente"
@@ -806,57 +799,8 @@ function MobileFiltersDrawer({
               </div>
             </div>
 
-            {/* Sort Options */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Sort By</Label>
-              <div className="grid grid-cols-1 gap-2">
-                <SortButton
-                  label="Recently Added"
-                  value="recently-added"
-                  current={urlState.sortBy}
-                  onChange={onSortChange}
-                  icon={<CalendarIcon className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Oldest First"
-                  value="oldest-first"
-                  current={urlState.sortBy}
-                  onChange={onSortChange}
-                  icon={<ClockIcon className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Name A-Z"
-                  value="a-z"
-                  current={urlState.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowDownAZ className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Name Z-A"
-                  value="z-a"
-                  current={urlState.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowUpAZ className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Price: High to Low"
-                  value="price-high-low"
-                  current={urlState.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowUpWideNarrowIcon className="h-4 w-4" />}
-                />
-                <SortButton
-                  label="Price: Low to High"
-                  value="price-low-high"
-                  current={urlState.sortBy}
-                  onChange={onSortChange}
-                  icon={<ArrowDownWideNarrowIcon className="h-4 w-4" />}
-                />
-              </div>
-            </div>
-
             {/* Filter Options */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-base font-semibold">Options</Label>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center space-x-2">
@@ -897,59 +841,6 @@ function MobileFiltersDrawer({
 // ============================================================================
 // Shared UI Components
 // ============================================================================
-
-function SortOption({
-  label,
-  value,
-  current,
-  onChange,
-  icon,
-}: {
-  label: string
-  value: FavoritesSortType
-  current: FavoritesSortType
-  onChange: (v: FavoritesSortType) => void
-  icon: React.ReactNode
-}) {
-  const isSelected = current === value
-  return (
-    <button
-      onClick={() => onChange(value)}
-      className={cn(
-        "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-        isSelected ? "bg-foreground text-background" : "hover:bg-muted",
-      )}
-    >
-      {icon}
-      {label}
-    </button>
-  )
-}
-
-function SortButton({
-  label,
-  value,
-  current,
-  onChange,
-  icon,
-}: {
-  label: string
-  value: FavoritesSortType
-  current: FavoritesSortType
-  onChange: (v: FavoritesSortType) => void
-  icon: React.ReactNode
-}) {
-  return (
-    <Button
-      variant={current === value ? "default" : "outline"}
-      className="justify-start"
-      onClick={() => onChange(value)}
-    >
-      {icon}
-      {label}
-    </Button>
-  )
-}
 
 interface PaginationControlsProps {
   currentPage: number
