@@ -271,16 +271,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   {sp.category || sp.category_3 || sp.category_2 || "No category"}
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                align="start"
-                sideOffset={6}
-                alignOffset={-6}
-                size="xs"
-                variant="glass"
-                className="max-w-60"
-              >
-                {categoryText || "No category set available"}
+              <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6} size="xs" className="max-w-96">
+                <span className="mb-1 block text-xs font-medium">Category hierarchy in {supermarketName}:</span>
+                <span className="text-xs font-semibold">{categoryText || "No category set available"}</span>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

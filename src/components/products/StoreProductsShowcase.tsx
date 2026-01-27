@@ -770,6 +770,35 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
+            {/* Categories Filter */}
+            <AccordionItem value="categories">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Categories
+                {localFilters.category && (
+                  <>
+                    <span className="text-muted-foreground text-xs">(1)</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClearCategory()
+                      }}
+                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </span>
+                  </>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <CanonicalCategoryCascade
+                  selectedCategorySlug={localFilters.category}
+                  onCategoryChange={handleCategoryChange}
+                />
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -867,35 +896,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                     </div>
                   ))}
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Categories Filter */}
-            <AccordionItem value="categories">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Categories
-                {localFilters.category && (
-                  <>
-                    <span className="text-muted-foreground text-xs">(1)</span>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleClearCategory()
-                      }}
-                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
-                    >
-                      Clear
-                    </span>
-                  </>
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <CanonicalCategoryCascade
-                  selectedCategorySlug={localFilters.category}
-                  onCategoryChange={handleCategoryChange}
-                />
               </AccordionContent>
             </AccordionItem>
 
