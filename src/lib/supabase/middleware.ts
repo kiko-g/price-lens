@@ -37,6 +37,11 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Skip auth check if DISABLE_ADMIN_AUTH is set (for development testing only)
+  if (process.env.DISABLE_ADMIN_AUTH === "true" && process.env.NODE_ENV === "development") {
+    return supabaseResponse
+  }
+
   // Define protected routes that require authentication
   const protectedRoutes = ["/profile", "/admin", "/api/admin"]
 

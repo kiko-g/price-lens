@@ -159,3 +159,76 @@ export type Profile = {
   role: "user" | "admin"
   updated_at: string | null
 }
+
+// ============================================================================
+// Canonical Categories - Category Normalization System
+// ============================================================================
+
+export interface CanonicalCategory {
+  id: number
+  name: string
+  parent_id: number | null
+  level: 1 | 2 | 3
+  created_at: string
+  updated_at: string
+  children?: CanonicalCategory[]
+}
+
+export interface CategoryMapping {
+  id: number
+  origin_id: number
+  store_category: string
+  store_category_2: string | null
+  store_category_3: string | null
+  canonical_category_id: number
+  created_at: string
+  updated_at: string
+  canonical_category?: CanonicalCategory
+}
+
+export interface StoreCategoryTuple {
+  origin_id: number
+  origin_name?: string
+  store_category: string
+  store_category_2: string | null
+  store_category_3: string | null
+  product_count: number
+  is_mapped: boolean
+  mapping_id?: number
+  canonical_category_id?: number
+  canonical_category?: CanonicalCategory
+}
+
+export interface CategoryMappingStats {
+  origin_id: number
+  origin_name: string
+  total_tuples: number
+  mapped_tuples: number
+  unmapped_tuples: number
+  total_products: number
+  mapped_products: number
+  coverage_percentage: number
+}
+
+export interface CreateCanonicalCategoryInput {
+  name: string
+  parent_id?: number | null
+  level: 1 | 2 | 3
+}
+
+export interface UpdateCanonicalCategoryInput {
+  name?: string
+  parent_id?: number | null
+}
+
+export interface CreateCategoryMappingInput {
+  origin_id: number
+  store_category: string
+  store_category_2?: string | null
+  store_category_3?: string | null
+  canonical_category_id: number
+}
+
+export interface BulkCreateCategoryMappingInput {
+  mappings: CreateCategoryMappingInput[]
+}

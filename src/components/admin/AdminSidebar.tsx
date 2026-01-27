@@ -32,6 +32,7 @@ import {
   MapIcon,
   GaugeIcon,
   PickaxeIcon,
+  LayersIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -104,6 +105,11 @@ const NAV_ITEMS: NavItem[] = [
     title: "Discovery",
     href: "/admin/discovery",
     icon: MapIcon,
+  },
+  {
+    title: "Categories",
+    href: "/admin/categories",
+    icon: LayersIcon,
   },
   {
     title: "Priorities",
