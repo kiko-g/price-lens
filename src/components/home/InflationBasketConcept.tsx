@@ -38,7 +38,7 @@ export function InflationBasketConcept() {
             </Button>
 
             <Button size="lg" variant="outline" asChild className="w-full md:w-auto">
-              <Link href="/products?priority_order=true">
+              <Link href="/products">
                 Supermarket listings
                 <ShoppingBasketIcon className="h-4 w-4" />
               </Link>

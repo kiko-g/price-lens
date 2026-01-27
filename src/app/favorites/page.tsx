@@ -188,7 +188,7 @@ export default function FavoritesPage() {
                 <Link href="/login">Sign In</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/products?priority_order=true">Browse Products</Link>
+                <Link href="/products">Browse Products</Link>
               </Button>
             </CardContent>
           </Card>
@@ -1036,7 +1036,7 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
             </Button>
           </>
         ) : (
-          <Button onClick={() => router.push("/products?priority_order=true")}>
+          <Button onClick={() => router.push("/products")}>
             <SearchIcon className="h-4 w-4" />
             Find Products
           </Button>

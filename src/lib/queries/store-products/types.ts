@@ -231,7 +231,7 @@ export interface StoreProductsQueryResult {
 
 export const DEFAULT_PAGINATION: PaginationOptions = {
   page: 1,
-  limit: 36,
+  limit: 40,
 }
 
 export const DEFAULT_SORT: SortOptions = {

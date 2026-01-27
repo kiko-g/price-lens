@@ -9,7 +9,7 @@ import { getShowcaseProducts } from "@/lib/business/showcase/queries"
 import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
 
 export async function Hero() {
-  const supermarketProductsLink = "/products?priority_order=true"
+  const supermarketProductsLink = "/products"
   const trackedProductsLink = "/products?priority=2,3,4,5"
 
   // Fetch showcase data server-side

@@ -53,7 +53,7 @@ export const navigation = [
   {
     icon: ShoppingBasketIcon,
     label: "Products",
-    href: "/products?priority_order=true",
+    href: "/products",
     shown: true,
   },
   {

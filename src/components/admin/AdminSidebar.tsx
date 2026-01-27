@@ -217,7 +217,7 @@ function CollapsibleNavItem({ item, pathname }: { item: NavItem; pathname: strin
 
 const SITE_NAV_ITEMS = [
   { title: "Home", href: "/", icon: HomeIcon },
-  { title: "Products", href: "/products?priority_order=true", icon: ShoppingBasketIcon },
+  { title: "Products", href: "/products", icon: ShoppingBasketIcon },
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
 ]
 
