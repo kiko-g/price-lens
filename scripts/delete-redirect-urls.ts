@@ -23,10 +23,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
 async function deleteRedirectUrls() {
   // Find all products with the redirect URL pattern
@@ -41,20 +38,17 @@ async function deleteRedirectUrls() {
   }
 
   console.log(`Found ${products.length} redirect URLs to delete`)
-  
+
   if (products.length === 0) {
     console.log("✅ No redirect URLs found - already clean!")
     return
   }
 
-  const ids = products.map(p => p.id)
+  const ids = products.map((p) => p.id)
   console.log("IDs:", ids.join(", "))
 
   // Delete prices first
-  const { error: priceError } = await supabase
-    .from("prices")
-    .delete()
-    .in("store_product_id", ids)
+  const { error: priceError } = await supabase.from("prices").delete().in("store_product_id", ids)
 
   if (priceError) {
     console.error("Error deleting prices:", priceError)
@@ -63,10 +57,7 @@ async function deleteRedirectUrls() {
   }
 
   // Delete the products
-  const { error: deleteError } = await supabase
-    .from("store_products")
-    .delete()
-    .in("id", ids)
+  const { error: deleteError } = await supabase.from("store_products").delete().in("id", ids)
 
   if (deleteError) {
     console.error("Error deleting products:", deleteError)

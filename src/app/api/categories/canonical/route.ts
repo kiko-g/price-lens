@@ -3,10 +3,10 @@ import { canonicalCategoryQueries } from "@/lib/queries/canonical-categories"
 
 /**
  * GET /api/categories/canonical
- * 
+ *
  * Public endpoint for fetching canonical categories for the filter UI.
  * Returns the hierarchical tree structure by default.
- * 
+ *
  * Query Parameters:
  * - format: "tree" (default) | "flat"
  */

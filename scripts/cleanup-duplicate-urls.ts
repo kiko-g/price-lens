@@ -1,8 +1,8 @@
 /**
  * Script to clean up duplicate store products by base URL
  * Run with: pnpm tsx scripts/cleanup-duplicate-urls.ts
- * 
- * Strategy: Keep the product with the clean URL (no query params), or if all have 
+ *
+ * Strategy: Keep the product with the clean URL (no query params), or if all have
  * query params, keep the oldest one. Delete the rest.
  */
 
@@ -90,15 +90,15 @@ async function fetchAllProducts(): Promise<StoreProduct[]> {
 
 function selectProductToKeep(products: StoreProduct[]): StoreProduct {
   // Priority 1: Clean URL (no query params) with barcode
-  const cleanWithBarcode = products.find(p => !hasQueryParams(p.url) && p.barcode)
+  const cleanWithBarcode = products.find((p) => !hasQueryParams(p.url) && p.barcode)
   if (cleanWithBarcode) return cleanWithBarcode
 
   // Priority 2: Clean URL (no query params)
-  const cleanUrl = products.find(p => !hasQueryParams(p.url))
+  const cleanUrl = products.find((p) => !hasQueryParams(p.url))
   if (cleanUrl) return cleanUrl
 
   // Priority 3: Has barcode
-  const withBarcode = products.find(p => p.barcode)
+  const withBarcode = products.find((p) => p.barcode)
   if (withBarcode) return withBarcode
 
   // Priority 4: Highest priority tracking
@@ -122,8 +122,7 @@ async function cleanupDuplicates(dryRun = true) {
   }
 
   // Find duplicates
-  const duplicates = Array.from(urlGroups.entries())
-    .filter(([_, group]) => group.length > 1)
+  const duplicates = Array.from(urlGroups.entries()).filter(([_, group]) => group.length > 1)
 
   if (duplicates.length === 0) {
     console.log("✅ No duplicates found!")
@@ -136,13 +135,15 @@ async function cleanupDuplicates(dryRun = true) {
 
   for (const [baseUrl, group] of duplicates) {
     const toKeep = selectProductToKeep(group)
-    const toDelete = group.filter(p => p.id !== toKeep.id)
+    const toDelete = group.filter((p) => p.id !== toKeep.id)
 
     console.log(`\n📦 ${baseUrl}`)
-    console.log(`   Keep: ID ${toKeep.id} (${hasQueryParams(toKeep.url) ? "has params" : "clean URL"}, barcode: ${toKeep.barcode || "null"})`)
-    console.log(`   Delete: ${toDelete.map(p => `ID ${p.id}`).join(", ")}`)
+    console.log(
+      `   Keep: ID ${toKeep.id} (${hasQueryParams(toKeep.url) ? "has params" : "clean URL"}, barcode: ${toKeep.barcode || "null"})`,
+    )
+    console.log(`   Delete: ${toDelete.map((p) => `ID ${p.id}`).join(", ")}`)
 
-    idsToDelete.push(...toDelete.map(p => p.id))
+    idsToDelete.push(...toDelete.map((p) => p.id))
   }
 
   console.log(`\n\n📊 Summary:`)
@@ -156,27 +157,21 @@ async function cleanupDuplicates(dryRun = true) {
 
   // Actually delete
   console.log(`\n🗑️  Deleting ${idsToDelete.length} products...`)
-  
+
   // Delete in batches
   const batchSize = 100
   for (let i = 0; i < idsToDelete.length; i += batchSize) {
     const batch = idsToDelete.slice(i, i + batchSize)
-    
+
     // First delete related prices
-    const { error: priceError } = await supabase
-      .from("prices")
-      .delete()
-      .in("store_product_id", batch)
-    
+    const { error: priceError } = await supabase.from("prices").delete().in("store_product_id", batch)
+
     if (priceError) {
       console.error(`Error deleting prices for batch ${i}:`, priceError)
     }
 
     // Then delete the products
-    const { error } = await supabase
-      .from("store_products")
-      .delete()
-      .in("id", batch)
+    const { error } = await supabase.from("store_products").delete().in("id", batch)
 
     if (error) {
       console.error(`Error deleting batch ${i}:`, error)

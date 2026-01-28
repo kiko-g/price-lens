@@ -61,7 +61,9 @@ export async function GET(req: NextRequest) {
 
     query = applyFilters(query, filters)
 
-    const { data: products, error } = await query.order("priority", { ascending: false, nullsFirst: false }).range(offset, offset + pageSize - 1)
+    const { data: products, error } = await query
+      .order("priority", { ascending: false, nullsFirst: false })
+      .range(offset, offset + pageSize - 1)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

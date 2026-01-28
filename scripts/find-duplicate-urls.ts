@@ -120,7 +120,9 @@ async function findDuplicates() {
     for (const p of group) {
       const hasQueryParams = p.url.includes("?")
       const priorityStr = p.priority !== null ? `P${p.priority}` : "no-priority"
-      console.log(`     - ID: ${p.id} | ${priorityStr} | barcode: ${p.barcode || "null"} | ${hasQueryParams ? "HAS QUERY PARAMS" : "clean URL"}`)
+      console.log(
+        `     - ID: ${p.id} | ${priorityStr} | barcode: ${p.barcode || "null"} | ${hasQueryParams ? "HAS QUERY PARAMS" : "clean URL"}`,
+      )
       if (hasQueryParams) {
         const queryPart = p.url.split("?")[1]
         console.log(`       Query: ?${queryPart.substring(0, 80)}${queryPart.length > 80 ? "..." : ""}`)

@@ -17,9 +17,7 @@ async function getDescendantCategoryIds(
   const ids: number[] = [categoryId]
 
   // Fetch all canonical categories at once (they're cached and there are only ~350)
-  const { data: allCategories, error } = await supabase
-    .from("canonical_categories")
-    .select("id, parent_id")
+  const { data: allCategories, error } = await supabase.from("canonical_categories").select("id, parent_id")
 
   if (error || !allCategories) {
     return ids
