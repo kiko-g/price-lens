@@ -28,7 +28,7 @@ interface BulkScrapeFilters {
 
 /**
  * GET /api/admin/bulk-scrape
- * Returns count of matching products for given filters, or lists active jobs
+ * Returns count of matching products for given filters, lists active jobs, or returns products list
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -38,6 +38,42 @@ export async function GET(req: NextRequest) {
   if (action === "jobs") {
     const jobs = await getActiveBulkScrapeJobs()
     return NextResponse.json({ jobs })
+  }
+
+  // List matching products with pagination
+  if (action === "products") {
+    const filters = parseFilters(searchParams)
+    const page = parseInt(searchParams.get("page") || "1", 10)
+    const pageSize = parseInt(searchParams.get("pageSize") || "50", 10)
+    const offset = (page - 1) * pageSize
+
+    const supabase = createClient()
+
+    // Get count first
+    let countQuery = supabase.from("store_products").select("id", { count: "exact", head: true })
+    countQuery = applyFilters(countQuery, filters)
+    const { count } = await countQuery
+
+    // Get products with pagination
+    let query = supabase
+      .from("store_products")
+      .select("id, url, name, brand, barcode, price, image, origin_id, priority, available, category, updated_at")
+
+    query = applyFilters(query, filters)
+
+    const { data: products, error } = await query.order("priority", { ascending: false, nullsFirst: false }).range(offset, offset + pageSize - 1)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      products: products ?? [],
+      total: count ?? 0,
+      page,
+      pageSize,
+      totalPages: Math.ceil((count ?? 0) / pageSize),
+    })
   }
 
   // Count matching products

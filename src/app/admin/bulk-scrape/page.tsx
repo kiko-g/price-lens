@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
@@ -55,6 +56,7 @@ import {
   MicroscopeIcon,
   PickaxeIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 /** Type guard to check if result is a batch result (not job creation) */
 function isBatchResult(result: BulkScrapeResult): result is BulkScrapeBatchResult {
@@ -151,6 +153,8 @@ export default function BulkScrapePage() {
   const [batchSize, setBatchSize] = useState(5)
   const [jobLimit, setJobLimit] = useState<number | null>(null) // null = no limit, process all matching
   const [activeJobId, setActiveJobId] = useState<string | null>(null) // Active job tracking
+  const [matchingProductsDialogOpen, setMatchingProductsDialogOpen] = useState(false)
+  const [productsPage, setProductsPage] = useState(1)
 
   // Cancel state
   const cancelRequestedRef = useRef(false)
@@ -223,6 +227,46 @@ export default function BulkScrapePage() {
       return res.data as { jobs: BulkScrapeJob[] }
     },
     staleTime: 60000,
+  })
+
+  // Fetch matching products for the dialog
+  const { data: matchingProducts, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ["bulk-scrape-products", filters, productsPage],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      params.set("action", "products")
+      params.set("origins", filters.origins.join(","))
+      if (filters.priorities.length > 0) params.set("priorities", filters.priorities.join(","))
+      params.set("missingBarcode", String(filters.missingBarcode))
+      if (filters.available !== null) params.set("available", String(filters.available))
+      params.set("onlyUrl", String(filters.onlyUrl))
+      params.set("page", String(productsPage))
+      params.set("pageSize", "50")
+
+      const res = await axios.get(`/api/admin/bulk-scrape?${params.toString()}`)
+      return res.data as {
+        products: Array<{
+          id: number
+          url: string
+          name: string | null
+          brand: string | null
+          barcode: string | null
+          price: number | null
+          image: string | null
+          origin_id: number
+          priority: number | null
+          available: boolean
+          category: string | null
+          updated_at: string
+        }>
+        total: number
+        page: number
+        pageSize: number
+        totalPages: number
+      }
+    },
+    enabled: matchingProductsDialogOpen,
+    staleTime: 30000,
   })
 
   // Fetch active job progress
@@ -912,7 +956,13 @@ export default function BulkScrapePage() {
 
         {/* Fixed Count & Start Button */}
         <div className="bg-accent bottom-0 z-50 flex shrink-0 flex-col border-t! p-4 xl:fixed xl:bottom-0 xl:left-0 xl:ml-(--sidebar-width) xl:w-[400px] xl:border-t-0 xl:border-r">
-          <button className="hover:bg-primary/20 hover:border-primary/50 bg-background flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2">
+          <button
+            onClick={() => {
+              setProductsPage(1)
+              setMatchingProductsDialogOpen(true)
+            }}
+            className="hover:bg-primary/20 hover:border-primary/50 bg-background flex flex-1 cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2"
+          >
             <div className="flex items-center gap-2">
               <PackageIcon className="text-muted-foreground h-4 w-4" />
               <span className="text-muted-foreground text-sm">Matching</span>
@@ -1240,6 +1290,134 @@ export default function BulkScrapePage() {
           )}
         </div>
       </main>
+
+      {/* Matching Products Dialog */}
+      <Dialog open={matchingProductsDialogOpen} onOpenChange={setMatchingProductsDialogOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PackageIcon className="h-5 w-5" />
+              Matching Products
+            </DialogTitle>
+            <DialogDescription>{count.toLocaleString()} products match the current filters</DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="h-[60vh] pr-4">
+            {isLoadingProducts ? (
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
+                    <Skeleton className="h-12 w-12 rounded" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : matchingProducts?.products.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <PackageIcon className="text-muted-foreground mb-4 h-12 w-12" />
+                <p className="text-muted-foreground">No products match the current filters</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {matchingProducts?.products.map((product) => {
+                  const origin = STORE_ORIGINS_BARCODE.find((o) => o.id === product.origin_id)
+                  const Logo = origin?.Logo
+
+                  return (
+                    <div key={product.id} className="flex items-center gap-3 rounded-lg border p-3 transition-colors">
+                      {product.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={product.image}
+                          alt={product.name || "Product"}
+                          className="h-12 w-12 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="bg-muted flex h-12 w-12 items-center justify-center rounded">
+                          <PackageIcon className="text-muted-foreground h-6 w-6" />
+                        </div>
+                      )}
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-medium">
+                            {product.name || (
+                              <span className="text-muted-foreground italic">No name (not scraped)</span>
+                            )}
+                          </span>
+                          {product.priority !== null && <PriorityBubble priority={product.priority} size="sm" />}
+                        </div>
+                        <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                          {product.brand && <span>{product.brand}</span>}
+                          {product.category && <span>{product.category}</span>}
+                          {product.barcode ? (
+                            <span className="flex items-center gap-1 text-emerald-600">
+                              <BarcodeIcon className="h-3 w-3" />
+                              {product.barcode}
+                            </span>
+                          ) : (
+                            <span className="text-amber-600">No barcode</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <Link
+                          href={product.url}
+                          target="_blank"
+                          className="bg-accent/50 hover:bg-accent rounded-md px-1 py-0.5"
+                        >
+                          {Logo && <Logo className="h-4 w-auto" />}
+                        </Link>
+                        {product.price !== null && (
+                          <span className="text-sm font-semibold">
+                            {product.price.toLocaleString("pt-PT", { style: "currency", currency: "EUR" })}
+                          </span>
+                        )}
+                        <Link href="/products/[id]" as={`/products/${product.id}`} target="_blank">
+                          <Badge variant={product.available ? "secondary" : "destructive"} size="2xs">
+                            {product.available ? "Available" : "Unavailable"}
+                          </Badge>
+                        </Link>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </ScrollArea>
+
+          {/* Pagination */}
+          {matchingProducts && matchingProducts.totalPages > 1 && (
+            <div className="flex items-center justify-between pt-6">
+              <span className="text-muted-foreground text-sm">
+                Page {matchingProducts.page} of {matchingProducts.totalPages}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
+                  disabled={productsPage <= 1 || isLoadingProducts}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setProductsPage((p) => Math.min(matchingProducts.totalPages, p + 1))}
+                  disabled={productsPage >= matchingProducts.totalPages || isLoadingProducts}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
