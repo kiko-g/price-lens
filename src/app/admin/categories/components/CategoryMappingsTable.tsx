@@ -233,7 +233,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
         <div className="rounded-md border">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-accent">
                 <TableHead className="w-10">
                   <Checkbox
                     checked={allUnmappedSelected}

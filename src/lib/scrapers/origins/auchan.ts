@@ -54,6 +54,9 @@ export interface ScrapedAddOnAuchan {
   }
 }
 
+// Pattern to validate quantity values (e.g., "0.5 LT", "500 ML", "1 KG", "6 UN")
+const QUANTITY_PATTERN = /^\s*\d+([.,]\d+)?\s*(LT|ML|L|KG|G|GR|UN|UNID|UNIDADES?|CL)\s*$/i
+
 /**
  * Scraper for Auchan supermarket (origin_id: 2)
  */
@@ -83,13 +86,14 @@ export class AuchanScraper extends BaseProductScraper {
     const item = addOn.ecommerce.items[0]
     const pricePerMajorUnitStr = this.getText($, ".auc-measures--price-per-unit")
     const majorUnit = pricePerMajorUnitStr?.split("/").pop() || null
+    const productName = formatProductName(schema.name)
 
     return {
       url,
-      name: formatProductName(schema.name),
+      name: productName,
       brand: formatProductName(schema.brand?.name),
       barcode: this.extractBarcode(schema),
-      pack: this.getText($, ".attribute-values.auc-pdp-regular"),
+      pack: this.extractPack($, productName),
       price: schema.offers?.price || null,
       priceRecommended: item.price ? priceToNumber(item.price) : null,
       pricePerMajorUnit: pricePerMajorUnitStr,
@@ -149,6 +153,30 @@ export class AuchanScraper extends BaseProductScraper {
   private extractBarcode(schema: ScrapedSchemaAuchan): string | null {
     // Auchan provides GTIN in the schema
     return schema.gtin || schema.sku || null
+  }
+
+  /**
+   * Extracts pack/quantity information with validation and fallback.
+   * Primary: "Quantidade Liquida" attribute (first .attribute-values.auc-pdp-regular)
+   * Fallback: Extract from product name if primary doesn't look like a quantity
+   */
+  private extractPack($: cheerio.CheerioAPI, productName: string | null): string | null {
+    // Try primary selector - works when "Quantidade Liquida" attribute exists
+    const primaryValue = this.getText($, ".attribute-values.auc-pdp-regular")
+
+    if (primaryValue && QUANTITY_PATTERN.test(primaryValue)) {
+      return primaryValue
+    }
+
+    // Fallback: extract quantity from product name (e.g., "ÁGUA...1L" or "LEITE...500ML")
+    if (productName) {
+      const nameMatch = productName.match(/(\d+([.,]\d+)?)\s*(LT|ML|L|KG|G|GR|UN|UNID|CL)\b/i)
+      if (nameMatch) {
+        return `${nameMatch[1]} ${nameMatch[3].toUpperCase()}`
+      }
+    }
+
+    return null
   }
 
   private extractImage($: cheerio.CheerioAPI, schema: ScrapedSchemaAuchan): string | null {

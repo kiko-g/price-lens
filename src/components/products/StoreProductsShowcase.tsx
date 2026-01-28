@@ -683,7 +683,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           )}
 
           {/* Filters Accordion */}
-          <Accordion type="multiple" className="w-full border-t" defaultValue={["sort", "options", "store-origin"]}>
+          <Accordion
+            type="multiple"
+            className="w-full border-t"
+            defaultValue={["sort", "options", "categories", "store-origin"]}
+          >
             {/* Sort Options */}
             <AccordionItem value="sort">
               <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -1545,7 +1549,10 @@ function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: Ca
           onValueChange={handleLevel1Change}
         >
           <SelectTrigger
-            className={cn("h-8 w-full text-sm", findCategoryPath.level1 && "border-primary/20 bg-primary/10")}
+            className={cn(
+              "h-8 w-full text-sm",
+              findCategoryPath.level1 && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+            )}
           >
             <SelectValue placeholder="All categories" />
           </SelectTrigger>
@@ -1570,7 +1577,10 @@ function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: Ca
           disabled={!findCategoryPath.level1}
         >
           <SelectTrigger
-            className={cn("h-8 w-full text-sm", findCategoryPath.level2 && "border-primary/20 bg-primary/10")}
+            className={cn(
+              "h-8 w-full text-sm",
+              findCategoryPath.level2 && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+            )}
           >
             <SelectValue placeholder={findCategoryPath.level1 ? "All subcategories" : "Select category first"} />
           </SelectTrigger>
@@ -1595,7 +1605,10 @@ function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: Ca
           disabled={!findCategoryPath.level2 || level3Options.length === 0}
         >
           <SelectTrigger
-            className={cn("h-8 w-full text-sm", findCategoryPath.level3 && "border-primary/20 bg-primary/10")}
+            className={cn(
+              "h-8 w-full text-sm",
+              findCategoryPath.level3 && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+            )}
           >
             <SelectValue
               placeholder={

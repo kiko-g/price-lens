@@ -62,7 +62,7 @@ function isBatchResult(result: BulkScrapeResult): result is BulkScrapeBatchResul
 }
 
 // Store origin mapping for SVG logos
-const STORE_ORIGINS = [
+const STORE_ORIGINS_BARCODE = [
   { id: 1, name: "Continente", Logo: ContinenteSvg, hasBarcode: true },
   { id: 2, name: "Auchan", Logo: AuchanSvg, hasBarcode: true },
   { id: 3, name: "Pingo Doce", Logo: PingoDoceSvg, hasBarcode: false },
@@ -788,7 +788,7 @@ export default function BulkScrapePage() {
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 <div className="flex flex-col gap-2">
-                  {STORE_ORIGINS.map((origin) => (
+                  {STORE_ORIGINS_BARCODE.map((origin) => (
                     <div key={origin.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={`origin-${origin.id}`}
@@ -912,7 +912,7 @@ export default function BulkScrapePage() {
 
         {/* Fixed Count & Start Button */}
         <div className="bg-accent bottom-0 z-50 flex shrink-0 flex-col border-t! p-4 xl:fixed xl:bottom-0 xl:left-0 xl:ml-(--sidebar-width) xl:w-[400px] xl:border-t-0 xl:border-r">
-          <div className="bg-background flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2">
+          <button className="hover:bg-primary/20 hover:border-primary/50 bg-background flex flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2">
             <div className="flex items-center gap-2">
               <PackageIcon className="text-muted-foreground h-4 w-4" />
               <span className="text-muted-foreground text-sm">Matching</span>
@@ -922,7 +922,7 @@ export default function BulkScrapePage() {
             ) : (
               <span className="text-lg font-bold">{count.toLocaleString()}</span>
             )}
-          </div>
+          </button>
           <Button
             size="lg"
             onClick={handleStart}
