@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
     query = applyFilters(query, filters)
 
     const { data: products, error } = await query
+      .order("scraped_at", { ascending: true, nullsFirst: true }) // Stale products first
       .order("priority", { ascending: false, nullsFirst: false })
       .range(offset, offset + pageSize - 1)
 
