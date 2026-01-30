@@ -151,7 +151,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   return (
-    <div className="mx-auto mb-8 flex w-full flex-col py-0 lg:py-4">
+    <div className="mx-auto mb-8 flex w-full max-w-7xl flex-col py-0 lg:py-4">
       <article className="grid w-full grid-cols-1 gap-3 md:grid-cols-20 md:gap-8">
         <aside className="col-span-1 flex items-start justify-end gap-4 md:col-span-6 md:flex-col md:items-center md:justify-center">
           {/* Product Image */}

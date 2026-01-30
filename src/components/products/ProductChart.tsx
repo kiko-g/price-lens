@@ -378,7 +378,7 @@ export function ProductChart({
       </div>
 
       {/* Chart container with touch handling for mobile tooltip dismiss */}
-      <div ref={chartRef} className="max-w-lg touch-pan-y md:max-w-md">
+      <div ref={chartRef} className="touch-pan-y">
         <ChartContainer
           config={chartConfig}
           className={cn(isLoading ? "" : "animate-fade-in")}
@@ -463,7 +463,7 @@ export function ProductChart({
       </div>
 
       {!isLoading && pricePoints !== null && pricePoints.length > 0 && (
-        <div className="flex flex-1 shrink-0 flex-col overflow-hidden md:max-w-md">
+        <div className="flex flex-1 shrink-0 flex-col overflow-hidden">
           <div
             className={cn(
               "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",
