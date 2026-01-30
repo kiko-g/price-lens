@@ -2,7 +2,17 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useMemo, useRef, useState, useCallback } from "react"
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  type ReactNode,
+  type RefObject,
+} from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
@@ -27,12 +37,73 @@ import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
 
 const FALLBACK_ACTIVE_DOT_RADIUS = 5
-const CHART_TRANSITION_DURATION = 300 // ms for fade transition
+const CHART_TRANSITION_DURATION = 300
 
-/**
- * Custom hook to handle chart touch interactions for mobile.
- * Provides touch-to-reveal tooltip behavior that dismisses on release (like Trade Republic).
- */
+// ============================================================================
+// Context Types
+// ============================================================================
+
+type ChartBounds = {
+  floor: number
+  ceiling: number
+  tickInterval: number
+  ticks: number[]
+}
+
+type ProductChartContextValue = {
+  // Core data
+  sp: StoreProduct
+  chartData: ProductChartEntry[]
+  pricePoints: PricePoint[] | null
+  mostCommon: PricePoint | null
+  chartBounds: ChartBounds
+
+  // State
+  activeAxis: string[]
+  selectedRange: DateRange
+  isLoading: boolean
+  isTransitioning: boolean
+  error: Error | null
+
+  // Derived values
+  daysBetweenDates: number
+  xAxisTickInterval: number
+  variations: {
+    price: number
+    priceRecommended: number
+    pricePerMajorUnit: number
+    discount: number
+  }
+
+  // Chart config
+  samplingMode: ChartSamplingMode
+  showDots: boolean
+  baseDotRadius: number
+  isMobile: boolean
+
+  // Actions
+  handleAxisChange: (axis: string) => void
+  handleRangeChange: (range: DateRange) => void
+
+  // Refs for touch handling
+  chartRef: RefObject<HTMLDivElement | null>
+  isTooltipActive: boolean
+}
+
+const ProductChartContext = createContext<ProductChartContextValue | null>(null)
+
+function useProductChartContext() {
+  const context = useContext(ProductChartContext)
+  if (!context) {
+    throw new Error("ProductChart compound components must be used within ProductChart.Root")
+  }
+  return context
+}
+
+// ============================================================================
+// Hooks
+// ============================================================================
+
 function useChartTouch() {
   const [isActive, setIsActive] = useState(false)
   const chartRef = useRef<HTMLDivElement>(null)
@@ -41,18 +112,9 @@ function useChartTouch() {
     const element = chartRef.current
     if (!element) return
 
-    const handleTouchStart = () => {
-      setIsActive(true)
-    }
-
-    const handleTouchEnd = () => {
-      // Small delay to allow the last tooltip position to render before hiding
-      setTimeout(() => setIsActive(false), 50)
-    }
-
-    const handleMouseLeave = () => {
-      setIsActive(false)
-    }
+    const handleTouchStart = () => setIsActive(true)
+    const handleTouchEnd = () => setTimeout(() => setIsActive(false), 50)
+    const handleMouseLeave = () => setIsActive(false)
 
     element.addEventListener("touchstart", handleTouchStart, { passive: true })
     element.addEventListener("touchend", handleTouchEnd, { passive: true })
@@ -70,41 +132,30 @@ function useChartTouch() {
   return { chartRef, isActive }
 }
 
-type Props = {
+// ============================================================================
+// Root Component (Provider)
+// ============================================================================
+
+type RootProps = {
+  children: ReactNode
   sp: StoreProduct
-  className?: string
   defaultRange?: DateRange
   onRangeChange?: (range: DateRange) => void
-  /** Chart data sampling mode: 'raw' (1 point/day), 'hybrid' (boundaries + samples), 'efficient' (boundaries only) */
   samplingMode?: ChartSamplingMode
-  options?: {
-    showPricesVariationCard?: boolean
-    showImage?: boolean
-    showBarcode?: boolean
-    showDots?: boolean
-    dotRadius?: number
-  }
+  className?: string
 }
 
-const defaultOptions: NonNullable<Props["options"]> = {
-  showPricesVariationCard: true,
-  showImage: true,
-  showBarcode: true,
-  showDots: undefined, // Will be determined by samplingMode
-  dotRadius: undefined, // Will be determined by samplingMode
-}
-
-export function ProductChart({
+function Root({
+  children,
   sp,
-  className,
   defaultRange = "Max",
   onRangeChange,
   samplingMode = "hybrid",
-  options = defaultOptions,
-}: Props) {
+  className,
+}: RootProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const showDots = options?.showDots ?? samplingMode === "efficient"
-  const baseDotRadius = options?.dotRadius ?? (isMobile ? 2 : 0)
+  const showDots = samplingMode === "efficient"
+  const baseDotRadius = isMobile ? 2 : 0
 
   const [chartData, setChartData] = useState<ProductChartEntry[]>([])
   const [selectedRange, setSelectedRange] = useState<DateRange>(defaultRange)
@@ -112,17 +163,15 @@ export function ProductChart({
   const [activeAxis, updateActiveAxis] = useActiveAxis()
   const pendingRangeRef = useRef<DateRange | null>(null)
   const { chartRef, isActive: isTooltipActive } = useChartTouch()
+
   const id = sp.id?.toString() || ""
   const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
 
   const prices = useMemo(() => data?.prices || [], [data?.prices])
   const analytics = data?.analytics || null
-
-  // Get computed analytics from backend
   const pricePoints = analytics?.pricePoints || null
   const mostCommon = analytics?.mostCommon || null
 
-  // Calculate chart bounds from VISIBLE chartData (respects selected time range)
   const chartBounds = useMemo(() => {
     if (chartData.length === 0) {
       return { floor: 0, ceiling: 1, tickInterval: 0.5, ticks: [0, 0.5, 1] }
@@ -145,84 +194,268 @@ export function ProductChart({
     return calculateChartBounds(min, max)
   }, [chartData, activeAxis])
 
-  const priceVariation = analytics?.variations.price || 0
-  const priceRecommendedVariation = analytics?.variations.priceRecommended || 0
-  const pricePerMajorUnitVariation = analytics?.variations.pricePerMajorUnit || 0
-  const discountVariation = analytics?.variations.discount || 0
+  const variations = useMemo(
+    () => ({
+      price: analytics?.variations.price || 0,
+      priceRecommended: analytics?.variations.priceRecommended || 0,
+      pricePerMajorUnit: analytics?.variations.pricePerMajorUnit || 0,
+      discount: analytics?.variations.discount || 0,
+    }),
+    [analytics],
+  )
 
   const daysBetweenDates = analytics?.dateRange.daysBetween || 0
 
-  // Calculate X-axis tick interval to show ~8 ticks max
   const xAxisTickInterval = useMemo(() => {
     const dataLength = chartData.length
-    if (dataLength <= 8) return 0 // Show all ticks
+    if (dataLength <= 8) return 0
     return Math.floor(dataLength / 8)
   }, [chartData.length])
 
-  // Build chart data with smooth transition
   const updateChartData = useCallback(
     (range: DateRange) => {
       if (!prices || prices.length === 0) return
-      const pricePoints = buildChartData(prices, { range, samplingMode })
-      setChartData(pricePoints)
+      const points = buildChartData(prices, { range, samplingMode })
+      setChartData(points)
     },
     [prices, samplingMode],
   )
 
-  // Initial data load (no transition)
   useEffect(() => {
     if (!prices || prices.length === 0) return
     updateChartData(selectedRange)
   }, [prices]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle range change with crossfade transition
   useEffect(() => {
     const pendingRange = pendingRangeRef.current
     if (!pendingRange || !prices || prices.length === 0) return
 
-    // Start fade-out
     setIsTransitioning(true)
 
     const fadeOutTimer = setTimeout(() => {
-      // Update data while faded out
       updateChartData(pendingRange)
-
-      // Start fade-in
       const fadeInTimer = setTimeout(() => {
         setIsTransitioning(false)
         pendingRangeRef.current = null
       }, 50)
-
       return () => clearTimeout(fadeInTimer)
     }, CHART_TRANSITION_DURATION)
 
     return () => clearTimeout(fadeOutTimer)
   }, [selectedRange, prices, updateChartData])
 
-  // Early return for error state - all hooks must be called before this
-  if (error) {
+  const handleAxisChange = useCallback(
+    (axis: string) => {
+      const newAxis = activeAxis.includes(axis) ? activeAxis.filter((a) => a !== axis) : [...activeAxis, axis]
+      updateActiveAxis(newAxis)
+    },
+    [activeAxis, updateActiveAxis],
+  )
+
+  const handleRangeChange = useCallback(
+    (range: DateRange) => {
+      if (range === selectedRange) return
+      pendingRangeRef.current = range
+      setSelectedRange(range)
+      onRangeChange?.(range)
+    },
+    [selectedRange, onRangeChange],
+  )
+
+  const contextValue: ProductChartContextValue = {
+    sp,
+    chartData,
+    pricePoints,
+    mostCommon,
+    chartBounds,
+    activeAxis,
+    selectedRange,
+    isLoading,
+    isTransitioning,
+    error: error || null,
+    daysBetweenDates,
+    xAxisTickInterval,
+    variations,
+    samplingMode,
+    showDots,
+    baseDotRadius,
+    isMobile,
+    handleAxisChange,
+    handleRangeChange,
+    chartRef,
+    isTooltipActive,
+  }
+
+  return (
+    <ProductChartContext.Provider value={contextValue}>
+      <div className={cn("flex w-full flex-col", className)}>{children}</div>
+    </ProductChartContext.Provider>
+  )
+}
+
+// ============================================================================
+// PricesVariation Component
+// ============================================================================
+
+type PricesVariationProps = {
+  className?: string
+  showImage?: boolean
+  showBarcode?: boolean
+}
+
+function PricesVariation({ className, showImage = false, showBarcode = false }: PricesVariationProps) {
+  const { sp, activeAxis, variations, handleAxisChange } = useProductChartContext()
+
+  return (
+    <header className={cn("mb-2 flex items-start justify-between gap-3", className)}>
+      <PricesVariationCard
+        state={{ activeAxis }}
+        data={{
+          discountVariation: variations.discount,
+          priceVariation: variations.price,
+          priceRecommendedVariation: variations.priceRecommended,
+          pricePerMajorUnitVariation: variations.pricePerMajorUnit,
+          storeProduct: sp,
+        }}
+        options={{
+          hideExtraInfo: !showImage,
+        }}
+        actions={{
+          onPriceChange: () => handleAxisChange("price"),
+          onPriceRecommendedChange: () => handleAxisChange("price-recommended"),
+          onPricePerMajorUnitChange: () => handleAxisChange("price-per-major-unit"),
+          onDiscountChange: () => handleAxisChange("discount"),
+        }}
+        className="max-w-xs text-xs font-medium md:text-sm"
+      />
+
+      {(showImage || showBarcode) && (
+        <div className="flex w-28 flex-col items-center justify-center gap-3 md:w-30">
+          {showImage && <ProductImage />}
+          {showBarcode && <Barcode value={sp.barcode} height={10} width={1} />}
+        </div>
+      )}
+    </header>
+  )
+}
+
+function ProductImage() {
+  const { sp } = useProductChartContext()
+
+  function resolveImageUrl(image: string, size = 400) {
+    const url = new URL(image)
+    const p = url.searchParams
+    ;["sm", "w", "h", "sw", "sh"].forEach((k) => p.delete(k))
+    p.set("sw", String(size))
+    p.set("sh", String(size))
+    p.set("sm", "fit")
+    return url.toString()
+  }
+
+  if (!sp.image) {
     return (
-      <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
-        <p className="text-destructive">Failed to load price data</p>
-        <p className="text-muted-foreground mt-1 text-sm">Please try refreshing the page</p>
+      <div className="bg-muted flex aspect-square w-24 items-center justify-center rounded-md">
+        <ImageIcon className="h-4 w-4" />
       </div>
     )
   }
 
+  return (
+    <div className="relative overflow-hidden">
+      <Link href={generateProductPath(sp)} target="_blank">
+        <Image
+          src={resolveImageUrl(sp.image, 400)}
+          alt={sp.name}
+          width={400}
+          height={400}
+          className={cn(
+            "aspect-square size-28 rounded-md border bg-white object-contain p-0.5 transition-all duration-300 md:size-30",
+            sp.available ? "opacity-100 hover:scale-105" : "grayscale hover:scale-105",
+          )}
+          placeholder="empty"
+          blurDataURL={imagePlaceholder.productBlur}
+          loading="lazy"
+        />
+      </Link>
+
+      {!sp.available && (
+        <div className="absolute top-1 left-1 flex flex-col gap-1">
+          <Badge size="xs" variant="destructive">
+            <TooltipProvider>
+              <TooltipUI delayDuration={100}>
+                <TooltipTrigger>
+                  <WifiOffIcon className="h-4 w-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>This product is not available in this store.</p>
+                </TooltipContent>
+              </TooltipUI>
+            </TooltipProvider>
+          </Badge>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================================
+// RangeSelector Component
+// ============================================================================
+
+type RangeSelectorProps = {
+  className?: string
+}
+
+function RangeSelector({ className }: RangeSelectorProps) {
+  const { selectedRange, daysBetweenDates, isLoading, handleRangeChange } = useProductChartContext()
+
+  return (
+    <div className={cn("flex flex-wrap items-center justify-start gap-2", className)}>
+      {RANGES.map((range) => (
+        <Button
+          key={range}
+          variant={range === selectedRange ? "default" : "ghost"}
+          onClick={() => handleRangeChange(range)}
+          disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
+          className="disabled:text-muted-foreground px-2 text-xs lg:text-sm"
+        >
+          {range}
+        </Button>
+      ))}
+      {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
+    </div>
+  )
+}
+
+// ============================================================================
+// Graph Component
+// ============================================================================
+
+type GraphProps = {
+  className?: string
+}
+
+function Graph({ className }: GraphProps) {
+  const {
+    chartData,
+    chartBounds,
+    activeAxis,
+    isLoading,
+    isTransitioning,
+    xAxisTickInterval,
+    showDots,
+    baseDotRadius,
+    isMobile,
+    chartRef,
+    isTooltipActive,
+  } = useProductChartContext()
+
   function getLineChartConfig(axis: string, chartDataLength: number) {
     const isSinglePoint = chartDataLength === 1
     const dotRadius = showDots || isSinglePoint ? baseDotRadius : 0
-
-    // Get the color for this axis from chartConfig
     const color = chartConfig[axis as keyof typeof chartConfig]?.color ?? "var(--chart-1)"
 
-    // Solid filled dots that grow by 1 on hover
-    const dotConfig = {
-      r: dotRadius,
-      fill: color,
-      strokeWidth: 0,
-    }
-
+    const dotConfig = { r: dotRadius, fill: color, strokeWidth: 0 }
     const activeDotConfig = {
       r: dotRadius >= 2 ? dotRadius + 1 : FALLBACK_ACTIVE_DOT_RADIUS,
       fill: color,
@@ -262,299 +495,287 @@ export function ProductChart({
     }
   }
 
-  function resolveImageUrlForDrawer(image: string, size = 400) {
-    const url = new URL(image)
-    const p = url.searchParams
-    const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
-    fieldsToDelete.forEach((k) => p.delete(k))
-    p.set("sw", String(size))
-    p.set("sh", String(size))
-    p.set("sm", "fit")
-    return url.toString()
-  }
-
-  function handleAxisChange(axis: string) {
-    const newAxis = activeAxis.includes(axis) ? activeAxis.filter((a) => a !== axis) : [...activeAxis, axis]
-    updateActiveAxis(newAxis)
-  }
-
-  function handleRangeChange(range: DateRange) {
-    if (range === selectedRange) return
-
-    // Store the pending range and trigger the transition effect
-    pendingRangeRef.current = range
-    setSelectedRange(range)
-    onRangeChange?.(range)
-  }
-
   return (
-    <div className={cn("flex w-full flex-col", className)}>
-      {(options?.showPricesVariationCard || options?.showImage) && (
-        <header className="mb-2 flex items-start justify-between gap-3">
-          {options?.showPricesVariationCard && (
-            <PricesVariationCard
-              state={{ activeAxis }}
-              data={{
-                discountVariation,
-                priceVariation,
-                priceRecommendedVariation,
-                pricePerMajorUnitVariation,
-                storeProduct: sp,
-              }}
-              options={{
-                hideExtraInfo: !options?.showImage,
-              }}
-              actions={{
-                onPriceChange: () => handleAxisChange("price"),
-                onPriceRecommendedChange: () => handleAxisChange("price-recommended"),
-                onPricePerMajorUnitChange: () => handleAxisChange("price-per-major-unit"),
-                onDiscountChange: () => handleAxisChange("discount"),
-              }}
-              className="max-w-xs text-xs font-medium md:text-sm"
-            />
-          )}
-
-          <div className="flex w-28 flex-col items-center justify-center gap-3 md:w-30">
-            {options?.showImage &&
-              (sp.image ? (
-                <div className="relative overflow-hidden">
-                  <Link href={generateProductPath(sp)} target="_blank">
-                    <Image
-                      src={resolveImageUrlForDrawer(sp.image, 400)}
-                      alt={sp.name}
-                      width={400}
-                      height={400}
-                      className={cn(
-                        "aspect-square size-28 rounded-md border bg-white object-contain p-0.5 transition-all duration-300 md:size-30",
-                        sp.available ? "opacity-100 hover:scale-105" : "grayscale hover:scale-105",
-                      )}
-                      placeholder="empty"
-                      blurDataURL={imagePlaceholder.productBlur}
-                      loading="lazy"
-                    />
-                  </Link>
-
-                  <div className="absolute top-1 left-1 flex flex-col gap-1">
-                    {!sp.available && (
-                      <Badge size="xs" variant="destructive">
-                        <TooltipProvider>
-                          <TooltipUI delayDuration={100}>
-                            <TooltipTrigger>
-                              <WifiOffIcon className="h-4 w-4" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>This product is not available in this store.</p>
-                            </TooltipContent>
-                          </TooltipUI>
-                        </TooltipProvider>
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-muted flex aspect-square w-24 items-center justify-center rounded-md">
-                  <ImageIcon className="h-4 w-4" />
-                </div>
-              ))}
-
-            {options?.showBarcode && <Barcode value={sp.barcode} height={10} width={1} />}
-          </div>
-        </header>
-      )}
-
-      <div className="mt-2 mb-2 flex flex-wrap items-center justify-start gap-2 md:mt-0 md:mb-4">
-        {RANGES.map((range) => (
-          <Button
-            key={range}
-            variant={range === selectedRange ? "default" : "ghost"}
-            onClick={() => handleRangeChange(range)}
-            disabled={range !== "Max" && daysBetweenDates < daysAmountInRange[range]}
-            className="disabled:text-muted-foreground px-2 text-xs lg:text-sm"
-          >
-            {range}
-          </Button>
-        ))}
-        {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
-      </div>
-
-      {/* Chart container with touch handling for mobile tooltip dismiss */}
-      <div ref={chartRef} className="touch-pan-y">
-        <ChartContainer
-          config={chartConfig}
-          className={cn(isLoading ? "" : "animate-fade-in")}
-          style={{
-            opacity: isTransitioning ? 0 : 1,
-            transition: `opacity ${CHART_TRANSITION_DURATION}ms ease-in-out`,
-          }}
+    <div ref={chartRef} className={cn("touch-pan-y", className)}>
+      <ChartContainer
+        config={chartConfig}
+        className={cn(isLoading ? "" : "animate-fade-in")}
+        style={{
+          opacity: isTransitioning ? 0 : 1,
+          transition: `opacity ${CHART_TRANSITION_DURATION}ms ease-in-out`,
+        }}
+      >
+        <LineChart
+          accessibilityLayer
+          data={chartData}
+          margin={{ left: 4, right: -20, top: 12, bottom: 30 }}
         >
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 4,
-              right: -20,
-              top: 12,
-              bottom: 30,
-            }}
-          >
-            <CartesianGrid strokeDasharray="4 4" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              interval={xAxisTickInterval}
-              tick={{ fontSize: 10 }}
-            />
-            <YAxis
-              dataKey="price"
-              yAxisId="price"
-              orientation="left"
-              tickLine={false}
-              axisLine={false}
-              width={40}
-              domain={[chartBounds.floor, chartBounds.ceiling]}
-              ticks={chartBounds.ticks}
-              tickFormatter={(value) => `€${value.toFixed(0)}`}
-              tick={(props) => <CustomTick {...props} yAxisId="price" />}
-            />
-            <YAxis
-              dataKey="discount"
-              yAxisId="discount"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              width={40}
-              domain={[0, 100]}
-              ticks={[0, 25, 50, 75, 100]}
-              tickFormatter={(value) => `${value}%`}
-              tick={(props) => <CustomTick {...props} yAxisId="discount" />}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
-              // On mobile, only show tooltip while finger is touching (Trade Republic style)
-              // On desktop, use default hover behavior
-              {...(isMobile ? { active: isTooltipActive } : {})}
-            />
-            {chartData.length > 0 &&
-              Object.entries(chartConfig)
-                .filter(([key]) => activeAxis.includes(key))
-                .map(([key, config]) => {
-                  const { dot, strokeDasharray, strokeWidth, activeDot } = getLineChartConfig(key, chartData.length)
-                  return (
-                    <Line
-                      key={key}
-                      yAxisId={key.includes("price") ? "price" : "discount"}
-                      dataKey={key}
-                      type="linear"
-                      stroke={config.color}
-                      strokeOpacity={1}
-                      strokeWidth={strokeWidth}
-                      strokeDasharray={strokeDasharray}
-                      dot={dot}
-                      activeDot={activeDot}
-                      isAnimationActive={false}
-                    />
-                  )
-                })}
-          </LineChart>
-        </ChartContainer>
-      </div>
-
-      {!isLoading && pricePoints !== null && pricePoints.length > 0 && (
-        <div className="flex flex-1 shrink-0 flex-col overflow-hidden">
-          <div
-            className={cn(
-              "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",
-              sp.price === mostCommon?.price
-                ? "bg-success/10 dark:bg-success/20 border-success/20 dark:border-success/40"
-                : "bg-destructive/10 dark:bg-destructive/20 border-destructive/20 dark:border-destructive/40",
-            )}
-          >
-            <BinocularsIcon className="h-4 w-4" />
-            {sp.price === mostCommon?.price ? (
-              <span>
-                Current price is <span className="text-success font-bold">the most common price</span>
-              </span>
-            ) : (
-              <span>
-                Current price is <span className="text-destructive font-bold">not</span> the most common price
-              </span>
-            )}
-          </div>
-
-          <Table className="mt-1 rounded-lg">
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="h-7 text-xs">
-                  <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
-                  Price
-                </TableHead>
-                <TableHead className="h-7 text-center text-xs">
-                  <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
-                  Original
-                </TableHead>
-                <TableHead className="h-7 text-center text-xs">
-                  <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
-                  Per Unit
-                </TableHead>
-                <TableHead className="h-7 text-center text-xs">
-                  <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
-                  Freq (%)
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {pricePoints
-                .sort((a, b) => b.price - a.price)
-                .map((point: PricePoint, index) => (
-                  <TableRow key={index} className="hover:bg-transparent">
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-semibold tracking-tighter">
-                          {point.price.toFixed(2)}€
-                        </span>
-
-                        {point.discount !== null && point.discount > 0.0 && (
-                          <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
-                            -{(point.discount * 100).toFixed(0)}%
-                          </Badge>
-                        )}
-                        {point.price === mostCommon?.price && (
-                          <Badge variant="secondary" size="2xs">
-                            Most Common
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                      {point.price_recommended?.toFixed(2)}€
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                      {point.price_per_major_unit?.toFixed(2)}€
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                      {(point.frequencyRatio * 100).toFixed(2)}%
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+          <CartesianGrid strokeDasharray="4 4" />
+          <XAxis
+            dataKey="date"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            interval={xAxisTickInterval}
+            tick={{ fontSize: 10 }}
+          />
+          <YAxis
+            dataKey="price"
+            yAxisId="price"
+            orientation="left"
+            tickLine={false}
+            axisLine={false}
+            width={40}
+            domain={[chartBounds.floor, chartBounds.ceiling]}
+            ticks={chartBounds.ticks}
+            tickFormatter={(value) => `€${value.toFixed(0)}`}
+            tick={(props) => <CustomTick {...props} yAxisId="price" />}
+          />
+          <YAxis
+            dataKey="discount"
+            yAxisId="discount"
+            orientation="right"
+            tickLine={false}
+            axisLine={false}
+            width={40}
+            domain={[0, 100]}
+            ticks={[0, 25, 50, 75, 100]}
+            tickFormatter={(value) => `${value}%`}
+            tick={(props) => <CustomTick {...props} yAxisId="discount" />}
+          />
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent />}
+            {...(isMobile ? { active: isTooltipActive } : {})}
+          />
+          {chartData.length > 0 &&
+            Object.entries(chartConfig)
+              .filter(([key]) => activeAxis.includes(key))
+              .map(([key, config]) => {
+                const { dot, strokeDasharray, strokeWidth, activeDot } = getLineChartConfig(key, chartData.length)
+                return (
+                  <Line
+                    key={key}
+                    yAxisId={key.includes("price") ? "price" : "discount"}
+                    dataKey={key}
+                    type="linear"
+                    stroke={config.color}
+                    strokeOpacity={1}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={strokeDasharray}
+                    dot={dot}
+                    activeDot={activeDot}
+                    isAnimationActive={false}
+                  />
+                )
+              })}
+        </LineChart>
+      </ChartContainer>
     </div>
   )
 }
 
-function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: any; yAxisId: string }) {
+function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: { value: number }; yAxisId: string }) {
   return (
     <text x={x} y={y} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
       {yAxisId === "price" ? `€${payload.value.toFixed(1)}` : `${payload.value}%`}
     </text>
   )
 }
+
+// ============================================================================
+// PriceTable Component
+// ============================================================================
+
+type PriceTableProps = {
+  className?: string
+}
+
+function PriceTable({ className }: PriceTableProps) {
+  const { sp, pricePoints, mostCommon, isLoading } = useProductChartContext()
+
+  if (isLoading || !pricePoints || pricePoints.length === 0) {
+    return null
+  }
+
+  return (
+    <div className={cn("flex flex-1 shrink-0 flex-col overflow-hidden", className)}>
+      <div
+        className={cn(
+          "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",
+          sp.price === mostCommon?.price
+            ? "bg-success/10 dark:bg-success/20 border-success/20 dark:border-success/40"
+            : "bg-destructive/10 dark:bg-destructive/20 border-destructive/20 dark:border-destructive/40",
+        )}
+      >
+        <BinocularsIcon className="h-4 w-4" />
+        {sp.price === mostCommon?.price ? (
+          <span>
+            Current price is <span className="text-success font-bold">the most common price</span>
+          </span>
+        ) : (
+          <span>
+            Current price is <span className="text-destructive font-bold">not</span> the most common price
+          </span>
+        )}
+      </div>
+
+      <Table className="mt-1 rounded-lg">
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="h-7 text-xs">
+              <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
+              Price
+            </TableHead>
+            <TableHead className="h-7 text-center text-xs">
+              <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
+              Original
+            </TableHead>
+            <TableHead className="h-7 text-center text-xs">
+              <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
+              Per Unit
+            </TableHead>
+            <TableHead className="h-7 text-center text-xs">
+              <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
+              Freq (%)
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {pricePoints
+            .sort((a, b) => b.price - a.price)
+            .map((point: PricePoint, index) => (
+              <TableRow key={index} className="hover:bg-transparent">
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
+
+                    {point.discount !== null && point.discount > 0.0 && (
+                      <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
+                        -{(point.discount * 100).toFixed(0)}%
+                      </Badge>
+                    )}
+                    {point.price === mostCommon?.price && (
+                      <Badge variant="secondary" size="2xs">
+                        Most Common
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+
+                <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                  {point.price_recommended?.toFixed(2)}€
+                </TableCell>
+
+                <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                  {point.price_per_major_unit?.toFixed(2)}€
+                </TableCell>
+
+                <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                  {(point.frequencyRatio * 100).toFixed(2)}%
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+// ============================================================================
+// Error Component
+// ============================================================================
+
+type ErrorDisplayProps = {
+  className?: string
+}
+
+function ErrorDisplay({ className }: ErrorDisplayProps) {
+  const { error } = useProductChartContext()
+
+  if (!error) return null
+
+  return (
+    <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
+      <p className="text-destructive">Failed to load price data</p>
+      <p className="text-muted-foreground mt-1 text-sm">Please try refreshing the page</p>
+    </div>
+  )
+}
+
+// ============================================================================
+// Legacy ProductChart Component (Backward Compatible)
+// ============================================================================
+
+type LegacyProps = {
+  sp: StoreProduct
+  className?: string
+  defaultRange?: DateRange
+  onRangeChange?: (range: DateRange) => void
+  samplingMode?: ChartSamplingMode
+  options?: {
+    showPricesVariationCard?: boolean
+    showImage?: boolean
+    showBarcode?: boolean
+    showDots?: boolean
+    dotRadius?: number
+  }
+}
+
+const defaultOptions: NonNullable<LegacyProps["options"]> = {
+  showPricesVariationCard: true,
+  showImage: true,
+  showBarcode: true,
+  showDots: undefined,
+  dotRadius: undefined,
+}
+
+function ProductChartLegacy({
+  sp,
+  className,
+  defaultRange = "Max",
+  onRangeChange,
+  samplingMode = "hybrid",
+  options = defaultOptions,
+}: LegacyProps) {
+  const showPricesVariation = options?.showPricesVariationCard ?? true
+  const showImage = options?.showImage ?? true
+  const showBarcode = options?.showBarcode ?? true
+
+  return (
+    <Root
+      sp={sp}
+      defaultRange={defaultRange}
+      onRangeChange={onRangeChange}
+      samplingMode={samplingMode}
+      className={className}
+    >
+      <ErrorDisplay />
+
+      {showPricesVariation && <PricesVariation showImage={showImage} showBarcode={showBarcode} />}
+
+      <RangeSelector className="mt-2 mb-2 md:mt-0 md:mb-4" />
+
+      <Graph />
+
+      <PriceTable />
+    </Root>
+  )
+}
+
+// ============================================================================
+// Compound Component Export
+// ============================================================================
+
+export const ProductChart = Object.assign(ProductChartLegacy, {
+  Root,
+  PricesVariation,
+  RangeSelector,
+  Graph,
+  PriceTable,
+  Error: ErrorDisplay,
+})
+
+// Also export types for external use
+export type { RootProps, PricesVariationProps, RangeSelectorProps, GraphProps, PriceTableProps }

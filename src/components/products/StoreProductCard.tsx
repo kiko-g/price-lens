@@ -459,8 +459,13 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 <ProductChart sp={sp} samplingMode="efficient" />
               </Suspense>
 
-              <Accordion type="single" collapsible className="mt-2 hidden w-full border-t md:flex">
-                <AccordionItem value="item-1" className="w-full border-0">
+              <Accordion
+                type="single"
+                collapsible
+                className="mt-6 hidden w-full border-t md:flex"
+                defaultValue="view-json-data"
+              >
+                <AccordionItem value="view-json-data" className="w-full border-0">
                   <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
