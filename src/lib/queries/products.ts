@@ -376,6 +376,31 @@ export const storeProductQueries = {
     return { data, error }
   },
 
+  async getByBarcode(barcode: string, userId?: string | null) {
+    const supabase = createClient()
+    const { data, error } = await supabase.from("store_products").select("*").eq("barcode", barcode).maybeSingle()
+
+    // If user is provided and product exists, check if it's favorited
+    if (userId && data && !error) {
+      const { data: favorite } = await supabase
+        .from("user_favorites")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("store_product_id", data.id)
+        .single()
+
+      return {
+        data: {
+          ...data,
+          is_favorited: !!favorite,
+        },
+        error,
+      }
+    }
+
+    return { data, error }
+  },
+
   async getByIds(ids: string[]) {
     const supabase = createClient()
     return supabase.from("store_products").select("*").in("id", ids)

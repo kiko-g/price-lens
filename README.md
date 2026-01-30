@@ -30,6 +30,7 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [ ] Add supermarket SuperCor and Lidl
 - [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
+- [ ] Add route for /products/barcode/xxx
 - [ ] Radically improve home page and think of marketing/sales/promoting the product via the homepage and its branding
 - [ ] Investigate our design system and app feel to be like Polymarket
 - [ ] Think about and plan product groups e.g. all coffee capsules store_products should be loosely associated

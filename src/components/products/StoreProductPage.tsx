@@ -150,17 +150,17 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
-      <div className="flex w-min">
+      <div className="hidden w-min md:flex">
         <Button variant="outline" className="mb-2" size="sm" onClick={() => router.back()}>
           <Undo2Icon className="h-4 w-4" />
           Back to supermarket products
         </Button>
       </div>
 
-      <div className="grid w-full gap-8 md:grid-cols-2">
-        <div className="flex flex-col items-center gap-4">
+      <div className="grid w-full gap-3 md:grid-cols-2 md:gap-8">
+        <div className="flex flex-col items-start gap-4 md:items-center">
           {/* Product Image */}
-          <div className="relative aspect-square w-full max-w-full overflow-hidden rounded-lg border bg-white">
+          <div className="relative aspect-square w-full max-w-48 overflow-hidden rounded-lg border bg-white md:max-w-full">
             {sp.image ? (
               <Image
                 fill

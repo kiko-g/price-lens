@@ -5,7 +5,7 @@ export default function ProductLoading() {
     <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
       <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
         {/* Back button skeleton */}
-        <div className="flex w-min">
+        <div className="hidden w-min md:flex">
           <Skeleton className="mb-2 h-8 w-48" />
         </div>
 

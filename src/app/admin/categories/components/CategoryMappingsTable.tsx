@@ -311,7 +311,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                       </TableCell>
                       <TableCell>
                         {tuple.is_mapped ? (
-                          <Badge variant="outline" className="border-emerald-500 text-emerald-500">
+                          <Badge variant="glass-success">
                             <CheckIcon className="mr-1 h-3 w-3" />
                             Mapped
                           </Badge>
