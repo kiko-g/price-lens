@@ -230,7 +230,11 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge size="2xs" variant="tertiary" className="gap-1">
+                  <Badge
+                    size="2xs"
+                    variant="tertiary"
+                    className="gap-1 opacity-100 transition-opacity duration-300 group-hover:opacity-0"
+                  >
                     <CalendarPlusIcon className="h-3 w-3" />
                     {getShortRelativeTime(new Date(favoritedAt))}
                   </Badge>

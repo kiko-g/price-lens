@@ -462,24 +462,35 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </DropdownMenu>
           </div>
 
-          <div className="flex-1">
-            <ProductChart
-              className="max-w-lg"
-              samplingMode="efficient"
-              sp={sp}
-              defaultRange={rangeFromUrl}
-              onRangeChange={handleRangeChange}
-              options={{
-                showPricesVariationCard: true,
-                showImage: false,
-                showBarcode: false,
-              }}
-            />
-          </div>
+          {/* Price Chart Section - uses compound components for flexible layout */}
+          <ProductChart.Root
+            sp={sp}
+            defaultRange={rangeFromUrl}
+            onRangeChange={handleRangeChange}
+            samplingMode="efficient"
+            className="flex-1"
+          >
+            <ProductChart.Error />
+
+            {/* Mobile: stacked | lg+: two columns */}
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+              {/* Left column: Price toggles + Price frequency table */}
+              <div className="flex max-w-2xl flex-col gap-3">
+                <ProductChart.PricesVariation />
+                <ProductChart.PriceTable className="xl:max-h-80 xl:overflow-y-auto" />
+              </div>
+
+              {/* Right column: Range selector + Chart */}
+              <div className="flex max-w-2xl flex-col gap-2 xl:rounded-lg xl:border xl:px-3 xl:pt-4 xl:pb-0">
+                <ProductChart.RangeSelector className="xl:justify-start" />
+                <ProductChart.Graph />
+              </div>
+            </div>
+          </ProductChart.Root>
         </section>
       </article>
 
-      <Separator className="mt-4 mb-6" />
+      <Separator className="mt-4 mb-6 bg-transparent" />
       <IdenticalStoreProducts id={storeProductId} limit={10} />
       <Separator className="my-8" />
       <RelatedStoreProducts id={storeProductId} limit={20} />

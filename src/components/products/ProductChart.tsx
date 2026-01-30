@@ -145,14 +145,7 @@ type RootProps = {
   className?: string
 }
 
-function Root({
-  children,
-  sp,
-  defaultRange = "Max",
-  onRangeChange,
-  samplingMode = "hybrid",
-  className,
-}: RootProps) {
+function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode = "hybrid", className }: RootProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const showDots = samplingMode === "efficient"
   const baseDotRadius = isMobile ? 2 : 0
@@ -505,11 +498,7 @@ function Graph({ className }: GraphProps) {
           transition: `opacity ${CHART_TRANSITION_DURATION}ms ease-in-out`,
         }}
       >
-        <LineChart
-          accessibilityLayer
-          data={chartData}
-          margin={{ left: 4, right: -20, top: 12, bottom: 30 }}
-        >
+        <LineChart accessibilityLayer data={chartData} margin={{ left: 4, right: -20, top: 12, bottom: 30 }}>
           <CartesianGrid strokeDasharray="4 4" />
           <XAxis
             dataKey="date"
@@ -589,9 +578,10 @@ function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload:
 
 type PriceTableProps = {
   className?: string
+  scrollable?: boolean
 }
 
-function PriceTable({ className }: PriceTableProps) {
+function PriceTable({ className, scrollable = true }: PriceTableProps) {
   const { sp, pricePoints, mostCommon, isLoading } = useProductChartContext()
 
   if (isLoading || !pricePoints || pricePoints.length === 0) {
@@ -642,7 +632,7 @@ function PriceTable({ className }: PriceTableProps) {
           </TableRow>
         </TableHeader>
 
-        <TableBody>
+        <TableBody className={cn(scrollable ? "max-h-80 overflow-y-auto" : "")}>
           {pricePoints
             .sort((a, b) => b.price - a.price)
             .map((point: PricePoint, index) => (
