@@ -353,7 +353,8 @@ export const storeProductQueries = {
 
   async getById(id: string, userId?: string | null) {
     const supabase = createClient()
-    const { data, error } = await supabase.from("store_products").select("*").eq("id", id).single()
+    // Use the view to get canonical category info
+    const { data, error } = await supabase.from("store_products_with_canonical").select("*").eq("id", id).single()
 
     // If user is provided and product exists, check if it's favorited
     if (userId && data && !error) {

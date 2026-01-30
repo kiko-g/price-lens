@@ -3,18 +3,20 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function ProductLoading() {
   return (
     <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
-      <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
+      <div className="mx-auto mb-8 flex w-full max-w-7xl flex-col py-0 lg:py-4">
         {/* Back button skeleton */}
         <div className="hidden w-min md:flex">
           <Skeleton className="mb-2 h-8 w-48" />
         </div>
 
-        <div className="grid w-full gap-8 md:grid-cols-2">
-          {/* Product Image skeleton */}
-          <Skeleton className="aspect-square w-full rounded-lg" />
+        <article className="grid w-full grid-cols-1 gap-3 md:grid-cols-20 md:gap-8">
+          <aside className="col-span-1 flex flex-col items-start gap-4 md:col-span-7 md:items-center">
+            {/* Product Image skeleton */}
+            <Skeleton className="aspect-square w-full rounded-lg" />
+          </aside>
 
           {/* Product Details skeleton */}
-          <div className="flex flex-col gap-3">
+          <section className="col-span-1 flex flex-col gap-2 md:col-span-13">
             {/* Category badge */}
             <Skeleton className="h-5 w-32" />
 
@@ -55,8 +57,8 @@ export default function ProductLoading() {
             <div className="mt-4 flex-1">
               <Skeleton className="h-64 w-full max-w-xl rounded-lg" />
             </div>
-          </div>
-        </div>
+          </section>
+        </article>
 
         {/* Separator and related products */}
         <Skeleton className="my-6 h-px w-full" />

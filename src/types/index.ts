@@ -90,6 +90,8 @@ export interface StoreProduct {
   updated_at: string
   scraped_at?: string | null
   is_favorited?: boolean
+  canonical_category_id?: number | null
+  canonical_category_name?: string | null
 }
 
 export interface StoreProductWithSimilarity extends StoreProduct {

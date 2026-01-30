@@ -91,7 +91,7 @@ export default async function ProductPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex w-full flex-col items-center justify-start gap-4 p-4">
+    <div className="relative flex w-full flex-col items-center justify-start gap-4 p-4">
       <StoreProductPage sp={storeProduct} />
     </div>
   )

@@ -265,10 +265,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   roundedness="sm"
                   className="text-2xs line-clamp-1 text-left"
                   onClick={() => {
-                    navigator.clipboard.writeText(sp.category || sp.category_3 || sp.category_2 || "")
+                    navigator.clipboard.writeText(sp.canonical_category_name || sp.category || "")
                   }}
                 >
-                  {sp.category || sp.category_3 || sp.category_2 || "No category"}
+                  {sp.canonical_category_name || sp.category || "No category"}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6} size="xs" className="max-w-96">
