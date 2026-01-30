@@ -60,6 +60,10 @@ import {
   AlertTriangleIcon,
 } from "lucide-react"
 
+const DEFAULT_PARAMS = {
+  range: "Max",
+} as const
+
 function resolveImageUrlForPage(image: string, size = 800) {
   const url = new URL(image)
   const p = url.searchParams
@@ -124,18 +128,18 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const updateStoreProduct = useUpdateStoreProduct()
   const updatePriority = useUpdateStoreProductPriority()
 
-  const parseRange = (value: string | null): DateRange => {
+  const parseRangeParam = (value: string | null): DateRange => {
     if (value && RANGES.includes(value as DateRange)) return value as DateRange
-    return "1M"
+    return DEFAULT_PARAMS.range
   }
 
   const handleRangeChange = (range: DateRange) => {
-    updateParams({ range: range === "1M" ? null : range })
+    updateParams({ range: range === DEFAULT_PARAMS.range ? null : range })
   }
 
   const refreshHours = sp.priority !== null ? PRIORITY_REFRESH_HOURS[sp.priority] : null
   const refreshLabel = refreshHours ? formatHoursDuration(refreshHours) : null
-  const rangeFromUrl = parseRange(searchParams.get("range"))
+  const rangeFromUrl = parseRangeParam(searchParams.get("range"))
   const supermarketName = getSupermarketChainName(sp?.origin_id)
   const storeProductId = sp.id?.toString() || ""
   const isPriceNotSet = !sp.price_recommended && !sp.price
@@ -149,7 +153,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   return (
     <div className="mx-auto mb-8 flex w-full flex-col py-0 lg:py-4">
       <article className="grid w-full grid-cols-1 gap-3 md:grid-cols-20 md:gap-8">
-        <aside className="col-span-1 flex flex-col items-start gap-4 md:col-span-6 md:items-center">
+        <aside className="col-span-1 flex items-start justify-end gap-4 md:col-span-6 md:flex-col md:items-center md:justify-center">
           {/* Product Image */}
           <div className="relative aspect-square w-full max-w-48 overflow-hidden rounded-lg border bg-white md:max-w-full">
             {sp.image ? (
@@ -179,12 +183,42 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               </div>
             )}
           </div>
-          <Barcode value={sp.barcode} height={40} width={2} showMissingValue className="mt-2 hidden md:inline-flex" />
+          <div className="flex flex-1 flex-col gap-2">
+            {/* Mobile */}
+            <Button
+              variant="outline"
+              size="sm"
+              roundedness="2xl"
+              asChild
+              className="w-fit md:hidden dark:bg-white dark:hover:bg-white/90"
+            >
+              <Link href={sp.url} target="_blank" rel="noreferrer noopener">
+                <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
+              </Link>
+            </Button>
+            <Barcode
+              value={sp.barcode}
+              height={20}
+              width={1.3}
+              showMissingValue
+              className="inline-flex rounded-md border px-2 pt-2 pb-1.5 md:hidden"
+            />
+
+            {/* Desktop */}
+            <Barcode
+              value={sp.barcode}
+              height={35}
+              width={2}
+              showMissingValue
+              className="hidden md:mt-2 md:inline-flex"
+            />
+          </div>
         </aside>
 
         {/* Product Details */}
         <section className="col-span-1 flex flex-col gap-2 md:col-span-14">
           <div>
+            {/* Category Badges */}
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.canonical_category_name || sp.category || sp.category_2 || sp.category_3 ? (
                 <TooltipProvider delayDuration={200}>
@@ -214,6 +248,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               ) : null}
             </div>
 
+            {/* Brand, Priority, Supermarket Chain Badges */}
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.brand && (
                 <Link href={`/products?q=${encodeURIComponent(sp.brand)}`} target="_blank">
@@ -281,51 +316,46 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               </Button>
             </div>
 
+            {/* Product Name and Pack size */}
             <h1 className="line-clamp-3 max-w-160 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
             {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
           </div>
 
-          {/* Price */}
-          <div className="flex flex-wrap items-center gap-2">
-            {hasDiscount ? (
-              <>
-                <span className="text-xl font-bold text-green-700 dark:text-green-600">{sp.price}€</span>
-                <span className="text-muted-foreground text-base line-through">{sp.price_recommended}€</span>
-              </>
-            ) : null}
+          {/* Pricing Basic Labels */}
+          <div className="flex flex-row flex-wrap items-center gap-2 md:flex-col md:items-start md:justify-start">
+            {/* Active Price and PVPR */}
+            <div className="flex flex-wrap items-center gap-2">
+              {hasDiscount ? (
+                <>
+                  <span className="text-xl font-bold text-green-700 dark:text-green-600">{sp.price}€</span>
+                  <span className="text-muted-foreground text-base line-through">{sp.price_recommended}€</span>
+                </>
+              ) : null}
 
-            {isNormalPrice ? (
-              <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
-            ) : null}
+              {isNormalPrice ? (
+                <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
+              ) : null}
 
-            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
+              {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
+            </div>
+
+            {/* Price per unit and discount */}
+            <div className="flex items-center gap-2">
+              {sp.price_per_major_unit && sp.major_unit ? (
+                <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
+                  {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
+                </Badge>
+              ) : null}
+
+              {sp.discount ? (
+                <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
+                  -{discountValueToPercentage(sp.discount)}
+                </Badge>
+              ) : null}
+
+              <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
+            </div>
           </div>
-
-          {/* Price per unit and discount */}
-          <div className="flex items-center gap-2">
-            {sp.price_per_major_unit && sp.major_unit ? (
-              <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
-                {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
-              </Badge>
-            ) : null}
-
-            {sp.discount ? (
-              <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-                -{discountValueToPercentage(sp.discount)}
-              </Badge>
-            ) : null}
-
-            <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
-          </div>
-
-          {/* Barcode */}
-          <Barcode
-            value={sp.barcode}
-            height={20}
-            width={1}
-            showMissingValue
-            className="inline-flex rounded md:hidden"
-          />
 
           <div className="flex flex-wrap items-center gap-2">
             <FavoriteButton storeProduct={sp} />
@@ -434,7 +464,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
           <div className="flex-1">
             <ProductChart
-              className="max-w-xl"
+              className="max-w-lg"
               samplingMode="efficient"
               sp={sp}
               defaultRange={rangeFromUrl}

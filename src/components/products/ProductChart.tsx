@@ -97,7 +97,7 @@ const defaultOptions: NonNullable<Props["options"]> = {
 export function ProductChart({
   sp,
   className,
-  defaultRange = "1W",
+  defaultRange = "Max",
   onRangeChange,
   samplingMode = "hybrid",
   options = defaultOptions,
@@ -378,7 +378,7 @@ export function ProductChart({
       </div>
 
       {/* Chart container with touch handling for mobile tooltip dismiss */}
-      <div ref={chartRef} className="max-w-lg touch-pan-y md:max-w-full">
+      <div ref={chartRef} className="max-w-lg touch-pan-y md:max-w-md">
         <ChartContainer
           config={chartConfig}
           className={cn(isLoading ? "" : "animate-fade-in")}
@@ -463,12 +463,19 @@ export function ProductChart({
       </div>
 
       {!isLoading && pricePoints !== null && pricePoints.length > 0 && (
-        <div className="overflow-hidden">
-          <div className="bg-accent flex items-center gap-2 rounded-lg border-0 px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap">
+        <div className="flex flex-1 shrink-0 flex-col overflow-hidden md:max-w-md">
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",
+              sp.price === mostCommon?.price
+                ? "bg-success/10 dark:bg-success/20 border-success/20 dark:border-success/40"
+                : "bg-destructive/10 dark:bg-destructive/20 border-destructive/20 dark:border-destructive/40",
+            )}
+          >
             <BinocularsIcon className="h-4 w-4" />
             {sp.price === mostCommon?.price ? (
               <span>
-                Current price is <span className="font-bold text-green-600">the most common price</span>
+                Current price is <span className="text-success font-bold">the most common price</span>
               </span>
             ) : (
               <span>

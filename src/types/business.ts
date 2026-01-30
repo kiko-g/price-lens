@@ -84,7 +84,7 @@ export const daysAmountInRange: {
   "6M": 180,
   "1Y": 365,
   "5Y": 1825,
-  Max: 3650,
+  Max: 36500, // 100 years
 }
 
 export const PRODUCT_PRIORITY_LEVELS = [0, 1, 2, 3, 4, 5] as const

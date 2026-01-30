@@ -14,7 +14,7 @@ type BuildChartDataOptions = {
 
 export function buildChartData(
   prices: Price[],
-  options: BuildChartDataOptions | DateRange = "1M",
+  options: BuildChartDataOptions | DateRange = "Max",
 ): ProductChartEntry[] {
   // Support both old signature (just range) and new signature (options object)
   const { range, samplingMode } =

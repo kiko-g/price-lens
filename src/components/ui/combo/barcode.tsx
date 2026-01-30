@@ -60,7 +60,7 @@ export function Barcode({
   const barPattern = generateBars(value)
 
   return (
-    <div className={cn("inline-flex w-fit flex-col items-center gap-1", className)}>
+    <div className={cn("inline-flex w-fit flex-col items-center gap-1.5", className)}>
       <svg
         viewBox={`0 0 ${barPattern.length * width} ${height}`}
         className="bg-white"
@@ -73,7 +73,7 @@ export function Barcode({
               bar === "1" && <rect key={index} x={index * width} y={0} width={width} height={height} fill="black" />,
           )}
       </svg>
-      {displayValue && <span className="font-mono text-xs tracking-wider">{value}</span>}
+      {displayValue && <span className="font-mono text-xs leading-none tracking-wider">{value}</span>}
     </div>
   )
 }
