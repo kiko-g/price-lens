@@ -5,17 +5,17 @@ import Link from "next/link"
 import { siteConfig } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
-import { generateProductPath } from "@/lib/business/product"
 
 import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/ui/combo/back-button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+import { BarcodeCompare } from "@/components/products/BarcodeCompare"
 
 import { HomeIcon, SearchIcon } from "lucide-react"
 
 interface PageProps {
-  params: Promise<{ barcode: string }>
+  searchParams: Promise<{ barcode?: string }>
 }
 
 async function getProductsByBarcode(barcode: string) {
@@ -28,25 +28,25 @@ async function getProductsByBarcode(barcode: string) {
   return products ?? []
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { barcode } = await params
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const { barcode } = await searchParams
+
+  if (!barcode) {
+    return {
+      title: "Compare Prices",
+      description: `Compare product prices across supermarkets on ${siteConfig.name}.`,
+    }
+  }
+
   const products = await getProductsByBarcode(barcode)
 
   if (products.length === 0) {
     return {
-      title: "Product Not Found",
+      title: "No Products Found",
       description: `No products found with barcode ${barcode}.`,
     }
   }
 
-  if (products.length === 1) {
-    return {
-      title: "Redirecting...",
-      description: "Redirecting to product page.",
-    }
-  }
-
-  // Multiple products - compare page metadata
   const firstProduct = products[0]
   const storeCount = new Set(products.map((p) => p.origin_id)).size
 
@@ -61,8 +61,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function ProductByBarcodePage({ params }: PageProps) {
-  const { barcode } = await params
+export default async function ComparePage({ searchParams }: PageProps) {
+  const { barcode } = await searchParams
+
+  // No barcode provided - redirect to products page
+  if (!barcode) {
+    redirect("/products")
+  }
+
   const products = await getProductsByBarcode(barcode)
 
   // No products found - show friendly not-found page
@@ -101,12 +107,9 @@ export default async function ProductByBarcodePage({ params }: PageProps) {
     )
   }
 
-  // Single product - redirect to product page
-  if (products.length === 1) {
-    const productPath = generateProductPath(products[0])
-    redirect(productPath)
-  }
-
-  // Multiple products - redirect to compare page
-  redirect(`/compare?barcode=${encodeURIComponent(barcode)}`)
+  return (
+    <div className="flex w-full flex-col items-center justify-start p-4">
+      <BarcodeCompare products={products} barcode={barcode} />
+    </div>
+  )
 }

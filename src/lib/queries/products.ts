@@ -401,6 +401,41 @@ export const storeProductQueries = {
     return { data, error }
   },
 
+  async getAllByBarcode(barcode: string, userId?: string | null) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("store_products")
+      .select("*")
+      .eq("barcode", barcode)
+      .order("price", { ascending: true, nullsFirst: false })
+
+    if (!data || error) {
+      return { data: null, error }
+    }
+
+    // Augment with favorite status if user is provided
+    if (userId && data.length > 0) {
+      const productIds = data.map((p) => p.id).filter(Boolean)
+      const { data: favorites } = await supabase
+        .from("user_favorites")
+        .select("store_product_id")
+        .eq("user_id", userId)
+        .in("store_product_id", productIds)
+
+      const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) ?? [])
+
+      return {
+        data: data.map((p) => ({
+          ...p,
+          is_favorited: favoriteIds.has(p.id),
+        })),
+        error: null,
+      }
+    }
+
+    return { data, error }
+  },
+
   async getByIds(ids: string[]) {
     const supabase = createClient()
     return supabase.from("store_products").select("*").in("id", ids)

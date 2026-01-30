@@ -149,7 +149,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   return (
-    <div className="mx-auto mb-8 flex w-full max-w-6xl flex-col py-0 lg:py-4">
+    <div className="mx-auto mb-8 flex w-full max-w-7xl flex-col py-0 lg:py-4">
       <div className="hidden w-min md:flex">
         <Button variant="outline" className="mb-2" size="sm" onClick={() => router.back()}>
           <Undo2Icon className="h-4 w-4" />
@@ -157,8 +157,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         </Button>
       </div>
 
-      <div className="grid w-full gap-3 md:grid-cols-2 md:gap-8">
-        <div className="flex flex-col items-start gap-4 md:items-center">
+      <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-20 md:gap-8">
+        <aside className="col-span-1 flex flex-col items-start gap-4 md:col-span-7 md:items-center">
           {/* Product Image */}
           <div className="relative aspect-square w-full max-w-48 overflow-hidden rounded-lg border bg-white md:max-w-full">
             {sp.image ? (
@@ -189,10 +189,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             )}
           </div>
           <Barcode value={sp.barcode} height={40} width={2} showMissingValue className="mt-2 hidden md:inline-flex" />
-        </div>
+        </aside>
 
         {/* Product Details */}
-        <div className="flex flex-col gap-2">
+        <div className="col-span-1 flex flex-col gap-2 md:col-span-13">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {sp.category || sp.category_2 || sp.category_3 ? (
