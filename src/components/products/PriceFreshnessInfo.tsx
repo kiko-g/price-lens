@@ -50,11 +50,11 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
           sideOffset={6}
           alignOffset={-6}
           size="xs"
-          variant="glass"
-          className="max-w-72"
+          variant="default"
+          className="max-w-72 text-sm"
         >
           <p className="font-semibold">Price last verified</p>
-          <p className="mt-1 text-xs">
+          <p className="mt-1">
             {updatedDate.toLocaleDateString("pt-PT", {
               day: "numeric",
               month: "short",
@@ -65,10 +65,12 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
           </p>
 
           {priority !== null && priority > 0 && refreshLabel && (
-            <p className="mt-1 text-xs">
-              This product has priority {priority} is checked every {refreshLabel}.
+            <p className="mt-1">
+              This product has priority <strong>{priority}</strong> meaning it is checked every{" "}
+              <strong>{refreshLabel}</strong>.
             </p>
           )}
+
           {(priority === null || priority < 2) && (
             <p className="mt-1 text-xs">
               <strong>Add to favorites</strong> to enable regular price tracking.
