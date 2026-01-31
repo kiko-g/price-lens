@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
@@ -610,9 +611,9 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         )}
       </div>
 
-      <div className="mt-1 overflow-hidden rounded-lg border">
+      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && "h-[220px]")}>
         <Table>
-          <TableHeader>
+          <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
             <TableRow className="bg-accent hover:bg-accent">
               <TableHead className="h-7 text-xs">
                 <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
@@ -633,7 +634,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
             </TableRow>
           </TableHeader>
 
-          <TableBody className={cn(scrollable ? "max-h-80 overflow-y-auto" : "")}>
+          <TableBody>
             {pricePoints
               .sort((a, b) => b.price - a.price)
               .map((point: PricePoint, index) => (
@@ -672,7 +673,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
               ))}
           </TableBody>
         </Table>
-      </div>
+      </ScrollArea>
     </div>
   )
 }

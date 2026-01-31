@@ -477,7 +477,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               {/* Left column: Price toggles + Price frequency table */}
               <div className="flex max-w-2xl flex-col gap-3">
                 <ProductChart.PricesVariation />
-                <ProductChart.PriceTable className="max-h-48 w-fit min-w-108 overflow-y-auto xl:max-h-75 xl:max-w-full xl:overflow-x-hidden xl:overflow-y-auto" />
+                <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
               </div>
 
               {/* Right column: Range selector + Chart */}
