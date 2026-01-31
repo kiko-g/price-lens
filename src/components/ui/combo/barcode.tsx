@@ -21,8 +21,8 @@ export function Barcode({
 }: BarcodeProps) {
   if (showMissingValue && !value) {
     return (
-      <div className={cn("inline-flex flex-col items-start justify-center gap-1", className)}>
-        <span className="text-muted-foreground font-mono text-xs tracking-wider">No barcode available</span>
+      <div className={cn("inline-flex flex-col items-start justify-center gap-0.5 md:gap-1", className)}>
+        <span className="text-muted-foreground text-2xs font-mono tracking-wider md:text-xs">No barcode available</span>
       </div>
     )
   }
@@ -60,7 +60,7 @@ export function Barcode({
   const barPattern = generateBars(value)
 
   return (
-    <div className={cn("inline-flex w-fit flex-col items-center gap-1.5", className)}>
+    <div className={cn("inline-flex w-fit flex-col items-center gap-0.5 md:gap-1.5", className)}>
       <svg
         viewBox={`0 0 ${barPattern.length * width} ${height}`}
         className="bg-white"
@@ -73,7 +73,7 @@ export function Barcode({
               bar === "1" && <rect key={index} x={index * width} y={0} width={width} height={height} fill="black" />,
           )}
       </svg>
-      {displayValue && <span className="font-mono text-xs leading-none tracking-wider">{value}</span>}
+      {displayValue && <span className="text-2xs font-mono leading-none tracking-wider md:text-xs">{value}</span>}
     </div>
   )
 }

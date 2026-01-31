@@ -153,9 +153,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:py-4">
       <article className="grid w-full grid-cols-1 gap-3 md:grid-cols-20 md:gap-8">
-        <aside className="col-span-1 grid grid-cols-5 gap-3 md:col-span-6 md:flex md:flex-col md:items-center">
-          {/* Product Image - takes 2 columns on mobile */}
-          <div className="relative col-span-2 aspect-square w-full overflow-hidden rounded-lg border bg-white md:col-span-1 md:max-w-full">
+        <aside className="col-span-1 grid grid-cols-7 gap-3 md:col-span-6 md:flex md:flex-col md:items-center">
+          {/* Product Image - takes 3/7 columns on mobile */}
+          <div className="relative col-span-3 aspect-square w-full overflow-hidden rounded-lg border bg-white md:col-span-1 md:max-w-full">
             {sp.image ? (
               <Image
                 fill
@@ -184,8 +184,17 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             )}
           </div>
 
-          {/* Mobile header info - takes 3 columns */}
-          <div className="col-span-3 flex flex-col items-start gap-1.5 md:hidden">
+          {/* Desktop Barcode */}
+          <Barcode
+            value={sp.barcode}
+            height={35}
+            width={2}
+            showMissingValue
+            className="hidden md:mt-2 md:inline-flex"
+          />
+
+          {/* Mobile header info - takes 4/7 columns */}
+          <div className="col-span-4 flex flex-col items-start gap-2 md:hidden">
             <Button
               variant="outline"
               size="sm"
@@ -198,48 +207,34 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               </Link>
             </Button>
 
-            <div className="mb-2 hidden md:flex md:flex-wrap md:items-center md:gap-2">
+            {/* Mobile: Category Badge */}
+            <div className="flex flex-wrap items-center gap-2 md:hidden">
               {sp.canonical_category_name || sp.category || sp.category_2 || sp.category_3 ? (
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger className="block self-start md:hidden">
-                      <Badge variant="boring" size="xs" roundedness="sm" className="w-fit max-w-96">
-                        {sp.canonical_category_name || sp.category || "No category"}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      size="xs"
-                      className="max-w-96"
-                    >
-                      <span className="mb-1 block text-xs font-medium">Category hierarchy in {supermarketName}:</span>
-                      <span className="text-xs font-semibold">
-                        {sp.category
-                          ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
-                          : "No category set available"}
-                      </span>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Badge variant="boring" size="xs" roundedness="sm" className="w-fit max-w-96">
+                  {sp.canonical_category_name || sp.category || "No category"}
+                </Badge>
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-0.5 md:hidden">
-              <h1 className="line-clamp-3 max-w-160 text-xl leading-6 font-bold md:line-clamp-2">{sp.name}</h1>
-              {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
-            </div>
+            {/* Mobile: Brand, Priority Badges and Barcode */}
+            <div className="flex flex-col items-start gap-2 md:hidden">
+              {sp.brand && (
+                <Badge variant="blue" size="sm" roundedness="sm">
+                  {sp.brand}
+                </Badge>
+              )}
 
-            {/* Desktop Barcode */}
-            <Barcode
-              value={sp.barcode}
-              height={35}
-              width={2}
-              showMissingValue
-              className="hidden md:mt-2 md:inline-flex"
-            />
+              {sp.priority !== null && sp.priority > 0 ? (
+                <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind} size="sm" roundedness="sm">
+                  Priority {sp.priority}
+                </Badge>
+              ) : (
+                <Badge variant="destructive" size="sm" roundedness="sm">
+                  <NavigationOffIcon className="h-4 w-4" />
+                  Untracked product
+                </Badge>
+              )}
+            </div>
           </div>
         </aside>
 
@@ -277,7 +272,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             {/* Brand, Priority, Supermarket Chain Badges */}
-            <div className="mb-0 flex flex-wrap items-center gap-2 md:mb-2">
+            <div className="mb-0 hidden md:mb-2 md:flex md:flex-wrap md:items-center md:gap-2">
               {sp.brand && (
                 <Link href={`/products?q=${encodeURIComponent(sp.brand)}`} target="_blank">
                   <Badge variant="blue">{sp.brand}</Badge>
@@ -295,10 +290,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       align="start"
                       sideOffset={6}
                       alignOffset={-6}
-                      size="xs"
-                      variant="glass"
-                      className="max-w-60"
+                      className="max-w-60 text-sm font-medium"
                     >
+                      <InfoIcon className="mr-1 inline-flex h-4 w-4" />
                       This product has priority {sp.priority} is checked every {refreshLabel}.
                     </TooltipContent>
                   </Tooltip>
@@ -317,11 +311,11 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                       align="start"
                       sideOffset={6}
                       alignOffset={-6}
-                      size="xs"
                       variant="destructive"
-                      className="max-w-60"
+                      className="max-w-60 text-sm font-medium"
                     >
                       <p>
+                        <AlertTriangleIcon className="mr-1 inline-flex h-4 w-4" />
                         This product has{" "}
                         {sp.priority === null ? "no tracking priority" : `low tracking priority (${sp.priority}/5)`}.
                       </p>
@@ -345,8 +339,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             {/* Product Name and Pack size */}
-            <div className="hidden md:flex md:flex-col md:gap-0">
-              <h1 className="line-clamp-3 max-w-160 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
+            <div className="flex flex-col gap-0">
+              <h1 className="line-clamp-3 max-w-160 text-xl leading-5 font-bold md:line-clamp-2 xl:text-2xl xl:leading-6">
+                {sp.name}
+              </h1>
               {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
             </div>
           </div>
@@ -520,9 +516,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         </section>
       </article>
 
-      <Separator className="mt-4 mb-6 bg-transparent" />
+      <Separator className="mt-8 mb-4" />
       <IdenticalStoreProducts id={storeProductId} limit={10} />
-      <Separator className="my-8" />
+      <Separator className="mt-8 mb-4" />
       <RelatedStoreProducts id={storeProductId} limit={20} />
     </div>
   )
