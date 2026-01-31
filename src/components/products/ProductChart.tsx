@@ -589,7 +589,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   }
 
   return (
-    <div className={cn("flex flex-1 shrink-0 flex-col overflow-hidden", className)}>
+    <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
       <div
         className={cn(
           "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",
@@ -610,65 +610,69 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         )}
       </div>
 
-      <Table className="mt-1 rounded-lg">
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="h-7 text-xs">
-              <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
-              Price
-            </TableHead>
-            <TableHead className="h-7 text-center text-xs">
-              <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
-              Original
-            </TableHead>
-            <TableHead className="h-7 text-center text-xs">
-              <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
-              Per Unit
-            </TableHead>
-            <TableHead className="h-7 text-center text-xs">
-              <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
-              Freq (%)
-            </TableHead>
-          </TableRow>
-        </TableHeader>
+      <div className="mt-1 overflow-hidden rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-accent hover:bg-accent">
+              <TableHead className="h-7 text-xs">
+                <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
+                Price
+              </TableHead>
+              <TableHead className="h-7 text-center text-xs">
+                <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
+                Original
+              </TableHead>
+              <TableHead className="h-7 text-center text-xs">
+                <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
+                Per Unit
+              </TableHead>
+              <TableHead className="h-7 text-center text-xs">
+                <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
+                Freq (%)
+              </TableHead>
+            </TableRow>
+          </TableHeader>
 
-        <TableBody className={cn(scrollable ? "max-h-80 overflow-y-auto" : "")}>
-          {pricePoints
-            .sort((a, b) => b.price - a.price)
-            .map((point: PricePoint, index) => (
-              <TableRow key={index} className="hover:bg-transparent">
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
+          <TableBody className={cn(scrollable ? "max-h-80 overflow-y-auto" : "")}>
+            {pricePoints
+              .sort((a, b) => b.price - a.price)
+              .map((point: PricePoint, index) => (
+                <TableRow key={index} className="hover:bg-transparent">
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-semibold tracking-tighter">
+                        {point.price.toFixed(2)}€
+                      </span>
 
-                    {point.discount !== null && point.discount > 0.0 && (
-                      <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
-                        -{(point.discount * 100).toFixed(0)}%
-                      </Badge>
-                    )}
-                    {point.price === mostCommon?.price && (
-                      <Badge variant="secondary" size="2xs">
-                        Most Common
-                      </Badge>
-                    )}
-                  </div>
-                </TableCell>
+                      {point.discount !== null && point.discount > 0.0 && (
+                        <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
+                          -{(point.discount * 100).toFixed(0)}%
+                        </Badge>
+                      )}
+                      {point.price === mostCommon?.price && (
+                        <Badge variant="secondary" size="2xs">
+                          Most Common
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
 
-                <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                  {point.price_recommended?.toFixed(2)}€
-                </TableCell>
+                  <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                    {point.price_recommended?.toFixed(2)}€
+                  </TableCell>
 
-                <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                  {point.price_per_major_unit?.toFixed(2)}€
-                </TableCell>
+                  <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                    {point.price_per_major_unit?.toFixed(2)}€
+                  </TableCell>
 
-                <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                  {(point.frequencyRatio * 100).toFixed(2)}%
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
+                  <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
+                    {(point.frequencyRatio * 100).toFixed(2)}%
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }
