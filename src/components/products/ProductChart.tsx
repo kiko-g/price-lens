@@ -185,7 +185,9 @@ function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode 
 
     const min = Math.min(...visiblePrices)
     const max = Math.max(...visiblePrices)
-    return calculateChartBounds(min, max)
+    const bounds = calculateChartBounds(min, max)
+    console.info(min, max, bounds)
+    return bounds
   }, [chartData, activeAxis])
 
   const variations = useMemo(
@@ -489,6 +491,14 @@ function Graph({ className }: GraphProps) {
     }
   }
 
+  if (activeAxis.length === 0) {
+    return (
+      <div className="flex h-60 w-full items-center justify-center">
+        <p className="text-muted-foreground mb-4 text-sm">No axis selected</p>
+      </div>
+    )
+  }
+
   return (
     <div ref={chartRef} className={cn("touch-pan-y", className)}>
       <ChartContainer
@@ -510,15 +520,15 @@ function Graph({ className }: GraphProps) {
             tick={{ fontSize: 10 }}
           />
           <YAxis
-            dataKey="price"
             yAxisId="price"
             orientation="left"
             tickLine={false}
             axisLine={false}
             width={40}
+            type="number"
             domain={[chartBounds.floor, chartBounds.ceiling]}
             ticks={chartBounds.ticks}
-            tickFormatter={(value) => `€${value.toFixed(0)}`}
+            allowDataOverflow={false}
             tick={(props) => <CustomTick {...props} yAxisId="price" />}
           />
           <YAxis
@@ -578,9 +588,16 @@ function Graph({ className }: GraphProps) {
 }
 
 function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: { value: number }; yAxisId: string }) {
+  const formatPrice = (value: number): string => {
+    // Use more decimal places for small values to show meaningful precision
+    if (value < 1) return `€${value.toFixed(2)}`
+    if (value < 10) return `€${value.toFixed(1)}`
+    return `€${value.toFixed(0)}`
+  }
+
   return (
     <text x={x} y={y} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
-      {yAxisId === "price" ? `€${payload.value.toFixed(1)}` : `${payload.value}%`}
+      {yAxisId === "price" ? formatPrice(payload.value) : `${payload.value}%`}
     </text>
   )
 }

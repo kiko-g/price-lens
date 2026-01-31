@@ -271,7 +271,7 @@ export type ChartBounds = {
  * Calculate chart bounds with nice numbers for Y-axis
  * Uses a hybrid approach: nice numbers with guaranteed minimum padding
  */
-export function calculateChartBounds(min: number, max: number, targetTicks: number = 5): ChartBounds {
+export function calculateChartBounds(min: number, max: number, targetTicks: number = 6): ChartBounds {
   // Handle edge cases
   if (min === max) {
     const padding = min === 0 ? 1 : min * 0.2
@@ -279,18 +279,23 @@ export function calculateChartBounds(min: number, max: number, targetTicks: numb
     max = max + padding
   }
 
+  const isMicro = max < 1.5
+
   // Ensure min is never negative for price data
   const safeMin = Math.max(0, min)
 
-  // Calculate raw range with padding (15% on each side, minimum)
+  // For micro prices (< €1.50), use more aggressive padding and fewer ticks
+  const paddingRatio = isMicro ? 0.4 : 0.15
+  const effectiveTargetTicks = isMicro ? 4 : targetTicks
+
+  // Calculate raw range with padding
   const rawRange = max - safeMin
-  const paddingRatio = 0.15
   const paddedMin = Math.max(0, safeMin - rawRange * paddingRatio)
   const paddedMax = max + rawRange * paddingRatio
 
   // Calculate nice tick interval
   const paddedRange = paddedMax - paddedMin
-  const roughTickInterval = paddedRange / (targetTicks - 1)
+  const roughTickInterval = paddedRange / (effectiveTargetTicks - 1)
   const tickInterval = getNiceNumber(roughTickInterval, true)
 
   // Calculate nice floor and ceiling aligned to tick interval
