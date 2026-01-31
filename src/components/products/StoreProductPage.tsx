@@ -481,7 +481,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               </div>
 
               {/* Right column: Range selector + Chart */}
-              <div className="flex h-fit max-w-xl flex-col gap-2 xl:rounded-lg xl:border xl:px-2 xl:pt-3 xl:pb-0">
+              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 flex h-fit max-w-xl flex-col gap-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
                 <ProductChart.RangeSelector className="xl:justify-start" />
                 <ProductChart.Graph />
               </div>

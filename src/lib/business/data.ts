@@ -7,18 +7,18 @@ export const imagePlaceholder = {
 }
 
 export const mockChartData: ProductChartEntry[] = [
-  { date: "January", price: 4.99, "price-recommended": 5.99, discount: 17, "price-per-major-unit": 9.99 },
-  { date: "February", price: 5.49, "price-recommended": 5.99, discount: 8, "price-per-major-unit": 10.98 },
-  { date: "March", price: 5.99, "price-recommended": 6.49, discount: 8, "price-per-major-unit": 11.98 },
-  { date: "April", price: 5.49, "price-recommended": 6.49, discount: 15, "price-per-major-unit": 10.98 },
-  { date: "May", price: 4.99, "price-recommended": 6.49, discount: 23, "price-per-major-unit": 9.99 },
-  { date: "June", price: 5.99, "price-recommended": 6.99, discount: 14, "price-per-major-unit": 11.98 },
-  { date: "July", price: 6.49, "price-recommended": 6.99, discount: 7, "price-per-major-unit": 12.98 },
-  { date: "August", price: 5.99, "price-recommended": 6.99, discount: 14, "price-per-major-unit": 11.98 },
-  { date: "September", price: 5.49, "price-recommended": 6.49, discount: 15, "price-per-major-unit": 10.98 },
-  { date: "October", price: 4.99, "price-recommended": 6.49, discount: 23, "price-per-major-unit": 9.99 },
-  { date: "November", price: 5.99, "price-recommended": 6.99, discount: 14, "price-per-major-unit": 11.98 },
-  { date: "December", price: 6.49, "price-recommended": 6.99, discount: 7, "price-per-major-unit": 16.0 },
+  { date: "January", rawDate: "2025-01-15", price: 4.99, "price-recommended": 5.99, discount: 17, "price-per-major-unit": 9.99 },
+  { date: "February", rawDate: "2025-02-15", price: 5.49, "price-recommended": 5.99, discount: 8, "price-per-major-unit": 10.98 },
+  { date: "March", rawDate: "2025-03-15", price: 5.99, "price-recommended": 6.49, discount: 8, "price-per-major-unit": 11.98 },
+  { date: "April", rawDate: "2025-04-15", price: 5.49, "price-recommended": 6.49, discount: 15, "price-per-major-unit": 10.98 },
+  { date: "May", rawDate: "2025-05-15", price: 4.99, "price-recommended": 6.49, discount: 23, "price-per-major-unit": 9.99 },
+  { date: "June", rawDate: "2025-06-15", price: 5.99, "price-recommended": 6.99, discount: 14, "price-per-major-unit": 11.98 },
+  { date: "July", rawDate: "2025-07-15", price: 6.49, "price-recommended": 6.99, discount: 7, "price-per-major-unit": 12.98 },
+  { date: "August", rawDate: "2025-08-15", price: 5.99, "price-recommended": 6.99, discount: 14, "price-per-major-unit": 11.98 },
+  { date: "September", rawDate: "2025-09-15", price: 5.49, "price-recommended": 6.49, discount: 15, "price-per-major-unit": 10.98 },
+  { date: "October", rawDate: "2025-10-15", price: 4.99, "price-recommended": 6.49, discount: 23, "price-per-major-unit": 9.99 },
+  { date: "November", rawDate: "2025-11-15", price: 5.99, "price-recommended": 6.99, discount: 14, "price-per-major-unit": 11.98 },
+  { date: "December", rawDate: "2025-12-15", price: 6.49, "price-recommended": 6.99, discount: 7, "price-per-major-unit": 16.0 },
 ]
 
 export const existingCategories = [

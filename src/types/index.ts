@@ -22,6 +22,7 @@ export const BasketCategoryLabels: Record<BasketProductCategory, { en: string; p
 
 export interface ProductChartEntry {
   date: string
+  rawDate: string
   price: number
   "price-recommended": number
   "price-per-major-unit": number

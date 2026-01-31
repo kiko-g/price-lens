@@ -535,7 +535,19 @@ function Graph({ className }: GraphProps) {
           />
           <ChartTooltip
             cursor={false}
-            content={<ChartTooltipContent />}
+            content={
+              <ChartTooltipContent
+                labelFormatter={(_, payload) => {
+                  const rawDate = (payload[0] as { payload?: { rawDate?: string } })?.payload?.rawDate
+                  if (!rawDate) return ""
+                  return new Date(rawDate).toLocaleDateString(undefined, {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                }}
+              />
+            }
             {...(isMobile ? { active: isTooltipActive } : {})}
           />
           {chartData.length > 0 &&

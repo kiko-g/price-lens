@@ -98,6 +98,7 @@ export function buildChartData(
 
     entries.push({
       date: date.toISOString(),
+      rawDate: date.toISOString(),
       price: price.price ?? 0,
       "price-per-major-unit": price.price_per_major_unit ?? 0,
       "price-recommended": price.price_recommended ?? 0,
@@ -181,7 +182,7 @@ export function buildChartData(
   // Sort entries by date
   entries.sort((a, b) => a.date.localeCompare(b.date))
 
-  // Format dates for display
+  // Format dates for display (keep rawDate for tooltip)
   return entries.map((entry) => ({
     ...entry,
     date: formatDateForChart(entry.date, totalDays),
