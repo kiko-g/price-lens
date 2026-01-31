@@ -153,9 +153,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:py-4">
       <article className="grid w-full grid-cols-1 gap-3 md:grid-cols-20 md:gap-8">
-        <aside className="col-span-1 flex items-start justify-end gap-4 md:col-span-6 md:flex-col md:items-center md:justify-center">
-          {/* Product Image */}
-          <div className="relative aspect-square w-full max-w-48 overflow-hidden rounded-lg border bg-white md:max-w-full">
+        <aside className="col-span-1 grid grid-cols-5 gap-3 md:col-span-6 md:flex md:flex-col md:items-center">
+          {/* Product Image - takes 2 columns on mobile */}
+          <div className="relative col-span-2 aspect-square w-full overflow-hidden rounded-lg border bg-white md:col-span-1 md:max-w-full">
             {sp.image ? (
               <Image
                 fill
@@ -183,28 +183,56 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               </div>
             )}
           </div>
-          <div className="flex flex-1 flex-col gap-2">
-            {/* Mobile */}
+
+          {/* Mobile header info - takes 3 columns */}
+          <div className="col-span-3 flex flex-col items-start gap-1.5 md:hidden">
             <Button
               variant="outline"
               size="sm"
               roundedness="2xl"
               asChild
-              className="w-fit md:hidden dark:bg-white dark:hover:bg-white/90"
+              className="w-fit dark:bg-white dark:hover:bg-white/90"
             >
               <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                 <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
               </Link>
             </Button>
-            <Barcode
-              value={sp.barcode}
-              height={20}
-              width={1.3}
-              showMissingValue
-              className="inline-flex rounded-md border px-2 pt-2 pb-1.5 md:hidden"
-            />
 
-            {/* Desktop */}
+            <div className="mb-2 hidden md:flex md:flex-wrap md:items-center md:gap-2">
+              {sp.canonical_category_name || sp.category || sp.category_2 || sp.category_3 ? (
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger className="block self-start md:hidden">
+                      <Badge variant="boring" size="xs" roundedness="sm" className="w-fit max-w-96">
+                        {sp.canonical_category_name || sp.category || "No category"}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="start"
+                      sideOffset={6}
+                      alignOffset={-6}
+                      size="xs"
+                      className="max-w-96"
+                    >
+                      <span className="mb-1 block text-xs font-medium">Category hierarchy in {supermarketName}:</span>
+                      <span className="text-xs font-semibold">
+                        {sp.category
+                          ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
+                          : "No category set available"}
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-0.5 md:hidden">
+              <h1 className="line-clamp-3 max-w-160 text-xl leading-6 font-bold md:line-clamp-2">{sp.name}</h1>
+              {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
+            </div>
+
+            {/* Desktop Barcode */}
             <Barcode
               value={sp.barcode}
               height={35}
@@ -219,7 +247,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         <section className="col-span-1 flex flex-col gap-2 md:col-span-14">
           <div>
             {/* Category Badges */}
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+            <div className="mb-2 hidden md:flex md:flex-wrap md:items-center md:gap-2">
               {sp.canonical_category_name || sp.category || sp.category_2 || sp.category_3 ? (
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
@@ -249,7 +277,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             {/* Brand, Priority, Supermarket Chain Badges */}
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+            <div className="mb-0 flex flex-wrap items-center gap-2 md:mb-2">
               {sp.brand && (
                 <Link href={`/products?q=${encodeURIComponent(sp.brand)}`} target="_blank">
                   <Badge variant="blue">{sp.brand}</Badge>
@@ -308,7 +336,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 size="sm"
                 roundedness="2xl"
                 asChild
-                className="dark:bg-white dark:hover:bg-white/90"
+                className="hidden md:inline-flex dark:bg-white dark:hover:bg-white/90"
               >
                 <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                   <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
@@ -317,8 +345,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
 
             {/* Product Name and Pack size */}
-            <h1 className="line-clamp-3 max-w-160 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
-            {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
+            <div className="hidden md:flex md:flex-col md:gap-0">
+              <h1 className="line-clamp-3 max-w-160 text-2xl font-bold md:line-clamp-2">{sp.name}</h1>
+              {sp.pack && <p className="text-muted-foreground line-clamp-3 text-sm md:text-base">{sp.pack}</p>}
+            </div>
           </div>
 
           {/* Pricing Basic Labels */}
@@ -357,7 +387,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2">
             <FavoriteButton storeProduct={sp} />
             <ShareButton sp={sp} />
             <DropdownMenu>
@@ -475,13 +505,13 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             {/* Mobile: stacked | lg+: two columns */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
               {/* Left column: Price toggles + Price frequency table */}
-              <div className="flex max-w-2xl flex-col gap-3">
+              <div className="order-2 -mt-8 flex max-w-2xl flex-col gap-3 xl:order-1 xl:mt-0">
                 <ProductChart.PricesVariation />
                 <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
               </div>
 
               {/* Right column: Range selector + Chart */}
-              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 flex h-fit max-w-xl flex-col gap-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
+              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-1 flex h-fit max-w-xl flex-col gap-2 xl:order-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
                 <ProductChart.RangeSelector className="xl:justify-start" />
                 <ProductChart.Graph />
               </div>
