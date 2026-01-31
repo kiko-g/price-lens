@@ -640,7 +640,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         )}
       </div>
 
-      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && "h-[220px]")}>
+      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && pricePoints.length > 5 && "h-[220px]")}>
         <Table>
           <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
             <TableRow className="bg-accent hover:bg-accent">

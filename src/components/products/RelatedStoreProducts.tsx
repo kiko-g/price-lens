@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import useEmblaCarousel from "embla-carousel-react"
 import { useRelatedStoreProducts } from "@/hooks/useProducts"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 
@@ -55,6 +56,11 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
         <h3 className="flex items-center gap-2 text-xl font-medium">
           <ChartScatterIcon className="h-4 w-4" />
           Related Products
+          {products && products.length > 0 && (
+            <Badge variant="boring" size="xs">
+              {products.length} product{products?.length !== 1 ? "s" : ""}
+            </Badge>
+          )}
         </h3>
         {!isLoading && products && products.length > 0 && (
           <div className="flex gap-2">

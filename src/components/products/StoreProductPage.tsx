@@ -47,7 +47,7 @@ import { ProductChart } from "@/components/products/ProductChart"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { RelatedStoreProducts } from "@/components/products/RelatedStoreProducts"
-import { IdenticalStoreProducts } from "@/components/products/IdenticalStoreProducts"
+import { IdenticalProductsCompare } from "@/components/products/IdenticalProductsCompare"
 
 import {
   HeartIcon,
@@ -517,7 +517,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       </article>
 
       <Separator className="mt-8 mb-4" />
-      <IdenticalStoreProducts id={storeProductId} limit={10} />
+      <IdenticalProductsCompare currentProduct={sp} />
       <Separator className="mt-8 mb-4" />
       <RelatedStoreProducts id={storeProductId} limit={20} />
     </div>
