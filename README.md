@@ -24,12 +24,12 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Chart floor and ceiling planning
 - [x] Chart should have refined data points for each range: update x scale (font size and more) and update number of data points for 5Y and MAX. Should never plot more than 500 points probably!
 - [x] 1200 ms debounce on product search
+- [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
+- [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
+- [x] Example spotify for searching when adding a song to a playlist
 - [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Badass smoke test
-  - [x] Example spotify for searching when adding a song to a playlist
-- [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [ ] Add supermarket SuperCor and Lidl
-- [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
 - [ ] Product analytics and views for better search results and ecosystem informatization
 - [ ] Develop idea of money saving tally like glovo.
 - [ ] If user searches for products including the name of the store origin we should help them out.

@@ -5,6 +5,7 @@ import {
   type StoreProductsQueryParams,
   SupermarketChain,
 } from "@/lib/queries/store-products"
+import { clearStoreProductsCache } from "@/lib/kv"
 import type { SearchType } from "@/types/business"
 import { PrioritySource } from "@/types"
 
@@ -86,6 +87,9 @@ export async function PATCH(req: NextRequest) {
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
+
+    // Clear Redis cache so fresh data is fetched
+    await clearStoreProductsCache()
 
     return NextResponse.json({ updatedCount: result.updatedCount }, { status: 200 })
   } catch (error: unknown) {
@@ -196,6 +200,15 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
           queryParams.categories = { categories }
         }
       }
+    }
+  }
+
+  // Canonical category filter
+  const canonicalCatParam = params.get("canonicalCat")
+  if (canonicalCatParam) {
+    const categoryId = parseInt(canonicalCatParam, 10)
+    if (!isNaN(categoryId) && categoryId > 0) {
+      queryParams.canonicalCategory = { categoryId }
     }
   }
 
