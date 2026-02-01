@@ -202,6 +202,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               asChild
               className="w-fit dark:bg-white dark:hover:bg-white/90"
             >
+              {/* Link to store product page */}
               <Link href={sp.url} target="_blank" rel="noreferrer noopener">
                 <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
               </Link>

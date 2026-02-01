@@ -30,6 +30,8 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [ ] Add supermarket SuperCor and Lidl
 - [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
+- [ ] Product analytics and views for better search results and ecosystem informatization
+- [ ] Develop idea of money saving tally like glovo.
 - [ ] If user searches for products including the name of the store origin we should help them out.
 - [ ] Some products could have multiple canonical categories attached to them. So we could have more than 1 canonical id: a new column possibly for additional references? A product like Açai Oakberry in continente is under Congelados > Frutas e Legumes > Frutas and wont be identified as Gelado... That's kind of a pain dont you think? Altho setting this precedent in the database may be truly horrific
 - [ ] Add route for /products/barcode/xxx

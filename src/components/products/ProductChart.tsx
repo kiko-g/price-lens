@@ -657,7 +657,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
                 Per Unit
               </TableHead>
               <TableHead className="h-7 text-center text-xs">
-                <span className="bg-chart-5 mr-1 inline-block size-2 rounded-full"></span>
+                <span className="bg-chart-4 mr-1 inline-block size-2 rounded-full"></span>
                 Freq (%)
               </TableHead>
             </TableRow>
@@ -688,15 +688,15 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
                   </TableCell>
 
                   <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                    {point.price_recommended?.toFixed(2)}€
+                    {point.price_recommended?.toFixed(1)}€
                   </TableCell>
 
                   <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                    {point.price_per_major_unit?.toFixed(2)}€
+                    {point.price_per_major_unit?.toFixed(1)}€
                   </TableCell>
 
                   <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                    {(point.frequencyRatio * 100).toFixed(2)}%
+                    {(point.frequencyRatio * 100).toFixed(1)}%
                   </TableCell>
                 </TableRow>
               ))}
