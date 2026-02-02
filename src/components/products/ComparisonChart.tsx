@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Legend } from "recharts"
 
 import type { StoreProduct, Price } from "@/types"
-import { STORE_NAMES, DateRange, daysAmountInRange } from "@/types/business"
+import { STORE_NAMES, DateRange } from "@/types/business"
 import { cn } from "@/lib/utils"
 import { buildChartData, calculateChartBounds } from "@/lib/business/chart"
 
@@ -62,6 +62,12 @@ function getStoreName(originId: number | null): string {
   return `Store ${originId || "Unknown"}`
 }
 
+function formatTrackingSince(dateStr: string | null): string {
+  if (!dateStr) return ""
+  const date = new Date(dateStr)
+  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" })
+}
+
 export function ComparisonChart({ productsWithPrices, selectedRange, className }: ComparisonChartProps) {
   // Build chart data for each product and merge by date
   const { mergedData, chartBounds, storeKeys } = useMemo(() => {
@@ -74,6 +80,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
       product,
       data: buildChartData(prices, { range: selectedRange, samplingMode: "efficient" }),
     }))
+    console.info(allChartData)
 
     // Create a map of all dates to their data points
     const dateMap = new Map<string, MergedDataPoint>()
@@ -86,6 +93,8 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
       color: string
       dashPattern: string
       index: number
+      dataPointCount: number
+      trackingSince: string | null
     }[] = []
 
     allChartData.forEach(({ product, data }, index) => {
@@ -97,6 +106,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
       // Only add if not already present (avoid duplicates for same store)
       if (!storeKeys.find((s) => s.key === key)) {
         const storeIndex = storeKeys.length
+        const earliestDate = data.length > 0 ? data[0].rawDate : null
         storeKeys.push({
           key,
           originId,
@@ -104,6 +114,8 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
           color,
           dashPattern: STROKE_DASH_PATTERNS[storeIndex % STROKE_DASH_PATTERNS.length],
           index: storeIndex,
+          dataPointCount: data.length,
+          trackingSince: earliestDate,
         })
       }
 
@@ -217,9 +229,12 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
             verticalAlign="bottom"
             height={36}
             content={({ payload }) => (
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
                 {payload?.map((entry, index) => {
                   const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
+                  const trackingSinceText = storeKey?.trackingSince
+                    ? `since ${formatTrackingSince(storeKey.trackingSince)}`
+                    : ""
                   return (
                     <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
                       <svg width="24" height="12" className="shrink-0">
@@ -235,13 +250,14 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                         <circle cx="12" cy="6" r="3" fill={entry.color} />
                       </svg>
                       <span>{storeKey?.name || entry.value}</span>
+                      {trackingSinceText && <span className="text-muted-foreground text-xs">{trackingSinceText}</span>}
                     </div>
                   )
                 })}
               </div>
             )}
           />
-          {storeKeys.map(({ key, color, dashPattern, index }) => (
+          {storeKeys.map(({ key, color, dashPattern }) => (
             <Line
               key={key}
               dataKey={key}
@@ -251,7 +267,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
               strokeDasharray={dashPattern}
               dot={{ r: 3, fill: color, strokeWidth: 0 }}
               activeDot={{ r: 5, fill: color, strokeWidth: 2, stroke: "var(--background)" }}
-              connectNulls={false}
+              connectNulls
             />
           ))}
         </LineChart>

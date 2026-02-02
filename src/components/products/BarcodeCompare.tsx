@@ -185,7 +185,7 @@ function CompareCard({
 }
 
 export function BarcodeCompare({ products, productsWithPrices, barcode }: BarcodeCompareProps) {
-  const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
+  const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
 
   const productsWithPrice = products.filter((p) => p.price !== null && p.price !== undefined)
   const cheapestPrice = productsWithPrice.length > 0 ? Math.min(...productsWithPrice.map((p) => p.price!)) : null

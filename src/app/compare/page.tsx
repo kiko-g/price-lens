@@ -127,6 +127,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
 
   // Fetch price history for all products in parallel
   const productsWithPrices = await getProductsWithPrices(products)
+  console.info("productsWithPrices", productsWithPrices)
 
   return (
     <div className="flex w-full flex-col items-center justify-start p-4">

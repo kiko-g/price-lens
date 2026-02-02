@@ -578,6 +578,7 @@ function Graph({ className }: GraphProps) {
                     dot={dot}
                     activeDot={activeDot}
                     isAnimationActive={false}
+                    connectNulls
                   />
                 )
               })}

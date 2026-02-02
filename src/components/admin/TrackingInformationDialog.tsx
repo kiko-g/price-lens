@@ -40,7 +40,7 @@ export function TrackingInformationDialog({ children }: { children: React.ReactN
               {Object.values(PRIORITY_CONFIG)
                 .filter((priority) => priority.label !== "?")
                 .map((priority) => (
-                  <span key={priority.label} className="flex items-center gap-2">
+                  <span key={priority.label} className="flex items-center gap-2 font-mono">
                     <PriorityBubble priority={Number(priority.label)} size="xs" />
                     <span className="text-sm">{priority.explanation}</span>
                   </span>

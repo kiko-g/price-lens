@@ -1584,7 +1584,7 @@ function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: Ca
           >
             <SelectValue placeholder={findCategoryPath.level1 ? "All subcategories" : "Select category first"} />
           </SelectTrigger>
-          <SelectContent className="max-h-[200px]">
+          <SelectContent className="max-h-[240px]">
             <SelectItem value="_all">All subcategories</SelectItem>
             {level2Options.length > 0 && <SelectSeparator />}
             {level2Options.map((cat) => (
@@ -1620,7 +1620,7 @@ function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: Ca
               }
             />
           </SelectTrigger>
-          <SelectContent className="max-h-[200px]">
+          <SelectContent className="max-h-[240px]">
             <SelectItem value="_all">All sub-subcategories</SelectItem>
             {level3Options.length > 0 && <SelectSeparator />}
             {level3Options.map((cat) => (
