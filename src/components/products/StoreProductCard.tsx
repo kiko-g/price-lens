@@ -46,6 +46,7 @@ import {
   MicroscopeIcon,
   HeartIcon,
   CalendarPlusIcon,
+  ScaleIcon,
 } from "lucide-react"
 
 function resolveImageUrlForCard(image: string, size = 400) {
@@ -320,7 +321,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent className="w-48" align="end">
+              <DropdownMenuContent className="min-w-48" align="end">
+                {/* Actions in dropdown menu */}
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Button variant="dropdown-item" asChild>
@@ -334,6 +336,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     </Link>
                   </Button>
                 </DropdownMenuItem>
+
                 <DropdownMenuItem asChild>
                   <Button
                     variant="dropdown-item"
@@ -344,16 +347,31 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     <CopyIcon />
                   </Button>
                 </DropdownMenuItem>
+
                 <ShareButton sp={sp} appearAs="dropdown-menu-item" />
-                {user ? (
+
+                {user && (
                   <DropdownMenuItem variant="love" asChild>
                     <Button variant="dropdown-item" onClick={toggleFavorite} disabled={isFavoritePending}>
                       {isFavorited ? "Remove from favorites" : "Add to favorites"}
                       <HeartIcon />
                     </Button>
                   </DropdownMenuItem>
-                ) : null}
+                )}
 
+                {/* Compare page link if sp.barcode is available */}
+                {sp.barcode && (
+                  <DropdownMenuItem variant="hype" asChild>
+                    <Button variant="dropdown-item" asChild>
+                      <Link href={`/compare?barcode=${sp.barcode}`}>
+                        <span className="mr-2">Compare identical in other stores</span>
+                        <ScaleIcon />
+                      </Link>
+                    </Button>
+                  </DropdownMenuItem>
+                )}
+
+                {/* Admin tools in dropdown menu */}
                 {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
                   <>
                     <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />

@@ -27,6 +27,8 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
 - [x] Example spotify for searching when adding a song to a playlist
+- [ ] Product groups and a page for that
+- [ ] Easily jump to compare pages
 - [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Badass smoke test
 - [ ] Add supermarket SuperCor and Lidl

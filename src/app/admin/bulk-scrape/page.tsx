@@ -115,6 +115,17 @@ interface EnhancedStats {
   successRate: number
 }
 
+const SETTINGS = {
+  origins: [1],
+  priorities: [],
+  missingBarcode: true,
+  available: true,
+  onlyUrl: false,
+  batchSize: 5,
+  jobLimit: null,
+  useAntiBlock: false,
+}
+
 export default function BulkScrapePage() {
   const queryClient = useQueryClient()
 
@@ -138,23 +149,24 @@ export default function BulkScrapePage() {
     priorityLevels,
   } = useAdminStoreProductFilters({
     initialFilters: {
-      origins: [3],
-      priorities: [],
-      missingBarcode: true,
-      available: null,
-      onlyUrl: false,
+      origins: SETTINGS.origins,
+      priorities: SETTINGS.priorities,
+      missingBarcode: SETTINGS.missingBarcode,
+      available: SETTINGS.available,
+      onlyUrl: SETTINGS.onlyUrl,
     },
     queryKeyPrefix: "bulk-scrape",
   })
 
-  const [useDirectMode, setUseDirectMode] = useState(true) // "direct" for local development
+  const [useAntiBlock, setUseAntiBlock] = useState(SETTINGS.useAntiBlock)
+  const [batchSize, setBatchSize] = useState(SETTINGS.batchSize)
+  const [jobLimit, setJobLimit] = useState<number | null>(SETTINGS.jobLimit) // null = no limit, process all matchin
+
   const [isDirectProcessing, setIsDirectProcessing] = useState(false)
-  const [useAntiBlock, setUseAntiBlock] = useState(false) // Anti-blocking measures (delays, rotating UA)
-  const [batchSize, setBatchSize] = useState(5)
-  const [jobLimit, setJobLimit] = useState<number | null>(null) // null = no limit, process all matching
-  const [activeJobId, setActiveJobId] = useState<string | null>(null) // Active job tracking
-  const [matchingProductsDialogOpen, setMatchingProductsDialogOpen] = useState(false)
+  const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [productsPage, setProductsPage] = useState(1)
+  const [useDirectMode, setUseDirectMode] = useState(true) // "direct" for local development
+  const [matchingProductsDialogOpen, setMatchingProductsDialogOpen] = useState(false)
 
   // Cancel state
   const cancelRequestedRef = useRef(false)
@@ -1259,7 +1271,7 @@ export default function BulkScrapePage() {
                               job.status === "running"
                                 ? "default"
                                 : job.status === "completed"
-                                  ? "secondary"
+                                  ? "success"
                                   : "destructive"
                             }
                             className="w-20 justify-center"

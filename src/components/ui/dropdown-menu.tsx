@@ -78,7 +78,7 @@ const DropdownMenuItem = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     asButton?: boolean
     inset?: boolean
-    variant?: "default" | "caution" | "destructive" | "love"
+    variant?: "default" | "caution" | "destructive" | "love" | "hype"
   }
 >(({ className, asButton, inset, variant = "default", ...props }, ref) => (
   <DropdownMenuPrimitive.Item
@@ -87,6 +87,7 @@ const DropdownMenuItem = React.forwardRef<
       "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
       variant === "default" && "hover:bg-accent hover:text-accent-foreground",
       variant === "love" && "text-rose-500 hover:bg-rose-500/20 hover:text-rose-500",
+      variant === "hype" && "text-sky-500 hover:bg-sky-500/20 hover:text-sky-500",
       variant === "caution" && "text-amber-700 hover:bg-amber-700/10 dark:text-amber-200 dark:hover:bg-amber-400/20",
       variant === "destructive" && "text-destructive hover:bg-destructive/20 hover:text-destructive",
       inset && "pl-8",
