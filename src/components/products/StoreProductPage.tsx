@@ -363,7 +363,9 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
               ) : null}
 
-              {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
+              {isPriceNotSet ? (
+                <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span>
+              ) : null}
             </div>
 
             {/* Price per unit and discount */}

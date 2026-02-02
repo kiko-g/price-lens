@@ -310,7 +310,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
             ) : null}
 
-            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">€€€€</span> : null}
+            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
           </div>
 
           <div className="flex items-center gap-2">

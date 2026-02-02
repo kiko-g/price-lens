@@ -2,9 +2,11 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 
+import type { StoreProduct, Price } from "@/types"
 import { siteConfig } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
+import { priceQueries } from "@/lib/queries/prices"
 
 import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/ui/combo/back-button"
@@ -18,6 +20,11 @@ interface PageProps {
   searchParams: Promise<{ barcode?: string }>
 }
 
+export interface ProductWithPrices {
+  product: StoreProduct
+  prices: Price[]
+}
+
 async function getProductsByBarcode(barcode: string) {
   const supabase = createClient()
   const {
@@ -26,6 +33,17 @@ async function getProductsByBarcode(barcode: string) {
   const { data: products } = await storeProductQueries.getAllByBarcode(barcode, user?.id || null)
 
   return products ?? []
+}
+
+async function getProductsWithPrices(products: StoreProduct[]): Promise<ProductWithPrices[]> {
+  // Fetch price history for all products in parallel
+  const pricePromises = products.map(async (product) => {
+    if (!product.id) return { product, prices: [] }
+    const prices = await priceQueries.getPricePointsPerIndividualProduct(product.id)
+    return { product, prices: prices ?? [] }
+  })
+
+  return Promise.all(pricePromises)
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
@@ -107,9 +125,12 @@ export default async function ComparePage({ searchParams }: PageProps) {
     )
   }
 
+  // Fetch price history for all products in parallel
+  const productsWithPrices = await getProductsWithPrices(products)
+
   return (
     <div className="flex w-full flex-col items-center justify-start p-4">
-      <BarcodeCompare products={products} barcode={barcode} />
+      <BarcodeCompare products={products} productsWithPrices={productsWithPrices} barcode={barcode} />
     </div>
   )
 }
