@@ -29,6 +29,7 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Example spotify for searching when adding a song to a playlist
 - [ ] Product groups and a page for that
 - [ ] Easily jump to compare pages
+- [ ] Scan barcode with phone camera feature.
 - [ ] Product filter options: show only available, missing barcode, must have barcode
 - [ ] Badass smoke test
 - [ ] Add supermarket SuperCor and Lidl

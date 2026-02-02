@@ -78,7 +78,12 @@ function CompareCard({
   const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
 
   return (
-    <div className={cn("bg-card relative flex flex-col overflow-hidden rounded-xl border")}>
+    <div
+      className={cn(
+        "bg-card relative flex flex-col overflow-hidden rounded-xl border",
+        isCheapest && "border-success/30 bg-success/5 dark:border-success/40",
+      )}
+    >
       {/* Compact Header: Thumbnail + Store + Price */}
       <div className="flex items-start gap-2 p-2.5">
         {/* Tiny thumbnail */}
@@ -150,7 +155,7 @@ function CompareCard({
             )}
             {product.pack && <span>· {product.pack}</span>}
             {priceDiff !== null && priceDiff > 0 && (
-              <Badge variant="outline" size="xs" className="text-orange-600 dark:text-orange-400">
+              <Badge variant="retail" size="xs">
                 +{priceDiff.toFixed(2)}€
               </Badge>
             )}
@@ -159,10 +164,16 @@ function CompareCard({
       </div>
 
       {/* Compact Actions */}
-      <div className="flex gap-2 border-t p-2">
-        <Button asChild variant="outline" size="sm" className="h-8 flex-1 text-xs">
+      <div
+        className={cn(
+          "flex items-center justify-end gap-2 border-t p-2",
+          isCheapest && "border-success/30 dark:border-success/40",
+        )}
+      >
+        <Button asChild variant="outline" size="sm" className="h-8 bg-white text-xs dark:bg-white/10">
           <Link href={generateProductPath(product)}>View details</Link>
         </Button>
+
         <Button asChild variant="outline" size="icon-sm" className="h-8 w-8">
           <Link href={product.url || "#"} target="_blank" rel="noopener noreferrer" title="Open in store">
             <ArrowUpRightIcon className="h-4 w-4" />
@@ -213,10 +224,10 @@ export function BarcodeCompare({ products, productsWithPrices, barcode }: Barcod
 
         {/* Savings callout - prominent */}
         {savings > 0 && (
-          <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 dark:border-green-800 dark:bg-green-950/30">
+          <div className="border-success/30 bg-success/5 dark:border-success/40 dark:bg-success/5 rounded-lg border px-3 py-2">
             <p className="text-sm">
-              <span className="font-semibold text-green-700 dark:text-green-400">Save up to {savings.toFixed(2)}€</span>{" "}
-              by choosing the cheapest option
+              <span className="text-success font-semibold">Save up to {savings.toFixed(2)}€</span> by choosing the
+              cheapest option
             </p>
           </div>
         )}

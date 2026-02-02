@@ -23,6 +23,14 @@ const FALLBACK_COLORS = [
   "var(--chart-3)", // Yellow (last resort)
 ]
 
+// Different dash patterns to distinguish overlapping lines
+const STROKE_DASH_PATTERNS = [
+  "0", // Solid
+  "8 4", // Dashed
+  "2 2", // Dotted
+  "8 4 2 4", // Dash-dot
+]
+
 interface ProductWithPrices {
   product: StoreProduct
   prices: Price[]
@@ -71,7 +79,14 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
     const dateMap = new Map<string, MergedDataPoint>()
 
     // Generate store keys based on origin_id
-    const storeKeys: { key: string; originId: number | null; name: string; color: string }[] = []
+    const storeKeys: {
+      key: string
+      originId: number | null
+      name: string
+      color: string
+      dashPattern: string
+      index: number
+    }[] = []
 
     allChartData.forEach(({ product, data }, index) => {
       const originId = product.origin_id
@@ -81,7 +96,15 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
 
       // Only add if not already present (avoid duplicates for same store)
       if (!storeKeys.find((s) => s.key === key)) {
-        storeKeys.push({ key, originId, name, color })
+        const storeIndex = storeKeys.length
+        storeKeys.push({
+          key,
+          originId,
+          name,
+          color,
+          dashPattern: STROKE_DASH_PATTERNS[storeIndex % STROKE_DASH_PATTERNS.length],
+          index: storeIndex,
+        })
       }
 
       data.forEach((point) => {
@@ -198,8 +221,19 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                 {payload?.map((entry, index) => {
                   const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
                   return (
-                    <div key={`legend-${index}`} className="flex items-center gap-1.5 text-sm">
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
+                    <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
+                      <svg width="24" height="12" className="shrink-0">
+                        <line
+                          x1="0"
+                          y1="6"
+                          x2="24"
+                          y2="6"
+                          stroke={entry.color}
+                          strokeWidth={2.5}
+                          strokeDasharray={storeKey?.dashPattern || "0"}
+                        />
+                        <circle cx="12" cy="6" r="3" fill={entry.color} />
+                      </svg>
                       <span>{storeKey?.name || entry.value}</span>
                     </div>
                   )
@@ -207,15 +241,16 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
               </div>
             )}
           />
-          {storeKeys.map(({ key, color }) => (
+          {storeKeys.map(({ key, color, dashPattern, index }) => (
             <Line
               key={key}
               dataKey={key}
               type="linear"
               stroke={color}
               strokeWidth={2.5}
-              dot={{ r: 0 }}
-              activeDot={{ r: 4, fill: color, strokeWidth: 0 }}
+              strokeDasharray={dashPattern}
+              dot={{ r: 3, fill: color, strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: color, strokeWidth: 2, stroke: "var(--background)" }}
               connectNulls={false}
             />
           ))}
