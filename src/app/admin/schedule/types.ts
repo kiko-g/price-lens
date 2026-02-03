@@ -15,6 +15,24 @@ export interface CostEstimate {
   estimatedMonthlyCost: number
 }
 
+export type CapacityHealthStatus = "healthy" | "degraded" | "critical"
+
+export interface CapacityAnalysis {
+  status: CapacityHealthStatus
+  requiredDailyScrapes: number
+  availableDailyCapacity: number
+  utilizationPercent: number
+  deficit: number
+  surplusPercent: number
+  byPriority: Record<number, { products: number; dailyScrapes: number }>
+  config: {
+    batchSize: number
+    maxBatches: number
+    cronFrequencyMinutes: number
+    runsPerDay: number
+  }
+}
+
 export interface ScheduleOverview {
   cronSchedule: string
   cronDescription: string
@@ -30,6 +48,7 @@ export interface ScheduleOverview {
   totalDueForScrape: number
   totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
   costEstimate: CostEstimate
+  capacity: CapacityAnalysis
 }
 
 export interface TimelineProduct {
@@ -105,6 +124,14 @@ export interface SchedulerTestResult {
   config: {
     batchSize: number
     maxBatches: number
+    cronFrequencyMinutes: number
     activePriorities: number[]
   }
+  dynamicBatching: {
+    backlogSize: number
+    dynamicMaxBatches: number
+    batchesUsed: number
+    reason: "critical-capacity" | "small-backlog" | "scaled"
+  }
+  capacity: CapacityAnalysis
 }

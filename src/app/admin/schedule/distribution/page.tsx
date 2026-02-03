@@ -26,7 +26,12 @@ import {
   BanIcon,
   SearchIcon,
   GhostIcon,
+  GaugeIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
 } from "lucide-react"
+
+import type { CapacityHealthStatus } from "@/app/admin/schedule/types"
 
 import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "@/app/admin/schedule/types"
 import { PRIORITY_CONFIG, formatThreshold } from "@/app/admin/schedule/constants"
@@ -113,9 +118,137 @@ export default function ScheduleDistributionPage() {
   const selectedStat = overview?.priorityStats.find((s) => s.priority === selectedPriority)
   const priorityConfig = selectedPriority !== null ? PRIORITY_CONFIG[selectedPriority ?? 0] : null
 
+  const getStatusConfig = (status: CapacityHealthStatus) => {
+    switch (status) {
+      case "healthy":
+        return {
+          label: "Healthy",
+          color: "text-emerald-600 dark:text-emerald-400",
+          bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+          borderColor: "border-emerald-500",
+          icon: CheckCircle2Icon,
+        }
+      case "degraded":
+        return {
+          label: "Degraded",
+          color: "text-amber-600 dark:text-amber-400",
+          bgColor: "bg-amber-50 dark:bg-amber-950/20",
+          borderColor: "border-amber-500",
+          icon: AlertTriangleIcon,
+        }
+      case "critical":
+        return {
+          label: "Critical",
+          color: "text-red-600 dark:text-red-400",
+          bgColor: "bg-red-50 dark:bg-red-950/20",
+          borderColor: "border-red-500",
+          icon: AlertTriangleIcon,
+        }
+    }
+  }
+
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        {/* Capacity Health Indicator */}
+        {overview?.capacity && (
+          <Card
+            className={cn(
+              getStatusConfig(overview.capacity.status).borderColor,
+              getStatusConfig(overview.capacity.status).bgColor,
+            )}
+          >
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle
+                  className={cn("flex items-center gap-2 text-lg", getStatusConfig(overview.capacity.status).color)}
+                >
+                  <GaugeIcon className="h-5 w-5" />
+                  Scheduler Capacity: {getStatusConfig(overview.capacity.status).label}
+                </CardTitle>
+                <Badge
+                  variant={
+                    overview.capacity.status === "healthy"
+                      ? "success"
+                      : overview.capacity.status === "degraded"
+                        ? "warning"
+                        : "destructive"
+                  }
+                >
+                  {overview.capacity.utilizationPercent}% utilization
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <TrendingUpIcon className="h-3.5 w-3.5" />
+                    Required Daily
+                  </div>
+                  <p className="mt-1 text-xl font-bold">{overview.capacity.requiredDailyScrapes.toLocaleString()}</p>
+                  <p className="text-muted-foreground text-xs">scrapes/day</p>
+                </div>
+                <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <GaugeIcon className="h-3.5 w-3.5" />
+                    Available Capacity
+                  </div>
+                  <p className="mt-1 text-xl font-bold">{overview.capacity.availableDailyCapacity.toLocaleString()}</p>
+                  <p className="text-muted-foreground text-xs">scrapes/day</p>
+                </div>
+                {overview.capacity.deficit > 0 ? (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/30">
+                    <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
+                      <TrendingDownIcon className="h-3.5 w-3.5" />
+                      Daily Deficit
+                    </div>
+                    <p className="mt-1 text-xl font-bold text-red-600 dark:text-red-400">
+                      -{overview.capacity.deficit.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-red-600/80 dark:text-red-400/80">scrapes short</p>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2Icon className="h-3.5 w-3.5" />
+                      Surplus
+                    </div>
+                    <p className="mt-1 text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                      +{overview.capacity.surplusPercent.toFixed(0)}%
+                    </p>
+                    <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80">extra capacity</p>
+                  </div>
+                )}
+                <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <CircleIcon className="h-3.5 w-3.5" />
+                    Config
+                  </div>
+                  <p className="mt-1 text-sm font-medium">
+                    {overview.capacity.config.batchSize} × {overview.capacity.config.maxBatches}
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    every {overview.capacity.config.cronFrequencyMinutes}m ({overview.capacity.config.runsPerDay}{" "}
+                    runs/day)
+                  </p>
+                </div>
+              </div>
+
+              {overview.capacity.status === "critical" && (
+                <div className="mt-4 rounded-lg border border-red-200 bg-red-100 p-3 dark:border-red-900 dark:bg-red-950/50">
+                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                    System cannot keep up with scraping demands. Products will accumulate staleness over time.
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    Consider: increasing batch size, running cron more frequently, or reducing product priorities.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Phantom Scraped Warning */}
         {overview && overview.totalPhantomScraped > 0 && (
           <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">

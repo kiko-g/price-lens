@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { ACTIVE_PRIORITIES, ESTIMATED_COST_PER_SCRAPE } from "@/lib/qstash"
-import { PRIORITY_REFRESH_HOURS } from "@/lib/business/priority"
+import {
+  ACTIVE_PRIORITIES,
+  ESTIMATED_COST_PER_SCRAPE,
+  WORKER_BATCH_SIZE,
+  MAX_BATCHES_PER_RUN,
+  CRON_FREQUENCY_MINUTES,
+} from "@/lib/qstash"
+import { PRIORITY_REFRESH_HOURS, analyzeSchedulerCapacity, type CapacityAnalysis } from "@/lib/business/priority"
 
 export const maxDuration = 30
 
@@ -37,6 +43,7 @@ interface ScheduleOverview {
   totalDueForScrape: number
   totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
   costEstimate: CostEstimate
+  capacity: CapacityAnalysis
 }
 
 interface TimelineProduct {
@@ -58,24 +65,24 @@ interface TimelineData {
   }[]
 }
 
-// Vercel cron schedule - hardcoded since vercel.json isn't accessible at runtime
-const CRON_SCHEDULE = "*/30 * * * *"
-const CRON_DESCRIPTION = "Every 30 minutes"
-const CRON_FREQUENCY_MINUTES = 30
+// Vercel cron schedule description (actual frequency comes from CRON_FREQUENCY_MINUTES)
+const CRON_SCHEDULE = `*/${CRON_FREQUENCY_MINUTES} * * * *`
+const CRON_DESCRIPTION = `Every ${CRON_FREQUENCY_MINUTES} minutes`
 
 function getNextCronRun(): Date {
   const now = new Date()
   const currentMinutes = now.getUTCMinutes()
 
-  // Find the next 30-minute mark (0 or 30)
-  const nextMinutes = currentMinutes < 30 ? 30 : 60
+  // Find the next cron interval mark based on CRON_FREQUENCY_MINUTES
+  const intervalsPassed = Math.floor(currentMinutes / CRON_FREQUENCY_MINUTES)
+  const nextMinutes = (intervalsPassed + 1) * CRON_FREQUENCY_MINUTES
 
   const nextRun = new Date(now)
   nextRun.setUTCSeconds(0, 0)
 
-  if (nextMinutes === 60) {
+  if (nextMinutes >= 60) {
     nextRun.setUTCHours(nextRun.getUTCHours() + 1)
-    nextRun.setUTCMinutes(0)
+    nextRun.setUTCMinutes(nextMinutes - 60)
   } else {
     nextRun.setUTCMinutes(nextMinutes)
   }
@@ -281,6 +288,20 @@ export async function GET(req: NextRequest) {
         estimatedMonthlyCost: Math.round(monthlyScrapes * ESTIMATED_COST_PER_SCRAPE * 100) / 100,
       }
 
+      // Calculate capacity analysis
+      const productCountsByPriority: Record<number, number> = {}
+      for (const stat of priorityStats) {
+        if (stat.priority !== null) {
+          productCountsByPriority[stat.priority] = stat.total
+        }
+      }
+      const capacity = analyzeSchedulerCapacity(
+        productCountsByPriority,
+        WORKER_BATCH_SIZE,
+        MAX_BATCHES_PER_RUN,
+        CRON_FREQUENCY_MINUTES,
+      )
+
       const overview: ScheduleOverview = {
         cronSchedule: CRON_SCHEDULE,
         cronDescription: CRON_DESCRIPTION,
@@ -296,6 +317,7 @@ export async function GET(req: NextRequest) {
         totalDueForScrape,
         totalPhantomScraped,
         costEstimate,
+        capacity,
       }
 
       return NextResponse.json(overview)

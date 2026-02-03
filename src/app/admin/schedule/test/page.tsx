@@ -20,6 +20,8 @@ import {
   PackageIcon,
   GaugeIcon,
   InfoIcon,
+  TrendingUpIcon,
+  LayersIcon,
 } from "lucide-react"
 
 import type { SchedulerTestResult } from "@/app/admin/schedule/types"
@@ -159,6 +161,101 @@ export default function ScheduleTestPage() {
                   </div>
                 </div>
 
+                {/* Dynamic Batching & Capacity */}
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {/* Dynamic Batching */}
+                  <div className="rounded-lg border p-4">
+                    <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
+                      <LayersIcon className="h-4 w-4 text-violet-500" />
+                      Dynamic Batching
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-muted/30 rounded-lg p-2">
+                        <p className="text-muted-foreground text-xs">Backlog Size</p>
+                        <p className="text-lg font-bold">
+                          {schedulerTestResult.dynamicBatching.backlogSize.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-2">
+                        <p className="text-muted-foreground text-xs">Dynamic Max</p>
+                        <p className="text-lg font-bold">{schedulerTestResult.dynamicBatching.dynamicMaxBatches}</p>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-2">
+                        <p className="text-muted-foreground text-xs">Batches Used</p>
+                        <p className="text-lg font-bold">{schedulerTestResult.dynamicBatching.batchesUsed}</p>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-2">
+                        <p className="text-muted-foreground text-xs">Reason</p>
+                        <Badge variant="outline" className="mt-1">
+                          {schedulerTestResult.dynamicBatching.reason}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Capacity */}
+                  <div
+                    className={cn(
+                      "rounded-lg border p-4",
+                      schedulerTestResult.capacity.status === "critical" &&
+                        "border-red-500 bg-red-50 dark:bg-red-950/20",
+                      schedulerTestResult.capacity.status === "degraded" &&
+                        "border-amber-500 bg-amber-50 dark:bg-amber-950/20",
+                      schedulerTestResult.capacity.status === "healthy" &&
+                        "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20",
+                    )}
+                  >
+                    <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
+                      <TrendingUpIcon className="h-4 w-4" />
+                      Capacity:{" "}
+                      <Badge
+                        variant={
+                          schedulerTestResult.capacity.status === "healthy"
+                            ? "success"
+                            : schedulerTestResult.capacity.status === "degraded"
+                              ? "warning"
+                              : "destructive"
+                        }
+                      >
+                        {schedulerTestResult.capacity.status}
+                      </Badge>
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg bg-white/50 p-2 dark:bg-black/20">
+                        <p className="text-muted-foreground text-xs">Required/Day</p>
+                        <p className="text-lg font-bold">
+                          {schedulerTestResult.capacity.requiredDailyScrapes.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-white/50 p-2 dark:bg-black/20">
+                        <p className="text-muted-foreground text-xs">Capacity/Day</p>
+                        <p className="text-lg font-bold">
+                          {schedulerTestResult.capacity.availableDailyCapacity.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-white/50 p-2 dark:bg-black/20">
+                        <p className="text-muted-foreground text-xs">Utilization</p>
+                        <p className="text-lg font-bold">{schedulerTestResult.capacity.utilizationPercent}%</p>
+                      </div>
+                      <div className="rounded-lg bg-white/50 p-2 dark:bg-black/20">
+                        <p className="text-muted-foreground text-xs">
+                          {schedulerTestResult.capacity.deficit > 0 ? "Deficit" : "Surplus"}
+                        </p>
+                        <p
+                          className={cn(
+                            "text-lg font-bold",
+                            schedulerTestResult.capacity.deficit > 0 ? "text-red-600" : "text-emerald-600",
+                          )}
+                        >
+                          {schedulerTestResult.capacity.deficit > 0
+                            ? `-${schedulerTestResult.capacity.deficit.toLocaleString()}`
+                            : `+${schedulerTestResult.capacity.surplusPercent}%`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Priority Breakdown */}
                 <div className="rounded-lg border p-4">
                   <h4 className="mb-3 text-sm font-medium">Priority Breakdown</h4>
@@ -218,7 +315,9 @@ export default function ScheduleTestPage() {
                                 </Badge>
                               </td>
                               <td className="text-muted-foreground p-2 text-right">
-                                {parseFloat(product.hoursOverdue).toFixed(0)}h
+                                {parseFloat(product.hoursOverdue) > 8760
+                                  ? "Never scraped"
+                                  : `${parseFloat(product.hoursOverdue).toFixed(0)}h`}
                               </td>
                             </tr>
                           ))}

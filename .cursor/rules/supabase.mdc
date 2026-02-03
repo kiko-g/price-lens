@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+## Supabase details
+
+- Our project is free tier AFAIK.
+- We do not use a local database. We use the same in production and local to save overhead even if that is dangerous.
+- Supabase has a limit of 1000 when presenting results sometimes. When making queries we need to handle this as if results can be way more than that hard limit, using pagination perhaps.image.png

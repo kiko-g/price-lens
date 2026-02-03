@@ -165,3 +165,116 @@ export function formatHoursDuration(hours: number): string {
   const months = Math.round(days / 30)
   return `${months} month${months !== 1 ? "s" : ""}`
 }
+
+/**
+ * CAPACITY CALCULATOR
+ *
+ * Calculates the system's ability to keep up with scheduled scraping demands.
+ * Used to monitor scheduler health and alert when capacity is insufficient.
+ */
+
+export type CapacityHealthStatus = "healthy" | "degraded" | "critical"
+
+export type CapacityAnalysis = {
+  status: CapacityHealthStatus
+  requiredDailyScrapes: number
+  availableDailyCapacity: number
+  utilizationPercent: number
+  deficit: number
+  surplusPercent: number
+  byPriority: Record<number, { products: number; dailyScrapes: number }>
+  config: {
+    batchSize: number
+    maxBatches: number
+    cronFrequencyMinutes: number
+    runsPerDay: number
+  }
+}
+
+/**
+ * Calculates the required daily scrapes based on product counts by priority.
+ * Each priority has a refresh threshold (hours), so daily scrapes = products / (threshold / 24)
+ */
+export function calculateRequiredDailyScrapes(productCountsByPriority: Record<number, number>): {
+  total: number
+  byPriority: Record<number, { products: number; dailyScrapes: number }>
+} {
+  const byPriority: Record<number, { products: number; dailyScrapes: number }> = {}
+  let total = 0
+
+  for (const priority of ACTIVE_PRIORITIES) {
+    const productCount = productCountsByPriority[priority] ?? 0
+    const refreshHours = PRIORITY_REFRESH_HOURS[priority]
+
+    if (refreshHours && productCount > 0) {
+      const dailyScrapes = Math.ceil(productCount / (refreshHours / 24))
+      byPriority[priority] = { products: productCount, dailyScrapes }
+      total += dailyScrapes
+    } else {
+      byPriority[priority] = { products: productCount, dailyScrapes: 0 }
+    }
+  }
+
+  return { total, byPriority }
+}
+
+/**
+ * Calculates available daily capacity based on scheduler configuration.
+ */
+export function calculateAvailableDailyCapacity(
+  batchSize: number,
+  maxBatches: number,
+  cronFrequencyMinutes: number,
+): number {
+  const runsPerDay = (24 * 60) / cronFrequencyMinutes
+  return batchSize * maxBatches * runsPerDay
+}
+
+/**
+ * Analyzes scheduler capacity and returns health status.
+ *
+ * @param productCountsByPriority - Map of priority level to product count
+ * @param batchSize - Products per batch (WORKER_BATCH_SIZE)
+ * @param maxBatches - Batches per run (MAX_BATCHES_PER_RUN)
+ * @param cronFrequencyMinutes - Cron frequency (CRON_FREQUENCY_MINUTES)
+ */
+export function analyzeSchedulerCapacity(
+  productCountsByPriority: Record<number, number>,
+  batchSize: number,
+  maxBatches: number,
+  cronFrequencyMinutes: number,
+): CapacityAnalysis {
+  const { total: requiredDailyScrapes, byPriority } = calculateRequiredDailyScrapes(productCountsByPriority)
+  const runsPerDay = (24 * 60) / cronFrequencyMinutes
+  const availableDailyCapacity = batchSize * maxBatches * runsPerDay
+
+  const utilizationPercent = availableDailyCapacity > 0 ? (requiredDailyScrapes / availableDailyCapacity) * 100 : 0
+  const deficit = Math.max(0, requiredDailyScrapes - availableDailyCapacity)
+  const surplusPercent =
+    availableDailyCapacity > 0 ? ((availableDailyCapacity - requiredDailyScrapes) / availableDailyCapacity) * 100 : 0
+
+  let status: CapacityHealthStatus
+  if (utilizationPercent <= 80) {
+    status = "healthy"
+  } else if (utilizationPercent <= 100) {
+    status = "degraded"
+  } else {
+    status = "critical"
+  }
+
+  return {
+    status,
+    requiredDailyScrapes,
+    availableDailyCapacity,
+    utilizationPercent: Math.round(utilizationPercent * 10) / 10,
+    deficit,
+    surplusPercent: Math.round(surplusPercent * 10) / 10,
+    byPriority,
+    config: {
+      batchSize,
+      maxBatches,
+      cronFrequencyMinutes,
+      runsPerDay,
+    },
+  }
+}
