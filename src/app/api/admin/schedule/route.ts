@@ -588,6 +588,68 @@ export async function GET(req: NextRequest) {
       }
       // If status is "all" or anything else, we just get all products for this priority
 
+      // Handle phantom-scraped status separately using RPC
+      if (status === "phantom-scraped") {
+        const { data: phantomData, error: phantomError } = await supabase.rpc("get_phantom_scraped_products", {
+          active_priorities: [...ACTIVE_PRIORITIES],
+          max_results: 10000,
+        })
+
+        if (phantomError) {
+          console.error("Phantom scraped query error:", phantomError)
+          return NextResponse.json(
+            { error: "Failed to fetch phantom products", details: phantomError.message },
+            { status: 500 },
+          )
+        }
+
+        const phantomProducts = (phantomData || []) as { id: number }[]
+        const phantomIds = phantomProducts.map((p) => p.id)
+
+        if (phantomIds.length === 0) {
+          return NextResponse.json({
+            data: [],
+            pagination: {
+              page,
+              limit,
+              totalCount: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            },
+          })
+        }
+
+        // Fetch full product data for the paginated subset
+        const paginatedIds = phantomIds.slice(offset, offset + limit)
+        const { data: products, error: productsError } = await supabase
+          .from("store_products")
+          .select("*")
+          .in("id", paginatedIds)
+
+        if (productsError) {
+          console.error("Products fetch error:", productsError)
+          return NextResponse.json(
+            { error: "Failed to fetch products", details: productsError.message },
+            { status: 500 },
+          )
+        }
+
+        const totalPages = Math.ceil(phantomIds.length / limit)
+
+        return NextResponse.json({
+          data: products || [],
+          pagination: {
+            page,
+            limit,
+            totalCount: phantomIds.length,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+          },
+        })
+      }
+
       // Order by updated_at (never scraped first, then oldest)
       query = query.order("updated_at", { ascending: true, nullsFirst: true })
 

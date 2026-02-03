@@ -24,6 +24,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   BanIcon,
+  SearchIcon,
+  GhostIcon,
 } from "lucide-react"
 
 import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "@/app/admin/schedule/types"
@@ -34,6 +36,7 @@ export default function ScheduleDistributionPage() {
   const [fixResult, setFixResult] = useState<{ fixed: number } | null>(null)
   const [selectedPriority, setSelectedPriority] = useState<number | null | undefined>(undefined)
   const [stalenessFilter, setStalenessFilter] = useState<StalenessStatus>("stale-actionable")
+  const [viewingPhantomScraped, setViewingPhantomScraped] = useState(false)
   const [page, setPage] = useState(1)
   const limit = 24
 
@@ -71,11 +74,29 @@ export default function ScheduleDistributionPage() {
       )
       return res.data as ProductsByStalenessResponse
     },
-    enabled: selectedPriority !== undefined,
+    enabled: selectedPriority !== undefined && !viewingPhantomScraped,
+    staleTime: 30000,
+  })
+
+  // Fetch phantom scraped products when inspecting
+  const {
+    data: phantomProductsData,
+    isLoading: isLoadingPhantomProducts,
+    isFetching: isFetchingPhantomProducts,
+  } = useQuery({
+    queryKey: ["phantom-scraped-products", page],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/api/admin/schedule?action=products-by-staleness&priority=5&status=phantom-scraped&page=${page}&limit=${limit}`,
+      )
+      return res.data as ProductsByStalenessResponse
+    },
+    enabled: viewingPhantomScraped,
     staleTime: 30000,
   })
 
   const handlePriorityClick = (priority: number | null) => {
+    setViewingPhantomScraped(false)
     if (selectedPriority === priority) {
       setSelectedPriority(undefined)
     } else {
@@ -111,7 +132,20 @@ export default function ScheduleDistributionPage() {
                 <code className="rounded bg-amber-100 px-1 dark:bg-amber-900">updated_at</code> set) but have{" "}
                 <strong>no price records</strong>. These products won&apos;t be picked up by the scheduler.
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setViewingPhantomScraped(true)
+                    setSelectedPriority(undefined)
+                    setPage(1)
+                  }}
+                  className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
+                >
+                  <SearchIcon className="h-4 w-4" />
+                  Inspect Products
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -317,8 +351,100 @@ export default function ScheduleDistributionPage() {
           </CardContent>
         </Card>
 
+        {/* Phantom Scraped Products Section */}
+        {viewingPhantomScraped && (
+          <Card className="border-amber-500">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+                    <GhostIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-amber-700 dark:text-amber-400">
+                      Phantom Scraped Products
+                    </CardTitle>
+                    <CardDescription>
+                      {phantomProductsData?.pagination.totalCount.toLocaleString() ?? "..."} products with{" "}
+                      <code className="rounded bg-amber-100 px-1 text-xs dark:bg-amber-900">updated_at</code> set but no
+                      price records
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => {
+                    setViewingPhantomScraped(false)
+                    setPage(1)
+                  }}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoadingPhantomProducts ? (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {Array.from({ length: limit }).map((_, i) => (
+                    <ProductCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : phantomProductsData?.data && phantomProductsData.data.length > 0 ? (
+                <>
+                  <div
+                    className={cn(
+                      "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6",
+                      isFetchingPhantomProducts && "opacity-50",
+                    )}
+                  >
+                    {phantomProductsData.data.map((product) => (
+                      <StoreProductCard key={product.id} sp={product} />
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {phantomProductsData.pagination.totalPages > 1 && (
+                    <div className="mt-6 flex items-center justify-between">
+                      <p className="text-muted-foreground text-sm">
+                        Page {phantomProductsData.pagination.page} of {phantomProductsData.pagination.totalPages}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          disabled={!phantomProductsData.pagination.hasPreviousPage || isFetchingPhantomProducts}
+                        >
+                          <ChevronLeftIcon className="h-4 w-4" />
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage((p) => p + 1)}
+                          disabled={!phantomProductsData.pagination.hasNextPage || isFetchingPhantomProducts}
+                        >
+                          Next
+                          <ChevronRightIcon className="ml-1 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-12 text-center">
+                  <GhostIcon className="mb-4 h-12 w-12 opacity-50" />
+                  <p className="text-lg font-medium">No phantom scraped products found</p>
+                  <p className="text-sm">All products with price data are properly tracked.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Product Detail Section */}
-        {selectedPriority !== undefined && (
+        {selectedPriority !== undefined && !viewingPhantomScraped && (
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">

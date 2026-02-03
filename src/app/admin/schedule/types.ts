@@ -70,7 +70,7 @@ export interface ActivityData {
   scrapesPerHour: number
 }
 
-export type StalenessStatus = "stale-actionable" | "never-scraped" | "fresh" | "unavailable"
+export type StalenessStatus = "stale-actionable" | "never-scraped" | "fresh" | "unavailable" | "phantom-scraped"
 
 export interface ProductsByStalenessResponse {
   data: import("@/types").StoreProduct[]
