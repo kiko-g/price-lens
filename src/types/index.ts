@@ -93,6 +93,11 @@ export interface StoreProduct {
   is_favorited?: boolean
   canonical_category_id?: number | null
   canonical_category_name?: string | null
+  canonical_level?: number | null
+  canonical_parent_id?: number | null
+  canonical_category_name_2?: string | null
+  canonical_parent_id_2?: number | null
+  canonical_category_name_3?: string | null
 }
 
 export interface StoreProductWithSimilarity extends StoreProduct {

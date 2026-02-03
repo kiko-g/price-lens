@@ -252,14 +252,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                         {sp.canonical_category_name || sp.category || "No category"}
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      size="xs"
-                      className="max-w-96"
-                    >
+                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
                       <span className="mb-1 block text-xs font-medium">Category hierarchy in {supermarketName}:</span>
                       <span className="text-xs font-semibold">
                         {sp.category
@@ -286,13 +279,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     <TooltipTrigger>
                       <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind}>Priority {sp.priority}</Badge>
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      className="max-w-60 text-sm font-medium"
-                    >
+                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
                       <InfoIcon className="mr-1 inline-flex h-4 w-4" />
                       This product has priority {sp.priority} is checked every {refreshLabel}.
                     </TooltipContent>
@@ -307,14 +294,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                         {sp.priority === null ? "Not tracked" : `Priority ${sp.priority}`}
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      variant="destructive"
-                      className="max-w-60 text-sm font-medium"
-                    >
+                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
                       <p>
                         <AlertTriangleIcon className="mr-1 inline-flex h-4 w-4" />
                         This product has{" "}

@@ -94,6 +94,11 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   }
 
   const supermarketName = getSupermarketChainName(sp?.origin_id)
+  const supermarketBadge = (
+    <span className="flex w-fit items-center justify-center rounded-full bg-white px-1.5 py-0.5">
+      <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
+    </span>
+  )
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isNormalPrice =
@@ -102,6 +107,15 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   const categoryText = sp.category
     ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
     : null
+
+  const canonicalCategoryPath = (() => {
+    if (!sp.canonical_category_name) return null
+    const parts: string[] = []
+    if (sp.canonical_category_name_3) parts.push(sp.canonical_category_name_3)
+    if (sp.canonical_category_name_2) parts.push(sp.canonical_category_name_2)
+    parts.push(sp.canonical_category_name)
+    return parts.join(" > ")
+  })()
 
   const isError = hasUpdateError || !sp.available
 
@@ -183,15 +197,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                         {sp.pack}
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      alignOffset={-6}
-                      size="xs"
-                      variant="glass"
-                      className="max-w-60"
-                    >
+                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
                       {sp.pack}
                     </TooltipContent>
                   </Tooltip>
@@ -240,7 +246,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     {getShortRelativeTime(new Date(favoritedAt))}
                   </Badge>
                 </TooltipTrigger>
-                <TooltipContent side="left" align="end" size="xs" variant="glass">
+                <TooltipContent side="left" align="end">
                   <span>Added to favorites</span>
                   <br />
                   <span className="text-muted-foreground">{new Date(favoritedAt).toLocaleDateString()}</span>
@@ -264,21 +270,55 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger>
-                <Badge
-                  variant="boring"
-                  size="xs"
-                  roundedness="sm"
-                  className="text-2xs line-clamp-1 text-left"
-                  onClick={() => {
-                    navigator.clipboard.writeText(sp.canonical_category_name || sp.category || "")
-                  }}
-                >
-                  {sp.canonical_category_name || sp.category || "No category"}
-                </Badge>
+                {sp.canonical_category_name ? (
+                  <Badge
+                    variant="boring"
+                    size="xs"
+                    roundedness="sm"
+                    className="text-2xs line-clamp-1 text-left"
+                    onClick={() => {
+                      if (sp.canonical_category_name) navigator.clipboard.writeText(sp.canonical_category_name)
+                    }}
+                  >
+                    {sp.canonical_category_name}
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="boring"
+                    size="xs"
+                    roundedness="sm"
+                    className="text-2xs line-clamp-1 text-left"
+                    onClick={() => {
+                      if (sp.category) navigator.clipboard.writeText(sp.category)
+                    }}
+                  >
+                    {sp.category}
+                  </Badge>
+                )}
               </TooltipTrigger>
-              <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6} size="xs" className="max-w-96">
-                <span className="mb-1 block text-xs font-medium">Category hierarchy in {supermarketName}:</span>
-                <span className="text-xs font-semibold">{categoryText || "No category set available"}</span>
+
+              <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
+                {canonicalCategoryPath ? (
+                  <div className="flex flex-col gap-0 text-sm">
+                    <span className="block font-medium">Hierarchy</span>
+                    <span className="font-semibold">{canonicalCategoryPath}</span>
+                    {categoryText && (
+                      <>
+                        <span className="mt-4 mb-1 flex items-center gap-1 font-medium">
+                          Original hierarchy in {supermarketBadge}
+                        </span>
+                        <span className="font-bold">{categoryText}</span>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-0 text-sm">
+                    <span className="mb-0 flex items-center gap-1 font-medium">
+                      Original hierarchy in {supermarketBadge}
+                    </span>
+                    <span className="font-bold">{categoryText || "No category available"}</span>
+                  </div>
+                )}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -442,15 +482,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                             {sp.pack}
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          align="start"
-                          sideOffset={6}
-                          alignOffset={-6}
-                          size="xs"
-                          variant="glass"
-                          className="max-w-60"
-                        >
+                        <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
                           {sp.pack}
                         </TooltipContent>
                       </Tooltip>

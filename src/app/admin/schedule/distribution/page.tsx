@@ -218,9 +218,7 @@ export default function ScheduleDistributionPage() {
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>
-                                    {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
-                                  </p>
+                                  {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -237,10 +235,7 @@ export default function ScheduleDistributionPage() {
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>
-                                    {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
-                                  </p>
-                                  <p className="text-muted-foreground text-xs">Products that need scraping</p>
+                                  {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -257,10 +252,7 @@ export default function ScheduleDistributionPage() {
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>
-                                    {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
-                                  </p>
-                                  <p className="text-muted-foreground text-xs">Products that can&apos;t be scraped</p>
+                                  {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>

@@ -42,7 +42,7 @@ export function Brands({ className }: { className?: string }) {
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <p>{brand.disabled ? `${brand.name} will be supported soon` : `${brand.name} is supported`}</p>
+                {brand.disabled ? `${brand.name} will be supported soon` : `${brand.name} is supported`}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

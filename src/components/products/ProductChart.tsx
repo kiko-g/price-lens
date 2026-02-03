@@ -382,9 +382,7 @@ function ProductImage() {
                 <TooltipTrigger>
                   <WifiOffIcon className="h-4 w-4" />
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>This product is not available in this store.</p>
-                </TooltipContent>
+                <TooltipContent>This product is not available in this store.</TooltipContent>
               </TooltipUI>
             </TooltipProvider>
           </Badge>

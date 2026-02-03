@@ -119,7 +119,7 @@ export default function ScheduleTimelinePage() {
                                   style={{ width: `${Math.max(barWidth, 2)}%` }}
                                 />
                               </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-sm">
+                              <TooltipContent side="right">
                                 <p className="font-medium">{bucket.products.length} products become stale</p>
                                 <div className="mt-1 space-y-1 text-xs">
                                   {Object.entries(byPriority)

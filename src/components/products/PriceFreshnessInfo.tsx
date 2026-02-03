@@ -44,15 +44,7 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
             <span>Verified {relativeTime}</span>
           </span>
         </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          align="start"
-          sideOffset={6}
-          alignOffset={-6}
-          size="xs"
-          variant="default"
-          className="max-w-72 text-sm"
-        >
+        <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
           <p className="font-semibold">Price last verified</p>
           <p className="mt-1">
             {updatedDate.toLocaleDateString("pt-PT", {
@@ -72,7 +64,7 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
           )}
 
           {(priority === null || priority < 2) && (
-            <p className="mt-1 text-xs">
+            <p className="mt-1">
               <strong>Add to favorites</strong> to enable regular price tracking.
             </p>
           )}

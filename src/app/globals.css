@@ -110,7 +110,7 @@
 
 .dark {
   --background: var(--base-950);
-  --foreground: var(--base-200);
+  --foreground: var(--base-50);
   --card: var(--base-950);
   --card-foreground: var(--base-200);
   --popover: var(--base-950);

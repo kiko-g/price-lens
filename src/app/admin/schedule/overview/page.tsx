@@ -128,11 +128,9 @@ export default function ScheduleOverviewPage() {
                           <TooltipTrigger>
                             <InfoIcon className="ml-1 inline h-3 w-3" />
                           </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <p>
-                              Most products are at priority 1 as a safety measure. Enable them gradually as you tune
-                              priorities.
-                            </p>
+                          <TooltipContent>
+                            Most products are at priority 1 as a safety measure. Enable them gradually as you tune
+                            priorities.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

@@ -1,65 +1,48 @@
 "use client"
 
 import * as React from "react"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
-import { cva, type VariantProps } from "class-variance-authority"
+import { Tooltip as TooltipPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-const TooltipProvider = TooltipPrimitive.Provider
+function TooltipProvider({ delayDuration = 0, ...props }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+  return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />
+}
 
-const Tooltip = TooltipPrimitive.Root
+function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+  return (
+    <TooltipProvider>
+      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+    </TooltipProvider>
+  )
+}
 
-const TooltipTrigger = TooltipPrimitive.Trigger
+function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
+}
 
-const tooltipVariants = cva(
-  "z-50 overflow-hidden animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-  {
-    variants: {
-      variant: {
-        default: "bg-zinc-950 text-zinc-50",
-        secondary: "bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50",
-        destructive: "bg-rose-600 text-zinc-50 dark:bg-rose-800",
-        success: "bg-emerald-600 text-zinc-50 dark:bg-emerald-800",
-        warning: "bg-yellow-600 text-zinc-50 dark:bg-yellow-800",
-        glass: "bg-zinc-950/80 text-zinc-50 backdrop-blur",
-      },
-      size: {
-        default: "px-3 py-1.5 text-xs",
-        xs: "px-2 py-1 text-2xs",
-        sm: "px-2 py-1 text-xs",
-        lg: "px-4 py-2 text-sm",
-      },
-      roundedness: {
-        default: "rounded-sm",
-        sm: "rounded-sm",
-        lg: "rounded-lg",
-        full: "rounded-full",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-      roundedness: "default",
-    },
-  },
-)
-
-export interface TooltipContentProps
-  extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>, VariantProps<typeof tooltipVariants> {}
-
-const TooltipContent = React.forwardRef<React.ElementRef<typeof TooltipPrimitive.Content>, TooltipContentProps>(
-  ({ className, sideOffset = 4, variant, size, roundedness, ...props }, ref) => (
+function TooltipContent({
+  className,
+  sideOffset = 0,
+  children,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+  return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
-        ref={ref}
+        data-slot="tooltip-content"
         sideOffset={sideOffset}
-        className={cn(tooltipVariants({ variant, size, roundedness }), className)}
+        className={cn(
+          "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 bg-foreground text-background z-50 w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) rounded-md px-3 py-1.5 text-xs",
+          className,
+        )}
         {...props}
-      />
+      >
+        {children}
+        <TooltipPrimitive.Arrow className="bg-foreground fill-foreground z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
+      </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
-  ),
-)
-TooltipContent.displayName = TooltipPrimitive.Content.displayName
+  )
+}
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger }
