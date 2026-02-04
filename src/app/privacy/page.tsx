@@ -13,8 +13,8 @@ export default function PrivacyPage() {
         <div className="prose dark:prose-invert mb-16">
           <h1>Privacy Policy</h1>
           <p>
-            Your privacy is important to us. It is Price Lens' policy to respect your privacy regarding any information
-            we may collect from you across our website.
+            Your privacy is important to us. It is Price Lens&apos; policy to respect your privacy regarding any
+            information we may collect from you across our website.
           </p>
 
           <h2>1. Information We Collect</h2>

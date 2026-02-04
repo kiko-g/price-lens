@@ -80,7 +80,6 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
       product,
       data: buildChartData(prices, { range: selectedRange, samplingMode: "efficient" }),
     }))
-    console.info(allChartData)
 
     // Create a map of all dates to their data points
     const dateMap = new Map<string, MergedDataPoint>()

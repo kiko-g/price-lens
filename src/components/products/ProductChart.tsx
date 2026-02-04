@@ -186,7 +186,6 @@ function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode 
     const min = Math.min(...visiblePrices)
     const max = Math.max(...visiblePrices)
     const bounds = calculateChartBounds(min, max)
-    console.info(min, max, bounds)
     return bounds
   }, [chartData, activeAxis])
 

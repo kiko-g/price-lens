@@ -197,7 +197,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                         {sp.pack}
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
+                    <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
                       {sp.pack}
                     </TooltipContent>
                   </Tooltip>
@@ -272,7 +272,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <TooltipTrigger>
                 {sp.canonical_category_name ? (
                   <Badge
-                    variant="boring"
+                    variant="glass-primary"
                     size="xs"
                     roundedness="sm"
                     className="text-2xs line-clamp-1 text-left"
@@ -297,9 +297,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 )}
               </TooltipTrigger>
 
-              <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
+              <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
                 {canonicalCategoryPath ? (
-                  <div className="flex flex-col gap-0 text-sm">
+                  <div className="flex flex-col gap-0">
                     <span className="block font-medium">Hierarchy</span>
                     <span className="font-semibold">{canonicalCategoryPath}</span>
                     {categoryText && (
@@ -312,7 +312,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-0 text-sm">
+                  <div className="flex flex-col gap-0">
                     <span className="mb-0 flex items-center gap-1 font-medium">
                       Original hierarchy in {supermarketBadge}
                     </span>
@@ -482,7 +482,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                             {sp.pack}
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
+                        <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
                           {sp.pack}
                         </TooltipContent>
                       </Tooltip>

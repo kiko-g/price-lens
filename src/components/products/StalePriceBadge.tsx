@@ -48,7 +48,7 @@ export function StalePriceBadge({
             {variant === "compact" && <span>Stale</span>}
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
+        <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
           <p className="font-semibold">Price may be outdated</p>
           <p className="text-muted-foreground mt-1 text-xs">
             Last verified {lastUpdateLabel} ago ({overdueLabel} overdue).

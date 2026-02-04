@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
-import { ArrowRightIcon, ScaleIcon, TrophyIcon, CheckIcon, ZapIcon } from "lucide-react"
+import { ArrowRightIcon, ScaleIcon, TrophyIcon, CheckIcon, ZapIcon, SearchAlertIcon } from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
@@ -177,8 +177,12 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
             Compare Prices
           </h3>
         </div>
-        <div className="bg-muted/30 rounded-lg border px-4 py-6 text-center">
-          <p className="text-muted-foreground text-sm">No identical products found in other stores.</p>
+
+        <div className="bg-destructive/10 border-destructive/20 rounded-lg border px-4 py-4 text-center">
+          <p className="flex items-center justify-start gap-2 text-sm">
+            <SearchAlertIcon className="h-4 w-4" />
+            No identical products found in other stores. No price comparison insights available.
+          </p>
         </div>
       </div>
     )

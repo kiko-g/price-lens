@@ -44,7 +44,7 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
             <span>Verified {relativeTime}</span>
           </span>
         </TooltipTrigger>
-        <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
+        <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
           <p className="font-semibold">Price last verified</p>
           <p className="mt-1">
             {updatedDate.toLocaleDateString("pt-PT", {

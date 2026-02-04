@@ -148,10 +148,8 @@ async function handler(req: NextRequest) {
     const totalDuration = Date.now() - batchStartTime
     const avgDuration = Math.round(totalDuration / products.length)
 
-    console.info(
-      `🛜 [BatchWorker] Completed batch ${batchId}: ${successCount}/${products.length} success in ${totalDuration}ms (avg ${avgDuration}ms/product)`,
-      `[BatchWorker] Completed batch ${batchId}: ${successCount}/${products.length} success in ${totalDuration}ms (avg ${avgDuration}ms/product)`,
-    )
+    console.info(`🛜 [BatchWorker] Completed batch ${batchId} (${successCount}/${products.length})`)
+    console.info(`🛜 [BatchWorker] > Stats: ${totalDuration}ms (avg ${avgDuration}ms/product)`)
 
     return NextResponse.json({
       batchId,

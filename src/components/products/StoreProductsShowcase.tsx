@@ -62,12 +62,12 @@ import {
   HandIcon,
   HomeIcon,
   Loader2Icon,
-  LoaderPinwheelIcon,
   MoreHorizontalIcon,
   PackageIcon,
   RefreshCcwIcon,
   SearchIcon,
   InfoIcon,
+  CircleIcon,
 } from "lucide-react"
 
 // Debounce delay for filter changes
@@ -588,6 +588,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           <div className="flex items-center gap-2">
             <PackageIcon className="size-5" />
             <h2 className="text-lg font-bold">Products</h2>
+            {isSearching ? (
+              <Loader2Icon className="text-muted-foreground size-4 animate-spin" />
+            ) : hasPendingChanges ? (
+              <CircleIcon className="fill-destructive stroke-destructive hidden size-2 animate-pulse duration-[50] md:block" />
+            ) : null}
           </div>
 
           <DropdownMenu>
@@ -620,25 +625,17 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
         <TrackingInformationDialog>
           <button className="text-muted-foreground mb-4 text-left text-sm hover:opacity-80">
-            Procuts have a priority level, from 0 to 5. When favorited, products are assigned 5{" "}
-            <InfoIcon className="inline-block size-3" />
+            <InfoIcon className="mb-px inline-block size-3.5" /> Procuts have priority levels from 0 to 5. When
+            favorited, products are assigned 5
           </button>
         </TrackingInformationDialog>
 
         {/* Search Input (debounced, no button on desktop) */}
         <div className="relative w-full">
-          {isSearching ? (
-            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 animate-spin" />
-          ) : hasPendingChanges ? (
-            <LoaderPinwheelIcon className="text-primary absolute top-1/2 left-2.5 hidden h-4 w-4 -translate-y-1/2 animate-spin duration-[50] md:block" />
-          ) : (
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
-          )}
-
           <Input
             type="text"
             placeholder="Search products..."
-            className="pr-16 pl-8 text-base md:text-sm"
+            className="pr-16 text-base md:text-sm"
             value={queryInput}
             onChange={(e) => {
               setQueryInput(e.target.value)

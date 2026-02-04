@@ -152,8 +152,6 @@ export class AuchanScraper extends BaseProductScraper {
 
   private extractBarcode(schema: ScrapedSchemaAuchan): string | null {
     // Auchan provides GTIN in the schema
-    console.info("schema.gtin", schema.gtin)
-    console.info("schema.sku", schema.sku)
     return schema.gtin || schema.sku || null
   }
 

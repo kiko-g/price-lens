@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 
-import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon, Loader2Icon } from "lucide-react"
+import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon, CircleOffIcon, Loader2Icon } from "lucide-react"
 
 interface Props {
   id: string
@@ -44,8 +44,11 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
 
   if (error) {
     return (
-      <div className="border-destructive bg-destructive/10 rounded-lg border px-4 py-8 text-white">
-        <p>Failed to load related products. Please try again later.</p>
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-center">
+        <p className="flex items-center justify-start gap-2 text-sm">
+          <CircleOffIcon className="h-4 w-4" />
+          Could not find related products.
+        </p>
       </div>
     )
   }

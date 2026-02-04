@@ -28,7 +28,7 @@ export function TrackingInformationDialog({ children }: { children: React.ReactN
         <DialogHeader>
           <DialogTitle>About tracking products</DialogTitle>
 
-          <div className="prose space-y-2 text-left text-sm">
+          <div className="prose dark:prose-invert space-y-2 text-left text-sm">
             <p>
               Price Lens collects price information across time and finds prices of <strong>store products</strong> on
               their store origins. Given that there are so many products out there, with varying relevancy of price

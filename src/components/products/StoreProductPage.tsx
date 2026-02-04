@@ -51,14 +51,16 @@ import { IdenticalProductsCompare } from "@/components/products/IdenticalProduct
 
 import {
   HeartIcon,
-  InfoIcon,
   NavigationOffIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
   MicroscopeIcon,
   CircleIcon,
   AlertTriangleIcon,
+  InfoIcon,
+  PickaxeIcon,
 } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
 
 const DEFAULT_PARAMS = {
   range: "Max",
@@ -148,6 +150,25 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const isPriceEqualToRecommended = sp.price_recommended && sp.price && sp.price_recommended === sp.price
   const isNormalPrice = isPriceRecommendedNotSet || isPriceEqualToRecommended
 
+  const supermarketBadge = (
+    <span className="flex w-fit items-center justify-center rounded-full bg-white px-1.5 py-0.5">
+      <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
+    </span>
+  )
+
+  const categoryText = sp.category
+    ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
+    : null
+
+  const canonicalCategoryPath = (() => {
+    if (!sp.canonical_category_name) return null
+    const parts: string[] = []
+    if (sp.canonical_category_name_3) parts.push(sp.canonical_category_name_3)
+    if (sp.canonical_category_name_2) parts.push(sp.canonical_category_name_2)
+    parts.push(sp.canonical_category_name)
+    return parts.join(" > ")
+  })()
+
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
 
   return (
@@ -210,11 +231,31 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
             {/* Mobile: Category Badge */}
             <div className="flex flex-wrap items-center gap-2 md:hidden">
-              {sp.canonical_category_name || sp.category || sp.category_2 || sp.category_3 ? (
-                <Badge variant="boring" size="xs" roundedness="sm" className="w-fit max-w-96">
-                  {sp.canonical_category_name || sp.category || "No category"}
+              {sp.canonical_category_name ? (
+                <Badge
+                  variant="glass-primary"
+                  size="xs"
+                  roundedness="sm"
+                  className="w-fit max-w-96"
+                  onClick={() => {
+                    if (sp.canonical_category_name) navigator.clipboard.writeText(sp.canonical_category_name)
+                  }}
+                >
+                  {sp.canonical_category_name}
                 </Badge>
-              ) : null}
+              ) : (
+                <Badge
+                  variant="boring"
+                  size="xs"
+                  roundedness="sm"
+                  className="w-fit max-w-96"
+                  onClick={() => {
+                    if (sp.category) navigator.clipboard.writeText(sp.category)
+                  }}
+                >
+                  {sp.category}
+                </Badge>
+              )}
             </div>
 
             {/* Mobile: Brand, Priority Badges and Barcode */}
@@ -248,17 +289,57 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Badge variant="boring" size="xs" roundedness="sm" className="w-fit max-w-96">
-                        {sp.canonical_category_name || sp.category || "No category"}
-                      </Badge>
+                      {sp.canonical_category_name ? (
+                        <Badge
+                          variant="glass-primary"
+                          size="xs"
+                          roundedness="sm"
+                          className="w-fit max-w-96"
+                          onClick={() => {
+                            if (sp.canonical_category_name) navigator.clipboard.writeText(sp.canonical_category_name)
+                          }}
+                        >
+                          <InfoIcon className="h-4 w-4" />
+                          {sp.canonical_category_name}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="boring"
+                          size="xs"
+                          roundedness="sm"
+                          className="w-fit max-w-96"
+                          onClick={() => {
+                            if (sp.category) navigator.clipboard.writeText(sp.category)
+                          }}
+                        >
+                          <InfoIcon className="h-4 w-4" />
+                          {sp.category}
+                        </Badge>
+                      )}
                     </TooltipTrigger>
-                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
-                      <span className="mb-1 block text-xs font-medium">Category hierarchy in {supermarketName}:</span>
-                      <span className="text-xs font-semibold">
-                        {sp.category
-                          ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
-                          : "No category set available"}
-                      </span>
+
+                    <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
+                      {canonicalCategoryPath ? (
+                        <div className="flex flex-col gap-0">
+                          <span className="block font-medium">Hierarchy</span>
+                          <span className="font-semibold">{canonicalCategoryPath}</span>
+                          {categoryText && (
+                            <>
+                              <span className="mt-4 mb-1 flex items-center gap-1 font-medium">
+                                Original hierarchy in {supermarketBadge}
+                              </span>
+                              <span className="font-bold">{categoryText}</span>
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-0">
+                          <span className="mb-0 flex items-center gap-1 font-medium">
+                            Original hierarchy in {supermarketBadge}
+                          </span>
+                          <span className="font-bold">{categoryText || "No category available"}</span>
+                        </div>
+                      )}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -277,10 +358,12 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind}>Priority {sp.priority}</Badge>
+                      <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind}>
+                        <PickaxeIcon />
+                        <span>Priority {sp.priority}</span>
+                      </Badge>
                     </TooltipTrigger>
-                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
-                      <InfoIcon className="mr-1 inline-flex h-4 w-4" />
+                    <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
                       This product has priority {sp.priority} is checked every {refreshLabel}.
                     </TooltipContent>
                   </Tooltip>
@@ -290,17 +373,13 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                   <Tooltip>
                     <TooltipTrigger>
                       <Badge variant="outline-destructive">
-                        <NavigationOffIcon className="h-4 w-4" />
-                        {sp.priority === null ? "Not tracked" : `Priority ${sp.priority}`}
+                        <PickaxeIcon />
+                        Untracked
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent side="top" align="start" sideOffset={6} alignOffset={-6}>
-                      <p>
-                        <AlertTriangleIcon className="mr-1 inline-flex h-4 w-4" />
-                        This product has{" "}
-                        {sp.priority === null ? "no tracking priority" : `low tracking priority (${sp.priority}/5)`}.
-                      </p>
-                      <p className="mt-2 font-bold">Add to your favorites to increase tracking priority.</p>
+                    <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
+                      <p className="font-semibold">Untracked (priority: {sp.priority})</p>
+                      This product is not being tracked. Add it to your favorites to increase tracking priority.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -472,30 +551,45 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           </div>
 
           {/* Price Chart Section - uses compound components for flexible layout */}
-          <ProductChart.Root
-            sp={sp}
-            defaultRange={rangeFromUrl}
-            onRangeChange={handleRangeChange}
-            samplingMode="efficient"
-            className="flex-1"
-          >
-            <ProductChart.Error />
+          {sp.priority !== null && sp.priority > 0 ? (
+            <ProductChart.Root
+              sp={sp}
+              defaultRange={rangeFromUrl}
+              onRangeChange={handleRangeChange}
+              samplingMode="efficient"
+              className="flex-1"
+            >
+              <ProductChart.Error />
 
-            {/* Mobile: stacked | lg+: two columns */}
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
-              {/* Left column: Price toggles + Price frequency table */}
-              <div className="order-2 -mt-8 flex max-w-2xl flex-col gap-3 xl:order-1 xl:mt-0">
-                <ProductChart.PricesVariation />
-                <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
-              </div>
+              {/* Mobile: stacked | lg+: two columns */}
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+                {/* Left column: Price toggles + Price frequency table */}
+                <div className="order-2 -mt-8 flex max-w-2xl flex-col gap-3 xl:order-1 xl:mt-0">
+                  <ProductChart.PricesVariation />
+                  <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
+                </div>
 
-              {/* Right column: Range selector + Chart */}
-              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-1 flex h-fit max-w-xl flex-col gap-2 xl:order-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
-                <ProductChart.RangeSelector className="xl:justify-start" />
-                <ProductChart.Graph />
+                {/* Right column: Range selector + Chart */}
+                <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-1 flex h-fit max-w-xl flex-col gap-2 xl:order-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
+                  <ProductChart.RangeSelector className="xl:justify-start" />
+                  <ProductChart.Graph />
+                </div>
               </div>
+            </ProductChart.Root>
+          ) : (
+            <div className="bg-muted/50 flex w-full max-w-xl flex-col gap-2 rounded-lg border p-4">
+              <Badge className="w-fit" variant="secondary">
+                <InfoIcon className="h-4 w-4" />
+                No price history available
+              </Badge>
+
+              <p className="text-sm">
+                This product is not being tracked actively. It was last checked{" "}
+                <strong>{formatDistanceToNow(sp.updated_at)} ago.</strong> Add this product to your favorites to enable
+                regular price tracking.
+              </p>
             </div>
-          </ProductChart.Root>
+          )}
         </section>
       </article>
 

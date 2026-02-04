@@ -239,7 +239,7 @@ function SiteNavigationDropup() {
           <ChevronUp className="ml-auto size-4" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]" align="start" sideOffset={4}>
+      <DropdownMenuContent side="right" className="w-[--radix-popper-anchor-width]" align="start" sideOffset={4}>
         <DropdownMenuLabel>Navigate to</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {SITE_NAV_ITEMS.map((item) => (
@@ -313,7 +313,7 @@ function UserDropup() {
           <MoreHorizontalIcon className="ml-auto size-4" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]" align="end" sideOffset={4}>
+      <DropdownMenuContent side="right" className="w-[--radix-popper-anchor-width]" align="end" sideOffset={4}>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm leading-none font-medium">{user.user_metadata.full_name}</p>
