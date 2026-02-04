@@ -5,6 +5,7 @@ import { type StoreProduct } from "@/types"
 
 import { Button } from "@/components/ui/button"
 import { PriceChange } from "@/components/products/PriceChange"
+import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
 import { ChevronRightIcon, ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
@@ -19,7 +20,8 @@ type Props = {
     storeProduct: StoreProduct
   }
   options: {
-    hideExtraInfo: boolean
+    hideExtraInfo?: boolean
+    showFreshnessInfo?: boolean
   }
   state: {
     activeAxis: string[]
@@ -34,6 +36,7 @@ type Props = {
 
 const defaultOptions: Props["options"] = {
   hideExtraInfo: true,
+  showFreshnessInfo: true,
 }
 
 export function PricesVariationCard({ className, data, actions, state, options = defaultOptions }: Props) {
@@ -58,6 +61,10 @@ export function PricesVariationCard({ className, data, actions, state, options =
 
   return (
     <div className="flex flex-1 flex-col">
+      {options.showFreshnessInfo && (
+        <PriceFreshnessInfo updatedAt={storeProduct.updated_at} priority={storeProduct.priority} className="mb-1" />
+      )}
+
       <div className={cn("flex flex-1 flex-col items-center gap-1 py-0.5", className)}>
         <PriceAxisButton
           isActive={isPriceActive}

@@ -32,12 +32,13 @@ import { Barcode } from "@/components/ui/combo/barcode"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
 import { formatDistanceToNow } from "date-fns"
-import { BarChart2Icon, BinocularsIcon, ImageIcon, InfoIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
+import { BarChart2Icon, BinocularsIcon, ImageIcon, InfoIcon, WifiOffIcon } from "lucide-react"
 
 const FALLBACK_ACTIVE_DOT_RADIUS = 5
 const CHART_TRANSITION_DURATION = 300
@@ -286,7 +287,7 @@ function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode 
 
   return (
     <ProductChartContext.Provider value={contextValue}>
-      <div className={cn("flex w-full flex-col gap-4", className)}>{children}</div>
+      <div className={cn("flex w-full flex-col", className)}>{children}</div>
     </ProductChartContext.Provider>
   )
 }
@@ -299,13 +300,36 @@ type PricesVariationProps = {
   className?: string
   showImage?: boolean
   showBarcode?: boolean
+  showFreshnessInfo?: boolean
 }
 
-function PricesVariation({ className, showImage = false, showBarcode = false }: PricesVariationProps) {
-  const { sp, activeAxis, variations, handleAxisChange } = useProductChartContext()
+function PricesVariation({
+  className,
+  showImage = false,
+  showBarcode = false,
+  showFreshnessInfo = true,
+}: PricesVariationProps) {
+  const { sp, activeAxis, variations, handleAxisChange, isLoading } = useProductChartContext()
+
+  if (isLoading) {
+    return (
+      <div className={cn("mb-2 flex flex-col gap-2", className)}>
+        <Skeleton className="h-4 w-40" />
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div className="flex flex-wrap items-center gap-2" key={i}>
+              <Skeleton className="h-4 w-50" />
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <header className={cn("mb-2 flex items-start justify-between gap-3", className)}>
+    <div className={cn("mb-2 flex items-start justify-between gap-3", className)}>
       <PricesVariationCard
         state={{ activeAxis }}
         data={{
@@ -317,6 +341,7 @@ function PricesVariation({ className, showImage = false, showBarcode = false }: 
         }}
         options={{
           hideExtraInfo: !showImage,
+          showFreshnessInfo: showFreshnessInfo,
         }}
         actions={{
           onPriceChange: () => handleAxisChange("price"),
@@ -333,7 +358,7 @@ function PricesVariation({ className, showImage = false, showBarcode = false }: 
           {showBarcode && <Barcode value={sp.barcode} height={10} width={1} />}
         </div>
       )}
-    </header>
+    </div>
   )
 }
 
@@ -405,6 +430,16 @@ type RangeSelectorProps = {
 function RangeSelector({ className }: RangeSelectorProps) {
   const { selectedRange, daysBetweenDates, isLoading, handleRangeChange } = useProductChartContext()
 
+  if (isLoading) {
+    return (
+      <div className={cn("flex flex-wrap items-center gap-2", className)}>
+        {RANGES.map((range) => (
+          <Skeleton key={range} className="h-8 w-10" />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className={cn("flex flex-wrap items-center justify-start gap-2", className)}>
       {RANGES.map((range) => (
@@ -418,7 +453,6 @@ function RangeSelector({ className }: RangeSelectorProps) {
           {range}
         </Button>
       ))}
-      {isLoading && <Loader2Icon className="ml-4 h-5 w-5 animate-spin" />}
     </div>
   )
 }
@@ -503,7 +537,7 @@ function Graph({ className }: GraphProps) {
     <div ref={chartRef} className={cn("touch-pan-y", className)}>
       <ChartContainer
         config={chartConfig}
-        className={cn(isLoading ? "" : "animate-fade-in")}
+        className="animate-fade-in"
         style={{
           opacity: isTransitioning ? 0 : 1,
           transition: `opacity ${CHART_TRANSITION_DURATION}ms ease-in-out`,
@@ -615,9 +649,22 @@ type PriceTableProps = {
 function PriceTable({ className, scrollable = true }: PriceTableProps) {
   const { sp, pricePoints, mostCommon, isLoading } = useProductChartContext()
 
-  if (isLoading || !pricePoints || pricePoints.length === 0) {
-    return null
+  if (isLoading) {
+    return (
+      <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-7 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-[80%]" />
+        </div>
+      </div>
+    )
   }
+
+  if (!pricePoints || pricePoints.length === 0) return null
 
   return (
     <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
@@ -794,7 +841,8 @@ type ChartContentProps = {
 function ChartContent({ children }: ChartContentProps) {
   const { isLoading, error, chartData } = useProductChartContext()
 
-  if (isLoading || error || chartData.length === 0) return null
+  if (error) return null
+  if (!isLoading && chartData.length === 0) return null
 
   return <>{children}</>
 }
@@ -817,6 +865,8 @@ function FallbackDetails({ className }: FallbackDetailsProps) {
   const isNormalPrice =
     (!sp.price_recommended && sp.price) || (sp.price_recommended && sp.price && sp.price_recommended === sp.price)
   const isPriceNotSet = !sp.price_recommended && !sp.price
+
+  if (isLoading) return null
 
   return (
     <div className={cn("flex w-full max-w-xl flex-col gap-2 rounded-lg", className)}>

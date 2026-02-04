@@ -34,7 +34,6 @@ import { ProductChart } from "@/components/products/ProductChart"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
-import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 
 import {
   ArrowUpRightIcon,
@@ -507,11 +506,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 </div>
               </div>
 
-              <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} className="mb-1" />
-
               <Suspense fallback={<div>Loading...</div>}>
                 <ProductChart.Root sp={sp} samplingMode="efficient">
-                  <ProductChart.FallbackDetails />
+                  <ProductChart.FallbackDetails className="mb-4" />
                   <ProductChart.NotTracked />
                   {sp.priority != null && sp.priority > 0 && (
                     <>
