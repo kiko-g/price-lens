@@ -256,7 +256,7 @@ describe("useStoreProductCard", () => {
   })
 
   describe("priority mutations", () => {
-    it("should show optimistic priority immediately", async () => {
+    it("should trigger priority mutation and show pending state", async () => {
       const sp = createMockStoreProduct({ priority: null })
 
       mockAxiosPut.mockImplementation(() => new Promise(() => {}))
@@ -271,21 +271,27 @@ describe("useStoreProductCard", () => {
         result.current.setPriority(5)
       })
 
-      // Wait for mutation to start and show optimistic state
       await waitFor(() => {
         expect(result.current.isPriorityPending).toBe(true)
       })
-      expect(result.current.priority).toBe(5)
+      expect(mockAxiosPut).toHaveBeenCalledWith(
+        "/api/products/store/1/priority",
+        expect.objectContaining({ priority: 5, source: "manual" }),
+      )
     })
 
-    it("should maintain priority after successful mutation", async () => {
+    it("should maintain priority after successful mutation when prop updates", async () => {
       const sp = createMockStoreProduct({ priority: null })
 
       mockAxiosPut.mockResolvedValueOnce({ status: 200, data: {} })
 
-      const { result } = renderHook(() => useStoreProductCard(sp), {
-        wrapper: createWrapper(),
-      })
+      const { result, rerender } = renderHook(
+        ({ storeProduct }) => useStoreProductCard(storeProduct),
+        {
+          initialProps: { storeProduct: sp },
+          wrapper: createWrapper(),
+        },
+      )
 
       await act(async () => {
         result.current.setPriority(3)
@@ -295,10 +301,12 @@ describe("useStoreProductCard", () => {
         expect(result.current.isPriorityPending).toBe(false)
       })
 
-      expect(result.current.priority).toBe(3)
       expect(toast.success).toHaveBeenCalledWith("Priority updated", {
-        description: "Priority set to 3",
+        description: "Product priority set to 3",
       })
+
+      rerender({ storeProduct: createMockStoreProduct({ priority: 3 }) })
+      expect(result.current.priority).toBe(3)
     })
 
     it("should handle clearing priority", async () => {
@@ -306,9 +314,13 @@ describe("useStoreProductCard", () => {
 
       mockAxiosPut.mockResolvedValueOnce({ status: 200, data: {} })
 
-      const { result } = renderHook(() => useStoreProductCard(sp), {
-        wrapper: createWrapper(),
-      })
+      const { result, rerender } = renderHook(
+        ({ storeProduct }) => useStoreProductCard(storeProduct),
+        {
+          initialProps: { storeProduct: sp },
+          wrapper: createWrapper(),
+        },
+      )
 
       await act(async () => {
         result.current.clearPriority()
@@ -318,10 +330,12 @@ describe("useStoreProductCard", () => {
         expect(result.current.isPriorityPending).toBe(false)
       })
 
-      expect(result.current.priority).toBe(null)
       expect(toast.success).toHaveBeenCalledWith("Priority updated", {
-        description: "Priority set to none",
+        description: "Product priority set to none",
       })
+
+      rerender({ storeProduct: createMockStoreProduct({ priority: null }) })
+      expect(result.current.priority).toBe(null)
     })
   })
 

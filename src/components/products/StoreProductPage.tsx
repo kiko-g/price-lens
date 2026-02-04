@@ -3,7 +3,6 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { toast } from "sonner"
 import { useSearchParams } from "next/navigation"
 
 import { cn } from "@/lib/utils"
@@ -15,7 +14,8 @@ import { RANGES, DateRange } from "@/types/business"
 import { useUser } from "@/hooks/useUser"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
-import { useUpdateStoreProduct, useUpdateStoreProductPriority } from "@/hooks/useProducts"
+import { useSetProductPriority } from "@/hooks/useSetProductPriority"
+import { useUpdateStoreProduct } from "@/hooks/useProducts"
 
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -128,7 +128,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const updateParams = useUpdateSearchParams()
   const { profile } = useUser()
   const updateStoreProduct = useUpdateStoreProduct()
-  const updatePriority = useUpdateStoreProductPriority()
+  const { promptAndSetPriority, clearPriority, isPending: isPriorityPending } = useSetProductPriority(sp.id)
 
   const parseRangeParam = (value: string | null): DateRange => {
     if (value && RANGES.includes(value as DateRange)) return value as DateRange
@@ -385,17 +385,14 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </TooltipProvider>
               )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                roundedness="2xl"
-                asChild
-                className="hidden md:inline-flex dark:bg-white dark:hover:bg-white/90"
+              <Link
+                href={sp.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="hidden rounded-full border-transparent px-2 py-[3px] md:inline-flex dark:bg-white dark:hover:bg-white/90"
               >
-                <Link href={sp.url} target="_blank" rel="noreferrer noopener">
-                  <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
-                </Link>
-              </Button>
+                <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
+              </Link>
             </div>
 
             {/* Product Name and Pack size */}
@@ -497,49 +494,14 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                     </DropdownMenuLabel>
 
                     <DropdownMenuItem asChild>
-                      <Button
-                        variant="dropdown-item"
-                        onClick={async () => {
-                          if (!sp.id) {
-                            toast.error("Invalid product", {
-                              description: "Product ID is missing",
-                            })
-                            return
-                          }
-
-                          const priorityStr = window.prompt("Enter priority (0-5):", "5")
-                          const priorityNum = priorityStr ? parseInt(priorityStr) : null
-                          if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
-                            toast.error("Invalid priority", {
-                              description: "Priority must be a number between 0 and 5",
-                            })
-                            return
-                          }
-
-                          updatePriority.mutate({ storeProductId: sp.id, priority: priorityNum })
-                        }}
-                        disabled={updatePriority.isPending}
-                      >
+                      <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
                         Set priority
                         <MicroscopeIcon />
                       </Button>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
-                      <Button
-                        variant="dropdown-item"
-                        onClick={async () => {
-                          if (!sp.id) {
-                            toast.error("Invalid product", {
-                              description: "Product ID is missing",
-                            })
-                            return
-                          }
-
-                          updatePriority.mutate({ storeProductId: sp.id, priority: null })
-                        }}
-                        disabled={updatePriority.isPending}
-                      >
+                      <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
                         Clear priority
                         <CircleIcon />
                       </Button>

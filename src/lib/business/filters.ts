@@ -11,6 +11,13 @@ import {
 
 export const SORT_OPTIONS_GROUPS = [
   {
+    label: "Last Updated",
+    options: [
+      { label: "Recently Updated", value: "updated-newest", icon: ClockArrowDown },
+      { label: "Least Updated", value: "updated-oldest", icon: ClockArrowUp },
+    ],
+  },
+  {
     label: "Name",
     options: [
       { label: "Name: A to Z", value: "a-z", icon: ArrowDownAZ },
@@ -22,13 +29,6 @@ export const SORT_OPTIONS_GROUPS = [
     options: [
       { label: "Price: High to Low", value: "price-high-low", icon: ArrowUpWideNarrowIcon },
       { label: "Price: Low to High", value: "price-low-high", icon: ArrowDownWideNarrowIcon },
-    ],
-  },
-  {
-    label: "Last Updated",
-    options: [
-      { label: "Recently Updated", value: "updated-newest", icon: ClockArrowDown },
-      { label: "Least Updated", value: "updated-oldest", icon: ClockArrowUp },
     ],
   },
   {

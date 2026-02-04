@@ -70,8 +70,8 @@ import {
   CircleIcon,
 } from "lucide-react"
 
-// Debounce delay for filter changes
-const FILTER_DEBOUNCE_MS = 800
+const FILTER_DEBOUNCE_MS = 800 // Debounce delay for filter changes
+const USE_SORT_GROUPS = false
 
 /**
  * Single source of truth for URL filter parameters.
@@ -80,7 +80,7 @@ const FILTER_DEBOUNCE_MS = 800
  */
 const FILTER_CONFIG = {
   page: { key: "page", default: 1 },
-  sortBy: { key: "sort", default: "a-z" },
+  sortBy: { key: "sort", default: "updated-newest" },
   origin: { key: "origin", default: "" },
   searchType: { key: "t", default: "any" },
   query: { key: "q", default: "" },
@@ -670,11 +670,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               <p className="text-muted-foreground text-xs">
                 <strong className="text-foreground">{totalCount}</strong> products found
                 {urlState.query && ` matching "${urlState.query}"`}
-                {showOverlay && (
-                  <span className="text-muted-foreground ml-2 inline-flex items-center gap-1">
-                    <Loader2Icon className="h-3 w-3 animate-spin" />
-                  </span>
-                )}
               </p>
             </div>
           )}
@@ -698,10 +693,21 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                     <SelectValue className="flex items-center gap-2 text-sm" />
                   </SelectTrigger>
                   <SelectContent>
-                    {SORT_OPTIONS_GROUPS.map((group) => (
-                      <SelectGroup key={group.label}>
-                        <SelectLabel>{group.label}</SelectLabel>
-                        {group.options.map((option) => (
+                    {USE_SORT_GROUPS
+                      ? SORT_OPTIONS_GROUPS.map((group) => (
+                          <SelectGroup key={group.label}>
+                            <SelectLabel>{group.label}</SelectLabel>
+                            {group.options.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                <div className="flex items-center gap-2">
+                                  <option.icon className="h-4 w-4" />
+                                  <span>{option.label}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))
+                      : SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             <div className="flex items-center gap-2">
                               <option.icon className="h-4 w-4" />
@@ -709,8 +715,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                             </div>
                           </SelectItem>
                         ))}
-                      </SelectGroup>
-                    ))}
                   </SelectContent>
                 </Select>
               </AccordionContent>
@@ -1697,8 +1701,8 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 text-center sm:py-16">
       {/* Icon with gradient ring */}
       <div className="relative mb-6">
-        <div className="from-primary/20 via-primary/5 absolute -inset-4 rounded-full bg-linear-to-b to-transparent blur-xl" />
-        <div className="bg-muted/50 relative flex h-20 w-20 items-center justify-center rounded-full ring-1 ring-white/10">
+        <div className="from-primary/50 via-primary/30 to-primary/10 absolute -inset-4 rounded-full bg-linear-to-b blur-xl" />
+        <div className="bg-muted/50 ring-foreground/10 relative flex h-20 w-20 items-center justify-center rounded-full ring-1">
           <SearchIcon className="text-muted-foreground h-9 w-9" />
         </div>
       </div>
@@ -1726,7 +1730,7 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
           Clear filters
         </Button>
         <Button
-          variant="ghost"
+          variant="active"
           className="text-muted-foreground hover:text-foreground h-10 w-full px-5 sm:w-auto"
           onClick={() => router.push("/")}
         >

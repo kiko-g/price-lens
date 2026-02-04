@@ -190,8 +190,15 @@ export function useStoreProductCategories() {
   })
 }
 
-async function updateStoreProductPriority(storeProductId: number, priority: number | null) {
-  const response = await axios.put(`/api/products/store/${storeProductId}/priority`, { priority })
+async function updateStoreProductPriority(
+  storeProductId: number,
+  priority: number | null,
+  source: "manual" | "ai" = "manual",
+) {
+  const response = await axios.put(`/api/products/store/${storeProductId}/priority`, {
+    priority,
+    source,
+  })
   if (response.status !== 200) {
     throw new Error(response.data?.error || "Failed to update priority")
   }
@@ -201,8 +208,15 @@ async function updateStoreProductPriority(storeProductId: number, priority: numb
 export function useUpdateStoreProductPriority() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ storeProductId, priority }: { storeProductId: number; priority: number | null }) =>
-      updateStoreProductPriority(storeProductId, priority),
+    mutationFn: ({
+      storeProductId,
+      priority,
+      source = "manual",
+    }: {
+      storeProductId: number
+      priority: number | null
+      source?: "manual" | "ai"
+    }) => updateStoreProductPriority(storeProductId, priority, source),
     onSuccess: (data, variables) => {
       const { storeProductId, priority } = variables
       toast.success("Priority updated", {

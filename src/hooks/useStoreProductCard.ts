@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import axios, { AxiosError } from "axios"
 import type { StoreProduct } from "@/types"
 import { useUser } from "@/hooks/useUser"
+import { useSetProductPriority } from "@/hooks/useSetProductPriority"
 
 export class ProductUnavailableError extends Error {
   constructor(message: string = "Product is no longer available") {
@@ -33,12 +34,6 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   }
 }
 
-async function updateStoreProductPriority(storeProductId: number, priority: number | null) {
-  const response = await axios.put(`/api/products/store/${storeProductId}/priority`, { priority })
-  if (response.status !== 200) throw new Error(response.data?.error || "Failed to update priority")
-  return response.data
-}
-
 async function addFavorite(storeProductId: number) {
   const response = await axios.post("/api/favorites", { store_product_id: storeProductId })
   if (response.status !== 200 && response.status !== 201) throw new Error("Failed to add to favorites")
@@ -59,14 +54,14 @@ export function useStoreProductCard(sp: StoreProduct) {
   const queryClient = useQueryClient()
   const { user } = useUser()
 
-  // Track last successful state to prevent flicker between mutation complete and query refetch
   const lastSuccessfulFavorite = useRef<boolean | null>(null)
-  const lastSuccessfulPriority = useRef<number | null | undefined>(undefined)
+  const { promptAndSetPriority, clearPriority, setPriority, isPending: isPriorityPending } =
+    useSetProductPriority(sp.id)
 
   // Scrape and update mutation
   const updateMutation = useMutation({
     mutationFn: () => scrapeAndUpdateStoreProduct(sp),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Product updated from source")
       invalidateProductQueries(queryClient, sp.id)
     },
@@ -81,23 +76,6 @@ export function useStoreProductCard(sp: StoreProduct) {
         })
       }
       invalidateProductQueries(queryClient, sp.id)
-    },
-  })
-
-  // Priority mutation with optimistic update
-  const priorityMutation = useMutation({
-    mutationFn: (priority: number | null) => updateStoreProductPriority(sp.id!, priority),
-    onSuccess: (_, priority) => {
-      lastSuccessfulPriority.current = priority
-      toast.success("Priority updated", {
-        description: `Priority set to ${priority === null ? "none" : priority}`,
-      })
-      invalidateProductQueries(queryClient, sp.id)
-    },
-    onError: (error) => {
-      toast.error("Failed to update priority", {
-        description: error instanceof Error ? error.message : "Unknown error",
-      })
     },
   })
 
@@ -137,25 +115,11 @@ export function useStoreProductCard(sp: StoreProduct) {
     },
   })
 
-  // Reset refs when prop catches up (query refetched with new data)
   if (lastSuccessfulFavorite.current !== null && sp.is_favorited === lastSuccessfulFavorite.current) {
     lastSuccessfulFavorite.current = null
   }
-  if (lastSuccessfulPriority.current !== undefined && sp.priority === lastSuccessfulPriority.current) {
-    lastSuccessfulPriority.current = undefined
-  }
 
-  // Compute effective values with optimistic updates
-  // Priority order: pending mutation > last successful > prop
-  const priority = useMemo(() => {
-    if (priorityMutation.isPending && priorityMutation.variables !== undefined) {
-      return priorityMutation.variables
-    }
-    if (lastSuccessfulPriority.current !== undefined) {
-      return lastSuccessfulPriority.current
-    }
-    return sp.priority
-  }, [priorityMutation.isPending, priorityMutation.variables, sp.priority])
+  const priority = sp.priority
 
   const isFavorited = useMemo(() => {
     if (addFavoriteMutation.isPending) return true
@@ -178,41 +142,6 @@ export function useStoreProductCard(sp: StoreProduct) {
     }
   }, [user, sp.id, isFavorited, addFavoriteMutation, removeFavoriteMutation])
 
-  const setPriority = useCallback(
-    (newPriority: number | null) => {
-      if (!sp.id) {
-        toast.error("Invalid product", { description: "Product ID is missing" })
-        return
-      }
-      priorityMutation.mutate(newPriority)
-    },
-    [sp.id, priorityMutation],
-  )
-
-  const promptAndSetPriority = useCallback(() => {
-    if (!sp.id) {
-      toast.error("Invalid product", { description: "Product ID is missing" })
-      return
-    }
-
-    const priorityStr = window.prompt("Enter priority (0-5):", "5")
-    const priorityNum = priorityStr ? parseInt(priorityStr) : null
-    if (priorityNum === null || isNaN(priorityNum) || priorityNum < 0 || priorityNum > 5) {
-      toast.error("Invalid priority", { description: "Priority must be a number between 0 and 5" })
-      return
-    }
-
-    priorityMutation.mutate(priorityNum)
-  }, [sp.id, priorityMutation])
-
-  const clearPriority = useCallback(() => {
-    if (!sp.id) {
-      toast.error("Invalid product", { description: "Product ID is missing" })
-      return
-    }
-    priorityMutation.mutate(null)
-  }, [sp.id, priorityMutation])
-
   const updateFromSource = useCallback(() => {
     updateMutation.mutate()
   }, [updateMutation])
@@ -233,7 +162,7 @@ export function useStoreProductCard(sp: StoreProduct) {
 
     // Loading states
     isUpdating: updateMutation.isPending,
-    isPriorityPending: priorityMutation.isPending,
+    isPriorityPending,
     isFavoritePending: addFavoriteMutation.isPending || removeFavoriteMutation.isPending,
 
     // Error states

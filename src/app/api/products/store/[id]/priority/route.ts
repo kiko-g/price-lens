@@ -4,7 +4,7 @@ import { storeProductQueries } from "@/lib/queries/products"
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const { priority } = await request.json()
+    const { priority, source = "manual" } = await request.json()
 
     const storeProductId = parseInt(id, 10)
     if (isNaN(storeProductId)) {
@@ -17,8 +17,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
+    const validSource = source === "ai" || source === "manual" ? source : "manual"
     const priorityValue = priority === undefined ? null : priority
-    const result = await storeProductQueries.updatePriority(storeProductId, priorityValue)
+    const result = await storeProductQueries.updatePriority(storeProductId, priorityValue, {
+      source: validSource,
+    })
 
     if (result.error) {
       console.error("Error updating priority:", result.error)
