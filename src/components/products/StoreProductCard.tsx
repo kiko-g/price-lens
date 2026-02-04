@@ -510,7 +510,22 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} className="mb-1" />
 
               <Suspense fallback={<div>Loading...</div>}>
-                <ProductChart sp={sp} samplingMode="efficient" />
+                <ProductChart.Root sp={sp} samplingMode="efficient">
+                  <ProductChart.FallbackDetails />
+                  <ProductChart.NotTracked />
+                  {sp.priority != null && sp.priority > 0 && (
+                    <>
+                      <ProductChart.NoData />
+                      <ProductChart.Error />
+                      <ProductChart.ChartContent>
+                        <ProductChart.PricesVariation showImage={false} showBarcode={false} />
+                        <ProductChart.RangeSelector className="mt-2 mb-2 md:mt-0 md:mb-4" />
+                        <ProductChart.Graph />
+                        <ProductChart.PriceTable />
+                      </ProductChart.ChartContent>
+                    </>
+                  )}
+                </ProductChart.Root>
               </Suspense>
 
               <Accordion

@@ -23,7 +23,7 @@ import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
 
 import { cn } from "@/lib/utils"
 import { buildChartData, chartConfig, calculateChartBounds, type ChartSamplingMode } from "@/lib/business/chart"
-import { generateProductPath } from "@/lib/business/product"
+import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 import { imagePlaceholder } from "@/lib/business/data"
 
 import { Badge } from "@/components/ui/badge"
@@ -33,9 +33,11 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
-import { BinocularsIcon, ImageIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
+import { BarChart2Icon, BinocularsIcon, ImageIcon, InfoIcon, Loader2Icon, WifiOffIcon } from "lucide-react"
 
 const FALLBACK_ACTIVE_DOT_RADIUS = 5
 const CHART_TRANSITION_DURATION = 300
@@ -159,7 +161,8 @@ function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode 
   const { chartRef, isActive: isTooltipActive } = useChartTouch()
 
   const id = sp.id?.toString() || ""
-  const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: true })
+  const isTracked = sp.priority != null && sp.priority > 0
+  const { data, isLoading, error } = usePricesWithAnalytics(id, { enabled: isTracked })
 
   const prices = useMemo(() => data?.prices || [], [data?.prices])
   const analytics = data?.analytics || null
@@ -283,7 +286,7 @@ function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode 
 
   return (
     <ProductChartContext.Provider value={contextValue}>
-      <div className={cn("flex w-full flex-col", className)}>{children}</div>
+      <div className={cn("flex w-full flex-col gap-4", className)}>{children}</div>
     </ProductChartContext.Provider>
   )
 }
@@ -706,6 +709,60 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
 }
 
 // ============================================================================
+// NotTracked Component
+// ============================================================================
+
+type NotTrackedDisplayProps = {
+  className?: string
+}
+
+const emptyStateContainerClasses = "bg-muted/50 flex w-full max-w-xl flex-col gap-2 rounded-lg border p-4"
+
+function NotTrackedDisplay({ className }: NotTrackedDisplayProps) {
+  const { sp } = useProductChartContext()
+
+  if (sp.priority != null && sp.priority > 0) return null
+
+  return (
+    <div className={cn(emptyStateContainerClasses, className)}>
+      <Badge className="w-fit" variant="secondary">
+        <InfoIcon className="h-4 w-4" />
+        No price history available
+      </Badge>
+      <p className="text-sm">
+        This product is not being tracked actively. It was last checked{" "}
+        <strong>{formatDistanceToNow(sp.updated_at)} ago.</strong> Add this product to your favorites to enable regular
+        price tracking.
+      </p>
+    </div>
+  )
+}
+
+// ============================================================================
+// NoData Component
+// ============================================================================
+
+type NoDataDisplayProps = {
+  className?: string
+}
+
+function NoDataDisplay({ className }: NoDataDisplayProps) {
+  const { isLoading, error, chartData } = useProductChartContext()
+
+  if (isLoading || error || chartData.length > 0) return null
+
+  return (
+    <div className={cn(emptyStateContainerClasses, className)}>
+      <Badge className="w-fit" variant="secondary">
+        <BarChart2Icon className="h-4 w-4" />
+        No price history yet
+      </Badge>
+      <p className="text-sm">Data will appear as we track this product.</p>
+    </div>
+  )
+}
+
+// ============================================================================
 // Error Component
 // ============================================================================
 
@@ -722,6 +779,71 @@ function ErrorDisplay({ className }: ErrorDisplayProps) {
     <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
       <p className="text-destructive">Failed to load price data</p>
       <p className="text-muted-foreground mt-1 text-sm">Please try refreshing the page</p>
+    </div>
+  )
+}
+
+// ============================================================================
+// ChartContent Component
+// ============================================================================
+
+type ChartContentProps = {
+  children: ReactNode
+}
+
+function ChartContent({ children }: ChartContentProps) {
+  const { isLoading, error, chartData } = useProductChartContext()
+
+  if (isLoading || error || chartData.length === 0) return null
+
+  return <>{children}</>
+}
+
+// ============================================================================
+// FallbackDetails Component
+// ============================================================================
+
+type FallbackDetailsProps = {
+  className?: string
+}
+
+function FallbackDetails({ className }: FallbackDetailsProps) {
+  const { sp, isLoading, error, chartData } = useProductChartContext()
+  const isTracked = sp.priority != null && sp.priority > 0
+  const showChart = isTracked && !isLoading && !error && chartData.length > 0
+  if (showChart) return null
+
+  const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
+  const isNormalPrice =
+    (!sp.price_recommended && sp.price) || (sp.price_recommended && sp.price && sp.price_recommended === sp.price)
+  const isPriceNotSet = !sp.price_recommended && !sp.price
+
+  return (
+    <div className={cn("flex w-full max-w-xl flex-col gap-2 rounded-lg", className)}>
+      <div className="flex flex-wrap items-center gap-2">
+        {hasDiscount ? (
+          <>
+            <span className="text-lg font-bold text-green-700 dark:text-green-600">{sp.price}€</span>
+            <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+          </>
+        ) : null}
+        {isNormalPrice ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span> : null}
+        {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {sp.price_per_major_unit && sp.major_unit ? (
+          <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
+            {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
+          </Badge>
+        ) : null}
+        {sp.discount ? (
+          <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
+            -{discountValueToPercentage(sp.discount)}
+          </Badge>
+        ) : null}
+        <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
+      </div>
     </div>
   )
 }
@@ -796,8 +918,22 @@ export const ProductChart = Object.assign(ProductChartLegacy, {
   RangeSelector,
   Graph,
   PriceTable,
+  ChartContent,
+  FallbackDetails,
+  NotTracked: NotTrackedDisplay,
+  NoData: NoDataDisplay,
   Error: ErrorDisplay,
 })
 
 // Also export types for external use
-export type { RootProps, PricesVariationProps, RangeSelectorProps, GraphProps, PriceTableProps }
+export type {
+  RootProps,
+  PricesVariationProps,
+  RangeSelectorProps,
+  GraphProps,
+  PriceTableProps,
+  ChartContentProps,
+  FallbackDetailsProps,
+  NotTrackedDisplayProps,
+  NoDataDisplayProps,
+}

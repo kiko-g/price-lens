@@ -60,7 +60,6 @@ import {
   InfoIcon,
   PickaxeIcon,
 } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
 
 const DEFAULT_PARAMS = {
   range: "Max",
@@ -513,45 +512,38 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           </div>
 
           {/* Price Chart Section - uses compound components for flexible layout */}
-          {sp.priority !== null && sp.priority > 0 ? (
-            <ProductChart.Root
-              sp={sp}
-              defaultRange={rangeFromUrl}
-              onRangeChange={handleRangeChange}
-              samplingMode="efficient"
-              className="flex-1"
-            >
-              <ProductChart.Error />
+          <ProductChart.Root
+            sp={sp}
+            defaultRange={rangeFromUrl}
+            onRangeChange={handleRangeChange}
+            samplingMode="efficient"
+            className="flex-1"
+          >
+            <ProductChart.NotTracked />
+            {sp.priority != null && sp.priority > 0 && (
+              <>
+                <ProductChart.NoData />
+                <ProductChart.Error />
 
-              {/* Mobile: stacked | lg+: two columns */}
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
-                {/* Left column: Price toggles + Price frequency table */}
-                <div className="order-2 -mt-8 flex max-w-2xl flex-col gap-3 xl:order-1 xl:mt-0">
-                  <ProductChart.PricesVariation />
-                  <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
-                </div>
+                <ProductChart.ChartContent>
+                  {/* Mobile: stacked | lg+: two columns */}
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+                    {/* Left column: Price toggles + Price frequency table */}
+                    <div className="order-2 -mt-8 flex max-w-2xl flex-col gap-3 xl:order-1 xl:mt-0">
+                      <ProductChart.PricesVariation />
+                      <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
+                    </div>
 
-                {/* Right column: Range selector + Chart */}
-                <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-1 flex h-fit max-w-xl flex-col gap-2 xl:order-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
-                  <ProductChart.RangeSelector className="xl:justify-start" />
-                  <ProductChart.Graph />
-                </div>
-              </div>
-            </ProductChart.Root>
-          ) : (
-            <div className="bg-muted/50 flex w-full max-w-xl flex-col gap-2 rounded-lg border p-4">
-              <Badge className="w-fit" variant="secondary">
-                <InfoIcon className="h-4 w-4" />
-                No price history available
-              </Badge>
-
-              <p className="text-sm">
-                This product is not being tracked actively. It was last checked{" "}
-                <strong>{formatDistanceToNow(sp.updated_at)} ago.</strong> Add this product to your favorites to enable
-                regular price tracking.
-              </p>
-            </div>
-          )}
+                    {/* Right column: Range selector + Chart */}
+                    <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-1 flex h-fit max-w-xl flex-col gap-2 xl:order-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
+                      <ProductChart.RangeSelector className="xl:justify-start" />
+                      <ProductChart.Graph />
+                    </div>
+                  </div>
+                </ProductChart.ChartContent>
+              </>
+            )}
+          </ProductChart.Root>
         </section>
       </article>
 
