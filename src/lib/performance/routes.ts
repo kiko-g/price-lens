@@ -7,21 +7,25 @@ export interface TestableRoute {
 
 export const TESTABLE_ROUTES: TestableRoute[] = [
   // Core
-  { path: "/api", name: "Health Check", category: "core", description: "Basic API health check" },
+  {
+    path: "/api",
+    name: "Health Check",
+    category: "core",
+    description: "Basic API health check",
+  },
 
   // Products
-  { path: "/api/products", name: "Search Products", category: "products", description: "Product search endpoint" },
+  {
+    path: "/api/products",
+    name: "Search Products",
+    category: "products",
+    description: "Product search endpoint",
+  },
   {
     path: "/api/products/shallow",
     name: "All Products (Shallow)",
     category: "products",
     description: "List all products without full details",
-  },
-  {
-    path: "/api/products/showcase",
-    name: "Homepage Showcase",
-    category: "products",
-    description: "Batch fetch for homepage",
   },
   {
     path: "/api/store_products",
@@ -31,10 +35,20 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
   },
 
   // Prices
-  { path: "/api/prices", name: "Paginated Prices", category: "prices", description: "Fetch paginated price data" },
+  {
+    path: "/api/prices",
+    name: "Paginated Prices",
+    category: "prices",
+    description: "Fetch paginated price data",
+  },
 
   // Categories
-  { path: "/api/categories", name: "Categories List", category: "categories", description: "All categories" },
+  {
+    path: "/api/categories",
+    name: "Categories List",
+    category: "categories",
+    description: "All categories",
+  },
   {
     path: "/api/categories/canonical",
     name: "Canonical Categories",
@@ -95,7 +109,12 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
   },
 
   // Debug
-  { path: "/api/debug", name: "Debug Endpoint", category: "admin", description: "Debug data by priority" },
+  {
+    path: "/api/debug",
+    name: "Debug Endpoint",
+    category: "admin",
+    description: "Debug data by priority",
+  },
 ]
 
 export const CATEGORY_LABELS: Record<TestableRoute["category"], string> = {
