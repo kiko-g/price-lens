@@ -83,7 +83,7 @@ async function insertPrice(json: string) {
 }
 
 async function scrapeProductUrl(url: string) {
-  const response = await axios.post("/api/products/store/add", { url })
+  const response = await axios.post("/api/store_products/add", { url })
   if (response.status !== 200) {
     throw new Error(response.data?.error || "Failed to scrape URL")
   }

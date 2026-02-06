@@ -41,7 +41,7 @@ async function fetchTrackedProducts({
     ...(priority.length > 0 && { priority: priority.join(",") }),
   })
 
-  const response = await axios.get(`/api/products/store?${params}`)
+  const response = await axios.get(`/api/store_products?${params}`)
 
   if (response.status !== 200) {
     throw new Error("Failed to fetch products")

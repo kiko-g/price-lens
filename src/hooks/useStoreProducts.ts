@@ -257,7 +257,7 @@ export function useUpdateStoreProductPriority() {
 
   return useMutation({
     mutationFn: async ({ storeProductId, priority }: { storeProductId: number; priority: number | null }) => {
-      const response = await axios.put(`/api/products/store/${storeProductId}/priority`, {
+      const response = await axios.put(`/api/store_products/${storeProductId}/priority`, {
         priority,
       })
       if (response.status !== 200) {

@@ -275,7 +275,7 @@ describe("useStoreProductCard", () => {
         expect(result.current.isPriorityPending).toBe(true)
       })
       expect(mockAxiosPut).toHaveBeenCalledWith(
-        "/api/products/store/1/priority",
+        "/api/store_products/1/priority",
         expect.objectContaining({ priority: 5, source: "manual" }),
       )
     })
@@ -285,13 +285,10 @@ describe("useStoreProductCard", () => {
 
       mockAxiosPut.mockResolvedValueOnce({ status: 200, data: {} })
 
-      const { result, rerender } = renderHook(
-        ({ storeProduct }) => useStoreProductCard(storeProduct),
-        {
-          initialProps: { storeProduct: sp },
-          wrapper: createWrapper(),
-        },
-      )
+      const { result, rerender } = renderHook(({ storeProduct }) => useStoreProductCard(storeProduct), {
+        initialProps: { storeProduct: sp },
+        wrapper: createWrapper(),
+      })
 
       await act(async () => {
         result.current.setPriority(3)
@@ -314,13 +311,10 @@ describe("useStoreProductCard", () => {
 
       mockAxiosPut.mockResolvedValueOnce({ status: 200, data: {} })
 
-      const { result, rerender } = renderHook(
-        ({ storeProduct }) => useStoreProductCard(storeProduct),
-        {
-          initialProps: { storeProduct: sp },
-          wrapper: createWrapper(),
-        },
-      )
+      const { result, rerender } = renderHook(({ storeProduct }) => useStoreProductCard(storeProduct), {
+        initialProps: { storeProduct: sp },
+        wrapper: createWrapper(),
+      })
 
       await act(async () => {
         result.current.clearPriority()
@@ -359,7 +353,7 @@ describe("useStoreProductCard", () => {
       await waitFor(() => {
         expect(result.current.isUpdating).toBe(true)
       })
-      expect(mockAxiosPost).toHaveBeenCalledWith("/api/products/store", { storeProduct: sp })
+      expect(mockAxiosPost).toHaveBeenCalledWith("/api/store_products/scrape", { storeProduct: sp })
     })
 
     it("should show success toast after update", async () => {

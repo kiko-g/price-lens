@@ -1,5 +1,4 @@
 import axios from "axios"
-import type { GetAllQuery } from "@/lib/queries/types"
 import type { ProductWithListings, StoreProduct, Price } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -21,16 +20,8 @@ async function getProducts(params?: GetProductsParams) {
   return response.data as ProductWithListings[]
 }
 
-async function getStoreProducts(params: GetAllQuery) {
-  const response = await axios.get("/api/products/store", { params })
-  if (response.status !== 200) {
-    throw new Error("Failed to fetch products")
-  }
-  return response.data.data as StoreProduct[]
-}
-
 async function getStoreProduct(id: string) {
-  const response = await axios.get(`/api/products/store/${id}`)
+  const response = await axios.get(`/api/store_products/${id}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch store product")
   }
@@ -38,7 +29,7 @@ async function getStoreProduct(id: string) {
 }
 
 async function getRelatedStoreProducts(id: string, limit: number = 8) {
-  const response = await axios.get(`/api/products/store/${id}/related?limit=${limit}`)
+  const response = await axios.get(`/api/store_products/${id}/related?limit=${limit}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch related store products")
   }
@@ -46,7 +37,7 @@ async function getRelatedStoreProducts(id: string, limit: number = 8) {
 }
 
 async function getIdenticalCrossStoreProducts(id: string, limit: number = 8) {
-  const response = await axios.get(`/api/products/store/${id}/cross-store?limit=${limit}`)
+  const response = await axios.get(`/api/store_products/${id}/cross-store?limit=${limit}`)
   if (response.status !== 200) {
     throw new Error("Failed to fetch identical store products")
   }
@@ -57,7 +48,7 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   const id = storeProduct.id
   if (!id) throw new Error("Cannot update a store product without an ID")
 
-  const response = await axios.post(`/api/products/store`, { storeProduct })
+  const response = await axios.post(`/api/store_products/scrape`, { storeProduct })
   if (response.status !== 200) throw new Error("Failed to update store product")
   return response.data as StoreProduct
 }
@@ -81,32 +72,6 @@ export function useProducts({ offset = 0, limit = 36, q = "", origin = 0 }: GetP
     queryKey: ["products", offset, limit, q, origin],
     queryFn: () => getProducts({ offset, limit, q, origin }),
     enabled: !q || q.length > 2,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  })
-}
-
-export function useStoreProducts(params: GetAllQuery) {
-  return useQuery({
-    queryKey: [
-      "storeProducts",
-      params.page,
-      params.limit,
-      params.tracked,
-      params.query,
-      params.sort,
-      params.searchType,
-      params.nonNulls,
-      params.categories,
-      params.category,
-      params.category2,
-      params.category3,
-      params.origin,
-      params.userId,
-      params.options?.onlyDiscounted,
-    ],
-    queryFn: () => getStoreProducts(params),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -195,7 +160,7 @@ async function updateStoreProductPriority(
   priority: number | null,
   source: "manual" | "ai" = "manual",
 ) {
-  const response = await axios.put(`/api/products/store/${storeProductId}/priority`, {
+  const response = await axios.put(`/api/store_products/${storeProductId}/priority`, {
     priority,
     source,
   })
@@ -252,7 +217,7 @@ export function useAllProductsWithPrices(productIds: string[]) {
       const promises = stableProductIds.map(async (id) => {
         try {
           const [storeProductResponse, pricesResponse] = await Promise.all([
-            axios.get(`/api/products/store/${id}`),
+            axios.get(`/api/store_products/${id}`),
             axios.get(`/api/prices/${id}`),
           ])
 

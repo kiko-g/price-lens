@@ -24,7 +24,7 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
     description: "Batch fetch for homepage",
   },
   {
-    path: "/api/products/store",
+    path: "/api/store_products",
     name: "Store Products Search",
     category: "products",
     description: "Search store-specific products",

@@ -7,6 +7,15 @@ const isRedisAvailable = !!process.env.REDIS_URL
 const STORE_PRODUCTS_CACHE_PREFIX = "store-products:"
 const STORE_PRODUCTS_CACHE_TTL = parseInt(process.env.STORE_PRODUCTS_CACHE_TTL_SECONDS || "120", 10)
 
+// Single Store Product Cache Configuration
+const SINGLE_PRODUCT_CACHE_PREFIX = "store-product:"
+const SINGLE_PRODUCT_CACHE_TTL = 60 // 1 minute
+
+// Related/Cross-Store Products Cache Configuration
+const RELATED_PRODUCTS_CACHE_PREFIX = "related-products:"
+const CROSS_STORE_CACHE_PREFIX = "cross-store:"
+const RELATED_PRODUCTS_CACHE_TTL = 300 // 5 minutes (rarely changes)
+
 // Create Redis client
 const redis = isRedisAvailable
   ? createClient({
@@ -162,6 +171,136 @@ export async function clearStoreProductsCache(): Promise<void> {
     }
   } catch (error) {
     console.error("Error clearing store products cache:", error)
+  }
+}
+
+// ============================================================================
+// Single Store Product Cache
+// ============================================================================
+
+/**
+ * Get cached single store product by ID.
+ */
+export async function getCachedSingleProduct<T>(productId: string): Promise<T | null> {
+  if (!isRedisAvailable || !redis) {
+    return null
+  }
+
+  try {
+    const key = `${SINGLE_PRODUCT_CACHE_PREFIX}${productId}`
+    const data = await redis.get(key)
+    return data ? JSON.parse(data) : null
+  } catch (error) {
+    console.error("Error fetching single product from cache:", error)
+    return null
+  }
+}
+
+/**
+ * Cache a single store product.
+ */
+export async function setCachedSingleProduct(productId: string, data: unknown): Promise<void> {
+  if (!isRedisAvailable || !redis) {
+    return
+  }
+
+  try {
+    const key = `${SINGLE_PRODUCT_CACHE_PREFIX}${productId}`
+    await redis.setEx(key, SINGLE_PRODUCT_CACHE_TTL, JSON.stringify(data))
+  } catch (error) {
+    console.error("Error caching single product:", error)
+  }
+}
+
+/**
+ * Invalidate a single product cache entry.
+ */
+export async function invalidateSingleProductCache(productId: string): Promise<void> {
+  if (!isRedisAvailable || !redis) {
+    return
+  }
+
+  try {
+    const key = `${SINGLE_PRODUCT_CACHE_PREFIX}${productId}`
+    await redis.del(key)
+  } catch (error) {
+    console.error("Error invalidating single product cache:", error)
+  }
+}
+
+// ============================================================================
+// Related Products Cache
+// ============================================================================
+
+/**
+ * Get cached related products for a product ID.
+ */
+export async function getCachedRelatedProducts<T>(productId: string, limit: number): Promise<T | null> {
+  if (!isRedisAvailable || !redis) {
+    return null
+  }
+
+  try {
+    const key = `${RELATED_PRODUCTS_CACHE_PREFIX}${productId}:${limit}`
+    const data = await redis.get(key)
+    return data ? JSON.parse(data) : null
+  } catch (error) {
+    console.error("Error fetching related products from cache:", error)
+    return null
+  }
+}
+
+/**
+ * Cache related products for a product ID.
+ */
+export async function setCachedRelatedProducts(productId: string, limit: number, data: unknown): Promise<void> {
+  if (!isRedisAvailable || !redis) {
+    return
+  }
+
+  try {
+    const key = `${RELATED_PRODUCTS_CACHE_PREFIX}${productId}:${limit}`
+    await redis.setEx(key, RELATED_PRODUCTS_CACHE_TTL, JSON.stringify(data))
+  } catch (error) {
+    console.error("Error caching related products:", error)
+  }
+}
+
+// ============================================================================
+// Cross-Store Products Cache
+// ============================================================================
+
+/**
+ * Get cached cross-store (identical) products for a product ID.
+ */
+export async function getCachedCrossStoreProducts<T>(productId: string, limit: number): Promise<T | null> {
+  if (!isRedisAvailable || !redis) {
+    return null
+  }
+
+  try {
+    const key = `${CROSS_STORE_CACHE_PREFIX}${productId}:${limit}`
+    const data = await redis.get(key)
+    return data ? JSON.parse(data) : null
+  } catch (error) {
+    console.error("Error fetching cross-store products from cache:", error)
+    return null
+  }
+}
+
+/**
+ * Cache cross-store (identical) products for a product ID.
+ */
+export async function setCachedCrossStoreProducts(productId: string, limit: number, data: unknown): Promise<void> {
+  if (!isRedisAvailable || !redis) {
+    return
+  }
+
+  try {
+    const key = `${CROSS_STORE_CACHE_PREFIX}${productId}:${limit}`
+    await redis.setEx(key, RELATED_PRODUCTS_CACHE_TTL, JSON.stringify(data))
+  } catch (error) {
+    console.error("Error caching cross-store products:", error)
   }
 }
 

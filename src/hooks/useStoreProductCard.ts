@@ -23,7 +23,7 @@ function truncateName(name: string, maxLength: number): string {
 async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   if (!storeProduct.id) throw new Error("Cannot update a store product without an ID")
   try {
-    const response = await axios.post(`/api/products/store`, { storeProduct })
+    const response = await axios.post(`/api/store_products/scrape`, { storeProduct })
     if (response.status !== 200) throw new Error("Failed to update store product")
     return response.data as StoreProduct
   } catch (error) {
