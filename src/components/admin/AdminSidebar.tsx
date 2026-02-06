@@ -33,6 +33,7 @@ import {
   GaugeIcon,
   PickaxeIcon,
   LayersIcon,
+  TimerIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -130,6 +131,11 @@ const NAV_ITEMS: NavItem[] = [
     title: "Test Scrapers",
     href: "/admin/test",
     icon: FlaskConicalIcon,
+  },
+  {
+    title: "Performance",
+    href: "/admin/performance",
+    icon: TimerIcon,
   },
 ]
 

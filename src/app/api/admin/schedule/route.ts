@@ -128,129 +128,45 @@ export async function GET(req: NextRequest) {
     const now = new Date()
 
     if (action === "overview") {
-      // Get counts by priority level using separate count queries (avoids 1000 row limit)
-      const priorityStats: PriorityStats[] = []
-
-      // Priority levels 5 down to 0, plus null
-      const priorityLevels = [5, 4, 3, 2, 1, 0, null]
-
-      for (const priority of priorityLevels) {
-        const thresholdHours = priority !== null ? PRIORITY_REFRESH_HOURS[priority] || null : null
-        const cutoffTime = thresholdHours
-          ? new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString()
-          : null
-
-        // Build base query for this priority
-        const baseFilter =
-          priority === null
-            ? supabase.from("store_products").select("id", { count: "exact", head: true }).is("priority", null)
-            : supabase.from("store_products").select("id", { count: "exact", head: true }).eq("priority", priority)
-
-        // Get total count
-        const { count: total } = await baseFilter
-
-        if (total === null || total === 0) {
-          priorityStats.push({
-            priority,
-            total: 0,
-            fresh: 0,
-            staleActionable: 0,
-            unavailable: 0,
-            neverScraped: 0,
-            stalenessThresholdHours: thresholdHours,
-          })
-          continue
-        }
-
-        // Get unavailable count (available = false)
-        const unavailableQuery =
-          priority === null
-            ? supabase
-                .from("store_products")
-                .select("id", { count: "exact", head: true })
-                .is("priority", null)
-                .eq("available", false)
-            : supabase
-                .from("store_products")
-                .select("id", { count: "exact", head: true })
-                .eq("priority", priority)
-                .eq("available", false)
-        const { count: unavailable } = await unavailableQuery
-
-        // Get never scraped count (updated_at is null) - informational, overlaps with other categories
-        const neverScrapedQuery =
-          priority === null
-            ? supabase
-                .from("store_products")
-                .select("id", { count: "exact", head: true })
-                .is("priority", null)
-                .is("updated_at", null)
-            : supabase
-                .from("store_products")
-                .select("id", { count: "exact", head: true })
-                .eq("priority", priority)
-                .is("updated_at", null)
-        const { count: neverScraped } = await neverScrapedQuery
-
-        // Calculate fresh and staleActionable for AVAILABLE products only
-        const availableTotal = total - (unavailable ?? 0)
-        let fresh = 0
-        let staleActionable = 0
-
-        if (availableTotal > 0) {
-          if (cutoffTime) {
-            // Fresh = available AND updated_at >= cutoffTime
-            const freshQuery =
-              priority === null
-                ? supabase
-                    .from("store_products")
-                    .select("id", { count: "exact", head: true })
-                    .is("priority", null)
-                    .eq("available", true)
-                    .gte("updated_at", cutoffTime)
-                : supabase
-                    .from("store_products")
-                    .select("id", { count: "exact", head: true })
-                    .eq("priority", priority)
-                    .eq("available", true)
-                    .gte("updated_at", cutoffTime)
-            const { count: freshCount } = await freshQuery
-            fresh = freshCount ?? 0
-
-            // Stale actionable = available - fresh
-            staleActionable = availableTotal - fresh
-          } else {
-            // No threshold = all available scraped products are "fresh", never scraped available are "stale"
-            const neverScrapedAvailableQuery =
-              priority === null
-                ? supabase
-                    .from("store_products")
-                    .select("id", { count: "exact", head: true })
-                    .is("priority", null)
-                    .eq("available", true)
-                    .is("updated_at", null)
-                : supabase
-                    .from("store_products")
-                    .select("id", { count: "exact", head: true })
-                    .eq("priority", priority)
-                    .eq("available", true)
-                    .is("updated_at", null)
-            const { count: neverScrapedAvailable } = await neverScrapedAvailableQuery
-            staleActionable = neverScrapedAvailable ?? 0
-            fresh = availableTotal - staleActionable
-          }
-        }
-
-        priorityStats.push({
-          priority,
-          total,
-          fresh,
-          staleActionable,
-          unavailable: unavailable ?? 0,
-          neverScraped: neverScraped ?? 0,
-          stalenessThresholdHours: thresholdHours,
-        })
+      // Build priority refresh hours config for the RPC
+      const priorityRefreshConfig: Record<string, number | null> = {}
+      for (const [priority, hours] of Object.entries(PRIORITY_REFRESH_HOURS)) {
+        priorityRefreshConfig[priority] = hours
       }
+
+      // Single RPC call replaces 28-35 sequential queries
+      const { data: statsData, error: statsError } = await supabase.rpc("get_schedule_stats", {
+        priority_refresh_hours: priorityRefreshConfig,
+      })
+
+      if (statsError) {
+        console.error("Schedule stats RPC error:", statsError)
+        return NextResponse.json(
+          { error: "Failed to fetch schedule stats", details: statsError.message },
+          { status: 500 },
+        )
+      }
+
+      // Map RPC results to expected format
+      const priorityStats: PriorityStats[] = (statsData || []).map(
+        (row: {
+          priority: number | null
+          total: number
+          unavailable: number
+          never_scraped: number
+          fresh: number
+          stale_actionable: number
+          staleness_threshold_hours: number | null
+        }) => ({
+          priority: row.priority,
+          total: Number(row.total),
+          fresh: Number(row.fresh),
+          staleActionable: Number(row.stale_actionable),
+          unavailable: Number(row.unavailable),
+          neverScraped: Number(row.never_scraped),
+          stalenessThresholdHours: row.staleness_threshold_hours,
+        }),
+      )
 
       const totalProducts = priorityStats.reduce((sum, p) => sum + p.total, 0)
       const totalTracked = priorityStats

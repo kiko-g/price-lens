@@ -691,8 +691,7 @@ export const categoryMappingQueries = {
     const supabase = createClient()
 
     // Try RPC function first (aggregates at database level)
-    // Note: Supabase still applies default row limit to RPC calls, so we override it
-    const { data: stats, error: statsError } = await supabase.rpc("get_category_mapping_stats").limit(100)
+    const { data: stats, error: statsError } = await supabase.rpc("get_category_mapping_stats")
 
     // If RPC fails or returns empty, fall back to paginated direct queries
     if (statsError) {
