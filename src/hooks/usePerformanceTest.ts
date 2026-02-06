@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { TESTABLE_ROUTES, type TestableRoute } from "@/lib/performance/routes"
+import { TESTABLE_ROUTES, buildTestUrl, type TestableRoute } from "@/lib/performance/routes"
 
 const STORAGE_KEY = "api-performance-metrics"
 const TEST_ITERATIONS = 5
@@ -18,6 +18,8 @@ export interface RouteMetrics {
 }
 
 export type PerformanceResults = Record<string, RouteMetrics>
+
+export type ParamOverrides = Record<string, Record<string, string | number | boolean>>
 
 interface TestProgress {
   currentRoute: string | null
@@ -91,6 +93,7 @@ function saveToStorage(results: PerformanceResults): void {
 
 export function usePerformanceTest() {
   const [results, setResults] = useState<PerformanceResults>({})
+  const [paramOverrides, setParamOverrides] = useState<ParamOverrides>({})
   const [isRunning, setIsRunning] = useState(false)
   const [progress, setProgress] = useState<TestProgress>({
     currentRoute: null,
@@ -99,37 +102,64 @@ export function usePerformanceTest() {
     completedRoutes: 0,
   })
 
-  // load from localStorage on mount
   useEffect(() => {
     setResults(loadFromStorage())
   }, [])
 
-  const runSingleTest = useCallback(async (route: TestableRoute) => {
-    setIsRunning(true)
-    setProgress({
-      currentRoute: route.path,
-      currentIteration: 0,
-      totalRoutes: 1,
-      completedRoutes: 0,
-    })
+  const getOverridesForRoute = useCallback(
+    (route: TestableRoute): Record<string, string | number | boolean> => {
+      return paramOverrides[route.path] ?? {}
+    },
+    [paramOverrides],
+  )
 
-    try {
-      const metrics = await runTestForRoute(route.path)
-      setResults((prev) => {
-        const updated = { ...prev, [route.path]: metrics }
-        saveToStorage(updated)
-        return updated
-      })
-    } finally {
-      setIsRunning(false)
+  const updateParamOverride = useCallback(
+    (routePath: string, overrides: Record<string, string | number | boolean>) => {
+      setParamOverrides((prev) => ({
+        ...prev,
+        [routePath]: { ...(prev[routePath] ?? {}), ...overrides },
+      }))
+    },
+    [],
+  )
+
+  const resolveUrl = useCallback(
+    (route: TestableRoute): string => {
+      return buildTestUrl(route, getOverridesForRoute(route))
+    },
+    [getOverridesForRoute],
+  )
+
+  const runSingleTest = useCallback(
+    async (route: TestableRoute, overrides?: Record<string, string | number | boolean>) => {
+      const url = buildTestUrl(route, overrides ?? getOverridesForRoute(route))
+      setIsRunning(true)
       setProgress({
-        currentRoute: null,
+        currentRoute: url,
         currentIteration: 0,
-        totalRoutes: 0,
+        totalRoutes: 1,
         completedRoutes: 0,
       })
-    }
-  }, [])
+
+      try {
+        const metrics = await runTestForRoute(url)
+        setResults((prev) => {
+          const updated = { ...prev, [url]: metrics }
+          saveToStorage(updated)
+          return updated
+        })
+      } finally {
+        setIsRunning(false)
+        setProgress({
+          currentRoute: null,
+          currentIteration: 0,
+          totalRoutes: 0,
+          completedRoutes: 0,
+        })
+      }
+    },
+    [getOverridesForRoute],
+  )
 
   const runAllTests = useCallback(async () => {
     setIsRunning(true)
@@ -145,16 +175,16 @@ export function usePerformanceTest() {
 
     for (let i = 0; i < routes.length; i++) {
       const route = routes[i]
+      const url = buildTestUrl(route, paramOverrides[route.path])
       setProgress((prev) => ({
         ...prev,
-        currentRoute: route.path,
+        currentRoute: url,
         completedRoutes: i,
       }))
 
-      const metrics = await runTestForRoute(route.path)
-      newResults[route.path] = metrics
+      const metrics = await runTestForRoute(url)
+      newResults[url] = metrics
 
-      // save after each route in case user navigates away
       setResults((prev) => {
         const updated = { ...prev, ...newResults }
         saveToStorage(updated)
@@ -169,7 +199,7 @@ export function usePerformanceTest() {
       totalRoutes: 0,
       completedRoutes: routes.length,
     })
-  }, [])
+  }, [paramOverrides])
 
   const clearResults = useCallback(() => {
     setResults({})
@@ -188,12 +218,15 @@ export function usePerformanceTest() {
 
   return {
     results,
+    paramOverrides,
+    updateParamOverride,
     isRunning,
     progress,
     runSingleTest,
     runAllTests,
     clearResults,
     getLastTestTime,
+    resolveUrl,
     routes: TESTABLE_ROUTES,
   }
 }
