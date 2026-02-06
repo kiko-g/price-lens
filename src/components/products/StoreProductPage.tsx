@@ -388,7 +388,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 href={sp.url}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="hidden rounded-full border-transparent px-2 py-[3px] md:inline-flex dark:bg-white dark:hover:bg-white/90"
+                className="border-border hidden rounded-full border px-2 py-0.5 md:inline-flex dark:border-transparent dark:bg-white dark:hover:bg-white/90"
               >
                 <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
               </Link>

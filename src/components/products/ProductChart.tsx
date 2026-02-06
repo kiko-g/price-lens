@@ -480,6 +480,14 @@ function Graph({ className }: GraphProps) {
     isTooltipActive,
   } = useProductChartContext()
 
+  if (isLoading) {
+    return (
+      <div className={cn("flex h-60 w-full items-center justify-center", className)}>
+        <Skeleton className="h-full w-full" />
+      </div>
+    )
+  }
+
   function getLineChartConfig(axis: string, chartDataLength: number) {
     const isSinglePoint = chartDataLength === 1
     const dotRadius = showDots || isSinglePoint ? baseDotRadius : 0
