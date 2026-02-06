@@ -1,24 +1,9 @@
 import axios from "axios"
-import type { ProductWithListings, StoreProduct, Price } from "@/types"
+import type { StoreProduct, Price } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useMemo } from "react"
 import { usePrices } from "./usePrices"
-
-type GetProductsParams = {
-  offset?: number
-  limit?: number
-  q?: string
-  origin?: number
-}
-
-async function getProducts(params?: GetProductsParams) {
-  const response = await axios.get("/api/products", { params })
-  if (response.status !== 200) {
-    throw new Error("Failed to fetch products")
-  }
-  return response.data as ProductWithListings[]
-}
 
 async function getStoreProduct(id: string) {
   const response = await axios.get(`/api/store_products/${id}`)
@@ -64,18 +49,6 @@ async function getStoreProductCategories() {
     category_3: string[]
     tuples: { category: string; category_2: string; category_3: string }[]
   }
-}
-
-// hooks
-export function useProducts({ offset = 0, limit = 36, q = "", origin = 0 }: GetProductsParams) {
-  return useQuery({
-    queryKey: ["products", offset, limit, q, origin],
-    queryFn: () => getProducts({ offset, limit, q, origin }),
-    enabled: !q || q.length > 2,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  })
 }
 
 export function useStoreProductById(id: string) {

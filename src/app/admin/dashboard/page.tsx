@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
-import { DollarSignIcon, PackageIcon, ShoppingCartIcon } from "lucide-react"
+import { DollarSignIcon, ShoppingCartIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
@@ -25,12 +25,6 @@ export default function AdminDashboard() {
           icon={DollarSignIcon}
           title="Prices"
           description="View all price entries in the database. Sanitize and manage price history."
-        />
-        <DashboardLink
-          href="/admin/dashboard/products"
-          icon={PackageIcon}
-          title="Products"
-          description="View generic product entries (cross-store matching candidates)."
         />
         <DashboardLink
           href="/admin/dashboard/store_products"

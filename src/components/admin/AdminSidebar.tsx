@@ -11,7 +11,6 @@ import {
   FlaskConicalIcon,
   CalendarClockIcon,
   DollarSignIcon,
-  PackageIcon,
   ShoppingCartIcon,
   ChevronDown,
   ChevronUp,
@@ -98,7 +97,6 @@ const NAV_ITEMS: NavItem[] = [
     icon: DatabaseIcon,
     items: [
       { title: "Prices", href: "/admin/dashboard/prices", icon: DollarSignIcon },
-      { title: "Products", href: "/admin/dashboard/products", icon: PackageIcon },
       { title: "Store Products", href: "/admin/dashboard/store_products", icon: ShoppingCartIcon },
     ],
   },

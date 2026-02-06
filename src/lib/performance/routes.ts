@@ -16,18 +16,6 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
 
   // Products
   {
-    path: "/api/products",
-    name: "Search Products",
-    category: "products",
-    description: "Product search endpoint",
-  },
-  {
-    path: "/api/products/shallow",
-    name: "All Products (Shallow)",
-    category: "products",
-    description: "List all products without full details",
-  },
-  {
     path: "/api/store_products",
     name: "Store Products Search",
     category: "products",

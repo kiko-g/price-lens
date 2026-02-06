@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { Price, Product, StoreProduct } from "@/types"
+import type { Price, StoreProduct } from "@/types"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -28,14 +28,6 @@ async function fetchPricesPaginated(params: PaginationParams) {
   return response.data as PricesPaginatedResponse
 }
 
-async function fetchShallowProducts() {
-  const response = await axios.get("/api/products/shallow")
-  if (response.status !== 200) {
-    throw new Error("Failed to fetch products")
-  }
-  return response.data.data as Product[]
-}
-
 type StoreProductsPaginatedResponse = {
   data: StoreProduct[]
   pagination: {
@@ -54,14 +46,6 @@ async function fetchStoreProductsPaginated(params: PaginationParams) {
     throw new Error("Failed to fetch store products")
   }
   return response.data as StoreProductsPaginatedResponse
-}
-
-async function deleteShallowProduct(id: number) {
-  const response = await axios.delete("/api/products/shallow/delete", { data: { id } })
-  if (response.status !== 200) {
-    throw new Error("Failed to delete product")
-  }
-  return response.data.data as Product
 }
 
 async function sanitizePrices(storeProductId: number) {
@@ -151,15 +135,6 @@ export function useAdminPrices(params: PaginationParams) {
   })
 }
 
-export function useAdminProducts() {
-  return useQuery({
-    queryKey: ["adminProducts"],
-    queryFn: fetchShallowProducts,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-    refetchOnWindowFocus: false,
-  })
-}
-
 export function useAdminStoreProducts(params: PaginationParams) {
   return useQuery({
     queryKey: ["adminStoreProducts", params.page, params.limit],
@@ -172,23 +147,6 @@ export function useAdminStoreProducts(params: PaginationParams) {
 // =============================================================================
 // MUTATION HOOKS (for modifying data)
 // =============================================================================
-
-export function useDeleteProduct() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: deleteShallowProduct,
-    onSuccess: () => {
-      toast.success("Product deleted")
-      queryClient.invalidateQueries({ queryKey: ["adminProducts"] })
-    },
-    onError: (error) => {
-      toast.error("Failed to delete product", {
-        description: error instanceof Error ? error.message : "Unknown error",
-      })
-    },
-  })
-}
 
 export function useSanitizePrices() {
   const queryClient = useQueryClient()
