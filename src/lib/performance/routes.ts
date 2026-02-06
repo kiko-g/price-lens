@@ -98,7 +98,7 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
 
   // Debug
   {
-    path: "/api/debug",
+    path: "/api/admin/debug",
     name: "Debug Endpoint",
     category: "admin",
     description: "Debug data by priority",

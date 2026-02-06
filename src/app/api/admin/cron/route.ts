@@ -71,8 +71,8 @@ export async function GET(req: NextRequest) {
         {
           error: "Missing required parameter",
           usage: {
-            priority: "GET /api/cron?priority=5",
-            ids: "GET /api/cron?ids=123,456,789",
+            priority: "GET /api/admin/cron?priority=5",
+            ids: "GET /api/admin/cron?ids=123,456,789",
           },
         },
         { status: 400 },

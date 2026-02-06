@@ -92,7 +92,7 @@ async function runAiPriorityClassification(params: AiPriorityParams) {
   if (params.includePriority) searchParams.set("includePriority", params.includePriority)
   if (params.batchSize) searchParams.set("batchSize", params.batchSize.toString())
 
-  const response = await axios.get(`/api/scrape/ai-priority?${searchParams}`)
+  const response = await axios.get(`/api/admin/scrape/ai-priority?${searchParams}`)
   if (response.status !== 200) {
     throw new Error("Failed to run AI classification")
   }
@@ -107,7 +107,7 @@ type DuplicateStatsResponse = {
 }
 
 async function fetchDuplicatePriceStats() {
-  const response = await axios.get("/api/prices/delete/duplicate")
+  const response = await axios.get("/api/admin/prices/duplicates")
   if (response.status !== 200) {
     throw new Error("Failed to fetch duplicate stats")
   }
@@ -115,7 +115,7 @@ async function fetchDuplicatePriceStats() {
 }
 
 async function deleteDuplicatePrices() {
-  const response = await axios.delete("/api/prices/delete/duplicate")
+  const response = await axios.delete("/api/admin/prices/duplicates")
   if (response.status !== 200) {
     throw new Error("Failed to delete duplicate prices")
   }
