@@ -68,6 +68,8 @@ import {
   SearchIcon,
   InfoIcon,
   CircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "lucide-react"
 
 const FILTER_DEBOUNCE_MS = 800 // Debounce delay for filter changes
@@ -525,7 +527,8 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
   const hasResults = products.length > 0
   const showingFrom = hasResults ? (currentPage - 1) * limit + 1 : 0
-  const showingTo = totalCount != null ? Math.min(currentPage * limit, totalCount) : (currentPage - 1) * limit + products.length
+  const showingTo =
+    totalCount != null ? Math.min(currentPage * limit, totalCount) : (currentPage - 1) * limit + products.length
 
   // Show full skeleton grid only on initial load (no products yet)
   // Show overlay when we have products but are fetching new ones
@@ -671,9 +674,17 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
             <div className="flex flex-col gap-1">
               <p className="text-muted-foreground text-xs">
                 {totalCount != null ? (
-                  <><strong className="text-foreground">{totalCount}</strong> products found</>
+                  <>
+                    <strong className="text-foreground">{totalCount}</strong> products found
+                  </>
                 ) : (
-                  <>Showing <strong className="text-foreground">{products.length}</strong> products</>
+                  <>
+                    Showing{" "}
+                    <strong className="text-foreground">
+                      {showingFrom}-{showingTo}
+                    </strong>{" "}
+                    products
+                  </>
                 )}
                 {urlState.query && ` matching "${urlState.query}"`}
               </p>
@@ -1020,22 +1031,29 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         ) : products.length > 0 ? (
           <>
             {/* Status Bar - Desktop */}
-            <div className="text-muted-foreground mb-4 hidden items-center justify-between text-xs lg:flex">
+            <div className="text-muted-foreground mb-4 hidden w-full items-center justify-between text-sm lg:flex">
               <span>
                 Showing{" "}
                 <span className="text-foreground font-semibold">
                   {showingFrom}-{showingTo}
                 </span>
                 {totalCount != null && (
-                  <> of <span className="text-foreground font-semibold">{totalCount}</span></>
-                )} results
+                  <>
+                    {" "}
+                    of <span className="text-foreground font-semibold">{totalCount}</span>
+                  </>
+                )}{" "}
+                results
               </span>
-              <span>
-                Page <span className="text-foreground font-semibold">{currentPage}</span>
-                {totalPages != null && (
-                  <> of <span className="text-foreground font-semibold">{totalPages}</span></>
-                )}
-              </span>
+
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                hasNextPage={hasNextPage}
+                isLoading={isLoading}
+                onPageChange={handlePageChange}
+                className=""
+              />
             </div>
 
             {/* Products grid with loading overlay */}
@@ -1172,13 +1190,19 @@ function MobileNav({
               {showingFrom}-{showingTo}
             </span>
             {totalCount != null && (
-              <> of <span className="text-foreground font-semibold">{totalCount}</span></>
+              <>
+                {" "}
+                of <span className="text-foreground font-semibold">{totalCount}</span>
+              </>
             )}
           </span>
           <span>
             Page <span className="text-foreground font-semibold">{currentPage}</span>
             {totalPages != null && (
-              <> of <span className="text-foreground font-semibold">{totalPages}</span></>
+              <>
+                {" "}
+                of <span className="text-foreground font-semibold">{totalPages}</span>
+              </>
             )}
           </span>
         </div>
@@ -1659,21 +1683,31 @@ interface PaginationControlsProps {
   hasNextPage: boolean
   isLoading: boolean
   onPageChange: (page: number) => void
+  className?: string
 }
 
-function PaginationControls({ currentPage, totalPages, hasNextPage, isLoading, onPageChange }: PaginationControlsProps) {
+function PaginationControls({
+  currentPage,
+  totalPages,
+  hasNextPage,
+  isLoading,
+  onPageChange,
+  className,
+}: PaginationControlsProps) {
   const isNextDisabled = isLoading || !hasNextPage
 
   return (
-    <div className="isolate flex flex-1 -space-x-px">
+    <div className={cn("text-foreground isolate flex items-center gap-3", className)}>
       <Button
-        variant="outline"
-        className="rounded-r-none focus:z-10"
+        variant="ghost"
+        className="focus:z-10 disabled:cursor-not-allowed"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        Prev
+        <ChevronLeftIcon className="h-4 w-4" />
+        Previous
       </Button>
+
       {totalPages != null ? (
         <Select value={currentPage.toString()} onValueChange={(v) => onPageChange(parseInt(v, 10))}>
           <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
@@ -1688,17 +1722,19 @@ function PaginationControls({ currentPage, totalPages, hasNextPage, isLoading, o
           </SelectContent>
         </Select>
       ) : (
-        <div className="border-input flex items-center justify-center border px-4 text-sm font-medium">
+        <span className="bg-foreground text-background flex size-5 items-center justify-center rounded-full text-sm font-medium">
           {currentPage}
-        </div>
+        </span>
       )}
+
       <Button
-        variant="outline"
-        className="rounded-l-none focus:z-10"
+        variant="ghost"
+        className="focus:z-10 disabled:cursor-not-allowed"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={isNextDisabled}
       >
         Next
+        <ChevronRightIcon className="h-4 w-4" />
       </Button>
     </div>
   )
@@ -1792,10 +1828,15 @@ function BottomPagination({
           Showing <span className="text-foreground font-semibold">{showingFrom}</span> to{" "}
           <span className="text-foreground font-semibold">{showingTo}</span>
           {totalCount != null && (
-            <> of <span className="text-foreground font-semibold">{totalCount}</span></>
-          )} results
+            <>
+              {" "}
+              of <span className="text-foreground font-semibold">{totalCount}</span>
+            </>
+          )}{" "}
+          results
         </span>
       </div>
+
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}
