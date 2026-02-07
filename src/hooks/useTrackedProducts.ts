@@ -54,9 +54,9 @@ async function fetchTrackedProducts({
     pagination: {
       page: data.pagination?.page || page,
       limit: data.pagination?.limit || limit,
-      totalCount: data.pagination?.pagedCount || 0,
-      totalPages: data.pagination?.totalPages || 0,
-      hasMore: page < (data.pagination?.totalPages || 0),
+      totalCount: data.pagination?.pagedCount ?? 0,
+      totalPages: data.pagination?.totalPages ?? 0,
+      hasMore: data.pagination?.hasNextPage ?? false,
     },
   }
 }

@@ -19,8 +19,8 @@ type Props = {
     pagination: {
       page: number
       limit: number
-      totalCount: number
-      totalPages: number
+      totalCount: number | null
+      totalPages: number | null
       hasMore: boolean
     }
   }
@@ -115,12 +115,16 @@ export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPrio
         <div className="text-muted-foreground flex items-center justify-between text-sm">
           <span>
             Showing <span className="text-foreground font-semibold">{(page - 1) * 48 + 1}</span> to{" "}
-            <span className="text-foreground font-semibold">{Math.min(page * 48, totalCount)}</span> of{" "}
-            <span className="text-foreground font-semibold">{totalCount}</span> products
+            <span className="text-foreground font-semibold">{Math.min(page * 48, totalCount ?? page * 48)}</span>
+            {totalCount != null && (
+              <> of <span className="text-foreground font-semibold">{totalCount}</span></>
+            )} products
           </span>
           <span>
-            Page <span className="text-foreground font-semibold">{page}</span> of{" "}
-            <span className="text-foreground font-semibold">{totalPages}</span>
+            Page <span className="text-foreground font-semibold">{page}</span>
+            {totalPages != null && (
+              <> of <span className="text-foreground font-semibold">{totalPages}</span></>
+            )}
           </span>
         </div>
       </div>
@@ -147,9 +151,9 @@ export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPrio
           Previous
         </Button>
         <span className="text-muted-foreground px-4 text-sm">
-          Page {page} of {totalPages}
+          Page {page}{totalPages != null ? ` of ${totalPages}` : ""}
         </span>
-        <Button variant="outline" onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>
+        <Button variant="outline" onClick={() => handlePageChange(page + 1)} disabled={totalPages != null ? page >= totalPages : false}>
           Next
         </Button>
       </div>

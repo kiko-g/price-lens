@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       if (cached) {
         result = cached
       } else {
-        result = await queryStoreProducts(queryParams)
+        result = await queryStoreProducts(queryParams, supabase)
         t("queryStoreProducts")
         if (!result.error) {
           await setCachedStoreProducts(cacheKey, result)
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
         t("cache.set")
       }
     } else {
-      result = await queryStoreProducts(queryParams)
+      result = await queryStoreProducts(queryParams, supabase)
       t("queryStoreProducts")
     }
 

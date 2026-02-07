@@ -518,12 +518,14 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   // Computed Values
   // ============================================================================
 
-  const totalPages = pagination?.totalPages ?? 0
-  const totalCount = pagination?.totalCount ?? 0
+  const totalPages = pagination?.totalPages ?? null
+  const totalCount = pagination?.totalCount ?? null
+  const hasNextPage = pagination?.hasNextPage ?? false
   const currentPage = urlState.page
 
-  const showingFrom = totalCount > 0 ? (currentPage - 1) * limit + 1 : 0
-  const showingTo = Math.min(currentPage * limit, totalCount)
+  const hasResults = products.length > 0
+  const showingFrom = hasResults ? (currentPage - 1) * limit + 1 : 0
+  const showingTo = totalCount != null ? Math.min(currentPage * limit, totalCount) : (currentPage - 1) * limit + products.length
 
   // Show full skeleton grid only on initial load (no products yet)
   // Show overlay when we have products but are fetching new ones
@@ -668,7 +670,11 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
           ) : (
             <div className="flex flex-col gap-1">
               <p className="text-muted-foreground text-xs">
-                <strong className="text-foreground">{totalCount}</strong> products found
+                {totalCount != null ? (
+                  <><strong className="text-foreground">{totalCount}</strong> products found</>
+                ) : (
+                  <>Showing <strong className="text-foreground">{products.length}</strong> products</>
+                )}
                 {urlState.query && ` matching "${urlState.query}"`}
               </p>
             </div>
@@ -981,6 +987,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
         totalCount={totalCount}
         currentPage={currentPage}
         totalPages={totalPages}
+        hasNextPage={hasNextPage}
       />
 
       {/* Mobile Filters Drawer */}
@@ -1018,12 +1025,16 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                 Showing{" "}
                 <span className="text-foreground font-semibold">
                   {showingFrom}-{showingTo}
-                </span>{" "}
-                of <span className="text-foreground font-semibold">{totalCount}</span> results
+                </span>
+                {totalCount != null && (
+                  <> of <span className="text-foreground font-semibold">{totalCount}</span></>
+                )} results
               </span>
               <span>
-                Page <span className="text-foreground font-semibold">{currentPage}</span> of{" "}
-                <span className="text-foreground font-semibold">{totalPages}</span>
+                Page <span className="text-foreground font-semibold">{currentPage}</span>
+                {totalPages != null && (
+                  <> of <span className="text-foreground font-semibold">{totalPages}</span></>
+                )}
               </span>
             </div>
 
@@ -1055,6 +1066,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               showingFrom={showingFrom}
               showingTo={showingTo}
               totalCount={totalCount}
+              hasNextPage={hasNextPage}
               onPageChange={handlePageChange}
             />
 
@@ -1093,9 +1105,10 @@ interface MobileNavProps {
   isSearching: boolean
   showingFrom: number
   showingTo: number
-  totalCount: number
+  totalCount: number | null
   currentPage: number
-  totalPages: number
+  totalPages: number | null
+  hasNextPage: boolean
 }
 
 function MobileNav({
@@ -1151,18 +1164,22 @@ function MobileNav({
       </div>
 
       {/* Status Bar */}
-      {totalCount > 0 && (
+      {showingFrom > 0 && (
         <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs leading-none">
           <span>
             Showing{" "}
             <span className="text-foreground font-semibold">
               {showingFrom}-{showingTo}
-            </span>{" "}
-            of <span className="text-foreground font-semibold">{totalCount}</span>
+            </span>
+            {totalCount != null && (
+              <> of <span className="text-foreground font-semibold">{totalCount}</span></>
+            )}
           </span>
           <span>
-            Page <span className="text-foreground font-semibold">{currentPage}</span> of{" "}
-            <span className="text-foreground font-semibold">{totalPages}</span>
+            Page <span className="text-foreground font-semibold">{currentPage}</span>
+            {totalPages != null && (
+              <> of <span className="text-foreground font-semibold">{totalPages}</span></>
+            )}
           </span>
         </div>
       )}
@@ -1638,12 +1655,15 @@ function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: Ca
 
 interface PaginationControlsProps {
   currentPage: number
-  totalPages: number
+  totalPages: number | null
+  hasNextPage: boolean
   isLoading: boolean
   onPageChange: (page: number) => void
 }
 
-function PaginationControls({ currentPage, totalPages, isLoading, onPageChange }: PaginationControlsProps) {
+function PaginationControls({ currentPage, totalPages, hasNextPage, isLoading, onPageChange }: PaginationControlsProps) {
+  const isNextDisabled = isLoading || !hasNextPage
+
   return (
     <div className="isolate flex flex-1 -space-x-px">
       <Button
@@ -1654,23 +1674,29 @@ function PaginationControls({ currentPage, totalPages, isLoading, onPageChange }
       >
         Prev
       </Button>
-      <Select value={currentPage.toString()} onValueChange={(v) => onPageChange(parseInt(v, 10))}>
-        <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
-          <SelectValue placeholder={currentPage} />
-        </SelectTrigger>
-        <SelectContent>
-          {getCenteredArray(Math.min(totalPages, 50), currentPage, totalPages || null).map((num: number) => (
-            <SelectItem key={num} value={num.toString()}>
-              {num}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {totalPages != null ? (
+        <Select value={currentPage.toString()} onValueChange={(v) => onPageChange(parseInt(v, 10))}>
+          <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
+            <SelectValue placeholder={currentPage} />
+          </SelectTrigger>
+          <SelectContent>
+            {getCenteredArray(Math.min(totalPages, 50), currentPage, totalPages || null).map((num: number) => (
+              <SelectItem key={num} value={num.toString()}>
+                {num}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <div className="border-input flex items-center justify-center border px-4 text-sm font-medium">
+          {currentPage}
+        </div>
+      )}
       <Button
         variant="outline"
         className="rounded-l-none focus:z-10"
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={isLoading || currentPage >= totalPages}
+        disabled={isNextDisabled}
       >
         Next
       </Button>
@@ -1748,13 +1774,15 @@ function BottomPagination({
   showingFrom,
   showingTo,
   totalCount,
+  hasNextPage,
   onPageChange,
 }: {
   currentPage: number
-  totalPages: number
+  totalPages: number | null
   showingFrom: number
   showingTo: number
-  totalCount: number
+  totalCount: number | null
+  hasNextPage: boolean
   onPageChange: (page: number) => void
 }) {
   return (
@@ -1762,13 +1790,16 @@ function BottomPagination({
       <div className="text-muted-foreground flex w-full flex-col text-sm">
         <span>
           Showing <span className="text-foreground font-semibold">{showingFrom}</span> to{" "}
-          <span className="text-foreground font-semibold">{showingTo}</span> of{" "}
-          <span className="text-foreground font-semibold">{totalCount}</span> results
+          <span className="text-foreground font-semibold">{showingTo}</span>
+          {totalCount != null && (
+            <> of <span className="text-foreground font-semibold">{totalCount}</span></>
+          )} results
         </span>
       </div>
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}
+        hasNextPage={hasNextPage}
         isLoading={false}
         onPageChange={onPageChange}
       />

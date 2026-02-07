@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import type { SupabaseClient } from "./types"
 import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
 
@@ -50,9 +51,15 @@ async function getDescendantCategoryIds(
 /**
  * Main query function for fetching store products
  * Handles all filtering, sorting, pagination, and user-specific augmentation
+ *
+ * @param params - Query parameters (filters, sort, pagination)
+ * @param client - Optional Supabase client (avoids duplicate createClient() on cold start)
  */
-export async function queryStoreProducts(params: StoreProductsQueryParams = {}): Promise<StoreProductsQueryResult> {
-  const supabase = createClient()
+export async function queryStoreProducts(
+  params: StoreProductsQueryParams = {},
+  client?: SupabaseClient,
+): Promise<StoreProductsQueryResult> {
+  const supabase = client ?? createClient()
 
   // Apply defaults
   const pagination = { ...DEFAULT_PAGINATION, ...params.pagination }
@@ -71,8 +78,9 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
     canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.canonicalCategory.categoryId)
   }
 
-  // Build the base query
-  let query = supabase.from(tableName).select("*", { count: "exact" })
+  // Build the base query — no count: "exact" to avoid expensive COUNT(*) OVER()
+  // Instead, fetch limit+1 rows to determine hasNextPage
+  let query = supabase.from(tableName).select("*")
 
   // Apply canonical category filter if present (must use the view)
   if (canonicalCategoryIds.length > 0) {
@@ -126,16 +134,16 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
   query = applySorting(query, sort.sortBy)
 
   // ============================================================================
-  // Apply Pagination
+  // Apply Pagination (fetch limit+1 to detect hasNextPage without COUNT)
   // ============================================================================
 
-  query = query.range(offset, offset + pagination.limit - 1)
+  query = query.range(offset, offset + pagination.limit)
 
   // ============================================================================
   // Execute Query
   // ============================================================================
 
-  const { data, error, count } = await query
+  const { data, error } = await query
 
   if (error) {
     return {
@@ -146,10 +154,18 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
   }
 
   // ============================================================================
+  // Determine pagination from limit+1 pattern
+  // ============================================================================
+
+  const rows = data ?? []
+  const hasNextPage = rows.length > pagination.limit
+  const pageData = hasNextPage ? rows.slice(0, pagination.limit) : rows
+
+  // ============================================================================
   // Augment with User Data (favorites)
   // ============================================================================
 
-  let augmentedData: StoreProductWithMeta[] = data ?? []
+  let augmentedData: StoreProductWithMeta[] = pageData
 
   if (params.userId && augmentedData.length > 0) {
     augmentedData = await augmentWithFavorites(supabase, augmentedData, params.userId)
@@ -159,17 +175,14 @@ export async function queryStoreProducts(params: StoreProductsQueryParams = {}):
   // Build Response
   // ============================================================================
 
-  const totalCount = count ?? 0
-  const totalPages = Math.ceil(totalCount / pagination.limit)
-
   return {
     data: augmentedData,
     pagination: {
       page: pagination.page,
       limit: pagination.limit,
-      totalCount,
-      totalPages,
-      hasNextPage: pagination.page < totalPages,
+      totalCount: null,
+      totalPages: null,
+      hasNextPage,
       hasPreviousPage: pagination.page > 1,
     },
     error: null,
@@ -388,8 +401,8 @@ function createEmptyPagination(pagination: { page: number; limit: number }): Pag
   return {
     page: pagination.page,
     limit: pagination.limit,
-    totalCount: 0,
-    totalPages: 0,
+    totalCount: null,
+    totalPages: null,
     hasNextPage: false,
     hasPreviousPage: pagination.page > 1,
   }

@@ -104,10 +104,10 @@ async function fetchStoreProducts(params: StoreProductsQueryParams): Promise<Sto
     pagination: {
       page: data.pagination.page,
       limit: data.pagination.limit,
-      totalCount: data.pagination.pagedCount,
-      totalPages: data.pagination.totalPages,
-      hasNextPage: data.pagination.page < data.pagination.totalPages,
-      hasPreviousPage: data.pagination.page > 1,
+      totalCount: data.pagination.pagedCount ?? null,
+      totalPages: data.pagination.totalPages ?? null,
+      hasNextPage: data.pagination.hasNextPage ?? false,
+      hasPreviousPage: data.pagination.hasPreviousPage ?? false,
     },
     error: null,
   }

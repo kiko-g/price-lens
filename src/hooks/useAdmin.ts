@@ -33,8 +33,8 @@ type StoreProductsPaginatedResponse = {
   pagination: {
     page: number
     limit: number
-    pagedCount: number
-    totalPages: number
+    pagedCount: number | null
+    totalPages: number | null
     hasNextPage: boolean
     hasPreviousPage: boolean
   }

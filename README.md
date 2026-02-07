@@ -27,6 +27,10 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
 - [x] Example spotify for searching when adding a song to a playlist
+- [ ] Audit queries
+- [ ] No exact() queries?
+- [ ] Use some kind of pagination magic wrapper to never deal with the 1000 supabase limit
+- [ ] Efficient SSR
 - [ ] Finish product category priority manual association
 - [ ] Benchmark api routes
 - [ ] Check query speeds especially on product page: loading time is very long for compare and related section.

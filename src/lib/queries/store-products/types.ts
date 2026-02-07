@@ -1,6 +1,7 @@
 import type { SearchType, SortByType } from "@/types/business"
 import { SupermarketChain } from "@/types/business"
 import type { StoreProduct, PrioritySource } from "@/types"
+import { createClient } from "@/lib/supabase/server"
 
 /**
  * Store Products Query System
@@ -11,6 +12,9 @@ import type { StoreProduct, PrioritySource } from "@/types"
 
 // Re-export SupermarketChain for convenience
 export { SupermarketChain }
+
+/** Supabase client type derived from our server createClient */
+export type SupabaseClient = ReturnType<typeof createClient>
 
 // ============================================================================
 // Filter Types
@@ -209,17 +213,19 @@ export interface StoreProductWithMeta extends StoreProduct {
 }
 
 /**
- * Pagination metadata returned with query results
+ * Pagination metadata returned with query results.
+ * totalCount and totalPages are null when using the fast limit+1 pattern
+ * (avoids expensive COUNT(*) OVER() on large tables).
  */
 export interface PaginationMeta {
   /** Current page number */
   page: number
   /** Items per page */
   limit: number
-  /** Total number of items matching the query */
-  totalCount: number
-  /** Total number of pages */
-  totalPages: number
+  /** Total number of items matching the query (null when count is skipped for performance) */
+  totalCount: number | null
+  /** Total number of pages (null when count is skipped for performance) */
+  totalPages: number | null
   /** Whether there are more pages after this one */
   hasNextPage: boolean
   /** Whether there are pages before this one */

@@ -84,6 +84,7 @@ export function AdminDashboardStoreProducts() {
         limit={paginationData.limit}
         totalCount={paginationData.pagedCount}
         totalPages={paginationData.totalPages}
+        hasNextPage={paginationData.hasNextPage}
       />
     </div>
   )

@@ -25,14 +25,18 @@ export function useAdminPagination(defaultLimit = 50): AdminPaginationState {
 type AdminPaginationProps = {
   page: number
   limit: number
-  totalCount: number
-  totalPages: number
+  totalCount: number | null
+  totalPages: number | null
+  hasNextPage?: boolean
 }
 
-export function AdminPagination({ page, limit, totalCount, totalPages }: AdminPaginationProps) {
+export function AdminPagination({ page, limit, totalCount, totalPages, hasNextPage }: AdminPaginationProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const resolvedTotalPages = totalPages ?? (hasNextPage ? page + 1 : page)
+  const isLastPage = !hasNextPage && totalPages === null ? true : page >= resolvedTotalPages
 
   const updateParams = (newPage: number, newLimit?: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -44,7 +48,7 @@ export function AdminPagination({ page, limit, totalCount, totalPages }: AdminPa
   }
 
   const goToPage = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
+    if (newPage >= 1) {
       updateParams(newPage)
     }
   }
@@ -54,14 +58,16 @@ export function AdminPagination({ page, limit, totalCount, totalPages }: AdminPa
   }
 
   const startItem = (page - 1) * limit + 1
-  const endItem = Math.min(page * limit, totalCount)
+  const endItem = totalCount != null ? Math.min(page * limit, totalCount) : page * limit
 
   return (
     <div className="bg-background/95 supports-backdrop-filter:bg-background/80 fixed right-0 bottom-0 left-0 z-50 border-t px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="text-muted-foreground text-sm">
-          Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of{" "}
-          <span className="font-medium">{totalCount}</span> results
+          Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span>
+          {totalCount != null && (
+            <> of <span className="font-medium">{totalCount}</span> results</>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
@@ -89,20 +95,22 @@ export function AdminPagination({ page, limit, totalCount, totalPages }: AdminPa
             </Button>
 
             <span className="text-muted-foreground mx-2 text-sm">
-              Page {page} of {totalPages}
+              Page {page}{totalPages != null ? ` of ${totalPages}` : ""}
             </span>
 
-            <Button variant="outline" size="icon-sm" onClick={() => goToPage(page + 1)} disabled={page === totalPages}>
+            <Button variant="outline" size="icon-sm" onClick={() => goToPage(page + 1)} disabled={isLastPage}>
               <ChevronRightIcon className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => goToPage(totalPages)}
-              disabled={page === totalPages}
-            >
-              <ChevronsRightIcon className="h-4 w-4" />
-            </Button>
+            {totalPages != null && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => goToPage(totalPages)}
+                disabled={page === totalPages}
+              >
+                <ChevronsRightIcon className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
