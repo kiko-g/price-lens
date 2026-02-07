@@ -109,7 +109,8 @@ export async function setCachedCategories(cacheKey: string, data: any, ttl: numb
 
 /**
  * Check if store products caching is enabled.
- * Requires Redis to be available and ENABLE_STORE_PRODUCTS_CACHE !== "false"
+ * Requires REDIS_URL and ENABLE_STORE_PRODUCTS_CACHE !== "false".
+ * When disabled, /api/store_products cold requests hit DB directly (slower).
  */
 export function isStoreProductsCacheEnabled(): boolean {
   return isRedisAvailable && process.env.ENABLE_STORE_PRODUCTS_CACHE !== "false"

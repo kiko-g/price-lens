@@ -5,7 +5,7 @@ import type { StoreCategoryTuple } from "@/types"
  * Used to avoid expensive database queries on every request
  */
 
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const CACHE_TTL = 10 * 60 * 1000 // 10 minutes (admin-only, reduces cold-start impact)
 
 // Stats cache
 let statsCache: { data: any; timestamp: number } | null = null

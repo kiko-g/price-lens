@@ -66,7 +66,7 @@ function RouteParamInputs({
 
         if (param.type === "boolean") {
           return (
-            <div key={param.name} className="flex items-center gap-2">
+            <div key={param.name} className="flex h-full items-center gap-2 self-center">
               <Checkbox
                 id={`${route.path}-${param.name}`}
                 checked={Boolean(value)}
@@ -167,7 +167,7 @@ function RouteBlock({
         isCurrentRoute && "bg-muted/50",
       )}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 border-r pr-4">
         <div className="flex flex-col gap-1">
           <Code className="w-fit">{route.path}</Code>
           <span className="text-muted-foreground text-xs">{route.description}</span>
@@ -284,10 +284,16 @@ export default function PerformancePage() {
     const data = {
       timestamp: new Date().toISOString(),
       summary: { testedCount, totalRoutes, overallAvg },
-      routes: Object.entries(results).map(([path, metrics]) => ({
-        path,
-        ...metrics,
-      })),
+      routes: Object.entries(results).map(([path, metrics]) => {
+        const pathname = path.split("?")[0]
+        const routePath = routes.find((r) => resolveUrl(r) === path)?.path ?? null
+        return {
+          path,
+          pathname,
+          routePath,
+          ...metrics,
+        }
+      }),
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
     const url = URL.createObjectURL(blob)
@@ -411,42 +417,45 @@ export default function PerformancePage() {
           </div>
         )}
 
-        <div className="space-y-12">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <GaugeIcon className="text-primary size-5" />
+        <div className="flex flex-col gap-2">
+          <h2 className="flex items-center gap-2 text-2xl font-bold">
+            <GaugeIcon className="text-primary size-7" />
             API Routes
             <Badge variant="boring">{totalRoutes}</Badge>
           </h2>
-          {CATEGORY_ORDER.map((category) => {
-            const categoryRoutes = routesByCategory.get(category)
-            if (!categoryRoutes?.length) return null
 
-            return (
-              <Card key={category}>
-                <CardHeader>
-                  <CardTitle>{CATEGORY_LABELS[category]}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {categoryRoutes.map((route) => {
-                    const resolvedUrl = resolveUrl(route)
-                    return (
-                      <RouteBlock
-                        key={route.path}
-                        route={route}
-                        metrics={results[resolvedUrl]}
-                        isRunning={isRunning}
-                        isCurrentRoute={progress.currentRoute === resolvedUrl}
-                        resolvedUrl={resolvedUrl}
-                        paramOverrides={paramOverrides[route.path] ?? {}}
-                        onUpdateParamOverride={(overrides) => updateParamOverride(route.path, overrides)}
-                        onTest={() => runSingleTest(route)}
-                      />
-                    )
-                  })}
-                </CardContent>
-              </Card>
-            )
-          })}
+          <div className="space-y-12">
+            {CATEGORY_ORDER.map((category) => {
+              const categoryRoutes = routesByCategory.get(category)
+              if (!categoryRoutes?.length) return null
+
+              return (
+                <Card key={category}>
+                  <CardHeader>
+                    <CardTitle>{CATEGORY_LABELS[category]}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {categoryRoutes.map((route) => {
+                      const resolvedUrl = resolveUrl(route)
+                      return (
+                        <RouteBlock
+                          key={route.path}
+                          route={route}
+                          metrics={results[resolvedUrl]}
+                          isRunning={isRunning}
+                          isCurrentRoute={progress.currentRoute === resolvedUrl}
+                          resolvedUrl={resolvedUrl}
+                          paramOverrides={paramOverrides[route.path] ?? {}}
+                          onUpdateParamOverride={(overrides) => updateParamOverride(route.path, overrides)}
+                          onTest={() => runSingleTest(route)}
+                        />
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </div>
 
         <Card>

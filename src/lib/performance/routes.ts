@@ -23,11 +23,23 @@ function formatDateToday(): string {
 }
 
 const SORT_OPTIONS = [
-  { value: "a-z", label: "A-Z" },
-  { value: "z-a", label: "Z-A" },
-  { value: "price-low-high", label: "Price low-high" },
-  { value: "price-high-low", label: "Price high-low" },
-  { value: "only-nulls", label: "Only nulls" },
+  { value: "a-z", label: "A to Z" },
+  { value: "z-a", label: "Z to A" },
+  { value: "price-low-high", label: "Cheapest" },
+  { value: "price-high-low", label: "Expensive" },
+  { value: "created-newest", label: "Newest First" },
+  { value: "created-oldest", label: "Oldest First" },
+  { value: "updated-newest", label: "Recently Updated" },
+  { value: "updated-oldest", label: "Least Recently" },
+  { value: "only-nulls", label: "Invalid products" },
+]
+
+const SEARCH_TYPE_OPTIONS = [
+  { value: "any", label: "Any" },
+  { value: "name", label: "Name" },
+  { value: "brand", label: "Brand" },
+  { value: "url", label: "URL" },
+  { value: "category", label: "Category" },
 ]
 
 const FORMAT_OPTIONS = [
@@ -59,7 +71,12 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
       { name: "page", type: "number", default: 1, placeholder: "Page" },
       { name: "limit", type: "number", default: 36, placeholder: "Limit" },
       { name: "origin", type: "number", default: 1, placeholder: "Origin (1-3)" },
-      { name: "sort", type: "select", default: "a-z", options: SORT_OPTIONS },
+      { name: "sort", type: "select", default: "updated-newest", options: SORT_OPTIONS },
+      { name: "searchType", type: "select", default: "any", options: SEARCH_TYPE_OPTIONS },
+      { name: "q", type: "string", default: "", placeholder: "Search query" },
+      { name: "orderByPriority", type: "boolean", default: true },
+      { name: "onlyDiscounted", type: "boolean", default: false },
+      { name: "tracked", type: "boolean", default: false },
     ],
   },
   {
@@ -218,7 +235,9 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
     name: "Discovery Status",
     category: "admin",
     description: "Sitemap discovery status",
-    queryParams: [{ name: "action", type: "select", default: "status", options: [{ value: "status", label: "Status" }] }],
+    queryParams: [
+      { name: "action", type: "select", default: "status", options: [{ value: "status", label: "Status" }] },
+    ],
   },
   {
     path: "/api/admin/bulk-scrape",
@@ -226,13 +245,6 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
     category: "admin",
     description: "List active bulk scrape jobs",
     queryParams: [{ name: "action", type: "select", default: "jobs", options: [{ value: "jobs", label: "Jobs" }] }],
-  },
-  {
-    path: "/api/admin/cron",
-    name: "Admin Cron Trigger",
-    category: "admin",
-    description: "Manual scrape trigger (omit params for ping)",
-    queryParams: [{ name: "priority", type: "number", default: 5, placeholder: "Priority (1-5)" }],
   },
   {
     path: "/api/admin/scrape/ai-priority",
@@ -245,7 +257,7 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
     path: "/api/admin/bulk-scrape/[jobId]",
     name: "Bulk Scrape Job Status",
     category: "admin",
-    description: "Single bulk scrape job (needs valid jobId)",
+    description: "Single bulk scrape job (404 expected for placeholder jobId)",
     pathParams: { jobId: "test" },
   },
 ]
@@ -256,6 +268,7 @@ export interface ExcludedRoute {
 }
 
 export const EXCLUDED_ROUTES: ExcludedRoute[] = [
+  { path: "/api/admin/cron", reason: "Triggers QStash scrape jobs" },
   { path: "/api/favorites", reason: "Auth required" },
   { path: "/api/favorites/count/[user_id]", reason: "Auth required" },
   { path: "/api/favorites/check/[store_product_id]", reason: "Auth required" },
@@ -276,10 +289,7 @@ export const CATEGORY_LABELS: Record<TestableRoute["category"], string> = {
   admin: "Admin",
 }
 
-export function buildTestUrl(
-  route: TestableRoute,
-  overrides?: Record<string, string | number | boolean>,
-): string {
+export function buildTestUrl(route: TestableRoute, overrides?: Record<string, string | number | boolean>): string {
   let url = route.path
 
   const pathParams = { ...route.pathParams, ...pickPathOverrides(overrides, route) }
