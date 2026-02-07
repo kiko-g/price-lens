@@ -1,0 +1,242 @@
+[
+  {
+    "schemaname": "public",
+    "tablename": "canonical_categories",
+    "indexname": "canonical_categories_pkey",
+    "indexdef": "CREATE UNIQUE INDEX canonical_categories_pkey ON public.canonical_categories USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "canonical_categories",
+    "indexname": "idx_canonical_categories_level",
+    "indexdef": "CREATE INDEX idx_canonical_categories_level ON public.canonical_categories USING btree (level)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "canonical_categories",
+    "indexname": "idx_canonical_categories_parent",
+    "indexdef": "CREATE INDEX idx_canonical_categories_parent ON public.canonical_categories USING btree (parent_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "canonical_categories",
+    "indexname": "idx_canonical_categories_parent_id",
+    "indexdef": "CREATE INDEX idx_canonical_categories_parent_id ON public.canonical_categories USING btree (parent_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "canonical_categories",
+    "indexname": "idx_canonical_categories_unique_name_parent",
+    "indexdef": "CREATE UNIQUE INDEX idx_canonical_categories_unique_name_parent ON public.canonical_categories USING btree (name, COALESCE(parent_id, 0))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "category_mappings",
+    "indexname": "category_mappings_pkey",
+    "indexdef": "CREATE UNIQUE INDEX category_mappings_pkey ON public.category_mappings USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "category_mappings",
+    "indexname": "idx_category_mappings_canonical",
+    "indexdef": "CREATE INDEX idx_category_mappings_canonical ON public.category_mappings USING btree (canonical_category_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "category_mappings",
+    "indexname": "idx_category_mappings_origin",
+    "indexdef": "CREATE INDEX idx_category_mappings_origin ON public.category_mappings USING btree (origin_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "category_mappings",
+    "indexname": "idx_category_mappings_tuple",
+    "indexdef": "CREATE INDEX idx_category_mappings_tuple ON public.category_mappings USING btree (store_category, store_category_2, store_category_3)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "category_mappings",
+    "indexname": "idx_category_mappings_unique_tuple",
+    "indexdef": "CREATE UNIQUE INDEX idx_category_mappings_unique_tuple ON public.category_mappings USING btree (origin_id, store_category, COALESCE(store_category_2, ''::text), COALESCE(store_category_3, ''::text))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "discovery_runs",
+    "indexname": "discovery_runs_pkey",
+    "indexdef": "CREATE UNIQUE INDEX discovery_runs_pkey ON public.discovery_runs USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "discovery_runs",
+    "indexname": "idx_discovery_runs_completed_at",
+    "indexdef": "CREATE INDEX idx_discovery_runs_completed_at ON public.discovery_runs USING btree (completed_at DESC)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "discovery_runs",
+    "indexname": "idx_discovery_runs_origin_id",
+    "indexdef": "CREATE INDEX idx_discovery_runs_origin_id ON public.discovery_runs USING btree (origin_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "discovery_runs",
+    "indexname": "idx_discovery_runs_source",
+    "indexdef": "CREATE INDEX idx_discovery_runs_source ON public.discovery_runs USING btree (discovery_source)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "discovery_runs",
+    "indexname": "idx_discovery_runs_status",
+    "indexdef": "CREATE INDEX idx_discovery_runs_status ON public.discovery_runs USING btree (status)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "prices",
+    "indexname": "prices_pkey",
+    "indexdef": "CREATE UNIQUE INDEX prices_pkey ON public.prices USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "products",
+    "indexname": "products_id_key1",
+    "indexdef": "CREATE UNIQUE INDEX products_id_key1 ON public.products USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "products",
+    "indexname": "products_pkey1",
+    "indexdef": "CREATE UNIQUE INDEX products_pkey1 ON public.products USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "indexname": "profiles_pkey",
+    "indexdef": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_available",
+    "indexdef": "CREATE INDEX idx_store_products_available ON public.store_products USING btree (available)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_available_origin_priority",
+    "indexdef": "CREATE INDEX idx_store_products_available_origin_priority ON public.store_products USING btree (available, origin_id, priority)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_barcode",
+    "indexdef": "CREATE INDEX idx_store_products_barcode ON public.store_products USING btree (barcode) WHERE (barcode IS NOT NULL)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_categories",
+    "indexdef": "CREATE INDEX idx_store_products_categories ON public.store_products USING btree (origin_id, category, category_2, category_3) WHERE (category IS NOT NULL)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_category",
+    "indexdef": "CREATE INDEX idx_store_products_category ON public.store_products USING btree (category)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_discount",
+    "indexdef": "CREATE INDEX idx_store_products_discount ON public.store_products USING btree (discount) WHERE (discount > (0)::double precision)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_name",
+    "indexdef": "CREATE INDEX idx_store_products_name ON public.store_products USING btree (name)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_price",
+    "indexdef": "CREATE INDEX idx_store_products_price ON public.store_products USING btree (price)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_priority",
+    "indexdef": "CREATE INDEX idx_store_products_priority ON public.store_products USING btree (priority)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_priority_source",
+    "indexdef": "CREATE INDEX idx_store_products_priority_source ON public.store_products USING btree (priority_source)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_priority_updated_at",
+    "indexdef": "CREATE INDEX idx_store_products_priority_updated_at ON public.store_products USING btree (priority_updated_at)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "idx_store_products_product_id",
+    "indexdef": "CREATE INDEX idx_store_products_product_id ON public.store_products USING btree (product_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "products_id_key",
+    "indexdef": "CREATE UNIQUE INDEX products_id_key ON public.store_products USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "products_origin_id_idx",
+    "indexdef": "CREATE INDEX products_origin_id_idx ON public.store_products USING btree (origin_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "products_pkey",
+    "indexdef": "CREATE UNIQUE INDEX products_pkey ON public.store_products USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "store_products",
+    "indexname": "products_url_unique",
+    "indexdef": "CREATE UNIQUE INDEX products_url_unique ON public.store_products USING btree (url)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "supermarkets",
+    "indexname": "supermarkets_pkey",
+    "indexdef": "CREATE UNIQUE INDEX supermarkets_pkey ON public.supermarkets USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_favorites",
+    "indexname": "idx_user_favorites_store_product_id",
+    "indexdef": "CREATE INDEX idx_user_favorites_store_product_id ON public.user_favorites USING btree (store_product_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_favorites",
+    "indexname": "idx_user_favorites_user_id",
+    "indexdef": "CREATE INDEX idx_user_favorites_user_id ON public.user_favorites USING btree (user_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_favorites",
+    "indexname": "user_favorites_pkey",
+    "indexdef": "CREATE UNIQUE INDEX user_favorites_pkey ON public.user_favorites USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_favorites",
+    "indexname": "user_favorites_user_id_store_product_id_key",
+    "indexdef": "CREATE UNIQUE INDEX user_favorites_user_id_store_product_id_key ON public.user_favorites USING btree (user_id, store_product_id)"
+  }
+]

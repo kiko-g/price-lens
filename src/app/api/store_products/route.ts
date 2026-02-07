@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import {
   queryStoreProducts,
@@ -34,52 +35,71 @@ import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProd
  * - tracked: "true" to show only tracked products (priority 1-5)
  */
 export async function GET(req: NextRequest) {
+  const start = performance.now()
+  const timings: Record<string, number> = {}
+  let last = start
+  const t = (label: string) => {
+    const now = performance.now()
+    timings[label] = Math.round(now - last)
+    last = now
+  }
+
   try {
     const params = req.nextUrl.searchParams
 
-    // Build structured query params (without userId for caching)
     const queryParams = parseSearchParams(params)
+    t("parseParams")
 
-    // Get authenticated user for favorites augmentation
     const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    t("createClient")
 
-    // Generate cache key from query params (excludes userId since favorites are fetched separately)
     const cacheKey = JSON.stringify(queryParams)
     const cacheEnabled = isStoreProductsCacheEnabled()
 
     let result: StoreProductsQueryResult
 
-    // Try to get from cache first
     if (cacheEnabled) {
       const cached = await getCachedStoreProducts<StoreProductsQueryResult>(cacheKey)
+      t("cache.get")
       if (cached) {
         result = cached
       } else {
-        // Cache miss - query database and cache result
         result = await queryStoreProducts(queryParams)
+        t("queryStoreProducts")
         if (!result.error) {
           await setCachedStoreProducts(cacheKey, result)
         }
+        t("cache.set")
       }
     } else {
-      // Caching disabled - query database directly
       result = await queryStoreProducts(queryParams)
+      t("queryStoreProducts")
     }
 
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
-    // Augment with user favorites if logged in (not cached, user-specific)
+    const hasAuthCookie = (await cookies()).getAll().some((c) => c.name.startsWith("sb-"))
+    let user: { id: string } | null = null
+    if (hasAuthCookie) {
+      const { data } = await supabase.auth.getUser()
+      user = data.user
+    }
+    t("auth.getUser")
+
     let data = result.data
     if (user?.id && data.length > 0) {
       data = await augmentWithUserFavorites(supabase, data, user.id)
+      t("augmentFavorites")
     }
 
-    // Return response in the expected format
+    t("total")
+    const headers: HeadersInit = {}
+    if (process.env.NODE_ENV === "development") {
+      headers["X-Perf-Timings"] = JSON.stringify(timings)
+    }
+
     return NextResponse.json(
       {
         data,
@@ -92,7 +112,7 @@ export async function GET(req: NextRequest) {
           hasPreviousPage: result.pagination.hasPreviousPage,
         },
       },
-      { status: 200 },
+      { status: 200, headers },
     )
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error"

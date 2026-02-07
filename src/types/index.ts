@@ -49,20 +49,6 @@ export interface Supermarket {
   name: string
 }
 
-export interface Product {
-  id: number
-  name: string
-  brand: string | null
-  category: string | null
-  is_generic: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface ProductWithListings extends Product {
-  store_products: StoreProduct[]
-}
-
 export type PrioritySource = "ai" | "manual"
 
 export interface StoreProduct {
@@ -85,7 +71,6 @@ export interface StoreProduct {
   priority: number | null
   priority_updated_at: string | null
   priority_source: PrioritySource | null
-  product_id: number | null
   available: boolean
   created_at: string
   updated_at: string

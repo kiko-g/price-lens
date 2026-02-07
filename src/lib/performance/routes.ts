@@ -76,7 +76,6 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
       { name: "q", type: "string", default: "", placeholder: "Search query" },
       { name: "orderByPriority", type: "boolean", default: true },
       { name: "onlyDiscounted", type: "boolean", default: false },
-      { name: "tracked", type: "boolean", default: false },
     ],
   },
   {

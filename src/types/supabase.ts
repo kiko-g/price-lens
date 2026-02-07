@@ -207,36 +207,6 @@ export type Database = {
           },
         ]
       }
-      products: {
-        Row: {
-          brand: string | null
-          category: string | null
-          created_at: string
-          id: number
-          is_generic: boolean
-          name: string | null
-          updated_at: string
-        }
-        Insert: {
-          brand?: string | null
-          category?: string | null
-          created_at?: string
-          id?: number
-          is_generic?: boolean
-          name?: string | null
-          updated_at?: string
-        }
-        Update: {
-          brand?: string | null
-          category?: string | null
-          created_at?: string
-          id?: number
-          is_generic?: boolean
-          name?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -288,7 +258,6 @@ export type Database = {
             | Database["public"]["Enums"]["priority_source_type"]
             | null
           priority_updated_at: string | null
-          product_id: number | null
           scraped_at: string | null
           updated_at: string | null
           url: string | null
@@ -316,7 +285,6 @@ export type Database = {
             | Database["public"]["Enums"]["priority_source_type"]
             | null
           priority_updated_at?: string | null
-          product_id?: number | null
           scraped_at?: string | null
           updated_at?: string | null
           url?: string | null
@@ -344,7 +312,6 @@ export type Database = {
             | Database["public"]["Enums"]["priority_source_type"]
             | null
           priority_updated_at?: string | null
-          product_id?: number | null
           scraped_at?: string | null
           updated_at?: string | null
           url?: string | null
@@ -355,13 +322,6 @@ export type Database = {
             columns: ["origin_id"]
             isOneToOne: false
             referencedRelation: "supermarkets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "store_products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -450,7 +410,6 @@ export type Database = {
             | Database["public"]["Enums"]["priority_source_type"]
             | null
           priority_updated_at: string | null
-          product_id: number | null
           scraped_at: string | null
           updated_at: string | null
           url: string | null
@@ -482,13 +441,6 @@ export type Database = {
             columns: ["origin_id"]
             isOneToOne: false
             referencedRelation: "supermarkets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "store_products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -539,6 +491,18 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_schedule_stats: {
+        Args: { priority_refresh_hours?: Json }
+        Returns: {
+          fresh: number
+          never_scraped: number
+          priority: number
+          stale_actionable: number
+          staleness_threshold_hours: number
+          total: number
+          unavailable: number
+        }[]
+      }
       get_unsynced_high_priority_products: {
         Args: never
         Returns: {
@@ -564,7 +528,6 @@ export type Database = {
             | Database["public"]["Enums"]["priority_source_type"]
             | null
           priority_updated_at: string | null
-          product_id: number | null
           scraped_at: string | null
           updated_at: string | null
           url: string | null

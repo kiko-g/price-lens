@@ -100,19 +100,7 @@ export const createMockStoreProduct = (overrides = {}) => ({
   priority: 3,
   priority_updated_at: "2024-01-01T00:00:00Z",
   priority_source: "ai" as const,
-  product_id: null,
   available: true,
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z",
-  ...overrides,
-})
-
-export const createMockProduct = (overrides = {}) => ({
-  id: 1,
-  name: "Test Product",
-  brand: "Test Brand",
-  category: "Food",
-  is_generic: false,
   created_at: "2024-01-01T00:00:00Z",
   updated_at: "2024-01-01T00:00:00Z",
   ...overrides,
