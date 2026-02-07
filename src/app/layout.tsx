@@ -86,6 +86,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://www.continente.pt" />
+        <link rel="preconnect" href="https://www.auchan.pt" />
+        <link rel="preconnect" href="https://www.pingodoce.pt" />
         {useReactScan && (
           <>
             <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />

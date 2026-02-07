@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Suspense, useState } from "react"
+import { Suspense } from "react"
 import { type StoreProduct } from "@/types"
 import { useUser } from "@/hooks/useUser"
 import { useStoreProductCard } from "@/hooks/useStoreProductCard"
@@ -67,8 +67,6 @@ type Props = {
 }
 
 export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showBarcode = false }: Props) {
-  const [imageLoaded, setImageLoaded] = useState(false)
-
   const {
     priority,
     isFavorited,
@@ -129,22 +127,19 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
         <Link href={generateProductPath(sp)} className="h-full w-full">
           {sp.image ? (
             <div className="relative aspect-square w-full">
-              {!imageLoaded && <div className="bg-background/10 absolute inset-0 z-10 animate-pulse" />}
               <Image
-                src={resolveImageUrlForCard(sp.image, 300)}
+                src={resolveImageUrlForCard(sp.image, 400)}
                 alt={sp.name || "Product Image"}
-                width={500}
-                height={500}
+                width={400}
+                height={400}
+                unoptimized
                 className={cn(
                   "aspect-square h-full w-full bg-white object-cover object-center transition duration-300",
                   sp.available ? "opacity-100" : "",
                 )}
-                {...(imagePriority && {
-                  placeholder: "blur" as const,
-                  blurDataURL: imagePlaceholder.productBlur,
-                })}
+                placeholder="blur"
+                blurDataURL={imagePlaceholder.productBlur}
                 priority={imagePriority}
-                onLoad={() => setImageLoaded(true)}
               />
             </div>
           ) : (
