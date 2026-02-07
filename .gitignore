@@ -48,3 +48,7 @@ docs/*.md
 # scripts output
 scripts/*.csv
 scripts/*-failed-ids.txt
+
+# local docs, plans, jsons
+docs/json
+docs/plans
