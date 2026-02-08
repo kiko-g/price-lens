@@ -87,10 +87,10 @@ export default function OverviewPage() {
             <h1 className="text-2xl font-bold">Overview</h1>
             <p className="text-muted-foreground text-sm">Key performance indicators and system health</p>
           </div>
-          <div className="flex items-start justify-start gap-3">
-            {dataUpdatedAt && (
+          <div className="flex items-center justify-start gap-3">
+            {dataUpdatedAt ? (
               <span className="text-muted-foreground text-xs">Updated {format(dataUpdatedAt, "HH:mm:ss")}</span>
-            )}
+            ) : null}
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               <RefreshCwIcon className="h-4 w-4" />
               Refresh
