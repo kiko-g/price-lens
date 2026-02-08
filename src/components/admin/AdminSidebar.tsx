@@ -188,10 +188,8 @@ export function AdminSidebar() {
 }
 
 function CollapsibleNavItem({ item, pathname }: { item: NavItem; pathname: string }) {
-  const isActive = pathname === item.href || item.items?.some((sub) => pathname === sub.href)
-
   return (
-    <Collapsible asChild defaultOpen={isActive} className="group/collapsible">
+    <Collapsible asChild defaultOpen className="group/collapsible">
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={item.title} isActive={pathname === item.href}>

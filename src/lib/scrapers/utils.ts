@@ -1,19 +1,29 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
 import https from "https"
+import { HttpsProxyAgent } from "https-proxy-agent"
 
 import type { StoreOrigin, RawProduct, ScrapedProduct, PriorityInfo, FetchResult } from "@/lib/scrapers/types"
 import { now } from "@/lib/utils"
 import { formatProductName, packageToUnit, priceToNumber, resizeImgSrc } from "@/lib/business/product"
 
 /**
- * Connection pooling agent - reuses TCP connections to reduce handshake overhead
+ * Connection pooling agent - reuses TCP connections to reduce handshake overhead.
+ * When PROXY_URL is set, routes all requests through the proxy (e.g. residential proxy).
  */
-const httpsAgent = new https.Agent({
-  keepAlive: true,
-  maxSockets: 50,
-  timeout: 30000,
-})
+const PROXY_URL = process.env.PROXY_URL
+
+const httpsAgent = PROXY_URL
+  ? new HttpsProxyAgent(PROXY_URL)
+  : new https.Agent({
+      keepAlive: true,
+      maxSockets: 50,
+      timeout: 30000,
+    })
+
+if (PROXY_URL) {
+  console.info(`[Scrapers] Using proxy: ${PROXY_URL.replace(/\/\/.*@/, "//***@")}`)
+}
 
 // Rotating User-Agents to look like different browsers
 const USER_AGENTS = [

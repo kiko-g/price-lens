@@ -22,17 +22,17 @@ export const getBaseUrl = () => {
 }
 
 // How many products to include in a single worker batch
-// Each worker has 300 seconds max, ~5 sec per scrape = ~60 products max
-// Using 50 with buffer for safety
-export const WORKER_BATCH_SIZE = 50
+// Each worker has 300s max. With useAntiBlock (300-1500ms delay) + ~5s scrape:
+// 40 products × ~5.9s avg = ~236s (safe margin within 300s limit)
+export const WORKER_BATCH_SIZE = 40
 
 // How many batches to send to QStash per scheduler run
-// With 50 products per batch and 20 batches = 1000 products per scheduler run
+// With 40 products per batch and 20 batches = 800 products per scheduler run
 // Note: Requires QStash paid plan (~$10/mo) for >500 messages/day
 export const MAX_BATCHES_PER_RUN = 20
 
 // Cron runs every 15 minutes = 96 runs/day
-// Max daily capacity: 50 × 20 × 96 = 96,000 products/day
+// Max daily capacity: 40 × 20 × 96 = 76,800 products/day
 export const CRON_FREQUENCY_MINUTES = 15
 
 // Legacy: Batch size for QStash fan-out (used by bulk-scrape)

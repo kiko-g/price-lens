@@ -103,6 +103,21 @@ export interface ProductsByStalenessResponse {
   }
 }
 
+export interface QStashSchedule {
+  scheduleId: string
+  cron: string
+  destination: string
+  isPaused: boolean
+  createdAt: number
+  method: string
+  retries: number
+}
+
+export interface QStashSchedulesResponse {
+  schedules: QStashSchedule[]
+  total: number
+}
+
 export interface SchedulerTestResult {
   dryRun: boolean
   message: string

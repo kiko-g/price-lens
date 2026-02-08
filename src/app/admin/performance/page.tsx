@@ -1,6 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 import { usePerformanceTest, type RouteMetrics } from "@/hooks/usePerformanceTest"
 import {
   CATEGORY_LABELS,
@@ -9,7 +10,6 @@ import {
   type TestableRoute,
   type RouteParam,
 } from "@/lib/performance/routes"
-import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 import { Badge, type BadgeKind } from "@/components/ui/badge"

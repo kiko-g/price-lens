@@ -96,11 +96,12 @@ async function handler(req: NextRequest) {
           .eq("id", product.id)
           .single()
 
-        // Scrape the product
+        // Scrape the product (useAntiBlock=true: rotating UAs + random delays)
         const response = await scrapeAndReplaceProduct(
           product.url,
           product.originId,
           existingProduct as StoreProduct | undefined,
+          true,
         )
         const json = await response.json()
 
@@ -141,8 +142,6 @@ async function handler(req: NextRequest) {
         console.error(`🛜 [BatchWorker] ✗ Error for ${product.name}:`, error)
       }
 
-      // Small delay between products to avoid hammering stores
-      await new Promise((resolve) => setTimeout(resolve, 100))
     }
 
     const totalDuration = Date.now() - batchStartTime
@@ -150,6 +149,22 @@ async function handler(req: NextRequest) {
 
     console.info(`🛜 [BatchWorker] Completed batch ${batchId} (${successCount}/${products.length})`)
     console.info(`🛜 [BatchWorker] > Stats: ${totalDuration}ms (avg ${avgDuration}ms/product)`)
+
+    // Persist run result for diagnostics
+    try {
+      await supabase.from("scrape_runs").insert({
+        batch_id: batchId,
+        started_at: new Date(batchStartTime).toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_ms: totalDuration,
+        total: products.length,
+        success: successCount,
+        failed: failCount,
+        avg_duration_ms: avgDuration,
+      })
+    } catch (err) {
+      console.warn("[BatchWorker] Failed to persist run result:", err)
+    }
 
     return NextResponse.json({
       batchId,
@@ -162,6 +177,24 @@ async function handler(req: NextRequest) {
     })
   } catch (error) {
     console.error("[BatchWorker] Batch error:", error)
+
+    // Persist failure for diagnostics
+    try {
+      const supabase = createClient()
+      await supabase.from("scrape_runs").insert({
+        batch_id: "unknown",
+        started_at: new Date(batchStartTime).toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_ms: Date.now() - batchStartTime,
+        total: 0,
+        success: 0,
+        failed: 0,
+        error: error instanceof Error ? error.message : "Unknown batch error",
+      })
+    } catch {
+      // Silently fail — don't let tracking break the response
+    }
+
     return NextResponse.json(
       { error: "Batch worker failed", details: error instanceof Error ? error.message : "Unknown" },
       { status: 500 },

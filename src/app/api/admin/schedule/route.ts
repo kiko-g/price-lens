@@ -7,6 +7,8 @@ import {
   WORKER_BATCH_SIZE,
   MAX_BATCHES_PER_RUN,
   CRON_FREQUENCY_MINUTES,
+  qstash,
+  getBaseUrl,
 } from "@/lib/qstash"
 import { PRIORITY_REFRESH_HOURS, analyzeSchedulerCapacity, type CapacityAnalysis } from "@/lib/business/priority"
 
@@ -672,11 +674,209 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    if (action === "scrape-runs") {
+      const page = parseInt(searchParams.get("page") || "1", 10)
+      const limit = parseInt(searchParams.get("limit") || "50", 10)
+      const offset = (page - 1) * limit
+
+      const { data: runs, error: runsError, count } = await supabase
+        .from("scrape_runs")
+        .select("*", { count: "exact" })
+        .order("started_at", { ascending: false })
+        .range(offset, offset + limit - 1)
+
+      if (runsError) {
+        // Table might not exist yet (migration not applied)
+        if (runsError.message.includes("does not exist")) {
+          return NextResponse.json({
+            runs: [],
+            pagination: { page: 1, limit, totalCount: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
+            stats24h: { totalBatches: 0, totalProducts: 0, totalSuccess: 0, totalFailed: 0, successRate: 0, avgBatchDuration: 0 },
+            migrationRequired: true,
+          })
+        }
+        console.error("Scrape runs query error:", runsError)
+        return NextResponse.json(
+          { error: "Failed to fetch scrape runs", details: runsError.message },
+          { status: 500 },
+        )
+      }
+
+      // Calculate aggregate stats from last 24 hours
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+      const { data: recentRuns } = await supabase
+        .from("scrape_runs")
+        .select("total, success, failed, duration_ms")
+        .gte("started_at", oneDayAgo)
+
+      const stats24h = (recentRuns || []).reduce(
+        (acc, run) => ({
+          totalBatches: acc.totalBatches + 1,
+          totalProducts: acc.totalProducts + (run.total || 0),
+          totalSuccess: acc.totalSuccess + (run.success || 0),
+          totalFailed: acc.totalFailed + (run.failed || 0),
+          totalDuration: acc.totalDuration + (run.duration_ms || 0),
+        }),
+        { totalBatches: 0, totalProducts: 0, totalSuccess: 0, totalFailed: 0, totalDuration: 0 },
+      )
+
+      const successRate = stats24h.totalProducts > 0
+        ? Math.round((stats24h.totalSuccess / stats24h.totalProducts) * 100)
+        : 0
+
+      return NextResponse.json({
+        runs: runs || [],
+        pagination: {
+          page,
+          limit,
+          totalCount: count || 0,
+          totalPages: Math.ceil((count || 0) / limit),
+          hasNextPage: page < Math.ceil((count || 0) / limit),
+          hasPreviousPage: page > 1,
+        },
+        stats24h: {
+          ...stats24h,
+          successRate,
+          avgBatchDuration: stats24h.totalBatches > 0
+            ? Math.round(stats24h.totalDuration / stats24h.totalBatches)
+            : 0,
+        },
+      })
+    }
+
+    if (action === "qstash-schedules") {
+      try {
+        const schedules = await qstash.schedules.list()
+        const schedulerPath = "/api/scrape/scheduler"
+        const relevantSchedules = schedules.filter((s) => s.destination.includes(schedulerPath))
+        return NextResponse.json({
+          schedules: relevantSchedules.map((s) => ({
+            scheduleId: s.scheduleId,
+            cron: s.cron,
+            destination: s.destination,
+            isPaused: s.isPaused,
+            createdAt: s.createdAt,
+            method: s.method,
+            retries: s.retries,
+          })),
+          total: relevantSchedules.length,
+        })
+      } catch (err) {
+        console.error("QStash schedules error:", err)
+        return NextResponse.json(
+          { error: "Failed to list QStash schedules", details: err instanceof Error ? err.message : "Unknown" },
+          { status: 500 },
+        )
+      }
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 })
   } catch (error) {
     console.error("Schedule API error:", error)
     return NextResponse.json(
       { error: "Failed to fetch schedule data", details: error instanceof Error ? error.message : "Unknown" },
+      { status: 500 },
+    )
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { action } = body as { action: string }
+
+    if (action === "create-qstash-cron") {
+      const { cron } = body as { cron?: string }
+      const cronExpression = cron || `*/${CRON_FREQUENCY_MINUTES} * * * *`
+      const baseUrl = getBaseUrl()
+      const destination = `${baseUrl}/api/scrape/scheduler`
+
+      try {
+        const result = await qstash.schedules.create({
+          destination,
+          cron: cronExpression,
+          method: "GET",
+          retries: 2,
+        })
+
+        console.log(`[Admin] Created QStash cron schedule: ${result.scheduleId} (${cronExpression})`)
+        return NextResponse.json({
+          message: `Created QStash cron schedule`,
+          scheduleId: result.scheduleId,
+          cron: cronExpression,
+          destination,
+        })
+      } catch (err) {
+        console.error("QStash create schedule error:", err)
+        return NextResponse.json(
+          { error: "Failed to create QStash schedule", details: err instanceof Error ? err.message : "Unknown" },
+          { status: 500 },
+        )
+      }
+    }
+
+    if (action === "delete-qstash-cron") {
+      const { scheduleId } = body as { scheduleId: string }
+      if (!scheduleId) {
+        return NextResponse.json({ error: "scheduleId is required" }, { status: 400 })
+      }
+
+      try {
+        await qstash.schedules.delete(scheduleId)
+        console.log(`[Admin] Deleted QStash cron schedule: ${scheduleId}`)
+        return NextResponse.json({ message: `Deleted schedule ${scheduleId}` })
+      } catch (err) {
+        console.error("QStash delete schedule error:", err)
+        return NextResponse.json(
+          { error: "Failed to delete QStash schedule", details: err instanceof Error ? err.message : "Unknown" },
+          { status: 500 },
+        )
+      }
+    }
+
+    if (action === "pause-qstash-cron") {
+      const { scheduleId } = body as { scheduleId: string }
+      if (!scheduleId) {
+        return NextResponse.json({ error: "scheduleId is required" }, { status: 400 })
+      }
+
+      try {
+        await qstash.schedules.pause({ schedule: scheduleId })
+        console.log(`[Admin] Paused QStash cron schedule: ${scheduleId}`)
+        return NextResponse.json({ message: `Paused schedule ${scheduleId}` })
+      } catch (err) {
+        console.error("QStash pause schedule error:", err)
+        return NextResponse.json(
+          { error: "Failed to pause QStash schedule", details: err instanceof Error ? err.message : "Unknown" },
+          { status: 500 },
+        )
+      }
+    }
+
+    if (action === "resume-qstash-cron") {
+      const { scheduleId } = body as { scheduleId: string }
+      if (!scheduleId) {
+        return NextResponse.json({ error: "scheduleId is required" }, { status: 400 })
+      }
+
+      try {
+        await qstash.schedules.resume({ schedule: scheduleId })
+        console.log(`[Admin] Resumed QStash cron schedule: ${scheduleId}`)
+        return NextResponse.json({ message: `Resumed schedule ${scheduleId}` })
+      } catch (err) {
+        console.error("QStash resume schedule error:", err)
+        return NextResponse.json(
+          { error: "Failed to resume QStash schedule", details: err instanceof Error ? err.message : "Unknown" },
+          { status: 500 },
+        )
+      }
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 })
+  } catch (error) {
+    console.error("Schedule API POST error:", error)
+    return NextResponse.json(
+      { error: "Failed to process request", details: error instanceof Error ? error.message : "Unknown" },
       { status: 500 },
     )
   }

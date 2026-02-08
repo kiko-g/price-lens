@@ -29,11 +29,21 @@ import {
   GaugeIcon,
   TrendingUpIcon,
   TrendingDownIcon,
+  ClockIcon,
+  PlayIcon,
+  PauseIcon,
+  TrashIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import type { CapacityHealthStatus } from "@/app/admin/schedule/types"
 
-import type { ScheduleOverview, StalenessStatus, ProductsByStalenessResponse } from "@/app/admin/schedule/types"
+import type {
+  ScheduleOverview,
+  StalenessStatus,
+  ProductsByStalenessResponse,
+  QStashSchedulesResponse,
+} from "@/app/admin/schedule/types"
 import { PRIORITY_CONFIG, formatThreshold } from "@/app/admin/schedule/constants"
 
 export default function ScheduleDistributionPage() {
@@ -62,6 +72,84 @@ export default function ScheduleDistributionPage() {
     onSuccess: (data) => {
       setFixResult({ fixed: data.fixed })
       queryClient.invalidateQueries({ queryKey: ["schedule-overview"] })
+    },
+  })
+
+  // Scrape runs tracking (24h stats)
+  const { data: scrapeRunsData } = useQuery({
+    queryKey: ["scrape-runs-stats"],
+    queryFn: async () => {
+      const res = await axios.get("/api/admin/schedule?action=scrape-runs&limit=10")
+      return res.data as {
+        runs: Array<{
+          id: number
+          batch_id: string
+          started_at: string
+          duration_ms: number
+          total: number
+          success: number
+          failed: number
+          error: string | null
+        }>
+        stats24h: {
+          totalBatches: number
+          totalProducts: number
+          totalSuccess: number
+          totalFailed: number
+          successRate: number
+          avgBatchDuration: number
+        }
+      }
+    },
+    staleTime: 30000,
+  })
+
+  // QStash cron schedule management
+  const { data: qstashSchedules, isLoading: isLoadingSchedules } = useQuery({
+    queryKey: ["qstash-schedules"],
+    queryFn: async () => {
+      const res = await axios.get("/api/admin/schedule?action=qstash-schedules")
+      return res.data as QStashSchedulesResponse
+    },
+    staleTime: 30000,
+  })
+
+  const createScheduleMutation = useMutation({
+    mutationFn: async (cron: string | undefined = undefined) => {
+      const res = await axios.post("/api/admin/schedule", {
+        action: "create-qstash-cron",
+        cron,
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["qstash-schedules"] })
+    },
+  })
+
+  const deleteScheduleMutation = useMutation({
+    mutationFn: async (scheduleId: string) => {
+      const res = await axios.post("/api/admin/schedule", {
+        action: "delete-qstash-cron",
+        scheduleId,
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["qstash-schedules"] })
+    },
+  })
+
+  const pauseScheduleMutation = useMutation({
+    mutationFn: async ({ scheduleId, isPaused }: { scheduleId: string; isPaused: boolean }) => {
+      const res = await axios.post("/api/admin/schedule", {
+        action: isPaused ? "resume-qstash-cron" : "pause-qstash-cron",
+        scheduleId,
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["qstash-schedules"] })
     },
   })
 
@@ -151,158 +239,325 @@ export default function ScheduleDistributionPage() {
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         {/* Capacity Health Indicator */}
-        {overview?.capacity && (
-          <Card
-            className={cn(
-              getStatusConfig(overview.capacity.status).borderColor,
-              getStatusConfig(overview.capacity.status).bgColor,
-            )}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle
-                  className={cn("flex items-center gap-2 text-lg", getStatusConfig(overview.capacity.status).color)}
-                >
-                  <GaugeIcon className="h-5 w-5" />
-                  Scheduler Capacity: {getStatusConfig(overview.capacity.status).label}
-                </CardTitle>
-                <Badge
-                  variant={
-                    overview.capacity.status === "healthy"
-                      ? "success"
-                      : overview.capacity.status === "degraded"
-                        ? "warning"
-                        : "destructive"
-                  }
-                >
-                  {overview.capacity.utilizationPercent}% utilization
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
-                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                    <TrendingUpIcon className="h-3.5 w-3.5" />
-                    Required Daily
-                  </div>
-                  <p className="mt-1 text-xl font-bold">{overview.capacity.requiredDailyScrapes.toLocaleString()}</p>
-                  <p className="text-muted-foreground text-xs">scrapes/day</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {overview?.capacity && (
+            <Card
+              className={cn(
+                "col-span-1 sm:col-span-2",
+                getStatusConfig(overview.capacity.status).borderColor,
+                getStatusConfig(overview.capacity.status).bgColor,
+              )}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle
+                    className={cn("flex items-center gap-2 text-lg", getStatusConfig(overview.capacity.status).color)}
+                  >
+                    <GaugeIcon className="h-5 w-5" />
+                    Scheduler Capacity: {getStatusConfig(overview.capacity.status).label}
+                  </CardTitle>
+                  <Badge
+                    variant={
+                      overview.capacity.status === "healthy"
+                        ? "success"
+                        : overview.capacity.status === "degraded"
+                          ? "warning"
+                          : "destructive"
+                    }
+                  >
+                    {overview.capacity.utilizationPercent}% utilization
+                  </Badge>
                 </div>
-                <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
-                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                    <GaugeIcon className="h-3.5 w-3.5" />
-                    Available Capacity
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                    <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                      <TrendingUpIcon className="h-3.5 w-3.5" />
+                      Required Daily
+                    </div>
+                    <p className="mt-1 text-xl font-bold">{overview.capacity.requiredDailyScrapes.toLocaleString()}</p>
+                    <p className="text-muted-foreground text-xs">scrapes/day</p>
                   </div>
-                  <p className="mt-1 text-xl font-bold">{overview.capacity.availableDailyCapacity.toLocaleString()}</p>
-                  <p className="text-muted-foreground text-xs">scrapes/day</p>
+                  <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                    <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                      <GaugeIcon className="h-3.5 w-3.5" />
+                      Available Capacity
+                    </div>
+                    <p className="mt-1 text-xl font-bold">
+                      {overview.capacity.availableDailyCapacity.toLocaleString()}
+                    </p>
+                    <p className="text-muted-foreground text-xs">scrapes/day</p>
+                  </div>
+                  {overview.capacity.deficit > 0 ? (
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/30">
+                      <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
+                        <TrendingDownIcon className="h-3.5 w-3.5" />
+                        Daily Deficit
+                      </div>
+                      <p className="mt-1 text-xl font-bold text-red-600 dark:text-red-400">
+                        -{overview.capacity.deficit.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-red-600/80 dark:text-red-400/80">scrapes short</p>
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle2Icon className="h-3.5 w-3.5" />
+                        Surplus
+                      </div>
+                      <p className="mt-1 text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                        +{overview.capacity.surplusPercent.toFixed(0)}%
+                      </p>
+                      <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80">extra capacity</p>
+                    </div>
+                  )}
+                  <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                    <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                      <CircleIcon className="h-3.5 w-3.5" />
+                      Config
+                    </div>
+                    <p className="mt-1 text-sm font-medium">
+                      {overview.capacity.config.batchSize} × {overview.capacity.config.maxBatches}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      every {overview.capacity.config.cronFrequencyMinutes}m ({overview.capacity.config.runsPerDay}{" "}
+                      runs/day)
+                    </p>
+                  </div>
                 </div>
-                {overview.capacity.deficit > 0 ? (
-                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/30">
-                    <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
-                      <TrendingDownIcon className="h-3.5 w-3.5" />
-                      Daily Deficit
-                    </div>
-                    <p className="mt-1 text-xl font-bold text-red-600 dark:text-red-400">
-                      -{overview.capacity.deficit.toLocaleString()}
+
+                {overview.capacity.status === "critical" && (
+                  <div className="mt-4 rounded-lg border border-red-200 bg-red-100 p-3 dark:border-red-900 dark:bg-red-950/50">
+                    <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                      System cannot keep up with scraping demands. Products will accumulate staleness over time.
                     </p>
-                    <p className="text-xs text-red-600/80 dark:text-red-400/80">scrapes short</p>
-                  </div>
-                ) : (
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle2Icon className="h-3.5 w-3.5" />
-                      Surplus
-                    </div>
-                    <p className="mt-1 text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                      +{overview.capacity.surplusPercent.toFixed(0)}%
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      Consider: increasing batch size, running cron more frequently, or reducing product priorities.
                     </p>
-                    <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80">extra capacity</p>
                   </div>
                 )}
-                <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
-                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                    <CircleIcon className="h-3.5 w-3.5" />
-                    Config
-                  </div>
-                  <p className="mt-1 text-sm font-medium">
-                    {overview.capacity.config.batchSize} × {overview.capacity.config.maxBatches}
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    every {overview.capacity.config.cronFrequencyMinutes}m ({overview.capacity.config.runsPerDay}{" "}
-                    runs/day)
-                  </p>
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          )}
 
-              {overview.capacity.status === "critical" && (
-                <div className="mt-4 rounded-lg border border-red-200 bg-red-100 p-3 dark:border-red-900 dark:bg-red-950/50">
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
-                    System cannot keep up with scraping demands. Products will accumulate staleness over time.
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Consider: increasing batch size, running cron more frequently, or reducing product priorities.
-                  </p>
+          {/* Phantom Scraped Warning */}
+          {overview && overview.totalPhantomScraped > 0 && (
+            <Card className="col-span-1 border-amber-500 bg-amber-50 sm:col-span-1 dark:bg-amber-950/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg text-amber-700 dark:text-amber-400">
+                  <AlertTriangleIcon className="h-5 w-5" />
+                  Data Integrity Issue Detected
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-3 text-sm">
+                  Found <strong className="text-foreground">{overview.totalPhantomScraped.toLocaleString()}</strong>{" "}
+                  products that appear scraped (have{" "}
+                  <code className="rounded bg-amber-100 px-1 dark:bg-amber-900">updated_at</code> set) but have{" "}
+                  <strong>no price records</strong>. These products won&apos;t be picked up by the scheduler.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setViewingPhantomScraped(true)
+                      setSelectedPriority(undefined)
+                      setPage(1)
+                    }}
+                    className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
+                  >
+                    <SearchIcon className="h-4 w-4" />
+                    Inspect Products
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fixPhantomMutation.mutate()}
+                    disabled={fixPhantomMutation.isPending}
+                    className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
+                  >
+                    {fixPhantomMutation.isPending ? (
+                      <>
+                        <Loader2Icon className="h-4 w-4 animate-spin" />
+                        Fixing...
+                      </>
+                    ) : (
+                      <>
+                        <WrenchIcon className="h-4 w-4" />
+                        Fix {overview.totalPhantomScraped.toLocaleString()} products
+                      </>
+                    )}
+                  </Button>
+                  {fixResult && (
+                    <span className="text-sm text-emerald-600 dark:text-emerald-400">
+                      ✓ Fixed {fixResult.fixed} products - they will be scraped on the next run
+                    </span>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-        {/* Phantom Scraped Warning */}
-        {overview && overview.totalPhantomScraped > 0 && (
-          <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-lg text-amber-700 dark:text-amber-400">
-                <AlertTriangleIcon className="h-5 w-5" />
-                Data Integrity Issue Detected
+        {/* QStash Cron Schedule Management */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <ClockIcon className="h-5 w-5" />
+                QStash Cron Schedule
               </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-3 text-sm">
-                Found <strong className="text-foreground">{overview.totalPhantomScraped.toLocaleString()}</strong>{" "}
-                products that appear scraped (have{" "}
-                <code className="rounded bg-amber-100 px-1 dark:bg-amber-900">updated_at</code> set) but have{" "}
-                <strong>no price records</strong>. These products won&apos;t be picked up by the scheduler.
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
+              {isLoadingSchedules ? (
+                <Skeleton className="h-6 w-20" />
+              ) : qstashSchedules && qstashSchedules.total > 0 ? (
+                <Badge variant="success">Active</Badge>
+              ) : (
+                <Badge variant="destructive">Not configured</Badge>
+              )}
+            </div>
+            <CardDescription>
+              External cron via QStash — bypasses Vercel plan limitations on cron frequency
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoadingSchedules ? (
+              <Skeleton className="h-16 w-full" />
+            ) : qstashSchedules && qstashSchedules.total > 0 ? (
+              <div className="space-y-3">
+                {qstashSchedules.schedules.map((schedule) => (
+                  <div
+                    key={schedule.scheduleId}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-gray-800">
+                          {schedule.cron}
+                        </code>
+                        {schedule.isPaused ? (
+                          <Badge variant="warning" size="xs">
+                            Paused
+                          </Badge>
+                        ) : (
+                          <Badge variant="success" size="xs">
+                            Running
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-muted-foreground text-xs">
+                        ID: {schedule.scheduleId.slice(0, 12)}... &middot; Created{" "}
+                        {new Date(schedule.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() =>
+                          pauseScheduleMutation.mutate({
+                            scheduleId: schedule.scheduleId,
+                            isPaused: schedule.isPaused,
+                          })
+                        }
+                        disabled={pauseScheduleMutation.isPending}
+                        aria-label={schedule.isPaused ? "Resume schedule" : "Pause schedule"}
+                      >
+                        {schedule.isPaused ? (
+                          <PlayIcon className="h-3.5 w-3.5" />
+                        ) : (
+                          <PauseIcon className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() => deleteScheduleMutation.mutate(schedule.scheduleId)}
+                        disabled={deleteScheduleMutation.isPending}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950"
+                        aria-label="Delete schedule"
+                      >
+                        <TrashIcon className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-start justify-start gap-2 text-center">
+                <p className="text-muted-foreground text-sm">
+                  No QStash cron schedule configured. Vercel&apos;s built-in cron may be limited to once per day on
+                  non-Pro plans.
+                </p>
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
-                  onClick={() => {
-                    setViewingPhantomScraped(true)
-                    setSelectedPriority(undefined)
-                    setPage(1)
-                  }}
-                  className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
+                  onClick={() => createScheduleMutation.mutate(undefined)}
+                  disabled={createScheduleMutation.isPending}
                 >
-                  <SearchIcon className="h-4 w-4" />
-                  Inspect Products
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fixPhantomMutation.mutate()}
-                  disabled={fixPhantomMutation.isPending}
-                  className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
-                >
-                  {fixPhantomMutation.isPending ? (
+                  {createScheduleMutation.isPending ? (
                     <>
                       <Loader2Icon className="h-4 w-4 animate-spin" />
-                      Fixing...
+                      Creating...
                     </>
                   ) : (
                     <>
-                      <WrenchIcon className="h-4 w-4" />
-                      Fix {overview.totalPhantomScraped.toLocaleString()} products
+                      <PlusIcon className="h-4 w-4" />
+                      Create QStash Cron (every {overview?.capacity?.config.cronFrequencyMinutes ?? 15}m)
                     </>
                   )}
                 </Button>
-                {fixResult && (
-                  <span className="text-sm text-emerald-600 dark:text-emerald-400">
-                    ✓ Fixed {fixResult.fixed} products - they will be scraped on the next run
-                  </span>
-                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Scrape Runs — 24h Stats */}
+        {scrapeRunsData?.stats24h && scrapeRunsData.stats24h.totalBatches > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUpIcon className="h-5 w-5" />
+                Actual Throughput (Last 24h)
+              </CardTitle>
+              <CardDescription>Persistent tracking of batch-worker executions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Batches Run</div>
+                  <p className="mt-1 text-xl font-bold">{scrapeRunsData.stats24h.totalBatches}</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Products Scraped</div>
+                  <p className="mt-1 text-xl font-bold">{scrapeRunsData.stats24h.totalProducts.toLocaleString()}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {scrapeRunsData.stats24h.totalSuccess.toLocaleString()} success /{" "}
+                    {scrapeRunsData.stats24h.totalFailed.toLocaleString()} failed
+                  </p>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Success Rate</div>
+                  <p
+                    className={cn(
+                      "mt-1 text-xl font-bold",
+                      scrapeRunsData.stats24h.successRate >= 90
+                        ? "text-emerald-600"
+                        : scrapeRunsData.stats24h.successRate >= 70
+                          ? "text-amber-600"
+                          : "text-red-600",
+                    )}
+                  >
+                    {scrapeRunsData.stats24h.successRate}%
+                  </p>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-muted-foreground text-xs">Avg Batch Duration</div>
+                  <p className="mt-1 text-xl font-bold">
+                    {(scrapeRunsData.stats24h.avgBatchDuration / 1000).toFixed(1)}s
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -360,11 +615,8 @@ export default function ScheduleDistributionPage() {
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-2 text-sm">
                             <span className="text-sm font-medium">{stat.total.toLocaleString()} products</span>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm">
                             <span className="text-muted-foreground">
                               Refresh: {formatThreshold(stat.stalenessThresholdHours)}
                             </span>
