@@ -1,5 +1,6 @@
 import type { GetAllQuery } from "./types"
 import { createClient } from "@/lib/supabase/server"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import type { PrioritySource, StoreProduct } from "@/types"
 import { now } from "@/lib/utils"
 
@@ -190,17 +191,19 @@ export const storeProductQueries = {
 
   async getInvalid() {
     const supabase = createClient()
-    return supabase
-      .from("store_products")
-      .select("*")
-      .not("url", "is", null)
-      .not("created_at", "is", null)
-      .is("name", null)
+    return fetchAll(() =>
+      supabase
+        .from("store_products")
+        .select("*")
+        .not("url", "is", null)
+        .not("created_at", "is", null)
+        .is("name", null),
+    )
   },
 
   async getUncharted() {
     const supabase = createClient()
-    return supabase.from("store_products").select("*").is("created_at", null)
+    return fetchAll(() => supabase.from("store_products").select("*").is("created_at", null))
   },
 
   async getById(id: string, userId?: string | null) {
@@ -291,7 +294,7 @@ export const storeProductQueries = {
 
   async getByIds(ids: string[]) {
     const supabase = createClient()
-    return supabase.from("store_products").select("*").in("id", ids)
+    return fetchAll(() => supabase.from("store_products").select("*").in("id", ids))
   },
 
   async getByUrlSubstrs(substrs: string[]) {
@@ -685,40 +688,17 @@ export const storeProductQueries = {
 
   async getAllEmptyByOriginId(origin: number) {
     const supabase = createClient()
-    const pageSize = 1000 // Large page size to minimize requests but avoid timeouts
-    let allProducts: StoreProduct[] = []
-    let hasMore = true
-    let page = 0
 
-    while (hasMore) {
-      const { data, error, count } = await supabase
-        .from("store_products")
-        .select("*", { count: "exact" })
-        .is("name", null)
-        .eq("origin_id", origin)
-        .range(page * pageSize, (page + 1) * pageSize - 1)
+    const { data, error } = await fetchAll(() =>
+      supabase.from("store_products").select("*").is("name", null).eq("origin_id", origin),
+    )
 
-      if (error) {
-        console.error("Error fetching products:", error)
-        return { data: null, error }
-      }
-
-      if (!data?.length) {
-        hasMore = false
-        break
-      }
-
-      allProducts = [...allProducts, ...data]
-
-      // Check if we've fetched all records
-      if (count && allProducts.length >= count) {
-        hasMore = false
-      }
-
-      page++
+    if (error) {
+      console.error("Error fetching products:", error)
+      return { data: null, error }
     }
 
-    return { data: allProducts, error: null }
+    return { data, error: null }
   },
 
   async getAllNullPriority({

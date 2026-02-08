@@ -53,7 +53,7 @@ describe("priceQueries", () => {
   describe("getPrices", () => {
     it("should return all prices", async () => {
       const mockPrices = [createMockPrice({ id: 1 }), createMockPrice({ id: 2 })]
-      mockChain.select.mockResolvedValue({ data: mockPrices, error: null })
+      mockChain.range.mockResolvedValue({ data: mockPrices, error: null })
 
       const result = await priceQueries.getPrices()
 
@@ -62,7 +62,7 @@ describe("priceQueries", () => {
     })
 
     it("should return null on error", async () => {
-      mockChain.select.mockResolvedValue({ data: null, error: { message: "Query failed" } })
+      mockChain.range.mockResolvedValue({ data: null, error: { message: "Query failed" } })
 
       const result = await priceQueries.getPrices()
 
@@ -76,7 +76,7 @@ describe("priceQueries", () => {
         createMockPrice({ id: 1, created_at: "2024-01-01T00:00:00Z" }),
         createMockPrice({ id: 2, created_at: "2024-01-02T00:00:00Z" }),
       ]
-      mockChain.order.mockResolvedValue({ data: mockPrices, error: null })
+      mockChain.range.mockResolvedValue({ data: mockPrices, error: null })
 
       const result = await priceQueries.getPricePointsPerIndividualProduct(1)
 
@@ -86,7 +86,7 @@ describe("priceQueries", () => {
     })
 
     it("should return null on error", async () => {
-      mockChain.order.mockResolvedValue({ data: null, error: { message: "Query failed" } })
+      mockChain.range.mockResolvedValue({ data: null, error: { message: "Query failed" } })
 
       const result = await priceQueries.getPricePointsPerIndividualProduct(1)
 
@@ -96,7 +96,7 @@ describe("priceQueries", () => {
 
   describe("getPricePointsWithAnalytics", () => {
     it("should return empty analytics when no prices", async () => {
-      mockChain.order.mockResolvedValue({ data: [], error: null })
+      mockChain.range.mockResolvedValue({ data: [], error: null })
 
       const result = await priceQueries.getPricePointsWithAnalytics(1)
 
@@ -143,7 +143,7 @@ describe("priceQueries", () => {
           valid_to: null,
         }),
       ]
-      mockChain.order.mockResolvedValue({ data: mockPrices, error: null })
+      mockChain.range.mockResolvedValue({ data: mockPrices, error: null })
 
       const result = await priceQueries.getPricePointsWithAnalytics(1)
 
@@ -176,7 +176,7 @@ describe("priceQueries", () => {
           valid_to: null,
         }),
       ]
-      mockChain.order.mockResolvedValue({ data: mockPrices, error: null })
+      mockChain.range.mockResolvedValue({ data: mockPrices, error: null })
 
       const result = await priceQueries.getPricePointsWithAnalytics(1)
 
@@ -187,7 +187,7 @@ describe("priceQueries", () => {
     })
 
     it("should return null on error", async () => {
-      mockChain.order.mockResolvedValue({ data: null, error: { message: "Query failed" } })
+      mockChain.range.mockResolvedValue({ data: null, error: { message: "Query failed" } })
 
       const result = await priceQueries.getPricePointsWithAnalytics(1)
 
@@ -328,10 +328,10 @@ describe("priceQueries", () => {
         createMockPrice({ id: 3, store_product_id: 1, price: 9, valid_from: "2024-01-01T00:00:00Z" }),
       ]
 
-      // Create chain that handles double .order() calls
+      // fetchAll calls .range() on the result of the query factory
       const orderChain: any = {}
       orderChain.order = vi.fn().mockImplementation(() => orderChain)
-      orderChain.then = (resolve: any) => resolve({ data: mockPrices, error: null })
+      orderChain.range = vi.fn().mockResolvedValue({ data: mockPrices, error: null })
       mockChain.select.mockReturnValue(orderChain)
       mockChain.eq.mockResolvedValue({ data: {}, error: null })
 
@@ -349,7 +349,7 @@ describe("priceQueries", () => {
 
       const orderChain: any = {}
       orderChain.order = vi.fn().mockImplementation(() => orderChain)
-      orderChain.then = (resolve: any) => resolve({ data: mockPrices, error: null })
+      orderChain.range = vi.fn().mockResolvedValue({ data: mockPrices, error: null })
       mockChain.select.mockReturnValue(orderChain)
 
       await priceQueries.deleteDuplicatePricePoints()
@@ -361,7 +361,7 @@ describe("priceQueries", () => {
     it("should return error object on fetch error", async () => {
       const orderChain: any = {}
       orderChain.order = vi.fn().mockImplementation(() => orderChain)
-      orderChain.then = (resolve: any) => resolve({ data: null, error: { message: "Query failed" } })
+      orderChain.range = vi.fn().mockResolvedValue({ data: null, error: { message: "Query failed" } })
       mockChain.select.mockReturnValue(orderChain)
 
       const result = await priceQueries.deleteDuplicatePricePoints()
@@ -373,7 +373,7 @@ describe("priceQueries", () => {
   describe("deleteAllPricePoints", () => {
     it("should delete all price points", async () => {
       const mockPrices = [createMockPrice({ id: 1 }), createMockPrice({ id: 2 })]
-      mockChain.select.mockResolvedValueOnce({ data: mockPrices, error: null })
+      mockChain.range.mockResolvedValueOnce({ data: mockPrices, error: null })
       mockChain.eq.mockResolvedValue({ data: {}, error: null })
 
       const result = await priceQueries.deleteAllPricePoints()
@@ -383,7 +383,7 @@ describe("priceQueries", () => {
     })
 
     it("should return null on fetch error", async () => {
-      mockChain.select.mockResolvedValue({ data: null, error: { message: "Query failed" } })
+      mockChain.range.mockResolvedValue({ data: null, error: { message: "Query failed" } })
 
       const result = await priceQueries.deleteAllPricePoints()
 

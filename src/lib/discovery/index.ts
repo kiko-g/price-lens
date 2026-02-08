@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import type { DiscoveryResult, DiscoveryOptions, StoreDiscoveryConfig, DiscoveryRun } from "./types"
 import { fetchProductUrlsFromSitemaps } from "./sitemap"
 import { getStoreConfig, getAllStoreConfigs } from "./stores"
@@ -8,10 +9,9 @@ export type { DiscoveryResult, DiscoveryOptions, StoreDiscoveryConfig }
 export { getStoreConfig, getAllStoreConfigs }
 
 const BATCH_SIZE = 500
-const DB_PAGE_SIZE = 1000
 
 /**
- * Fetches all existing SKUs for a store from the database (paginated)
+ * Fetches all existing SKUs for a store from the database
  */
 async function fetchAllExistingSkus(
   originId: number,
@@ -19,49 +19,33 @@ async function fetchAllExistingSkus(
   verbose?: boolean,
 ): Promise<Set<string>> {
   const supabase = createAdminClient()
-  const existingSkus = new Set<string>()
-  let offset = 0
-  let hasMore = true
 
-  while (hasMore) {
-    const { data, error } = await supabase
+  const { data, error } = await fetchAll(() =>
+    supabase
       .from("store_products")
       .select("url")
       .eq("origin_id", originId)
       .not("url", "is", null)
-      .order("id", { ascending: true })
-      .range(offset, offset + DB_PAGE_SIZE - 1)
+      .order("id", { ascending: true }),
+  )
 
-    if (error) {
-      console.error(`[Discovery] Error fetching existing products:`, error.message)
-      break
-    }
+  if (error) {
+    console.error(`[Discovery] Error fetching existing products:`, error.message)
+    return new Set<string>()
+  }
 
-    if (data && data.length > 0) {
-      for (const p of data) {
-        if (p.url) {
-          const sku = skuExtractor(p.url)
-          if (sku) {
-            existingSkus.add(sku)
-          }
-        }
+  const existingSkus = new Set<string>()
+  for (const p of data) {
+    if (p.url) {
+      const sku = skuExtractor(p.url as string)
+      if (sku) {
+        existingSkus.add(sku)
       }
-      offset += DB_PAGE_SIZE
-
-      if (verbose) {
-        process.stdout.write(`\r[Discovery] Loaded ${existingSkus.size} existing SKUs...`)
-      }
-
-      if (data.length < DB_PAGE_SIZE) {
-        hasMore = false
-      }
-    } else {
-      hasMore = false
     }
   }
 
   if (verbose) {
-    console.log(`\r[Discovery] Loaded ${existingSkus.size} existing SKUs (complete)`)
+    console.log(`[Discovery] Loaded ${existingSkus.size} existing SKUs (complete)`)
   }
 
   return existingSkus

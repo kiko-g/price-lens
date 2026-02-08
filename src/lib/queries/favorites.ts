@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createClientBrowser } from "@/lib/supabase/client"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import type { PaginationParams, PaginatedQueryResult } from "./types"
 import type { StoreProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/business"
@@ -126,18 +127,20 @@ export const favoriteQueries = {
   async getUserFavorites(userId: string, isServer = true) {
     const supabase = isServer ? createClient() : createClientBrowser()
 
-    const { data, error } = await supabase
-      .from("user_favorites")
-      .select(
-        `
-        id,
-        created_at,
-        store_product_id,
-        store_products (*)
-      `,
-      )
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
+    const { data, error } = await fetchAll(() =>
+      supabase
+        .from("user_favorites")
+        .select(
+          `
+          id,
+          created_at,
+          store_product_id,
+          store_products (*)
+        `,
+        )
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+    )
 
     return { data, error }
   },

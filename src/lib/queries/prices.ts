@@ -1,12 +1,13 @@
 import { arePricePointsEqual } from "@/lib/business/pricing"
 import { createClient } from "@/lib/supabase/server"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import { now } from "@/lib/utils"
 import type { Price, PricesWithAnalytics, PricePoint } from "@/types"
 
 export const priceQueries = {
   async getPrices() {
     const supabase = createClient()
-    const { data, error } = await supabase.from("prices").select("*")
+    const { data, error } = await fetchAll(() => supabase.from("prices").select("*"))
 
     if (error) {
       console.error("Error fetching price points:", error)
@@ -53,11 +54,13 @@ export const priceQueries = {
   async getPricePointsPerIndividualProduct(store_product_id: number) {
     const supabase = createClient()
 
-    const { data, error } = await supabase
-      .from("prices")
-      .select("*")
-      .eq("store_product_id", store_product_id)
-      .order("created_at", { ascending: true })
+    const { data, error } = await fetchAll(() =>
+      supabase
+        .from("prices")
+        .select("*")
+        .eq("store_product_id", store_product_id)
+        .order("created_at", { ascending: true }),
+    )
 
     if (error) {
       console.error("Error fetching price points:", error)
@@ -70,11 +73,13 @@ export const priceQueries = {
   async getPricePointsWithAnalytics(store_product_id: number): Promise<PricesWithAnalytics | null> {
     const supabase = createClient()
 
-    const { data, error } = await supabase
-      .from("prices")
-      .select("*")
-      .eq("store_product_id", store_product_id)
-      .order("created_at", { ascending: true })
+    const { data, error } = await fetchAll(() =>
+      supabase
+        .from("prices")
+        .select("*")
+        .eq("store_product_id", store_product_id)
+        .order("created_at", { ascending: true }),
+    )
 
     if (error) {
       console.error("Error fetching price points:", error)
@@ -405,14 +410,16 @@ export const priceQueries = {
   async getDuplicatePricePointsStats() {
     const supabase = createClient()
 
-    const { data, error, count } = await supabase
-      .from("prices")
-      .select("*", { count: "exact" })
-      .order("store_product_id", { ascending: true })
-      .order("valid_from", { ascending: false })
+    const { data, error } = await fetchAll(() =>
+      supabase
+        .from("prices")
+        .select("*")
+        .order("store_product_id", { ascending: true })
+        .order("valid_from", { ascending: false }),
+    )
 
-    if (error || !data) {
-      console.error("Error fetching price points:", error)
+    if (error || !data.length) {
+      if (error) console.error("Error fetching price points:", error)
       return null
     }
 
@@ -432,7 +439,7 @@ export const priceQueries = {
     }
 
     return {
-      totalPricePoints: count ?? data.length,
+      totalPricePoints: data.length,
       duplicateCount: duplicateIds.length,
       affectedProductsCount: affectedStoreProductIds.size,
       duplicateIds,
@@ -462,10 +469,10 @@ export const priceQueries = {
   async deleteAllPricePoints() {
     const supabase = createClient()
 
-    const { data, error } = await supabase.from("prices").select("*")
+    const { data, error } = await fetchAll(() => supabase.from("prices").select("*"))
 
-    if (error || !data) {
-      console.error("Error deleting price points:", error)
+    if (error || !data.length) {
+      if (error) console.error("Error deleting price points:", error)
       return null
     }
 

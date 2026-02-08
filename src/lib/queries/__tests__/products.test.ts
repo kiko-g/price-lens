@@ -198,7 +198,7 @@ describe("storeProductQueries", () => {
   describe("getByIds", () => {
     it("should return store products by ids", async () => {
       const mockProducts = [createMockStoreProduct({ id: 1 }), createMockStoreProduct({ id: 2 })]
-      mockChain.in.mockResolvedValue({ data: mockProducts, error: null })
+      setChainResult(mockChain, mockProducts)
 
       const result = await storeProductQueries.getByIds(["1", "2"])
 

@@ -149,7 +149,7 @@ describe("favoriteQueries", () => {
         },
       ]
 
-      mockChain.order.mockResolvedValue({ data: mockFavorites, error: null })
+      mockChain.range.mockResolvedValue({ data: mockFavorites, error: null })
 
       const result = await favoriteQueries.getUserFavorites("user-123")
 
@@ -159,7 +159,7 @@ describe("favoriteQueries", () => {
     })
 
     it("should return empty array when no favorites", async () => {
-      mockChain.order.mockResolvedValue({ data: [], error: null })
+      mockChain.range.mockResolvedValue({ data: [], error: null })
 
       const result = await favoriteQueries.getUserFavorites("user-123")
 
@@ -167,7 +167,7 @@ describe("favoriteQueries", () => {
     })
 
     it("should return error on database failure", async () => {
-      mockChain.order.mockResolvedValue({ data: null, error: { message: "Query failed" } })
+      mockChain.range.mockResolvedValue({ data: null, error: { message: "Query failed" } })
 
       const result = await favoriteQueries.getUserFavorites("user-123")
 

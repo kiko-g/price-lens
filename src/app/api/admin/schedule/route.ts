@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import {
   ACTIVE_PRIORITIES,
   ESTIMATED_COST_PER_SCRAPE,
@@ -314,12 +315,15 @@ export async function GET(req: NextRequest) {
         { label: "7+ days overdue", min: 168, max: Infinity },
       ]
 
-      const { data: products } = await supabase
-        .from("store_products")
-        .select("id, priority, updated_at")
-        .in("priority", ACTIVE_PRIORITIES)
+      const { data: products, error: productsError } = await fetchAll(() =>
+        supabase
+          .from("store_products")
+          .select("id, priority, updated_at")
+          .in("priority", ACTIVE_PRIORITIES),
+      )
 
-      if (!products) {
+      if (productsError || !products.length) {
+        if (productsError) console.error("Stale breakdown query error:", productsError)
         return NextResponse.json({ buckets: [] })
       }
 
@@ -372,55 +376,39 @@ export async function GET(req: NextRequest) {
     }
 
     if (action === "activity") {
-      // Show recent scraping activity - products updated recently
-      const timeWindows = [
-        { label: "Last 30 minutes", hours: 0.5 },
-        { label: "Last hour", hours: 1 },
-        { label: "Last 6 hours", hours: 6 },
-        { label: "Last 24 hours", hours: 24 },
-      ]
+      // Use RPC to get aggregated counts — avoids Supabase's 1000-row default limit
+      const { data: rpcResult, error: rpcError } = await supabase.rpc("get_activity_window_stats")
 
-      const activityData: {
-        windows: { label: string; count: number; byPriority: Record<number, number> }[]
-        scrapesPerHour: number
-      } = {
-        windows: [],
-        scrapesPerHour: 0,
+      if (rpcError) {
+        console.error("Activity stats RPC error:", rpcError)
+        return NextResponse.json({ error: "Failed to fetch activity stats" }, { status: 500 })
       }
 
-      for (const window of timeWindows) {
-        const cutoff = new Date(now.getTime() - window.hours * 60 * 60 * 1000).toISOString()
+      const raw = rpcResult as {
+        windows: { label: string; byPriority: Record<string, number>; total: number }[]
+      }
 
-        const { data: products } = await supabase
-          .from("store_products")
-          .select("id, priority")
-          .gte("updated_at", cutoff)
-
+      const windows = raw.windows.map((w) => {
+        // Normalize byPriority: RPC uses -1 for null priority, convert to 0-5 keys
         const byPriority: Record<number, number> = {}
         for (const p of [5, 4, 3, 2, 1, 0]) {
           byPriority[p] = 0
         }
-
-        if (products) {
-          for (const p of products) {
-            if (p.priority !== null) {
-              byPriority[p.priority] = (byPriority[p.priority] || 0) + 1
-            }
+        for (const [key, count] of Object.entries(w.byPriority)) {
+          const priority = Number(key)
+          if (priority >= 0 && priority <= 5) {
+            byPriority[priority] = count
           }
         }
+        return { label: w.label, count: w.total, byPriority }
+      })
 
-        activityData.windows.push({
-          label: window.label,
-          count: products?.length || 0,
-          byPriority,
-        })
-      }
+      const lastHourWindow = windows.find((w) => w.label === "Last hour")
 
-      // Calculate scrapes per hour based on last hour
-      const lastHourWindow = activityData.windows.find((w) => w.label === "Last hour")
-      activityData.scrapesPerHour = lastHourWindow?.count || 0
-
-      return NextResponse.json(activityData)
+      return NextResponse.json({
+        windows,
+        scrapesPerHour: lastHourWindow?.count || 0,
+      })
     }
 
     if (action === "activity-log") {

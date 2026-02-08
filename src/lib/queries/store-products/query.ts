@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import type { SupabaseClient } from "./types"
 import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
@@ -636,32 +637,17 @@ export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Prom
     return query
   }
 
-  // Fetch all matching IDs with pagination to avoid Supabase's default 1000 row limit
-  // Note: Supabase has a default server-side limit of 1000 rows per query
-  const PAGE_SIZE = 1000
-  const allIds: number[] = []
-  let offset = 0
+  // Fetch all matching IDs using fetchAll to avoid Supabase's default 1000 row limit
+  const { data: idRows, error: fetchError } = await fetchAll(buildFilteredQuery)
 
-  while (true) {
-    // Build fresh query for each page (Supabase query builders are mutable)
-    const { data, error } = await buildFilteredQuery().range(offset, offset + PAGE_SIZE - 1)
-
-    if (error) {
-      return {
-        updatedCount: 0,
-        error: { message: error.message, code: error.code },
-      }
+  if (fetchError) {
+    return {
+      updatedCount: 0,
+      error: { message: fetchError.message, code: fetchError.code },
     }
-
-    if (!data || data.length === 0) break
-
-    allIds.push(...data.map((p) => p.id))
-
-    // If we got fewer results than PAGE_SIZE, we've reached the end
-    if (data.length < PAGE_SIZE) break
-
-    offset += PAGE_SIZE
   }
+
+  const allIds = idRows.map((p) => p.id)
 
   if (allIds.length === 0) {
     return { updatedCount: 0, error: null }

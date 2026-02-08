@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { fetchAll } from "@/lib/supabase/fetch-all"
 import type {
   CanonicalCategory,
   CategoryMapping,
@@ -378,8 +379,6 @@ export const categoryMappingQueries = {
     const supabase = createClient()
 
     // Try RPC function first (aggregates at database level)
-    // Supabase has a hard 1000 row limit, so we must paginate
-    const PAGE_SIZE = 1000
     type RpcTuple = {
       origin_id: number
       store_category: string
@@ -387,64 +386,25 @@ export const categoryMappingQueries = {
       store_category_3: string | null
       product_count: number
     }
-    const allTuples: RpcTuple[] = []
-    let page = 0
-    let hasMore = true
-    let rpcFailed = false
 
-    while (hasMore) {
-      const from = page * PAGE_SIZE
-      const to = from + PAGE_SIZE - 1
+    const { data: allTuples, error: rpcError } = await fetchAll(() =>
+      supabase.rpc("get_distinct_store_category_tuples"),
+    )
 
-      const { data: batch, error: batchError } = await supabase
-        .rpc("get_distinct_store_category_tuples")
-        .range(from, to)
-
-      if (batchError) {
-        console.warn("RPC get_distinct_store_category_tuples failed, using fallback:", batchError.message)
-        rpcFailed = true
-        break
-      }
-
-      if (!batch || batch.length === 0) {
-        hasMore = false
-      } else {
-        allTuples.push(...(batch as RpcTuple[]))
-        hasMore = batch.length === PAGE_SIZE
-        page++
-      }
-    }
-
-    // If RPC fails, fall back to paginated direct queries
-    if (rpcFailed) {
+    if (rpcError) {
+      console.warn("RPC get_distinct_store_category_tuples failed, using fallback:", rpcError.message)
       return this.getStoreTuplesWithMappingStatusFallback(filters)
     }
 
-    const tuples = allTuples
+    const tuples = allTuples as RpcTuple[]
 
-    // Get all mappings with pagination (Supabase has 1000 row default limit)
-    const MAPPING_PAGE_SIZE = 1000
-    const allMappings: any[] = []
-    let mappingPage = 0
-    let hasMoreMappings = true
+    // Get all mappings
+    const { data: allMappings, error: mappingsError } = await fetchAll(() =>
+      supabase.from("category_mappings").select("*"),
+    )
 
-    while (hasMoreMappings) {
-      const from = mappingPage * MAPPING_PAGE_SIZE
-      const to = from + MAPPING_PAGE_SIZE - 1
-
-      const { data: batch, error: batchError } = await supabase.from("category_mappings").select("*").range(from, to)
-
-      if (batchError) {
-        return { data: null, count: 0, error: batchError }
-      }
-
-      if (!batch || batch.length === 0) {
-        hasMoreMappings = false
-      } else {
-        allMappings.push(...batch)
-        hasMoreMappings = batch.length === MAPPING_PAGE_SIZE
-        mappingPage++
-      }
+    if (mappingsError) {
+      return { data: null, count: 0, error: mappingsError }
     }
 
     const mappings = allMappings
@@ -529,40 +489,17 @@ export const categoryMappingQueries = {
     offset?: number
   }): Promise<{ data: StoreCategoryTuple[] | null; count: number; error: any }> {
     const supabase = createClient()
-    const PAGE_SIZE = 1000
 
-    // Fetch all store products with pagination
-    const allProducts: Array<{
-      origin_id: number
-      category: string
-      category_2: string | null
-      category_3: string | null
-    }> = []
-
-    let page = 0
-    let hasMore = true
-
-    while (hasMore) {
-      const from = page * PAGE_SIZE
-      const to = from + PAGE_SIZE - 1
-
-      const { data: batch, error } = await supabase
+    // Fetch all store products
+    const { data: allProducts, error: productsError } = await fetchAll(() =>
+      supabase
         .from("store_products")
         .select("origin_id, category, category_2, category_3")
-        .not("category", "is", null)
-        .range(from, to)
+        .not("category", "is", null),
+    )
 
-      if (error) {
-        return { data: null, count: 0, error }
-      }
-
-      if (batch && batch.length > 0) {
-        allProducts.push(...(batch as typeof allProducts))
-        hasMore = batch.length === PAGE_SIZE
-      } else {
-        hasMore = false
-      }
-      page++
+    if (productsError) {
+      return { data: null, count: 0, error: productsError }
     }
 
     // Group by tuple and count products
@@ -578,38 +515,22 @@ export const categoryMappingQueries = {
         existing.count++
       } else {
         tupleMap.set(key, {
-          origin_id: sp.origin_id,
-          category: sp.category,
-          category_2: sp.category_2,
-          category_3: sp.category_3,
+          origin_id: sp.origin_id as number,
+          category: sp.category as string,
+          category_2: sp.category_2 as string | null,
+          category_3: sp.category_3 as string | null,
           count: 1,
         })
       }
     }
 
-    // Get all mappings with pagination (Supabase has 1000 row default limit)
-    const MAPPING_PAGE_SIZE = 1000
-    const allMappings: any[] = []
-    let mappingPage = 0
-    let hasMoreMappings = true
+    // Get all mappings
+    const { data: allMappings, error: mappingsError } = await fetchAll(() =>
+      supabase.from("category_mappings").select("*"),
+    )
 
-    while (hasMoreMappings) {
-      const from = mappingPage * MAPPING_PAGE_SIZE
-      const to = from + MAPPING_PAGE_SIZE - 1
-
-      const { data: batch, error: batchError } = await supabase.from("category_mappings").select("*").range(from, to)
-
-      if (batchError) {
-        return { data: null, count: 0, error: batchError }
-      }
-
-      if (!batch || batch.length === 0) {
-        hasMoreMappings = false
-      } else {
-        allMappings.push(...batch)
-        hasMoreMappings = batch.length === MAPPING_PAGE_SIZE
-        mappingPage++
-      }
+    if (mappingsError) {
+      return { data: null, count: 0, error: mappingsError }
     }
 
     const mappings = allMappings
@@ -738,65 +659,26 @@ export const categoryMappingQueries = {
    */
   async getStatsFallback(): Promise<{ data: CategoryMappingStats[] | null; error: any }> {
     const supabase = createClient()
-    const PAGE_SIZE = 1000
 
-    // Fetch all store products with pagination
-    const allProducts: Array<{
-      origin_id: number
-      category: string
-      category_2: string | null
-      category_3: string | null
-    }> = []
-
-    let page = 0
-    let hasMore = true
-
-    while (hasMore) {
-      const from = page * PAGE_SIZE
-      const to = from + PAGE_SIZE - 1
-
-      const { data: batch, error } = await supabase
+    // Fetch all store products
+    const { data: allProducts, error: productsError } = await fetchAll(() =>
+      supabase
         .from("store_products")
         .select("origin_id, category, category_2, category_3")
-        .not("category", "is", null)
-        .range(from, to)
+        .not("category", "is", null),
+    )
 
-      if (error) {
-        return { data: null, error }
-      }
-
-      if (batch && batch.length > 0) {
-        allProducts.push(...(batch as typeof allProducts))
-        hasMore = batch.length === PAGE_SIZE
-      } else {
-        hasMore = false
-      }
-      page++
+    if (productsError) {
+      return { data: null, error: productsError }
     }
 
-    // Get all mappings with pagination (Supabase has 1000 row default limit)
-    const MAPPING_PAGE_SIZE = 1000
-    const allMappings: any[] = []
-    let mappingPage = 0
-    let hasMoreMappings = true
+    // Get all mappings
+    const { data: allMappings, error: mappingsError } = await fetchAll(() =>
+      supabase.from("category_mappings").select("*"),
+    )
 
-    while (hasMoreMappings) {
-      const from = mappingPage * MAPPING_PAGE_SIZE
-      const to = from + MAPPING_PAGE_SIZE - 1
-
-      const { data: batch, error: batchError } = await supabase.from("category_mappings").select("*").range(from, to)
-
-      if (batchError) {
-        return { data: null, error: batchError }
-      }
-
-      if (!batch || batch.length === 0) {
-        hasMoreMappings = false
-      } else {
-        allMappings.push(...batch)
-        hasMoreMappings = batch.length === MAPPING_PAGE_SIZE
-        mappingPage++
-      }
+    if (mappingsError) {
+      return { data: null, error: mappingsError }
     }
 
     const mappings = allMappings
