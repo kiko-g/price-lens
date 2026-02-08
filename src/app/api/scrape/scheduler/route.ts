@@ -113,6 +113,7 @@ export async function GET(req: NextRequest) {
       .select("id, url, name, origin_id, priority, updated_at", { count: "exact" })
       .or(orConditions.join(","))
       .not("url", "is", null)
+      .eq("available", true)
       .in("priority", [...ACTIVE_PRIORITIES])
       .limit(WORKER_BATCH_SIZE * MAX_BATCHES_PER_RUN)
 
@@ -121,7 +122,26 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Failed to query products" }, { status: 500 })
     }
 
-    if (!products || products.length === 0) {
+    // Re-check a small batch of unavailable products weekly to catch any that come back
+    const RECHECK_BATCH_SIZE = 50
+    const recheckCutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const { data: recheckProducts } = await supabase
+      .from("store_products")
+      .select("id, url, name, origin_id, priority, updated_at")
+      .eq("available", false)
+      .not("url", "is", null)
+      .in("priority", [...ACTIVE_PRIORITIES])
+      .or(`updated_at.lt.${recheckCutoff},updated_at.is.null`)
+      .limit(RECHECK_BATCH_SIZE)
+
+    if (recheckProducts && recheckProducts.length > 0) {
+      console.log(`[Scheduler] Re-checking ${recheckProducts.length} unavailable products`)
+    }
+
+    // Merge main products with re-check products
+    const allProducts = [...(products || []), ...(recheckProducts || [])]
+
+    if (allProducts.length === 0) {
       console.info("🛜 [Scheduler] No overdue products found")
       return NextResponse.json({
         message: "No overdue products",
@@ -132,7 +152,7 @@ export async function GET(req: NextRequest) {
 
     // DYNAMIC BATCH SIZING based on actual backlog
     // backlogSize is the total count of overdue products (may exceed our limit)
-    const actualBacklogSize = backlogSize ?? products.length
+    const actualBacklogSize = backlogSize ?? allProducts.length
     const MIN_BATCHES = 5
     const batchesNeeded = Math.ceil(actualBacklogSize / WORKER_BATCH_SIZE)
     let dynamicMaxBatches: number
@@ -157,7 +177,7 @@ export async function GET(req: NextRequest) {
     )
 
     // Calculate urgency score for each product and sort by most urgent first
-    const productsWithUrgency = products
+    const productsWithUrgency = allProducts
       .map((product) => {
         const thresholdHours = PRIORITY_REFRESH_HOURS[product.priority ?? 0] ?? 24
         const updatedAt = product.updated_at ? new Date(product.updated_at) : new Date(0) // Never scraped = very old
@@ -190,7 +210,7 @@ export async function GET(req: NextRequest) {
       {} as Record<number, number>,
     )
 
-    console.log(`[Scheduler] Found ${products.length} overdue products, sending ${batchesToSend.length} batches`)
+    console.log(`[Scheduler] Found ${allProducts.length} products (${products?.length ?? 0} overdue + ${recheckProducts?.length ?? 0} re-check), sending ${batchesToSend.length} batches`)
 
     // Send batched messages to QStash
     // NOTE: batchJSON() auto-stringifies, so pass objects NOT strings

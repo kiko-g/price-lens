@@ -235,15 +235,37 @@ export default function ScheduleDistributionPage() {
     }
   }
 
+  if (isLoadingOverview) {
+    return (
+      <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <Skeleton className="col-span-1 h-45 w-full lg:col-span-2" />
+            <Skeleton className="col-span-1 h-45 w-full lg:col-span-1" />
+
+            <Skeleton className="col-span-1 h-40 w-full lg:col-span-3" />
+
+            <Skeleton className="col-span-1 h-50 w-full lg:col-span-3" />
+
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="col-span-1 h-48 w-full lg:col-span-1" />
+            ))}
+            <Skeleton className="col-span-1 h-12 w-full lg:col-span-3" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         {/* Capacity Health Indicator */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {overview?.capacity && (
             <Card
               className={cn(
-                "col-span-1 sm:col-span-2",
+                "col-span-1 lg:col-span-2",
                 getStatusConfig(overview.capacity.status).borderColor,
                 getStatusConfig(overview.capacity.status).bgColor,
               )}
@@ -563,178 +585,162 @@ export default function ScheduleDistributionPage() {
           </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Priority Distribution</CardTitle>
-            <CardDescription>Product count and staleness by priority level</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoadingOverview ? (
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {overview?.priorityStats
-                  .filter((s) => s.priority !== null)
-                  .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-                  .map((stat) => {
-                    const config = PRIORITY_CONFIG[stat.priority ?? 0]
-                    const isActive = overview.activePriorities.includes(stat.priority ?? 0)
-                    const isSelected = selectedPriority === stat.priority
+        {/* Priority Distribution */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {overview?.priorityStats
+            .filter((s) => s.priority !== null)
+            .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+            .map((stat) => {
+              const config = PRIORITY_CONFIG[stat.priority ?? 0]
+              const isActive = overview.activePriorities.includes(stat.priority ?? 0)
+              const isSelected = selectedPriority === stat.priority
 
-                    // Calculate percentages for the 3-segment bar (Fresh | Stale Actionable | Unavailable)
-                    const freshPercent = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
-                    const staleActionablePercent =
-                      stat.total > 0 ? Math.round((stat.staleActionable / stat.total) * 100) : 0
-                    const unavailablePercent = stat.total > 0 ? Math.round((stat.unavailable / stat.total) * 100) : 0
+              // Calculate percentages for the 3-segment bar (Fresh | Stale Actionable | Unavailable)
+              const freshPercent = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
+              const staleActionablePercent = stat.total > 0 ? Math.round((stat.staleActionable / stat.total) * 100) : 0
+              const unavailablePercent = stat.total > 0 ? Math.round((stat.unavailable / stat.total) * 100) : 0
 
-                    return (
-                      <div
-                        key={stat.priority}
-                        onClick={() => handlePriorityClick(stat.priority)}
-                        className={cn(
-                          "cursor-pointer rounded-lg border p-4 transition-all",
-                          !isActive && "bg-accent border-dashed opacity-80",
-                          isSelected && "ring-primary ring-2 ring-offset-2",
-                          !isSelected && "hover:border-primary/50 hover:shadow-sm",
-                        )}
-                      >
-                        <div className="mb-2 flex flex-col flex-wrap gap-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <PriorityBubble priority={stat.priority} size="sm" />
-                              <span className="font-medium">{config?.name}</span>
-                            </div>
-                            {!isActive && (
-                              <Badge variant="default" className="text-xs" size="xs">
-                                Not scheduled
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="flex items-center justify-between gap-2 text-sm">
-                            <span className="text-sm font-medium">{stat.total.toLocaleString()} products</span>
-                            <span className="text-muted-foreground">
-                              Refresh: {formatThreshold(stat.stalenessThresholdHours)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 3-segment progress bar: Fresh (green) | Stale Actionable (orange) | Unavailable (gray) */}
-                        <div className="flex h-6 w-full overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
-                          {stat.fresh > 0 && (
-                            <TooltipProvider>
-                              <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                  <div
-                                    className="flex items-center justify-center bg-emerald-500 text-xs font-medium text-white transition-all"
-                                    style={{ width: `${freshPercent}%` }}
-                                  >
-                                    {freshPercent > 10 && stat.fresh.toLocaleString()}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                          {stat.staleActionable > 0 && (
-                            <TooltipProvider>
-                              <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                  <div
-                                    className="flex items-center justify-center bg-orange-500 text-xs font-medium text-white transition-all"
-                                    style={{ width: `${staleActionablePercent}%` }}
-                                  >
-                                    {staleActionablePercent > 10 && stat.staleActionable.toLocaleString()}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                          {stat.unavailable > 0 && (
-                            <TooltipProvider>
-                              <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                  <div
-                                    className="flex items-center justify-center bg-gray-400 text-xs font-medium text-white transition-all dark:bg-gray-600"
-                                    style={{ width: `${unavailablePercent}%` }}
-                                  >
-                                    {unavailablePercent > 10 && stat.unavailable.toLocaleString()}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </div>
-
-                        {/* Stats breakdown */}
-                        <div className="mt-3 flex flex-col gap-1 text-xs font-medium">
-                          <span className="text-success flex items-center gap-1">
-                            <CheckCircle2Icon className="h-4 w-4" />
-                            {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
-                          </span>
-                          {stat.staleActionable > 0 && (
-                            <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
-                              <AlertTriangleIcon className="h-4 w-4" />
-                              {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
-                            </span>
-                          )}
-                          {stat.unavailable > 0 && (
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <BanIcon className="h-4 w-4" />
-                              {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
-                            </span>
-                          )}
-                          {stat.neverScraped > 0 && (
-                            <span className="text-muted-foreground flex items-center gap-1 text-[11px] opacity-70">
-                              <CircleIcon className="h-3 w-3" />
-                              {stat.neverScraped.toLocaleString()} never scraped
-                            </span>
-                          )}
-                        </div>
+              return (
+                <div
+                  key={stat.priority}
+                  onClick={() => handlePriorityClick(stat.priority)}
+                  className={cn(
+                    "cursor-pointer rounded-lg border p-4 transition-all",
+                    !isActive && "bg-accent border-dashed opacity-80",
+                    isSelected && "ring-primary ring-2 ring-offset-2",
+                    !isSelected && "hover:border-primary/50 hover:shadow-sm",
+                  )}
+                >
+                  <div className="mb-2 flex flex-col flex-wrap gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <PriorityBubble priority={stat.priority} size="sm" />
+                        <span className="font-medium">{config?.name}</span>
                       </div>
-                    )
-                  })}
+                      {!isActive && (
+                        <Badge variant="default" className="text-xs" size="xs">
+                          Not scheduled
+                        </Badge>
+                      )}
+                    </div>
 
-                {overview?.priorityStats.find((s) => s.priority === null) && (
-                  <div
-                    onClick={() => handlePriorityClick(null)}
-                    className={cn(
-                      "bg-accent col-span-1 flex cursor-pointer justify-between gap-2 rounded-lg border border-dashed p-4 opacity-80 transition-all sm:col-span-2 lg:col-span-3",
-                      selectedPriority === null && "ring-primary ring-2 ring-offset-2",
-                      selectedPriority !== null && "hover:border-primary/50 hover:shadow-sm",
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <PriorityBubble priority={null} size="sm" />
-                      <span className="font-medium">Unclassified</span>
-                      <span className="text-muted-foreground text-sm">
-                        ({overview.priorityStats.find((s) => s.priority === null)?.total.toLocaleString()} products)
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="text-sm font-medium">{stat.total.toLocaleString()} products</span>
+                      <span className="text-muted-foreground">
+                        Refresh: {formatThreshold(stat.stalenessThresholdHours)}
                       </span>
                     </div>
-
-                    <div>
-                      <Badge variant="default" className="text-xs" size="xs">
-                        Not scheduled
-                      </Badge>
-                    </div>
                   </div>
-                )}
+
+                  {/* 3-segment progress bar: Fresh (green) | Stale Actionable (orange) | Unavailable (gray) */}
+                  <div className="flex h-6 w-full overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+                    {stat.fresh > 0 && (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="flex items-center justify-center bg-emerald-500 text-xs font-medium text-white transition-all"
+                              style={{ width: `${freshPercent}%` }}
+                            >
+                              {freshPercent > 10 && stat.fresh.toLocaleString()}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {stat.staleActionable > 0 && (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="flex items-center justify-center bg-orange-500 text-xs font-medium text-white transition-all"
+                              style={{ width: `${staleActionablePercent}%` }}
+                            >
+                              {staleActionablePercent > 10 && stat.staleActionable.toLocaleString()}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {stat.unavailable > 0 && (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="flex items-center justify-center bg-gray-400 text-xs font-medium text-white transition-all dark:bg-gray-600"
+                              style={{ width: `${unavailablePercent}%` }}
+                            >
+                              {unavailablePercent > 10 && stat.unavailable.toLocaleString()}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+
+                  {/* Stats breakdown */}
+                  <div className="mt-3 flex flex-col gap-1 text-xs font-medium">
+                    <span className="text-success flex items-center gap-1">
+                      <CheckCircle2Icon className="h-4 w-4" />
+                      {stat.fresh.toLocaleString()} fresh ({freshPercent}%)
+                    </span>
+                    {stat.staleActionable > 0 && (
+                      <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                        <AlertTriangleIcon className="h-4 w-4" />
+                        {stat.staleActionable.toLocaleString()} stale actionable ({staleActionablePercent}%)
+                      </span>
+                    )}
+                    {stat.unavailable > 0 && (
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <BanIcon className="h-4 w-4" />
+                        {stat.unavailable.toLocaleString()} unavailable ({unavailablePercent}%)
+                      </span>
+                    )}
+                    {stat.neverScraped > 0 && (
+                      <span className="text-muted-foreground flex items-center gap-1 text-[11px] opacity-70">
+                        <CircleIcon className="h-3 w-3" />
+                        {stat.neverScraped.toLocaleString()} never scraped
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+
+          {overview?.priorityStats.find((s) => s.priority === null) && (
+            <div
+              onClick={() => handlePriorityClick(null)}
+              className={cn(
+                "bg-accent col-span-1 flex cursor-pointer justify-between gap-2 rounded-lg border border-dashed p-4 opacity-80 transition-all sm:col-span-2 lg:col-span-3",
+                selectedPriority === null && "ring-primary ring-2 ring-offset-2",
+                selectedPriority !== null && "hover:border-primary/50 hover:shadow-sm",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <PriorityBubble priority={null} size="sm" />
+                <span className="font-medium">Unclassified</span>
+                <span className="text-muted-foreground text-sm">
+                  ({overview.priorityStats.find((s) => s.priority === null)?.total.toLocaleString()} products)
+                </span>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              <div>
+                <Badge variant="default" className="text-xs" size="xs">
+                  Not scheduled
+                </Badge>
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* Phantom Scraped Products Section */}
         {viewingPhantomScraped && (

@@ -120,13 +120,13 @@ export async function fetchHtml(url: string, useAntiBlock = false): Promise<Fetc
     return { html: response.data, status: "success" }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      // Check for 404 specifically - product doesn't exist
-      if (error.response?.status === 404) {
-        console.warn(`[404] Product not found at URL: ${cleanedUrl}`)
+      // Product doesn't exist (404, or Continente's 474 which means product hidden/removed)
+      if (error.response?.status === 404 || error.response?.status === 474) {
+        console.warn(`[${error.response.status}] Product not found at URL: ${cleanedUrl}`)
         return { html: null, status: "not_found" }
       }
-      // Rate limiting / blocking responses (429, 474, 403, etc.)
-      if (error.response?.status && [429, 474, 403].includes(error.response.status)) {
+      // Rate limiting / blocking responses (429, 403, etc.)
+      if (error.response?.status && [429, 403].includes(error.response.status)) {
         console.warn(`[${error.response.status}] Rate limited/blocked at URL: ${cleanedUrl}`)
         return { html: null, status: "error" }
       }
