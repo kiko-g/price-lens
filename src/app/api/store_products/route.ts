@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
+import { resolveUser } from "@/lib/supabase/tools"
 import {
   queryStoreProducts,
   type StoreProductsQueryParams,
@@ -56,6 +56,9 @@ export async function GET(req: NextRequest) {
     const cacheKey = JSON.stringify(queryParams)
     const cacheEnabled = isStoreProductsCacheEnabled()
 
+    // Start auth resolution in parallel with the main query
+    const userPromise = resolveUser(supabase)
+
     let result: StoreProductsQueryResult
 
     if (cacheEnabled) {
@@ -80,12 +83,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
-    const hasAuthCookie = (await cookies()).getAll().some((c) => c.name.startsWith("sb-"))
-    let user: { id: string } | null = null
-    if (hasAuthCookie) {
-      const { data } = await supabase.auth.getUser()
-      user = data.user
-    }
+    const user = await userPromise
     t("auth.getUser")
 
     let data = result.data
