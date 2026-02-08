@@ -510,7 +510,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                       <ProductChart.NoData />
                       <ProductChart.Error />
                       <ProductChart.ChartContent>
-                        <ProductChart.PricesVariation showImage={false} showBarcode={false} />
+                        <ProductChart.PricesVariation showImage showBarcode />
                         <ProductChart.RangeSelector className="mt-2 mb-2 md:mt-0 md:mb-4" />
                         <ProductChart.Graph />
                         <ProductChart.PriceTable />

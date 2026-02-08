@@ -67,7 +67,7 @@ async function fetchFavorites(params: FavoritesQueryParams): Promise<FavoritesQu
 
 type QueryKeyValue = string | number | boolean | null
 
-function generateQueryKey(params: FavoritesQueryParams): QueryKeyValue[] {
+export function generateQueryKey(params: FavoritesQueryParams): QueryKeyValue[] {
   const getOriginKey = (): QueryKeyValue => {
     if (!params.origin?.originIds) return null
     const ids = params.origin.originIds

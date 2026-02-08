@@ -482,7 +482,7 @@ function Graph({ className }: GraphProps) {
 
   if (isLoading) {
     return (
-      <div className={cn("flex h-60 w-full items-center justify-center", className)}>
+      <div className={cn("mb-2 flex h-60 w-full items-center justify-center", className)}>
         <Skeleton className="h-full w-full" />
       </div>
     )

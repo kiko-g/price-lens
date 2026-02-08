@@ -649,7 +649,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
           <Select value={localFilters.searchType} onValueChange={(v) => handleSearchTypeChange(v as SearchType)}>
-            <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
+            <SelectTrigger className="text-muted-foreground hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground bg-muted absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs leading-0 shadow-none transition">
               <SelectValue placeholder="Search by" />
             </SelectTrigger>
             <SelectContent align="start" className="w-[180px]">
@@ -1160,7 +1160,7 @@ function MobileNav({
             onChange={(e) => setQueryInput(e.target.value)}
           />
           <Select value={localFilters.searchType} onValueChange={(v) => onSearchTypeChange(v as SearchType)}>
-            <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
+            <SelectTrigger className="text-muted-foreground bg-muted hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
               <SelectValue placeholder="Search by" />
             </SelectTrigger>
             <SelectContent align="start" className="w-[180px]">
@@ -1697,8 +1697,9 @@ function PaginationControls({
   const isNextDisabled = isLoading || !hasNextPage
 
   return (
-    <div className={cn("text-foreground isolate flex items-center gap-3", className)}>
+    <div className={cn("text-foreground isolate flex items-center gap-1 md:gap-2", className)}>
       <Button
+        size="sm"
         variant="ghost"
         className="focus:z-10 disabled:cursor-not-allowed"
         onClick={() => onPageChange(currentPage - 1)}
@@ -1722,12 +1723,13 @@ function PaginationControls({
           </SelectContent>
         </Select>
       ) : (
-        <span className="bg-foreground text-background flex size-5 items-center justify-center rounded-full text-sm font-medium">
+        <span className="bg-foreground text-background flex size-4 items-center justify-center rounded-full text-xs font-medium">
           {currentPage}
         </span>
       )}
 
       <Button
+        size="sm"
         variant="ghost"
         className="focus:z-10 disabled:cursor-not-allowed"
         onClick={() => onPageChange(currentPage + 1)}

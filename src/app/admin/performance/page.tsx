@@ -34,8 +34,8 @@ import {
 } from "lucide-react"
 
 function getSpeedBadge(avgMs: number): { label: string; variant: BadgeKind } {
-  if (avgMs < 200) return { label: "Fast", variant: "success" }
-  if (avgMs < 500) return { label: "Medium", variant: "default" }
+  if (avgMs < 250) return { label: "Fast", variant: "success" }
+  if (avgMs < 800) return { label: "Medium", variant: "default" }
 
   return { label: "Slow", variant: "warning" }
 }
