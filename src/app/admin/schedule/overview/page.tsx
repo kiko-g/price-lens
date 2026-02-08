@@ -25,7 +25,7 @@ import {
 } from "lucide-react"
 
 import type { ScheduleOverview } from "@/app/admin/schedule/types"
-import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
 
 export default function ScheduleOverviewPage() {
   const {
@@ -116,9 +116,7 @@ export default function ScheduleOverviewPage() {
                   <>
                     <div className="flex flex-wrap gap-1.5">
                       {overview?.activePriorities.map((p) => (
-                        <Badge key={p} className={cn("text-white", PRIORITY_CONFIG[p]?.bgColor)}>
-                          {PRIORITY_CONFIG[p]?.name}
-                        </Badge>
+                        <PriorityBubble key={p} priority={p} size="xs" />
                       ))}
                     </div>
                     <p className="text-muted-foreground text-xs">

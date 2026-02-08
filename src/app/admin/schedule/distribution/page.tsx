@@ -44,7 +44,7 @@ import type {
   ProductsByStalenessResponse,
   QStashSchedulesResponse,
 } from "@/app/admin/schedule/types"
-import { PRIORITY_CONFIG, formatThreshold } from "@/app/admin/schedule/constants"
+import { PRIORITY_CONFIG, formatThreshold } from "@/lib/business/priority"
 
 export default function ScheduleDistributionPage() {
   const queryClient = useQueryClient()
@@ -615,7 +615,7 @@ export default function ScheduleDistributionPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <PriorityBubble priority={stat.priority} size="sm" />
-                        <span className="font-medium">{config?.name}</span>
+                        <span className="font-medium">{config?.description}</span>
                       </div>
                       {!isActive && (
                         <Badge variant="default" className="text-xs" size="xs">
@@ -843,7 +843,7 @@ export default function ScheduleDistributionPage() {
                   <PriorityBubble priority={selectedPriority} size="md" />
                   <div>
                     <CardTitle className="text-lg">
-                      {selectedPriority === null ? "Unclassified" : priorityConfig?.name} Products
+                      {selectedPriority === null ? "Unclassified" : priorityConfig?.description} Products
                     </CardTitle>
                     <CardDescription>
                       {productsData?.pagination.totalCount.toLocaleString() ?? "..."} products matching filter

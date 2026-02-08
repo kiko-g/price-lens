@@ -89,6 +89,13 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
   },
 }
 
+export function formatThreshold(hours: number | null): string {
+  if (hours === null) return "—"
+  if (hours < 24) return `${hours}h`
+  const days = Math.round(hours / 24)
+  return days === 1 ? "1 day" : `${days} days`
+}
+
 /** Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS) */
 export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
 

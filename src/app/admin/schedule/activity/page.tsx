@@ -6,7 +6,6 @@ import axios from "axios"
 import { format, formatDistanceToNow } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useActivityLog } from "@/hooks/useActivityLog"
-import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
 import type { ActivityData } from "@/app/admin/schedule/types"
 
 import { Badge } from "@/components/ui/badge"
@@ -82,6 +81,7 @@ export default function ScheduleActivityPage() {
                     <Skeleton key={i} className="h-20" />
                   ))}
                 </div>
+
                 <Skeleton className="h-40" />
               </div>
             ) : (
@@ -118,11 +118,9 @@ export default function ScheduleActivityPage() {
                               .map(([priority, count]) => (
                                 <span
                                   key={priority}
-                                  className="flex items-center gap-1 rounded bg-white/50 px-1.5 py-0.5 dark:bg-black/20"
+                                  className="flex items-center gap-1 rounded bg-white/50 px-2 py-1 dark:bg-black/50"
                                 >
-                                  <span
-                                    className={cn("h-2 w-2 rounded-full", PRIORITY_CONFIG[Number(priority)]?.bgColor)}
-                                  />
+                                  <PriorityBubble priority={Number(priority)} size="xs" />
                                   {count}
                                 </span>
                               ))}
@@ -206,12 +204,7 @@ export default function ScheduleActivityPage() {
                               </span>
                             </td>
                             <td className="p-3">
-                              <div className="flex items-center gap-2">
-                                <PriorityBubble priority={product.priority} size="sm" />
-                                <span className="text-muted-foreground text-xs">
-                                  {PRIORITY_CONFIG[product.priority ?? 0]?.name || "None"}
-                                </span>
-                              </div>
+                              <PriorityBubble priority={product.priority} size="sm" useDescription />
                             </td>
                             <td className="text-muted-foreground p-3 text-right">
                               <TooltipProvider>

@@ -12,9 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
 
 import type { TimelineData, StaleBreakdown } from "@/app/admin/schedule/types"
-import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
+import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
 function formatDateLabel(date: Date): string {
   if (isToday(date)) return "Today"
@@ -126,14 +127,9 @@ export default function ScheduleTimelinePage() {
                                     .sort(([a], [b]) => Number(b) - Number(a))
                                     .map(([priority, count]) => (
                                       <div key={priority} className="flex items-center gap-1">
-                                        <span
-                                          className={cn(
-                                            "h-2 w-2 rounded-full",
-                                            PRIORITY_CONFIG[Number(priority)]?.bgColor,
-                                          )}
-                                        />
+                                        <PriorityBubble priority={Number(priority)} size="xs" />
                                         <span>
-                                          {PRIORITY_CONFIG[Number(priority)]?.name}: {count}
+                                          {PRIORITY_CONFIG[priority]?.description}: {count}
                                         </span>
                                       </div>
                                     ))}
@@ -218,9 +214,7 @@ export default function ScheduleTimelinePage() {
                             .sort(([a], [b]) => Number(b) - Number(a))
                             .map(([priority, count]) => (
                               <span key={priority} className="flex items-center gap-1">
-                                <span
-                                  className={cn("h-2 w-2 rounded-full", PRIORITY_CONFIG[Number(priority)]?.bgColor)}
-                                />
+                                <PriorityBubble priority={Number(priority)} size="xs" />
                                 {count}
                               </span>
                             ))}

@@ -25,7 +25,7 @@ import {
 } from "lucide-react"
 
 import type { SchedulerTestResult } from "@/app/admin/schedule/types"
-import { PRIORITY_CONFIG } from "@/app/admin/schedule/constants"
+import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
 export default function ScheduleTestPage() {
   const [schedulerTestResult, setSchedulerTestResult] = useState<SchedulerTestResult | null>(null)
@@ -265,7 +265,7 @@ export default function ScheduleTestPage() {
                       .map(([priority, count]) => (
                         <div key={priority} className="bg-muted/50 flex items-center gap-2 rounded-lg px-3 py-2">
                           <PriorityBubble priority={Number(priority)} size="sm" />
-                          <span className="font-medium">{PRIORITY_CONFIG[Number(priority)]?.name}</span>
+                          <span className="font-medium">{PRIORITY_CONFIG[priority]?.description}</span>
                           <Badge variant="secondary">{count}</Badge>
                         </div>
                       ))}
@@ -294,10 +294,7 @@ export default function ScheduleTestPage() {
                               </td>
                               <td className="p-2">
                                 <div className="flex items-center gap-1.5">
-                                  <PriorityBubble priority={product.priority} size="xs" />
-                                  <span className="text-muted-foreground text-xs">
-                                    {PRIORITY_CONFIG[product.priority]?.name}
-                                  </span>
+                                  <PriorityBubble priority={product.priority} size="xs" useDescription />
                                 </div>
                               </td>
                               <td className="p-2 text-right">
