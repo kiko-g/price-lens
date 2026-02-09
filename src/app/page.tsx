@@ -5,8 +5,10 @@ import { Layout } from "@/components/layout"
 
 import { Hero } from "@/components/home/Hero"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+import { PriceCreep } from "@/components/home/PriceCreep"
+import { HowItWorks } from "@/components/home/HowItWorks"
+import { ProductShowcaseSection } from "@/components/home/ProductShowcaseSection"
 import { InflationBasketConcept } from "@/components/home/InflationBasketConcept"
-import { InflationTrends } from "@/components/home/InflationTrends"
 import { PricingSection } from "@/components/home/Pricing"
 import { SearchDialogQuickNav } from "@/components/layout/SearchDialogQuickNav"
 
@@ -24,9 +26,11 @@ export default async function Home() {
 
       <main className="flex w-full flex-col items-center justify-center">
         <Hero />
-        <PricingSection />
-        <InflationTrends />
+        <PriceCreep />
+        <HowItWorks />
+        <ProductShowcaseSection />
         <InflationBasketConcept />
+        <PricingSection />
         <SearchDialogQuickNav />
       </main>
     </Layout>

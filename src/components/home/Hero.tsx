@@ -2,58 +2,53 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Brands } from "@/components/home/showcase/Brands"
-import { ProductShowcaseCarousel } from "@/components/home/showcase/ProductShowcaseCarousel"
-import { SHOWCASE_PRODUCT_IDS } from "@/lib/business/showcase"
-import { getShowcaseProducts } from "@/lib/business/showcase/queries"
+import { AnimatedPriceCounter } from "@/components/home/AnimatedPriceCounter"
 
-import { BadgeEuroIcon, ShoppingBasketIcon } from "lucide-react"
+import { ShoppingBasketIcon, ArrowRightIcon } from "lucide-react"
 
 export async function Hero() {
   const supermarketProductsLink = "/products"
-  const trackedProductsLink = "/products?priority=2,3,4,5"
-
-  // Fetch showcase data server-side
-  const showcaseData = await getShowcaseProducts(SHOWCASE_PRODUCT_IDS)
 
   return (
-    <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">
-      <div className="flex w-full flex-1 flex-col gap-4 pt-12 pb-4 md:gap-4 lg:pt-0 lg:pb-0">
-        <h1 className="animate-fade-in z-10 -translate-y-4 bg-linear-to-br from-black from-30% to-black/40 bg-clip-text py-2 text-center text-4xl leading-none font-medium tracking-tighter text-balance text-transparent opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-left md:text-6xl lg:text-7xl dark:from-white dark:to-white/40">
-          Price Lens
-          <br className="block" />
-          See through prices
+    <section className="z-20 flex w-full flex-col items-center justify-center px-4 pt-16 pb-8 md:px-16 md:pt-24 md:pb-12 lg:px-20 lg:pt-32 lg:pb-16">
+      <div className="flex max-w-4xl flex-col items-center gap-6 text-center">
+        <div className="animate-fade-in flex flex-col items-center gap-3 opacity-0 [--animation-delay:100ms]">
+          <span className="text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium tracking-tight">
+            Price tracking for Portuguese supermarkets
+          </span>
+        </div>
+
+        <h1 className="animate-fade-in z-10 -translate-y-4 text-center text-4xl leading-[1.1] font-bold tracking-tighter text-balance opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-6xl lg:text-7xl">
+          Prices rise.
+          <br />
+          <span className="text-muted-foreground/70">You barely notice.</span>
         </h1>
-        <p className="animate-fade-in text-muted-foreground max-w-3xl -translate-y-4 text-center tracking-tight text-balance opacity-0 [--animation-delay:400ms] md:text-left md:text-lg">
-          Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware
-          of how supermarket prices change. See beyond the headlines and tags. Data focused on Portugal-available
-          supermarket chains.
+
+        <p className="animate-fade-in text-muted-foreground max-w-2xl -translate-y-4 text-center text-lg leading-relaxed tracking-tight text-balance opacity-0 [--animation-delay:400ms] md:text-xl">
+          A few cents here, a few cents there. Over months, your grocery bill quietly climbs without you ever noticing.
+          Price Lens tracks it all so you can see what&apos;s really happening.
         </p>
 
-        <div className="animate-fade-in flex flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">
-          <Button variant="primary" size="lg" className="w-full md:w-auto" asChild>
+        <AnimatedPriceCounter />
+
+        <div className="animate-fade-in flex flex-wrap items-center justify-center gap-3 opacity-0 [--animation-delay:800ms] md:gap-4">
+          <Button variant="marketing" size="lg" className="w-full md:w-auto" asChild>
             <Link href={supermarketProductsLink}>
-              Explore Supermarket
+              Explore Products
               <ShoppingBasketIcon />
             </Link>
           </Button>
 
-          <Button variant="outline" size="lg" className="w-full md:w-auto" asChild>
-            <Link href={trackedProductsLink}>
-              Tracked Products
-              <BadgeEuroIcon />
+          <Button variant="ghost" size="lg" className="w-full md:w-auto" asChild>
+            <Link href="#how-it-works">
+              See how it works
+              <ArrowRightIcon />
             </Link>
           </Button>
         </div>
 
-        <Brands className="mt-8" />
+        <Brands className="mt-4 md:mt-8" />
       </div>
-
-      <div className="my-8 w-full max-w-full flex-1 self-start overflow-hidden lg:my-0 lg:w-auto lg:max-w-md">
-        <ProductShowcaseCarousel
-          className="border-border w-full bg-linear-to-br shadow-none"
-          initialData={showcaseData}
-        />
-      </div>
-    </div>
+    </section>
   )
 }
