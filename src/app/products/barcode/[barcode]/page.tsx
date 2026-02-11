@@ -65,16 +65,15 @@ export default async function ProductByBarcodePage({ params }: PageProps) {
   const { barcode } = await params
   const products = await getProductsByBarcode(barcode)
 
-  // No products found - show friendly not-found page
   if (products.length === 0) {
     return (
       <div className="flex w-full grow flex-col items-center justify-center">
         <HeroGridPattern
+          withGradient
           variant="grid"
-          className="mask-[linear-gradient(to_top_left,rgba(255,255,255,0.4))]"
-          width={16}
-          height={16}
+          className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
         />
+
         <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
           <Barcode value={barcode} height={50} width={2} className="mb-2" />
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">No products found</h1>

@@ -133,7 +133,7 @@ export async function GET(request: Request) {
                         tw="text-lg font-bold"
                         style={{ color: product.discount ? "#16a34a" : "#18181b", letterSpacing: "-0.02em" }}
                       >
-                        {product.price != null ? `${product.price.toFixed(2)}€` : "—"}
+                        {product.price != null ? `${product.price.toFixed(2)}€` : "-"}
                       </span>
 
                       {product.origin_id && (

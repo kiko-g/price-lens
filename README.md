@@ -31,6 +31,7 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [ ] No exact() queries?
 - [ ] Use some kind of pagination magic wrapper to never deal with the 1000 supabase limit
 - [ ] Efficient SSR
+- [ ] Nutri score and priority score
 - [ ] Finish product category priority manual association
 - [ ] Benchmark api routes
 - [ ] Check query speeds especially on product page: loading time is very long for compare and related section.

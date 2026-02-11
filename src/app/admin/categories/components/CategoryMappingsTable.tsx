@@ -304,8 +304,8 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                       </TableCell>
                       <TableCell>{Logo && <Logo className="h-3 w-16" />}</TableCell>
                       <TableCell className="font-medium">{tuple.store_category}</TableCell>
-                      <TableCell className="text-muted-foreground">{tuple.store_category_2 || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{tuple.store_category_3 || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{tuple.store_category_2 || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground">{tuple.store_category_3 || "-"}</TableCell>
                       <TableCell className="text-right font-mono text-sm">
                         {tuple.product_count.toLocaleString()}
                       </TableCell>
@@ -333,7 +333,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                             }}
                           />
                         ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
                     </TableRow>

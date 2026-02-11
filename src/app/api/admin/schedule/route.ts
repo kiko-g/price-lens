@@ -318,10 +318,7 @@ export async function GET(req: NextRequest) {
       ]
 
       const { data: products, error: productsError } = await fetchAll(() =>
-        supabase
-          .from("store_products")
-          .select("id, priority, updated_at")
-          .in("priority", ACTIVE_PRIORITIES),
+        supabase.from("store_products").select("id, priority, updated_at").in("priority", ACTIVE_PRIORITIES),
       )
 
       if (productsError || !products.length) {
@@ -378,7 +375,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (action === "activity") {
-      // Use RPC to get aggregated counts — avoids Supabase's 1000-row default limit
+      // Use RPC to get aggregated counts - avoids Supabase's 1000-row default limit
       const { data: rpcResult, error: rpcError } = await supabase.rpc("get_activity_window_stats")
 
       if (rpcError) {
@@ -679,7 +676,11 @@ export async function GET(req: NextRequest) {
       const limit = parseInt(searchParams.get("limit") || "50", 10)
       const offset = (page - 1) * limit
 
-      const { data: runs, error: runsError, count } = await supabase
+      const {
+        data: runs,
+        error: runsError,
+        count,
+      } = await supabase
         .from("scrape_runs")
         .select("*", { count: "exact" })
         .order("started_at", { ascending: false })
@@ -691,15 +692,19 @@ export async function GET(req: NextRequest) {
           return NextResponse.json({
             runs: [],
             pagination: { page: 1, limit, totalCount: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
-            stats24h: { totalBatches: 0, totalProducts: 0, totalSuccess: 0, totalFailed: 0, successRate: 0, avgBatchDuration: 0 },
+            stats24h: {
+              totalBatches: 0,
+              totalProducts: 0,
+              totalSuccess: 0,
+              totalFailed: 0,
+              successRate: 0,
+              avgBatchDuration: 0,
+            },
             migrationRequired: true,
           })
         }
         console.error("Scrape runs query error:", runsError)
-        return NextResponse.json(
-          { error: "Failed to fetch scrape runs", details: runsError.message },
-          { status: 500 },
-        )
+        return NextResponse.json({ error: "Failed to fetch scrape runs", details: runsError.message }, { status: 500 })
       }
 
       // Calculate aggregate stats from last 24 hours
@@ -720,9 +725,8 @@ export async function GET(req: NextRequest) {
         { totalBatches: 0, totalProducts: 0, totalSuccess: 0, totalFailed: 0, totalDuration: 0 },
       )
 
-      const successRate = stats24h.totalProducts > 0
-        ? Math.round((stats24h.totalSuccess / stats24h.totalProducts) * 100)
-        : 0
+      const successRate =
+        stats24h.totalProducts > 0 ? Math.round((stats24h.totalSuccess / stats24h.totalProducts) * 100) : 0
 
       return NextResponse.json({
         runs: runs || [],
@@ -737,9 +741,7 @@ export async function GET(req: NextRequest) {
         stats24h: {
           ...stats24h,
           successRate,
-          avgBatchDuration: stats24h.totalBatches > 0
-            ? Math.round(stats24h.totalDuration / stats24h.totalBatches)
-            : 0,
+          avgBatchDuration: stats24h.totalBatches > 0 ? Math.round(stats24h.totalDuration / stats24h.totalBatches) : 0,
         },
       })
     }

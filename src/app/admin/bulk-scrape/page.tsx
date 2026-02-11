@@ -1158,7 +1158,7 @@ export default function BulkScrapePage() {
                                 ((count - enhancedStats.totalProcessed) / enhancedStats.productsPerMinute) * 60,
                               ),
                             )
-                          : "—"
+                          : "-"
                     }
                     color="text-teal-500"
                     small
@@ -1171,7 +1171,7 @@ export default function BulkScrapePage() {
                     <ClockIcon className="h-3.5 w-3.5" />
                     Started:{" "}
                     {enhancedStats.startTime?.toLocaleTimeString() ??
-                      (jobProgress?.startedAt ? new Date(jobProgress.startedAt).toLocaleTimeString() : "—")}
+                      (jobProgress?.startedAt ? new Date(jobProgress.startedAt).toLocaleTimeString() : "-")}
                   </span>
                   {enhancedStats.startTime && (
                     <span>

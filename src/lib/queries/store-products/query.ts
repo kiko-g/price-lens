@@ -79,7 +79,7 @@ export async function queryStoreProducts(
     canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.canonicalCategory.categoryId)
   }
 
-  // Build the base query — no count: "exact" to avoid expensive COUNT(*) OVER()
+  // Build the base query - no count: "exact" to avoid expensive COUNT(*) OVER()
   // Instead, fetch limit+1 rows to determine hasNextPage
   let query = supabase.from(tableName).select("*")
 

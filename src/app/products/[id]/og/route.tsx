@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const storeName = product.origin_id ? STORE_NAMES[product.origin_id] : null
 
   // Format prices
-  const currentPrice = product.price?.toFixed(2) ?? "—"
+  const currentPrice = product.price?.toFixed(2) ?? "-"
   const originalPrice = product.price_recommended?.toFixed(2)
   const pricePerUnit = product.price_per_major_unit?.toFixed(2)
   const majorUnit = product.major_unit || "kg"

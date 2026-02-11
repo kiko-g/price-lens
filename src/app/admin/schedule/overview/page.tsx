@@ -4,11 +4,9 @@ import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -103,7 +101,7 @@ export default function ScheduleOverviewPage() {
                     </p>
                   </>
                 ) : (
-                  <p className="text-muted-foreground">—</p>
+                  <p className="text-muted-foreground">-</p>
                 )}
               </div>
 

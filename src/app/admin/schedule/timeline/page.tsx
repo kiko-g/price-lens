@@ -140,7 +140,7 @@ export default function ScheduleTimelinePage() {
                         )}
                       </div>
                       <span className="text-muted-foreground w-24 text-right text-xs">
-                        {hasProducts ? `${bucket.products.length} products` : "—"}
+                        {hasProducts ? `${bucket.products.length} products` : "-"}
                       </span>
                     </div>
                   )

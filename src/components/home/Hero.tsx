@@ -16,17 +16,17 @@ export async function Hero() {
   const showcaseData = await getShowcaseProducts(SHOWCASE_PRODUCT_IDS)
 
   return (
-    <div className="z-20 flex w-full flex-1 flex-col items-center justify-center gap-3 px-4 py-8 lg:flex-row lg:items-start lg:justify-start lg:gap-8 lg:px-20 lg:py-20">
-      <div className="flex w-full flex-1 flex-col gap-4 pt-12 pb-4 md:gap-4 lg:pt-0 lg:pb-0">
+    <div className="z-20 flex min-h-[calc(100svh-54px)] w-full flex-col items-center justify-center gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-center lg:gap-12 lg:px-20 lg:py-0">
+      <div className="flex w-full max-w-2xl flex-col gap-4 lg:max-w-none lg:flex-1">
         <h1 className="animate-fade-in z-10 -translate-y-4 bg-linear-to-br from-black from-30% to-black/40 bg-clip-text py-2 text-center text-4xl leading-none font-medium tracking-tighter text-balance text-transparent opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-left md:text-6xl lg:text-7xl dark:from-white dark:to-white/40">
-          Price Lens
+          Your groceries cost more than last month.
           <br className="block" />
-          See through prices
+          Did you notice?
         </h1>
         <p className="animate-fade-in text-muted-foreground max-w-3xl -translate-y-4 text-center tracking-tight text-balance opacity-0 [--animation-delay:400ms] md:text-left md:text-lg">
-          Monitor daily price changes on essential consumer goods that impact inflation metrics. Stay informed and aware
-          of how supermarket prices change. See beyond the headlines and tags. Data focused on Portugal-available
-          supermarket chains.
+          Price hikes happen in tiny increments. A few cents here, a few cents there. You barely notice each one, but
+          they add up fast. Price Lens tracks daily price changes across Portuguese supermarkets so you can see what the
+          shelf tag won&apos;t tell you.
         </p>
 
         <div className="animate-fade-in flex flex-wrap gap-3 opacity-0 [--animation-delay:600ms] md:mt-3 md:gap-4">
@@ -48,7 +48,7 @@ export async function Hero() {
         <Brands className="mt-8" />
       </div>
 
-      <div className="my-8 w-full max-w-full flex-1 self-start overflow-hidden lg:my-0 lg:w-auto lg:max-w-md">
+      <div className="w-full max-w-full flex-1 overflow-hidden lg:w-auto lg:max-w-md">
         <ProductShowcaseCarousel
           className="border-border w-full bg-linear-to-br shadow-none"
           initialData={showcaseData}

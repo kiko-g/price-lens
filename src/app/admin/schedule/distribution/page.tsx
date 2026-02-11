@@ -440,7 +440,7 @@ export default function ScheduleDistributionPage() {
               )}
             </div>
             <CardDescription>
-              External cron via QStash — bypasses Vercel plan limitations on cron frequency
+              External cron via QStash - bypasses Vercel plan limitations on cron frequency
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -535,7 +535,7 @@ export default function ScheduleDistributionPage() {
           </CardContent>
         </Card>
 
-        {/* Scrape Runs — 24h Stats */}
+        {/* Scrape Runs - 24h Stats */}
         {scrapeRunsData?.stats24h && scrapeRunsData.stats24h.totalBatches > 0 && (
           <Card>
             <CardHeader className="pb-2">

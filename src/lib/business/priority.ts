@@ -90,7 +90,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
 }
 
 export function formatThreshold(hours: number | null): string {
-  if (hours === null) return "—"
+  if (hours === null) return "-"
   if (hours < 24) return `${hours}h`
   const days = Math.round(hours / 24)
   return days === 1 ? "1 day" : `${days} days`

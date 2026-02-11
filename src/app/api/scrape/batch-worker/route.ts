@@ -141,7 +141,6 @@ async function handler(req: NextRequest) {
         })
         console.error(`🛜 [BatchWorker] ✗ Error for ${product.name}:`, error)
       }
-
     }
 
     const totalDuration = Date.now() - batchStartTime
@@ -192,7 +191,7 @@ async function handler(req: NextRequest) {
         error: error instanceof Error ? error.message : "Unknown batch error",
       })
     } catch {
-      // Silently fail — don't let tracking break the response
+      // Silently fail - don't let tracking break the response
     }
 
     return NextResponse.json(
