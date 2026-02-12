@@ -106,6 +106,8 @@
   --sidebar-accent-foreground: var(--base-800);
   --sidebar-border: var(--base-200);
   --sidebar-ring: var(--primary-500);
+
+  --primary-glow: 235 82% 50%;
 }
 
 .dark {
@@ -141,6 +143,8 @@
   --sidebar-accent-foreground: var(--base-200);
   --sidebar-border: var(--base-800);
   --sidebar-ring: var(--primary-600);
+
+  --primary-glow: 235 82% 58%;
 }
 
 @theme inline {
@@ -408,7 +412,7 @@
   }
 
   html {
-    @apply scroll-smooth;
+    @apply scroll-smooth overflow-x-clip;
   }
 
   body.drawer-open {

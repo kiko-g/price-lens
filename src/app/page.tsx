@@ -22,18 +22,23 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
+  const CustomSeparator = () => (
+    <div className="from-border/5 via-border/30 to-border/5 dark:from-border/5 dark:via-border/50 dark:to-border/5 my-4 h-[2px] w-full bg-linear-to-r lg:my-8" />
+  )
+
   return (
     <Layout>
       <HeroGridPattern
         withGradient
         variant="grid"
-        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,1.0),transparent_100%)]"
       />
 
-      <main className="max-w-9xl mx-auto flex w-full flex-col items-center justify-center">
+      <main className="flex w-full flex-col items-center justify-center">
         <Hero />
-        <div className="via-border my-4 h-px w-full bg-linear-to-r from-transparent to-transparent lg:my-8" />
+        <CustomSeparator />
         <SavePotential />
+        <CustomSeparator />
         <PriceCreep />
         <ValueProposition />
         <InflationContext />

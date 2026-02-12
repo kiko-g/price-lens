@@ -54,6 +54,7 @@ Developer notes on theming. The main theme file is [`src/app/globals.css`](src/a
 - [ ] Organize types
 - [ ] Investigate if more things can be scraped and what new columns can be used for `store_products`.
 - [ ] Chart error
+- [ ] Open food facts api: https://world.openfoodfacts.org/product/5060639126521
 - [ ] Add store_products.sku
 
 ```

@@ -87,9 +87,6 @@ export const daysAmountInRange: {
   Max: 36500, // 100 years
 }
 
-export const PRODUCT_PRIORITY_LEVELS = [0, 1, 2, 3, 4, 5] as const
-export type ProductPriorityLevel = (typeof PRODUCT_PRIORITY_LEVELS)[number]
-
 export const STORE_PRODUCT_FILTER_DEFAULTS_MAP = {
   sort: "updated-newest",
   origin: [],

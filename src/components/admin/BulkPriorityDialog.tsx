@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 
-import { PRODUCT_PRIORITY_LEVELS } from "@/types/business"
+import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import type { PriorityDistribution } from "@/lib/queries/store-products"
 
 import {
