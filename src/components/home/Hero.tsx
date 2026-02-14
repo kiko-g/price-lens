@@ -18,7 +18,7 @@ export async function Hero() {
   return (
     <div className="max-w-9xl z-20 mx-auto flex min-h-[calc(100svh-54px)] w-full flex-col items-center justify-center gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-center lg:gap-12 lg:px-20 lg:py-0">
       <div className="qjustify-center flex w-full max-w-2xl flex-col items-center gap-4 lg:max-w-none lg:flex-1 lg:items-start lg:justify-start">
-        <h1 className="animate-fade-in z-10 -translate-y-4 bg-linear-to-br from-black from-30% to-black/40 bg-clip-text py-2 text-center text-4xl leading-none font-medium tracking-tighter text-balance text-transparent opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-left md:text-6xl lg:text-7xl dark:from-white dark:to-white/40">
+        <h1 className="animate-fade-in z-10 -translate-y-4 bg-linear-to-br from-zinc-950 from-30% to-zinc-950/40 bg-clip-text py-2 text-center text-4xl leading-none font-medium tracking-tighter text-balance text-transparent opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-left md:text-6xl md:font-medium lg:text-7xl dark:from-white dark:to-white/40">
           Your groceries cost more than last month.
           <br className="block" />
           Did you notice?

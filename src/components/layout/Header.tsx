@@ -22,7 +22,7 @@ export function Header() {
   const isEarlyAccess = false
 
   return (
-    <header className="bg-opacity-80 dark:bg-opacity-80 bg-background/90 sticky top-0 z-50 mx-auto h-[54px] w-full border-b backdrop-blur backdrop-filter xl:px-4">
+    <header className="bg-opacity-80 dark:bg-opacity-80 bg-background/90 sticky top-0 z-50 mx-auto h-(--header-height) w-full border-b backdrop-blur backdrop-filter xl:px-4">
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
           <LogoLink />

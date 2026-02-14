@@ -36,7 +36,6 @@ export default async function Home() {
 
       <main className="flex w-full flex-col items-center justify-center">
         <Hero />
-        <CustomSeparator />
         <SavePotential />
         <CustomSeparator />
         <PriceCreep />

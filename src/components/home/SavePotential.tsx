@@ -216,7 +216,7 @@ export function SavePotential() {
           </div>
 
           {/* Trust indicators */}
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-8">
+          <div className="flex flex-row flex-wrap items-center justify-center gap-4 sm:gap-8">
             {[
               { icon: ShieldCheck, text: "No payment required" },
               { icon: TrendingUp, text: "Average 20% savings" },

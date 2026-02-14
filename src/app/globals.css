@@ -248,6 +248,8 @@
   --container-9xl: 96rem;
   --container-10xl: 104rem;
 
+  --header-height: 54px;
+
   @keyframes slither {
     0% {
       transform: translateX(-100%);
@@ -412,7 +414,7 @@
   }
 
   html {
-    @apply scroll-smooth overflow-x-clip;
+    @apply overflow-x-clip scroll-smooth;
   }
 
   body.drawer-open {
