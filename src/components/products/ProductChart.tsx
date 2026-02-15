@@ -783,7 +783,7 @@ const emptyStateContainerClasses = "bg-muted/50 flex w-full max-w-xl flex-col ga
 function NotTrackedDisplay({ className }: NotTrackedDisplayProps) {
   const { sp } = useProductChartContext()
 
-  if (sp.priority != null && sp.priority > 0) return null
+  if (sp.priority !== null && sp.priority > 0) return null
 
   return (
     <div className={cn(emptyStateContainerClasses, className)}>

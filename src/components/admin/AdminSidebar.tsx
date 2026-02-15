@@ -18,8 +18,6 @@ import {
   ShoppingBasketIcon,
   HeartIcon,
   LogOutIcon,
-  MoonIcon,
-  SunIcon,
   UserIcon,
   ScanFaceIcon,
   MoreHorizontalIcon,
@@ -33,6 +31,7 @@ import {
   PickaxeIcon,
   LayersIcon,
   TimerIcon,
+  ContrastIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -340,7 +339,7 @@ function UserDropup() {
           onSelect={(e) => e.preventDefault()}
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
-          {theme === "dark" ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
+          <ContrastIcon className="size-4 dark:rotate-180" />
           <span>{theme === "dark" ? "Light" : "Dark"} Theme</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 import { PRIORITY_CONFIG, PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 
-type BadgeSize = "sm" | "md" | "lg"
+type BadgeSize = "xs" | "sm" | "md" | "lg"
 
 const SIZE_MAP: Record<
   BadgeSize,
@@ -15,11 +15,20 @@ const SIZE_MAP: Record<
     label: string
   }
 > = {
+  xs: {
+    pill: "h-4 w-4 text-[10px]",
+    activePill: "h-5 w-5 text-xs",
+    fontSize: "text-[10px]",
+    activeFontSize: "text-xs",
+    gap: "gap-0",
+    wrapper: "gap-1",
+    label: "text-xs",
+  },
   sm: {
     pill: "h-5 w-5 text-[10px]",
     activePill: "h-6 w-6 text-xs",
-    fontSize: "text-[10px]",
-    activeFontSize: "text-xs",
+    fontSize: "text-xs",
+    activeFontSize: "text-sm",
     gap: "gap-0",
     wrapper: "gap-1.5",
     label: "text-xs",

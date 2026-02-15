@@ -7,8 +7,10 @@ import { navigation } from "@/lib/config"
 import { usePathname } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 
 import { LogoLink } from "@/components/layout/LogoLink"
+import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { NavigationMenu } from "@/components/layout/NavigationMenu"
 import { SearchContainer } from "@/components/layout/search"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
@@ -51,14 +53,19 @@ export function Header() {
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && (
             <SearchContainer>
-              <Button variant="outline" size="sm" className="relative hidden bg-transparent md:inline-flex">
+              <Button variant="primary-soft" className="relative hidden shadow-none md:inline-flex">
                 <SearchIcon className="h-4 w-4" />
                 <span>Search products</span>
               </Button>
             </SearchContainer>
           )}
-          <UserDropdownMenu />
+
+          <ThemeToggle size="icon" variant="outline" />
           <NavigationMenu />
+
+          <Separator orientation="vertical" className="h-6" />
+
+          <UserDropdownMenu />
         </div>
       </div>
     </header>

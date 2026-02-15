@@ -21,7 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { GithubIcon } from "@/components/icons"
-import { HeartIcon, LogOut, MoonIcon, ScanFaceIcon, SunIcon, UserIcon } from "lucide-react"
+import { ContrastIcon, HeartIcon, LogOut, ScanFaceIcon, UserIcon } from "lucide-react"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
@@ -54,7 +54,7 @@ export function UserDropdownMenu() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="relative size-[34px] rounded-full bg-transparent">
           <Avatar className="size-[34px]">
@@ -74,6 +74,7 @@ export function UserDropdownMenu() {
           </Badge>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center justify-between gap-1">
@@ -97,6 +98,22 @@ export function UserDropdownMenu() {
 
         <DropdownMenuSeparator />
 
+        <DropdownMenuItem asChild>
+          <Link href="/profile">
+            <UserIcon className="h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/favorites">
+            <HeartIcon className="h-4 w-4" />
+            <span>Favorites</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
         <DropdownMenuLabel>
           <div className="flex items-center justify-between gap-1">
             <p className="text-sm leading-none font-medium"></p>
@@ -110,25 +127,9 @@ export function UserDropdownMenu() {
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-full"
           >
-            {theme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+            <ContrastIcon className="size-4 dark:rotate-180" />
             <span className="w-full text-left">{theme === "dark" ? "Light" : "Dark"} Theme</span>
           </Button>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem asChild>
-          <Link href="/profile">
-            <UserIcon className="h-4 w-4" />
-            <span>Profile</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link href="/favorites">
-            <HeartIcon className="h-4 w-4" />
-            <span>Favorites</span>
-          </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import type { NavigationItem } from "@/types"
 import { GithubIcon } from "@/components/icons"
-import { LogInIcon, MenuIcon, SearchIcon } from "lucide-react"
+import { MenuIcon, SearchIcon } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
 import { navigation, siteConfig } from "@/lib/config"

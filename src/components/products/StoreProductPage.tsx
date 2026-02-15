@@ -31,6 +31,7 @@ import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { ProductChart } from "@/components/products/ProductChart"
 import { PriorityScore } from "@/components/products/PriorityScore"
+import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { RelatedStoreProducts } from "@/components/products/RelatedStoreProducts"
@@ -38,7 +39,6 @@ import { IdenticalProductsCompare } from "@/components/products/IdenticalProduct
 
 import {
   HeartIcon,
-  NavigationOffIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
   MicroscopeIcon,
@@ -191,10 +191,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             )}
           </div>
 
-          <div className="hidden md:mt-2 md:inline-flex md:w-full md:items-center md:justify-between md:gap-2">
+          <div className="hidden md:inline-flex md:w-full md:flex-col md:items-start md:justify-center md:gap-4">
             {/* Desktop Barcode */}
+            <PriorityScore priority={sp.priority} size="sm" showDescription wrapperClassName="flex-row gap-3" />
             <Barcode value={sp.barcode} height={35} width={2} showMissingValue />
-            <PriorityScore priority={sp.priority} size="sm" showDescription />
           </div>
 
           {/* Mobile header info - takes 4/7 columns */}
@@ -236,19 +236,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </Badge>
               )}
 
-              {sp.priority !== null && sp.priority > 0 ? (
-                <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind} size="sm" roundedness="sm">
-                  Priority {sp.priority}
-                </Badge>
-              ) : (
-                <Badge variant="destructive" size="sm" roundedness="sm">
-                  <NavigationOffIcon className="h-4 w-4" />
-                  Untracked product
-                </Badge>
-              )}
+              <PriorityBadge priority={sp.priority} />
             </div>
 
-            <PriorityScore priority={sp.priority} size="sm" showDescription />
+            <PriorityScore priority={sp.priority} size="xs" showDescription />
 
             <Button
               variant="outline"
@@ -430,7 +421,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             <FavoriteButton storeProduct={sp} />
             <ShareButton sp={sp} />
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon-sm">
                   <EllipsisVerticalIcon className="h-4 w-4" />

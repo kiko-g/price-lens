@@ -31,8 +31,8 @@ import { ShareButton } from "@/components/ui/combo/share-button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { ProductChart } from "@/components/products/ProductChart"
+import { PriorityChip } from "@/components/products/PriorityChip"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
-import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 
 import {
@@ -198,7 +198,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 </TooltipProvider>
               )}
 
-              <PriorityBadge priority={priority} variant="compact" size="2xs" />
+              <PriorityChip priority={priority} variant="compact" size="2xs" />
             </>
           )}
         </div>
@@ -491,7 +491,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                       <WifiOffIcon className="size-3 text-white" />
                     </span>
                   ) : (
-                    <PriorityBadge
+                    <PriorityChip
                       priority={sp.priority}
                       size="xs"
                       variant="compact"
