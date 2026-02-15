@@ -7,6 +7,12 @@ import { type BadgeKind } from "@/components/ui/badge"
  * All priority thresholds, staleness checks, and related utilities live here.
  */
 
+/** Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS) */
+export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
+
+/** Default grace period before showing staleness warning (24 hours) */
+export const DEFAULT_STALENESS_LENIENCE_HOURS = 24
+
 /**
  * SCHEDULE CONFIGURATION
  *
@@ -98,12 +104,6 @@ export function formatThreshold(hours: number | null): string {
   const days = Math.round(hours / 24)
   return days === 1 ? "1 day" : `${days} days`
 }
-
-/** Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS) */
-export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
-
-/** Default grace period before showing staleness warning (24 hours) */
-export const DEFAULT_STALENESS_LENIENCE_HOURS = 24
 
 export type PriceStalenessResult = {
   isStale: boolean

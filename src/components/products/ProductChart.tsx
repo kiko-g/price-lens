@@ -631,12 +631,7 @@ function Graph({ className }: GraphProps) {
 }
 
 function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: { value: number }; yAxisId: string }) {
-  const formatPrice = (value: number): string => {
-    // Use more decimal places for small values to show meaningful precision
-    if (value < 1) return `€${value.toFixed(2)}`
-    if (value < 10) return `€${value.toFixed(1)}`
-    return `€${value.toFixed(0)}`
-  }
+  const formatPrice = (value: number): string => `€${value.toFixed(2)}`
 
   return (
     <text x={x} y={y} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
@@ -674,6 +669,8 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
 
   if (!pricePoints || pricePoints.length === 0) return null
 
+  const hasMultiplePrices = pricePoints?.length > 1
+
   return (
     <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
       <div
@@ -696,7 +693,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         )}
       </div>
 
-      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && pricePoints.length > 5 && "h-[220px]")}>
+      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && pricePoints.length > 6 && "h-[250px]")}>
         <Table>
           <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
             <TableRow className="bg-accent hover:bg-accent">
@@ -722,40 +719,50 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
           <TableBody>
             {pricePoints
               .sort((a, b) => b.price - a.price)
-              .map((point: PricePoint, index) => (
-                <TableRow key={index} className="hover:bg-transparent">
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-semibold tracking-tighter">
-                        {point.price.toFixed(2)}€
-                      </span>
+              .map((point: PricePoint, index) => {
+                const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
 
-                      {point.discount !== null && point.discount > 0.0 && (
-                        <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
-                          -{(point.discount * 100).toFixed(0)}%
-                        </Badge>
-                      )}
-                      {point.price === mostCommon?.price && (
-                        <Badge variant="secondary" size="2xs">
-                          Most Common
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
+                return (
+                  <TableRow
+                    key={index}
+                    className={cn(
+                      "hover:bg-transparent",
+                      isCurrentPrice && hasMultiplePrices && "bg-primary/10 dark:bg-primary/20",
+                    )}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-semibold tracking-tighter">
+                          {point.price.toFixed(2)}€
+                        </span>
 
-                  <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                    {point.price_recommended?.toFixed(1)}€
-                  </TableCell>
+                        {point.discount !== null && point.discount > 0.0 && (
+                          <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
+                            -{(point.discount * 100).toFixed(0)}%
+                          </Badge>
+                        )}
+                        {point.price === mostCommon?.price && (
+                          <Badge variant="secondary" size="2xs">
+                            Most Common
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
 
-                  <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                    {point.price_per_major_unit?.toFixed(1)}€
-                  </TableCell>
+                    <TableCell className="text-center font-mono text-xs font-medium tracking-tighter">
+                      {point.price_recommended?.toFixed(2)}€
+                    </TableCell>
 
-                  <TableCell className="text-muted-foreground text-center font-mono text-xs font-medium tracking-tighter">
-                    {(point.frequencyRatio * 100).toFixed(1)}%
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell className="text-center font-mono text-xs font-medium tracking-tighter">
+                      {point.price_per_major_unit?.toFixed(2)}€
+                    </TableCell>
+
+                    <TableCell className="text-center font-mono text-xs font-medium tracking-tighter">
+                      {(point.frequencyRatio * 100).toFixed(0)}%
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
           </TableBody>
         </Table>
       </ScrollArea>
