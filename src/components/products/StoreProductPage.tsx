@@ -248,7 +248,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
               )}
             </div>
 
-            <PriorityScore priority={0} size="sm" showDescription />
+            <PriorityScore priority={sp.priority} size="sm" showDescription />
 
             <Button
               variant="outline"

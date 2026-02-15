@@ -126,7 +126,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
       >
         <Link href={generateProductPath(sp)} className="h-full w-full">
           {sp.image ? (
-            <div className="relative aspect-square w-full">
+            <div className="relative aspect-5/6 w-full">
               <Image
                 src={resolveImageUrlForCard(sp.image, 400)}
                 alt={sp.name || "Product Image"}
@@ -134,7 +134,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 height={400}
                 unoptimized
                 className={cn(
-                  "aspect-square h-full w-full bg-white object-cover object-center transition duration-300",
+                  "aspect-5/6 h-full w-full bg-white object-cover object-center transition duration-300",
                   sp.available ? "opacity-100" : "",
                 )}
                 placeholder="blur"

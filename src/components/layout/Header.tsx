@@ -51,8 +51,9 @@ export function Header() {
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && (
             <SearchContainer>
-              <Button variant="outline" size="icon" className="relative hidden bg-transparent md:inline-flex">
+              <Button variant="outline" size="sm" className="relative hidden bg-transparent md:inline-flex">
                 <SearchIcon className="h-4 w-4" />
+                <span>Search products</span>
               </Button>
             </SearchContainer>
           )}
