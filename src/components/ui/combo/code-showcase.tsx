@@ -27,10 +27,11 @@ export function CodeShowcase({ className, code, language, allowDownload = true }
         className,
       )}
     >
-      <div className="absolute top-3 right-3 z-20 flex items-center justify-end gap-1">
+      <div className="absolute top-3 right-3 z-20 flex items-center justify-end gap-1 text-white">
         {canDownload ? <DownloadButton text={code} filename={`code.${language}`} /> : null}
         {canCopy ? <CopyCodeButton text={code} /> : null}
       </div>
+
       <SyntaxHighlighter
         language={language}
         style={coldarkDark}
@@ -63,7 +64,7 @@ function CopyCodeButton({ text }: { text: string }) {
   }, [text])
 
   return (
-    <Button onClick={copyToClipboard} disabled={isCopied} variant="ghost" size="icon-xs">
+    <Button onClick={copyToClipboard} disabled={isCopied} variant="ghost-dark" size="icon">
       {isCopied ? <CheckIcon /> : <ClipboardIcon />}
     </Button>
   )
@@ -92,7 +93,7 @@ function DownloadButton({ text, filename }: { text: string; filename: string }) 
   }
 
   return (
-    <Button onClick={download} disabled={isDownloading} variant="ghost" size="icon-xs">
+    <Button onClick={download} disabled={isDownloading} variant="ghost-dark" size="icon">
       {isDownloading ? <CheckIcon /> : <DownloadIcon />}
     </Button>
   )
