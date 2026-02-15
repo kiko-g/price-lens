@@ -24,26 +24,13 @@ import { Barcode } from "@/components/ui/combo/barcode"
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/ui/combo/share-button"
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
 
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { ProductChart } from "@/components/products/ProductChart"
+import { PriorityScore } from "@/components/products/PriorityScore"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { RelatedStoreProducts } from "@/components/products/RelatedStoreProducts"
@@ -168,7 +155,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
     return parts.join(" > ")
   })()
 
-  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false)
+  const elevated = process.env.NODE_ENV === "development" || profile?.role === "admin"
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:py-4">
@@ -204,30 +191,14 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             )}
           </div>
 
-          {/* Desktop Barcode */}
-          <Barcode
-            value={sp.barcode}
-            height={35}
-            width={2}
-            showMissingValue
-            className="hidden md:mt-2 md:inline-flex"
-          />
+          <div className="hidden md:mt-2 md:inline-flex md:w-full md:items-center md:justify-between md:gap-2">
+            {/* Desktop Barcode */}
+            <Barcode value={sp.barcode} height={35} width={2} showMissingValue />
+            <PriorityScore priority={sp.priority} size="sm" showDescription />
+          </div>
 
           {/* Mobile header info - takes 4/7 columns */}
           <div className="col-span-4 flex flex-col items-start gap-2 md:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              roundedness="2xl"
-              asChild
-              className="w-fit dark:bg-white dark:hover:bg-white/90"
-            >
-              {/* Link to store product page */}
-              <Link href={sp.url} target="_blank" rel="noreferrer noopener">
-                <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
-              </Link>
-            </Button>
-
             {/* Mobile: Category Badge */}
             <div className="flex flex-wrap items-center gap-2 md:hidden">
               {sp.canonical_category_name ? (
@@ -276,6 +247,21 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 </Badge>
               )}
             </div>
+
+            <PriorityScore priority={0} size="sm" showDescription />
+
+            <Button
+              variant="outline"
+              size="sm"
+              roundedness="2xl"
+              asChild
+              className="mt-3 w-fit dark:bg-white dark:hover:bg-white/90"
+            >
+              {/* Link to store product page */}
+              <Link href={sp.url} target="_blank" rel="noreferrer noopener">
+                <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
+              </Link>
+            </Button>
           </div>
         </aside>
 
@@ -453,24 +439,20 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Drawer open={isDetailsDrawerOpen} onOpenChange={setIsDetailsDrawerOpen}>
-                    <DrawerTrigger asChild>
+                  <DrawerSheet
+                    title="Details"
+                    description="Inspect store product data"
+                    trigger={
                       <Button variant="dropdown-item" className="hover:bg-accent flex items-center gap-2 px-2">
                         Store product details
                         <InfoIcon className="-ml-1 h-4 w-4" />
                       </Button>
-                    </DrawerTrigger>
-                    <DrawerContent className="overflow-y-auto">
-                      <DrawerHeader className="text-left">
-                        <DrawerTitle>Details</DrawerTitle>
-                        <DrawerDescription>Inspect store product data</DrawerDescription>
-                      </DrawerHeader>
-
-                      <div className="max-w-md px-4">
-                        <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
-                      </div>
-                    </DrawerContent>
-                  </Drawer>
+                    }
+                  >
+                    <div className="max-w-md">
+                      <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
+                    </div>
+                  </DrawerSheet>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
@@ -485,27 +467,28 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                   </Button>
                 </DropdownMenuItem>
 
-                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
-                  <>
-                    <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      Admin tools <DevBadge />
-                    </DropdownMenuLabel>
-
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
+                {elevated && (
+                  <DropdownMenuItem asChild>
+                    <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
+                      <span className="flex items-center gap-1">
                         Set priority
-                        <MicroscopeIcon />
-                      </Button>
-                    </DropdownMenuItem>
+                        <DevBadge />
+                      </span>
+                      <MicroscopeIcon />
+                    </Button>
+                  </DropdownMenuItem>
+                )}
 
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
+                {elevated && (
+                  <DropdownMenuItem asChild>
+                    <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
+                      <span className="flex items-center gap-1">
                         Clear priority
-                        <CircleIcon />
-                      </Button>
-                    </DropdownMenuItem>
-                  </>
+                        <DevBadge />
+                      </span>
+                      <CircleIcon />
+                    </Button>
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>

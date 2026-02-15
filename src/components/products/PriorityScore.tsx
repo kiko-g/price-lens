@@ -20,7 +20,7 @@ const SIZE_MAP: Record<
     activePill: "h-6 w-6 text-xs",
     fontSize: "text-[10px]",
     activeFontSize: "text-xs",
-    gap: "gap-px",
+    gap: "gap-0",
     wrapper: "gap-1.5",
     label: "text-xs",
   },
@@ -29,7 +29,7 @@ const SIZE_MAP: Record<
     activePill: "h-7 w-7 text-sm",
     fontSize: "text-xs",
     activeFontSize: "text-sm",
-    gap: "gap-0.5",
+    gap: "gap-0",
     wrapper: "gap-2",
     label: "text-sm",
   },
@@ -38,7 +38,7 @@ const SIZE_MAP: Record<
     activePill: "h-9 w-9 text-base",
     fontSize: "text-sm",
     activeFontSize: "text-base",
-    gap: "gap-0.5",
+    gap: "gap-0",
     wrapper: "gap-2.5",
     label: "text-base",
   },
@@ -50,6 +50,7 @@ interface PriorityScoreProps {
   showDescription?: boolean
   size?: BadgeSize
   className?: string
+  wrapperClassName?: string
 }
 
 export function PriorityScore({
@@ -58,6 +59,7 @@ export function PriorityScore({
   showDescription = false,
   size = "md",
   className,
+  wrapperClassName,
 }: PriorityScoreProps) {
   const isNull = priority === null
   const key = isNull ? "null" : String(priority)
@@ -65,7 +67,7 @@ export function PriorityScore({
   const s = SIZE_MAP[size]
 
   return (
-    <div className="flex flex-col items-center gap-0.5">
+    <div className={cn("flex flex-col items-center gap-0.5", wrapperClassName)}>
       <div
         role="img"
         className={cn("inline-flex items-center", s.wrapper, className)}
@@ -77,13 +79,18 @@ export function PriorityScore({
             const levelKey = String(level)
             const levelConfig = PRIORITY_CONFIG[levelKey]
             const isActive = !isNull && level === priority
+            const isFirst = level === 0
+            const isLast = level === 5
 
             if (isActive) {
               return (
                 <span
                   key={levelKey}
                   className={cn(
-                    "relative z-10 inline-flex shrink-0 items-center justify-center rounded-[10px] font-bold text-white shadow-sm",
+                    "relative z-10 inline-flex shrink-0 items-center justify-center rounded-[5px] font-bold text-white shadow-sm",
+                    isFirst && "mr-0.5 rounded-l rounded-r-none",
+                    isLast && "ml-0.5 rounded-l-none rounded-r",
+                    !isFirst && !isLast && "mx-0.5",
                     levelConfig.bgClass,
                     s.activePill,
                   )}
@@ -92,9 +99,6 @@ export function PriorityScore({
                 </span>
               )
             }
-
-            const isFirst = level === 0
-            const isLast = level === 5
 
             return (
               <span

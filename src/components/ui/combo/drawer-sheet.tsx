@@ -14,14 +14,22 @@ import {
 
 import { ChartSplineIcon } from "lucide-react"
 
+const DefaultTrigger = (
+  <Button size="icon-sm">
+    <ChartSplineIcon />
+  </Button>
+)
+
 export function DrawerSheet({
   children,
   title,
   description,
+  trigger = DefaultTrigger,
 }: {
   children: React.ReactNode
   title?: string
   description?: string
+  trigger?: React.ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const isDesktop = useMediaQuery("(min-width: 768px)")
@@ -30,9 +38,7 @@ export function DrawerSheet({
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild className="top-4">
-          <Button size="icon-sm">
-            <ChartSplineIcon />
-          </Button>
+          {trigger}
         </SheetTrigger>
         <SheetContent className="overflow-x-hidden overflow-y-scroll">
           <SheetHeader>
@@ -49,14 +55,12 @@ export function DrawerSheet({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild className="top-4">
-        <Button size="icon-sm">
-          <ChartSplineIcon />
-        </Button>
+        {trigger}
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="text-left">{title}</DrawerTitle>
-          {description ? <DrawerDescription>{description}</DrawerDescription> : null}
+          {description ? <DrawerDescription className="text-left">{description}</DrawerDescription> : null}
         </DrawerHeader>
 
         {/* Scrollable content area - touch-pan-y allows vertical scrolling while drawer handles dismiss */}
