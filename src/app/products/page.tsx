@@ -4,6 +4,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 import { StoreProductsShowcase } from "@/components/products/StoreProductsShowcase"
 import { queryStoreProducts, generateQueryKey } from "@/lib/queries/store-products"
 import type { StoreProductsQueryParams, StoreProductsQueryResult } from "@/lib/queries/store-products"
+import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProducts } from "@/lib/kv"
 import { buildPageTitle } from "@/lib/business/page-title"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Footer } from "@/components/layout/Footer"
@@ -116,6 +117,31 @@ function buildServerQueryParams(
   return qp
 }
 
+/**
+ * Server-side fetch with Redis cache layer.
+ * 1. Redis cache hit → serve immediately (no DB call)
+ * 2. Cache miss → query DB → cache result for next request
+ * 3. DB error → throw so React Query treats it as a failure
+ */
+async function fetchWithCache(queryParams: StoreProductsQueryParams): Promise<StoreProductsQueryResult> {
+  const cacheKey = JSON.stringify(queryParams)
+  const cacheEnabled = isStoreProductsCacheEnabled()
+
+  if (cacheEnabled) {
+    const cached = await getCachedStoreProducts<StoreProductsQueryResult>(cacheKey)
+    if (cached && cached.data.length > 0) return cached
+  }
+
+  const result = await queryStoreProducts(queryParams)
+  if (result.error) throw new Error(result.error.message)
+
+  if (cacheEnabled && result.data.length > 0) {
+    await setCachedStoreProducts(cacheKey, result)
+  }
+
+  return result
+}
+
 function LoadingFallback() {
   return (
     <div className="flex w-full flex-col gap-3 p-4">
@@ -137,13 +163,7 @@ export default async function StoreProductsPage({ searchParams }: PageProps) {
   const queryKey = generateQueryKey(queryParams)
   await queryClient.prefetchQuery({
     queryKey,
-    queryFn: async () => {
-      const result = await queryStoreProducts(queryParams)
-      // Throw on DB errors so React Query treats it as a failure,
-      // not as "successful empty data" that gets cached for staleTime
-      if (result.error) throw new Error(result.error.message)
-      return result
-    },
+    queryFn: () => fetchWithCache(queryParams),
   })
 
   // Safety net: if server prefetch returned 0 rows (transient issue or error
