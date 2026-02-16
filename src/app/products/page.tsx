@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import { StoreProductsShowcase } from "@/components/products/StoreProductsShowcase"
 import { queryStoreProducts, generateQueryKey } from "@/lib/queries/store-products"
-import type { StoreProductsQueryParams } from "@/lib/queries/store-products"
+import type { StoreProductsQueryParams, StoreProductsQueryResult } from "@/lib/queries/store-products"
 import { buildPageTitle } from "@/lib/business/page-title"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Footer } from "@/components/layout/Footer"
@@ -134,13 +134,27 @@ export default async function StoreProductsPage({ searchParams }: PageProps) {
   const queryParams = buildServerQueryParams(params, LIMIT)
 
   const queryClient = new QueryClient()
+  const queryKey = generateQueryKey(queryParams)
   await queryClient.prefetchQuery({
-    queryKey: generateQueryKey(queryParams),
-    queryFn: () => queryStoreProducts(queryParams),
+    queryKey,
+    queryFn: async () => {
+      const result = await queryStoreProducts(queryParams)
+      // Throw on DB errors so React Query treats it as a failure,
+      // not as "successful empty data" that gets cached for staleTime
+      if (result.error) throw new Error(result.error.message)
+      return result
+    },
   })
 
+  // Safety net: if server prefetch returned 0 rows (transient issue or error
+  // that slipped through), evict it so the client refetches via the API route
+  const prefetchedResult = queryClient.getQueryData<StoreProductsQueryResult>(queryKey)
+  if (!prefetchedResult || prefetchedResult.data.length === 0) {
+    queryClient.removeQueries({ queryKey })
+  }
+
   return (
-    <main className="lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
+    <main className="lg:h-[calc(100dvh-var(--header-height))] lg:overflow-hidden">
       <HideFooter />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<LoadingFallback />}>
