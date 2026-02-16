@@ -136,7 +136,7 @@ async function fetchWithCache(queryParams: StoreProductsQueryParams): Promise<St
   if (result.error) throw new Error(result.error.message)
 
   if (cacheEnabled && result.data.length > 0) {
-    await setCachedStoreProducts(cacheKey, result)
+    setCachedStoreProducts(cacheKey, result).catch(() => {})
   }
 
   return result

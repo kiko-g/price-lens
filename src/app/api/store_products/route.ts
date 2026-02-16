@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
         result = await queryStoreProducts(queryParams, supabase)
         t("queryStoreProducts")
         if (!result.error) {
-          await setCachedStoreProducts(cacheKey, result)
+          setCachedStoreProducts(cacheKey, result).catch(() => {})
         }
         t("cache.set")
       }
@@ -93,7 +93,9 @@ export async function GET(req: NextRequest) {
     }
 
     t("total")
-    const headers: HeadersInit = {}
+    const headers: HeadersInit = {
+      "Cache-Control": "private, max-age=0, stale-while-revalidate=120",
+    }
     if (process.env.NODE_ENV === "development") {
       headers["X-Perf-Timings"] = JSON.stringify(timings)
     }
