@@ -5,6 +5,8 @@ import Image from "next/image"
 import { memo, useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
+import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { useChartTouch } from "@/hooks/useChartTouch"
 import { cn } from "@/lib/utils"
 import { chartConfig, calculateChartBounds } from "@/lib/business/chart"
 import { generateProductPath } from "@/lib/business/product"
@@ -213,6 +215,8 @@ const ShowcaseChart = memo(function ShowcaseChart({
   className?: string
 }) {
   const [imageLoaded, setImageLoaded] = useState(false)
+  const isMobile = useMediaQuery("(max-width: 768px)")
+  const { chartRef, isActive: isTooltipActive } = useChartTouch()
   const { storeProduct, chartData, trendStats } = productData
 
   // Calculate chart bounds with nice numbers for Y-axis
@@ -300,70 +304,76 @@ const ShowcaseChart = memo(function ShowcaseChart({
       </CardHeader>
 
       <CardContent className="p-2 pt-0 sm:p-4 sm:pt-2">
-        <ChartContainer config={chartConfig}>
-          <LineChart data={chartData} accessibilityLayer margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="4 4" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={10}
-              interval="preserveEnd"
-              tick={{ fontSize: 10 }}
-              tickFormatter={(value) => value.slice(0, 10)}
-            />
-            <YAxis
-              dataKey="price"
-              yAxisId="price"
-              orientation="left"
-              tickLine={false}
-              axisLine={false}
-              width={40}
-              domain={[chartBounds.floor, chartBounds.ceiling]}
-              ticks={chartBounds.ticks}
-              tickFormatter={(value) => `€${value.toFixed(1)}`}
-            />
-            <YAxis
-              dataKey="discount"
-              yAxisId="discount"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              width={40}
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={3} dot={false} />
-            <Line
-              yAxisId="price"
-              dataKey="price-recommended"
-              type="linear"
-              stroke="var(--chart-2)"
-              strokeWidth={3}
-              strokeDasharray="6 6"
-              dot={false}
-            />
-            <Line
-              yAxisId="price"
-              dataKey="price-per-major-unit"
-              type="linear"
-              stroke="var(--chart-3)"
-              strokeWidth={2}
-              strokeDasharray="6 6"
-              dot={false}
-            />
-            <Line
-              yAxisId="discount"
-              dataKey="discount"
-              type="linear"
-              stroke="var(--chart-4)"
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+        <div ref={chartRef} className="touch-pan-y">
+          <ChartContainer config={chartConfig}>
+            <LineChart data={chartData} accessibilityLayer margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 4" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                interval="preserveEnd"
+                tick={{ fontSize: 10 }}
+                tickFormatter={(value) => value.slice(0, 10)}
+              />
+              <YAxis
+                dataKey="price"
+                yAxisId="price"
+                orientation="left"
+                tickLine={false}
+                axisLine={false}
+                width={40}
+                domain={[chartBounds.floor, chartBounds.ceiling]}
+                ticks={chartBounds.ticks}
+                tickFormatter={(value) => `€${value.toFixed(1)}`}
+              />
+              <YAxis
+                dataKey="discount"
+                yAxisId="discount"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                width={40}
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent />}
+                {...(isMobile ? { active: isTooltipActive } : {})}
+              />
+              <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={3} dot={false} />
+              <Line
+                yAxisId="price"
+                dataKey="price-recommended"
+                type="linear"
+                stroke="var(--chart-2)"
+                strokeWidth={3}
+                strokeDasharray="6 6"
+                dot={false}
+              />
+              <Line
+                yAxisId="price"
+                dataKey="price-per-major-unit"
+                type="linear"
+                stroke="var(--chart-3)"
+                strokeWidth={2}
+                strokeDasharray="6 6"
+                dot={false}
+              />
+              <Line
+                yAxisId="discount"
+                dataKey="discount"
+                type="linear"
+                stroke="var(--chart-4)"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
+            </LineChart>
+          </ChartContainer>
+        </div>
       </CardContent>
 
       <TrendFooter trendStats={trendStats} />

@@ -16,6 +16,7 @@ import {
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
+import { useChartTouch } from "@/hooks/useChartTouch"
 import { usePricesWithAnalytics } from "@/hooks/usePrices"
 
 import type { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
@@ -109,38 +110,6 @@ function useProductChartContext() {
     throw new Error("ProductChart compound components must be used within ProductChart.Root")
   }
   return context
-}
-
-// ============================================================================
-// Hooks
-// ============================================================================
-
-function useChartTouch() {
-  const [isActive, setIsActive] = useState(false)
-  const chartRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const element = chartRef.current
-    if (!element) return
-
-    const handleTouchStart = () => setIsActive(true)
-    const handleTouchEnd = () => setTimeout(() => setIsActive(false), 50)
-    const handleMouseLeave = () => setIsActive(false)
-
-    element.addEventListener("touchstart", handleTouchStart, { passive: true })
-    element.addEventListener("touchend", handleTouchEnd, { passive: true })
-    element.addEventListener("touchcancel", handleTouchEnd, { passive: true })
-    element.addEventListener("mouseleave", handleMouseLeave)
-
-    return () => {
-      element.removeEventListener("touchstart", handleTouchStart)
-      element.removeEventListener("touchend", handleTouchEnd)
-      element.removeEventListener("touchcancel", handleTouchEnd)
-      element.removeEventListener("mouseleave", handleMouseLeave)
-    }
-  }, [])
-
-  return { chartRef, isActive }
 }
 
 // ============================================================================
