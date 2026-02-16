@@ -1,6 +1,9 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+
+import { TriangleAlertIcon } from "lucide-react"
 
 interface BarcodeProps {
   value: string | null
@@ -21,9 +24,10 @@ export function Barcode({
 }: BarcodeProps) {
   if (showMissingValue && !value) {
     return (
-      <div className={cn("inline-flex flex-col items-start justify-center gap-0.5 md:gap-1", className)}>
-        <span className="text-muted-foreground text-2xs font-mono tracking-wider md:text-xs">No barcode available</span>
-      </div>
+      <Badge size="sm" variant="boring" className={cn(className)}>
+        <TriangleAlertIcon className="h-4 w-4" />
+        No barcode available
+      </Badge>
     )
   }
 

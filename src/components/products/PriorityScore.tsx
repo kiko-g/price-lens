@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { PRIORITY_CONFIG, PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type BadgeSize = "xs" | "sm" | "md" | "lg"
 
@@ -70,69 +71,76 @@ export function PriorityScore({
   className,
   wrapperClassName,
 }: PriorityScoreProps) {
-  const isNull = priority === null
-  const key = isNull ? "null" : String(priority)
-  const config = PRIORITY_CONFIG[key] ?? PRIORITY_CONFIG["null"]
+  const normalizedPriority = priority ?? 0
+  const config = PRIORITY_CONFIG[String(normalizedPriority)] ?? PRIORITY_CONFIG["0"]
   const s = SIZE_MAP[size]
 
   return (
-    <div className={cn("flex flex-col items-center gap-0.5", wrapperClassName)}>
-      <div
-        role="img"
-        className={cn("inline-flex items-center", s.wrapper, className)}
-        aria-label={`Priority ${config.label}: ${config.description}`}
-      >
-        {/* Pill strip */}
-        <div className={cn("flex items-center", s.gap)}>
-          {PRODUCT_PRIORITY_LEVELS.map((level) => {
-            const levelKey = String(level)
-            const levelConfig = PRIORITY_CONFIG[levelKey]
-            const isActive = !isNull && level === priority
-            const isFirst = level === 0
-            const isLast = level === 5
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className={cn("flex flex-col items-center gap-0.5", wrapperClassName)}>
+            <div
+              role="img"
+              className={cn("inline-flex items-center", s.wrapper, className)}
+              aria-label={`Priority ${config.label}: ${config.description}`}
+            >
+              <div className={cn("flex items-center", s.gap)}>
+                {PRODUCT_PRIORITY_LEVELS.map((level) => {
+                  const levelKey = String(level)
+                  const levelConfig = PRIORITY_CONFIG[levelKey]
+                  const isActive = level === normalizedPriority
+                  const isFirst = level === 0
+                  const isLast = level === 5
 
-            if (isActive) {
-              return (
-                <span
-                  key={levelKey}
-                  className={cn(
-                    "relative z-10 inline-flex shrink-0 items-center justify-center rounded-[5px] font-bold text-white shadow-sm",
-                    isFirst && "mr-0.5 rounded-l rounded-r-none",
-                    isLast && "ml-0.5 rounded-l-none rounded-r",
-                    !isFirst && !isLast && "mx-0.5",
-                    levelConfig.bgClass,
-                    s.activePill,
-                  )}
-                >
-                  {level}
-                </span>
-              )
-            }
+                  if (isActive) {
+                    return (
+                      <span
+                        key={levelKey}
+                        className={cn(
+                          "relative z-10 inline-flex shrink-0 items-center justify-center rounded-[5px] font-bold text-white shadow-sm",
+                          isFirst && "mr-0.5 rounded-l rounded-r-none",
+                          isLast && "ml-0.5 rounded-l-none rounded-r",
+                          !isFirst && !isLast && "mx-0.5",
+                          levelConfig.bgClass,
+                          s.activePill,
+                        )}
+                      >
+                        {level}
+                      </span>
+                    )
+                  }
 
-            return (
-              <span
-                key={levelKey}
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center font-medium text-white opacity-50",
-                  levelConfig.bgClass,
-                  s.pill,
-                  isFirst && "rounded-l",
-                  isLast && "rounded-r",
-                )}
-              >
-                {level}
-              </span>
-            )
-          })}
-        </div>
+                  return (
+                    <span
+                      key={levelKey}
+                      className={cn(
+                        "inline-flex shrink-0 items-center justify-center font-medium text-white opacity-50",
+                        levelConfig.bgClass,
+                        s.pill,
+                        isFirst && "rounded-l",
+                        isLast && "rounded-r",
+                      )}
+                    >
+                      {level}
+                    </span>
+                  )
+                })}
+              </div>
 
-        {/* Optional text label */}
-        {showLabel && <span className={cn("font-medium", s.label)}>{config.description}</span>}
-      </div>
+              {showLabel && <span className={cn("font-medium", s.label)}>{config.description}</span>}
+            </div>
 
-      {showDescription && (
-        <span className={cn("text-muted-foreground text-xs font-normal", s.label)}>{config.explanation}</span>
-      )}
-    </div>
+            {showDescription && (
+              <span className={cn("text-muted-foreground text-xs font-normal", s.label)}>{config.explanation}</span>
+            )}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
+          <p className="font-semibold">{config.description}</p>
+          {config.explanation}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }

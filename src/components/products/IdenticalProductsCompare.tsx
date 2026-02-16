@@ -12,7 +12,15 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
-import { ArrowRightIcon, ScaleIcon, TrophyIcon, CheckIcon, ZapIcon, SearchAlertIcon } from "lucide-react"
+import {
+  ArrowRightIcon,
+  ScaleIcon,
+  TrophyIcon,
+  MapPinIcon,
+  ZapIcon,
+  SearchAlertIcon,
+  SmilePlusIcon,
+} from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
@@ -35,34 +43,31 @@ function CompactStoreCard({
     <Link
       href={generateProductPath(product)}
       className={cn(
-        "group hover:bg-foreground/10 hover:border-foreground/50 relative flex min-w-[120px] flex-1 flex-col items-center gap-2 rounded-lg border p-3 transition-colors",
-        isCheapest && "border-success bg-success/10 dark:border-success/20 dark:bg-success/20",
-        isCurrent && !isCheapest && "",
+        "group relative flex min-w-[120px] flex-1 flex-col items-center gap-2 overflow-hidden rounded-lg border p-3 transition-all hover:shadow-md hover:border-foreground/20 dark:hover:border-foreground/30",
+        isCheapest && "border-success/40 bg-success/5 shadow-[0_0_14px_-2px] shadow-success/30 dark:border-success/50 dark:bg-success/10 dark:shadow-[0_0_20px_-2px] dark:shadow-success/40",
       )}
     >
-      {/* Badges */}
-      <div className="absolute -top-2 left-1/2 flex -translate-x-1/2 gap-1">
-        {isCheapest && (
-          <Badge
-            size="xs"
-            variant="success"
-            className="group-hover:bg-foreground group-hover:border-foreground whitespace-nowrap"
-          >
-            <TrophyIcon className="h-3 w-3" />
-            Cheapest
-          </Badge>
-        )}
-        {isCurrent && !isCheapest && (
-          <Badge
-            size="xs"
-            variant="blue"
-            className="group-hover:bg-foreground group-hover:border-foreground whitespace-nowrap"
-          >
-            <CheckIcon className="h-3 w-3" />
-            Current
-          </Badge>
-        )}
-      </div>
+      {/* Badge */}
+      {isCheapest && (
+        <Badge
+          size="xs"
+          variant="success"
+          className="absolute top-0 right-0 rounded-none rounded-bl-md whitespace-nowrap"
+        >
+          <TrophyIcon className="h-3 w-3" />
+          Cheapest
+        </Badge>
+      )}
+      {isCurrent && !isCheapest && (
+        <Badge
+          size="xs"
+          variant="blue"
+          className="absolute top-0 right-0 rounded-none rounded-bl-md whitespace-nowrap"
+        >
+          <MapPinIcon className="h-3 w-3" />
+          This page
+        </Badge>
+      )}
 
       {/* Store Logo */}
       <div className="mt-2">
@@ -148,9 +153,10 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   // Combine current product with identical products for comparison
   const allProducts = identicalProducts ? [currentProduct, ...identicalProducts] : [currentProduct]
 
-  // Find cheapest price
+  // Find cheapest price (only mark as "cheapest" if a single product holds the lowest price)
   const productsWithPrice = allProducts.filter((p) => p.price !== null && p.price !== undefined)
   const cheapestPrice = productsWithPrice.length > 0 ? Math.min(...productsWithPrice.map((p) => p.price!)) : null
+  const hasUniqueCheapest = productsWithPrice.filter((p) => p.price === cheapestPrice).length === 1
 
   // Check if we have a barcode for the compare page link
   const hasBarcode = currentProduct.barcode && currentProduct.barcode.length > 0
@@ -191,10 +197,10 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   const storeCount = new Set(allProducts.map((p) => p.origin_id)).size
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 text-lg font-semibold">
+        <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
           <ScaleIcon className="h-5 w-5" />
           Compare Prices
           <Badge variant="boring" size="xs">
@@ -212,6 +218,25 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         )}
       </div>
 
+      {/* Savings hint */}
+      {cheapestPrice !== null && currentProduct.price !== null && currentProduct.price > cheapestPrice ? (
+        <p className="text-muted-foreground mb-3">
+          <ZapIcon className="text-success mr-1 inline-flex h-4 w-4" />
+          <span className="text-success font-medium">Save {(currentProduct.price - cheapestPrice).toFixed(2)}€</span> by
+          switching to the cheapest option.
+        </p>
+      ) : hasUniqueCheapest ? (
+        <p className="text-muted-foreground mb-3">
+          <SmilePlusIcon className="text-success mr-1 inline-flex h-4 w-4" />
+          <span className="text-success font-medium">You are already viewing</span> the cheapest option.
+        </p>
+      ) : (
+        <p className="text-muted-foreground mb-3">
+          <ScaleIcon className="text-muted-foreground mr-1 inline-flex h-4 w-4" />
+          All stores have the same price. You&apos;re not missing out on deals.
+        </p>
+      )}
+
       {/* Compact comparison cards */}
       <div
         className={cn(
@@ -223,7 +248,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         )}
       >
         {allProducts.map((product) => {
-          const isCheapest = cheapestPrice !== null && product.price === cheapestPrice
+          const isCheapest = hasUniqueCheapest && cheapestPrice !== null && product.price === cheapestPrice
           const isCurrent = product.id === currentProduct.id
           const priceDiff =
             cheapestPrice !== null && product.price !== null && product.price !== undefined
@@ -241,15 +266,6 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
           )
         })}
       </div>
-
-      {/* Savings hint */}
-      {cheapestPrice !== null && currentProduct.price !== null && currentProduct.price > cheapestPrice && (
-        <p className="text-muted-foreground">
-          <ZapIcon className="text-success mr-1 inline-flex h-4 w-4" />
-          <span className="text-success font-medium">Save {(currentProduct.price - cheapestPrice).toFixed(2)}€</span> by
-          switching to the cheapest option.
-        </p>
-      )}
     </div>
   )
 }

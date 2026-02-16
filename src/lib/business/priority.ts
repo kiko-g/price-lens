@@ -56,7 +56,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
   "0": {
     label: "0",
     description: "Niche",
-    explanation: `Not tracked`,
+    explanation: `Untracked`,
     period: null,
     badgeKind: "gray",
     bgClass: "bg-gray-800/70  border-gray-800",

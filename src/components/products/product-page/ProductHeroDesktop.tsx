@@ -4,20 +4,18 @@ import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/business/product"
-import { formatHoursDuration, PRIORITY_CONFIG, PRIORITY_REFRESH_HOURS } from "@/lib/business/priority"
 
 import type { StoreProduct } from "@/types"
 
 import { Badge } from "@/components/ui/badge"
 import { Barcode } from "@/components/ui/combo/barcode"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { PriorityScore } from "@/components/products/PriorityScore"
+import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { ProductActions } from "@/components/products/product-page/ProductActions"
 
-import { AlertTriangleIcon, PickaxeIcon } from "lucide-react"
+import { AlertTriangleIcon, ExternalLinkIcon } from "lucide-react"
 
 export function resolveImageUrlForPage(image: string, size = 800) {
   const url = new URL(image)
@@ -37,9 +35,6 @@ interface ProductHeroDesktopProps {
 }
 
 export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
-  const refreshHours = sp.priority !== null ? PRIORITY_REFRESH_HOURS[sp.priority] : null
-  const refreshLabel = refreshHours ? formatHoursDuration(refreshHours) : null
-
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isPriceRecommendedNotSet = !sp.price_recommended && sp.price
@@ -77,10 +72,21 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
               </Badge>
             </div>
           )}
+
+          <div className="absolute right-3 bottom-3 z-10">
+            <Link
+              href={sp.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="border-border inline-flex items-center justify-center gap-1 rounded-full border px-2 py-0.5 transition-all duration-300 hover:bg-zinc-100 dark:border-zinc-300 dark:bg-white dark:hover:bg-zinc-200"
+            >
+              <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
+              <ExternalLinkIcon className="h-4 w-4 text-black" />
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-4 inline-flex w-full flex-col items-start justify-center gap-4">
-          <PriorityScore priority={sp.priority} size="sm" showDescription wrapperClassName="flex-row gap-3" />
+        <div className="mt-4 inline-flex w-full flex-wrap items-start justify-center gap-4">
           <Barcode value={sp.barcode} height={35} width={2} showMissingValue />
         </div>
       </aside>
@@ -95,42 +101,13 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
             </Link>
           )}
 
-          {sp.priority !== null && sp.priority > 0 ? (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge variant={PRIORITY_CONFIG[sp.priority].badgeKind}>
-                    <PickaxeIcon />
-                    <span>Priority {sp.priority}</span>
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
-                  This product has priority {sp.priority} is checked every {refreshLabel}.
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge variant="outline-destructive">
-                    <PickaxeIcon />
-                    Untracked
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
-                  <p className="font-semibold">Untracked (priority: {sp.priority})</p>
-                  This product is not being tracked. Add it to your favorites to increase tracking priority.
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          <PriorityBadge priority={sp.priority} roundedness="2xl" />
 
           <Link
             href={sp.url}
             target="_blank"
             rel="noreferrer noopener"
-            className="border-border rounded-full border px-2 py-0.5 dark:border-transparent dark:bg-white dark:hover:bg-white/90"
+            className="border-border inline-flex rounded-full border px-2 py-0.5 md:hidden dark:border-transparent dark:bg-white dark:hover:bg-white/90"
           >
             <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
           </Link>
