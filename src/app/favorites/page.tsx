@@ -28,10 +28,7 @@ const LIMIT = 40
  * Mirrors the client-side buildQueryParams (in FavoritesShowcase)
  * so the server prefetch uses the exact same query key the client will.
  */
-function buildServerQueryParams(
-  params: { [key: string]: string | undefined },
-  limit: number,
-): FavoritesQueryParams {
+function buildServerQueryParams(params: { [key: string]: string | undefined }, limit: number): FavoritesQueryParams {
   const qp: FavoritesQueryParams = {
     pagination: {
       page: Math.max(1, parseInt(params.page ?? "1", 10) || 1),
@@ -84,7 +81,7 @@ export default async function FavoritesPage({ searchParams }: PageProps) {
 
   if (!user) {
     return (
-      <main className="flex items-center justify-center lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
+      <main className="flex items-center justify-center lg:h-[calc(100dvh-var(--header-height))] lg:overflow-hidden">
         <HideFooter />
         <div className="container mx-auto max-w-2xl px-4 py-6">
           <Card className="text-center">
@@ -121,7 +118,7 @@ export default async function FavoritesPage({ searchParams }: PageProps) {
   })
 
   return (
-    <main className="lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
+    <main className="lg:h-[calc(100dvh-var(--header-height))] lg:overflow-hidden">
       <HideFooter />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<LoadingFallback />}>

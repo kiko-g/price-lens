@@ -5,7 +5,7 @@ const LIMIT = 40
 
 export default function FavoritesLoading() {
   return (
-    <main className="lg:h-[calc(100dvh-54px)] lg:overflow-hidden">
+    <main className="lg:h-[calc(100dvh-var(--header-height))] lg:overflow-hidden">
       <HideFooter />
       <div className="flex w-full flex-col lg:h-full lg:flex-row">
         {/* Desktop Sidebar skeleton */}
