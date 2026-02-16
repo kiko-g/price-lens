@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 import { HideFooter } from "@/contexts/FooterContext"
 
-const LIMIT = 40
+const LIMIT = 20
 
 export default function ProductsLoading() {
   return (

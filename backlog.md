@@ -24,6 +24,10 @@
 - [ ] Product analytics and views for better search results and ecosystem informatization
 - [ ] Develop idea of money saving tally like glovo.
 
+## SEO
+
+- [] Review SEO for products page. Needs to be fast and relevant products.
+
 ## UI Features
 
 - [x] Product filter options: show only available, missing barcode, must have barcode

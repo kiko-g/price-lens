@@ -52,7 +52,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 }
 
-const LIMIT = 40
+const LIMIT = 20
 
 /**
  * Mirrors the client-side buildQueryParams (in StoreProductsShowcase)

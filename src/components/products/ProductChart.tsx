@@ -644,13 +644,12 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   if (isLoading) {
     return (
       <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
-        <Skeleton className="h-10 w-full rounded-lg" />
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-7 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-[80%]" />
+        <Skeleton className="h-10 w-full rounded-lg border" />
+        <div className="flex flex-col">
+          <Skeleton className="h-8 w-full rounded-none rounded-t-lg" />
+          <Skeleton className="-mt-px h-8 w-full rounded-none" variant="outline" />
+          <Skeleton className="-mt-px h-8 w-full rounded-none" variant="outline" />
+          <Skeleton className="-mt-px h-8 w-full rounded-none rounded-b-lg" variant="outline" />
         </div>
       </div>
     )
@@ -722,9 +721,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
                   key={index}
                   className={cn(
                     "hover:bg-transparent",
-                    isCurrentPrice &&
-                      hasMultiplePrices &&
-                      "border-l-primary bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/15 dark:bg-primary/15 border-l-2",
+                    isCurrentPrice && hasMultiplePrices && "border-l-primary border-l-2",
                     isCurrentPrice && index === 0 && hasMultiplePrices && "border-b-border border-b",
                   )}
                 >

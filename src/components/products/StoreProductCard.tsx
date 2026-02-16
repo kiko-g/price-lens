@@ -1,8 +1,8 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import Image from "next/image"
-import { Suspense } from "react"
 import { type StoreProduct } from "@/types"
 import { useUser } from "@/hooks/useUser"
 import { useStoreProductCard } from "@/hooks/useStoreProductCard"
@@ -28,9 +28,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ShareButton } from "@/components/ui/combo/share-button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { ProductChart } from "@/components/products/ProductChart"
 import { PriorityChip } from "@/components/products/PriorityChip"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
@@ -47,6 +47,14 @@ import {
   CalendarPlusIcon,
   ScaleIcon,
 } from "lucide-react"
+
+const StoreProductCardDrawerChart = dynamic(
+  () =>
+    import("@/components/products/StoreProductCardDrawerChart").then(
+      (mod) => mod.StoreProductCardDrawerChart,
+    ),
+  { ssr: false, loading: () => <Skeleton className="h-60 w-full rounded-lg" /> },
+)
 
 function resolveImageUrlForCard(image: string, size = 400) {
   const url = new URL(image)
@@ -498,24 +506,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 </div>
               </div>
 
-              <Suspense fallback={<div>Loading...</div>}>
-                <ProductChart.Root sp={sp} samplingMode="efficient">
-                  <ProductChart.FallbackDetails className="mb-4" />
-                  <ProductChart.NotTracked />
-                  {sp.priority != null && sp.priority > 0 && (
-                    <>
-                      <ProductChart.NoData />
-                      <ProductChart.Error />
-                      <ProductChart.ChartContent>
-                        <ProductChart.PricesVariation showImage showBarcode />
-                        <ProductChart.RangeSelector className="mt-2 mb-2 md:mt-0 md:mb-4" />
-                        <ProductChart.Graph />
-                        <ProductChart.PriceTable />
-                      </ProductChart.ChartContent>
-                    </>
-                  )}
-                </ProductChart.Root>
-              </Suspense>
+              <StoreProductCardDrawerChart sp={sp} />
 
               <Accordion
                 type="single"
