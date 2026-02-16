@@ -50,7 +50,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
     <article className="hidden w-full grid-cols-20 gap-8 md:grid">
       {/* Left column: Image + Barcode */}
       <aside className="col-span-6 flex flex-col items-center">
-        <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-white">
+        <div className="relative aspect-7/8 w-full overflow-hidden rounded-lg border bg-white">
           {sp.image ? (
             <Image
               fill
@@ -156,9 +156,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
               <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
             ) : null}
 
-            {isPriceNotSet ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span>
-            ) : null}
+            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
           </div>
 
           <div className="flex items-center gap-2">

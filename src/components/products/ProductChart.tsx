@@ -22,7 +22,13 @@ import type { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
 
 import { cn } from "@/lib/utils"
-import { buildChartData, chartConfig, calculateChartBounds, type ChartSamplingMode } from "@/lib/business/chart"
+import {
+  buildChartData,
+  chartConfig,
+  calculateChartBounds,
+  getLongRelativeTime,
+  type ChartSamplingMode,
+} from "@/lib/business/chart"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 import { imagePlaceholder } from "@/lib/business/data"
 
@@ -70,6 +76,7 @@ type ProductChartContextValue = {
   error: Error | null
 
   // Derived values
+  trackingSince: string | null
   daysBetweenDates: number
   xAxisTickInterval: number
   variations: {
@@ -272,6 +279,7 @@ function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode 
     isLoading,
     isTransitioning,
     error: error || null,
+    trackingSince: analytics?.dateRange.minDate || null,
     daysBetweenDates,
     xAxisTickInterval,
     variations,
@@ -566,7 +574,7 @@ function Graph({ className }: GraphProps) {
             orientation="left"
             tickLine={false}
             axisLine={false}
-            width={40}
+            width={estimatePriceAxisWidth(chartBounds.ticks)}
             type="number"
             domain={[chartBounds.floor, chartBounds.ceiling]}
             ticks={chartBounds.ticks}
@@ -630,12 +638,24 @@ function Graph({ className }: GraphProps) {
   )
 }
 
-function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: { value: number }; yAxisId: string }) {
-  const formatPrice = (value: number): string => `€${value.toFixed(2)}`
+function formatPriceTickLabel(value: number): string {
+  return `€${value.toFixed(2)}`
+}
 
+function estimatePriceAxisWidth(ticks: number[]): number {
+  if (ticks.length === 0) return 40
+  const longestLabel = ticks.reduce((longest, tick) => {
+    const label = formatPriceTickLabel(tick)
+    return label.length > longest.length ? label : longest
+  }, "")
+  // ~7px per character at font size 12, plus 8px padding
+  return Math.max(40, longestLabel.length * 7 + 8)
+}
+
+function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: { value: number }; yAxisId: string }) {
   return (
     <text x={x} y={y} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
-      {yAxisId === "price" ? formatPrice(payload.value) : `${payload.value}%`}
+      {yAxisId === "price" ? formatPriceTickLabel(payload.value) : `${payload.value}%`}
     </text>
   )
 }
@@ -650,7 +670,7 @@ type PriceTableProps = {
 }
 
 function PriceTable({ className, scrollable = true }: PriceTableProps) {
-  const { sp, pricePoints, mostCommon, isLoading } = useProductChartContext()
+  const { sp, pricePoints, mostCommon, trackingSince, isLoading } = useProductChartContext()
 
   if (isLoading) {
     return (
@@ -670,6 +690,12 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   if (!pricePoints || pricePoints.length === 0) return null
 
   const hasMultiplePrices = pricePoints?.length > 1
+  const sorted = [...pricePoints].sort((a, b) => a.price - b.price || a.price_recommended - b.price_recommended)
+
+  // Pin active price at the top, rest sorted by price ascending
+  const currentPricePoint = sorted.find((p) => p.price === sp.price && p.price_recommended === sp.price_recommended)
+  const restPoints = sorted.filter((p) => !(p.price === sp.price && p.price_recommended === sp.price_recommended))
+  const orderedPoints = currentPricePoint ? [currentPricePoint, ...restPoints] : sorted
 
   return (
     <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
@@ -693,7 +719,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         )}
       </div>
 
-      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && pricePoints.length > 6 && "h-[250px]")}>
+      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && orderedPoints.length > 6 && "h-[250px]")}>
         <Table>
           <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
             <TableRow className="bg-accent hover:bg-accent">
@@ -717,62 +743,73 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
           </TableHeader>
 
           <TableBody>
-            {pricePoints
-              .sort((a, b) => a.price - b.price || a.price_recommended - b.price_recommended)
-              .map((point: PricePoint, index) => {
-                const isMostCommon = point.price === mostCommon?.price
-                const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
-                const hasDiscount = point.discount !== null && point.discount > 0.0
+            {orderedPoints.map((point: PricePoint, index) => {
+              const isMostCommon = point.price === mostCommon?.price
+              const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
+              const hasDiscount = point.discount !== null && point.discount > 0.0
 
-                return (
-                  <TableRow
-                    key={index}
+              return (
+                <TableRow
+                  key={index}
+                  className={cn(
+                    "hover:bg-transparent",
+                    isCurrentPrice &&
+                      hasMultiplePrices &&
+                      "border-l-primary bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/15 dark:bg-primary/15 border-l-2",
+                    isCurrentPrice && index === 0 && hasMultiplePrices && "border-b-border border-b",
+                  )}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      {isCurrentPrice && hasMultiplePrices && (
+                        <span className="text-primary text-xs leading-none">▸</span>
+                      )}
+
+                      <span className="text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
+
+                      {hasDiscount && (
+                        <span className="text-2xs text-success flex items-center gap-0.5">
+                          <ArrowDownIcon className="size-2.5" />
+                          {discountValueToPercentage(point.discount, 0)}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-center text-xs font-medium tracking-tighter">
+                    {point.price_recommended?.toFixed(2)}€
+                  </TableCell>
+
+                  <TableCell className="text-center text-xs font-medium tracking-tighter">
+                    {point.price_per_major_unit?.toFixed(2)}€
+                  </TableCell>
+
+                  <TableCell
                     className={cn(
-                      "hover:bg-transparent",
-                      isCurrentPrice &&
-                        hasMultiplePrices &&
-                        "border-l-primary bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/15 dark:bg-primary/15 border-l-2",
+                      "text-center text-xs font-medium tracking-tighter",
+                      isMostCommon ? "text-success" : "",
                     )}
                   >
-                    <TableCell>
-                      <div className="flex items-center gap-1.5">
-                        {isCurrentPrice && hasMultiplePrices && (
-                          <span className="text-primary text-xs leading-none">▸</span>
-                        )}
-
-                        <span className="text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
-
-                        {hasDiscount && (
-                          <span className="text-2xs text-success flex items-center gap-0.5">
-                            <ArrowDownIcon className="size-2.5" />
-                            {discountValueToPercentage(point.discount, 0)}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="text-center text-xs font-medium tracking-tighter">
-                      {point.price_recommended?.toFixed(2)}€
-                    </TableCell>
-
-                    <TableCell className="text-center text-xs font-medium tracking-tighter">
-                      {point.price_per_major_unit?.toFixed(2)}€
-                    </TableCell>
-
-                    <TableCell
-                      className={cn(
-                        "text-center text-xs font-medium tracking-tighter",
-                        isMostCommon ? "text-success" : "",
-                      )}
-                    >
-                      {(point.frequencyRatio * 100).toFixed(0)}%
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                    {(point.frequencyRatio * 100).toFixed(0)}%
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </ScrollArea>
+
+      {trackingSince && (
+        <blockquote className="text-muted-foreground text-xs italic">
+          Tracking since{" "}
+          {new Date(trackingSince).toLocaleDateString(undefined, {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}
+          . Showing data for up to {getLongRelativeTime(new Date(trackingSince))}.
+        </blockquote>
+      )}
     </div>
   )
 }
@@ -895,7 +932,7 @@ function FallbackDetails({ className }: FallbackDetailsProps) {
       <div className="flex flex-wrap items-center gap-2">
         {hasDiscount ? (
           <>
-            <span className="text-lg font-bold text-green-700 dark:text-green-600">{sp.price}€</span>
+            <span className="text-success text-lg font-bold">{sp.price}€</span>
             <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
           </>
         ) : null}

@@ -26,9 +26,9 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
   const isNormalPrice = isPriceRecommendedNotSet || isPriceEqualToRecommended
 
   return (
-    <article className="flex w-full flex-col gap-3 md:hidden">
+    <article className="flex w-full flex-col gap-2.5 md:hidden">
       {/* Full-width product image */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-white">
+      <div className="relative aspect-6/5 w-full overflow-hidden rounded-lg border bg-white">
         {sp.image ? (
           <Image
             fill
@@ -93,13 +93,9 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
           </>
         ) : null}
 
-        {isNormalPrice ? (
-          <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
-        ) : null}
+        {isNormalPrice ? <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span> : null}
 
-        {isPriceNotSet ? (
-          <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span>
-        ) : null}
+        {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
 
         {/* Price per unit and discount */}
         {sp.price_per_major_unit && sp.major_unit ? (

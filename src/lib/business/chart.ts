@@ -325,7 +325,7 @@ export function calculateChartBounds(min: number, max: number, targetTicks: numb
 }
 
 /**
- * Get a short version of relative time for compact displays
+ * Get a short version of relative time for compact displays (e.g. "6mo", "2w")
  */
 export function getShortRelativeTime(date: Date): string {
   const now = new Date()
@@ -343,4 +343,26 @@ export function getShortRelativeTime(date: Date): string {
   if (diffMonths < 12 && diffMonths > 0) return `${diffMonths}mo`
   if (diffYears === 1) return "1y"
   return `${diffYears}y`
+}
+
+/**
+ * Get a human-readable relative time (e.g. "6 months", "2 weeks", "1 year")
+ */
+export function getLongRelativeTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffWeeks = Math.floor(diffDays / 7)
+  const diffMonths = Math.floor(diffDays / 30)
+  const diffYears = Math.floor(diffDays / 365)
+
+  if (diffDays === 0) return "today"
+  if (diffDays === 1) return "1 day"
+  if (diffDays < 7) return `${diffDays} days`
+  if (diffWeeks === 1) return "1 week"
+  if (diffWeeks < 12) return `${diffWeeks} weeks`
+  if (diffMonths === 1) return "1 month"
+  if (diffMonths < 12 && diffMonths > 0) return `${diffMonths} months`
+  if (diffYears === 1) return "1 year"
+  return `${diffYears} years`
 }

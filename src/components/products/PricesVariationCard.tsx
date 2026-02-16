@@ -98,10 +98,11 @@ export function PricesVariationCard({ className, data, actions, state, options =
           onClick={actions.onDiscountChange}
           chartColor="chart-4"
           label="Discount"
-          value={discount ? discountValueToPercentage(discount) : "0%"}
+          value={discount ? discountValueToPercentage(discount, 0) : "0%"}
           variation={discountVariation}
           invertColors
           showEuro={false}
+          variationDecimalPlaces={0}
         />
       </div>
 
@@ -145,6 +146,7 @@ type PriceAxisButtonProps = {
   variation: number
   invertColors?: boolean
   showEuro?: boolean
+  variationDecimalPlaces?: number
 }
 
 function PriceAxisButton({
@@ -156,6 +158,7 @@ function PriceAxisButton({
   variation,
   invertColors = false,
   showEuro = true,
+  variationDecimalPlaces,
 }: PriceAxisButtonProps) {
   return (
     <button
@@ -185,7 +188,7 @@ function PriceAxisButton({
           {value}
           {showEuro ? "€" : ""}
         </span>
-        <PriceChange invertColors={invertColors} variation={variation} />
+        <PriceChange invertColors={invertColors} variation={variation} decimalPlaces={variationDecimalPlaces} />
       </div>
     </button>
   )

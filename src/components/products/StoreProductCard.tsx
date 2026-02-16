@@ -126,7 +126,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
       >
         <Link href={generateProductPath(sp)} className="h-full w-full">
           {sp.image ? (
-            <div className="relative aspect-5/6 w-full">
+            <div className="relative aspect-7/8 w-full">
               <Image
                 src={resolveImageUrlForCard(sp.image, 400)}
                 alt={sp.name || "Product Image"}
@@ -134,7 +134,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 height={400}
                 unoptimized
                 className={cn(
-                  "aspect-5/6 h-full w-full bg-white object-cover object-center transition duration-300",
+                  "aspect-7/8 h-full w-full bg-white object-cover object-center p-1 transition duration-300",
                   sp.available ? "opacity-100" : "",
                 )}
                 placeholder="blur"
@@ -143,7 +143,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               />
             </div>
           ) : (
-            <div className="aspect-square w-full bg-zinc-100 dark:bg-zinc-800" />
+            <div className="aspect-7/8 w-full bg-zinc-100 dark:bg-zinc-800" />
           )}
         </Link>
 
@@ -562,7 +562,7 @@ export function ProductCardSkeleton() {
   return (
     <div className="bg-background flex w-full flex-col rounded-lg">
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <div className="border-border bg-muted aspect-square w-full animate-pulse rounded-md border" />
+        <div className="border-border bg-muted aspect-7/8 w-full animate-pulse rounded-md border" />
       </div>
 
       <div className="mb-5 flex flex-col items-start gap-2">

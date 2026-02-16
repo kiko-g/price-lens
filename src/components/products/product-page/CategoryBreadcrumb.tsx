@@ -95,8 +95,8 @@ export function CategoryBreadcrumb({ sp, className }: CategoryBreadcrumbProps) {
 
 function BreadcrumbSegment({ segment, isLast }: { segment: CategorySegment; isLast: boolean }) {
   const baseClass = cn(
-    "truncate transition-colors",
-    isLast ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground",
+    "truncate transition-colors hover:underline",
+    isLast ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground",
   )
 
   if (segment.href) {
