@@ -7,6 +7,7 @@ interface PriorityBubbleProps {
   priority: number | null
   size?: BubbleSize
   useDescription?: boolean
+  usePeriod?: boolean
   className?: string
 }
 
@@ -17,7 +18,13 @@ const SIZE_CLASSES: Record<BubbleSize, string> = {
   lg: "size-8 text-base",
 }
 
-export function PriorityBubble({ priority, size = "sm", useDescription = false, className }: PriorityBubbleProps) {
+export function PriorityBubble({
+  priority,
+  size = "sm",
+  useDescription = false,
+  usePeriod = false,
+  className,
+}: PriorityBubbleProps) {
   const key = priority === null ? "null" : String(priority)
   const config = PRIORITY_CONFIG[key] ?? PRIORITY_CONFIG["null"]
 
@@ -25,7 +32,7 @@ export function PriorityBubble({ priority, size = "sm", useDescription = false, 
     <span className={cn("inline-flex items-center gap-1.5", className)}>
       <span
         className={cn(
-          "inline-flex shrink-0 items-center justify-center rounded-full border font-mono font-medium text-white",
+          "inline-flex shrink-0 items-center justify-center rounded-full border font-semibold text-white",
           config.bgClass,
           SIZE_CLASSES[size],
         )}
@@ -33,6 +40,7 @@ export function PriorityBubble({ priority, size = "sm", useDescription = false, 
         {config.label}
       </span>
       {useDescription && <span className="text-sm">{config.description}</span>}
+      {usePeriod && <span className="text-sm">({config.period})</span>}
     </span>
   )
 }

@@ -903,7 +903,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 <div className="flex flex-col gap-2">
-                  {PRODUCT_PRIORITY_LEVELS.map((level) => (
+                  {PRODUCT_PRIORITY_LEVELS.filter((level) => level !== 0).map((level) => (
                     <div key={level} className="flex items-center space-x-2">
                       <Checkbox
                         id={`priority-${level}`}
@@ -914,7 +914,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                         htmlFor={`priority-${level}`}
                         className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                       >
-                        <PriorityBubble priority={level} size="sm" useDescription />
+                        <PriorityBubble priority={level} size="sm" useDescription usePeriod />
                       </Label>
                     </div>
                   ))}

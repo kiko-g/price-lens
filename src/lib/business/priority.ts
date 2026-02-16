@@ -8,7 +8,7 @@ import { type BadgeKind } from "@/components/ui/badge"
  */
 
 /** Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS) */
-export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
+export const ACTIVE_PRIORITIES = [5, 4, 3, 2, 1] as const
 
 /** Default grace period before showing staleness warning (24 hours) */
 export const DEFAULT_STALENESS_LENIENCE_HOURS = 24
@@ -39,6 +39,7 @@ type PriorityConfig = {
   label: string
   description: string
   explanation: string
+  period: string | null
   badgeKind: BadgeKind
   bgClass: string
 }
@@ -48,6 +49,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "?",
     description: "Unclassified",
     explanation: "Products that have not been classified yet",
+    period: null,
     badgeKind: "gray",
     bgClass: "bg-neutral-500/70 border-neutral-500",
   },
@@ -55,6 +57,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "0",
     description: "Niche",
     explanation: `Not tracked`,
+    period: null,
     badgeKind: "gray",
     bgClass: "bg-gray-800/70  border-gray-800",
   },
@@ -62,6 +65,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "1",
     description: "Minor",
     explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[1] ?? 0)}`,
+    period: formatHoursDuration(PRIORITY_REFRESH_HOURS[1] ?? 0),
     badgeKind: "destructive",
     bgClass: "bg-rose-600/70 border-rose-600",
   },
@@ -69,6 +73,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "2",
     description: "Low",
     explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[2] ?? 0)}`,
+    period: formatHoursDuration(PRIORITY_REFRESH_HOURS[2] ?? 0),
     badgeKind: "retail",
     bgClass: "bg-orange-600/70 border-orange-600",
   },
@@ -76,6 +81,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "3",
     description: "Medium",
     explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[3] ?? 0)}`,
+    period: formatHoursDuration(PRIORITY_REFRESH_HOURS[3] ?? 0),
     badgeKind: "warning",
     bgClass: "bg-amber-600/70 border-amber-600",
   },
@@ -83,6 +89,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "4",
     description: "Important",
     explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[4] ?? 0)}`,
+    period: formatHoursDuration(PRIORITY_REFRESH_HOURS[4] ?? 0),
     badgeKind: "sky",
     bgClass: "bg-sky-600/70 border-sky-600",
   },
@@ -90,6 +97,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     label: "5",
     description: "Essential",
     explanation: `Tracked every ${formatHoursDuration(PRIORITY_REFRESH_HOURS[5] ?? 0)}`,
+    period: formatHoursDuration(PRIORITY_REFRESH_HOURS[5] ?? 0),
     badgeKind: "success",
     bgClass: "bg-emerald-700/70 border-emerald-700",
   },

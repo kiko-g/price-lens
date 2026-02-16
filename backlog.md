@@ -1,5 +1,9 @@
 # Backlog
 
+## Bugs
+
+- [ ] Products cache issue showing 0-0 ?????
+
 ## General
 
 - [x] Bulk scrape: orchestate a job in admin page that efficiently updates every store product by visiting every url

@@ -68,7 +68,6 @@ type Props = {
 
 export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showBarcode = false }: Props) {
   const {
-    priority,
     isFavorited,
     updateFromSource,
     toggleFavorite,
@@ -197,8 +196,6 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   </Tooltip>
                 </TooltipProvider>
               )}
-
-              <PriorityChip priority={priority} variant="compact" size="2xs" />
             </>
           )}
         </div>
