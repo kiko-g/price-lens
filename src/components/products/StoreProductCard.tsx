@@ -49,14 +49,11 @@ import {
 } from "lucide-react"
 
 const StoreProductCardDrawerChart = dynamic(
-  () =>
-    import("@/components/products/StoreProductCardDrawerChart").then(
-      (mod) => mod.StoreProductCardDrawerChart,
-    ),
+  () => import("@/components/products/StoreProductCardDrawerChart").then((mod) => mod.StoreProductCardDrawerChart),
   { ssr: false, loading: () => <Skeleton className="h-60 w-full rounded-lg" /> },
 )
 
-function resolveImageUrlForCard(image: string, size = 400) {
+function resolveImageUrlForCard(image: string, size = 300) {
   const url = new URL(image)
   const p = url.searchParams
   const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]
@@ -135,7 +132,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           {sp.image ? (
             <div className="relative aspect-7/8 w-full">
               <Image
-                src={resolveImageUrlForCard(sp.image, 400)}
+                src={resolveImageUrlForCard(sp.image, 300)}
                 alt={sp.name || "Product Image"}
                 width={400}
                 height={400}

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description: "View and manage your favorite products with price tracking across supermarkets.",
 }
 
-const LIMIT = 40
+const LIMIT = 20
 
 /**
  * Mirrors the client-side buildQueryParams (in FavoritesShowcase)

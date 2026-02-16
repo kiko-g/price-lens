@@ -24,8 +24,9 @@
 - [ ] Product analytics and views for better search results and ecosystem informatization
 - [ ] Develop idea of money saving tally like glovo.
 
-## SEO
+## SEO and Usability
 
+- [] Product filters are complex. We cant expect users to use it always. We must have links scattered around the app to set the origin to 1,2,3 or other things like that.
 - [] Review SEO for products page. Needs to be fast and relevant products.
 
 ## UI Features

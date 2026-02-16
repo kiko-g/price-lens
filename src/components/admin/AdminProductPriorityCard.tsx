@@ -33,7 +33,7 @@ const priorityColors: Record<number, string> = {
   5: "bg-red-500",
 }
 
-function resolveImageUrlForCard(image: string, size = 400) {
+function resolveImageUrlForCard(image: string, size = 300) {
   const url = new URL(image)
   const p = url.searchParams
   const fieldsToDelete = ["sm", "w", "h", "sw", "sh"]

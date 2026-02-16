@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
-import { useDebouncedCallback } from "use-debounce"
 import axios from "axios"
 import { PrioritySource, CanonicalCategory } from "@/types"
 
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
+import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
@@ -68,13 +68,28 @@ import {
   RefreshCcwIcon,
   SearchIcon,
   InfoIcon,
-  CircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
 
-const FILTER_DEBOUNCE_MS = 800 // Debounce delay for filter changes
+const FILTER_DEBOUNCE_MS = 750 // Debounce delay for filter changes
 const USE_SORT_GROUPS = false
+
+function DebounceProgressBar({ durationMs }: { durationMs: number }) {
+  const [filled, setFilled] = useState(false)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setFilled(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
+  return (
+    <div className="bg-primary/20 hidden h-1 w-12 overflow-hidden rounded-full md:block">
+      <div
+        className="bg-primary h-full rounded-full transition-[width] ease-linear"
+        style={{ width: filled ? "100%" : "0%", transitionDuration: `${durationMs}ms` }}
+      />
+    </div>
+  )
+}
 
 /**
  * Single source of truth for URL filter parameters.
@@ -273,7 +288,7 @@ interface StoreProductsShowcaseProps {
   children?: React.ReactNode
 }
 
-export function StoreProductsShowcase({ limit = 40, children }: StoreProductsShowcaseProps) {
+export function StoreProductsShowcase({ limit = 20, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
 
@@ -282,7 +297,6 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
 
   // Local input state (for search)
   const [queryInput, setQueryInput] = useState(urlState.query)
-  const [isSearching, setIsSearching] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   // Local filter state (updates immediately, syncs to URL with debounce)
@@ -299,12 +313,12 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
   })
 
   // Debounced URL sync for filter changes
-  const debouncedUpdateUrl = useDebouncedCallback(
-    (updates: Record<string, string | number | boolean | null | undefined>) => {
-      updateUrl(updates)
-    },
-    FILTER_DEBOUNCE_MS,
-  )
+  const {
+    trigger: debouncedUpdateUrl,
+    animKey: debounceAnimKey,
+    completed: debounceCompleted,
+    setCompleted: setDebounceCompleted,
+  } = useTrackedDebouncedCallback(updateUrl, FILTER_DEBOUNCE_MS)
 
   // Check if there are pending filter changes (local differs from URL)
   const hasPendingChanges = useMemo(() => {
@@ -341,14 +355,10 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
     setQueryInput(urlState.query)
   }, [urlState.query])
 
-  // Track searching state
   useEffect(() => {
-    if (isFetching) {
-      setIsSearching(true)
-    } else {
-      setIsSearching(false)
-    }
-  }, [isFetching])
+    if (!isFetching && !hasPendingChanges) setDebounceCompleted(false)
+  }, [isFetching, hasPendingChanges, setDebounceCompleted])
+  const isSearching = isFetching || debounceCompleted
 
   // Update document title based on active filters
   useEffect(() => {
@@ -597,7 +607,7 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
             {isSearching ? (
               <Loader2Icon className="text-muted-foreground size-4 animate-spin" />
             ) : hasPendingChanges ? (
-              <CircleIcon className="fill-destructive stroke-destructive hidden size-2 animate-pulse duration-[50] md:block" />
+              <DebounceProgressBar key={debounceAnimKey} durationMs={FILTER_DEBOUNCE_MS} />
             ) : null}
           </div>
 
@@ -678,6 +688,8 @@ export function StoreProductsShowcase({ limit = 40, children }: StoreProductsSho
                   <>
                     <strong className="text-foreground">{totalCount}</strong> products found
                   </>
+                ) : showingFrom === 0 && showingTo === 0 ? (
+                  <>No products found {urlState.query && `matching "${urlState.query}"`}</>
                 ) : (
                   <>
                     Showing{" "}

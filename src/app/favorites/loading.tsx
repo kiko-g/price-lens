@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { HideFooter } from "@/contexts/FooterContext"
 
-const LIMIT = 40
+const LIMIT = 20
 
 export default function FavoritesLoading() {
   return (
