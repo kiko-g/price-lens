@@ -95,6 +95,6 @@ export function formatProductName(name: string | undefined) {
   return name.toUpperCase() === name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : name
 }
 
-export function discountValueToPercentage(discount: number) {
-  return `${(Math.round(discount * 1000) / 10).toFixed(1)}%`
+export function discountValueToPercentage(discount: number, decimalPlaces = 1) {
+  return `${(Math.round(discount * 1000) / 10).toFixed(decimalPlaces)}%`
 }

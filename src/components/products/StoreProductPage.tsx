@@ -46,13 +46,16 @@ function ChartSection({
           <ProductChart.Error />
 
           <ProductChart.ChartContent>
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
-              <div className="order-2 -mt-8 flex max-w-2xl flex-col gap-3 xl:order-1 xl:mt-0">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-x-6 xl:gap-y-3">
+              <div className="order-2 flex max-w-2xl flex-col xl:col-start-1 xl:row-start-1">
                 <ProductChart.PricesVariation showFreshnessInfo={false} />
+              </div>
+
+              <div className="order-1 max-w-2xl xl:col-start-1 xl:row-start-2">
                 <ProductChart.PriceTable className="max-h-60 min-w-100 xl:max-h-75 xl:max-w-full" scrollable />
               </div>
 
-              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-1 flex h-fit max-w-xl flex-col gap-2 xl:order-2 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
+              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-3 flex h-fit max-w-xl flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
                 <ProductChart.RangeSelector className="xl:justify-start" />
                 <ProductChart.Graph />
               </div>

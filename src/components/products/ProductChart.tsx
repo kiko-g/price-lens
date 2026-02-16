@@ -38,7 +38,7 @@ import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
 import { formatDistanceToNow } from "date-fns"
-import { BarChart2Icon, BinocularsIcon, ImageIcon, InfoIcon, WifiOffIcon } from "lucide-react"
+import { ArrowDownIcon, BarChart2Icon, BinocularsIcon, ImageIcon, InfoIcon, WifiOffIcon } from "lucide-react"
 
 const FALLBACK_ACTIVE_DOT_RADIUS = 5
 const CHART_TRANSITION_DURATION = 300
@@ -718,46 +718,53 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
 
           <TableBody>
             {pricePoints
-              .sort((a, b) => b.price - a.price)
+              .sort((a, b) => a.price - b.price || a.price_recommended - b.price_recommended)
               .map((point: PricePoint, index) => {
+                const isMostCommon = point.price === mostCommon?.price
                 const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
+                const hasDiscount = point.discount !== null && point.discount > 0.0
 
                 return (
                   <TableRow
                     key={index}
                     className={cn(
                       "hover:bg-transparent",
-                      isCurrentPrice && hasMultiplePrices && "bg-primary/10 dark:bg-primary/20",
+                      isCurrentPrice &&
+                        hasMultiplePrices &&
+                        "border-l-primary bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/15 dark:bg-primary/15 border-l-2",
                     )}
                   >
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-semibold tracking-tighter">
-                          {point.price.toFixed(2)}€
-                        </span>
-
-                        {point.discount !== null && point.discount > 0.0 && (
-                          <Badge variant="destructive" size="xs" className="text-2xs font-mono tracking-tighter">
-                            -{(point.discount * 100).toFixed(0)}%
-                          </Badge>
+                      <div className="flex items-center gap-1.5">
+                        {isCurrentPrice && hasMultiplePrices && (
+                          <span className="text-primary text-xs leading-none">▸</span>
                         )}
-                        {point.price === mostCommon?.price && (
-                          <Badge variant="secondary" size="2xs">
-                            Most Common
-                          </Badge>
+
+                        <span className="text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
+
+                        {hasDiscount && (
+                          <span className="text-2xs text-success flex items-center gap-0.5">
+                            <ArrowDownIcon className="size-2.5" />
+                            {discountValueToPercentage(point.discount, 0)}
+                          </span>
                         )}
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-center font-mono text-xs font-medium tracking-tighter">
+                    <TableCell className="text-center text-xs font-medium tracking-tighter">
                       {point.price_recommended?.toFixed(2)}€
                     </TableCell>
 
-                    <TableCell className="text-center font-mono text-xs font-medium tracking-tighter">
+                    <TableCell className="text-center text-xs font-medium tracking-tighter">
                       {point.price_per_major_unit?.toFixed(2)}€
                     </TableCell>
 
-                    <TableCell className="text-center font-mono text-xs font-medium tracking-tighter">
+                    <TableCell
+                      className={cn(
+                        "text-center text-xs font-medium tracking-tighter",
+                        isMostCommon ? "text-success" : "",
+                      )}
+                    >
                       {(point.frequencyRatio * 100).toFixed(0)}%
                     </TableCell>
                   </TableRow>
