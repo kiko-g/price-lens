@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
 import { fetchAll } from "@/lib/supabase/fetch-all"
+import { withTimeout } from "@/lib/resilience"
 import type { SupabaseClient } from "./types"
 import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
+
+const SUPABASE_QUERY_TIMEOUT_MS = 8000
 
 // ============================================================================
 // Canonical Category Helpers
@@ -141,10 +144,10 @@ export async function queryStoreProducts(
   query = query.range(offset, offset + pagination.limit)
 
   // ============================================================================
-  // Execute Query
+  // Execute Query (with timeout to prevent indefinite hangs)
   // ============================================================================
 
-  const { data, error } = await query
+  const { data, error } = await withTimeout(Promise.resolve(query), SUPABASE_QUERY_TIMEOUT_MS)
 
   if (error) {
     return {

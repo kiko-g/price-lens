@@ -1,4 +1,5 @@
 import { createClient } from "redis"
+import { withTimeout, CircuitBreaker } from "@/lib/resilience"
 
 // Check if Redis is available
 const isRedisAvailable = !!process.env.REDIS_URL
@@ -16,89 +17,138 @@ const RELATED_PRODUCTS_CACHE_PREFIX = "related-products:"
 const CROSS_STORE_CACHE_PREFIX = "cross-store:"
 const RELATED_PRODUCTS_CACHE_TTL = 300 // 5 minutes (rarely changes)
 
+const REDIS_COMMAND_TIMEOUT_MS = 2000
+
+/** withTimeout pre-bound to the Redis command timeout */
+function rTimeout<T>(promise: Promise<T>): Promise<T> {
+  return withTimeout(promise, REDIS_COMMAND_TIMEOUT_MS)
+}
+
+const breaker = new CircuitBreaker({
+  threshold: 3,
+  cooldownMs: 30_000,
+  name: "Redis",
+})
+
 // Create Redis client
 const redis = isRedisAvailable
   ? createClient({
       url: process.env.REDIS_URL,
+      socket: {
+        connectTimeout: 3000,
+        reconnectStrategy: (retries) => {
+          if (retries > 5) return false
+          return Math.min(retries * 500, 3000)
+        },
+      },
     })
   : null
 
 // Connect to Redis if available
 if (redis) {
   redis.on("error", (err) => console.error("Redis Client Error", err))
-  // Connect only once
   if (!redis.isOpen) {
     redis.connect().catch(console.error)
   }
 }
 
-export async function getLastProcessedId(): Promise<number> {
+/**
+ * Health check: returns Redis connectivity status.
+ */
+export async function pingRedis(): Promise<{ ok: boolean; latencyMs: number; error?: string }> {
   if (!isRedisAvailable || !redis) {
+    return { ok: false, latencyMs: 0, error: "Redis not configured" }
+  }
+  if (breaker.isOpen()) {
+    return { ok: false, latencyMs: 0, error: "Circuit breaker open" }
+  }
+  const start = performance.now()
+  try {
+    await rTimeout(redis.ping())
+    const latencyMs = Math.round(performance.now() - start)
+    breaker.recordSuccess()
+    return { ok: true, latencyMs }
+  } catch (error) {
+    const latencyMs = Math.round(performance.now() - start)
+    breaker.recordFailure()
+    return { ok: false, latencyMs, error: error instanceof Error ? error.message : "Unknown error" }
+  }
+}
+
+export async function getLastProcessedId(): Promise<number> {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return 0
   }
 
   try {
-    const id = await redis.get("lastProcessedProductId")
+    const id = await rTimeout(redis.get("lastProcessedProductId"))
+    breaker.recordSuccess()
     return id ? parseInt(id, 10) : 0
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error getting last processed ID:", error)
     return 0
   }
 }
 
 export async function setLastProcessedId(id: number): Promise<void> {
-  if (!isRedisAvailable || !redis) {
-    console.log("Redis not available, skipping set last processed ID")
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
-    await redis.set("lastProcessedProductId", id.toString())
+    await rTimeout(redis.set("lastProcessedProductId", id.toString()))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error setting last processed ID:", error)
   }
 }
 
 export async function clearCategoriesCache(): Promise<void> {
-  if (!isRedisAvailable || !redis) {
-    console.log("Redis not available, skipping cache clear")
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
-    const keys = await redis.keys("categories:*")
+    const keys = await rTimeout(redis.keys("categories:*"))
     if (keys.length > 0) {
-      await redis.del(keys)
+      await rTimeout(redis.del(keys))
       console.log(`Cleared ${keys.length} category cache entries`)
     }
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error clearing categories cache:", error)
   }
 }
 
 export async function getCachedCategories(cacheKey: string) {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return null
   }
 
   try {
-    const data = await redis.get(cacheKey)
+    const data = await rTimeout(redis.get(cacheKey))
+    breaker.recordSuccess()
     return data ? JSON.parse(data) : null
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error fetching from cache:", error)
     return null
   }
 }
 
 export async function setCachedCategories(cacheKey: string, data: any, ttl: number = 7 * 24 * 60 * 60) {
-  if (!isRedisAvailable || !redis) {
-    console.log("Redis not available, skipping cache set")
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
-    await redis.setEx(cacheKey, ttl, JSON.stringify(data))
+    await rTimeout(redis.setEx(cacheKey, ttl, JSON.stringify(data)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error setting cache:", error)
   }
 }
@@ -122,15 +172,17 @@ export function isStoreProductsCacheEnabled(): boolean {
  * @returns Cached data or null if not found/expired
  */
 export async function getCachedStoreProducts<T>(cacheKey: string): Promise<T | null> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return null
   }
 
   try {
     const fullKey = `${STORE_PRODUCTS_CACHE_PREFIX}${cacheKey}`
-    const data = await redis.get(fullKey)
+    const data = await rTimeout(redis.get(fullKey))
+    breaker.recordSuccess()
     return data ? JSON.parse(data) : null
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error fetching store products from cache:", error)
     return null
   }
@@ -142,14 +194,16 @@ export async function getCachedStoreProducts<T>(cacheKey: string): Promise<T | n
  * @param data - Query result to cache
  */
 export async function setCachedStoreProducts(cacheKey: string, data: any): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
     const fullKey = `${STORE_PRODUCTS_CACHE_PREFIX}${cacheKey}`
-    await redis.setEx(fullKey, STORE_PRODUCTS_CACHE_TTL, JSON.stringify(data))
+    await rTimeout(redis.setEx(fullKey, STORE_PRODUCTS_CACHE_TTL, JSON.stringify(data)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error caching store products:", error)
   }
 }
@@ -159,18 +213,19 @@ export async function setCachedStoreProducts(cacheKey: string, data: any): Promi
  * Useful after bulk updates or when you need to force fresh data.
  */
 export async function clearStoreProductsCache(): Promise<void> {
-  if (!isRedisAvailable || !redis) {
-    console.log("Redis not available, skipping cache clear")
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
-    const keys = await redis.keys(`${STORE_PRODUCTS_CACHE_PREFIX}*`)
+    const keys = await rTimeout(redis.keys(`${STORE_PRODUCTS_CACHE_PREFIX}*`))
     if (keys.length > 0) {
-      await redis.del(keys)
+      await rTimeout(redis.del(keys))
       console.log(`Cleared ${keys.length} store products cache entries`)
     }
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error clearing store products cache:", error)
   }
 }
@@ -183,15 +238,17 @@ export async function clearStoreProductsCache(): Promise<void> {
  * Get cached single store product by ID.
  */
 export async function getCachedSingleProduct<T>(productId: string): Promise<T | null> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return null
   }
 
   try {
     const key = `${SINGLE_PRODUCT_CACHE_PREFIX}${productId}`
-    const data = await redis.get(key)
+    const data = await rTimeout(redis.get(key))
+    breaker.recordSuccess()
     return data ? JSON.parse(data) : null
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error fetching single product from cache:", error)
     return null
   }
@@ -201,14 +258,16 @@ export async function getCachedSingleProduct<T>(productId: string): Promise<T | 
  * Cache a single store product.
  */
 export async function setCachedSingleProduct(productId: string, data: unknown): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
     const key = `${SINGLE_PRODUCT_CACHE_PREFIX}${productId}`
-    await redis.setEx(key, SINGLE_PRODUCT_CACHE_TTL, JSON.stringify(data))
+    await rTimeout(redis.setEx(key, SINGLE_PRODUCT_CACHE_TTL, JSON.stringify(data)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error caching single product:", error)
   }
 }
@@ -217,14 +276,16 @@ export async function setCachedSingleProduct(productId: string, data: unknown): 
  * Invalidate a single product cache entry.
  */
 export async function invalidateSingleProductCache(productId: string): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
     const key = `${SINGLE_PRODUCT_CACHE_PREFIX}${productId}`
-    await redis.del(key)
+    await rTimeout(redis.del(key))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error invalidating single product cache:", error)
   }
 }
@@ -237,15 +298,17 @@ export async function invalidateSingleProductCache(productId: string): Promise<v
  * Get cached related products for a product ID.
  */
 export async function getCachedRelatedProducts<T>(productId: string, limit: number): Promise<T | null> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return null
   }
 
   try {
     const key = `${RELATED_PRODUCTS_CACHE_PREFIX}${productId}:${limit}`
-    const data = await redis.get(key)
+    const data = await rTimeout(redis.get(key))
+    breaker.recordSuccess()
     return data ? JSON.parse(data) : null
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error fetching related products from cache:", error)
     return null
   }
@@ -255,14 +318,16 @@ export async function getCachedRelatedProducts<T>(productId: string, limit: numb
  * Cache related products for a product ID.
  */
 export async function setCachedRelatedProducts(productId: string, limit: number, data: unknown): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
     const key = `${RELATED_PRODUCTS_CACHE_PREFIX}${productId}:${limit}`
-    await redis.setEx(key, RELATED_PRODUCTS_CACHE_TTL, JSON.stringify(data))
+    await rTimeout(redis.setEx(key, RELATED_PRODUCTS_CACHE_TTL, JSON.stringify(data)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error caching related products:", error)
   }
 }
@@ -275,15 +340,17 @@ export async function setCachedRelatedProducts(productId: string, limit: number,
  * Get cached cross-store (identical) products for a product ID.
  */
 export async function getCachedCrossStoreProducts<T>(productId: string, limit: number): Promise<T | null> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return null
   }
 
   try {
     const key = `${CROSS_STORE_CACHE_PREFIX}${productId}:${limit}`
-    const data = await redis.get(key)
+    const data = await rTimeout(redis.get(key))
+    breaker.recordSuccess()
     return data ? JSON.parse(data) : null
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error fetching cross-store products from cache:", error)
     return null
   }
@@ -293,14 +360,16 @@ export async function getCachedCrossStoreProducts<T>(productId: string, limit: n
  * Cache cross-store (identical) products for a product ID.
  */
 export async function setCachedCrossStoreProducts(productId: string, limit: number, data: unknown): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
     const key = `${CROSS_STORE_CACHE_PREFIX}${productId}:${limit}`
-    await redis.setEx(key, RELATED_PRODUCTS_CACHE_TTL, JSON.stringify(data))
+    await rTimeout(redis.setEx(key, RELATED_PRODUCTS_CACHE_TTL, JSON.stringify(data)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error caching cross-store products:", error)
   }
 }
@@ -335,34 +404,37 @@ const BULK_SCRAPE_JOB_PREFIX = "bulk-scrape-job:"
 const BULK_SCRAPE_JOB_TTL = 24 * 60 * 60 // 24 hours
 
 export async function createBulkScrapeJob(job: BulkScrapeJob): Promise<void> {
-  if (!isRedisAvailable || !redis) {
-    console.log("Redis not available, cannot create bulk scrape job")
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
   try {
-    await redis.setEx(`${BULK_SCRAPE_JOB_PREFIX}${job.id}`, BULK_SCRAPE_JOB_TTL, JSON.stringify(job))
+    await rTimeout(redis.setEx(`${BULK_SCRAPE_JOB_PREFIX}${job.id}`, BULK_SCRAPE_JOB_TTL, JSON.stringify(job)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error creating bulk scrape job:", error)
   }
 }
 
 export async function getBulkScrapeJob(jobId: string): Promise<BulkScrapeJob | null> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return null
   }
 
   try {
-    const data = await redis.get(`${BULK_SCRAPE_JOB_PREFIX}${jobId}`)
+    const data = await rTimeout(redis.get(`${BULK_SCRAPE_JOB_PREFIX}${jobId}`))
+    breaker.recordSuccess()
     return data ? JSON.parse(data) : null
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error getting bulk scrape job:", error)
     return null
   }
 }
 
 export async function updateBulkScrapeJob(jobId: string, updates: Partial<BulkScrapeJob>): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
@@ -376,8 +448,10 @@ export async function updateBulkScrapeJob(jobId: string, updates: Partial<BulkSc
       updatedAt: new Date().toISOString(),
     }
 
-    await redis.setEx(`${BULK_SCRAPE_JOB_PREFIX}${jobId}`, BULK_SCRAPE_JOB_TTL, JSON.stringify(updated))
+    await rTimeout(redis.setEx(`${BULK_SCRAPE_JOB_PREFIX}${jobId}`, BULK_SCRAPE_JOB_TTL, JSON.stringify(updated)))
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error updating bulk scrape job:", error)
   }
 }
@@ -386,7 +460,7 @@ export async function incrementBulkScrapeProgress(
   jobId: string,
   options: { failed?: boolean; barcodeFound?: boolean } = {},
 ): Promise<void> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return
   }
 
@@ -406,7 +480,6 @@ export async function incrementBulkScrapeProgress(
       updates.barcodesFound = job.barcodesFound + 1
     }
 
-    // Check if job is complete
     if (updates.processed === job.total) {
       updates.status = "completed"
       updates.completedAt = new Date().toISOString()
@@ -419,26 +492,27 @@ export async function incrementBulkScrapeProgress(
 }
 
 export async function getActiveBulkScrapeJobs(): Promise<BulkScrapeJob[]> {
-  if (!isRedisAvailable || !redis) {
+  if (!isRedisAvailable || !redis || breaker.isOpen()) {
     return []
   }
 
   try {
-    const keys = await redis.keys(`${BULK_SCRAPE_JOB_PREFIX}*`)
+    const keys = await rTimeout(redis.keys(`${BULK_SCRAPE_JOB_PREFIX}*`))
     if (keys.length === 0) return []
 
     const jobs: BulkScrapeJob[] = []
     for (const key of keys) {
-      const data = await redis.get(key)
+      const data = await rTimeout(redis.get(key))
       if (data) {
         const job = JSON.parse(data) as BulkScrapeJob
         jobs.push(job)
       }
     }
 
-    // Sort by startedAt descending (most recent first)
+    breaker.recordSuccess()
     return jobs.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error getting active bulk scrape jobs:", error)
     return []
   }
