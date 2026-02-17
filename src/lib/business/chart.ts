@@ -324,45 +324,45 @@ export function calculateChartBounds(min: number, max: number, targetTicks: numb
   }
 }
 
+export type RelativeTimeMode = "short" | "long" | "relative"
+
 /**
- * Get a short version of relative time for compact displays (e.g. "6mo", "2w")
+ * Unified relative time formatter with 3 display modes:
+ * - "short": compact (today, 3d, 2w, 6mo, 1y)
+ * - "long": noun form (today, 3 days, 2 weeks, 6 months, 1 year)
+ * - "relative": sentence-like (today, 3 days ago, 2 weeks ago, 6 months ago)
  */
-export function getShortRelativeTime(date: Date): string {
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
+export function formatRelativeTime(date: Date, mode: RelativeTimeMode = "short"): string {
+  const diffMs = Date.now() - date.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffDays < 1) return "today"
+
   const diffWeeks = Math.floor(diffDays / 7)
   const diffMonths = Math.floor(diffDays / 30)
   const diffYears = Math.floor(diffDays / 365)
 
-  if (diffDays === 0) return "today"
-  if (diffDays === 1) return "1d"
-  if (diffDays < 7) return `${diffDays}d`
-  if (diffWeeks === 1) return "1w"
-  if (diffWeeks < 12) return `${diffWeeks}w`
-  if (diffMonths < 12 && diffMonths > 0) return `${diffMonths}mo`
-  if (diffYears === 1) return "1y"
-  return `${diffYears}y`
-}
+  const suffix = mode === "relative" ? " ago" : ""
 
-/**
- * Get a human-readable relative time (e.g. "6 months", "2 weeks", "1 year")
- */
-export function getLongRelativeTime(date: Date): string {
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const diffWeeks = Math.floor(diffDays / 7)
-  const diffMonths = Math.floor(diffDays / 30)
-  const diffYears = Math.floor(diffDays / 365)
+  if (diffDays < 14) {
+    if (mode === "short") return `${diffDays}d`
+    const label = diffDays === 1 ? "1 day" : `${diffDays} days`
+    return `${label}${suffix}`
+  }
 
-  if (diffDays === 0) return "today"
-  if (diffDays === 1) return "1 day"
-  if (diffDays < 7) return `${diffDays} days`
-  if (diffWeeks === 1) return "1 week"
-  if (diffWeeks < 12) return `${diffWeeks} weeks`
-  if (diffMonths === 1) return "1 month"
-  if (diffMonths < 12 && diffMonths > 0) return `${diffMonths} months`
-  if (diffYears === 1) return "1 year"
-  return `${diffYears} years`
+  if (diffDays < 30) {
+    if (mode === "short") return `${diffWeeks}w`
+    const label = diffWeeks === 1 ? "1 week" : `${diffWeeks} weeks`
+    return `${label}${suffix}`
+  }
+
+  if (diffDays < 365) {
+    if (mode === "short") return `${diffMonths}mo`
+    const label = diffMonths === 1 ? "1 month" : `${diffMonths} months`
+    return `${label}${suffix}`
+  }
+
+  if (mode === "short") return `${diffYears}y`
+  const label = diffYears === 1 ? "1 year" : `${diffYears} years`
+  return `${label}${suffix}`
 }

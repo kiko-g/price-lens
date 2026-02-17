@@ -27,7 +27,7 @@ import {
   buildChartData,
   chartConfig,
   calculateChartBounds,
-  getLongRelativeTime,
+  formatRelativeTime,
   type ChartSamplingMode,
 } from "@/lib/business/chart"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
@@ -753,7 +753,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
                   <TableCell
                     className={cn(
                       "text-center text-xs font-medium tracking-tighter",
-                      isMostCommon ? "text-success" : "",
+                      isMostCommon ? "text-success font-semibold" : "",
                     )}
                   >
                     {(point.frequencyRatio * 100).toFixed(0)}%
@@ -773,7 +773,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
             month: "long",
             year: "numeric",
           })}
-          . Showing data for up to {getLongRelativeTime(new Date(trackingSince))}.
+          . Showing data for up to {formatRelativeTime(new Date(trackingSince), "long")}.
         </blockquote>
       )}
     </div>

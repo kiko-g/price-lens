@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils"
 import { Badge, BadgeProps } from "@/components/ui/badge"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -22,7 +23,7 @@ export function PriorityBadge({ priority, ...props }: Props) {
               Untracked product
             </Badge>
           </TooltipTrigger>
-          <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
+          <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6} className={cn(props.className)}>
             <p className="font-semibold">{config.description}</p>
             {config.explanation}
           </TooltipContent>
@@ -40,7 +41,7 @@ export function PriorityBadge({ priority, ...props }: Props) {
             Priority {priority}
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
+        <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6} className={cn(props.className)}>
           <p className="font-semibold">{config.description}</p>
           {config.explanation}
         </TooltipContent>

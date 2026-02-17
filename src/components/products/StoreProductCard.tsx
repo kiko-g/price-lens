@@ -9,7 +9,7 @@ import { useStoreProductCard } from "@/hooks/useStoreProductCard"
 
 import { cn } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/business/data"
-import { getShortRelativeTime } from "@/lib/business/chart"
+import { formatRelativeTime } from "@/lib/business/chart"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -46,12 +46,15 @@ import {
   HeartIcon,
   CalendarPlusIcon,
   ScaleIcon,
+  TriangleAlertIcon,
 } from "lucide-react"
 
 const StoreProductCardDrawerChart = dynamic(
   () => import("@/components/products/StoreProductCardDrawerChart").then((mod) => mod.StoreProductCardDrawerChart),
   { ssr: false, loading: () => <Skeleton className="h-60 w-full rounded-lg" /> },
 )
+
+const DISCOUNT_DECIMAL_PLACES = 0
 
 function resolveImageUrlForCard(image: string, size = 300) {
   const url = new URL(image)
@@ -138,7 +141,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 height={400}
                 unoptimized
                 className={cn(
-                  "aspect-7/8 h-full w-full bg-white object-cover object-center p-1 transition duration-300",
+                  "aspect-7/8 h-full w-full bg-white object-cover object-center transition duration-300",
                   sp.available ? "opacity-100" : "",
                 )}
                 placeholder="blur"
@@ -153,33 +156,18 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
         <div className="absolute top-1.5 left-1.5 flex flex-col items-start gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
-            <Badge
-              variant="price-per-unit"
-              size="xs"
-              roundedness="sm"
-              className="w-fit opacity-100 transition-opacity duration-300 group-hover:opacity-0"
-            >
-              {sp.price_per_major_unit}€{sp.major_unit}
-            </Badge>
-          ) : null}
-
-          {sp.discount ? (
-            <Badge
-              variant="destructive"
-              size="xs"
-              roundedness="sm"
-              className="w-fit opacity-100 transition-opacity duration-300 group-hover:opacity-0"
-            >
-              -{discountValueToPercentage(sp.discount)}
+            <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit lowercase">
+              {sp.price_per_major_unit.toFixed(2)}€/
+              {sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
             </Badge>
           ) : null}
         </div>
 
         <div className="absolute top-1.5 right-1.5 flex flex-col items-end gap-1">
           {isError ? (
-            <span className="bg-destructive flex items-center justify-center rounded p-1">
-              <WifiOffIcon className="size-3 text-white" />
-            </span>
+            <Badge variant="destructive" size="sm" roundedness="sm">
+              <TriangleAlertIcon />
+            </Badge>
           ) : (
             <>
               {sp.pack && (
@@ -239,7 +227,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     className="gap-1 opacity-100 transition-opacity duration-300 group-hover:opacity-0"
                   >
                     <CalendarPlusIcon className="h-3 w-3" />
-                    {getShortRelativeTime(new Date(favoritedAt))}
+                    {formatRelativeTime(new Date(favoritedAt), "short")}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent side="left" align="end">
@@ -334,10 +322,20 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
         {/* Prices and Actions */}
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            {hasDiscount ? (
+          <div className="items-ce flex flex-wrap justify-between gap-2">
+            {hasDiscount && sp.discount ? (
               <div className="flex flex-col">
-                <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+                  <Badge
+                    variant="destructive"
+                    size="2xs"
+                    roundedness="sm"
+                    className="w-fit opacity-100 transition-opacity duration-300 group-hover:opacity-0"
+                  >
+                    -{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
+                  </Badge>
+                </div>
                 <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
               </div>
             ) : null}

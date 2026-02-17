@@ -23,6 +23,7 @@
 - [ ] Scan barcode with phone camera feature.
 - [ ] Product analytics and views for better search results and ecosystem informatization
 - [ ] Develop idea of money saving tally like glovo.
+- [ ] IMAGE URL AS ARRAY!!!! UPDATE SCRAPER, DATABASE AND THEN WE HAVE CAROUSELS
 
 ## SEO and Usability
 

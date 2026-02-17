@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { getShortRelativeTime } from "@/lib/business/chart"
+import { formatRelativeTime } from "@/lib/business/chart"
 import { PRIORITY_REFRESH_HOURS, formatHoursDuration } from "@/lib/business/priority"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -21,7 +21,7 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
   }
 
   const updatedDate = new Date(updatedAt)
-  const relativeTime = getShortRelativeTime(updatedDate)
+  const relativeTime = formatRelativeTime(updatedDate, "relative")
   const refreshHours = priority !== null ? PRIORITY_REFRESH_HOURS[priority] : null
   const refreshLabel = refreshHours ? formatHoursDuration(refreshHours) : null
 

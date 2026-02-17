@@ -10,12 +10,14 @@ import type { StoreProduct } from "@/types"
 import { Badge } from "@/components/ui/badge"
 import { Barcode } from "@/components/ui/combo/barcode"
 
+import { useIsAdmin } from "@/contexts/UserContext"
+
 import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { ProductActions } from "@/components/products/product-page/ProductActions"
 
-import { AlertTriangleIcon, ExternalLinkIcon } from "lucide-react"
+import { AlertTriangleIcon } from "lucide-react"
 
 export function resolveImageUrlForPage(image: string, size = 800) {
   const url = new URL(image)
@@ -40,6 +42,8 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
   const isPriceRecommendedNotSet = !sp.price_recommended && sp.price
   const isPriceEqualToRecommended = sp.price_recommended && sp.price && sp.price_recommended === sp.price
   const isNormalPrice = isPriceRecommendedNotSet || isPriceEqualToRecommended
+  const isAdmin = useIsAdmin()
+  const elevated = process.env.NODE_ENV === "development" || isAdmin
 
   return (
     <article className="hidden w-full grid-cols-20 gap-8 md:grid">
@@ -72,18 +76,6 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
               </Badge>
             </div>
           )}
-
-          <div className="absolute right-3 bottom-3 z-10">
-            <Link
-              href={sp.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="border-border inline-flex items-center justify-center gap-1 rounded-full border px-2 py-0.5 transition-all duration-300 hover:bg-zinc-100 dark:border-zinc-300 dark:bg-white dark:hover:bg-zinc-200"
-            >
-              <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
-              <ExternalLinkIcon className="h-4 w-4 text-black" />
-            </Link>
-          </div>
         </div>
 
         <div className="mt-4 inline-flex w-full flex-wrap items-start justify-center gap-4">
@@ -101,13 +93,13 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
             </Link>
           )}
 
-          <PriorityBadge priority={sp.priority} roundedness="2xl" />
+          {elevated ? <PriorityBadge priority={sp.priority} roundedness="2xl" /> : null}
 
           <Link
             href={sp.url}
             target="_blank"
             rel="noreferrer noopener"
-            className="border-border inline-flex rounded-full border px-2 py-0.5 md:hidden dark:border-transparent dark:bg-white dark:hover:bg-white/90"
+            className="border-border inline-flex rounded-full border px-2 py-0.5 dark:border-transparent dark:bg-white dark:hover:bg-white/90"
           >
             <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
           </Link>
@@ -138,8 +130,9 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
 
           <div className="flex items-center gap-2">
             {sp.price_per_major_unit && sp.major_unit ? (
-              <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
-                {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
+              <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit lowercase">
+                {sp.price_per_major_unit.toFixed(2)}€/
+                {sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
               </Badge>
             ) : null}
 

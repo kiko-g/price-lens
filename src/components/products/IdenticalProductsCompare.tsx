@@ -9,18 +9,11 @@ import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
-import {
-  ArrowRightIcon,
-  ScaleIcon,
-  TrophyIcon,
-  MapPinIcon,
-  ZapIcon,
-  SearchAlertIcon,
-  SmilePlusIcon,
-} from "lucide-react"
+import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon, SearchXIcon } from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
@@ -43,8 +36,9 @@ function CompactStoreCard({
     <Link
       href={generateProductPath(product)}
       className={cn(
-        "group relative flex min-w-[120px] flex-1 flex-col items-center gap-2 overflow-hidden rounded-lg border p-3 transition-all hover:shadow-md hover:border-foreground/20 dark:hover:border-foreground/30",
-        isCheapest && "border-success/40 bg-success/5 shadow-[0_0_14px_-2px] shadow-success/30 dark:border-success/50 dark:bg-success/10 dark:shadow-[0_0_20px_-2px] dark:shadow-success/40",
+        "group hover:border-foreground/20 dark:hover:border-foreground/30 relative flex min-w-[120px] flex-1 flex-col items-center gap-2 overflow-hidden rounded-lg border p-3 transition-all hover:shadow-md",
+        isCheapest &&
+          "border-success/40 bg-success/5 shadow-success/30 dark:border-success/50 dark:bg-success/10 dark:shadow-success/40 shadow-[0_0_14px_-2px] dark:shadow-[0_0_20px_-2px]",
       )}
     >
       {/* Badge */}
@@ -59,11 +53,7 @@ function CompactStoreCard({
         </Badge>
       )}
       {isCurrent && !isCheapest && (
-        <Badge
-          size="xs"
-          variant="blue"
-          className="absolute top-0 right-0 rounded-none rounded-bl-md whitespace-nowrap"
-        >
+        <Badge size="xs" variant="blue" className="absolute top-0 right-0 rounded-none rounded-bl-md whitespace-nowrap">
           <MapPinIcon className="h-3 w-3" />
           This page
         </Badge>
@@ -126,17 +116,42 @@ function CompactStoreCard({
     </Link>
   )
 }
-
 function LoadingSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-9 w-32" />
+    <div className="flex flex-col">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-2 flex items-center gap-2">
+          <Skeleton className="h-5 w-5 rounded" />
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+        <Skeleton className="h-9 w-32 rounded-md" />
       </div>
-      <div className="flex gap-3">
+
+      {/* Savings hint */}
+      <div className="mb-3">
+        <Skeleton className="h-4 w-64" />
+      </div>
+
+      {/* Compact comparison cards */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 min-w-[120px] flex-1 rounded-lg" />
+          <div key={i} className="rounded-lg border p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Skeleton className="h-6 w-6 rounded" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <Skeleton className="mb-2 h-4 w-full" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-4 w-12 rounded-full" />
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <Skeleton className="h-4 w-12 rounded-full" />
+              <Skeleton className="h-4 w-16 rounded-full" />
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -184,12 +199,18 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
           </h3>
         </div>
 
-        <div className="bg-destructive/10 border-destructive/20 rounded-lg border px-4 py-4 text-center">
-          <p className="flex items-center justify-start gap-2 text-sm">
-            <SearchAlertIcon className="h-4 w-4" />
-            No identical products found in other stores. No price comparison insights available.
-          </p>
-        </div>
+        <Empty className="border-border bg-muted/30 border py-10">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchXIcon className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>No price comparisons available</EmptyTitle>
+            <EmptyDescription>
+              We couldn{"'"}t find this product listed at other stores right now. Check back later as availability
+              updates regularly.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     )
   }
