@@ -56,8 +56,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: error }, { status: 500 })
   }
 
-  // Cache the result (without user-specific favorites)
-  if (cacheEnabled && data) {
+  // Cache the result (without user-specific favorites) -- skip caching empty results
+  if (cacheEnabled && data && data.length > 0) {
     const dataWithoutFavorites = data.map((p) => ({ ...p, is_favorited: false }))
     await setCachedCrossStoreProducts(id, limit, dataWithoutFavorites)
   }

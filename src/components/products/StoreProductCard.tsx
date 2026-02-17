@@ -24,7 +24,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ShareButton } from "@/components/ui/combo/share-button"
@@ -37,7 +36,6 @@ import { StoreProductCardSkeleton } from "@/components/products/StoreProductCard
 
 import {
   ArrowUpRightIcon,
-  CopyIcon,
   EllipsisVerticalIcon,
   RefreshCcwIcon,
   WifiOffIcon,
@@ -47,6 +45,7 @@ import {
   CalendarPlusIcon,
   ScaleIcon,
   TriangleAlertIcon,
+  ExternalLinkIcon,
 } from "lucide-react"
 
 const StoreProductCardDrawerChart = dynamic(
@@ -121,10 +120,11 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
     return parts.join(" > ")
   })()
 
+  const elevated = process.env.NODE_ENV === "development" || profile?.role === "admin"
   const isError = hasUpdateError || !sp.available
 
   return (
-    <div className="flex w-full flex-col rounded-lg bg-transparent">
+    <div className="flex h-full w-full flex-col rounded-lg bg-transparent">
       <div
         className={cn(
           "group relative mb-2 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
@@ -365,20 +365,22 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                       target="_blank"
                       className="flex w-full items-center justify-between gap-1"
                     >
-                      Open in {supermarketName}
+                      <span className="flex items-center gap-1">Open product page</span>
                       <ArrowUpRightIcon />
                     </Link>
                   </Button>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
-                  <Button
-                    variant="dropdown-item"
-                    onClick={() => navigator.clipboard.writeText(sp.url || "")}
-                    title={sp.url || ""}
-                  >
-                    Copy {supermarketName} URL
-                    <CopyIcon />
+                  <Button variant="dropdown-item" asChild>
+                    <Link
+                      href={sp.url || "#"}
+                      target="_blank"
+                      className="flex w-full items-center justify-between gap-1"
+                    >
+                      Open in {supermarketName}
+                      <ExternalLinkIcon />
+                    </Link>
                   </Button>
                 </DropdownMenuItem>
 
@@ -398,7 +400,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   <DropdownMenuItem variant="hype" asChild>
                     <Button variant="dropdown-item" asChild>
                       <Link href={`/compare?barcode=${sp.barcode}`}>
-                        <span className="mr-2">Compare identical in other stores</span>
+                        <span className="mr-2">Compare in other stores</span>
                         <ScaleIcon />
                       </Link>
                     </Button>
@@ -406,35 +408,40 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 )}
 
                 {/* Admin tools in dropdown menu */}
-                {(process.env.NODE_ENV === "development" || profile?.role === "admin") && (
-                  <>
-                    <DropdownMenuSeparator className="[&:not(:has(+*))]:hidden" />
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      Admin tools
-                      <DevBadge />
-                    </DropdownMenuLabel>
+                {elevated && (
+                  <DropdownMenuItem asChild>
+                    <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
+                      <span className="flex items-center gap-1">
+                        Update from {supermarketName}
+                        <DevBadge />
+                      </span>
+                      <RefreshCcwIcon />
+                    </Button>
+                  </DropdownMenuItem>
+                )}
 
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
-                        Update from origin ({supermarketName})
-                        <RefreshCcwIcon />
-                      </Button>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
+                {elevated && (
+                  <DropdownMenuItem asChild>
+                    <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
+                      <span className="flex items-center gap-1">
                         Set priority
-                        <MicroscopeIcon />
-                      </Button>
-                    </DropdownMenuItem>
+                        <DevBadge />
+                      </span>
+                      <MicroscopeIcon />
+                    </Button>
+                  </DropdownMenuItem>
+                )}
 
-                    <DropdownMenuItem asChild>
-                      <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
+                {elevated && (
+                  <DropdownMenuItem asChild>
+                    <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
+                      <span className="flex items-center gap-1">
                         Clear priority
-                        <CircleIcon />
-                      </Button>
-                    </DropdownMenuItem>
-                  </>
+                        <DevBadge />
+                      </span>
+                      <CircleIcon />
+                    </Button>
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>

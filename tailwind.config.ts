@@ -79,6 +79,7 @@ export default {
         "shimmer-slide": "shimmer-slide var(--speed) ease-in-out infinite alternate",
         "spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
         "fade-in": "fade-in 1s ease-in-out forwards",
+        "fade-in-fast": "fade-in 300ms ease-out forwards",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         spin: "spin 1s linear infinite",

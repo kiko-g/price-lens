@@ -116,9 +116,10 @@ function CompactStoreCard({
     </Link>
   )
 }
+
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-[180px] flex-col">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="mb-2 flex items-center gap-2">
@@ -134,21 +135,14 @@ function LoadingSkeleton() {
         <Skeleton className="h-4 w-64" />
       </div>
 
-      {/* Compact comparison cards */}
+      {/* Cards matching CompactStoreCard layout: centered logo, price, badges */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-lg border p-3">
-            <div className="mb-2 flex items-center gap-2">
-              <Skeleton className="h-6 w-6 rounded" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-            <Skeleton className="mb-2 h-4 w-full" />
+          <div key={i} className="flex flex-col items-center gap-2 rounded-lg border p-3">
+            <Skeleton className="h-7 w-16 rounded-full" />
+            <Skeleton className="h-6 w-20" />
             <div className="flex items-center gap-2">
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-4 w-12 rounded-full" />
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <Skeleton className="h-4 w-12 rounded-full" />
+              <Skeleton className="h-4 w-14 rounded-full" />
               <Skeleton className="h-4 w-16 rounded-full" />
             </div>
           </div>
@@ -191,7 +185,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   // No identical products found (only current product)
   if (!identicalProducts || identicalProducts.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className="animate-fade-in-fast min-h-[180px] space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-lg font-semibold">
             <ScaleIcon className="h-5 w-5" />
@@ -218,7 +212,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   const storeCount = new Set(allProducts.map((p) => p.origin_id)).size
 
   return (
-    <div className="flex flex-col">
+    <div className="animate-fade-in-fast flex flex-col">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">

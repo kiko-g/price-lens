@@ -9,8 +9,12 @@ import { Button } from "@/components/ui/button"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 
 import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon, SearchXIcon } from "lucide-react"
+
+const SKELETON_COUNT = 6
+const SLIDE_CLASS = "min-w-0 shrink-0 pl-4 basis-[46%] sm:basis-2/5 md:basis-1/3 lg:basis-1/5 xl:basis-1/6"
 
 interface Props {
   id: string
@@ -32,10 +36,14 @@ function LoadingSkeleton() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[300px] min-w-[220px] flex-[0_0_220px] rounded-lg" />
-        ))}
+      <div className="overflow-hidden">
+        <div className="-ml-4 flex">
+          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <div key={i} className={SLIDE_CLASS}>
+              <StoreProductCardSkeleton />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -82,7 +90,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
 
   if (!products || products.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className="animate-fade-in-fast min-h-[200px] space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-lg font-semibold">
             <ChartScatterIcon className="h-5 w-5" />
@@ -107,7 +115,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-in-fast space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <ChartScatterIcon className="h-5 w-5" />
@@ -141,9 +149,9 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
       </div>
 
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
+        <div className="-ml-4 flex">
           {products.map((product: StoreProduct) => (
-            <div key={product.id} className="min-w-[220px] flex-[0_0_220px] pl-4 first:pl-0">
+            <div key={product.id} className={SLIDE_CLASS}>
               <StoreProductCard sp={product} />
             </div>
           ))}

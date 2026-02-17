@@ -290,14 +290,18 @@ function PricesVariation({
 
   if (isLoading) {
     return (
-      <div className={cn("mb-2 flex flex-col gap-2", className)}>
-        <Skeleton className="h-4 w-40" />
-        <div className="flex flex-col gap-2">
+      <div className={cn("mb-2 flex items-start justify-between gap-3", className)}>
+        <div className="flex flex-1 flex-col gap-1 py-0.5">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div className="flex flex-wrap items-center gap-2" key={i}>
-              <Skeleton className="h-4 w-50" />
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-4 w-16" />
+            <div className="flex items-center justify-between gap-2" key={i}>
+              <div className="flex items-center gap-1.5">
+                <Skeleton className="size-2 rounded-full" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <div className="flex items-center gap-1">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-4 w-12" />
+              </div>
             </div>
           ))}
         </div>
@@ -306,7 +310,7 @@ function PricesVariation({
   }
 
   return (
-    <div className={cn("mb-2 flex items-start justify-between gap-3", className)}>
+    <div className={cn("animate-fade-in-fast mb-2 flex items-start justify-between gap-3", className)}>
       <PricesVariationCard
         state={{ activeAxis }}
         data={{
@@ -418,7 +422,7 @@ function RangeSelector({ className }: RangeSelectorProps) {
   }
 
   return (
-    <div className={cn("flex flex-wrap items-center justify-start gap-2", className)}>
+    <div className={cn("animate-fade-in-fast flex flex-wrap items-center justify-start gap-2", className)}>
       {RANGES.map((range) => (
         <Button
           key={range}
@@ -459,8 +463,8 @@ function Graph({ className }: GraphProps) {
 
   if (isLoading) {
     return (
-      <div className={cn("mb-2 flex h-60 w-full items-center justify-center", className)}>
-        <Skeleton className="h-full w-full" />
+      <div className={cn("mb-2 flex w-full items-center justify-center", className)}>
+        <Skeleton className="aspect-video w-full" />
       </div>
     )
   }
@@ -644,13 +648,18 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   if (isLoading) {
     return (
       <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
-        <Skeleton className="h-10 w-full rounded-lg border" />
-        <div className="flex flex-col">
-          <Skeleton className="h-8 w-full rounded-none rounded-t-lg" />
-          <Skeleton className="-mt-px h-8 w-full rounded-none" variant="outline" />
-          <Skeleton className="-mt-px h-8 w-full rounded-none" variant="outline" />
-          <Skeleton className="-mt-px h-8 w-full rounded-none rounded-b-lg" variant="outline" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <div className="mt-1 flex flex-col rounded-lg border">
+          <Skeleton className="h-7 w-full rounded-none rounded-t-lg" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              className="-mt-px h-8 w-full rounded-none last:rounded-b-lg"
+              variant="outline"
+            />
+          ))}
         </div>
+        <Skeleton className="h-3 w-52" />
       </div>
     )
   }
@@ -666,7 +675,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   const orderedPoints = currentPricePoint ? [currentPricePoint, ...restPoints] : sorted
 
   return (
-    <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
+    <div className={cn("animate-fade-in-fast flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
       <div
         className={cn(
           "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",

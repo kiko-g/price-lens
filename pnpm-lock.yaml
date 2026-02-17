@@ -137,6 +137,9 @@ importers:
       immer:
         specifier: ^11.0.1
         version: 11.0.1
+      import-in-the-middle:
+        specifier: ^2.0.6
+        version: 2.0.6
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
@@ -173,6 +176,9 @@ importers:
       redis:
         specifier: ^5.10.0
         version: 5.10.0
+      require-in-the-middle:
+        specifier: ^8.0.1
+        version: 8.0.1
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

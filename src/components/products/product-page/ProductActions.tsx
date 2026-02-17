@@ -65,7 +65,10 @@ export function ProductActions({ sp }: ProductActionsProps) {
               onClick={() => updateStoreProduct.mutate(sp)}
               disabled={updateStoreProduct.isPending}
             >
-              Update from origin ({supermarketName})
+              <span className="flex items-center gap-1">
+                Update from {supermarketName}
+                <DevBadge />
+              </span>
               {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon className="h-4 w-4" />}
             </Button>
           </DropdownMenuItem>

@@ -493,86 +493,73 @@ export async function findIdenticalProducts(
     return { data: null, error: error || "Product not found" }
   }
 
-  const results: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] = []
+  // Build both queries upfront and run in parallel
+  const barcodeQuery =
+    source.barcode
+      ? supabase
+          .from("store_products")
+          .select("*")
+          .eq("barcode", source.barcode)
+          .neq("origin_id", source.origin_id)
+          .neq("id", productId)
+          .limit(limit)
+      : null
 
-  // STEP 1: Try exact barcode match first (highest confidence)
-  if (source.barcode) {
-    const { data: barcodeMatches, error: barcodeError } = await supabase
+  // Fuzzy query: exact brand + text search on name (pushes hard requirements into DB)
+  let fuzzyQuery = null
+  if (source.brand) {
+    const words = extractWords(source.name)
+    let query = supabase
       .from("store_products")
       .select("*")
-      .eq("barcode", source.barcode)
+      .eq("brand", source.brand)
       .neq("origin_id", source.origin_id)
       .neq("id", productId)
-      .limit(limit)
 
-    if (barcodeError) {
-      console.error("Error fetching barcode matches:", barcodeError)
+    if (words.length >= 2) {
+      const searchTerms = words.slice(0, 3).join(" & ")
+      query = query.textSearch("name", searchTerms)
     }
 
-    if (barcodeMatches && barcodeMatches.length > 0) {
-      // Add barcode matches with 100% score
-      for (const match of barcodeMatches) {
-        results.push({
-          ...match,
-          similarity_score: 100,
-          similarity_factors: ["exact_barcode"],
-        })
-      }
-    }
+    fuzzyQuery = query.limit(30)
   }
 
-  // STEP 2: Fuzzy matching to find additional matches (or if no barcode)
-  // Skip if we already have enough results from barcode matching
-  if (results.length < limit) {
-    const existingIds = new Set(results.map((r) => r.id))
+  const [barcodeResult, fuzzyResult] = await Promise.all([
+    barcodeQuery ?? Promise.resolve(null),
+    fuzzyQuery ?? Promise.resolve(null),
+  ])
 
-    // Build search query - get candidates from other stores
-    let query = supabase.from("store_products").select("*").neq("origin_id", source.origin_id).neq("id", productId)
+  // Process barcode matches (score 100)
+  const results: (StoreProduct & { similarity_score: number; similarity_factors: string[] })[] = []
+  const seenIds = new Set<number>()
 
-    // Filter by brand if available (use ilike for fuzzy brand matching)
-    // This handles "Compal" matching "Compal Classico" and vice versa
-    if (source.brand) {
-      const brandFirstWord = source.brand.split(" ")[0]
-      if (brandFirstWord.length >= 3) {
-        query = query.ilike("brand", `${brandFirstWord}%`)
-      } else {
-        query = query.ilike("brand", source.brand)
-      }
+  if (barcodeResult && !barcodeResult.error && barcodeResult.data) {
+    for (const match of barcodeResult.data) {
+      seenIds.add(match.id)
+      results.push({ ...match, similarity_score: 100, similarity_factors: ["exact_barcode"] })
     }
+  } else if (barcodeResult?.error) {
+    console.warn("[findIdenticalProducts] barcode query failed:", barcodeResult.error.code, barcodeResult.error.message)
+  }
 
-    const { data: candidates, error: queryError } = await query.limit(500)
-
-    if (queryError) {
-      console.error("Error fetching candidates:", queryError)
-    }
-
-    // Score all candidates
+  // Process fuzzy matches (score via scoreIdenticalMatch)
+  if (fuzzyResult && !fuzzyResult.error && fuzzyResult.data) {
     const matches: ProductMatch[] = []
-    for (const candidate of candidates || []) {
-      // Skip if already matched by barcode
-      if (existingIds.has(candidate.id)) continue
-
+    for (const candidate of fuzzyResult.data) {
+      if (seenIds.has(candidate.id)) continue
       const match = scoreIdenticalMatch(source, candidate)
-      if (match && match.score > 50) {
-        // Minimum score for "identical"
-        matches.push(match)
-      }
+      if (match && match.score > 50) matches.push(match)
     }
 
-    // Sort by score and add to results
     matches.sort((a, b) => b.score - a.score)
-
     const remaining = limit - results.length
     for (const m of matches.slice(0, remaining)) {
-      results.push({
-        ...m.product,
-        similarity_score: m.score,
-        similarity_factors: m.factors,
-      })
+      results.push({ ...m.product, similarity_score: m.score, similarity_factors: m.factors })
     }
+  } else if (fuzzyResult?.error) {
+    console.warn("[findIdenticalProducts] fuzzy query failed:", fuzzyResult.error.code, fuzzyResult.error.message)
   }
 
-  // Sort final results by score (barcode matches first, then fuzzy matches)
   results.sort((a, b) => b.similarity_score - a.similarity_score)
 
   // Augment with favorites
@@ -598,16 +585,18 @@ export async function findRelatedProducts(
   const { data: source, error } = await supabase.from("store_products").select("*").eq("id", productId).single()
 
   if (error || !source) {
+    console.warn(`[findRelatedProducts] source product ${productId} not found`, error)
     return { data: null, error: error || "Product not found" }
   }
+
+  const brandTrimmed = source.brand?.trim() || null
 
   // Get candidates: same brand from any store, or similar name
   const queries = []
 
-  // Same brand products
-  if (source.brand) {
+  if (brandTrimmed) {
     queries.push(
-      supabase.from("store_products").select("*").ilike("brand", source.brand).neq("id", productId).limit(100),
+      supabase.from("store_products").select("*").ilike("brand", brandTrimmed).neq("id", productId).limit(100),
     )
   }
 
@@ -624,12 +613,20 @@ export async function findRelatedProducts(
   const allCandidates = new Map<number, StoreProduct>()
 
   for (const result of results) {
+    if (result.error) {
+      console.warn("[findRelatedProducts] candidate query failed:", result.error.code, result.error.message)
+    }
     if (result.data) {
       for (const p of result.data) {
         allCandidates.set(p.id, p)
       }
     }
   }
+
+  console.log(
+    `[findRelatedProducts] id=${productId} brand="${brandTrimmed}" name="${source.name}" ` +
+      `candidates=${allCandidates.size} queries=${queries.length}`,
+  )
 
   // Score all candidates
   const matches: ProductMatch[] = []
@@ -639,6 +636,11 @@ export async function findRelatedProducts(
       matches.push(match)
     }
   }
+
+  console.log(
+    `[findRelatedProducts] id=${productId} scored=${matches.length}/${allCandidates.size} ` +
+      `top=${matches[0]?.score ?? "n/a"}`,
+  )
 
   // Sort by score and return top matches
   matches.sort((a, b) => b.score - a.score)
