@@ -48,7 +48,7 @@ export function SearchContent({ onClose, autoFocus = true }: SearchContentProps)
 
     addSearch(trimmed)
     onClose()
-    window.location.href = `/products?q=${encodeURIComponent(trimmed)}`
+    router.push(`/products?q=${encodeURIComponent(trimmed)}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent): void => {
@@ -84,7 +84,8 @@ export function SearchContent({ onClose, autoFocus = true }: SearchContentProps)
         <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
         <Input
           ref={inputRef}
-          type="text"
+          type="search"
+          enterKeyHint="search"
           placeholder="What product are you looking for?"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

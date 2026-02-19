@@ -28,7 +28,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
   return (
     <article className="flex w-full flex-col gap-2.5 md:hidden">
       {/* Full-width product image */}
-      <div className="relative aspect-6/5 w-full overflow-hidden rounded-lg border bg-white">
+      <div className="relative aspect-6/5 w-full max-w-lg overflow-hidden rounded-lg border bg-white">
         {sp.image ? (
           <Image
             fill

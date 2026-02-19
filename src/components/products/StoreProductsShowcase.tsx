@@ -643,7 +643,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         {/* Search Input (debounced, no button on desktop) */}
         <div className="relative w-full">
           <Input
-            type="text"
+            type="search"
+            enterKeyHint="search"
             placeholder="Search products..."
             className="pr-16 text-base md:text-sm"
             value={queryInput}
@@ -1161,7 +1162,8 @@ function MobileNav({
             <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
           )}
           <Input
-            type="text"
+            type="search"
+            enterKeyHint="search"
             placeholder="Search products..."
             className="pr-16 pl-8 text-base"
             value={queryInput}
