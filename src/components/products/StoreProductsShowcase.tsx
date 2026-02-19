@@ -44,7 +44,7 @@ import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
-import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
+import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
@@ -57,7 +57,6 @@ import {
   BadgePercentIcon,
   BotIcon,
   CircleCheckIcon,
-  CircleOffIcon,
   CrownIcon,
   FilterIcon,
   HandIcon,
@@ -348,7 +347,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
 
   // Fetch products
-  const { data: products, pagination, isLoading, isFetching, isError, refetch } = useStoreProducts(queryParams)
+  const { data: products, pagination, isLoading, isFetching, isError, error, refetch } = useStoreProducts(queryParams)
 
   // Sync local query input when URL changes
   useEffect(() => {
@@ -585,14 +584,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   if (isError) {
     return (
-      <SectionWrapper>
-        <CircleOffIcon className="h-6 w-6" />
-        <p>Error fetching products. Please try again.</p>
-        <Button variant="default" onClick={() => refetch()}>
-          <span>Try again</span>
-          <RefreshCcwIcon />
-        </Button>
-      </SectionWrapper>
+      <div className="flex flex-1 items-center justify-center p-4">
+        <ErrorStateView error={error} onRetry={() => refetch()} />
+      </div>
     )
   }
 
@@ -1777,46 +1771,27 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
   const router = useRouter()
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 text-center sm:py-16">
-      {/* Icon with gradient ring */}
-      <div className="relative mb-6">
-        <div className="from-primary/50 via-primary/30 to-primary/10 absolute -inset-4 rounded-full bg-linear-to-b blur-xl" />
-        <div className="bg-muted/50 ring-foreground/10 relative flex h-20 w-20 items-center justify-center rounded-full ring-1">
-          <SearchIcon className="text-muted-foreground h-9 w-9" />
-        </div>
-      </div>
-
-      {/* Title */}
-      <h3 className="text-xl font-semibold tracking-tight">No results found</h3>
-
-      {/* Description */}
-      <p className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed">
-        {query ? (
-          <>
-            We couldn&apos;t find any products matching &quot;
-            <span className="text-foreground font-medium">{query}</span>&quot;. Try a different search term or clear
-            your filters.
-          </>
-        ) : (
-          "Try adjusting your filters to find what you're looking for."
-        )}
-      </p>
-
-      {/* Actions - stacked on mobile */}
-      <div className="mt-8 flex w-full max-w-xs flex-col gap-2 sm:max-w-none sm:flex-row sm:justify-center sm:gap-3">
-        <Button variant="outline" className="h-10 w-full px-5 sm:w-auto" onClick={onClearFilters}>
-          <RefreshCcwIcon className="h-4 w-4" />
-          Clear filters
-        </Button>
-        <Button
-          variant="active"
-          className="text-muted-foreground hover:text-foreground h-10 w-full px-5 sm:w-auto"
-          onClick={() => router.push("/")}
-        >
-          <HomeIcon className="h-4 w-4" />
-          Return home
-        </Button>
-      </div>
+    <div className="flex flex-1 items-center justify-center p-4">
+      <EmptyStateView
+        title="No results found"
+        message={
+          query
+            ? `We couldn't find any products matching "${query}". Try a different search term or clear your filters.`
+            : "Try adjusting your filters to find what you're looking for."
+        }
+        actions={
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <Button variant="outline" size="sm" onClick={onClearFilters}>
+              <RefreshCcwIcon className="size-4" />
+              Clear filters
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push("/")}>
+              <HomeIcon className="size-4" />
+              Return home
+            </Button>
+          </div>
+        }
+      />
     </div>
   )
 }

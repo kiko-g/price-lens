@@ -28,12 +28,11 @@ import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
-import { SectionWrapper } from "@/components/ui/combo/section-wrapper"
+import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
 import {
   BadgePercentIcon,
-  CircleOffIcon,
   FilterIcon,
   HeartIcon,
   Loader2Icon,
@@ -157,7 +156,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
 
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
 
-  const { data: favorites, pagination, isLoading, isFetching, isError, refetch } = useFavoritesFiltered(queryParams)
+  const { data: favorites, pagination, isLoading, isFetching, isError, error, refetch } = useFavoritesFiltered(queryParams)
 
   useEffect(() => {
     setQueryInput(urlState.query)
@@ -228,14 +227,9 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
 
   if (isError) {
     return (
-      <SectionWrapper>
-        <CircleOffIcon className="h-6 w-6" />
-        <p>Error fetching favorites. Please try again.</p>
-        <Button variant="default" onClick={() => refetch()}>
-          <span>Try again</span>
-          <RefreshCcwIcon />
-        </Button>
-      </SectionWrapper>
+      <div className="flex flex-1 items-center justify-center p-4">
+        <ErrorStateView error={error} onRetry={() => refetch()} />
+      </div>
     )
   }
 
@@ -842,37 +836,30 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
   const router = useRouter()
 
   return (
-    <SectionWrapper>
-      <HeartIcon className="text-muted-foreground h-12 w-12" />
-      <div className="flex flex-col items-center justify-center text-center">
-        {query ? (
-          <>
-            <p className="text-lg font-medium">No favorites match your search</p>
-            <p className="text-muted-foreground text-sm">Query: &quot;{query}&quot;</p>
-          </>
-        ) : (
-          <>
-            <p className="text-lg font-medium">No favorites yet</p>
-            <p className="text-muted-foreground text-sm">Start adding products to your favorites to see them here</p>
-          </>
-        )}
-      </div>
-      <div className="mt-4 flex w-full items-center justify-center gap-3">
-        {query ? (
-          <>
-            <Button variant="outline" onClick={onClearFilters}>
-              <RefreshCcwIcon className="h-4 w-4" />
+    <div className="flex flex-1 items-center justify-center p-4">
+      <EmptyStateView
+        icon={HeartIcon}
+        title={query ? "No favorites match your search" : "No favorites yet"}
+        message={
+          query
+            ? `We couldn't find any favorites matching "${query}".`
+            : "Start adding products to your favorites to see them here."
+        }
+        actions={
+          query ? (
+            <Button variant="outline" size="sm" onClick={onClearFilters}>
+              <RefreshCcwIcon className="size-4" />
               Clear filters
             </Button>
-          </>
-        ) : (
-          <Button onClick={() => router.push("/products")}>
-            <SearchIcon className="h-4 w-4" />
-            Find Products
-          </Button>
-        )}
-      </div>
-    </SectionWrapper>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => router.push("/products")}>
+              <SearchIcon className="size-4" />
+              Find products
+            </Button>
+          )
+        }
+      />
+    </div>
   )
 }
 

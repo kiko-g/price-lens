@@ -4,6 +4,7 @@ import useEmblaCarousel from "embla-carousel-react"
 import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
 import { Button } from "@/components/ui/button"
+import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 
 import { ArrowLeftIcon, ArrowRightIcon, BrainCogIcon, Loader2Icon } from "lucide-react"
@@ -42,11 +43,7 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
   }, [emblaApi])
 
   if (error) {
-    return (
-      <div className="border-destructive bg-destructive/10 rounded-lg border p-4 text-white">
-        <p>Failed to load identical cross-store products. Please try again later.</p>
-      </div>
-    )
+    return <ErrorStateView error={error} title="Failed to load cross-store products" />
   }
 
   return (
@@ -87,9 +84,11 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
           <Loader2Icon className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : products && products.length === 0 ? (
-        <div className="text-muted-foreground bg-muted rounded-lg border px-4 py-8 text-center">
-          <p>No identical products in other stores found.</p>
-        </div>
+        <EmptyStateView
+          icon={BrainCogIcon}
+          title="No identical products found"
+          message="We couldn't find this product in other stores right now."
+        />
       ) : (
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">

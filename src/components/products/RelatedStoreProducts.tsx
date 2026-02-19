@@ -6,12 +6,12 @@ import { useRelatedStoreProducts } from "@/hooks/useProducts"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 
-import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon, SearchXIcon } from "lucide-react"
+import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon } from "lucide-react"
 
 const SKELETON_COUNT = 6
 const SLIDE_CLASS = "min-w-0 shrink-0 pl-4 basis-[46%] sm:basis-2/5 md:basis-1/3 lg:basis-1/5 xl:basis-1/6"
@@ -77,11 +77,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
   }, [emblaApi])
 
   if (error) {
-    return (
-      <div className="border-destructive/50 bg-destructive/10 rounded-lg border p-4">
-        <p className="text-destructive text-sm">Failed to load related products. Please try again later.</p>
-      </div>
-    )
+    return <ErrorStateView error={error} title="Failed to load related products" />
   }
 
   if (isLoading) {
@@ -98,18 +94,10 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
           </h3>
         </div>
 
-        <Empty className="border-border bg-muted/30 border py-10">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <SearchXIcon className="size-5" />
-            </EmptyMedia>
-            <EmptyTitle>No related products found</EmptyTitle>
-            <EmptyDescription>
-              We couldn{"'"}t find related products for this item right now. Check back later as our catalog updates
-              regularly.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <EmptyStateView
+          title="No related products found"
+          message="We couldn't find related products for this item right now. Check back later as our catalog updates regularly."
+        />
       </div>
     )
   }

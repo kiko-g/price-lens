@@ -9,11 +9,11 @@ import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
-import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon, SearchXIcon } from "lucide-react"
+import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon } from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
@@ -171,11 +171,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   const hasBarcode = currentProduct.barcode && currentProduct.barcode.length > 0
 
   if (error) {
-    return (
-      <div className="border-destructive/50 bg-destructive/10 rounded-lg border p-4">
-        <p className="text-destructive text-sm">Failed to load price comparison. Please try again later.</p>
-      </div>
-    )
+    return <ErrorStateView error={error} title="Failed to load price comparison" />
   }
 
   if (isLoading) {
@@ -193,18 +189,11 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
           </h3>
         </div>
 
-        <Empty className="border-border bg-muted/30 border py-10">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <SearchXIcon className="size-5" />
-            </EmptyMedia>
-            <EmptyTitle>No price comparisons available</EmptyTitle>
-            <EmptyDescription>
-              We couldn{"'"}t find this product listed at other stores right now. Check back later as availability
-              updates regularly.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <EmptyStateView
+          icon={ScaleIcon}
+          title="No price comparisons available"
+          message="We couldn't find this product listed at other stores right now. Check back later as availability updates regularly."
+        />
       </div>
     )
   }

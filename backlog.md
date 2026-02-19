@@ -4,10 +4,11 @@
 
 - [ ] Find out if scraping pressure is affecting loading times and UX.
 - [ ] Products cache issue showing 0-0 ?????
-- [ ] Use local database
 
 ## General
 
+- [ ] Ask what other pages we could create
+- [x] Use local database
 - [x] Bulk scrape: orchestate a job in admin page that efficiently updates every store product by visiting every url
 - [x] Crawl store origins for new product discovery.
 - [x] ! Review product scheduling. Visualization of the schedule in admin page.
@@ -34,6 +35,7 @@
 
 ## UI Features
 
+- [ ] Product price max variability next to range buttons like TR (min and max % uptick).
 - [x] Product filter options: show only available, missing barcode, must have barcode
 - [x] Example spotify for searching when adding a song to a playlist
 - [x] ! Add side by side comparer and possibly N-way product comparer. Should work for identical products but also more.
