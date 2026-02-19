@@ -1336,7 +1336,8 @@ function MobileFiltersDrawer({
         <DrawerTrigger asChild>
           <Button
             size="icon-xl"
-            className="fixed right-6 bottom-6 z-40 h-14 w-14 rounded-full shadow-lg lg:hidden"
+            className="fixed right-6 z-40 h-14 w-14 rounded-full shadow-lg lg:hidden"
+            style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
             variant="default"
           >
             <FilterIcon />

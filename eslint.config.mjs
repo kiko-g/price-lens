@@ -2,6 +2,7 @@ import nextConfig from "eslint-config-next"
 
 const eslintConfig = [
   ...nextConfig,
+  { ignores: ["public/**"] },
   {
     files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
     rules: {

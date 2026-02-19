@@ -170,7 +170,7 @@ describe("storeProductQueries", () => {
 
       const result = await storeProductQueries.getAll({ page: 1, limit: 10, userId: "user-123" })
 
-      expect(result.data?.[0].is_favorited).toBe(true)
+      expect((result.data?.[0] as Record<string, unknown>).is_favorited).toBe(true)
     })
   })
 
@@ -191,7 +191,7 @@ describe("storeProductQueries", () => {
 
       const result = await storeProductQueries.getById("1", "user-123")
 
-      expect(result.data?.is_favorited).toBe(true)
+      expect((result.data as Record<string, unknown>)?.is_favorited).toBe(true)
     })
   })
 

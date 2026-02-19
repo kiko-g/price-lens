@@ -1,6 +1,15 @@
 {
   "name": "Price Lens",
   "short_name": "Price Lens",
+  "description": "Track supermarket prices across Portugal. Compare products, spot discounts, and monitor price history.",
+  "start_url": "/products",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
+  "categories": ["shopping", "finance", "food"],
+  "lang": "en",
   "icons": [
     {
       "src": "/icons/android-chrome-192x192.png",
@@ -11,9 +20,26 @@
       "src": "/icons/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  "shortcuts": [
+    {
+      "name": "Browse Products",
+      "short_name": "Products",
+      "url": "/products",
+      "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Favorites",
+      "short_name": "Favorites",
+      "url": "/favorites",
+      "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
 }

@@ -74,7 +74,7 @@ const DrawerContent = React.forwardRef<
       ref={ref}
       // "transform-gpu will-change" keep animation smooth, touch-pan-y/overscroll-contain prevent scroll chaining/P2R.
       className={cn(
-        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90dvh] transform-gpu touch-pan-y flex-col overscroll-contain rounded-t-2xl border-t will-change-transform",
+        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90svh] transform-gpu touch-pan-y flex-col overscroll-contain rounded-t-2xl border-t will-change-transform",
         className,
       )}
       {...props}

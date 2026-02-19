@@ -1,6 +1,6 @@
 import { Monitoring } from "react-scan/monitoring/next"
 import Script from "next/script"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 
 import "./globals.css"
 import React from "react"
@@ -12,6 +12,19 @@ import { Providers } from "./providers"
 import { Analytics } from "@/components/layout/Analytics"
 import { Toaster } from "@/components/ui/sonner"
 import { MainLayout } from "@/components/layout/MainLayout"
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration"
+import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+}
 
 export const metadata: Metadata = {
   title: {
@@ -21,15 +34,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   description: siteConfig.description,
   keywords: [
-    "Next.js",
-    "React",
-    "Tailwind CSS",
-    "Shadcn UI",
     "Price Tracking",
+    "Supermarket Prices",
+    "Portugal",
+    "Continente",
+    "Pingo Doce",
+    "Auchan",
+    "Price Comparison",
+    "Grocery",
     "Inflation",
-    "CPI",
-    "Consumer Price Index",
-    "Real Purchasing Power",
   ],
   authors: [
     {
@@ -38,6 +51,14 @@ export const metadata: Metadata = {
     },
   ],
   creator: siteConfig.author,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: siteConfig.name,
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -103,6 +124,8 @@ export default function RootLayout({
       <body className={cn(GeistSans.className)}>
         <Providers>
           <Analytics />
+          <ServiceWorkerRegistration />
+          <PWAInstallPrompt />
           <MainLayout>{children}</MainLayout>
           <Toaster />
         </Providers>
