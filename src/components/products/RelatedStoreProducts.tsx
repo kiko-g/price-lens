@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
 import { ArrowLeftIcon, ArrowRightIcon, ChartScatterIcon } from "lucide-react"
 

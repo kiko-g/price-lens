@@ -32,7 +32,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { PriorityChip } from "@/components/products/PriorityChip"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
-import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
 import {
   ArrowUpRightIcon,
@@ -543,35 +543,6 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             </div>
           )
         )}
-      </div>
-    </div>
-  )
-}
-
-export function ProductCardSkeleton() {
-  return (
-    <div className="bg-background flex w-full flex-col rounded-lg">
-      <div className="relative mb-3 flex items-center justify-between gap-2">
-        <div className="border-border bg-muted aspect-7/8 w-full animate-pulse rounded-md border" />
-      </div>
-
-      <div className="mb-5 flex flex-col items-start gap-2">
-        {/* Category, Brand and Name */}
-        <span className="bg-muted h-3 w-16 animate-pulse rounded lg:w-16"></span>
-        <span className="bg-muted h-3 w-24 animate-pulse rounded lg:w-24"></span>
-        <span className="bg-muted h-3 w-full animate-pulse rounded lg:w-full"></span>
-      </div>
-
-      <div className="mb-1 flex w-full items-start justify-between gap-2">
-        <div className="flex flex-col gap-2">
-          <span className="bg-muted h-4 w-12 animate-pulse rounded lg:w-12"></span>
-          <span className="bg-muted h-4 w-20 animate-pulse rounded lg:w-20"></span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="bg-muted size-6 animate-pulse rounded lg:size-7"></span>
-          <span className="bg-muted size-6 animate-pulse rounded lg:size-7"></span>
-        </div>
       </div>
     </div>
   )

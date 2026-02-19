@@ -1,5 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
+
 import { HideFooter } from "@/contexts/FooterContext"
 
 const LIMIT = 20
@@ -15,23 +17,27 @@ export default function ProductsLoading() {
           <Skeleton className="mb-4 h-4 w-full" />
           <Skeleton className="h-9 w-full rounded-md" />
           <Skeleton className="mt-2 h-4 w-40" />
-          <div className="mt-4 flex flex-col gap-2 border-t pt-2">
+
+          <div className="mt-4 flex flex-col gap-2 pt-2">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-8 w-full" />
           </div>
-          <div className="mt-2 flex flex-col gap-2 border-t pt-2">
+
+          <div className="mt-2 flex flex-col gap-2 pt-2">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
           </div>
-          <div className="mt-2 flex flex-col gap-2 border-t pt-2">
+
+          <div className="mt-2 flex flex-col gap-2 pt-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
           </div>
-          <div className="mt-2 flex flex-col gap-2 border-t pt-2">
+
+          <div className="mt-2 flex flex-col gap-2 pt-2">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
@@ -47,7 +53,7 @@ export default function ProductsLoading() {
           </div>
           <ProductGridWrapper className="w-full">
             {Array.from({ length: LIMIT }).map((_, i) => (
-              <Skeleton key={i} className="aspect-7/8 w-full rounded-lg" />
+              <StoreProductCardSkeleton key={i} />
             ))}
           </ProductGridWrapper>
         </div>

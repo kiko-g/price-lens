@@ -43,7 +43,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"

@@ -12,7 +12,7 @@ import { HideFooter } from "@/contexts/FooterContext"
 import { siteConfig } from "@/lib/config"
 import type { SearchType, SortByType } from "@/types/business"
 import type { PrioritySource } from "@/types"
-import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>

@@ -27,18 +27,11 @@ import {
 import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
-import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 
-import {
-  BadgePercentIcon,
-  FilterIcon,
-  HeartIcon,
-  Loader2Icon,
-  RefreshCcwIcon,
-  SearchIcon,
-} from "lucide-react"
+import { BadgePercentIcon, FilterIcon, HeartIcon, Loader2Icon, RefreshCcwIcon, SearchIcon } from "lucide-react"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 import { FAVORITES_SORT_OPTIONS_GROUPS } from "@/lib/business/filters"
 
@@ -156,7 +149,15 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
 
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
 
-  const { data: favorites, pagination, isLoading, isFetching, isError, error, refetch } = useFavoritesFiltered(queryParams)
+  const {
+    data: favorites,
+    pagination,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useFavoritesFiltered(queryParams)
 
   useEffect(() => {
     setQueryInput(urlState.query)

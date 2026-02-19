@@ -12,7 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
-import { StoreProductCard, ProductCardSkeleton } from "@/components/products/StoreProductCard"
+import { StoreProductCard } from "@/components/products/StoreProductCard"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
 import {
   AlertTriangleIcon,
@@ -778,7 +779,7 @@ export default function ScheduleDistributionPage() {
               {isLoadingPhantomProducts ? (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {Array.from({ length: limit }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
+                    <StoreProductCardSkeleton key={i} />
                   ))}
                 </div>
               ) : phantomProductsData?.data && phantomProductsData.data.length > 0 ? (
@@ -906,7 +907,7 @@ export default function ScheduleDistributionPage() {
               {isLoadingProducts ? (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {Array.from({ length: limit }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
+                    <StoreProductCardSkeleton key={i} />
                   ))}
                 </div>
               ) : productsData?.data && productsData.data.length > 0 ? (

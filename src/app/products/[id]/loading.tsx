@@ -1,6 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
+
 const SKELETON_COUNT = 6
 
 function BreadcrumbSkeleton() {
@@ -170,31 +172,6 @@ function IdenticalProductsSkeleton() {
   )
 }
 
-function ProductCardSkeleton() {
-  return (
-    <div className="flex w-full flex-col rounded-lg">
-      <div className="relative mb-3 flex items-center justify-between gap-2">
-        <Skeleton className="border-border aspect-7/8 w-full border" />
-      </div>
-      <div className="mb-5 flex flex-col items-start gap-2">
-        <Skeleton className="h-3 w-16" />
-        <Skeleton className="h-3 w-24" />
-        <Skeleton className="h-3 w-full" />
-      </div>
-      <div className="mb-1 flex w-full items-start justify-between gap-2">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-12" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="size-6 lg:size-7" />
-          <Skeleton className="size-6 lg:size-7" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function RelatedProductsSkeleton() {
   return (
     <div className="space-y-4">
@@ -212,8 +189,11 @@ function RelatedProductsSkeleton() {
       <div className="overflow-hidden">
         <div className="-ml-4 flex">
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-            <div key={i} className="min-w-0 shrink-0 pl-4 basis-[46%] sm:basis-2/5 md:basis-1/3 lg:basis-1/5 xl:basis-1/6">
-              <ProductCardSkeleton />
+            <div
+              key={i}
+              className="min-w-0 shrink-0 basis-[46%] pl-4 sm:basis-2/5 md:basis-1/3 lg:basis-1/5 xl:basis-1/6"
+            >
+              <StoreProductCardSkeleton />
             </div>
           ))}
         </div>

@@ -625,9 +625,9 @@ function estimatePriceAxisWidth(ticks: number[]): number {
   return Math.max(40, longestLabel.length * 7 + 8)
 }
 
-function CustomTick({ x, y, payload, yAxisId }: { x: number; y: number; payload: { value: number }; yAxisId: string }) {
+function CustomTick({ x, y, payload, yAxisId }: { x: string | number; y: string | number; payload: { value: number }; yAxisId: string }) {
   return (
-    <text x={x} y={y} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
+    <text x={Number(x)} y={Number(y)} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
       {yAxisId === "price" ? formatPriceTickLabel(payload.value) : `${payload.value}%`}
     </text>
   )
