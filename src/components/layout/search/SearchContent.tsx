@@ -48,6 +48,7 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
     if (!trimmed) return
 
     addSearch(trimmed)
+    window.dispatchEvent(new CustomEvent("products-search-pending", { detail: { query: trimmed } }))
     onClose()
     router.push(`/products?q=${encodeURIComponent(trimmed)}`)
   }

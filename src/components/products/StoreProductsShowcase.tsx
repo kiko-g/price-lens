@@ -422,6 +422,32 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     setQueryInput(urlState.query)
   }, [urlState.query])
 
+  // Pending search navigation state (bridges SearchContent → here)
+  // Server prefetch via HydrationBoundary means isFetching is never true when
+  // useSearchParams finally updates, so we use a custom event to detect the gap.
+  const [pendingSearchQuery, setPendingSearchQuery] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setPendingSearchQuery((e as CustomEvent<{ query: string }>).detail.query)
+    }
+    window.addEventListener("products-search-pending", handler)
+    return () => window.removeEventListener("products-search-pending", handler)
+  }, [])
+
+  useEffect(() => {
+    if (pendingSearchQuery !== null && urlState.query === pendingSearchQuery) {
+      setPendingSearchQuery(null)
+    }
+  }, [urlState.query, pendingSearchQuery])
+
+  useEffect(() => {
+    if (pendingSearchQuery !== null) {
+      const timer = setTimeout(() => setPendingSearchQuery(null), 15_000)
+      return () => clearTimeout(timer)
+    }
+  }, [pendingSearchQuery])
+
   useEffect(() => {
     if (!isFetching && !hasPendingChanges) setDebounceCompleted(false)
   }, [isFetching, hasPendingChanges, setDebounceCompleted])
@@ -612,7 +638,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     : displayProducts.length
 
   const showSkeletons = isLoading && displayProducts.length === 0
-  const showOverlay = isFetching && products.length > 0
+  const isNavigationPending = pendingSearchQuery !== null && pendingSearchQuery !== urlState.query
+  const showOverlay = (isFetching && products.length > 0) || (isNavigationPending && displayProducts.length > 0)
 
   const activeFilterCount = useMemo(() => {
     let count = 0
