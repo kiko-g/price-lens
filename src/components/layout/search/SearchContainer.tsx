@@ -68,10 +68,10 @@ export function SearchContainer({ children, open: controlledOpen, onOpenChange, 
     <>
       {trigger}
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="max-h-[85vh]">
+        <DrawerContent className="max-h-[85dvh]">
           <DrawerTitle className="sr-only">Search products</DrawerTitle>
           <DrawerDescription className="sr-only">Search for supermarket products</DrawerDescription>
-          <div className="flex h-[75vh] flex-col overflow-hidden">
+          <div className="flex h-[75dvh] flex-col overflow-hidden">
             <SearchContent onClose={handleClose} initialQuery={initialQuery} />
           </div>
         </DrawerContent>

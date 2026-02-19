@@ -1140,8 +1140,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
             {/* Products grid with loading overlay */}
             <div className="relative">
-              {/* Loading overlay (desktop only) */}
-              {showOverlay && (
+                {showOverlay && (
                 <div className="bg-background/60 absolute inset-0 z-10 flex items-start justify-center pt-24 backdrop-blur-[2px]">
                   <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
                     <Loader2Icon className="h-4 w-4 animate-spin" />
