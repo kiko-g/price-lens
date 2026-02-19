@@ -611,10 +611,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       : (currentPage - 1) * limit + products.length
     : displayProducts.length
 
-  // Show full skeleton grid only on initial load (no products yet)
-  // Show overlay when we have products but are fetching new ones (desktop only)
   const showSkeletons = isLoading && displayProducts.length === 0
-  const showOverlay = isDesktop && isFetching && products.length > 0
+  const showOverlay = isFetching && products.length > 0
 
   const activeFilterCount = useMemo(() => {
     let count = 0
