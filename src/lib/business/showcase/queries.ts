@@ -2,7 +2,7 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import { buildChartData } from "@/lib/business/chart"
-import type { Price } from "@/types"
+import type { Price, StoreProduct } from "@/types"
 import { SHOWCASE_PRODUCT_IDS } from "./index"
 import type { ShowcaseData, ShowcaseTrendStats } from "./index"
 
@@ -68,10 +68,9 @@ export async function getShowcaseProducts(productIds: string[]): Promise<Showcas
 
     const supabase = createClient()
 
-    // Batch fetch all products
     const { data: products, error: productsError } = await supabase
       .from("store_products")
-      .select("*")
+      .select("id, origin_id, url, name, brand, pack, price, price_recommended, price_per_major_unit, discount, image, category, available, created_at, updated_at")
       .in("id", productIds)
 
     if (productsError) {
@@ -115,7 +114,7 @@ export async function getShowcaseProducts(productIds: string[]): Promise<Showcas
       const trendStats = calculateTrendStats(prices)
 
       result[productId] = {
-        storeProduct: product,
+        storeProduct: product as unknown as StoreProduct,
         prices,
         chartData,
         trendStats,

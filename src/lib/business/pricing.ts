@@ -1,6 +1,7 @@
 import type { StoreProduct, Price } from "@/types"
 
 import { now } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/server"
 import { priceQueries } from "@/lib/queries/prices"
 import { storeProductQueries } from "@/lib/queries/products"
 
@@ -116,12 +117,60 @@ export function arePricePointsEqual(p1: Price, p2: Price) {
   )
 }
 
+/**
+ * Updates the price point for a product using a server-side RPC.
+ * All comparison and insert/update logic happens inside Postgres,
+ * eliminating the read egress that the old approach required.
+ *
+ * Falls back to the legacy read-compare-write path if the RPC is
+ * not yet deployed (e.g., migration not applied).
+ */
 export async function updatePricePoint(sp: StoreProduct) {
   if (!sp.id) {
     console.error("No id for product", sp.id)
     return
   }
 
+  if (!sp.price || sp.price <= 0) {
+    console.warn("Invalid price point, skipping:", { id: sp.id, price: sp.price })
+    return
+  }
+
+  const supabase = createClient()
+  const timestamp = now()
+
+  const { data, error } = await supabase.rpc("upsert_price_point", {
+    p_store_product_id: sp.id,
+    p_price: sp.price,
+    p_price_recommended: sp.price_recommended,
+    p_price_per_major_unit: sp.price_per_major_unit,
+    p_discount: sp.discount,
+    p_timestamp: timestamp,
+  })
+
+  if (error) {
+    // RPC might not exist yet — fall back to legacy path
+    if (error.message.includes("upsert_price_point") || error.code === "42883") {
+      console.warn("[Pricing] RPC not available, falling back to legacy path")
+      return updatePricePointLegacy(sp)
+    }
+    console.error(`[Pricing] RPC error for product ${sp.id}:`, error.message)
+    return
+  }
+
+  const result = data as { action: string; reason?: string }
+  if (result.action === "skipped") {
+    console.warn(`[Pricing] Skipped by RPC:`, result.reason)
+  } else {
+    console.info(`🛜 [Pricing] ${result.action} price for product ${sp.id}`)
+  }
+}
+
+/**
+ * Legacy path: read latest price → compare in JS → write.
+ * Kept as fallback while the upsert_price_point RPC is being deployed.
+ */
+async function updatePricePointLegacy(sp: StoreProduct) {
   const timestamp = now()
   const newPricePoint: Price = {
     store_product_id: sp.id,
@@ -135,61 +184,28 @@ export async function updatePricePoint(sp: StoreProduct) {
     updated_at: timestamp,
   }
 
-  // Only require price to be valid - price_recommended and price_per_major_unit are optional
-  // Many products don't have price_per_major_unit, and we shouldn't skip updates because of it
-  const isInvalidPricePoint = !sp.price || sp.price <= 0
-
-  // Skip invalid price data entirely
-  if (isInvalidPricePoint) {
-    console.warn("Invalid price point, skipping:", { id: sp.id, price: sp.price })
-    return
-  }
-
   const existingPricePoint = await priceQueries.getLatestPricePoint(sp.id)
 
-  // Price unchanged - just update the timestamp to show it was checked
   if (existingPricePoint && arePricePointsEqual(existingPricePoint, newPricePoint)) {
-    console.info(`🛜 [Pricing] Price point already exists and is up to date.`, existingPricePoint)
     await priceQueries.updatePricePointUpdatedAt(existingPricePoint.id)
-    // Update store product's updated_at to mark successful price check
     await storeProductQueries.touchUpdatedAt(sp.id)
     return
   }
 
-  // Price changed - close old price point and insert new one
   if (existingPricePoint) {
-    console.info(`🛜 [Pricing] Price changed for product ${sp.id}:`, {
-      old: {
-        price: existingPricePoint.price,
-        price_recommended: existingPricePoint.price_recommended,
-        price_per_major_unit: existingPricePoint.price_per_major_unit,
-      },
-      new: {
-        price: newPricePoint.price,
-        price_recommended: newPricePoint.price_recommended,
-        price_per_major_unit: newPricePoint.price_per_major_unit,
-      },
-    })
-
     const result = await priceQueries.closeExistingPricePoint(existingPricePoint.id, newPricePoint)
-
     if (!result.success) {
       console.error(`[Pricing] Failed to update price point for product ${sp.id}:`, result.error)
-      // Don't update store product's updated_at - the price recording failed!
       return
     }
-
-    // Update store product's updated_at to mark successful price recording
     await storeProductQueries.touchUpdatedAt(sp.id)
     return
   }
 
-  // First price point for this product
   const insertResult = await priceQueries.insertNewPricePoint(newPricePoint)
   if (insertResult.error) {
     console.error(`[Pricing] Failed to insert first price point for product ${sp.id}:`, insertResult.error)
     return
   }
-  // Update store product's updated_at to mark first successful price recording
   await storeProductQueries.touchUpdatedAt(sp.id)
 }

@@ -34,7 +34,7 @@ export const storeProductQueries = {
     const supabase = createClient()
     const offset = (page - 1) * limit
 
-    let dbQuery = supabase.from("store_products").select("*", { count: "exact" })
+    let dbQuery = supabase.from("store_products").select("id, origin_id, url, name, brand, barcode, pack, price, price_recommended, price_per_major_unit, major_unit, discount, image, category, category_2, category_3, priority, priority_source, available, created_at, updated_at", { count: "exact" })
 
     // Priority filter: comma-separated values, "none" for null priorities
     if (priority) {
@@ -208,8 +208,11 @@ export const storeProductQueries = {
 
   async getById(id: string, userId?: string | null) {
     const supabase = createClient()
-    // Use the view to get canonical category info
-    const { data, error } = await supabase.from("store_products_with_canonical").select("*").eq("id", id).single()
+    const { data, error } = await supabase
+      .from("store_products_with_canonical")
+      .select("id, origin_id, url, name, brand, barcode, pack, price, price_recommended, price_per_major_unit, major_unit, discount, image, category, category_2, category_3, priority, priority_source, priority_updated_at, available, created_at, updated_at, canonical_category_id, canonical_category_name, canonical_level, canonical_parent_id, canonical_category_name_2, canonical_parent_id_2, canonical_category_name_3")
+      .eq("id", id)
+      .single()
 
     // If user is provided and product exists, check if it's favorited
     if (userId && data && !error) {
@@ -437,28 +440,39 @@ export const storeProductQueries = {
     return { error }
   },
 
-  async createOrUpdateProduct(sp: StoreProduct) {
+  async createOrUpdateProduct(
+    sp: StoreProduct,
+    prefetchedExisting?: {
+      created_at: string | null
+      updated_at: string | null
+      barcode: string | null
+      brand: string | null
+      image: string | null
+      pack: string | null
+      category: string | null
+      category_2: string | null
+      category_3: string | null
+    } | undefined,
+  ) {
     const supabase = createClient()
-    const { data: existingProduct } = await supabase
+
+    // Use pre-fetched data when available (from scheduler payload) to skip a SELECT.
+    // Falls back to a DB read when called without pre-fetched data (e.g., manual scrape).
+    const existingProduct = prefetchedExisting ?? (await supabase
       .from("store_products")
       .select("created_at, updated_at, barcode, brand, image, pack, category, category_2, category_3")
       .eq("url", sp.url)
       .single()
+    ).data
 
-    // IMPORTANT: We explicitly preserve existing updated_at (which may be null)
-    // updated_at should ONLY be set by touchUpdatedAt() when a valid price is recorded
-    // This prevents the database from auto-setting updated_at on every upsert
-    //
-    // CONSERVATIVE UPSERT: For descriptive fields that rarely change, we preserve
-    // existing values if the new scrape returns null. This prevents data loss when
-    // scraping fails to extract certain fields due to page changes or network issues.
+    // CONSERVATIVE UPSERT: preserve existing values when the new scrape returns null.
+    // updated_at should ONLY be set by touchUpdatedAt() when a valid price is recorded.
     const productToUpsert = {
       ...sp,
       priority: sp.priority || 1,
       created_at: sp.created_at || existingProduct?.created_at || new Date().toISOString(),
       updated_at: existingProduct?.updated_at ?? null,
-      scraped_at: now(), // Track when we last attempted to scrape (success case)
-      // Conservative fields - preserve existing if new is null
+      scraped_at: now(),
       barcode: sp.barcode || existingProduct?.barcode || null,
       brand: sp.brand || existingProduct?.brand || null,
       image: sp.image || existingProduct?.image || null,
@@ -474,7 +488,7 @@ export const storeProductQueries = {
         onConflict: "url",
         ignoreDuplicates: false,
       })
-      .select("*")
+      .select("id, url, name, price, price_recommended, price_per_major_unit, discount, barcode, brand, image, pack, category, category_2, category_3, origin_id, priority, available, created_at, updated_at")
       .single()
 
     // Clear categories cache when products are updated as they might introduce new categories

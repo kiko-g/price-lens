@@ -14,6 +14,17 @@ interface BatchProduct {
   name: string
   originId: number
   priority: number
+  // Pre-fetched by scheduler to avoid per-product SELECTs (egress optimization)
+  prioritySource?: string | null
+  barcode?: string | null
+  brand?: string | null
+  image?: string | null
+  pack?: string | null
+  category?: string | null
+  category2?: string | null
+  category3?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
 }
 
 interface BatchRequest {
@@ -89,18 +100,26 @@ async function handler(req: NextRequest) {
       const productStartTime = Date.now()
 
       try {
-        // Fetch existing product for comparison
-        const { data: existingProduct } = await supabase
-          .from("store_products")
-          .select("*")
-          .eq("id", product.id)
-          .single()
+        // Build existing product data from the scheduler payload (no DB read needed).
+        // The scheduler pre-fetches these fields so we skip a SELECT per product.
+        const existingData = product.prioritySource !== undefined ? {
+          priority: product.priority,
+          priority_source: product.prioritySource,
+          barcode: product.barcode ?? null,
+          brand: product.brand ?? null,
+          image: product.image ?? null,
+          pack: product.pack ?? null,
+          category: product.category ?? null,
+          category_2: product.category2 ?? null,
+          category_3: product.category3 ?? null,
+          created_at: product.createdAt ?? null,
+          updated_at: product.updatedAt ?? null,
+        } : undefined
 
-        // Scrape the product (useAntiBlock=true: rotating UAs + random delays)
         const response = await scrapeAndReplaceProduct(
           product.url,
           product.originId,
-          existingProduct as StoreProduct | undefined,
+          existingData as Partial<StoreProduct> | undefined,
           true,
         )
         const json = await response.json()

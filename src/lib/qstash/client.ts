@@ -27,13 +27,13 @@ export const getBaseUrl = () => {
 export const WORKER_BATCH_SIZE = 40
 
 // How many batches to send to QStash per scheduler run
-// With 40 products per batch and 20 batches = 800 products per scheduler run
-// Note: Requires QStash paid plan (~$10/mo) for >500 messages/day
-export const MAX_BATCHES_PER_RUN = 20
+// NOTE: Temporarily reduced from 20 to 10 to halve egress. Revert after ~20 Mar 2026.
+// With 40 products per batch and 10 batches = 400 products per scheduler run
+export const MAX_BATCHES_PER_RUN = 10
 
-// Cron runs every 15 minutes = 96 runs/day
-// Max daily capacity: 40 × 20 × 96 = 76,800 products/day
-export const CRON_FREQUENCY_MINUTES = 15
+// Cron runs every 30 minutes = 48 runs/day (temporarily slowed from 15 min)
+// Max daily capacity: 40 × 10 × 48 = 19,200 products/day
+export const CRON_FREQUENCY_MINUTES = 30
 
 // Legacy: Batch size for QStash fan-out (used by bulk-scrape)
 export const BATCH_SIZE = 100

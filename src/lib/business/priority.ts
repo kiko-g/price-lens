@@ -7,8 +7,12 @@ import { type BadgeKind } from "@/components/ui/badge"
  * All priority thresholds, staleness checks, and related utilities live here.
  */
 
-/** Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS) */
-export const ACTIVE_PRIORITIES = [5, 4, 3, 2, 1] as const
+/**
+ * Priorities that are actively scheduled (must have non-null value in PRIORITY_REFRESH_HOURS).
+ * NOTE: P1/P2 temporarily paused to reduce egress while over Supabase free-tier limit.
+ * Restore to [5,4,3,2,1] once billing period resets (~20 Mar 2026).
+ */
+export const ACTIVE_PRIORITIES = [5, 4] as const
 
 /** Default grace period before showing staleness warning (24 hours) */
 export const DEFAULT_STALENESS_LENIENCE_HOURS = 24

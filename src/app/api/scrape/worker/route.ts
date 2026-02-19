@@ -48,7 +48,11 @@ async function handler(req: NextRequest) {
 
     // Fetch existing product for comparison
     const supabase = createClient()
-    const { data: existingProduct } = await supabase.from("store_products").select("*").eq("id", productId).single()
+    const { data: existingProduct } = await supabase
+      .from("store_products")
+      .select("id, url, name, origin_id, priority, priority_source, price, price_recommended, price_per_major_unit, discount, barcode, brand, image, pack, category, category_2, category_3, available, created_at, updated_at")
+      .eq("id", productId)
+      .single()
 
     const hadBarcode = !!existingProduct?.barcode
 

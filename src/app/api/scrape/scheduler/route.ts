@@ -104,13 +104,17 @@ export async function GET(req: NextRequest) {
 
     // Fetch overdue products with count to get accurate backlog size
     // Use a high limit to get the real backlog count, then we'll slice for actual scheduling
+    // Fetch wider column set so the batch worker doesn't need to re-read each product.
+    // The extra fields are passed through QStash to eliminate per-product SELECTs.
+    const SCHEDULER_COLUMNS = "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at"
+
     const {
       data: products,
       count: backlogSize,
       error,
     } = await supabase
       .from("store_products")
-      .select("id, url, name, origin_id, priority, updated_at", { count: "exact" })
+      .select(SCHEDULER_COLUMNS, { count: "exact" })
       .or(orConditions.join(","))
       .not("url", "is", null)
       .eq("available", true)
@@ -127,7 +131,7 @@ export async function GET(req: NextRequest) {
     const recheckCutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
     const { data: recheckProducts } = await supabase
       .from("store_products")
-      .select("id, url, name, origin_id, priority, updated_at")
+      .select(SCHEDULER_COLUMNS)
       .eq("available", false)
       .not("url", "is", null)
       .in("priority", [...ACTIVE_PRIORITIES])
@@ -224,6 +228,16 @@ export async function GET(req: NextRequest) {
           name: p.name,
           originId: p.origin_id,
           priority: p.priority,
+          prioritySource: p.priority_source ?? null,
+          barcode: p.barcode ?? null,
+          brand: p.brand ?? null,
+          image: p.image ?? null,
+          pack: p.pack ?? null,
+          category: p.category ?? null,
+          category2: p.category_2 ?? null,
+          category3: p.category_3 ?? null,
+          createdAt: p.created_at ?? null,
+          updatedAt: p.updated_at ?? null,
         })),
       },
       headers: {

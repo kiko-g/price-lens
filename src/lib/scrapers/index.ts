@@ -85,18 +85,17 @@ export function isValidProduct(product: unknown): product is ScrapedProduct {
 }
 
 /**
- * Scrapes a product URL and upserts it to the database
- * Handles availability tracking:
- * - Success: sets available = true
- * - 404: sets available = false (product definitively doesn't exist)
- * - Other errors: doesn't change availability (might be temporary)
+ * Scrapes a product URL and upserts it to the database.
+ * Handles availability tracking (success=available, 404=unavailable, error=unchanged).
  *
+ * @param prevSp - Previous product data. Accepts partial data (e.g., from scheduler payload)
+ *   so the batch worker can skip redundant DB reads.
  * @param useAntiBlock - Enable anti-blocking measures (random delays, rotating UA) for bulk scraping
  */
 export async function scrapeAndReplaceProduct(
   url: string | null,
   origin: number | null,
-  prevSp?: StoreProduct,
+  prevSp?: Partial<StoreProduct>,
   useAntiBlock = false,
 ) {
   if (!url) {
@@ -108,7 +107,7 @@ export async function scrapeAndReplaceProduct(
   }
 
   const scraper = getScraper(origin)
-  const result = await scraper.scrape({ url, previousProduct: prevSp, useAntiBlock })
+  const result = await scraper.scrape({ url, previousProduct: prevSp as StoreProduct | undefined, useAntiBlock })
 
   // Handle 404 - product definitively doesn't exist
   // Mark as unavailable AND close the price point (price is no longer valid)
@@ -133,9 +132,22 @@ export async function scrapeAndReplaceProduct(
     return NextResponse.json({ error: "Invalid product data", url }, { status: 422 })
   }
 
-  // Success - product is available (already set in transformRawProduct)
+  // Pass pre-fetched existing data so createOrUpdateProduct can skip its own SELECT
+  const prefetchedExisting = prevSp ? {
+    created_at: prevSp.created_at ?? null,
+    updated_at: prevSp.updated_at ?? null,
+    barcode: prevSp.barcode ?? null,
+    brand: prevSp.brand ?? null,
+    image: prevSp.image ?? null,
+    pack: prevSp.pack ?? null,
+    category: prevSp.category ?? null,
+    category_2: prevSp.category_2 ?? null,
+    category_3: prevSp.category_3 ?? null,
+  } : undefined
+
   const { data, error } = await storeProductQueries.createOrUpdateProduct(
     result.product as unknown as import("@/types").StoreProduct,
+    prefetchedExisting,
   )
 
   if (error) {
