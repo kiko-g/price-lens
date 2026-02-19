@@ -13,9 +13,10 @@ interface SearchContainerProps {
   children: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  initialQuery?: string
 }
 
-export function SearchContainer({ children, open: controlledOpen, onOpenChange }: SearchContainerProps) {
+export function SearchContainer({ children, open: controlledOpen, onOpenChange, initialQuery }: SearchContainerProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
@@ -55,7 +56,7 @@ export function SearchContainer({ children, open: controlledOpen, onOpenChange }
             <DialogTitle className="sr-only">Search products</DialogTitle>
             <DialogDescription className="sr-only">Search for supermarket products</DialogDescription>
             <div className="max-h-[60vh] min-h-[450px]">
-              <SearchContent onClose={handleClose} />
+              <SearchContent onClose={handleClose} initialQuery={initialQuery} />
             </div>
           </DialogContent>
         </Dialog>
@@ -71,7 +72,7 @@ export function SearchContainer({ children, open: controlledOpen, onOpenChange }
           <DrawerTitle className="sr-only">Search products</DrawerTitle>
           <DrawerDescription className="sr-only">Search for supermarket products</DrawerDescription>
           <div className="flex h-[75vh] flex-col overflow-hidden">
-            <SearchContent onClose={handleClose} />
+            <SearchContent onClose={handleClose} initialQuery={initialQuery} />
           </div>
         </DrawerContent>
       </Drawer>

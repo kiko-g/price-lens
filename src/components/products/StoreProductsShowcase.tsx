@@ -49,6 +49,7 @@ import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-view
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
+import { SearchContainer } from "@/components/layout/search"
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
 import { BulkPriorityDialog } from "@/components/admin/BulkPriorityDialog"
 import { TrackingInformationDialog } from "@/components/admin/TrackingInformationDialog"
@@ -545,6 +546,17 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const showSkeletons = isLoading && products.length === 0
   const showOverlay = isFetching && products.length > 0
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (urlState.origin) count++
+    if (urlState.category) count++
+    if (urlState.priority) count++
+    if (urlState.source) count++
+    if (urlState.onlyDiscounted) count++
+    if (urlState.sortBy !== FILTER_CONFIG.sortBy.default) count++
+    return count
+  }, [urlState])
+
   // Build filter params string for bulk priority API (dev only)
   const bulkPriorityFilterParams = useMemo(() => {
     const params = new URLSearchParams()
@@ -996,25 +1008,20 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
       {/* Mobile Navigation */}
       <MobileNav
-        localFilters={localFilters}
-        queryInput={queryInput}
-        setQueryInput={setQueryInput}
-        onSearch={handleSearch}
-        onSearchTypeChange={handleSearchTypeChange}
-        isLoading={isLoading}
+        query={urlState.query}
         isSearching={isSearching}
         showingFrom={showingFrom}
         showingTo={showingTo}
         totalCount={totalCount}
         currentPage={currentPage}
         totalPages={totalPages}
-        hasNextPage={hasNextPage}
       />
 
       {/* Mobile Filters Drawer */}
       <MobileFiltersDrawer
         open={mobileFiltersOpen}
         onOpenChange={setMobileFiltersOpen}
+        activeFilterCount={activeFilterCount}
         localFilters={localFilters}
         selectedOrigins={selectedOrigins}
         selectedPriorities={selectedPriorities}
@@ -1114,37 +1121,17 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 // ============================================================================
 
 interface MobileNavProps {
-  localFilters: {
-    searchType: SearchType
-    sortBy: SortByType
-    origin: string
-    orderByPriority: boolean
-    onlyAvailable: boolean
-    onlyDiscounted: boolean
-    priority: string
-    source: string
-    category: string
-  }
-  queryInput: string
-  setQueryInput: (value: string) => void
-  onSearch: () => void
-  onSearchTypeChange: (type: SearchType) => void
-  isLoading: boolean
+  query: string
   isSearching: boolean
   showingFrom: number
   showingTo: number
   totalCount: number | null
   currentPage: number
   totalPages: number | null
-  hasNextPage: boolean
 }
 
 function MobileNav({
-  localFilters,
-  queryInput,
-  setQueryInput,
-  onSearch,
-  onSearchTypeChange,
+  query,
   isSearching,
   showingFrom,
   showingTo,
@@ -1153,44 +1140,19 @@ function MobileNav({
   totalPages,
 }: MobileNavProps) {
   return (
-    <nav className="sticky top-(--header-height) z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-3 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
-      <div className="flex w-full items-center gap-2">
-        <div className="relative flex-1">
+    <nav className="sticky top-(--header-height) z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
+      <SearchContainer initialQuery={query}>
+        <div className="flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 active:bg-accent">
           {isSearching ? (
-            <Loader2Icon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 animate-spin" />
+            <Loader2Icon className="text-muted-foreground h-4 w-4 shrink-0 animate-spin" />
           ) : (
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
+            <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
           )}
-          <Input
-            type="search"
-            enterKeyHint="search"
-            placeholder="Search products..."
-            className="pr-16 pl-8 text-base"
-            value={queryInput}
-            onKeyDown={(e) => e.key === "Enter" && onSearch()}
-            onChange={(e) => setQueryInput(e.target.value)}
-          />
-          <Select value={localFilters.searchType} onValueChange={(v) => onSearchTypeChange(v as SearchType)}>
-            <SelectTrigger className="text-muted-foreground bg-muted hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
-              <SelectValue placeholder="Search by" />
-            </SelectTrigger>
-            <SelectContent align="start" className="w-[180px]">
-              <SelectGroup>
-                <SelectLabel>Search by</SelectLabel>
-                <SelectSeparator />
-                {searchTypes.map((type) => (
-                  <SelectItem key={type} value={type} className="capitalize">
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <span className={cn("flex-1 truncate text-sm", query ? "text-foreground" : "text-muted-foreground")}>
+            {query || "Search products..."}
+          </span>
         </div>
-        <Button variant="primary" disabled={isSearching} onClick={onSearch} className="px-4">
-          Search
-        </Button>
-      </div>
+      </SearchContainer>
 
       {/* Status Bar */}
       {showingFrom > 0 && (
@@ -1225,6 +1187,7 @@ function MobileNav({
 interface MobileFiltersDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  activeFilterCount: number
   localFilters: {
     searchType: SearchType
     sortBy: SortByType
@@ -1256,6 +1219,7 @@ interface MobileFiltersDrawerProps {
 function MobileFiltersDrawer({
   open,
   onOpenChange,
+  activeFilterCount,
   localFilters,
   selectedOrigins,
   selectedPriorities,
@@ -1281,6 +1245,11 @@ function MobileFiltersDrawer({
             variant="default"
           >
             <FilterIcon />
+            {activeFilterCount > 0 && (
+              <span className="bg-destructive text-destructive-foreground absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-bold">
+                {activeFilterCount}
+              </span>
+            )}
             <BorderBeam
               duration={2}
               size={60}

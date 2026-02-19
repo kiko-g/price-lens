@@ -21,14 +21,15 @@ import { SearchIcon, ClockIcon, XIcon, PackageIcon, ArrowRightIcon, LoaderIcon }
 interface SearchContentProps {
   onClose: () => void
   autoFocus?: boolean
+  initialQuery?: string
 }
 
 const MAX_LIVE_RESULTS = 7
 
-export function SearchContent({ onClose, autoFocus = true }: SearchContentProps) {
+export function SearchContent({ onClose, autoFocus = true, initialQuery }: SearchContentProps) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState(initialQuery ?? "")
 
   const { searches: recentSearches, addSearch, removeSearch, hasSearches } = useRecentSearches()
   const { results, isLoading, isDebouncing, isEmpty } = useLiveSearch(query, { enabled: true, limit: MAX_LIVE_RESULTS })
