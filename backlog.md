@@ -8,6 +8,7 @@
 ## General
 
 - [ ] Ask what other pages we could create
+- [x] Error states
 - [x] Use local database
 - [x] Bulk scrape: orchestate a job in admin page that efficiently updates every store product by visiting every url
 - [x] Crawl store origins for new product discovery.

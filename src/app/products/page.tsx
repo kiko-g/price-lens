@@ -12,6 +12,7 @@ import { HideFooter } from "@/contexts/FooterContext"
 import { siteConfig } from "@/lib/config"
 import type { SearchType, SortByType } from "@/types/business"
 import type { PrioritySource } from "@/types"
+import { StoreProductCardSkeleton } from "@/components/products/StoreProductCardSkeleton"
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>
@@ -148,7 +149,7 @@ function LoadingFallback() {
       <Skeleton className="h-12 w-full" />
       <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {Array.from({ length: LIMIT }).map((_, i) => (
-          <Skeleton key={i} className="aspect-square w-full rounded-lg" />
+          <StoreProductCardSkeleton key={i} />
         ))}
       </div>
     </div>
