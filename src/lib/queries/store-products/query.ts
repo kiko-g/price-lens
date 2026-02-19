@@ -5,7 +5,21 @@ import type { SupabaseClient } from "./types"
 import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
 
-const SUPABASE_QUERY_TIMEOUT_MS = 8000
+const SUPABASE_QUERY_TIMEOUT_MS = parseInt(process.env.SUPABASE_QUERY_TIMEOUT_MS || "15000", 10)
+
+// Explicit column lists to avoid SELECT * egress overhead
+const LISTING_COLUMNS = [
+  "id", "origin_id", "url", "name", "brand", "barcode", "pack",
+  "price", "price_recommended", "price_per_major_unit", "major_unit",
+  "discount", "image", "category", "category_2", "category_3",
+  "priority", "priority_source", "priority_updated_at",
+  "available", "updated_at",
+].join(", ")
+
+const LISTING_COLUMNS_CANONICAL = [
+  LISTING_COLUMNS,
+  "canonical_category_name", "canonical_category_name_2", "canonical_category_name_3",
+].join(", ")
 
 // ============================================================================
 // Canonical Category Helpers
@@ -84,7 +98,8 @@ export async function queryStoreProducts(
 
   // Build the base query - no count: "exact" to avoid expensive COUNT(*) OVER()
   // Instead, fetch limit+1 rows to determine hasNextPage
-  let query = supabase.from(tableName).select("*")
+  const columns = useCanonicalView ? LISTING_COLUMNS_CANONICAL : LISTING_COLUMNS
+  let query = supabase.from(tableName).select(columns)
 
   // Apply canonical category filter if present (must use the view)
   if (canonicalCategoryIds.length > 0) {
@@ -147,7 +162,10 @@ export async function queryStoreProducts(
   // Execute Query (with timeout to prevent indefinite hangs)
   // ============================================================================
 
-  const { data, error } = await withTimeout(Promise.resolve(query), SUPABASE_QUERY_TIMEOUT_MS)
+  const { data, error } = await withTimeout(
+    Promise.resolve(query) as Promise<{ data: StoreProductWithMeta[] | null; error: { message: string; code?: string } | null }>,
+    SUPABASE_QUERY_TIMEOUT_MS,
+  )
 
   if (error) {
     return {

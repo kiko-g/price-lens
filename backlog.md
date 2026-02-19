@@ -2,7 +2,9 @@
 
 ## Bugs
 
+- [ ] Find out if scraping pressure is affecting loading times and UX.
 - [ ] Products cache issue showing 0-0 ?????
+- [ ] Use local database
 
 ## General
 
@@ -23,7 +25,7 @@
 - [ ] Scan barcode with phone camera feature.
 - [ ] Product analytics and views for better search results and ecosystem informatization
 - [ ] Develop idea of money saving tally like glovo.
-- [ ] IMAGE URL AS ARRAY!!!! UPDATE SCRAPER, DATABASE AND THEN WE HAVE CAROUSELS
+- [ ] IMAGE URL AS ARRAY!!!! UPDATE SCRAPER, DATABASE AND THEN WE HAVE CAROUSELS (ask if image_urls_extra column is a good idea so that we dont break main images. Good for SEO possibly or something and for code stability.)
 
 ## SEO and Usability
 

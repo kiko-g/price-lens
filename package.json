@@ -18,6 +18,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
     "supabase:generate:types": "npx supabase gen types typescript --project-id srpjxzydhsumqbrzpisa > src/types/supabase.ts",
     "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts"
   },

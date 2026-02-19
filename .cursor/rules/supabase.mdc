@@ -4,6 +4,10 @@ alwaysApply: true
 
 ## Supabase details
 
-- Our project is free tier AFAIK.
-- We do not use a local database. We use the same in production and local to save overhead even if that is dangerous.
-- Supabase has a limit of 1000 when presenting results sometimes. When making queries we need to handle this as if results can be way more than that hard limit, using pagination perhaps.image.png
+- Production is on Supabase free tier (org ID: xfgtjrilgugxlqsczqdp).
+- **Local development uses a local Supabase stack** via `supabase start` (Docker). Run `pnpm db:start` before `pnpm dev`.
+  - `.env.development.local` points to the local instance (auto-loaded by `next dev`).
+  - `.env.local` keeps production credentials (used by `next build` and Vercel).
+  - Local Supabase Studio: http://127.0.0.1:54323
+- To refresh local data from production: `supabase db dump --linked -f production_dump.sql && supabase db dump --linked --data-only -f production_data.sql`, then restore with `psql`.
+- Supabase has a limit of 1000 when presenting results sometimes. When making queries we need to handle this as if results can be way more than that hard limit, using pagination perhaps.
