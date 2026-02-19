@@ -248,7 +248,7 @@
   --container-9xl: 96rem;
   --container-10xl: 104rem;
 
-  --header-height: 54px;
+  --header-height: calc(54px + env(safe-area-inset-top, 0px));
 
   @keyframes slither {
     0% {

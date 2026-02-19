@@ -59,7 +59,7 @@ export function PWAInstallPrompt() {
       deferredPrompt.current = e as BeforeInstallPromptEvent
       setTimeout(() => {
         toast("Install Price Lens", {
-          description: "Add to your home screen for the best experience — no app store needed.",
+          description: "Add to your home screen for a full-screen app experience — no app store needed.",
           icon: <DownloadIcon className="h-5 w-5" />,
           duration: 15_000,
           action: { label: "Install", onClick: handleAndroidInstall },
@@ -76,8 +76,9 @@ export function PWAInstallPrompt() {
         toast("Add Price Lens to Home Screen", {
           description: (
             <span>
-              Tap the <ShareIcon className="mb-0.5 inline h-4 w-4" /> Share button in Safari, then{" "}
-              <strong>&quot;Add to Home Screen&quot;</strong>.
+              Tap the <ShareIcon className="mb-0.5 inline h-4 w-4" /> Share button, then{" "}
+              <strong>&quot;Add to Home Screen&quot;</strong>. Make sure <strong>&quot;Open as Web App&quot;</strong> is
+              enabled for the best experience.
             </span>
           ),
           duration: 20_000,
