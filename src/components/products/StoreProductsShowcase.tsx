@@ -1224,30 +1224,34 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
   const hidden = scrollDirection === "down"
 
   return (
-    <nav
+    <div
       className={cn(
-        "sticky top-(--header-height) z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter transition-all duration-300 ease-in-out lg:hidden dark:bg-zinc-950/95",
-        hidden && "-translate-y-full opacity-0",
+        "sticky top-(--header-height) z-50 grid transition-[grid-template-rows] duration-300 ease-in-out lg:hidden",
+        hidden ? "grid-rows-[0fr]" : "grid-rows-[1fr]",
       )}
     >
-      <SearchContainer initialQuery={query}>
-        <div className="active:bg-accent flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5">
-          {isSearching ? (
-            <Loader2Icon className="text-muted-foreground h-4 w-4 shrink-0 animate-spin" />
-          ) : (
-            <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
-          )}
-          <span className={cn("flex-1 truncate text-sm", query ? "text-foreground" : "text-muted-foreground")}>
-            {query || "Search products..."}
-          </span>
-          {loadedCount > 0 && totalCount != null && (
-            <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-              {loadedCount}/{totalCount}
-            </span>
-          )}
+      <nav className="overflow-hidden">
+        <div className="mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
+          <SearchContainer initialQuery={query}>
+            <div className="flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 active:bg-accent">
+              {isSearching ? (
+                <Loader2Icon className="text-muted-foreground h-4 w-4 shrink-0 animate-spin" />
+              ) : (
+                <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+              )}
+              <span className={cn("flex-1 truncate text-sm", query ? "text-foreground" : "text-muted-foreground")}>
+                {query || "Search products..."}
+              </span>
+              {loadedCount > 0 && totalCount != null && (
+                <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+                  {loadedCount}/{totalCount}
+                </span>
+              )}
+            </div>
+          </SearchContainer>
         </div>
-      </SearchContainer>
-    </nav>
+      </nav>
+    </div>
   )
 }
 
