@@ -1,12 +1,17 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { PrioritySource, CanonicalCategory } from "@/types"
 
-import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
+import {
+  useStoreProducts,
+  fetchStoreProducts,
+  SupermarketChain,
+  type StoreProductsQueryParams,
+} from "@/hooks/useStoreProducts"
 import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
 import { useScrollDirection } from "@/hooks/useScrollDirection"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -348,8 +353,69 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   // Build query params from URL state
   const queryParams = useMemo(() => buildQueryParams(urlState, limit), [urlState, limit])
 
-  // Fetch products
+  // Fetch products (page 1 or desktop current page)
   const { data: products, pagination, isLoading, isFetching, isError, error, refetch } = useStoreProducts(queryParams)
+
+  // Mobile "Load More" state: accumulates products beyond page 1
+  const [mobileExtraProducts, setMobileExtraProducts] = useState<
+    import("@/hooks/useStoreProducts").StoreProductWithMeta[]
+  >([])
+  const [mobilePage, setMobilePage] = useState(1)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [mobileHasMore, setMobileHasMore] = useState(true)
+
+  // Stable filter identity string (excludes page) to detect filter changes
+  const filterIdentity = useMemo(
+    () =>
+      JSON.stringify({
+        q: urlState.query,
+        sort: urlState.sortBy,
+        origin: urlState.origin,
+        searchType: urlState.searchType,
+        priority: urlState.priority,
+        source: urlState.source,
+        category: urlState.category,
+        orderByPriority: urlState.orderByPriority,
+        onlyAvailable: urlState.onlyAvailable,
+        onlyDiscounted: urlState.onlyDiscounted,
+      }),
+    [urlState],
+  )
+
+  const prevFilterIdentity = useRef(filterIdentity)
+  useEffect(() => {
+    if (prevFilterIdentity.current !== filterIdentity) {
+      setMobileExtraProducts([])
+      setMobilePage(1)
+      setMobileHasMore(true)
+      prevFilterIdentity.current = filterIdentity
+    }
+  }, [filterIdentity])
+
+  // Sync mobileHasMore from the first page's pagination
+  useEffect(() => {
+    if (pagination && mobilePage === 1) {
+      setMobileHasMore(pagination.hasNextPage)
+    }
+  }, [pagination, mobilePage])
+
+  const handleLoadMore = useCallback(async () => {
+    if (isLoadingMore || !mobileHasMore) return
+    const nextPage = mobilePage + 1
+    setIsLoadingMore(true)
+    try {
+      const nextParams = buildQueryParams({ ...urlState, page: nextPage }, limit)
+      const result = await fetchStoreProducts(nextParams)
+      setMobileExtraProducts((prev) => [...prev, ...result.data])
+      setMobilePage(nextPage)
+      setMobileHasMore(result.pagination.hasNextPage)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [isLoadingMore, mobileHasMore, mobilePage, urlState, limit])
+
+  // On mobile: page-1 products + accumulated extra pages. On desktop: just current page.
+  const displayProducts = isDesktop ? products : [...products, ...mobileExtraProducts]
 
   // Sync local query input when URL changes
   useEffect(() => {
@@ -537,15 +603,18 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const hasNextPage = pagination?.hasNextPage ?? false
   const currentPage = urlState.page
 
-  const hasResults = products.length > 0
+  const hasResults = displayProducts.length > 0
   const showingFrom = hasResults ? (currentPage - 1) * limit + 1 : 0
-  const showingTo =
-    totalCount != null ? Math.min(currentPage * limit, totalCount) : (currentPage - 1) * limit + products.length
+  const showingTo = isDesktop
+    ? totalCount != null
+      ? Math.min(currentPage * limit, totalCount)
+      : (currentPage - 1) * limit + products.length
+    : displayProducts.length
 
   // Show full skeleton grid only on initial load (no products yet)
-  // Show overlay when we have products but are fetching new ones
-  const showSkeletons = isLoading && products.length === 0
-  const showOverlay = isFetching && products.length > 0
+  // Show overlay when we have products but are fetching new ones (desktop only)
+  const showSkeletons = isLoading && displayProducts.length === 0
+  const showOverlay = isDesktop && isFetching && products.length > 0
 
   const activeFilterCount = useMemo(() => {
     let count = 0
@@ -1011,11 +1080,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       <MobileNav
         query={urlState.query}
         isSearching={isSearching}
-        showingFrom={showingFrom}
-        showingTo={showingTo}
+        loadedCount={displayProducts.length}
         totalCount={totalCount}
-        currentPage={currentPage}
-        totalPages={totalPages}
       />
 
       {/* Mobile Filters Drawer */}
@@ -1046,7 +1112,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         {/* Products Grid */}
         {showSkeletons ? (
           <LoadingGrid limit={limit} />
-        ) : products.length > 0 ? (
+        ) : displayProducts.length > 0 ? (
           <>
             {/* Status Bar - Desktop */}
             <div className="text-muted-foreground mb-4 hidden w-full items-center justify-between text-sm lg:flex">
@@ -1076,7 +1142,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
             {/* Products grid with loading overlay */}
             <div className="relative">
-              {/* Loading overlay */}
+              {/* Loading overlay (desktop only) */}
               {showOverlay && (
                 <div className="bg-background/60 absolute inset-0 z-10 flex items-start justify-center pt-24 backdrop-blur-[2px]">
                   <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
@@ -1089,24 +1155,49 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               <ProductGridWrapper
                 className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
               >
-                {products.map((product, idx) => (
+                {displayProducts.map((product, idx) => (
                   <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} />
                 ))}
               </ProductGridWrapper>
             </div>
 
-            {/* Bottom Pagination */}
-            <BottomPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              showingFrom={showingFrom}
-              showingTo={showingTo}
-              totalCount={totalCount}
-              hasNextPage={hasNextPage}
-              onPageChange={handlePageChange}
-            />
+            {/* Desktop: page-based pagination */}
+            <div className="hidden lg:block">
+              <BottomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                showingFrom={showingFrom}
+                showingTo={showingTo}
+                totalCount={totalCount}
+                hasNextPage={hasNextPage}
+                onPageChange={handlePageChange}
+              />
+            </div>
 
-            {/* Use children here to render the footer (or content below the products grid) */}
+            {/* Mobile: Load More button */}
+            <div className="my-6 flex flex-col items-center gap-3 lg:hidden">
+              {mobileHasMore ? (
+                <Button variant="outline" className="w-full max-w-xs" onClick={handleLoadMore} disabled={isLoadingMore}>
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Load more products"
+                  )}
+                </Button>
+              ) : (
+                <p className="text-muted-foreground text-xs">No more products to load</p>
+              )}
+              {totalCount != null && (
+                <p className="text-muted-foreground text-xs">
+                  Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> of{" "}
+                  <span className="text-foreground font-semibold">{totalCount}</span> products
+                </p>
+              )}
+            </div>
+
             {children}
           </>
         ) : (
@@ -1124,22 +1215,11 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 interface MobileNavProps {
   query: string
   isSearching: boolean
-  showingFrom: number
-  showingTo: number
+  loadedCount: number
   totalCount: number | null
-  currentPage: number
-  totalPages: number | null
 }
 
-function MobileNav({
-  query,
-  isSearching,
-  showingFrom,
-  showingTo,
-  totalCount,
-  currentPage,
-  totalPages,
-}: MobileNavProps) {
+function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavProps) {
   const scrollDirection = useScrollDirection()
   const hidden = scrollDirection === "down"
 
@@ -1151,7 +1231,7 @@ function MobileNav({
       )}
     >
       <SearchContainer initialQuery={query}>
-        <div className="flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 active:bg-accent">
+        <div className="active:bg-accent flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5">
           {isSearching ? (
             <Loader2Icon className="text-muted-foreground h-4 w-4 shrink-0 animate-spin" />
           ) : (
@@ -1160,35 +1240,13 @@ function MobileNav({
           <span className={cn("flex-1 truncate text-sm", query ? "text-foreground" : "text-muted-foreground")}>
             {query || "Search products..."}
           </span>
+          {loadedCount > 0 && totalCount != null && (
+            <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+              {loadedCount}/{totalCount}
+            </span>
+          )}
         </div>
       </SearchContainer>
-
-      {/* Status Bar */}
-      {showingFrom > 0 && (
-        <div className="text-muted-foreground mt-2 flex w-full items-center justify-between text-xs leading-none">
-          <span>
-            Showing{" "}
-            <span className="text-foreground font-semibold">
-              {showingFrom}-{showingTo}
-            </span>
-            {totalCount != null && (
-              <>
-                {" "}
-                of <span className="text-foreground font-semibold">{totalCount}</span>
-              </>
-            )}
-          </span>
-          <span>
-            Page <span className="text-foreground font-semibold">{currentPage}</span>
-            {totalPages != null && (
-              <>
-                {" "}
-                of <span className="text-foreground font-semibold">{totalPages}</span>
-              </>
-            )}
-          </span>
-        </div>
-      )}
     </nav>
   )
 }

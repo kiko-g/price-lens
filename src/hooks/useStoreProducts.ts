@@ -87,7 +87,7 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
 /**
  * Fetches store products from the API
  */
-async function fetchStoreProducts(params: StoreProductsQueryParams): Promise<StoreProductsQueryResult> {
+export async function fetchStoreProducts(params: StoreProductsQueryParams): Promise<StoreProductsQueryResult> {
   const searchParams = paramsToSearchParams(params)
 
   const response = await axios.get("/api/store_products", { params: searchParams })
