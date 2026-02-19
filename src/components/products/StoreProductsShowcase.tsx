@@ -8,6 +8,7 @@ import { PrioritySource, CanonicalCategory } from "@/types"
 
 import { useStoreProducts, SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
 import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
+import { useScrollDirection } from "@/hooks/useScrollDirection"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
@@ -1139,8 +1140,16 @@ function MobileNav({
   currentPage,
   totalPages,
 }: MobileNavProps) {
+  const scrollDirection = useScrollDirection()
+  const hidden = scrollDirection === "down"
+
   return (
-    <nav className="sticky top-(--header-height) z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter lg:hidden dark:bg-zinc-950/95">
+    <nav
+      className={cn(
+        "sticky top-(--header-height) z-50 mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter transition-all duration-300 ease-in-out lg:hidden dark:bg-zinc-950/95",
+        hidden && "-translate-y-full opacity-0",
+      )}
+    >
       <SearchContainer initialQuery={query}>
         <div className="flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 active:bg-accent">
           {isSearching ? (

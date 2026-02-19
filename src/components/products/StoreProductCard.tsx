@@ -124,7 +124,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   const isError = hasUpdateError || !sp.available
 
   return (
-    <div className="flex h-full w-full flex-col rounded-lg bg-transparent">
+    <div className="flex h-full w-full flex-col rounded-lg bg-transparent transition-transform duration-150 active:scale-[0.97]">
       <div
         className={cn(
           "group relative mb-2 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
