@@ -40,6 +40,7 @@ export function usePullToRefresh({
     (e: TouchEvent) => {
       if (!enabled || refreshing.current) return
       if (window.scrollY > 0) return
+      if (document.body.classList.contains("drawer-open")) return
       touchStartY.current = e.touches[0].clientY
       pulling.current = true
       currentPull.current = 0
