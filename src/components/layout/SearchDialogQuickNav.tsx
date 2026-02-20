@@ -9,7 +9,7 @@ import { BorderBeam } from "@/components/ui/magic/border-beam"
 export function SearchDialogQuickNav() {
   return (
     <div className="fixed right-5 bottom-7 z-50 flex flex-col items-end justify-center gap-3 md:right-8 md:bottom-10">
-      <SearchContainer>
+      <SearchContainer registerKeyboardShortcut={false}>
         <Button variant="default" size="icon-xl" roundedness="circular" className="relative border-transparent">
           <SearchIcon />
           <BorderBeam

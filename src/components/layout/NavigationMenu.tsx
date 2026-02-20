@@ -67,7 +67,7 @@ export function NavigationMenu() {
         </ScrollArea>
 
         <SheetFooter className="mb-2 flex flex-col gap-3">
-          <SearchContainer>
+          <SearchContainer registerKeyboardShortcut={false}>
             <Button variant="outline" className="w-full">
               <SearchIcon className="h-4 w-4" />
               <span>Search products</span>

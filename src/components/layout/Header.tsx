@@ -7,6 +7,7 @@ import { navigation } from "@/lib/config"
 import { usePathname } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
+import { Kbd } from "@/components/ui/kbd"
 import { Separator } from "@/components/ui/separator"
 
 import { LogoLink } from "@/components/layout/LogoLink"
@@ -53,10 +54,11 @@ export function Header() {
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && (
             <SearchContainer>
-              <Button variant="primary-soft" className="relative hidden shadow-none md:inline-flex">
-                <SearchIcon className="h-4 w-4" />
-                <span>Search products</span>
-              </Button>
+              <div className="text-muted-foreground hover:border-input hover:text-foreground border-border bg-accent hidden h-[34px] max-w-[280px] min-w-[200px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors md:flex">
+                <SearchIcon className="h-4 w-4 shrink-0" />
+                <span className="flex-1 truncate text-sm">Search products</span>
+                <Kbd className="bg-muted dark:bg-primary/20 h-5 min-w-5 px-1.5 text-[10px]">⌘K</Kbd>
+              </div>
             </SearchContainer>
           )}
 

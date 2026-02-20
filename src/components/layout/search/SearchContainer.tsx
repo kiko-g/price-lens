@@ -14,9 +14,17 @@ interface SearchContainerProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   initialQuery?: string
+  /** When true (default), this instance registers Cmd+K/Ctrl+K. Only one instance on the page should be true to avoid stacked modals. */
+  registerKeyboardShortcut?: boolean
 }
 
-export function SearchContainer({ children, open: controlledOpen, onOpenChange, initialQuery }: SearchContainerProps) {
+export function SearchContainer({
+  children,
+  open: controlledOpen,
+  onOpenChange,
+  initialQuery,
+  registerKeyboardShortcut = true,
+}: SearchContainerProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
@@ -27,18 +35,19 @@ export function SearchContainer({ children, open: controlledOpen, onOpenChange, 
     setOpen(false)
   }, [setOpen])
 
-  // keyboard shortcut: Cmd+K / Ctrl+K
   useEffect(() => {
+    if (!registerKeyboardShortcut) return
+
     const handleKeyDown = (e: KeyboardEvent): void => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
-        setOpen(!open)
+        setOpen((prev) => !prev)
       }
     }
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [open, setOpen])
+  }, [registerKeyboardShortcut, setOpen])
 
   // clone children to add onClick handler
   const trigger = (
