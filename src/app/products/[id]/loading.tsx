@@ -8,11 +8,11 @@ const SKELETON_COUNT = 6
 function BreadcrumbSkeleton() {
   return (
     <div className="mb-2 flex items-center gap-1 md:mb-3">
-      <Skeleton className="h-4 w-16" />
+      <Skeleton variant="shimmer" className="h-4 w-16" />
       <Skeleton className="h-3 w-3 rounded-full" />
-      <Skeleton className="h-4 w-20" />
+      <Skeleton variant="shimmer" className="h-4 w-20" />
       <Skeleton className="h-3 w-3 rounded-full" />
-      <Skeleton className="h-4 w-28 font-semibold" />
+      <Skeleton variant="shimmer" className="h-4 w-28 font-semibold" />
     </div>
   )
 }
@@ -51,7 +51,7 @@ function ChartSkeleton() {
               <Skeleton key={i} className="h-7 w-10 rounded-md" />
             ))}
           </div>
-          <Skeleton className="h-60 w-full rounded-md" />
+          <Skeleton variant="shimmer" className="h-60 w-full rounded-md" />
         </div>
       </div>
     </div>
@@ -63,9 +63,9 @@ function DesktopHeroSkeleton() {
     <article className="hidden w-full grid-cols-20 gap-8 md:grid">
       {/* Left column: Image + Barcode (col-span-6 matches ProductHeroDesktop) */}
       <aside className="col-span-6 flex flex-col items-center">
-        <Skeleton className="aspect-7/8 w-full rounded-lg" />
+        <Skeleton variant="shimmer" className="aspect-7/8 w-full rounded-lg" />
         <div className="mt-4 flex items-center gap-1">
-          <Skeleton className="h-[35px] w-40" />
+          <Skeleton variant="shimmer" className="h-[35px] w-40" />
         </div>
       </aside>
 
@@ -80,13 +80,13 @@ function DesktopHeroSkeleton() {
 
         {/* Title + Pack */}
         <div className="flex flex-col gap-0">
-          <Skeleton className="h-6 w-3/4 xl:h-7" />
+          <Skeleton variant="shimmer" className="h-6 w-3/4 xl:h-7" />
           <Skeleton className="mt-1 h-5 w-24" />
         </div>
 
         {/* Price */}
         <div className="flex flex-col items-start justify-start gap-2">
-          <Skeleton className="h-6 w-20" />
+          <Skeleton variant="shimmer" className="h-6 w-20" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-20 rounded-sm" />
             <Skeleton className="h-5 w-14 rounded-sm" />
@@ -110,7 +110,7 @@ function DesktopHeroSkeleton() {
 function MobileHeroSkeleton() {
   return (
     <article className="flex w-full flex-col gap-2.5 md:hidden">
-      <Skeleton className="aspect-6/5 w-full rounded-lg" />
+      <Skeleton variant="shimmer" className="aspect-6/5 w-full rounded-lg" />
 
       <div className="flex flex-wrap items-center gap-2">
         <Skeleton className="h-6 w-20 rounded-sm" />
@@ -118,12 +118,12 @@ function MobileHeroSkeleton() {
       </div>
 
       <div className="flex flex-col gap-0">
-        <Skeleton className="h-6 w-4/5" />
+        <Skeleton variant="shimmer" className="h-6 w-4/5" />
         <Skeleton className="mt-1 h-4 w-24" />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Skeleton className="h-6 w-16" />
+        <Skeleton variant="shimmer" className="h-6 w-16" />
         <Skeleton className="h-5 w-20 rounded-sm" />
       </div>
 
@@ -148,13 +148,13 @@ function IdenticalProductsSkeleton() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="mb-2 flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded" />
-          <Skeleton className="h-6 w-32" />
+          <Skeleton variant="shimmer" className="h-6 w-32" />
           <Skeleton className="h-5 w-16 rounded-full" />
         </div>
-        <Skeleton className="h-9 w-32 rounded-md" />
+        <Skeleton variant="shimmer" className="h-9 w-32 rounded-md" />
       </div>
       <div className="mb-3">
-        <Skeleton className="h-4 w-64" />
+        <Skeleton variant="shimmer" className="h-4 w-64" />
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -178,7 +178,7 @@ function RelatedProductsSkeleton() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded" />
-          <Skeleton className="h-6 w-36" />
+          <Skeleton variant="shimmer" className="h-6 w-36" />
           <Skeleton className="h-5 w-16 rounded-full" />
         </div>
         <div className="flex gap-2">
