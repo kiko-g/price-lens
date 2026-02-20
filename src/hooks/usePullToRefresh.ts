@@ -6,7 +6,7 @@ interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void>
   /** Minimum pull distance (px) before refresh triggers (default: 80) */
   threshold?: number
-  /** Maximum visual pull distance (px) after damping (default: 128) */
+  /** Maximum visual pull distance (px) after damping (default: 120) */
   maxPull?: number
   enabled?: boolean
 }
@@ -15,61 +15,77 @@ interface UsePullToRefreshOptions {
  * Pull-to-refresh gesture for mobile. Only activates when the page
  * is scrolled to the very top (scrollY === 0) to coexist with iOS
  * Safari's native elastic scrolling.
+ *
+ * Uses refs for all gesture tracking to avoid stale-closure bugs
+ * in touch event handlers. React state is only used for rendering.
  */
 export function usePullToRefresh({
   onRefresh,
   threshold = 80,
-  maxPull = 128,
+  maxPull = 120,
   enabled = true,
 }: UsePullToRefreshOptions) {
   const [pullDistance, setPullDistance] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false)
+
   const touchStartY = useRef(0)
   const pulling = useRef(false)
+  const currentPull = useRef(0)
+  const refreshing = useRef(false)
+
+  const onRefreshRef = useRef(onRefresh)
+  onRefreshRef.current = onRefresh
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
-      if (!enabled || isRefreshing) return
+      if (!enabled || refreshing.current) return
       if (window.scrollY > 0) return
       touchStartY.current = e.touches[0].clientY
       pulling.current = true
+      currentPull.current = 0
     },
-    [enabled, isRefreshing],
+    [enabled],
   )
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (!pulling.current || isRefreshing) return
+      if (!pulling.current || refreshing.current) return
       const diff = e.touches[0].clientY - touchStartY.current
+
       if (diff <= 0) {
         pulling.current = false
+        currentPull.current = 0
         setPullDistance(0)
         return
       }
-      const dampened = Math.min(diff * 0.4, maxPull)
+
+      const dampened = Math.min(diff * 0.35, maxPull)
+      currentPull.current = dampened
       setPullDistance(dampened)
     },
-    [isRefreshing, maxPull],
+    [maxPull],
   )
 
-  const handleTouchEnd = useCallback(async () => {
+  const handleTouchEnd = useCallback(() => {
     if (!pulling.current) return
     pulling.current = false
-    const dist = pullDistance
+    const dist = currentPull.current
 
-    if (dist >= threshold && !isRefreshing) {
+    if (dist >= threshold && !refreshing.current) {
+      refreshing.current = true
       setIsRefreshing(true)
-      setPullDistance(threshold * 0.5)
-      try {
-        await onRefresh()
-      } finally {
+      setPullDistance(36)
+
+      onRefreshRef.current().finally(() => {
+        refreshing.current = false
         setIsRefreshing(false)
         setPullDistance(0)
-      }
+      })
     } else {
+      currentPull.current = 0
       setPullDistance(0)
     }
-  }, [pullDistance, threshold, isRefreshing, onRefresh])
+  }, [threshold])
 
   useEffect(() => {
     if (!enabled) return
@@ -88,7 +104,6 @@ export function usePullToRefresh({
   return {
     pullDistance,
     isRefreshing,
-    /** 0–1 progress toward threshold */
     progress: Math.min(pullDistance / threshold, 1),
   }
 }

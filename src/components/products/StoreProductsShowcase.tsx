@@ -1147,18 +1147,21 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       />
 
       {/* Main Content Area */}
-      <div className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
-        {/* Pull-to-refresh indicator (mobile) */}
+      <div className="relative flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
+        {/* Pull-to-refresh indicator (mobile) - absolute overlay, no layout shift */}
         {(pullDistance > 0 || isPullRefreshing) && (
           <div
-            className="flex items-center justify-center overflow-hidden transition-[height] duration-200 ease-out lg:hidden"
-            style={{ height: pullDistance > 0 ? pullDistance : isPullRefreshing ? 40 : 0 }}
+            className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center lg:hidden"
+            style={{ transform: `translateY(${Math.min(pullDistance, 60) - 8}px)` }}
           >
             <div
-              className={cn("text-muted-foreground", isPullRefreshing && "animate-spin")}
-              style={{ opacity: pullProgress, transform: `rotate(${pullProgress * 360}deg)` }}
+              className={cn(
+                "bg-background flex h-8 w-8 items-center justify-center rounded-full border shadow-md",
+                isPullRefreshing && "animate-spin",
+              )}
+              style={{ opacity: isPullRefreshing ? 1 : pullProgress }}
             >
-              <RefreshCcwIcon className="h-5 w-5" />
+              <RefreshCcwIcon className="text-muted-foreground h-4 w-4" />
             </div>
           </div>
         )}
@@ -1194,18 +1197,20 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               />
             </div>
 
-            {/* Mobile: thin progress bar */}
-            {showOverlay && <MobileProgressBar />}
-
             {/* Products grid with loading overlay */}
             <div className="relative">
               {showOverlay && (
-                <div className="bg-background/60 absolute inset-0 z-10 hidden items-start justify-center pt-24 backdrop-blur-[2px] lg:flex">
-                  <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
-                    <Loader2Icon className="h-4 w-4 animate-spin" />
-                    <span className="text-sm font-medium">Loading...</span>
+                <>
+                  {/* Desktop: blur overlay */}
+                  <div className="bg-background/60 absolute inset-0 z-10 hidden items-start justify-center pt-24 backdrop-blur-[2px] lg:flex">
+                    <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                      <span className="text-sm font-medium">Loading...</span>
+                    </div>
                   </div>
-                </div>
+                  {/* Mobile: thin progress bar at top edge */}
+                  <MobileProgressBar />
+                </>
               )}
 
               <ProductGridWrapper
@@ -1270,7 +1275,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
 function MobileProgressBar() {
   return (
-    <div className="bg-primary/20 h-1 w-full overflow-hidden rounded-full lg:hidden">
+    <div className="absolute inset-x-0 top-0 z-10 h-1 overflow-hidden lg:hidden">
       <div className="bg-primary h-full w-1/3 animate-[progressSlide_1s_ease-in-out_infinite] rounded-full" />
     </div>
   )
