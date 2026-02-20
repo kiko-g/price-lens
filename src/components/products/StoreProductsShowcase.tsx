@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
@@ -35,7 +35,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -357,6 +365,10 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   // Fetch products (page 1 or desktop current page)
   const { data: products, pagination, isLoading, isFetching, isError, error, refetch } = useStoreProducts(queryParams)
 
+  // Desktop pagination: show our overlay instead of Next.js loading/rendering badge
+  const [isPageChanging, setIsPageChanging] = useState(false)
+  const pendingPageRef = useRef<number | null>(null)
+
   // Mobile "Load More" state: accumulates products beyond page 1
   const [mobileExtraProducts, setMobileExtraProducts] = useState<
     import("@/hooks/useStoreProducts").StoreProductWithMeta[]
@@ -426,7 +438,11 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     await refetch()
   }, [refetch])
 
-  const { pullDistance, isRefreshing: isPullRefreshing, progress: pullProgress } = usePullToRefresh({
+  const {
+    pullDistance,
+    isRefreshing: isPullRefreshing,
+    progress: pullProgress,
+  } = usePullToRefresh({
     onRefresh: handlePullRefresh,
     enabled: !isDesktop,
   })
@@ -510,22 +526,50 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     })
   }
 
+  // Clear page-changing overlay when URL has caught up (desktop pagination)
+  useEffect(() => {
+    if (pendingPageRef.current !== null && urlState.page === pendingPageRef.current) {
+      pendingPageRef.current = null
+      setIsPageChanging(false)
+    }
+  }, [urlState.page])
+
   // Explicit action: flush debounce and update URL immediately
   const handlePageChange = (newPage: number) => {
     debouncedUpdateUrl.cancel()
-    updateUrl({
-      q: queryInput || null,
-      t: localFilters.searchType,
-      sort: localFilters.sortBy,
-      origin: localFilters.origin || null,
-      priority: localFilters.priority || null,
-      source: localFilters.source || null,
-      category: localFilters.category || null,
-      priority_order: localFilters.orderByPriority,
-      available: localFilters.onlyAvailable,
-      discounted: localFilters.onlyDiscounted,
-      page: newPage,
-    })
+    if (isDesktop) {
+      pendingPageRef.current = newPage
+      setIsPageChanging(true)
+      startTransition(() => {
+        updateUrl({
+          q: queryInput || null,
+          t: localFilters.searchType,
+          sort: localFilters.sortBy,
+          origin: localFilters.origin || null,
+          priority: localFilters.priority || null,
+          source: localFilters.source || null,
+          category: localFilters.category || null,
+          priority_order: localFilters.orderByPriority,
+          available: localFilters.onlyAvailable,
+          discounted: localFilters.onlyDiscounted,
+          page: newPage,
+        })
+      })
+    } else {
+      updateUrl({
+        q: queryInput || null,
+        t: localFilters.searchType,
+        sort: localFilters.sortBy,
+        origin: localFilters.origin || null,
+        priority: localFilters.priority || null,
+        source: localFilters.source || null,
+        category: localFilters.category || null,
+        priority_order: localFilters.orderByPriority,
+        available: localFilters.onlyAvailable,
+        discounted: localFilters.onlyDiscounted,
+        page: newPage,
+      })
+    }
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
@@ -653,7 +697,45 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   const showSkeletons = isLoading && displayProducts.length === 0
   const isNavigationPending = pendingSearchQuery !== null && pendingSearchQuery !== urlState.query
-  const showOverlay = (isFetching && products.length > 0) || (isNavigationPending && displayProducts.length > 0)
+  const showOverlay =
+    (isFetching && products.length > 0) || (isNavigationPending && displayProducts.length > 0) || isPageChanging
+
+  const SLOW_LOAD_THRESHOLD_MS = 6000
+  const [showSlowLoadMessage, setShowSlowLoadMessage] = useState(false)
+  const slowLoadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const isSlowLoadCondition = showSkeletons || showOverlay
+  useEffect(() => {
+    if (isSlowLoadCondition) {
+      setShowSlowLoadMessage(false)
+      slowLoadTimerRef.current = setTimeout(() => {
+        setShowSlowLoadMessage(true)
+        slowLoadTimerRef.current = null
+      }, SLOW_LOAD_THRESHOLD_MS)
+      return () => {
+        if (slowLoadTimerRef.current) {
+          clearTimeout(slowLoadTimerRef.current)
+          slowLoadTimerRef.current = null
+        }
+        setShowSlowLoadMessage(false)
+      }
+    } else {
+      if (slowLoadTimerRef.current) {
+        clearTimeout(slowLoadTimerRef.current)
+        slowLoadTimerRef.current = null
+      }
+      setShowSlowLoadMessage(false)
+    }
+  }, [isSlowLoadCondition])
+
+  useEffect(() => {
+    return () => {
+      if (slowLoadTimerRef.current) {
+        clearTimeout(slowLoadTimerRef.current)
+        slowLoadTimerRef.current = null
+      }
+    }
+  }, [])
 
   const activeFilterCount = useMemo(() => {
     let count = 0
@@ -1168,7 +1250,14 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
         {/* Products Grid */}
         {showSkeletons ? (
-          <LoadingGrid limit={limit} />
+          <div className="flex w-full flex-col gap-3">
+            <LoadingGrid limit={limit} />
+            {showSlowLoadMessage && (
+              <div className="text-muted-foreground flex flex-col items-center gap-1 text-center text-sm">
+                <p>This is taking longer than usual. Hold on…</p>
+              </div>
+            )}
+          </div>
         ) : displayProducts.length > 0 ? (
           <>
             {/* Status Bar - Desktop */}
@@ -1203,9 +1292,13 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                 <>
                   {/* Desktop: blur overlay */}
                   <div className="bg-background/60 absolute inset-0 z-10 hidden items-start justify-center pt-24 backdrop-blur-[2px] lg:flex">
-                    <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
-                      <Loader2Icon className="h-4 w-4 animate-spin" />
-                      <span className="text-sm font-medium">Loading...</span>
+                    <div className="bg-background flex flex-col items-center gap-1 rounded-lg border px-4 py-3 shadow-lg">
+                      <div className="flex items-center gap-2">
+                        <Loader2Icon className="h-4 w-4 animate-spin" />
+                        <span className="text-sm font-medium">
+                          {showSlowLoadMessage ? "This is taking longer than usual. Hold on…" : "Loading..."}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   {/* Mobile: thin progress bar at top edge */}
@@ -1217,7 +1310,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                 className={cn("w-full transition-opacity duration-200", showOverlay && "lg:pointer-events-none")}
               >
                 {displayProducts.map((product, idx) => (
-                  <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} />
+                  <StoreProductCard key={product.id} sp={product} imagePriority={isDesktop ? idx < 20 : idx < 10} />
                 ))}
               </ProductGridWrapper>
             </div>
@@ -1302,7 +1395,7 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
       <nav className="overflow-hidden">
         <div className="mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
           <SearchContainer initialQuery={query} registerKeyboardShortcut={false}>
-            <div className="flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 active:bg-accent">
+            <div className="active:bg-accent flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5">
               {isSearching ? (
                 <Loader2Icon className="text-muted-foreground h-4 w-4 shrink-0 animate-spin" />
               ) : (
@@ -1562,7 +1655,7 @@ function MobileFiltersDrawer({
             </div>
           </div>
 
-          <DrawerFooter className="flex-row border-t gap-2 px-4">
+          <DrawerFooter className="flex-row gap-2 border-t px-4">
             <DrawerClose asChild>
               <Button variant="outline" className="flex-1">
                 Cancel
