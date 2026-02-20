@@ -327,14 +327,6 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     category: urlState.category,
   })
 
-  // Debounced URL sync for filter changes
-  const {
-    trigger: debouncedUpdateUrl,
-    animKey: debounceAnimKey,
-    completed: debounceCompleted,
-    setCompleted: setDebounceCompleted,
-  } = useTrackedDebouncedCallback(updateUrl, FILTER_DEBOUNCE_MS)
-
   // Check if there are pending filter changes (local differs from URL)
   const hasPendingChanges = useMemo(() => {
     return (
@@ -351,6 +343,31 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     )
   }, [queryInput, localFilters, urlState])
 
+  // Desktop: show our overlay for any URL update (page, sort, filters) so we don’t see Next.js "Rendering..." badge
+  const [isNavigating, setIsNavigating] = useState(false)
+  const urlStateKeyWhenNavigatingRef = useRef<string | null>(null)
+
+  const updateUrlWithOverlay = useCallback(
+    (updates: Record<string, string | number | boolean | null | undefined>) => {
+      if (isDesktop) {
+        urlStateKeyWhenNavigatingRef.current = JSON.stringify(urlState)
+        setIsNavigating(true)
+        startTransition(() => updateUrl(updates))
+      } else {
+        updateUrl(updates)
+      }
+    },
+    [isDesktop, urlState, updateUrl],
+  )
+
+  // Debounced URL sync for filter changes (uses updateUrlWithOverlay on desktop so overlay shows)
+  const {
+    trigger: debouncedUpdateUrl,
+    animKey: debounceAnimKey,
+    completed: debounceCompleted,
+    setCompleted: setDebounceCompleted,
+  } = useTrackedDebouncedCallback(updateUrlWithOverlay, FILTER_DEBOUNCE_MS)
+
   // Parse origin, priority, and source from local filters (for UI)
   const selectedOrigins = useMemo(() => parseArrayParam(localFilters.origin), [localFilters.origin])
   const selectedPriorities = useMemo(() => parseArrayParam(localFilters.priority), [localFilters.priority])
@@ -364,10 +381,6 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   // Fetch products (page 1 or desktop current page)
   const { data: products, pagination, isLoading, isFetching, isError, error, refetch } = useStoreProducts(queryParams)
-
-  // Desktop pagination: show our overlay instead of Next.js loading/rendering badge
-  const [isPageChanging, setIsPageChanging] = useState(false)
-  const pendingPageRef = useRef<number | null>(null)
 
   // Mobile "Load More" state: accumulates products beyond page 1
   const [mobileExtraProducts, setMobileExtraProducts] = useState<
@@ -511,7 +524,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const handleSearch = () => {
     setMobileFiltersOpen(false)
     debouncedUpdateUrl.cancel()
-    updateUrl({
+    updateUrlWithOverlay({
       q: queryInput,
       t: localFilters.searchType,
       sort: localFilters.sortBy,
@@ -526,50 +539,43 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     })
   }
 
-  // Clear page-changing overlay when URL has caught up (desktop pagination)
+  const urlStateKey = useMemo(() => JSON.stringify(urlState), [urlState])
+
+  // Clear navigating overlay when URL has caught up (any filter/page change on desktop)
   useEffect(() => {
-    if (pendingPageRef.current !== null && urlState.page === pendingPageRef.current) {
-      pendingPageRef.current = null
-      setIsPageChanging(false)
+    if (!isNavigating || urlStateKeyWhenNavigatingRef.current === null) return
+    if (urlStateKey !== urlStateKeyWhenNavigatingRef.current) {
+      urlStateKeyWhenNavigatingRef.current = null
+      setIsNavigating(false)
     }
-  }, [urlState.page])
+  }, [isNavigating, urlStateKey])
+
+  // Safety: clear navigating if URL never updates (e.g. navigation blocked)
+  useEffect(() => {
+    if (!isNavigating) return
+    const t = setTimeout(() => {
+      urlStateKeyWhenNavigatingRef.current = null
+      setIsNavigating(false)
+    }, 3000)
+    return () => clearTimeout(t)
+  }, [isNavigating])
 
   // Explicit action: flush debounce and update URL immediately
   const handlePageChange = (newPage: number) => {
     debouncedUpdateUrl.cancel()
-    if (isDesktop) {
-      pendingPageRef.current = newPage
-      setIsPageChanging(true)
-      startTransition(() => {
-        updateUrl({
-          q: queryInput || null,
-          t: localFilters.searchType,
-          sort: localFilters.sortBy,
-          origin: localFilters.origin || null,
-          priority: localFilters.priority || null,
-          source: localFilters.source || null,
-          category: localFilters.category || null,
-          priority_order: localFilters.orderByPriority,
-          available: localFilters.onlyAvailable,
-          discounted: localFilters.onlyDiscounted,
-          page: newPage,
-        })
-      })
-    } else {
-      updateUrl({
-        q: queryInput || null,
-        t: localFilters.searchType,
-        sort: localFilters.sortBy,
-        origin: localFilters.origin || null,
-        priority: localFilters.priority || null,
-        source: localFilters.source || null,
-        category: localFilters.category || null,
-        priority_order: localFilters.orderByPriority,
-        available: localFilters.onlyAvailable,
-        discounted: localFilters.onlyDiscounted,
-        page: newPage,
-      })
-    }
+    updateUrlWithOverlay({
+      q: queryInput || null,
+      t: localFilters.searchType,
+      sort: localFilters.sortBy,
+      origin: localFilters.origin || null,
+      priority: localFilters.priority || null,
+      source: localFilters.source || null,
+      category: localFilters.category || null,
+      priority_order: localFilters.orderByPriority,
+      available: localFilters.onlyAvailable,
+      discounted: localFilters.onlyDiscounted,
+      page: newPage,
+    })
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
@@ -697,8 +703,11 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   const showSkeletons = isLoading && displayProducts.length === 0
   const isNavigationPending = pendingSearchQuery !== null && pendingSearchQuery !== urlState.query
+  // Overlay: we have data but something is in progress (refetch, pending search, or desktop URL update)
   const showOverlay =
-    (isFetching && products.length > 0) || (isNavigationPending && displayProducts.length > 0) || isPageChanging
+    (isFetching && products.length > 0) ||
+    (isNavigationPending && displayProducts.length > 0) ||
+    isNavigating
 
   const SLOW_LOAD_THRESHOLD_MS = 6000
   const [showSlowLoadMessage, setShowSlowLoadMessage] = useState(false)
