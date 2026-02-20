@@ -794,7 +794,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   if (isError) {
     return (
-      <div className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 items-start justify-center p-4">
         <ErrorStateView error={error} onRetry={() => refetch()} />
       </div>
     )

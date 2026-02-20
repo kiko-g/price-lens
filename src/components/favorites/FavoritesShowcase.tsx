@@ -13,7 +13,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import {
   Select,
   SelectContent,
@@ -228,7 +236,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
 
   if (isError) {
     return (
-      <div className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 items-start justify-center p-4">
         <ErrorStateView error={error} onRetry={() => refetch()} />
       </div>
     )
@@ -755,7 +763,7 @@ function MobileFiltersDrawer({
             </div>
           </div>
 
-          <DrawerFooter className="flex-row border-t gap-2 px-4">
+          <DrawerFooter className="flex-row gap-2 border-t px-4">
             <DrawerClose asChild>
               <Button variant="outline" className="flex-1">
                 Cancel

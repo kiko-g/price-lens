@@ -29,18 +29,24 @@ export function PriorityBubble({
   const config = PRIORITY_CONFIG[key] ?? PRIORITY_CONFIG["null"]
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
+    <span className={cn("inline-flex items-center gap-2", className)}>
       <span
         className={cn(
-          "inline-flex shrink-0 items-center justify-center rounded-full border font-semibold text-white",
+          "inline-flex shrink-0 items-center justify-center rounded-full border text-white",
           config.bgClass,
           SIZE_CLASSES[size],
         )}
       >
         {config.label}
       </span>
-      {useDescription && <span className="text-sm">{config.description}</span>}
-      {usePeriod && <span className="text-sm">({config.period})</span>}
+      {(useDescription || usePeriod) && (
+        <span className="flex flex-col gap-0 leading-tight">
+          {useDescription && <span className="text-sm font-medium">{config.description}</span>}
+          {usePeriod && config.period != null && (
+            <span className="text-muted-foreground text-xs font-normal">({config.period})</span>
+          )}
+        </span>
+      )}
     </span>
   )
 }
