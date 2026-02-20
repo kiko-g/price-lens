@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1359,7 +1359,7 @@ function MobileFiltersDrawer({
           <DrawerHeader>
             <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
           </DrawerHeader>
-          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4 pb-24">
+          <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4">
             {/* Categories Filter */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -1517,17 +1517,16 @@ function MobileFiltersDrawer({
             </div>
           </div>
 
-          {/* Apply Button */}
-          <div className="absolute right-0 bottom-0 left-0 border-t bg-white p-4 dark:bg-zinc-950">
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
+          <DrawerFooter className="flex-row border-t gap-2 px-4">
+            <DrawerClose asChild>
+              <Button variant="outline" className="flex-1">
                 Cancel
               </Button>
-              <Button className="flex-1" onClick={onApply}>
-                Apply Filters
-              </Button>
-            </div>
-          </div>
+            </DrawerClose>
+            <Button className="flex-1" onClick={onApply}>
+              Apply Filters
+            </Button>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     </>
