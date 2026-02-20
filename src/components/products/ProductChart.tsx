@@ -291,19 +291,22 @@ function PricesVariation({
   if (isLoading) {
     return (
       <div className={cn("mb-2 flex items-start justify-between gap-3", className)}>
-        <div className="flex flex-1 flex-col gap-1 py-0.5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div className="flex items-center justify-between gap-2" key={i}>
-              <div className="flex items-center gap-1.5">
-                <Skeleton className="size-2 rounded-full" />
-                <Skeleton className="h-4 w-32" />
+        <div className="flex flex-1 items-center justify-between gap-1 py-0.5">
+          <div className="flex flex-col gap-1">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div className="flex items-center gap-2" key={i}>
+                <div className="flex items-center gap-1.5">
+                  <Skeleton variant="shimmer" className="size-4 rounded" />
+                  <Skeleton variant="shimmer" className="h-4 w-32" />
+                </div>
+                <div className="flex items-center gap-1">
+                  <Skeleton variant="shimmer" className="h-4 w-12" />
+                  <Skeleton variant="shimmer" className="h-4 w-12" />
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-4 w-12" />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <Skeleton variant="shimmer" className="h-20 w-20" />
         </div>
       </div>
     )
@@ -415,7 +418,7 @@ function RangeSelector({ className }: RangeSelectorProps) {
     return (
       <div className={cn("flex flex-wrap items-center gap-2", className)}>
         {RANGES.map((range) => (
-          <Skeleton key={range} className="h-8 w-10" />
+          <Skeleton key={range} variant="shimmer" className="h-8 w-10" />
         ))}
       </div>
     )
@@ -464,7 +467,7 @@ function Graph({ className }: GraphProps) {
   if (isLoading) {
     return (
       <div className={cn("mb-2 flex w-full items-center justify-center", className)}>
-        <Skeleton className="aspect-video w-full" />
+        <Skeleton variant="shimmer" className="aspect-video w-full rounded-lg" />
       </div>
     )
   }
@@ -625,7 +628,17 @@ function estimatePriceAxisWidth(ticks: number[]): number {
   return Math.max(40, longestLabel.length * 7 + 8)
 }
 
-function CustomTick({ x, y, payload, yAxisId }: { x: string | number; y: string | number; payload: { value: number }; yAxisId: string }) {
+function CustomTick({
+  x,
+  y,
+  payload,
+  yAxisId,
+}: {
+  x: string | number
+  y: string | number
+  payload: { value: number }
+  yAxisId: string
+}) {
   return (
     <text x={Number(x)} y={Number(y)} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
       {yAxisId === "price" ? formatPriceTickLabel(payload.value) : `${payload.value}%`}
@@ -648,18 +661,14 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   if (isLoading) {
     return (
       <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
-        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton variant="shimmer" className="h-10 w-full rounded-lg" />
         <div className="mt-1 flex flex-col rounded-lg border">
-          <Skeleton className="h-7 w-full rounded-none rounded-t-lg" />
+          <Skeleton variant="shimmer" className="h-7 w-full rounded-none rounded-t-lg" />
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton
-              key={i}
-              className="-mt-px h-8 w-full rounded-none last:rounded-b-lg"
-              variant="outline"
-            />
+            <Skeleton key={i} variant="shimmer" className="-mt-px h-8 w-full rounded-none last:rounded-b-lg" />
           ))}
         </div>
-        <Skeleton className="h-3 w-52" />
+        <Skeleton variant="shimmer" className="h-3 w-52" />
       </div>
     )
   }

@@ -27,11 +27,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ShareButton } from "@/components/ui/combo/share-button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { PriorityChip } from "@/components/products/PriorityChip"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
+import { StoreProductCardDrawerChartSkeleton } from "@/components/products/skeletons/StoreProductCardDrawerChartSkeleton"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
 import {
@@ -50,7 +50,7 @@ import {
 
 const StoreProductCardDrawerChart = dynamic(
   () => import("@/components/products/StoreProductCardDrawerChart").then((mod) => mod.StoreProductCardDrawerChart),
-  { ssr: false, loading: () => <Skeleton className="h-60 w-full rounded-lg" /> },
+  { ssr: false, loading: () => <StoreProductCardDrawerChartSkeleton /> },
 )
 
 const DISCOUNT_DECIMAL_PLACES = 0

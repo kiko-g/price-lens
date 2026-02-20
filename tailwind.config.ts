@@ -77,6 +77,7 @@ export default {
       },
       animation: {
         "shimmer-slide": "shimmer-slide var(--speed) ease-in-out infinite alternate",
+        "skeleton-shimmer": "skeleton-shimmer 1.5s ease-in-out infinite",
         "spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
         "fade-in": "fade-in 1s ease-in-out forwards",
         "fade-in-fast": "fade-in 300ms ease-out forwards",
@@ -97,6 +98,10 @@ export default {
           to: {
             transform: "translate(calc(100cqw - 100%), 0)",
           },
+        },
+        "skeleton-shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
         },
         "spin-around": {
           "0%": {

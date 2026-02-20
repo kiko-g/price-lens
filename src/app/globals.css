@@ -277,6 +277,15 @@
     }
   }
 
+  @keyframes skeleton-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
   @keyframes spin-around {
     0% {
       transform: translateZ(0) rotate(0);
