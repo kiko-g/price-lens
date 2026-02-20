@@ -22,7 +22,8 @@
     "db:stop": "supabase stop",
     "db:status": "supabase status",
     "supabase:generate:types": "npx supabase gen types typescript --project-id srpjxzydhsumqbrzpisa > src/types/supabase.ts",
-    "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts"
+    "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts",
+    "icons:generate": "node scripts/generate-app-icons.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.91",
@@ -108,9 +109,11 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "puppeteer": "^24.37.4",
+    "sharp": "^0.34.5",
     "supabase": "^2.76.10",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.2.0",
+    "to-ico": "^1.1.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
