@@ -26,6 +26,7 @@
 // Query functions
 export {
   queryStoreProducts,
+  queryStoreProductsQuick,
   getMatchingProductsCount,
   getMatchingProductsWithDistribution,
   bulkUpdatePriority,

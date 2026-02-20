@@ -9,16 +9,16 @@ function Skeleton({ variant = "default", className, ...props }: Props) {
     <div
       className={cn(
         "rounded-md",
-        variant === "default" && "animate-pulse bg-muted",
-        variant === "outline" && "animate-pulse border-border border",
-        variant === "shimmer" && "relative overflow-hidden bg-muted",
+        variant === "default" && "bg-muted animate-pulse",
+        variant === "outline" && "border-border animate-pulse border",
+        variant === "shimmer" && "bg-muted relative overflow-hidden",
         className,
       )}
       {...props}
     >
       {variant === "shimmer" && (
         <span
-          className="absolute inset-0 -translate-x-full animate-skeleton-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10"
+          className="animate-skeleton-shimmer absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent dark:via-white/10"
           aria-hidden
         />
       )}

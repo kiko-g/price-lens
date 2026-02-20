@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useStoreProducts, type StoreProductWithMeta } from "@/hooks/useStoreProducts"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { fetchQuickStoreProducts, type StoreProductWithMeta } from "@/hooks/useStoreProducts"
 
 interface UseLiveSearchOptions {
   debounceMs?: number
@@ -23,7 +24,6 @@ export function useLiveSearch(query: string, options: UseLiveSearchOptions = {})
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [isDebouncing, setIsDebouncing] = useState(false)
 
-  // debounce the query
   useEffect(() => {
     const trimmed = query.trim()
 
@@ -45,24 +45,21 @@ export function useLiveSearch(query: string, options: UseLiveSearchOptions = {})
 
   const shouldFetch = enabled && debouncedQuery.length >= minChars
 
-  const { data, isLoading, isFetching } = useStoreProducts(
-    {
-      search: { query: debouncedQuery, searchIn: "any" },
-      pagination: { page: 1, limit },
-      sort: { sortBy: "a-z", prioritizeByPriority: true },
-      flags: { onlyAvailable: true, onlyTracked: true },
-    },
-    {
-      enabled: shouldFetch,
-      staleTime: 1000 * 60 * 5, // 5 minutes cache
-      refetchOnWindowFocus: false,
-    },
-  )
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["storeProductsQuick", debouncedQuery, limit],
+    queryFn: () => fetchQuickStoreProducts(debouncedQuery, limit),
+    enabled: shouldFetch,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
+  })
+
+  const results = shouldFetch && data ? data.data : []
 
   return {
-    results: shouldFetch ? data : [],
+    results,
     isLoading: shouldFetch && (isLoading || isFetching),
     isDebouncing,
-    isEmpty: shouldFetch && !isLoading && !isFetching && data.length === 0,
+    isEmpty: shouldFetch && !isLoading && !isFetching && (!data || data.data.length === 0),
   }
 }

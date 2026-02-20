@@ -41,13 +41,17 @@ export function SearchContainer({
     const handleKeyDown = (e: KeyboardEvent): void => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
-        setOpen((prev) => !prev)
+        if (onOpenChange) {
+          onOpenChange(!open)
+        } else {
+          setInternalOpen((prev) => !prev)
+        }
       }
     }
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [registerKeyboardShortcut, setOpen])
+  }, [registerKeyboardShortcut, onOpenChange, open])
 
   // clone children to add onClick handler
   const trigger = (

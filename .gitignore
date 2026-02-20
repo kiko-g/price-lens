@@ -52,6 +52,7 @@ scripts/*-failed-ids.txt
 # local docs, plans, jsons
 docs/json
 docs/plans
+docs/sql
 
 # database dumps
 production_dump.sql

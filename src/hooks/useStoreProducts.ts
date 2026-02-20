@@ -80,6 +80,9 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
   if (params.flags?.onlyAvailable === false) {
     searchParams.onlyAvailable = "false"
   }
+  if (params.flags?.onlyTracked) {
+    searchParams.tracked = "true"
+  }
 
   return searchParams
 }
@@ -105,6 +108,33 @@ export async function fetchStoreProducts(params: StoreProductsQueryParams): Prom
       page: data.pagination.page,
       limit: data.pagination.limit,
       totalCount: data.pagination.pagedCount ?? null,
+      totalPages: data.pagination.totalPages ?? null,
+      hasNextPage: data.pagination.hasNextPage ?? false,
+      hasPreviousPage: data.pagination.hasPreviousPage ?? false,
+    },
+    error: null,
+  }
+}
+
+/**
+ * Fast path for quick/header search. Uses /api/store_products/quick (name-only, no auth).
+ */
+export async function fetchQuickStoreProducts(query: string, limit: number): Promise<StoreProductsQueryResult> {
+  const response = await axios.get("/api/store_products/quick", {
+    params: { q: query.trim(), limit },
+  })
+
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch products")
+  }
+
+  const data = response.data
+  return {
+    data: data.data as StoreProductWithMeta[],
+    pagination: {
+      page: data.pagination.page,
+      limit: data.pagination.limit,
+      totalCount: data.pagination.totalCount ?? null,
       totalPages: data.pagination.totalPages ?? null,
       hasNextPage: data.pagination.hasNextPage ?? false,
       hasPreviousPage: data.pagination.hasPreviousPage ?? false,

@@ -247,6 +247,66 @@ function applyPriorityFilter<Q extends { [key: string]: any }>(
   return query
 }
 
+/**
+ * Fast path for quick search (e.g. header autocomplete).
+ * Name-only ilike, tracked + available, no favorites, no count.
+ * Use when limit is small (e.g. 7) for lower latency.
+ */
+export async function queryStoreProductsQuick(
+  searchQuery: string,
+  limit: number,
+  client?: SupabaseClient,
+): Promise<StoreProductsQueryResult> {
+  const supabase = client ?? createClient()
+  const safeLimit = Math.min(Math.max(1, limit), 20)
+
+  const sanitized = searchQuery.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
+  if (!sanitized) {
+    return {
+      data: [],
+      pagination: { page: 1, limit: safeLimit, totalCount: null, totalPages: null, hasNextPage: false, hasPreviousPage: false },
+      error: null,
+    }
+  }
+
+  const pattern = `%${sanitized.replace(/ /g, "%")}%`
+  const query = supabase
+    .from("store_products")
+    .select(LISTING_COLUMNS)
+    .ilike("name", pattern)
+    .eq("available", true)
+    .in("priority", [1, 2, 3, 4, 5])
+    .order("priority", { ascending: false, nullsFirst: false })
+    .order("name", { ascending: true })
+    .range(0, safeLimit - 1)
+
+  const { data, error } = await withTimeout(
+    Promise.resolve(query) as Promise<{ data: StoreProductWithMeta[] | null; error: { message: string; code?: string } | null }>,
+    Math.min(SUPABASE_QUERY_TIMEOUT_MS, 5000),
+  )
+
+  if (error) {
+    return {
+      data: [],
+      pagination: createEmptyPagination({ page: 1, limit: safeLimit }),
+      error: { message: error.message, code: error.code },
+    }
+  }
+
+  return {
+    data: (data ?? []).map((row) => ({ ...row, is_favorited: false })),
+    pagination: {
+      page: 1,
+      limit: safeLimit,
+      totalCount: null,
+      totalPages: null,
+      hasNextPage: (data ?? []).length >= safeLimit,
+      hasPreviousPage: false,
+    },
+    error: null,
+  }
+}
+
 function applyOriginFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.origin?.originIds) return query
 
