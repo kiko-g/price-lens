@@ -9,6 +9,28 @@ import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/compone
 
 import { SearchContent } from "./SearchContent"
 
+function useVisualViewportHeight(enabled: boolean): number | null {
+  const [height, setHeight] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined" || !window.visualViewport) return
+
+    const vv = window.visualViewport
+    const update = (): void => setHeight(vv.height)
+
+    update()
+    vv.addEventListener("resize", update)
+    vv.addEventListener("scroll", update)
+    return () => {
+      vv.removeEventListener("resize", update)
+      vv.removeEventListener("scroll", update)
+      setHeight(null)
+    }
+  }, [enabled])
+
+  return height
+}
+
 interface SearchContainerProps {
   children: React.ReactNode
   open?: boolean
@@ -30,6 +52,7 @@ export function SearchContainer({
 
   const open = controlledOpen ?? internalOpen
   const setOpen = onOpenChange ?? setInternalOpen
+  const visualHeight = useVisualViewportHeight(open && !isDesktop)
 
   const handleClose = useCallback((): void => {
     setOpen(false)
@@ -77,14 +100,19 @@ export function SearchContainer({
     )
   }
 
+  const drawerStyle =
+    visualHeight != null
+      ? { maxHeight: `${visualHeight}px`, height: `${visualHeight}px` }
+      : undefined
+
   return (
     <>
       {trigger}
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="max-h-[85svh]">
+        <DrawerContent className="max-h-[85svh]" style={drawerStyle}>
           <DrawerTitle className="sr-only">Search products</DrawerTitle>
           <DrawerDescription className="sr-only">Search for supermarket products</DrawerDescription>
-          <div className="flex h-[75svh] flex-col overflow-hidden">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <SearchContent onClose={handleClose} initialQuery={initialQuery} />
           </div>
         </DrawerContent>
