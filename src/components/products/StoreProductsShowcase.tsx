@@ -14,6 +14,7 @@ import {
 } from "@/hooks/useStoreProducts"
 import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
 import { useScrollDirection } from "@/hooks/useScrollDirection"
+import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
@@ -416,6 +417,19 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   // On mobile: page-1 products + accumulated extra pages. On desktop: just current page.
   const displayProducts = isDesktop ? products : [...products, ...mobileExtraProducts]
+
+  // Pull-to-refresh (mobile only)
+  const handlePullRefresh = useCallback(async () => {
+    setMobileExtraProducts([])
+    setMobilePage(1)
+    setMobileHasMore(true)
+    await refetch()
+  }, [refetch])
+
+  const { pullDistance, isRefreshing: isPullRefreshing, progress: pullProgress } = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    enabled: !isDesktop,
+  })
 
   // Sync local query input when URL changes
   useEffect(() => {
@@ -1134,6 +1148,21 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
       {/* Main Content Area */}
       <div className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
+        {/* Pull-to-refresh indicator (mobile) */}
+        {(pullDistance > 0 || isPullRefreshing) && (
+          <div
+            className="flex items-center justify-center overflow-hidden transition-[height] duration-200 ease-out lg:hidden"
+            style={{ height: pullDistance > 0 ? pullDistance : isPullRefreshing ? 40 : 0 }}
+          >
+            <div
+              className={cn("text-muted-foreground", isPullRefreshing && "animate-spin")}
+              style={{ opacity: pullProgress, transform: `rotate(${pullProgress * 360}deg)` }}
+            >
+              <RefreshCcwIcon className="h-5 w-5" />
+            </div>
+          </div>
+        )}
+
         {/* Products Grid */}
         {showSkeletons ? (
           <LoadingGrid limit={limit} />
@@ -1165,10 +1194,13 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               />
             </div>
 
+            {/* Mobile: thin progress bar */}
+            {showOverlay && <MobileProgressBar />}
+
             {/* Products grid with loading overlay */}
             <div className="relative">
-                {showOverlay && (
-                <div className="bg-background/60 absolute inset-0 z-10 flex items-start justify-center pt-24 backdrop-blur-[2px]">
+              {showOverlay && (
+                <div className="bg-background/60 absolute inset-0 z-10 hidden items-start justify-center pt-24 backdrop-blur-[2px] lg:flex">
                   <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
                     <Loader2Icon className="h-4 w-4 animate-spin" />
                     <span className="text-sm font-medium">Loading...</span>
@@ -1177,7 +1209,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               )}
 
               <ProductGridWrapper
-                className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
+                className={cn("w-full transition-opacity duration-200", showOverlay && "lg:pointer-events-none")}
               >
                 {displayProducts.map((product, idx) => (
                   <StoreProductCard key={product.id} sp={product} imagePriority={idx < 15} />
@@ -1235,6 +1267,14 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 // ============================================================================
 // Sub-Components
 // ============================================================================
+
+function MobileProgressBar() {
+  return (
+    <div className="bg-primary/20 h-1 w-full overflow-hidden rounded-full lg:hidden">
+      <div className="bg-primary h-full w-1/3 animate-[progressSlide_1s_ease-in-out_infinite] rounded-full" />
+    </div>
+  )
+}
 
 interface MobileNavProps {
   query: string

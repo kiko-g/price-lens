@@ -467,6 +467,15 @@
   .animate-slither {
     animation: slither 2s infinite linear;
   }
+
+  @keyframes progressSlide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(400%);
+    }
+  }
 }
 
 @layer base {

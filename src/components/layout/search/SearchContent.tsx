@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -79,6 +79,24 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
 
   const filteredPopular = popularProducts.filter((p) => p.value.toLowerCase().includes(query.toLowerCase()))
 
+  const suggestions = useMemo(() => {
+    if (!showLiveResults || results.length === 0) return []
+    const q = query.trim().toLowerCase()
+    const seen = new Set<string>()
+    const items: string[] = []
+
+    for (const product of results) {
+      if (!product.name) continue
+      const name = product.name.trim()
+      const key = name.toLowerCase()
+      if (key === q || seen.has(key)) continue
+      seen.add(key)
+      items.push(name.length > 50 ? name.slice(0, 48) + "…" : name)
+      if (items.length >= 6) break
+    }
+    return items
+  }, [results, query, showLiveResults])
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       {/* search input */}
@@ -130,6 +148,28 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
                   onRemove={() => removeSearch(search)}
                 />
               ))}
+            </SearchSection>
+          )}
+
+          {/* query suggestions */}
+          {showLiveResults && suggestions.length > 0 && (
+            <SearchSection title="Suggestions">
+              <div className="flex flex-wrap gap-1.5 px-2 pb-1">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      setQuery(s)
+                      inputRef.current?.focus()
+                    }}
+                    className="bg-muted hover:bg-accent truncate rounded-full px-3 py-1 text-xs font-medium transition-colors"
+                    style={{ maxWidth: "15rem" }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </SearchSection>
           )}
 
