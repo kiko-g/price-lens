@@ -705,9 +705,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const isNavigationPending = pendingSearchQuery !== null && pendingSearchQuery !== urlState.query
   // Overlay: we have data but something is in progress (refetch, pending search, or desktop URL update)
   const showOverlay =
-    (isFetching && products.length > 0) ||
-    (isNavigationPending && displayProducts.length > 0) ||
-    isNavigating
+    (isFetching && products.length > 0) || (isNavigationPending && displayProducts.length > 0) || isNavigating
 
   const SLOW_LOAD_THRESHOLD_MS = 6000
   const [showSlowLoadMessage, setShowSlowLoadMessage] = useState(false)
@@ -912,11 +910,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
           )}
 
           {/* Filters Accordion */}
-          <Accordion
-            type="multiple"
-            className="w-full border-t"
-            defaultValue={["sort", "options", "categories", "store-origin"]}
-          >
+          <Accordion type="multiple" className="w-full border-t" defaultValue={["sort", "categories", "store-origin"]}>
             {/* Sort Options */}
             <AccordionItem value="sort">
               <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -954,90 +948,6 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                         ))}
                   </SelectContent>
                 </Select>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Checkbox Filter Options */}
-            <AccordionItem value="options">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Options
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="order-by-priority"
-                      checked={localFilters.orderByPriority}
-                      onCheckedChange={handleTogglePriorityOrder}
-                    />
-                    <Label
-                      htmlFor="order-by-priority"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CrownIcon className="h-4 w-4" />
-                      Order by priority
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-available"
-                      checked={localFilters.onlyAvailable}
-                      onCheckedChange={handleToggleAvailable}
-                    />
-                    <Label
-                      htmlFor="only-available"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CircleCheckIcon className="h-4 w-4" />
-                      <span>Only available</span>
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-discounted"
-                      checked={localFilters.onlyDiscounted}
-                      onCheckedChange={handleToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
-                    </Label>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Categories Filter */}
-            <AccordionItem value="categories">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Categories
-                {localFilters.category && (
-                  <>
-                    <span className="text-muted-foreground text-xs">(1)</span>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleClearCategory()
-                      }}
-                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
-                    >
-                      Clear
-                    </span>
-                  </>
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <CanonicalCategoryCascade
-                  selectedCategorySlug={localFilters.category}
-                  onCategoryChange={handleCategoryChange}
-                />
               </AccordionContent>
             </AccordionItem>
 
@@ -1095,6 +1005,90 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                       </Label>
                     </div>
                   ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Categories Filter */}
+            <AccordionItem value="categories">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Categories
+                {localFilters.category && (
+                  <>
+                    <span className="text-muted-foreground text-xs">(1)</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClearCategory()
+                      }}
+                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </span>
+                  </>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <CanonicalCategoryCascade
+                  selectedCategorySlug={localFilters.category}
+                  onCategoryChange={handleCategoryChange}
+                />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Checkbox Filter Options */}
+            <AccordionItem value="options">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Options
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="order-by-priority"
+                      checked={localFilters.orderByPriority}
+                      onCheckedChange={handleTogglePriorityOrder}
+                    />
+                    <Label
+                      htmlFor="order-by-priority"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CrownIcon className="h-4 w-4" />
+                      Order by priority
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-available"
+                      checked={localFilters.onlyAvailable}
+                      onCheckedChange={handleToggleAvailable}
+                    />
+                    <Label
+                      htmlFor="only-available"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CircleCheckIcon className="h-4 w-4" />
+                      <span>Only available</span>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="only-discounted"
+                      checked={localFilters.onlyDiscounted}
+                      onCheckedChange={handleToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
