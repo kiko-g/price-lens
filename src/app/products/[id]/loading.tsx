@@ -63,7 +63,7 @@ function DesktopHeroSkeleton() {
     <article className="hidden w-full grid-cols-20 gap-8 md:grid">
       {/* Left column: Image + Barcode (col-span-6 matches ProductHeroDesktop) */}
       <aside className="col-span-6 flex flex-col items-center">
-        <Skeleton variant="shimmer" className="aspect-7/8 w-full rounded-lg" />
+        <Skeleton variant="shimmer" className="aspect-8/7 w-full rounded-lg" />
         <div className="mt-4 flex items-center gap-1">
           <Skeleton variant="shimmer" className="h-[35px] w-40" />
         </div>

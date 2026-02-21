@@ -86,19 +86,24 @@ export async function queryStoreProducts(
 
   const offset = (pagination.page - 1) * pagination.limit
 
-  // Determine which table/view to use based on canonical category filter
   const useCanonicalView = !!params.canonicalCategory?.categoryId
   const tableName = useCanonicalView ? "store_products_with_canonical" : "store_products"
 
-  // If using canonical category filter, get all descendant IDs
   let canonicalCategoryIds: number[] = []
   if (params.canonicalCategory?.categoryId) {
     canonicalCategoryIds = await getDescendantCategoryIds(supabase, params.canonicalCategory.categoryId)
   }
 
-  // Build the base query - no count: "exact" to avoid expensive COUNT(*) OVER()
-  // Instead, fetch limit+1 rows to determine hasNextPage
-  const columns = useCanonicalView ? LISTING_COLUMNS_CANONICAL : LISTING_COLUMNS
+  const useMinimalSelect = flags.minimalSelectForPreview === true
+  const OG_COLUMNS = "id,origin_id,name,brand,price,discount,image"
+  const OG_COLUMNS_CANONICAL = `${OG_COLUMNS},canonical_category_id`
+  const columns = useMinimalSelect
+    ? useCanonicalView
+      ? OG_COLUMNS_CANONICAL
+      : OG_COLUMNS
+    : useCanonicalView
+      ? LISTING_COLUMNS_CANONICAL
+      : LISTING_COLUMNS
   let query = supabase.from(tableName).select(columns)
 
   // Apply canonical category filter if present (must use the view)

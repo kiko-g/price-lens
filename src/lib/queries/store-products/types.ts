@@ -158,6 +158,8 @@ export interface FilterFlags {
   onlyTracked?: boolean
   /** Only include available products (available = true) */
   onlyAvailable?: boolean
+  /** Use minimal column set for OG/preview (id, origin_id, name, brand, price, discount, image) */
+  minimalSelectForPreview?: boolean
 }
 
 // ============================================================================

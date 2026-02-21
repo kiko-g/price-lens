@@ -6,7 +6,7 @@ export function StoreProductCardSkeleton() {
   return (
     <div className="bg-background flex w-full flex-col rounded-lg">
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <Skeleton className="aspect-7/8 w-full" />
+        <Skeleton className="aspect-8/7 w-full" />
       </div>
 
       <div className="mb-5 flex flex-col items-start gap-2">

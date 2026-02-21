@@ -2,32 +2,65 @@ import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
 import { buildPageTitle } from "@/lib/business/page-title"
-import { STORE_COLORS, STORE_NAMES, type SortByType } from "@/types/business"
+import { siteConfig } from "@/lib/config"
+import { getSearchType, STORE_COLORS, STORE_NAMES, type SortByType } from "@/types/business"
+import type { PrioritySource } from "@/types"
 
 const PRODUCTS_AMOUNT = 4
+
+function parseCategoryId(slug: string): number | null {
+  const match = slug.match(/^(\d+)/)
+  return match ? parseInt(match[1], 10) : null
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get("q") || undefined
+  const searchIn = getSearchType(searchParams.get("t") ?? "any")
   const sortBy = searchParams.get("sort") || undefined
-  const priorityOrder = searchParams.get("priority_order") === "true"
+  const priorityOrder = searchParams.get("priority_order") !== "false"
   const originParam = searchParams.get("origin")
-  const category = searchParams.get("category") || undefined
+  const categoryParam = searchParams.get("category") || undefined
   const onlyDiscounted = searchParams.get("discounted") === "true"
+  const onlyAvailable = searchParams.get("available") !== "false"
+  const priorityParam = searchParams.get("priority")
+  const sourceParam = searchParams.get("source")
 
   const origins = originParam
     ?.split(",")
     .map(Number)
     .filter((n) => !isNaN(n) && Object.values(SupermarketChain).includes(n)) as SupermarketChain[] | undefined
 
-  const title = buildPageTitle({ query, sortBy, origins, category, onlyDiscounted })
+  const categoryId = categoryParam ? parseCategoryId(categoryParam) : null
+  const priorityValues = priorityParam
+    ?.split(",")
+    .map((v) => parseInt(v.trim(), 10))
+    .filter((v) => !isNaN(v) && v >= 0 && v <= 5)
+  const sourceValues = sourceParam
+    ?.split(",")
+    .map((v) => v.trim())
+    .filter((v): v is PrioritySource => v === "ai" || v === "manual")
 
-  // Fetch 9 products for 3x3 grid
+  const title = buildPageTitle({
+    query,
+    sortBy,
+    origins,
+    category: categoryParam ?? undefined,
+    onlyDiscounted,
+  })
+
   const result = await queryStoreProducts({
-    search: query ? { query, searchIn: "any" } : undefined,
+    search: query ? { query, searchIn } : undefined,
     origin: origins?.length ? { originIds: origins.length === 1 ? origins[0] : origins } : undefined,
-    categories: category ? { hierarchy: { category1: category } } : undefined,
-    flags: { onlyDiscounted, excludeEmptyNames: true },
+    canonicalCategory: categoryId && categoryId > 0 ? { categoryId } : undefined,
+    priority: priorityValues?.length ? { values: priorityValues } : undefined,
+    source: sourceValues?.length ? { values: sourceValues } : undefined,
+    flags: {
+      onlyDiscounted,
+      onlyAvailable,
+      excludeEmptyNames: true,
+      minimalSelectForPreview: true,
+    },
     pagination: { page: 1, limit: PRODUCTS_AMOUNT },
     sort: { sortBy: (sortBy as SortByType) || "a-z", prioritizeByPriority: priorityOrder },
   })
@@ -51,18 +84,15 @@ export async function GET(request: Request) {
           tw="flex items-center px-4 py-2.5 rounded-xl border border-zinc-200 bg-white"
           style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
         >
-          <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
-            <defs>
-              <linearGradient id="grad" x1="26.5" y1="4" x2="7.5" y2="29.5" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#688EEF" />
-                <stop offset="1" stopColor="#A57EEC" />
-              </linearGradient>
-            </defs>
-            <circle cx="16" cy="16" r="16" fill="url(#grad)" />
-            <rect x="16" y="16" width="8" height="8" rx="2" fill="white" fillOpacity="0.4" />
-            <rect x="12" y="12" width="8" height="8" rx="2" fill="white" fillOpacity="0.5" />
-            <rect x="8" y="8" width="8" height="8" rx="2" fill="white" />
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${siteConfig.url}/price-lens.svg`}
+            alt=""
+            width={36}
+            height={36}
+            tw="w-9 h-9"
+            style={{ objectFit: "contain" }}
+          />
           <span tw="ml-2.5 text-xl font-semibold text-zinc-700" style={{ letterSpacing: "-0.02em" }}>
             Price Lens
           </span>

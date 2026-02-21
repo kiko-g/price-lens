@@ -49,7 +49,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
     <article className="hidden w-full grid-cols-20 gap-8 md:grid">
       {/* Left column: Image + Barcode */}
       <aside className="col-span-6 flex flex-col items-center">
-        <div className="relative aspect-7/8 w-full overflow-hidden rounded-lg border bg-white">
+        <div className="relative aspect-8/7 w-full overflow-hidden rounded-lg border bg-white">
           {sp.image ? (
             <Image
               fill

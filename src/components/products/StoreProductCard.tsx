@@ -133,7 +133,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
       >
         <Link href={generateProductPath(sp)} className="h-full w-full">
           {sp.image ? (
-            <div className="relative aspect-7/8 w-full">
+            <div className="relative aspect-8/7 w-full">
               <Image
                 src={resolveImageUrlForCard(sp.image, 300)}
                 alt={sp.name || "Product Image"}
@@ -141,7 +141,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 height={400}
                 unoptimized
                 className={cn(
-                  "aspect-7/8 h-full w-full bg-white object-cover object-center transition duration-300",
+                  "aspect-8/7 h-full w-full bg-white object-cover object-center transition duration-300",
                   sp.available ? "opacity-100" : "",
                 )}
                 placeholder="blur"
@@ -150,7 +150,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               />
             </div>
           ) : (
-            <div className="aspect-7/8 w-full bg-zinc-100 dark:bg-zinc-800" />
+            <div className="aspect-8/7 w-full bg-zinc-100 dark:bg-zinc-800" />
           )}
         </Link>
 

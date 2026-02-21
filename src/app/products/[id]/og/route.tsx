@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { storeProductQueries } from "@/lib/queries/products"
 import { extractProductIdFromSlug } from "@/lib/business/product"
+import { siteConfig } from "@/lib/config"
 import { STORE_NAMES } from "@/types/business"
 
 export const runtime = "nodejs"
@@ -111,23 +112,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       </div>
 
       <div tw="absolute bottom-6 right-6 flex items-center">
-        {/* Logo Badge */}
         <div
           tw="flex items-center px-4 py-2.5 rounded-xl bg-white/10"
           style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
         >
-          <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
-            <defs>
-              <linearGradient id="grad" x1="26.5" y1="4" x2="7.5" y2="29.5" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#688EEF" />
-                <stop offset="1" stopColor="#A57EEC" />
-              </linearGradient>
-            </defs>
-            <circle cx="16" cy="16" r="16" fill="url(#grad)" />
-            <rect x="16" y="16" width="8" height="8" rx="2" fill="white" fillOpacity="0.4" />
-            <rect x="12" y="12" width="8" height="8" rx="2" fill="white" fillOpacity="0.5" />
-            <rect x="8" y="8" width="8" height="8" rx="2" fill="white" />
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${siteConfig.url}/price-lens.svg`}
+            alt=""
+            width={36}
+            height={36}
+            tw="w-9 h-9"
+            style={{ objectFit: "contain" }}
+          />
           <span tw="ml-2.5 text-xl font-semibold text-zinc-50" style={{ letterSpacing: "-0.02em" }}>
             Price Lens
           </span>

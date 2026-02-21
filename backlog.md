@@ -3,7 +3,7 @@
 ## Bugs
 
 - [ ] Find out if scraping pressure is affecting loading times and UX.
-- [ ] Products cache issue showing 0-0 ?????
+- [x] Products cache issue showing 0-0 ?????
 
 ## General
 
@@ -19,6 +19,7 @@
 - [x] Develop `business.ts` to have priority business logic data propagated from there across the app (single source of truth)
 - [x] Debounce product search in desktop mode
 - [x] Add route for /products/barcode/xxx
+- [ ] Tangle scrape action with relevance score? How to reassess?
 - [ ] Tangle scrape action with product barcode discoverability action on open api
 - [ ] FILTER OPTION FOR RELEVANT PRODUCTS. RELEVANT HAVE MORE VIEWS, MORE DATA POINTS, ETC
 - [ ] Radically improve home page and think of marketing/sales/promoting the product via the homepage and its branding

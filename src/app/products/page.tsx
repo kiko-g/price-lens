@@ -31,14 +31,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     onlyDiscounted: params.discounted === "true",
   })
 
-  // Build OG image URL with filters
+  // Build OG image URL from all valid /products URL params (omit page so preview shows first page)
+  const ogParamKeys = ["q", "t", "sort", "origin", "priority_order", "available", "discounted", "priority", "source", "category"] as const
   const ogParams = new URLSearchParams()
-  if (params.q) ogParams.set("q", params.q)
-  if (params.sort) ogParams.set("sort", params.sort)
-  if (params.priority_order) ogParams.set("priority_order", params.priority_order)
-  if (params.origin) ogParams.set("origin", params.origin)
-  if (params.cat) ogParams.set("category", params.cat)
-  if (params.discounted) ogParams.set("discounted", params.discounted)
+  for (const key of ogParamKeys) {
+    const value = params[key] ?? params[key === "category" ? "cat" : key]
+    if (value !== undefined && value !== "") ogParams.set(key, value)
+  }
 
   const ogImageUrl = `${siteConfig.url}/api/og/products${ogParams.toString() ? `?${ogParams}` : ""}`
 
