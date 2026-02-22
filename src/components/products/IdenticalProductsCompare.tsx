@@ -203,8 +203,8 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   return (
     <div className="animate-fade-in-fast flex flex-col">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
           <ScaleIcon className="h-5 w-5" />
           Compare Prices
           <Badge variant="boring" size="xs">
@@ -214,7 +214,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
 
         {hasBarcode && (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/compare?barcode=${encodeURIComponent(currentProduct.barcode!)}`}>
+            <Link href={`/identical?barcode=${encodeURIComponent(currentProduct.barcode!)}`}>
               Compare in detail
               <ArrowRightIcon className="h-4 w-4" />
             </Link>

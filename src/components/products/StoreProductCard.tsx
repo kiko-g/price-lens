@@ -399,7 +399,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 {sp.barcode && (
                   <DropdownMenuItem variant="hype" asChild>
                     <Button variant="dropdown-item" asChild>
-                      <Link href={`/compare?barcode=${sp.barcode}`}>
+                      <Link href={`/identical?barcode=${sp.barcode}`}>
                         <span className="mr-2">Compare in other stores</span>
                         <ScaleIcon />
                       </Link>

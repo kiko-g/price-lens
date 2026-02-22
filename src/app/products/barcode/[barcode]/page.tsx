@@ -107,5 +107,5 @@ export default async function ProductByBarcodePage({ params }: PageProps) {
   }
 
   // Multiple products - redirect to compare page
-  redirect(`/compare?barcode=${encodeURIComponent(barcode)}`)
+  redirect(`/identical?barcode=${encodeURIComponent(barcode)}`)
 }
