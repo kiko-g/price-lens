@@ -29,7 +29,7 @@ export const WORKER_BATCH_SIZE = 40
 // How many batches to send to QStash per scheduler run
 // NOTE: Temporarily reduced from 20 to 10 to halve egress. Revert after ~20 Mar 2026.
 // With 40 products per batch and 10 batches = 400 products per scheduler run
-export const MAX_BATCHES_PER_RUN = 10
+export const MAX_BATCHES_PER_RUN = 20
 
 // Cron runs every 30 minutes = 48 runs/day (temporarily slowed from 15 min)
 // Max daily capacity: 40 × 10 × 48 = 19,200 products/day

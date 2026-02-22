@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic"
+import { Suspense } from "react"
 
 import { defaultMetadata } from "@/lib/config"
 import type { Metadata } from "next"
@@ -35,7 +36,13 @@ export default async function Home() {
       />
 
       <main className="flex w-full flex-col items-center justify-center">
-        <Hero />
+        <Suspense
+          fallback={
+            <div className="max-w-9xl z-20 mx-auto flex min-h-[calc(100svh-var(--header-height))] w-full flex-col items-center justify-center gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-center lg:gap-12 lg:px-20 lg:py-0" />
+          }
+        >
+          <Hero />
+        </Suspense>
         <SavePotential />
         <CustomSeparator />
         <PriceCreep />

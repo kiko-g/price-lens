@@ -78,46 +78,66 @@ export function BarcodeScanButton() {
         },
       })
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-      }
       setIsScanning(true)
-
-      const codeReader = new BrowserMultiFormatReader()
-      scanIntervalRef.current = setInterval(async () => {
-        const video = videoRef.current
-        const canvas = canvasRef.current
-        if (
-          !video ||
-          !canvas ||
-          video.readyState !== video.HAVE_ENOUGH_DATA ||
-          !streamRef.current
-        )
-          return
-        const ctx = canvas.getContext("2d")
-        if (!ctx) return
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-        try {
-          const result = await codeReader.decodeFromCanvas(canvas)
-          const code = result?.getText()
-          if (code && isProductBarcode(code)) {
-            handleScanSuccess(code)
-          }
-        } catch {
-          // no barcode in frame, continue
-        }
-      }, 300)
     } catch (err) {
       console.error("Error accessing camera:", err)
       setError(
         "Unable to access camera. Please ensure you have granted camera permissions.",
       )
-      stopScanning()
     }
-  }, [handleScanSuccess, stopScanning])
+  }, [])
+
+  useEffect(() => {
+    if (!isScanning || !streamRef.current) return
+    const video = videoRef.current
+    if (!video) return
+
+    video.srcObject = streamRef.current
+    video
+      .play()
+      .then(() => {
+        const codeReader = new BrowserMultiFormatReader()
+        scanIntervalRef.current = setInterval(async () => {
+          const v = videoRef.current
+          const canvas = canvasRef.current
+          if (
+            !v ||
+            !canvas ||
+            v.readyState !== v.HAVE_ENOUGH_DATA ||
+            !streamRef.current
+          )
+            return
+          const ctx = canvas.getContext("2d")
+          if (!ctx) return
+          canvas.width = v.videoWidth
+          canvas.height = v.videoHeight
+          ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
+          try {
+            const result = await codeReader.decodeFromCanvas(canvas)
+            const code = result?.getText()
+            if (code && isProductBarcode(code)) {
+              handleScanSuccess(code)
+            }
+          } catch {
+            // no barcode in frame
+          }
+        }, 300)
+      })
+      .catch((err) => {
+        console.error("Video play failed:", err)
+        setError("Unable to play camera stream.")
+        stopScanning()
+      })
+
+    return () => {
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current)
+        scanIntervalRef.current = null
+      }
+      streamRef.current?.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+    }
+  }, [isScanning, handleScanSuccess, stopScanning])
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
