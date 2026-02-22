@@ -2,13 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import {
-  Html5Qrcode,
-  Html5QrcodeSupportedFormats,
-  type Html5QrcodeCameraScanConfig,
-} from "html5-qrcode"
+import { BrowserMultiFormatReader } from "@zxing/browser"
 
-import { decodeBarcodeFromFile } from "@/lib/barcode-decode"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -18,118 +13,111 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import { CameraIcon, ImageIcon, Loader2Icon } from "lucide-react"
-
-const SCANNER_ELEMENT_ID = "barcode-scanner-root"
-
-const BARCODE_FORMATS = [
-  Html5QrcodeSupportedFormats.EAN_13,
-  Html5QrcodeSupportedFormats.EAN_8,
-  Html5QrcodeSupportedFormats.UPC_A,
-  Html5QrcodeSupportedFormats.UPC_E,
-]
+import { CameraIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
 
 function navigateToCompare(router: ReturnType<typeof useRouter>, barcode: string) {
   router.push(`/identical?barcode=${encodeURIComponent(barcode)}`)
 }
 
+function isProductBarcode(value: string): boolean {
+  const digits = value.replace(/\D/g, "")
+  return digits.length >= 8 && digits.length <= 14
+}
+
 export function BarcodeScanButton() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [status, setStatus] = useState<"idle" | "starting" | "scanning" | "file-picking">("idle")
+  const [isScanning, setIsScanning] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const stopScanner = useCallback(async () => {
-    const scanner = scannerRef.current
-    if (!scanner) return
-    try {
-      if (scanner.isScanning) await scanner.stop()
-      scanner.clear()
-    } finally {
-      scannerRef.current = null
+  const stopScanning = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current)
+      scanIntervalRef.current = null
     }
+    setIsScanning(false)
   }, [])
+
+  const handleScanSuccess = useCallback(
+    (code: string) => {
+      if (!isProductBarcode(code)) return
+      stopScanning()
+      setOpen(false)
+      navigateToCompare(router, code)
+    },
+    [router, stopScanning],
+  )
 
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
       if (!isOpen) {
-        stopScanner()
+        stopScanning()
         setError(null)
-        setStatus("idle")
       }
       setOpen(isOpen)
     },
-    [stopScanner],
+    [stopScanning],
   )
 
-  const handleScanSuccess = useCallback(
-    (decodedText: string) => {
-      stopScanner()
-      setOpen(false)
-      navigateToCompare(router, decodedText)
-    },
-    [router, stopScanner],
-  )
+  const startScanning = useCallback(async () => {
+    try {
+      setError(null)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      setIsScanning(true)
 
-  useEffect(() => {
-    if (!open) return
-
-    const element = document.getElementById(SCANNER_ELEMENT_ID)
-    if (!element) return
-
-    setStatus("starting")
-    setError(null)
-
-    const config: Html5QrcodeCameraScanConfig = {
-      fps: 10,
-      qrbox: (viewfinderWidth, viewfinderHeight) => ({
-        width: Math.min(viewfinderWidth, 320),
-        height: Math.min(Math.round(viewfinderHeight * 0.4), 160),
-      }),
-    }
-    const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, {
-      formatsToSupport: BARCODE_FORMATS,
-      verbose: false,
-      useBarCodeDetectorIfSupported: true,
-    })
-    scannerRef.current = scanner
-
-    Html5Qrcode.getCameras()
-      .then((cameras) => {
-        if (!cameras?.length) {
-          setError("No camera found. Use \"Pick image\" instead.")
-          setStatus("idle")
-          return
-        }
-        const cameraId = cameras[0].id
-        return scanner.start(
-          cameraId,
-          config,
-          (text) => handleScanSuccess(text),
-          () => {},
+      const codeReader = new BrowserMultiFormatReader()
+      scanIntervalRef.current = setInterval(async () => {
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        if (
+          !video ||
+          !canvas ||
+          video.readyState !== video.HAVE_ENOUGH_DATA ||
+          !streamRef.current
         )
-      })
-      .then(() => {
-        if (scannerRef.current?.isScanning) setStatus("scanning")
-      })
-      .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : "Camera access failed"
-        setError(message.includes("NotAllowedError") ? "Camera permission denied." : message)
-        setStatus("idle")
-      })
-
-    return () => {
-      stopScanner()
+          return
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        try {
+          const result = await codeReader.decodeFromCanvas(canvas)
+          const code = result?.getText()
+          if (code && isProductBarcode(code)) {
+            handleScanSuccess(code)
+          }
+        } catch {
+          // no barcode in frame, continue
+        }
+      }, 300)
+    } catch (err) {
+      console.error("Error accessing camera:", err)
+      setError(
+        "Unable to access camera. Please ensure you have granted camera permissions.",
+      )
+      stopScanning()
     }
-  }, [open, handleScanSuccess, stopScanner])
-
-  const handlePickImage = useCallback(() => {
-    setStatus("file-picking")
-    setError(null)
-    fileInputRef.current?.click()
-  }, [])
+  }, [handleScanSuccess, stopScanning])
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,25 +125,44 @@ export function BarcodeScanButton() {
       e.target.value = ""
       if (!file || !open) return
 
-      await stopScanner()
-      setStatus("file-picking")
+      setIsProcessing(true)
+      setError(null)
+      stopScanning()
 
-      try {
-        const barcode = await decodeBarcodeFromFile(file)
-        if (barcode) {
-          setOpen(false)
-          navigateToCompare(router, barcode)
-        } else {
-          setError("No barcode found in image.")
+      const imageUrl = URL.createObjectURL(file)
+      const img = new Image()
+
+      img.onload = async () => {
+        try {
+          const codeReader = new BrowserMultiFormatReader()
+          const result = await codeReader.decodeFromImageUrl(imageUrl)
+          const code = result?.getText()
+          if (code && isProductBarcode(code)) {
+            setOpen(false)
+            navigateToCompare(router, code)
+          } else {
+            setError("No barcode found in image. Try another image.")
+          }
+        } catch {
+          setError("No barcode found in image. Try another image.")
+        } finally {
+          URL.revokeObjectURL(imageUrl)
+          setIsProcessing(false)
         }
-      } catch {
-        setError("No barcode found in image.")
-      } finally {
-        setStatus("idle")
       }
+      img.onerror = () => {
+        URL.revokeObjectURL(imageUrl)
+        setError("Failed to load image.")
+        setIsProcessing(false)
+      }
+      img.src = imageUrl
     },
-    [open, router, stopScanner],
+    [open, router, stopScanning],
   )
+
+  useEffect(() => {
+    return () => stopScanning()
+  }, [stopScanning])
 
   return (
     <>
@@ -180,48 +187,89 @@ export function BarcodeScanButton() {
           <DialogHeader>
             <DialogTitle>Scan barcode</DialogTitle>
             <DialogDescription>
-              Point your camera at a product barcode, or pick an image.
+              Scan product barcodes with your camera or upload an image.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-3">
-            <div
-              id={SCANNER_ELEMENT_ID}
-              className="min-h-[200px] w-full overflow-hidden rounded-md bg-black"
-            />
-            {status === "starting" && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2Icon className="h-4 w-4 animate-spin" />
-                Starting camera…
-              </div>
-            )}
+          <div className="flex flex-col gap-4">
             {error && (
               <p className="text-destructive text-sm" role="alert">
                 {error}
               </p>
             )}
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handlePickImage}
-                disabled={status === "file-picking"}
-              >
-                <ImageIcon className="h-4 w-4" />
-                Pick image
-              </Button>
-            </div>
-          </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            aria-hidden
-            onChange={handleFileChange}
-          />
+            {isScanning ? (
+              <div className="flex flex-col gap-3">
+                <div className="relative aspect-video overflow-hidden rounded-md bg-black">
+                  <video
+                    ref={videoRef}
+                    className="h-full w-full object-cover"
+                    playsInline
+                    muted
+                  />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="border-primary/60 h-1/2 w-3/4 rounded-lg border-2 shadow-lg" />
+                  </div>
+                </div>
+                <canvas ref={canvasRef} className="hidden" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                  onClick={stopScanning}
+                >
+                  <XIcon className="h-5 w-5" />
+                  Stop scanning
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full"
+                  size="lg"
+                  onClick={startScanning}
+                  disabled={isProcessing}
+                >
+                  <CameraIcon className="h-5 w-5" />
+                  Start camera
+                </Button>
+                <div className="relative">
+                  <span className="border-border absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </span>
+                  <span className="text-muted-foreground relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2">or</span>
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <Loader2Icon className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <ImageIcon className="h-5 w-5" />
+                  )}
+                  {isProcessing ? "Processing…" : "Upload image"}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  aria-hidden
+                  onChange={handleFileChange}
+                />
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
