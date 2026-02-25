@@ -5,6 +5,21 @@
 - [ ] Find out if scraping pressure is affecting loading times and UX.
 - [x] Products cache issue showing 0-0 ?????
 
+## Macro Features
+
+### MF 1. Barcode scanner
+
+### MF 2. Product families
+
+1. ⁠⁠Chegares a loja
+2. ⁠⁠Quero este tipo X de produto
+3. ⁠⁠Diz me o mais barato e/ou o mais barato por unidade
+
+### MF 3. Best deals today in this store
+
+1. Im at this store
+2. Tell me what to buy from list X (or favorites)
+
 ## General
 
 - [ ] Ask what other pages we could create
