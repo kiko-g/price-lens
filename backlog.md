@@ -75,7 +75,9 @@
 
 - [x] Ensure scraper is completely using upserting behavior.
 - [x] (+/-) Add store_products column better than available that sets the status according to the last scrape http response status
-- [ ] Add supermarket SuperCor and Lidl
+- [ ] Discover pingo doce products consistently
+- [ ] Periodic product cleanup and additions (weekly)
+- [ ] Barcode operations and derivations
 - [ ] Open food facts api: https://world.openfoodfacts.org/product/5060639126521
 - [ ] Add store_products.sku
 - [ ] Investigate if more things can be scraped and what new columns can be used for `store_products`.

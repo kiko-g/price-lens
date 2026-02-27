@@ -56,7 +56,6 @@ export enum StoreOrigin {
   Continente = 1,
   Auchan = 2,
   PingoDoce = 3,
-  ElCorteIngles = 4,
 }
 
 /**
@@ -67,7 +66,7 @@ export interface ScraperContext {
   previousProduct?: StoreProduct
   /** Enable anti-blocking measures (random delays, rotating UA). Use for bulk scraping. */
   useAntiBlock?: boolean
-  /** Override request timeout in ms (e.g. for slow or strict sites like El Corte Inglés). */
+  /** Override request timeout in ms. */
   requestTimeoutMs?: number
 }
 

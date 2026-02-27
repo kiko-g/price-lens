@@ -2,21 +2,18 @@ export enum SupermarketChain {
   Continente = 1,
   Auchan = 2,
   PingoDoce = 3,
-  ElCorteIngles = 4,
 }
 
 export const STORE_NAMES: Record<number, string> = {
   [SupermarketChain.Continente]: "Continente",
   [SupermarketChain.Auchan]: "Auchan",
   [SupermarketChain.PingoDoce]: "Pingo Doce",
-  [SupermarketChain.ElCorteIngles]: "El Corte Inglés",
 }
 
 export const STORE_COLORS: Record<number, string> = {
   [SupermarketChain.Continente]: "#e3001b",
   [SupermarketChain.Auchan]: "#e30713",
   [SupermarketChain.PingoDoce]: "#71a82b",
-  [SupermarketChain.ElCorteIngles]: "#00802D",
 }
 
 export const SORT_LABELS: Record<string, string> = {
