@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 import Link from "next/link"
@@ -7,14 +8,18 @@ import { siteConfig } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { priceQueries } from "@/lib/queries/prices"
+import { lookupBarcode } from "@/lib/canonical/open-food-facts"
 
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { BackButton } from "@/components/ui/combo/back-button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { BarcodeCompare } from "@/components/products/BarcodeCompare"
+import { OffProductCard } from "@/components/products/OffProductCard"
+import { StoreProductCard } from "@/components/products/StoreProductCard"
 
-import { HomeIcon, SearchIcon } from "lucide-react"
+import { HomeIcon, SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, StoreIcon, Loader2Icon } from "lucide-react"
 
 interface PageProps {
   searchParams: Promise<{ barcode?: string }>
@@ -30,13 +35,12 @@ async function getProductsByBarcode(barcode: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const { data: products } = await storeProductQueries.getAllByBarcode(barcode, user?.id || null)
+  const { data: products } = await storeProductQueries.getAllByBarcodeOrCanonical(barcode, user?.id || null)
 
   return products ?? []
 }
 
 async function getProductsWithPrices(products: StoreProduct[]): Promise<ProductWithPrices[]> {
-  // Fetch price history for all products in parallel
   const pricePromises = products.map(async (product) => {
     if (!product.id) return { product, prices: [] }
     const prices = await priceQueries.getPricePointsPerIndividualProduct(product.id)
@@ -60,8 +64,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
   if (products.length === 0) {
     return {
-      title: "No Products Found",
-      description: `No products found with barcode ${barcode}.`,
+      title: `Product Lookup - ${barcode}`,
+      description: `Looking up barcode ${barcode} on ${siteConfig.name}.`,
     }
   }
 
@@ -82,15 +86,102 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 export default async function ComparePage({ searchParams }: PageProps) {
   const { barcode } = await searchParams
 
-  // No barcode provided - redirect to products page
   if (!barcode) {
     redirect("/products")
   }
 
   const products = await getProductsByBarcode(barcode)
 
-  // No products found - show friendly not-found page
-  if (products.length === 0) {
+  if (products.length > 0) {
+    const productsWithPrices = await getProductsWithPrices(products)
+
+    return (
+      <div className="flex w-full flex-col items-center justify-start p-4">
+        <BarcodeCompare products={products} productsWithPrices={productsWithPrices} barcode={barcode} />
+      </div>
+    )
+  }
+
+  // Not in our DB — try OFF with streaming via Suspense
+  return (
+    <Suspense fallback={<OffLookupSkeleton barcode={barcode} />}>
+      <OffLookupResult barcode={barcode} />
+    </Suspense>
+  )
+}
+
+// ─── Streamed OFF lookup ────────────────────────────────────────────
+
+async function OffLookupResult({ barcode }: { barcode: string }) {
+  const offResult = await lookupBarcode(barcode, { maxRetries: 1 })
+
+  if (offResult.status === "found") {
+    const primaryBrand = offResult.product.brands?.split(",")[0]?.trim() || null
+    let brandProducts: StoreProduct[] = []
+    if (primaryBrand) {
+      const { data } = await storeProductQueries.getByBrand(primaryBrand)
+      brandProducts = data
+    }
+
+    return (
+      <div className="flex w-full grow flex-col items-center justify-center">
+        <HeroGridPattern
+          withGradient
+          variant="grid"
+          className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+        />
+
+        <div className="flex w-full flex-col items-center justify-center gap-6 px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product identified</h1>
+            <p className="text-muted-foreground mt-1.5 max-w-sm text-center">
+              We found this product externally but it&apos;s not available in our tracked stores yet.
+            </p>
+          </div>
+
+          <OffProductCard product={offResult.product} barcode={barcode} />
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <BackButton />
+            <Button asChild variant="outline">
+              <Link href="/products" prefetch={false}>
+                <SearchIcon className="h-4 w-4" />
+                Browse products
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <a
+                href={`https://world.openfoodfacts.org/product/${barcode}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLinkIcon className="h-4 w-4" />
+                View on Open Food Facts
+              </a>
+            </Button>
+          </div>
+
+          {brandProducts.length > 0 && (
+            <div className="mt-4 w-full max-w-5xl">
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+                <StoreIcon className="h-5 w-5" />
+                Products from {primaryBrand} in our stores
+              </h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {brandProducts.map((sp) => (
+                  <StoreProductCard key={sp.id} sp={sp} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  if (offResult.status === "error") {
+    console.warn(`[identical] OFF lookup failed for ${barcode}: ${offResult.reason}`)
+
     return (
       <div className="flex w-full grow flex-col items-center justify-center">
         <HeroGridPattern
@@ -100,24 +191,41 @@ export default async function ComparePage({ searchParams }: PageProps) {
         />
 
         <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
-          <Barcode value={barcode} height={50} width={2} className="mb-2" />
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">No products found</h1>
+          <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+            <WifiOffIcon className="text-muted-foreground h-6 w-6" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Lookup unavailable</h1>
           <p className="text-muted-foreground max-w-sm text-center">
-            We couldn&apos;t find any products with barcode <span className="font-mono font-medium">{barcode}</span>.
+            We couldn&apos;t find barcode <span className="font-mono font-medium">{barcode}</span> in
+            our stores, and the external product database is temporarily unreachable.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button asChild variant="outline">
+              <a href={`/identical?barcode=${barcode}`}>
+                <RefreshCwIcon className="h-4 w-4" />
+                Try again
+              </a>
+            </Button>
             <BackButton />
             <Button asChild variant="outline">
-              <Link href="/products" prefetch={false}>
-                <SearchIcon className="h-4 w-4" />
-                Browse products
-              </Link>
+              <a
+                href={`https://world.openfoodfacts.org/product/${barcode}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLinkIcon className="h-4 w-4" />
+                Check Open Food Facts
+              </a>
             </Button>
-            <Button asChild>
-              <Link href="/" prefetch={false}>
-                <HomeIcon className="h-4 w-4" />
-                Go home
-              </Link>
+            <Button asChild variant="outline">
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLinkIcon className="h-4 w-4" />
+                Search on Google
+              </a>
             </Button>
           </div>
         </div>
@@ -125,12 +233,98 @@ export default async function ComparePage({ searchParams }: PageProps) {
     )
   }
 
-  // Fetch price history for all products in parallel
-  const productsWithPrices = await getProductsWithPrices(products)
-
+  // Status: "not_found" — barcode genuinely not in OFF either
   return (
-    <div className="flex w-full flex-col items-center justify-start p-4">
-      <BarcodeCompare products={products} productsWithPrices={productsWithPrices} barcode={barcode} />
+    <div className="flex w-full grow flex-col items-center justify-center">
+      <HeroGridPattern
+        withGradient
+        variant="grid"
+        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+      />
+
+      <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
+        <Barcode value={barcode} height={50} width={2} className="mb-2" />
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
+        <p className="text-muted-foreground max-w-sm text-center">
+          We couldn&apos;t find any product with barcode{" "}
+          <span className="font-mono font-medium">{barcode}</span> in our stores or external databases.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <BackButton />
+          <Button asChild variant="outline">
+            <Link href="/products" prefetch={false}>
+              <SearchIcon className="h-4 w-4" />
+              Browse products
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLinkIcon className="h-4 w-4" />
+              Search on Google
+            </a>
+          </Button>
+          <Button asChild>
+            <Link href="/" prefetch={false}>
+              <HomeIcon className="h-4 w-4" />
+              Go home
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Suspense fallback ──────────────────────────────────────────────
+
+function OffLookupSkeleton({ barcode }: { barcode: string }) {
+  return (
+    <div className="flex w-full grow flex-col items-center justify-center">
+      <HeroGridPattern
+        withGradient
+        variant="grid"
+        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+      />
+
+      <div className="flex w-full flex-col items-center justify-center gap-6 px-4">
+        <Loader2Icon className="text-primary h-8 w-8 animate-spin" />
+        <div className="text-center">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Not found in our stores</h1>
+          <p className="text-muted-foreground mt-1.5 max-w-sm text-center">
+            Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our
+            database. Checking Open Food Facts — this can take a few seconds.
+          </p>
+        </div>
+
+        <div className="border-border/60 bg-card w-full max-w-lg rounded-xl border p-6 shadow-sm">
+          <div className="mb-4 flex items-start gap-3">
+            <Skeleton className="h-16 w-16 shrink-0 rounded-lg" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          </div>
+          <div className="mb-4 flex gap-2">
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-24 rounded-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-16" />
+            <div className="flex flex-wrap gap-1.5">
+              <Skeleton className="h-5 w-20 rounded-full" />
+              <Skeleton className="h-5 w-28 rounded-full" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <Skeleton className="h-10 w-48" />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

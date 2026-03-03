@@ -297,6 +297,75 @@ export const storeProductQueries = {
     return { data, error }
   },
 
+  async getAllByBarcodeOrCanonical(barcode: string, userId?: string | null) {
+    const supabase = createClient()
+
+    // Step 1: exact barcode match
+    const { data: barcodeMatches, error } = await supabase
+      .from("store_products")
+      .select("*")
+      .eq("barcode", barcode)
+      .order("price", { ascending: true, nullsFirst: false })
+
+    if (error) return { data: null, error }
+
+    // Step 2: broaden via canonical_product_id if available
+    const canonicalId = barcodeMatches?.find((p) => p.canonical_product_id)?.canonical_product_id
+    let allProducts = barcodeMatches ?? []
+
+    if (canonicalId) {
+      const { data: canonicalMatches } = await supabase
+        .from("store_products")
+        .select("*")
+        .eq("canonical_product_id", canonicalId)
+        .order("price", { ascending: true, nullsFirst: false })
+
+      if (canonicalMatches && canonicalMatches.length > 0) {
+        const seenIds = new Set(allProducts.map((p) => p.id))
+        for (const p of canonicalMatches) {
+          if (!seenIds.has(p.id)) {
+            allProducts.push(p)
+            seenIds.add(p.id)
+          }
+        }
+      }
+    }
+
+    if (allProducts.length === 0) return { data: null, error: null }
+
+    // Augment with favorite status
+    if (userId && allProducts.length > 0) {
+      const productIds = allProducts.map((p) => p.id).filter(Boolean)
+      const { data: favorites } = await supabase
+        .from("user_favorites")
+        .select("store_product_id")
+        .eq("user_id", userId)
+        .in("store_product_id", productIds)
+
+      const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) ?? [])
+      return {
+        data: allProducts.map((p) => ({ ...p, is_favorited: favoriteIds.has(p.id) })),
+        error: null,
+      }
+    }
+
+    return { data: allProducts, error: null }
+  },
+
+  async getByBrand(brand: string, limit = 8) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("store_products")
+      .select("*")
+      .ilike("brand", `%${brand}%`)
+      .eq("available", true)
+      .not("image", "is", null)
+      .order("priority", { ascending: false, nullsFirst: true })
+      .limit(limit)
+
+    return { data: data ?? [], error }
+  },
+
   async getByIds(ids: string[]) {
     const supabase = createClient()
     return fetchAll(() => supabase.from("store_products").select("*").in("id", ids))

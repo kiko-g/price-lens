@@ -21,6 +21,7 @@ export interface OffProduct {
   brands: string | null
   quantity: string | null
   categories: string | null
+  imageUrl: string | null
 }
 
 async function throttle(): Promise<void> {
@@ -44,14 +45,18 @@ export type LookupResult =
  * Look up a barcode in Open Food Facts with retry on transient failures.
  * HTTP 404 is treated as "not found" (OFF uses 404 for unknown barcodes).
  */
-export async function lookupBarcode(barcode: string): Promise<LookupResult> {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+export async function lookupBarcode(
+  barcode: string,
+  { maxRetries = MAX_RETRIES }: { maxRetries?: number } = {},
+): Promise<LookupResult> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     await throttle()
 
     try {
-      const res = await fetch(`${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories`, {
+      const res = await fetch(`${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url`, {
         headers: { "User-Agent": USER_AGENT },
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(15_000),
+        next: { revalidate: 86_400 },
       })
 
       // OFF returns 404 for unknown barcodes — that's a genuine "not found"
@@ -61,7 +66,7 @@ export async function lookupBarcode(barcode: string): Promise<LookupResult> {
 
       if (!res.ok) {
         // 429 / 5xx → transient, retry
-        if (attempt < MAX_RETRIES) {
+        if (attempt < maxRetries) {
           const backoff = RETRY_DELAY_MS * (attempt + 1)
           await sleep(backoff)
           continue
@@ -98,10 +103,11 @@ export async function lookupBarcode(barcode: string): Promise<LookupResult> {
           brands: rawBrands,
           quantity: p.quantity || null,
           categories: p.categories || null,
+          imageUrl: p.image_front_small_url || null,
         },
       }
     } catch (err) {
-      if (attempt < MAX_RETRIES) {
+      if (attempt < maxRetries) {
         const backoff = RETRY_DELAY_MS * (attempt + 1)
         await sleep(backoff)
         continue
