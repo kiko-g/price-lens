@@ -113,15 +113,12 @@ export function usePerformanceTest() {
     [paramOverrides],
   )
 
-  const updateParamOverride = useCallback(
-    (routePath: string, overrides: Record<string, string | number | boolean>) => {
-      setParamOverrides((prev) => ({
-        ...prev,
-        [routePath]: { ...(prev[routePath] ?? {}), ...overrides },
-      }))
-    },
-    [],
-  )
+  const updateParamOverride = useCallback((routePath: string, overrides: Record<string, string | number | boolean>) => {
+    setParamOverrides((prev) => ({
+      ...prev,
+      [routePath]: { ...(prev[routePath] ?? {}), ...overrides },
+    }))
+  }, [])
 
   const resolveUrl = useCallback(
     (route: TestableRoute): string => {

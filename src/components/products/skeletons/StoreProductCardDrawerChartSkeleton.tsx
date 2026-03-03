@@ -32,11 +32,7 @@ export function StoreProductCardDrawerChartSkeleton() {
         <div className="mt-1 flex flex-col rounded-lg border">
           <Skeleton variant="shimmer" className="h-7 w-full rounded-none rounded-t-lg" />
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton
-              key={i}
-              variant="shimmer"
-              className="-mt-px h-8 w-full rounded-none last:rounded-b-lg"
-            />
+            <Skeleton key={i} variant="shimmer" className="-mt-px h-8 w-full rounded-none last:rounded-b-lg" />
           ))}
         </div>
         <Skeleton variant="shimmer" className="h-3 w-52" />

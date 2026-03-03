@@ -32,6 +32,8 @@ import {
   LayersIcon,
   TimerIcon,
   ContrastIcon,
+  ScanBarcodeIcon,
+  GitMergeIcon,
 } from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
@@ -97,6 +99,8 @@ const NAV_ITEMS: NavItem[] = [
     items: [
       { title: "Prices", href: "/admin/dashboard/prices", icon: DollarSignIcon },
       { title: "Store Products", href: "/admin/dashboard/store_products", icon: ShoppingCartIcon },
+      { title: "Trade Items", href: "/admin/trade-items", icon: ScanBarcodeIcon },
+      { title: "Canonical Matches", href: "/admin/canonical-matches", icon: GitMergeIcon },
     ],
   },
   {

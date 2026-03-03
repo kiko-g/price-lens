@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { findIdenticalProducts } from "@/lib/queries/product-matching"
 import { createClient } from "@/lib/supabase/server"
-import {
-  isStoreProductsCacheEnabled,
-  getCachedCrossStoreProducts,
-  setCachedCrossStoreProducts,
-} from "@/lib/kv"
+import { isStoreProductsCacheEnabled, getCachedCrossStoreProducts, setCachedCrossStoreProducts } from "@/lib/kv"
 import type { StoreProduct } from "@/types"
 
 type CrossStoreProduct = StoreProduct & {

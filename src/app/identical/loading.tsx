@@ -26,7 +26,7 @@ export default function CompareLoading() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex flex-col overflow-hidden rounded-xl border">
               {/* Store Header */}
-              <div className="border-b bg-muted/30 px-3 py-2">
+              <div className="bg-muted/30 border-b px-3 py-2">
                 <Skeleton className="h-6 w-20" />
               </div>
 

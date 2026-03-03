@@ -42,18 +42,19 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# docs
-docs/*.md
-
 # scripts output
 scripts/*.csv
 scripts/*-failed-ids.txt
 
-# local docs, plans, jsons
-docs/json
-docs/plans
-docs/sql
+# run logs
+/logs
 
 # database dumps
 production_dump.sql
 production_data.sql
+supabase/schema.sql
+supabase/data.sql
+*.dump
+
+# docs
+docs/*

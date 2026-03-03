@@ -12,8 +12,14 @@ export const STORE_NAMES: Record<number, string> = {
 
 export const STORE_COLORS: Record<number, string> = {
   [SupermarketChain.Continente]: "#e3001b",
-  [SupermarketChain.Auchan]: "#e30713",
+  [SupermarketChain.Auchan]: "#cc2131",
   [SupermarketChain.PingoDoce]: "#71a82b",
+}
+
+export const STORE_COLORS_SECONDARY: Record<number, string> = {
+  [SupermarketChain.Continente]: "#ffffff",
+  [SupermarketChain.Auchan]: "#2f9c5c",
+  [SupermarketChain.PingoDoce]: "#000000",
 }
 
 export const SORT_LABELS: Record<string, string> = {

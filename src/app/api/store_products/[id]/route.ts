@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { createClient } from "@/lib/supabase/server"
-import {
-  isStoreProductsCacheEnabled,
-  getCachedSingleProduct,
-  setCachedSingleProduct,
-} from "@/lib/kv"
+import { isStoreProductsCacheEnabled, getCachedSingleProduct, setCachedSingleProduct } from "@/lib/kv"
 
 /**
  * GET /api/store_products/[id]

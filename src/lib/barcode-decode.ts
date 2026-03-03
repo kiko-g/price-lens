@@ -4,11 +4,7 @@
  * Uses: native BarcodeDetector (Chrome/Edge), Quagga2, html5-qrcode.
  */
 
-import {
-  Html5Qrcode,
-  Html5QrcodeSupportedFormats,
-  type Html5QrcodeResult,
-} from "html5-qrcode"
+import { Html5Qrcode, Html5QrcodeSupportedFormats, type Html5QrcodeResult } from "html5-qrcode"
 import Quagga from "@ericblade/quagga2"
 
 const BARCODE_FORMATS = [
@@ -59,14 +55,12 @@ function ensureDecodeElement(): void {
   const div = document.createElement("div")
   div.id = ELEMENT_ID_ROBUST_DECODE
   div.setAttribute("aria-hidden", "true")
-  div.style.cssText =
-    "position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;pointer-events:none;"
+  div.style.cssText = "position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;pointer-events:none;"
   document.body.appendChild(div)
 }
 
 async function tryBarcodeDetector(file: File): Promise<string | null> {
-  const BarcodeDetector = (globalThis as unknown as { BarcodeDetector?: unknown })
-    .BarcodeDetector
+  const BarcodeDetector = (globalThis as unknown as { BarcodeDetector?: unknown }).BarcodeDetector
   if (!BarcodeDetector || typeof (BarcodeDetector as CallableFunction) !== "function") {
     return null
   }
@@ -154,9 +148,7 @@ function preprocessImage(file: File, options: PreprocessOptions): Promise<File> 
             reject(new Error("toBlob failed"))
             return
           }
-          resolve(
-            new File([blob], file.name, { type: blob.type, lastModified: Date.now() }),
-          )
+          resolve(new File([blob], file.name, { type: blob.type, lastModified: Date.now() }))
         },
         "image/jpeg",
         0.92,

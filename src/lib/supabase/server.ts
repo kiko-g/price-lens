@@ -23,13 +23,6 @@ export const createAdminClient = () => {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 
-  console.log("Admin client creation:", {
-    hasServiceRoleKey: !!serviceRoleKey,
-    hasUrl: !!supabaseUrl,
-    serviceRoleKeyLength: serviceRoleKey?.length,
-    serviceRoleKeyPrefix: serviceRoleKey?.substring(0, 20) + "...",
-  })
-
   if (!serviceRoleKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set")
   }

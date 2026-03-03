@@ -70,7 +70,9 @@ export async function getShowcaseProducts(productIds: string[]): Promise<Showcas
 
     const { data: products, error: productsError } = await supabase
       .from("store_products")
-      .select("id, origin_id, url, name, brand, pack, price, price_recommended, price_per_major_unit, discount, image, category, available, created_at, updated_at")
+      .select(
+        "id, origin_id, url, name, brand, pack, price, price_recommended, price_per_major_unit, discount, image, category, available, created_at, updated_at",
+      )
       .in("id", productIds)
 
     if (productsError) {

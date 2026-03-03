@@ -83,6 +83,8 @@ export interface StoreProduct {
   canonical_category_name_2?: string | null
   canonical_parent_id_2?: number | null
   canonical_category_name_3?: string | null
+  trade_item_id?: number | null
+  canonical_product_id?: number | null
 }
 
 export interface StoreProductWithSimilarity extends StoreProduct {
@@ -224,4 +226,33 @@ export interface CreateCategoryMappingInput {
 
 export interface BulkCreateCategoryMappingInput {
   mappings: CreateCategoryMappingInput[]
+}
+
+// ============================================================================
+// Canonical Products - Cross-barcode product normalization
+// ============================================================================
+
+export interface CanonicalProduct {
+  id: number
+  name: string
+  brand: string | null
+  volume_value: number | null
+  volume_unit: string | null
+  source: "auto" | "manual"
+  created_at: string
+  updated_at: string
+}
+
+export type GtinFormat = "ean13" | "ean8" | "gtin14" | "upca"
+
+export interface TradeItem {
+  id: number
+  gtin: string
+  gtin_format: GtinFormat
+  gs1_prefix: string | null
+  canonical_product_id: number | null
+  off_product_name: string | null
+  source: "scraped" | "manual"
+  created_at: string
+  updated_at: string
 }

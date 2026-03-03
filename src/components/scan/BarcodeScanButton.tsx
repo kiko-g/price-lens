@@ -5,13 +5,7 @@ import { useRouter } from "next/navigation"
 import { BrowserMultiFormatReader } from "@zxing/browser"
 
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 import { CameraIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
 
@@ -81,9 +75,7 @@ export function BarcodeScanButton() {
       setIsScanning(true)
     } catch (err) {
       console.error("Error accessing camera:", err)
-      setError(
-        "Unable to access camera. Please ensure you have granted camera permissions.",
-      )
+      setError("Unable to access camera. Please ensure you have granted camera permissions.")
     }
   }, [])
 
@@ -100,13 +92,7 @@ export function BarcodeScanButton() {
         scanIntervalRef.current = setInterval(async () => {
           const v = videoRef.current
           const canvas = canvasRef.current
-          if (
-            !v ||
-            !canvas ||
-            v.readyState !== v.HAVE_ENOUGH_DATA ||
-            !streamRef.current
-          )
-            return
+          if (!v || !canvas || v.readyState !== v.HAVE_ENOUGH_DATA || !streamRef.current) return
           const ctx = canvas.getContext("2d")
           if (!ctx) return
           canvas.width = v.videoWidth
@@ -206,9 +192,7 @@ export function BarcodeScanButton() {
         >
           <DialogHeader>
             <DialogTitle>Scan barcode</DialogTitle>
-            <DialogDescription>
-              Scan product barcodes with your camera or upload an image.
-            </DialogDescription>
+            <DialogDescription>Scan product barcodes with your camera or upload an image.</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
@@ -221,24 +205,13 @@ export function BarcodeScanButton() {
             {isScanning ? (
               <div className="flex flex-col gap-3">
                 <div className="relative aspect-video overflow-hidden rounded-md bg-black">
-                  <video
-                    ref={videoRef}
-                    className="h-full w-full object-cover"
-                    playsInline
-                    muted
-                  />
+                  <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <div className="border-primary/60 h-1/2 w-3/4 rounded-lg border-2 shadow-lg" />
                   </div>
                 </div>
                 <canvas ref={canvasRef} className="hidden" />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                  onClick={stopScanning}
-                >
+                <Button type="button" variant="outline" className="w-full" size="lg" onClick={stopScanning}>
                   <XIcon className="h-5 w-5" />
                   Stop scanning
                 </Button>
@@ -272,11 +245,7 @@ export function BarcodeScanButton() {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? (
-                    <Loader2Icon className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <ImageIcon className="h-5 w-5" />
-                  )}
+                  {isProcessing ? <Loader2Icon className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
                   {isProcessing ? "Processing…" : "Upload image"}
                 </Button>
                 <input

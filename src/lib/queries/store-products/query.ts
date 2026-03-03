@@ -9,16 +9,34 @@ const SUPABASE_QUERY_TIMEOUT_MS = parseInt(process.env.SUPABASE_QUERY_TIMEOUT_MS
 
 // Explicit column lists to avoid SELECT * egress overhead
 const LISTING_COLUMNS = [
-  "id", "origin_id", "url", "name", "brand", "barcode", "pack",
-  "price", "price_recommended", "price_per_major_unit", "major_unit",
-  "discount", "image", "category", "category_2", "category_3",
-  "priority", "priority_source", "priority_updated_at",
-  "available", "updated_at",
+  "id",
+  "origin_id",
+  "url",
+  "name",
+  "brand",
+  "barcode",
+  "pack",
+  "price",
+  "price_recommended",
+  "price_per_major_unit",
+  "major_unit",
+  "discount",
+  "image",
+  "category",
+  "category_2",
+  "category_3",
+  "priority",
+  "priority_source",
+  "priority_updated_at",
+  "available",
+  "updated_at",
 ].join(", ")
 
 const LISTING_COLUMNS_CANONICAL = [
   LISTING_COLUMNS,
-  "canonical_category_name", "canonical_category_name_2", "canonical_category_name_3",
+  "canonical_category_name",
+  "canonical_category_name_2",
+  "canonical_category_name_3",
 ].join(", ")
 
 // ============================================================================
@@ -168,7 +186,10 @@ export async function queryStoreProducts(
   // ============================================================================
 
   const { data, error } = await withTimeout(
-    Promise.resolve(query) as Promise<{ data: StoreProductWithMeta[] | null; error: { message: string; code?: string } | null }>,
+    Promise.resolve(query) as Promise<{
+      data: StoreProductWithMeta[] | null
+      error: { message: string; code?: string } | null
+    }>,
     SUPABASE_QUERY_TIMEOUT_MS,
   )
 
@@ -269,7 +290,14 @@ export async function queryStoreProductsQuick(
   if (!sanitized) {
     return {
       data: [],
-      pagination: { page: 1, limit: safeLimit, totalCount: null, totalPages: null, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: safeLimit,
+        totalCount: null,
+        totalPages: null,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
       error: null,
     }
   }
@@ -286,7 +314,10 @@ export async function queryStoreProductsQuick(
     .range(0, safeLimit - 1)
 
   const { data, error } = await withTimeout(
-    Promise.resolve(query) as Promise<{ data: StoreProductWithMeta[] | null; error: { message: string; code?: string } | null }>,
+    Promise.resolve(query) as Promise<{
+      data: StoreProductWithMeta[] | null
+      error: { message: string; code?: string } | null
+    }>,
     Math.min(SUPABASE_QUERY_TIMEOUT_MS, 5000),
   )
 

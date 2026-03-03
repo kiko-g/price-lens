@@ -100,10 +100,7 @@ export function SearchContainer({
     )
   }
 
-  const drawerStyle =
-    visualHeight != null
-      ? { maxHeight: `${visualHeight}px`, height: `${visualHeight}px` }
-      : undefined
+  const drawerStyle = visualHeight != null ? { maxHeight: `${visualHeight}px`, height: `${visualHeight}px` } : undefined
 
   return (
     <>

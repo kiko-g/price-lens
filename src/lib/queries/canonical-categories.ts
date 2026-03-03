@@ -492,10 +492,7 @@ export const categoryMappingQueries = {
 
     // Fetch all store products
     const { data: allProducts, error: productsError } = await fetchAll(() =>
-      supabase
-        .from("store_products")
-        .select("origin_id, category, category_2, category_3")
-        .not("category", "is", null),
+      supabase.from("store_products").select("origin_id, category, category_2, category_3").not("category", "is", null),
     )
 
     if (productsError) {
@@ -662,10 +659,7 @@ export const categoryMappingQueries = {
 
     // Fetch all store products
     const { data: allProducts, error: productsError } = await fetchAll(() =>
-      supabase
-        .from("store_products")
-        .select("origin_id, category, category_2, category_3")
-        .not("category", "is", null),
+      supabase.from("store_products").select("origin_id, category, category_2, category_3").not("category", "is", null),
     )
 
     if (productsError) {

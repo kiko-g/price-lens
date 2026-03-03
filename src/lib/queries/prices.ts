@@ -8,7 +8,13 @@ export const priceQueries = {
   async getPrices() {
     console.warn("[Prices] getPrices() fetches ALL rows — avoid in production")
     const supabase = createClient()
-    const { data, error } = await fetchAll(() => supabase.from("prices").select("id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at"))
+    const { data, error } = await fetchAll(() =>
+      supabase
+        .from("prices")
+        .select(
+          "id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at",
+        ),
+    )
 
     if (error) {
       console.error("Error fetching price points:", error)
@@ -238,7 +244,9 @@ export const priceQueries = {
 
     const { data, error } = await supabase
       .from("prices")
-      .select("id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at")
+      .select(
+        "id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at",
+      )
       .eq("store_product_id", store_product_id)
       .order("valid_from", { ascending: false })
       .limit(1)
@@ -414,7 +422,9 @@ export const priceQueries = {
     const { data, error } = await fetchAll(() =>
       supabase
         .from("prices")
-        .select("id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at")
+        .select(
+          "id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at",
+        )
         .order("store_product_id", { ascending: true })
         .order("valid_from", { ascending: false }),
     )

@@ -63,7 +63,9 @@ export function DrawerSheet({
           {description ? <DrawerDescription className="text-left">{description}</DrawerDescription> : null}
         </DrawerHeader>
 
-        <div className="no-scrollbar min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pt-2 pb-8">{children}</div>
+        <div className="no-scrollbar min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pt-2 pb-8">
+          {children}
+        </div>
       </DrawerContent>
     </Drawer>
   )

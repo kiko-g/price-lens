@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { findRelatedProducts } from "@/lib/queries/product-matching"
 import { createClient } from "@/lib/supabase/server"
-import {
-  isStoreProductsCacheEnabled,
-  getCachedRelatedProducts,
-  setCachedRelatedProducts,
-} from "@/lib/kv"
+import { isStoreProductsCacheEnabled, getCachedRelatedProducts, setCachedRelatedProducts } from "@/lib/kv"
 import type { StoreProduct } from "@/types"
 
 type RelatedProduct = StoreProduct & {

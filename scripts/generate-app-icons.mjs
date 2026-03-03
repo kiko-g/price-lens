@@ -29,10 +29,7 @@ async function main() {
   const pngs = {}
   for (const { size, name } of SIZES) {
     const outPath = join(iconsDir, name)
-    await sharp(svgBuffer)
-      .resize(size, size)
-      .png()
-      .toFile(outPath)
+    await sharp(svgBuffer).resize(size, size).png().toFile(outPath)
     console.log(`Wrote ${name} (${size}x${size})`)
     if (size === 16 || size === 32) {
       pngs[size] = await readFile(outPath)

@@ -133,17 +133,19 @@ export async function scrapeAndReplaceProduct(
   }
 
   // Pass pre-fetched existing data so createOrUpdateProduct can skip its own SELECT
-  const prefetchedExisting = prevSp ? {
-    created_at: prevSp.created_at ?? null,
-    updated_at: prevSp.updated_at ?? null,
-    barcode: prevSp.barcode ?? null,
-    brand: prevSp.brand ?? null,
-    image: prevSp.image ?? null,
-    pack: prevSp.pack ?? null,
-    category: prevSp.category ?? null,
-    category_2: prevSp.category_2 ?? null,
-    category_3: prevSp.category_3 ?? null,
-  } : undefined
+  const prefetchedExisting = prevSp
+    ? {
+        created_at: prevSp.created_at ?? null,
+        updated_at: prevSp.updated_at ?? null,
+        barcode: prevSp.barcode ?? null,
+        brand: prevSp.brand ?? null,
+        image: prevSp.image ?? null,
+        pack: prevSp.pack ?? null,
+        category: prevSp.category ?? null,
+        category_2: prevSp.category_2 ?? null,
+        category_3: prevSp.category_3 ?? null,
+      }
+    : undefined
 
   const { data, error } = await storeProductQueries.createOrUpdateProduct(
     result.product as unknown as import("@/types").StoreProduct,

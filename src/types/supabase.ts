@@ -1,16 +1,30 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -48,6 +62,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      canonical_products: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: number
+          name: string
+          source: string
+          updated_at: string
+          volume_unit: string | null
+          volume_value: number | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: number
+          name: string
+          source?: string
+          updated_at?: string
+          volume_unit?: string | null
+          volume_value?: number | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: number
+          name?: string
+          source?: string
+          updated_at?: string
+          volume_unit?: string | null
+          volume_value?: number | null
+        }
+        Relationships: []
       }
       category_mappings: {
         Row: {
@@ -234,11 +281,51 @@ export type Database = {
         }
         Relationships: []
       }
+      scrape_runs: {
+        Row: {
+          avg_duration_ms: number | null
+          batch_id: string
+          duration_ms: number | null
+          error: string | null
+          failed: number
+          finished_at: string | null
+          id: number
+          started_at: string
+          success: number
+          total: number
+        }
+        Insert: {
+          avg_duration_ms?: number | null
+          batch_id: string
+          duration_ms?: number | null
+          error?: string | null
+          failed?: number
+          finished_at?: string | null
+          id?: number
+          started_at?: string
+          success?: number
+          total?: number
+        }
+        Update: {
+          avg_duration_ms?: number | null
+          batch_id?: string
+          duration_ms?: number | null
+          error?: string | null
+          failed?: number
+          finished_at?: string | null
+          id?: number
+          started_at?: string
+          success?: number
+          total?: number
+        }
+        Relationships: []
+      }
       store_products: {
         Row: {
           available: boolean
           barcode: string | null
           brand: string | null
+          canonical_product_id: number | null
           category: string | null
           category_2: string | null
           category_3: string | null
@@ -254,11 +341,10 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source:
-            | Database["public"]["Enums"]["priority_source_type"]
-            | null
+          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           scraped_at: string | null
+          trade_item_id: number | null
           updated_at: string | null
           url: string | null
         }
@@ -266,6 +352,7 @@ export type Database = {
           available?: boolean
           barcode?: string | null
           brand?: string | null
+          canonical_product_id?: number | null
           category?: string | null
           category_2?: string | null
           category_3?: string | null
@@ -281,11 +368,10 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
-          priority_source?:
-            | Database["public"]["Enums"]["priority_source_type"]
-            | null
+          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           scraped_at?: string | null
+          trade_item_id?: number | null
           updated_at?: string | null
           url?: string | null
         }
@@ -293,6 +379,7 @@ export type Database = {
           available?: boolean
           barcode?: string | null
           brand?: string | null
+          canonical_product_id?: number | null
           category?: string | null
           category_2?: string | null
           category_3?: string | null
@@ -308,11 +395,10 @@ export type Database = {
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
-          priority_source?:
-            | Database["public"]["Enums"]["priority_source_type"]
-            | null
+          priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           scraped_at?: string | null
+          trade_item_id?: number | null
           updated_at?: string | null
           url?: string | null
         }
@@ -322,6 +408,20 @@ export type Database = {
             columns: ["origin_id"]
             isOneToOne: false
             referencedRelation: "supermarkets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_canonical_product_id_fkey"
+            columns: ["canonical_product_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_trade_item_id_fkey"
+            columns: ["trade_item_id"]
+            isOneToOne: false
+            referencedRelation: "trade_items"
             referencedColumns: ["id"]
           },
         ]
@@ -340,6 +440,50 @@ export type Database = {
           name?: string | null
         }
         Relationships: []
+      }
+      trade_items: {
+        Row: {
+          canonical_product_id: number | null
+          created_at: string
+          gs1_prefix: string | null
+          gtin: string
+          gtin_format: string
+          id: number
+          off_product_name: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          canonical_product_id?: number | null
+          created_at?: string
+          gs1_prefix?: string | null
+          gtin: string
+          gtin_format: string
+          id?: number
+          off_product_name?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_product_id?: number | null
+          created_at?: string
+          gs1_prefix?: string | null
+          gtin?: string
+          gtin_format?: string
+          id?: number
+          off_product_name?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_items_canonical_product_id_fkey"
+            columns: ["canonical_product_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_favorites: {
         Row: {
@@ -406,9 +550,7 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source:
-            | Database["public"]["Enums"]["priority_source_type"]
-            | null
+          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           scraped_at: string | null
           updated_at: string | null
@@ -447,9 +589,30 @@ export type Database = {
       }
     }
     Functions: {
+      count_canonical_matches: {
+        Args: { min_stores?: number; search_term?: string }
+        Returns: number
+      }
       count_phantom_scraped_products: {
         Args: { active_priorities: number[] }
         Returns: number
+      }
+      get_activity_window_stats: { Args: never; Returns: Json }
+      get_admin_overview_stats: { Args: never; Returns: Json }
+      get_canonical_matches: {
+        Args: {
+          min_stores?: number
+          result_limit?: number
+          result_offset?: number
+          search_term?: string
+        }
+        Returns: {
+          barcodes: number
+          brand: string
+          canonical_id: number
+          name: string
+          stores: number
+        }[]
       }
       get_category_mapping_stats: {
         Args: never
@@ -509,6 +672,7 @@ export type Database = {
           available: boolean
           barcode: string | null
           brand: string | null
+          canonical_product_id: number | null
           category: string | null
           category_2: string | null
           category_3: string | null
@@ -524,11 +688,10 @@ export type Database = {
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
-          priority_source:
-            | Database["public"]["Enums"]["priority_source_type"]
-            | null
+          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           scraped_at: string | null
+          trade_item_id: number | null
           updated_at: string | null
           url: string | null
         }[]
@@ -542,6 +705,17 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       unaccent: { Args: { "": string }; Returns: string }
+      upsert_price_point: {
+        Args: {
+          p_discount: number
+          p_price: number
+          p_price_per_major_unit: number
+          p_price_recommended: number
+          p_store_product_id: number
+          p_timestamp?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       plan_tier: "free" | "plus"
@@ -577,10 +751,8 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -588,9 +760,7 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -613,9 +783,7 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -638,9 +806,7 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -672,6 +838,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       plan_tier: ["free", "plus"],

@@ -1,7 +1,15 @@
 import { cn } from "@/lib/utils"
 import { TriangleIcon, EqualIcon } from "lucide-react"
 
-export function PriceChange({ variation, invertColors, decimalPlaces = 1 }: { variation: number; invertColors?: boolean; decimalPlaces?: number }) {
+export function PriceChange({
+  variation,
+  invertColors,
+  decimalPlaces = 1,
+}: {
+  variation: number
+  invertColors?: boolean
+  decimalPlaces?: number
+}) {
   const percentage = variation === 0 ? 0 : (variation * 100).toFixed(decimalPlaces)
   const positiveSign = variation > 0 ? "+" : ""
 

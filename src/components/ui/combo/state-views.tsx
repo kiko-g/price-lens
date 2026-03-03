@@ -19,8 +19,17 @@ interface ErrorStateViewProps {
   className?: string
 }
 
-export function ErrorStateView({ error, title, message, onRetry, icon: Icon = CircleOffIcon, className }: ErrorStateViewProps) {
-  const display = error ? getErrorDisplay(error) : { title: "Something went wrong", message: "An unexpected error occurred." }
+export function ErrorStateView({
+  error,
+  title,
+  message,
+  onRetry,
+  icon: Icon = CircleOffIcon,
+  className,
+}: ErrorStateViewProps) {
+  const display = error
+    ? getErrorDisplay(error)
+    : { title: "Something went wrong", message: "An unexpected error occurred." }
   const resolvedTitle = title ?? display.title
   const resolvedMessage = message ?? display.message
 
@@ -57,13 +66,7 @@ interface EmptyStateViewProps {
   className?: string
 }
 
-export function EmptyStateView({
-  title,
-  message,
-  icon: Icon = SearchXIcon,
-  actions,
-  className,
-}: EmptyStateViewProps) {
+export function EmptyStateView({ title, message, icon: Icon = SearchXIcon, actions, className }: EmptyStateViewProps) {
   return (
     <Empty className={cn("border-border bg-muted/30 border py-10", className)}>
       <EmptyHeader>

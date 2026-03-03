@@ -23,7 +23,11 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((k) => k !== STATIC_CACHE && k !== RUNTIME_CACHE && k !== IMAGE_CACHE).map((k) => caches.delete(k))),
+        Promise.all(
+          keys
+            .filter((k) => k !== STATIC_CACHE && k !== RUNTIME_CACHE && k !== IMAGE_CACHE)
+            .map((k) => caches.delete(k)),
+        ),
       )
       .then(() => self.clients.claim()),
   )
@@ -36,7 +40,12 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return
 
   // Product images: cache-first (they rarely change)
-  if (url.pathname.match(/\.(png|jpg|jpeg|webp|avif|svg)$/i) || url.hostname.includes("continente") || url.hostname.includes("auchan") || url.hostname.includes("pingodoce")) {
+  if (
+    url.pathname.match(/\.(png|jpg|jpeg|webp|avif|svg)$/i) ||
+    url.hostname.includes("continente") ||
+    url.hostname.includes("auchan") ||
+    url.hostname.includes("pingodoce")
+  ) {
     event.respondWith(cacheFirst(request, IMAGE_CACHE, 60 * 60 * 24 * 7))
     return
   }
@@ -93,7 +102,10 @@ async function cacheFirst(request, cacheName, maxAgeSeconds) {
 
 async function networkFirst(request, cacheName, timeoutMs) {
   try {
-    const response = await Promise.race([fetch(request), new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), timeoutMs))])
+    const response = await Promise.race([
+      fetch(request),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), timeoutMs)),
+    ])
     if (response.ok) {
       const cache = await caches.open(cacheName)
       cache.put(request, response.clone())
@@ -101,7 +113,13 @@ async function networkFirst(request, cacheName, timeoutMs) {
     return response
   } catch {
     const cached = await caches.match(request)
-    return cached || new Response(JSON.stringify({ error: "offline" }), { status: 503, headers: { "Content-Type": "application/json" } })
+    return (
+      cached ||
+      new Response(JSON.stringify({ error: "offline" }), {
+        status: 503,
+        headers: { "Content-Type": "application/json" },
+      })
+    )
   }
 }
 

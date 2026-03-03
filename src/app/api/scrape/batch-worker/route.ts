@@ -102,19 +102,22 @@ async function handler(req: NextRequest) {
       try {
         // Build existing product data from the scheduler payload (no DB read needed).
         // The scheduler pre-fetches these fields so we skip a SELECT per product.
-        const existingData = product.prioritySource !== undefined ? {
-          priority: product.priority,
-          priority_source: product.prioritySource,
-          barcode: product.barcode ?? null,
-          brand: product.brand ?? null,
-          image: product.image ?? null,
-          pack: product.pack ?? null,
-          category: product.category ?? null,
-          category_2: product.category2 ?? null,
-          category_3: product.category3 ?? null,
-          created_at: product.createdAt ?? null,
-          updated_at: product.updatedAt ?? null,
-        } : undefined
+        const existingData =
+          product.prioritySource !== undefined
+            ? {
+                priority: product.priority,
+                priority_source: product.prioritySource,
+                barcode: product.barcode ?? null,
+                brand: product.brand ?? null,
+                image: product.image ?? null,
+                pack: product.pack ?? null,
+                category: product.category ?? null,
+                category_2: product.category2 ?? null,
+                category_3: product.category3 ?? null,
+                created_at: product.createdAt ?? null,
+                updated_at: product.updatedAt ?? null,
+              }
+            : undefined
 
         const response = await scrapeAndReplaceProduct(
           product.url,

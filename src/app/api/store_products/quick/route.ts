@@ -17,7 +17,17 @@ export async function GET(req: NextRequest) {
 
     if (!q || q.length < 2) {
       return NextResponse.json(
-        { data: [], pagination: { page: 1, limit, totalCount: null, totalPages: null, hasNextPage: false, hasPreviousPage: false } },
+        {
+          data: [],
+          pagination: {
+            page: 1,
+            limit,
+            totalCount: null,
+            totalPages: null,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        },
         { status: 200, headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=120" } },
       )
     }

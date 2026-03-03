@@ -66,7 +66,10 @@ export function AdminPagination({ page, limit, totalCount, totalPages, hasNextPa
         <div className="text-muted-foreground text-sm">
           Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span>
           {totalCount != null && (
-            <> of <span className="font-medium">{totalCount}</span> results</>
+            <>
+              {" "}
+              of <span className="font-medium">{totalCount}</span> results
+            </>
           )}
         </div>
 
@@ -95,7 +98,8 @@ export function AdminPagination({ page, limit, totalCount, totalPages, hasNextPa
             </Button>
 
             <span className="text-muted-foreground mx-2 text-sm">
-              Page {page}{totalPages != null ? ` of ${totalPages}` : ""}
+              Page {page}
+              {totalPages != null ? ` of ${totalPages}` : ""}
             </span>
 
             <Button variant="outline" size="icon-sm" onClick={() => goToPage(page + 1)} disabled={isLastPage}>

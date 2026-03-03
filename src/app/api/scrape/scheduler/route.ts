@@ -106,7 +106,8 @@ export async function GET(req: NextRequest) {
     // Use a high limit to get the real backlog count, then we'll slice for actual scheduling
     // Fetch wider column set so the batch worker doesn't need to re-read each product.
     // The extra fields are passed through QStash to eliminate per-product SELECTs.
-    const SCHEDULER_COLUMNS = "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at"
+    const SCHEDULER_COLUMNS =
+      "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at"
 
     const {
       data: products,
@@ -214,7 +215,9 @@ export async function GET(req: NextRequest) {
       {} as Record<number, number>,
     )
 
-    console.log(`[Scheduler] Found ${allProducts.length} products (${products?.length ?? 0} overdue + ${recheckProducts?.length ?? 0} re-check), sending ${batchesToSend.length} batches`)
+    console.log(
+      `[Scheduler] Found ${allProducts.length} products (${products?.length ?? 0} overdue + ${recheckProducts?.length ?? 0} re-check), sending ${batchesToSend.length} batches`,
+    )
 
     // Send batched messages to QStash
     // NOTE: batchJSON() auto-stringifies, so pass objects NOT strings

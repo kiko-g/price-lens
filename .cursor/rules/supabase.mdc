@@ -5,9 +5,30 @@ alwaysApply: true
 ## Supabase details
 
 - Production is on Supabase free tier (org ID: xfgtjrilgugxlqsczqdp).
-- **Local development uses a local Supabase stack** via `supabase start` (Docker). Run `pnpm db:start` before `pnpm dev`.
+- **Local development uses a local Supabase stack** via Docker. Run `pnpm db:start` before `pnpm dev`. Use `pnpm db:status` to verify and see URLs/keys.
   - `.env.development.local` points to the local instance (auto-loaded by `next dev`).
   - `.env.local` keeps production credentials (used by `next build` and Vercel).
-  - Local Supabase Studio: http://127.0.0.1:54323
-- To refresh local data from production: `supabase db dump --linked -f production_dump.sql && supabase db dump --linked --data-only -f production_data.sql`, then restore with `psql`.
+
+### Local ports (config.toml)
+
+| Port  | Service   | Use for |
+|-------|-----------|--------|
+| 54321 | API       | `NEXT_PUBLIC_SUPABASE_URL` and all client/SDK usage — **must be 54321, not 54322** |
+| 54322 | Database  | Direct Postgres (restore script, server-side `DATABASE_URL`, Studio backend) |
+| 54323 | Studio    | http://127.0.0.1:54323 |
+| 54324 | Mailpit   | Email testing UI |
+
+- Local stack uses `project_id = "price-lens-local"` in `supabase/config.toml` (distinct from remote). If port 54322 is in use, stop the other project: `supabase stop --project-id <other-project-id>` (e.g. `srpjxzydhsumqbrzpisa` or `price-lens`) then `pnpm db:start` again.
+- "Stopped services: imgproxy, pooler" in `pnpm db:status` is expected when those are disabled in `supabase/config.toml`.
+
+### Refresh local DB from production (production-truth-first)
+
+1. `pnpm db:dump:schema` — pulls production schema to `supabase/schema.sql`
+2. `pnpm db:dump:data` — pulls production data to `supabase/data.sql` (can take ~2 min)
+3. `pnpm db:restore` — loads both into local Supabase (must be running via `pnpm db:start`)
+
+Dump files are gitignored. Restore writes only to local (`127.0.0.1:54322`), never production.
+
+- **Types:** `pnpm supabase:generate:types` generates from the **local** DB (`--local`) so `src/types/supabase.ts` matches the running schema (e.g. includes `trade_items`, `canonical_products` if migrations were applied locally). Remote project is used only for dump/restore and linking.
+
 - Supabase has a limit of 1000 when presenting results sometimes. When making queries we need to handle this as if results can be way more than that hard limit, using pagination perhaps.

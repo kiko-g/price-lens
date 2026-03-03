@@ -55,8 +55,12 @@ export function useStoreProductCard(sp: StoreProduct) {
   const { user } = useUser()
 
   const lastSuccessfulFavorite = useRef<boolean | null>(null)
-  const { promptAndSetPriority, clearPriority, setPriority, isPending: isPriorityPending } =
-    useSetProductPriority(sp.id)
+  const {
+    promptAndSetPriority,
+    clearPriority,
+    setPriority,
+    isPending: isPriorityPending,
+  } = useSetProductPriority(sp.id)
 
   // Scrape and update mutation
   const updateMutation = useMutation({

@@ -14,7 +14,9 @@ const DEFAULT_MAX_PAGES = 100
  * )
  */
 export async function fetchAll<T extends Record<string, unknown>>(
-  queryFactory: () => { range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: PostgrestError | null }> },
+  queryFactory: () => {
+    range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: PostgrestError | null }>
+  },
   options?: { pageSize?: number; maxPages?: number },
 ): Promise<{ data: T[]; error: PostgrestError | null }> {
   const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE

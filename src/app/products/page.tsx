@@ -32,7 +32,18 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   })
 
   // Build OG image URL from all valid /products URL params (omit page so preview shows first page)
-  const ogParamKeys = ["q", "t", "sort", "origin", "priority_order", "available", "discounted", "priority", "source", "category"] as const
+  const ogParamKeys = [
+    "q",
+    "t",
+    "sort",
+    "origin",
+    "priority_order",
+    "available",
+    "discounted",
+    "priority",
+    "source",
+    "category",
+  ] as const
   const ogParams = new URLSearchParams()
   for (const key of ogParamKeys) {
     const value = params[key] ?? params[key === "category" ? "cat" : key]

@@ -50,7 +50,9 @@ async function handler(req: NextRequest) {
     const supabase = createClient()
     const { data: existingProduct } = await supabase
       .from("store_products")
-      .select("id, url, name, origin_id, priority, priority_source, price, price_recommended, price_per_major_unit, discount, barcode, brand, image, pack, category, category_2, category_3, available, created_at, updated_at")
+      .select(
+        "id, url, name, origin_id, priority, priority_source, price, price_recommended, price_per_major_unit, discount, barcode, brand, image, pack, category, category_2, category_3, available, created_at, updated_at",
+      )
       .eq("id", productId)
       .single()
 

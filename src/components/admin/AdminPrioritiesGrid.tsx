@@ -117,13 +117,20 @@ export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPrio
             Showing <span className="text-foreground font-semibold">{(page - 1) * 48 + 1}</span> to{" "}
             <span className="text-foreground font-semibold">{Math.min(page * 48, totalCount ?? page * 48)}</span>
             {totalCount != null && (
-              <> of <span className="text-foreground font-semibold">{totalCount}</span></>
-            )} products
+              <>
+                {" "}
+                of <span className="text-foreground font-semibold">{totalCount}</span>
+              </>
+            )}{" "}
+            products
           </span>
           <span>
             Page <span className="text-foreground font-semibold">{page}</span>
             {totalPages != null && (
-              <> of <span className="text-foreground font-semibold">{totalPages}</span></>
+              <>
+                {" "}
+                of <span className="text-foreground font-semibold">{totalPages}</span>
+              </>
             )}
           </span>
         </div>
@@ -151,9 +158,14 @@ export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPrio
           Previous
         </Button>
         <span className="text-muted-foreground px-4 text-sm">
-          Page {page}{totalPages != null ? ` of ${totalPages}` : ""}
+          Page {page}
+          {totalPages != null ? ` of ${totalPages}` : ""}
         </span>
-        <Button variant="outline" onClick={() => handlePageChange(page + 1)} disabled={totalPages != null ? page >= totalPages : false}>
+        <Button
+          variant="outline"
+          onClick={() => handlePageChange(page + 1)}
+          disabled={totalPages != null ? page >= totalPages : false}
+        >
           Next
         </Button>
       </div>
