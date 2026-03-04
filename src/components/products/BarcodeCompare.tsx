@@ -176,9 +176,7 @@ function CompareCard({
             )}
           </div>
 
-          {product.name && (
-            <p className="text-muted-foreground line-clamp-1 text-xs">{product.name}</p>
-          )}
+          {product.name && <p className="text-muted-foreground line-clamp-1 text-xs">{product.name}</p>}
 
           <div className="flex items-baseline gap-2">
             {hasDiscount ? (
@@ -314,10 +312,7 @@ function OffEnrichmentSection({ barcode }: { barcode: string }) {
 
   return (
     <div className="bg-card rounded-lg border">
-      <button
-        onClick={handleToggle}
-        className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium"
-      >
+      <button onClick={handleToggle} className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium">
         <span className="flex items-center gap-2">
           <InfoIcon className="text-muted-foreground h-4 w-4" />
           Product Details (Open Food Facts)
@@ -426,7 +421,9 @@ function StoreComparisonTable({
 
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase">Recommended</span>
-                <span className={cn(product.price_recommended !== product.price && "text-muted-foreground line-through")}>
+                <span
+                  className={cn(product.price_recommended !== product.price && "text-muted-foreground line-through")}
+                >
                   {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "—"}
                 </span>
               </div>
@@ -455,12 +452,7 @@ function StoreComparisonTable({
 
 // ─── Main component ──────────────────────────────────────────────────
 
-export function BarcodeCompare({
-  products,
-  productsWithPrices,
-  barcode,
-  barcodes: barcodesProp,
-}: BarcodeCompareProps) {
+export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes: barcodesProp }: BarcodeCompareProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
 
   const productsWithPrice = products.filter((p) => p.price !== null && p.price !== undefined)
