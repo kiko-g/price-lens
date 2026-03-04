@@ -16,7 +16,7 @@ import { Barcode } from "@/components/ui/combo/barcode"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { ComparisonChart } from "@/components/products/ComparisonChart"
 
-import { ArrowUpRightIcon, TrophyIcon, TagIcon, Loader2Icon } from "lucide-react"
+import { ArrowUpRightIcon, TrophyIcon, TagIcon, Loader2Icon, LinkIcon } from "lucide-react"
 
 export interface ProductWithPrices {
   product: StoreProduct
@@ -27,6 +27,7 @@ interface BarcodeCompareProps {
   products: StoreProduct[]
   productsWithPrices: ProductWithPrices[]
   barcode: string
+  barcodes?: string[]
 }
 
 function resolveImageUrl(image: string, size = 80) {
@@ -184,7 +185,7 @@ function CompareCard({
   )
 }
 
-export function BarcodeCompare({ products, productsWithPrices, barcode }: BarcodeCompareProps) {
+export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes: barcodesProp }: BarcodeCompareProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange>("Max")
 
   const productsWithPrice = products.filter((p) => p.price !== null && p.price !== undefined)
@@ -194,6 +195,8 @@ export function BarcodeCompare({ products, productsWithPrices, barcode }: Barcod
 
   const firstProduct = products[0]
   const storeCount = new Set(products.map((p) => p.origin_id)).size
+  const uniqueBarcodes = barcodesProp ?? ([...new Set(products.map((p) => p.barcode).filter(Boolean))] as string[])
+  const isMultiBarcode = uniqueBarcodes.length > 1
 
   return (
     <div className="mx-auto w-full max-w-7xl">
@@ -215,11 +218,27 @@ export function BarcodeCompare({ products, productsWithPrices, barcode }: Barcod
                 {storeCount} store{storeCount !== 1 ? "s" : ""} · {products.length} listing
                 {products.length !== 1 ? "s" : ""}
               </Badge>
+              {isMultiBarcode && (
+                <Badge variant="secondary" size="xs" className="gap-1">
+                  <LinkIcon className="h-3 w-3" />
+                  {uniqueBarcodes.length} barcodes
+                </Badge>
+              )}
             </div>
             <h1 className="text-xl font-bold md:text-2xl">{firstProduct?.name || "Compare Prices"}</h1>
           </div>
 
-          <Barcode value={barcode} height={40} width={1.5} className="hidden sm:flex" />
+          {isMultiBarcode ? (
+            <div className="hidden flex-col gap-1 sm:flex">
+              {uniqueBarcodes.map((b) => (
+                <span key={b} className="bg-muted rounded px-2 py-0.5 font-mono text-xs">
+                  {b}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <Barcode value={barcode} height={40} width={1.5} className="hidden sm:flex" />
+          )}
         </div>
 
         {/* Savings callout - prominent */}

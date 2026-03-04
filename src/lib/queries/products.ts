@@ -352,6 +352,35 @@ export const storeProductQueries = {
     return { data: allProducts, error: null }
   },
 
+  async getAllByCanonicalId(canonicalId: number, userId?: string | null) {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from("store_products")
+      .select("*")
+      .eq("canonical_product_id", canonicalId)
+      .order("price", { ascending: true, nullsFirst: false })
+
+    if (error || !data || data.length === 0) return { data: null, error }
+
+    if (userId) {
+      const productIds = data.map((p) => p.id).filter(Boolean)
+      const { data: favorites } = await supabase
+        .from("user_favorites")
+        .select("store_product_id")
+        .eq("user_id", userId)
+        .in("store_product_id", productIds)
+
+      const favoriteIds = new Set(favorites?.map((f) => f.store_product_id) ?? [])
+      return {
+        data: data.map((p) => ({ ...p, is_favorited: favoriteIds.has(p.id) })),
+        error: null,
+      }
+    }
+
+    return { data, error: null }
+  },
+
   async getByBrand(brand: string, limit = 8) {
     const supabase = createClient()
     const { data, error } = await supabase

@@ -53,11 +53,14 @@ export async function lookupBarcode(
     await throttle()
 
     try {
-      const res = await fetch(`${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url`, {
-        headers: { "User-Agent": USER_AGENT },
-        signal: AbortSignal.timeout(15_000),
-        next: { revalidate: 86_400 },
-      })
+      const res = await fetch(
+        `${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url`,
+        {
+          headers: { "User-Agent": USER_AGENT },
+          signal: AbortSignal.timeout(15_000),
+          next: { revalidate: 86_400 },
+        },
+      )
 
       // OFF returns 404 for unknown barcodes — that's a genuine "not found"
       if (res.status === 404) {

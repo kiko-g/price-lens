@@ -167,8 +167,13 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   const cheapestPrice = productsWithPrice.length > 0 ? Math.min(...productsWithPrice.map((p) => p.price!)) : null
   const hasUniqueCheapest = productsWithPrice.filter((p) => p.price === cheapestPrice).length === 1
 
-  // Check if we have a barcode for the compare page link
+  // Build compare page link: prefer canonical, fall back to barcode
   const hasBarcode = currentProduct.barcode && currentProduct.barcode.length > 0
+  const compareHref = currentProduct.canonical_product_id
+    ? `/identical?canonical=${currentProduct.canonical_product_id}`
+    : hasBarcode
+      ? `/identical?barcode=${encodeURIComponent(currentProduct.barcode!)}`
+      : null
 
   if (error) {
     return <ErrorStateView error={error} title="Failed to load price comparison" />
@@ -212,9 +217,9 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
           </Badge>
         </h3>
 
-        {hasBarcode && (
+        {compareHref && (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/identical?barcode=${encodeURIComponent(currentProduct.barcode!)}`}>
+            <Link href={compareHref}>
               Compare in detail
               <ArrowRightIcon className="h-4 w-4" />
             </Link>

@@ -299,10 +299,7 @@ export async function runPass1(
       return { gtin: b, gtin_format: parsed?.format ?? "ean13", gs1_prefix: parsed?.gs1Prefix ?? null }
     })
 
-    const { data, error } = await supabase
-      .from("trade_items")
-      .upsert(rows, { onConflict: "gtin" })
-      .select("id, gtin")
+    const { data, error } = await supabase.from("trade_items").upsert(rows, { onConflict: "gtin" }).select("id, gtin")
 
     if (error) {
       log(`[Pass 1] WARN: batch upsert failed at offset ${i}: ${formatSupabaseError(error)}`)
@@ -430,7 +427,11 @@ export async function runPass2(
 
   // Pre-load existing canonicals with their OFF name
   const allCanonicals = await fetchAllPaginated<CanonicalDbRow>((from, to) =>
-    supabase.from("canonical_products").select("id, name, brand, volume_value, volume_unit").order("id").range(from, to),
+    supabase
+      .from("canonical_products")
+      .select("id, name, brand, volume_value, volume_unit")
+      .order("id")
+      .range(from, to),
   )
 
   const canonicalOffNames = new Map<number, string>()

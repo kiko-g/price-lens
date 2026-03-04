@@ -395,11 +395,17 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   </DropdownMenuItem>
                 )}
 
-                {/* Compare page link if sp.barcode is available */}
-                {sp.barcode && (
+                {/* Compare page link: prefer canonical, fall back to barcode */}
+                {(sp.canonical_product_id || sp.barcode) && (
                   <DropdownMenuItem variant="hype" asChild>
                     <Button variant="dropdown-item" asChild>
-                      <Link href={`/identical?barcode=${sp.barcode}`}>
+                      <Link
+                        href={
+                          sp.canonical_product_id
+                            ? `/identical?canonical=${sp.canonical_product_id}`
+                            : `/identical?barcode=${sp.barcode}`
+                        }
+                      >
                         <span className="mr-2">Compare in other stores</span>
                         <ScaleIcon />
                       </Link>

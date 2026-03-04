@@ -19,10 +19,18 @@ import { BarcodeCompare } from "@/components/products/BarcodeCompare"
 import { OffProductCard } from "@/components/products/OffProductCard"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 
-import { HomeIcon, SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, StoreIcon, Loader2Icon } from "lucide-react"
+import {
+  HomeIcon,
+  SearchIcon,
+  ExternalLinkIcon,
+  WifiOffIcon,
+  RefreshCwIcon,
+  StoreIcon,
+  Loader2Icon,
+} from "lucide-react"
 
 interface PageProps {
-  searchParams: Promise<{ barcode?: string }>
+  searchParams: Promise<{ barcode?: string; canonical?: string }>
 }
 
 export interface ProductWithPrices {
@@ -40,6 +48,16 @@ async function getProductsByBarcode(barcode: string) {
   return products ?? []
 }
 
+async function getProductsByCanonical(canonicalId: number) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const { data: products } = await storeProductQueries.getAllByCanonicalId(canonicalId, user?.id || null)
+
+  return products ?? []
+}
+
 async function getProductsWithPrices(products: StoreProduct[]): Promise<ProductWithPrices[]> {
   const pricePromises = products.map(async (product) => {
     if (!product.id) return { product, prices: [] }
@@ -51,21 +69,23 @@ async function getProductsWithPrices(products: StoreProduct[]): Promise<ProductW
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const { barcode } = await searchParams
+  const { barcode, canonical } = await searchParams
+  const canonicalId = canonical ? parseInt(canonical) : null
 
-  if (!barcode) {
+  if (!barcode && !canonicalId) {
     return {
       title: "Compare Prices",
       description: `Compare product prices across supermarkets on ${siteConfig.name}.`,
     }
   }
 
-  const products = await getProductsByBarcode(barcode)
+  const products = canonicalId ? await getProductsByCanonical(canonicalId) : await getProductsByBarcode(barcode!)
 
   if (products.length === 0) {
+    const label = barcode || `Canonical #${canonicalId}`
     return {
-      title: `Product Lookup - ${barcode}`,
-      description: `Looking up barcode ${barcode} on ${siteConfig.name}.`,
+      title: `Product Lookup - ${label}`,
+      description: `Looking up ${label} on ${siteConfig.name}.`,
     }
   }
 
@@ -73,10 +93,10 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const storeCount = new Set(products.map((p) => p.origin_id)).size
 
   return {
-    title: `Compare Prices - ${firstProduct.name || barcode}`,
+    title: `Compare Prices - ${firstProduct.name || barcode || "Product"}`,
     description: `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`,
     openGraph: {
-      title: `Compare Prices - ${firstProduct.name || barcode}`,
+      title: `Compare Prices - ${firstProduct.name || barcode || "Product"}`,
       description: `Compare prices across ${storeCount} stores.`,
       type: "website",
     },
@@ -84,29 +104,65 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 }
 
 export default async function ComparePage({ searchParams }: PageProps) {
-  const { barcode } = await searchParams
+  const { barcode, canonical } = await searchParams
+  const canonicalId = canonical ? parseInt(canonical) : null
 
-  if (!barcode) {
+  if (!barcode && !canonicalId) {
     redirect("/products")
   }
 
-  const products = await getProductsByBarcode(barcode)
+  const products = canonicalId ? await getProductsByCanonical(canonicalId) : await getProductsByBarcode(barcode!)
 
   if (products.length > 0) {
     const productsWithPrices = await getProductsWithPrices(products)
+    const barcodes = [...new Set(products.map((p) => p.barcode).filter(Boolean))] as string[]
+    const displayBarcode = barcodes[0] ?? barcode ?? ""
 
     return (
       <div className="flex w-full flex-col items-center justify-start p-4">
-        <BarcodeCompare products={products} productsWithPrices={productsWithPrices} barcode={barcode} />
+        <BarcodeCompare
+          products={products}
+          productsWithPrices={productsWithPrices}
+          barcode={displayBarcode}
+          barcodes={barcodes}
+        />
       </div>
     )
   }
 
-  // Not in our DB — try OFF with streaming via Suspense
+  // Not in our DB — try OFF with streaming via Suspense (only for barcode lookups)
+  if (barcode) {
+    return (
+      <Suspense fallback={<OffLookupSkeleton barcode={barcode} />}>
+        <OffLookupResult barcode={barcode} />
+      </Suspense>
+    )
+  }
+
+  // Canonical ID with no products — empty state
   return (
-    <Suspense fallback={<OffLookupSkeleton barcode={barcode} />}>
-      <OffLookupResult barcode={barcode} />
-    </Suspense>
+    <div className="flex w-full grow flex-col items-center justify-center">
+      <HeroGridPattern
+        withGradient
+        variant="grid"
+        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+      />
+      <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
+        <p className="text-muted-foreground max-w-sm text-center">
+          No store products found for this canonical product.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <BackButton />
+          <Button asChild variant="outline">
+            <Link href="/products" prefetch={false}>
+              <SearchIcon className="h-4 w-4" />
+              Browse products
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -150,11 +206,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <a
-                href={`https://world.openfoodfacts.org/product/${barcode}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
                 <ExternalLinkIcon className="h-4 w-4" />
                 View on Open Food Facts
               </a>
@@ -196,8 +248,8 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
           </div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Lookup unavailable</h1>
           <p className="text-muted-foreground max-w-sm text-center">
-            We couldn&apos;t find barcode <span className="font-mono font-medium">{barcode}</span> in
-            our stores, and the external product database is temporarily unreachable.
+            We couldn&apos;t find barcode <span className="font-mono font-medium">{barcode}</span> in our stores, and
+            the external product database is temporarily unreachable.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button asChild variant="outline">
@@ -208,11 +260,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
             </Button>
             <BackButton />
             <Button asChild variant="outline">
-              <a
-                href={`https://world.openfoodfacts.org/product/${barcode}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
                 <ExternalLinkIcon className="h-4 w-4" />
                 Check Open Food Facts
               </a>
@@ -246,8 +294,8 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
         <Barcode value={barcode} height={50} width={2} className="mb-2" />
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
         <p className="text-muted-foreground max-w-sm text-center">
-          We couldn&apos;t find any product with barcode{" "}
-          <span className="font-mono font-medium">{barcode}</span> in our stores or external databases.
+          We couldn&apos;t find any product with barcode <span className="font-mono font-medium">{barcode}</span> in our
+          stores or external databases.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <BackButton />
@@ -295,8 +343,8 @@ function OffLookupSkeleton({ barcode }: { barcode: string }) {
         <div className="text-center">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Not found in our stores</h1>
           <p className="text-muted-foreground mt-1.5 max-w-sm text-center">
-            Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our
-            database. Checking Open Food Facts — this can take a few seconds.
+            Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our database. Checking Open
+            Food Facts — this can take a few seconds.
           </p>
         </div>
 

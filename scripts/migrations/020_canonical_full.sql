@@ -121,7 +121,9 @@ AS $$
   JOIN store_products sp ON sp.trade_item_id = ti.id
   WHERE (search_term IS NULL
          OR cp.name ILIKE '%' || search_term || '%'
-         OR cp.brand ILIKE '%' || search_term || '%')
+         OR cp.brand ILIKE '%' || search_term || '%'
+         OR ti.gtin LIKE '%' || search_term || '%'
+         OR sp.name ILIKE '%' || search_term || '%')
   GROUP BY cp.id, cp.name, cp.brand
   HAVING COUNT(DISTINCT ti.gtin) > 1
      AND COUNT(DISTINCT sp.origin_id) >= min_stores
@@ -144,7 +146,9 @@ AS $$
     JOIN store_products sp ON sp.trade_item_id = ti.id
     WHERE (search_term IS NULL
            OR cp.name ILIKE '%' || search_term || '%'
-           OR cp.brand ILIKE '%' || search_term || '%')
+           OR cp.brand ILIKE '%' || search_term || '%'
+           OR ti.gtin LIKE '%' || search_term || '%'
+           OR sp.name ILIKE '%' || search_term || '%')
     GROUP BY cp.id
     HAVING COUNT(DISTINCT ti.gtin) > 1
        AND COUNT(DISTINCT sp.origin_id) >= min_stores

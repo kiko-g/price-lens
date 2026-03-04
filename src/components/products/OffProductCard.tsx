@@ -35,9 +35,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
         )}
         <div className="min-w-0">
           <h2 className="text-lg font-semibold tracking-tight">{product.displayName}</h2>
-          {product.brands && (
-            <p className="text-muted-foreground text-sm">{product.brands}</p>
-          )}
+          {product.brands && <p className="text-muted-foreground text-sm">{product.brands}</p>}
         </div>
       </div>
 
@@ -56,7 +54,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
 
       {categories && categories.length > 0 && (
         <div className="mb-4">
-          <div className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide">
+          <div className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase">
             <LayersIcon className="h-3 w-3" />
             Categories
           </div>
