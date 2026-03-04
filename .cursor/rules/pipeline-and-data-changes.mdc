@@ -1,0 +1,18 @@
+---
+description: Workflow for pipeline, script, and database-touching changes
+globs: scripts/**/*.ts, src/lib/canonical/**/*.ts, scripts/migrations/**/*.sql
+alwaysApply: false
+---
+
+## Pipeline & Data Change Workflow
+
+When modifying scripts that write to the database (pipeline passes, reset scripts, migrations):
+
+1. **Diagnose before coding.** Read the relevant code end-to-end. Identify the exact bug with line numbers. Do not patch symptoms.
+2. **Plan with specifics.** Name the files, functions, and thresholds. Show the math if heuristics are involved. Get user approval before executing.
+3. **Never fire hundreds of concurrent Supabase REST calls.** Use bulk SQL RPCs (`unnest`, CTEs) instead of `Promise.all` over individual `.update().in()` calls. The REST API silently drops requests under load.
+4. **Batch all large writes.** Any UPDATE/DELETE touching >1000 rows must be batched. Use adaptive batch sizing (start at 2000, halve on timeout, minimum 200) for production resilience.
+5. **Test locally first, verify with counts.** Run the full script locally, then run `SELECT count(*)` queries to confirm the expected rows were affected. Do not trust the script's own output alone.
+6. **Use `--verify` for integrity.** After pipeline runs, check: all trade_items linked, all store_products denormalized, 0 orphaned canonical_products.
+7. **Production deployment order:** Apply migration → reset old data → run pipeline with `--verify` → confirm integrity → deploy app code.
+8. **Sync local after production changes.** After touching production data, run `pnpm db:dump:schema && pnpm db:dump:data && pnpm db:restore` to keep local in sync.
