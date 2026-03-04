@@ -271,7 +271,7 @@ export type ChartBounds = {
  * Calculate chart bounds with nice numbers for Y-axis
  * Uses a hybrid approach: nice numbers with guaranteed minimum padding
  */
-export function calculateChartBounds(min: number, max: number, targetTicks: number = 6): ChartBounds {
+export function calculateChartBounds(min: number, max: number, targetTicks: number = 10): ChartBounds {
   // Handle edge cases
   if (min === max) {
     const padding = min === 0 ? 1 : min * 0.2
@@ -286,7 +286,7 @@ export function calculateChartBounds(min: number, max: number, targetTicks: numb
 
   // For micro prices (< €1.50), use more aggressive padding and fewer ticks
   const paddingRatio = isMicro ? 0.4 : 0.15
-  const effectiveTargetTicks = isMicro ? 4 : targetTicks
+  const effectiveTargetTicks = isMicro ? 6 : targetTicks
 
   // Calculate raw range with padding
   const rawRange = max - safeMin

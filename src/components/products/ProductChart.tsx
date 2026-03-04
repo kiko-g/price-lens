@@ -596,7 +596,7 @@ function Graph({ className }: GraphProps) {
                     key={key}
                     yAxisId={key.includes("price") ? "price" : "discount"}
                     dataKey={key}
-                    type="linear"
+                    type="stepAfter"
                     stroke={config.color}
                     strokeOpacity={1}
                     strokeWidth={strokeWidth}

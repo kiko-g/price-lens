@@ -22,6 +22,7 @@ export interface OffProduct {
   quantity: string | null
   categories: string | null
   imageUrl: string | null
+  nutriscoreGrade: string | null
 }
 
 async function throttle(): Promise<void> {
@@ -54,7 +55,7 @@ export async function lookupBarcode(
 
     try {
       const res = await fetch(
-        `${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url`,
+        `${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url,nutriscore_grade`,
         {
           headers: { "User-Agent": USER_AGENT },
           signal: AbortSignal.timeout(15_000),
@@ -107,6 +108,7 @@ export async function lookupBarcode(
           quantity: p.quantity || null,
           categories: p.categories || null,
           imageUrl: p.image_front_small_url || null,
+          nutriscoreGrade: p.nutriscore_grade || null,
         },
       }
     } catch (err) {

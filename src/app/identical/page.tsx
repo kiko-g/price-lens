@@ -114,9 +114,10 @@ export default async function ComparePage({ searchParams }: PageProps) {
   const products = canonicalId ? await getProductsByCanonical(canonicalId) : await getProductsByBarcode(barcode!)
 
   if (products.length > 0) {
-    const productsWithPrices = await getProductsWithPrices(products)
     const barcodes = [...new Set(products.map((p) => p.barcode).filter(Boolean))] as string[]
     const displayBarcode = barcodes[0] ?? barcode ?? ""
+
+    const productsWithPrices = await getProductsWithPrices(products)
 
     return (
       <div className="flex w-full flex-col items-center justify-start p-4">

@@ -4,24 +4,20 @@ import { useMemo } from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Legend } from "recharts"
 
 import type { StoreProduct, Price } from "@/types"
-import { STORE_NAMES, DateRange } from "@/types/business"
+import { STORE_NAMES, STORE_COLORS, STORE_COLORS_SECONDARY, DateRange } from "@/types/business"
 import { cn } from "@/lib/utils"
 import { buildChartData, calculateChartBounds } from "@/lib/business/chart"
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 
-// Map store origin_id to chart colors (skip chart-3 as it's yellow/hard to see)
 const STORE_CHART_COLORS: Record<number, string> = {
-  1: "var(--chart-1)", // Continente → Blue
-  2: "var(--chart-2)", // Auchan → Coral
-  3: "var(--chart-4)", // Pingo Doce → Teal/Green
+  1: STORE_COLORS[1], // Continente red
+  2: STORE_COLORS_SECONDARY[2], // Auchan secondary green (avoids red clash)
+  3: STORE_COLORS[3], // Pingo Doce green
 }
 
-// Fallback colors for additional stores
-const FALLBACK_COLORS = [
-  "var(--chart-5)", // Purple
-  "var(--chart-3)", // Yellow (last resort)
-]
+const FALLBACK_COLORS = ["var(--chart-5)", "var(--chart-3)"]
 
 // Different dash patterns to distinguish overlapping lines
 const STROKE_DASH_PATTERNS = [
@@ -226,41 +222,51 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
           />
           <Legend
             verticalAlign="bottom"
-            height={36}
-            content={({ payload }) => (
-              <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
-                {payload?.map((entry, index) => {
-                  const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
-                  const trackingSinceText = storeKey?.trackingSince
-                    ? `since ${formatTrackingSince(storeKey.trackingSince)}`
-                    : ""
-                  return (
-                    <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
-                      <svg width="24" height="12" className="shrink-0">
-                        <line
-                          x1="0"
-                          y1="6"
-                          x2="24"
-                          y2="6"
-                          stroke={entry.color}
-                          strokeWidth={2.5}
-                          strokeDasharray={storeKey?.dashPattern || "0"}
-                        />
-                        <circle cx="12" cy="6" r="3" fill={entry.color} />
-                      </svg>
-                      <span>{storeKey?.name || entry.value}</span>
-                      {trackingSinceText && <span className="text-muted-foreground text-xs">{trackingSinceText}</span>}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            height={44}
+            content={({ payload }) => {
+              const maxPts = Math.max(...storeKeys.map((s) => s.dataPointCount), 1)
+              return (
+                <div className="flex flex-col flex-wrap items-start justify-start gap-x-6 gap-y-1 pt-2">
+                  {payload?.map((entry, index) => {
+                    const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
+                    const trackingSinceText = storeKey?.trackingSince
+                      ? `since ${formatTrackingSince(storeKey.trackingSince)}`
+                      : ""
+                    const isLimited = storeKey ? storeKey.dataPointCount < maxPts * 0.2 : false
+                    return (
+                      <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
+                        {storeKey?.originId && (
+                          <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />
+                        )}
+                        <svg width="24" height="12" className="shrink-0">
+                          <line
+                            x1="0"
+                            y1="6"
+                            x2="24"
+                            y2="6"
+                            stroke={entry.color}
+                            strokeWidth={2.5}
+                            strokeDasharray={storeKey?.dashPattern || "0"}
+                          />
+                          <circle cx="12" cy="6" r="3" fill={entry.color} />
+                        </svg>
+                        <span className="text-muted-foreground text-xs">
+                          {storeKey?.dataPointCount ?? 0} pts
+                          {trackingSinceText ? `, ${trackingSinceText}` : ""}
+                          {isLimited && " · Limited data"}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            }}
           />
           {storeKeys.map(({ key, color, dashPattern }) => (
             <Line
               key={key}
               dataKey={key}
-              type="linear"
+              type="stepAfter"
               stroke={color}
               strokeWidth={2.5}
               strokeDasharray={dashPattern}
