@@ -1,0 +1,1 @@
+SELECT count(*) FROM trade_items WHERE canonical_product_id IS NOT NULL;

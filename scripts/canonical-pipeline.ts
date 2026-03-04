@@ -12,6 +12,7 @@
  *   pnpm canonical:run --dry-run        # preview without writing
  *   pnpm canonical:run --force-download # re-download OFF CSV even if fresh
  *   pnpm canonical:run --stats          # print current table stats only
+ *   pnpm canonical:run --verify         # run integrity checks after pipeline
  */
 
 import * as fs from "fs"
@@ -44,6 +45,7 @@ import {
   runPass2,
   getTableCounts,
   logCounts,
+  verifyIntegrity,
   type PipelineOptions,
 } from "@/lib/canonical/matcher"
 
@@ -62,6 +64,7 @@ function parseArgs(): {
   dryRun: boolean
   forceDownload: boolean
   statsOnly: boolean
+  verify: boolean
 } {
   const args = process.argv.slice(2)
   return {
@@ -71,6 +74,7 @@ function parseArgs(): {
     dryRun: args.includes("--dry-run"),
     forceDownload: args.includes("--force-download"),
     statsOnly: args.includes("--stats"),
+    verify: args.includes("--verify"),
   }
 }
 
@@ -125,7 +129,7 @@ async function main() {
     process.exit(1)
   }
 
-  const { pass1Only, enrichOnly, pass2Only, dryRun, forceDownload, statsOnly } = parseArgs()
+  const { pass1Only, enrichOnly, pass2Only, dryRun, forceDownload, statsOnly, verify } = parseArgs()
 
   if (dryRun) {
     log("*** DRY RUN MODE -- no writes will be performed ***")
@@ -167,6 +171,15 @@ async function main() {
   } else {
     const stats = await runFullPipeline(supabase, log, options)
     if (!dryRun) writeReviewFile(stats.lowConfidenceMatches)
+  }
+
+  if (verify && !dryRun) {
+    log("")
+    const result = await verifyIntegrity(supabase, log)
+    if (!result.passed) {
+      log("INTEGRITY CHECK FAILED — review output above before deploying.")
+      process.exit(1)
+    }
   }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1)

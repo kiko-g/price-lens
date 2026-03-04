@@ -30,14 +30,64 @@ for (const envFile of [".env.local", ".env.development.local"]) {
   }
 }
 
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const BATCH_SIZE = 500
 
 function log(msg: string) {
   const ts = new Date().toISOString().slice(11, 19)
   console.log(`[${ts}] ${msg}`)
+}
+
+async function batchClearColumn(
+  supabase: SupabaseClient,
+  table: "store_products" | "trade_items",
+  label: string,
+): Promise<void> {
+  let cleared = 0
+  for (;;) {
+    const { data: batch, error: fetchErr } = await supabase
+      .from(table)
+      .select("id")
+      .not("canonical_product_id", "is", null)
+      .order("id")
+      .limit(BATCH_SIZE)
+
+    if (fetchErr) throw new Error(`Fetch ${label} failed: ${fetchErr.message}`)
+    if (!batch || batch.length === 0) break
+
+    const ids = batch.map((r: { id: number }) => r.id)
+    const { error: updateErr } = await supabase.from(table).update({ canonical_product_id: null }).in("id", ids)
+
+    if (updateErr) throw new Error(`Update ${label} failed: ${updateErr.message}`)
+    cleared += ids.length
+    log(`  ${label}: cleared ${cleared} rows...`)
+  }
+  log(`  ${label}: done (${cleared} total)`)
+}
+
+async function batchDeleteAll(supabase: SupabaseClient): Promise<void> {
+  let deleted = 0
+  for (;;) {
+    const { data: batch, error: fetchErr } = await supabase
+      .from("canonical_products")
+      .select("id")
+      .order("id")
+      .limit(BATCH_SIZE)
+
+    if (fetchErr) throw new Error(`Fetch canonical_products failed: ${fetchErr.message}`)
+    if (!batch || batch.length === 0) break
+
+    const ids = batch.map((r: { id: number }) => r.id)
+    const { error: delErr } = await supabase.from("canonical_products").delete().in("id", ids)
+
+    if (delErr) throw new Error(`Delete canonical_products failed: ${delErr.message}`)
+    deleted += ids.length
+    log(`  canonical_products: deleted ${deleted} rows...`)
+  }
+  log(`  canonical_products: done (${deleted} total)`)
 }
 
 async function main() {
@@ -54,7 +104,6 @@ async function main() {
   log("=== Reset Pass 2 (canonical_products) ===")
   log(`Target: ${SUPABASE_URL}`)
 
-  // Counts before
   const [spCount, tiCount, cpCount] = await Promise.all([
     supabase
       .from("store_products")
@@ -74,40 +123,15 @@ async function main() {
     return
   }
 
-  // Step 1: Clear canonical_product_id on store_products
-  log("Step 1/3: Clearing canonical_product_id on store_products...")
-  const { error: spErr } = await supabase
-    .from("store_products")
-    .update({ canonical_product_id: null })
-    .not("canonical_product_id", "is", null)
-  if (spErr) {
-    log(`ERROR clearing store_products: ${spErr.message}`)
-    process.exit(1)
-  }
-  log("  Done.")
+  log("Step 1/3: Clearing canonical_product_id on store_products (batched)...")
+  await batchClearColumn(supabase, "store_products", "store_products")
 
-  // Step 2: Clear canonical_product_id on trade_items
-  log("Step 2/3: Clearing canonical_product_id on trade_items...")
-  const { error: tiErr } = await supabase
-    .from("trade_items")
-    .update({ canonical_product_id: null })
-    .not("canonical_product_id", "is", null)
-  if (tiErr) {
-    log(`ERROR clearing trade_items: ${tiErr.message}`)
-    process.exit(1)
-  }
-  log("  Done.")
+  log("Step 2/3: Clearing canonical_product_id on trade_items (batched)...")
+  await batchClearColumn(supabase, "trade_items", "trade_items")
 
-  // Step 3: Delete all canonical_products
-  log("Step 3/3: Deleting all canonical_products...")
-  const { error: cpErr } = await supabase.from("canonical_products").delete().gte("id", 0)
-  if (cpErr) {
-    log(`ERROR deleting canonical_products: ${cpErr.message}`)
-    process.exit(1)
-  }
-  log("  Done.")
+  log("Step 3/3: Deleting all canonical_products (batched)...")
+  await batchDeleteAll(supabase)
 
-  // Verify
   const [spAfter, tiAfter, cpAfter] = await Promise.all([
     supabase
       .from("store_products")

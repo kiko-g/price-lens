@@ -251,9 +251,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         className={cn(
           "grid grid-cols-1 gap-3 sm:grid-cols-2",
           storeCount <= 3 && "md:grid-cols-3",
-          storeCount === 4 && "md:grid-cols-4",
-          storeCount === 5 && "md:grid-cols-5",
-          storeCount >= 6 && "md:grid-cols-6",
+          storeCount >= 4 && "md:grid-cols-4",
         )}
       >
         {allProducts.map((product) => {

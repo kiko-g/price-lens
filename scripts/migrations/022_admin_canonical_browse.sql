@@ -99,3 +99,72 @@ BEGIN
   WHERE id = target_id;
 END;
 $$;
+
+-- =========================================================================
+-- 4. Bulk-link trade_items to canonical_products (pipeline use)
+-- =========================================================================
+
+CREATE OR REPLACE FUNCTION bulk_link_trade_items(
+  ti_ids BIGINT[],
+  cp_ids BIGINT[]
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  affected BIGINT;
+BEGIN
+  UPDATE trade_items ti
+  SET canonical_product_id = mapping.cp_id
+  FROM unnest(ti_ids, cp_ids) AS mapping(ti_id, cp_id)
+  WHERE ti.id = mapping.ti_id;
+
+  GET DIAGNOSTICS affected = ROW_COUNT;
+  RETURN affected;
+END;
+$$;
+
+-- =========================================================================
+-- 5. Count orphaned canonical_products (integrity check)
+-- =========================================================================
+
+CREATE OR REPLACE FUNCTION count_orphaned_canonicals()
+RETURNS BIGINT
+LANGUAGE sql STABLE
+AS $$
+  SELECT COUNT(*)::BIGINT
+  FROM canonical_products cp
+  WHERE NOT EXISTS (
+    SELECT 1 FROM trade_items ti WHERE ti.canonical_product_id = cp.id
+  );
+$$;
+
+-- =========================================================================
+-- 6. Batched denormalization (REST-API safe)
+-- =========================================================================
+
+CREATE OR REPLACE FUNCTION denormalize_canonical_ids_batch(batch_size INT DEFAULT 5000)
+RETURNS BIGINT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  updated_count BIGINT;
+BEGIN
+  WITH to_update AS (
+    SELECT sp.id, ti.canonical_product_id AS new_cp_id
+    FROM store_products sp
+    JOIN trade_items ti ON ti.id = sp.trade_item_id
+    WHERE ti.canonical_product_id IS NOT NULL
+      AND (sp.canonical_product_id IS NULL
+           OR sp.canonical_product_id != ti.canonical_product_id)
+    LIMIT batch_size
+  )
+  UPDATE store_products sp
+  SET canonical_product_id = to_update.new_cp_id
+  FROM to_update
+  WHERE sp.id = to_update.id;
+
+  GET DIAGNOSTICS updated_count = ROW_COUNT;
+  RETURN updated_count;
+END;
+$$;

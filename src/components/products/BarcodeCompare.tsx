@@ -534,9 +534,7 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
           "mb-4 grid gap-3",
           "grid grid-cols-1 gap-3 sm:grid-cols-2",
           products.length <= 3 && "md:grid-cols-3",
-          products.length === 4 && "md:grid-cols-4",
-          products.length === 5 && "md:grid-cols-5",
-          products.length >= 6 && "md:grid-cols-6",
+          products.length >= 4 && "md:grid-cols-4",
         )}
       >
         {products.map((product) => {

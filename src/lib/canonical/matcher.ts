@@ -90,8 +90,8 @@ interface RepresentativeAttrs {
   size: NormalizedSize | null
 }
 
-const CONFIDENCE_ASSIGN = 95
-const CONFIDENCE_LOG = 80
+const CONFIDENCE_ASSIGN = 88
+const CONFIDENCE_LOG = 70
 const PAGE_SIZE = 1000
 
 // ---------------------------------------------------------------------------
@@ -478,24 +478,31 @@ export async function runPass2(
   }
   log(`[Pass 2] Pre-loaded ${allStoreProds.length} store_products for ${spByTradeItemId.size} trade_items`)
 
-  let canonicalsCreated = 0
   let canonicalsMatched = 0
   const lowConfidenceMatches: LowConfidenceMatch[] = []
 
-  // Handle GTIN-14 → inner GTIN-13 pre-linking (in-memory using unassigned list)
+  // GTIN-14 → inner GTIN-13 pre-linking using ASSIGNED trade_items from DB
   log("[Pass 2] Pre-linking GTIN-14 → inner GTIN-13...")
   const gtinToCanonical = new Map<string, number>()
-  // Build gtin→canonical lookup from already-assigned trade items (loaded above if any)
-  // For fresh run with 0 existing canonicals, this will find nothing — that's expected
-  const gtinLookup = new Map<string, number | null>()
-  for (const ti of unassigned) {
-    gtinLookup.set(ti.gtin, ti.canonical_product_id)
+  const assignedGtinLookup = new Map<string, number>()
+  if (allCanonicals.length > 0) {
+    const assignedGtins = await fetchAllPaginated<{ gtin: string; canonical_product_id: number }>((from, to) =>
+      supabase
+        .from("trade_items")
+        .select("gtin, canonical_product_id")
+        .not("canonical_product_id", "is", null)
+        .order("id")
+        .range(from, to),
+    )
+    for (const ti of assignedGtins) {
+      assignedGtinLookup.set(ti.gtin, ti.canonical_product_id)
+    }
   }
   let gtin14Linked = 0
   for (const ti of unassigned) {
     const inner = extractInnerGtin13(ti.gtin)
     if (!inner) continue
-    const innerCanonical = gtinLookup.get(inner)
+    const innerCanonical = assignedGtinLookup.get(inner)
     if (innerCanonical) {
       gtinToCanonical.set(ti.gtin, innerCanonical)
       gtin14Linked++
@@ -503,16 +510,15 @@ export async function runPass2(
   }
   log(`[Pass 2] GTIN-14 pre-link done: ${gtin14Linked} linked`)
 
-  // Process all trade_items in memory, accumulating DB writes
-  type PendingCreate = {
-    tiId: number
-    offName: string | null
-    rep: RepresentativeAttrs
-  }
-  type PendingLink = { tiId: number; canonicalId: number }
+  // Virtual canonical tracking for single-run clustering.
+  // During the loop, unmatched trade_items create virtual canonicals (negative IDs)
+  // that subsequent trade_items can match against.
+  let nextVirtualId = -1
+  type VirtualCanonical = { virtualId: number; offName: string | null; rep: RepresentativeAttrs; tiIds: number[] }
+  const virtualById = new Map<number, VirtualCanonical>()
 
+  type PendingLink = { tiId: number; canonicalId: number }
   const pendingLinks: PendingLink[] = []
-  const pendingCreates: PendingCreate[] = []
 
   log(`[Pass 2] Processing ${unassigned.length} trade_items...`)
   let processed = 0
@@ -524,7 +530,7 @@ export async function runPass2(
     if (pct % 5 === 0 && pct !== lastLoggedPct2) {
       lastLoggedPct2 = pct
       log(
-        `[Pass 2] Matching: ${pct}% (${processed}/${unassigned.length}) — ${pendingCreates.length} to create, ${canonicalsMatched} matched`,
+        `[Pass 2] Matching: ${pct}% (${processed}/${unassigned.length}) — ${virtualById.size} to create, ${canonicalsMatched} matched`,
       )
     }
 
@@ -536,13 +542,12 @@ export async function runPass2(
       continue
     }
 
-    // Get representative attributes from pre-loaded store_products
     const storeProds = spByTradeItemId.get(ti.id)?.slice(0, 20)
     if (!storeProds || storeProds.length === 0) continue
 
     const rep = computeRepresentative(storeProds as StoreProductRow[], ti.off_product_name)
 
-    // Try matching against same-brand canonicals first
+    // Score against same-brand canonicals (includes both DB-loaded and virtual)
     const brandKey = normalizeName(rep.brand)
     const candidates = canonicalsByBrand.get(brandKey) || []
 
@@ -555,24 +560,16 @@ export async function runPass2(
       }
     }
 
-    // Fuzzy brand fallback across all canonicals
-    if (!bestMatch && brandKey) {
-      for (const [bk, group] of canonicalsByBrand) {
-        if (bk === brandKey) continue
-        for (const candidate of group) {
-          const result = scoreCanonicalMatch(rep, candidate)
-          if (!result) continue
-          if (!bestMatch || result.confidence > bestMatch.confidence) {
-            bestMatch = { canonical: candidate, ...result }
-          }
-        }
-      }
-    }
-
     if (bestMatch && bestMatch.confidence >= CONFIDENCE_ASSIGN) {
-      pendingLinks.push({ tiId: ti.id, canonicalId: bestMatch.canonical.id })
-      if (ti.off_product_name && !canonicalOffNames.has(bestMatch.canonical.id)) {
-        canonicalOffNames.set(bestMatch.canonical.id, ti.off_product_name)
+      const matchedId = bestMatch.canonical.id
+      if (matchedId < 0) {
+        // Matched a virtual canonical — add to its group
+        virtualById.get(matchedId)!.tiIds.push(ti.id)
+      } else {
+        pendingLinks.push({ tiId: ti.id, canonicalId: matchedId })
+      }
+      if (ti.off_product_name && !canonicalOffNames.has(matchedId)) {
+        canonicalOffNames.set(matchedId, ti.off_product_name)
         bestMatch.canonical.off_name = ti.off_product_name
       }
       canonicalsMatched++
@@ -587,25 +584,39 @@ export async function runPass2(
         })
       }
 
-      pendingCreates.push({ tiId: ti.id, offName: ti.off_product_name, rep })
+      // Create a virtual canonical and add it to the brand index
+      // so subsequent trade_items in this run can match against it
+      const virtualId = nextVirtualId--
+      const virtualRow: CanonicalRow = {
+        id: virtualId,
+        name: rep.offName || rep.name,
+        brand: rep.brand,
+        volume_value: rep.size?.baseValue ?? null,
+        volume_unit: rep.size?.baseUnit ?? null,
+        off_name: ti.off_product_name,
+      }
+      addToIndex(canonicalsByBrand, virtualRow)
+      virtualById.set(virtualId, { virtualId, offName: ti.off_product_name, rep, tiIds: [ti.id] })
     }
   }
 
-  log(`[Pass 2] Matching complete: ${canonicalsMatched} matched, ${pendingCreates.length} new canonicals to create`)
+  log(`[Pass 2] Matching complete: ${canonicalsMatched} matched, ${virtualById.size} new canonicals to create`)
+
+  const allVirtuals = [...virtualById.values()]
+  let canonicalsCreated = 0
 
   if (!dryRun) {
-    // Batch-insert new canonical_products and link trade_items
     const BATCH = 500
     let createdSoFar = 0
     let lastCreatePct = -1
 
-    for (let i = 0; i < pendingCreates.length; i += BATCH) {
-      const batch = pendingCreates.slice(i, i + BATCH)
-      const rows = batch.map((pc) => ({
-        name: pc.rep.offName || pc.rep.name,
-        brand: pc.rep.brand,
-        volume_value: pc.rep.size?.baseValue ?? null,
-        volume_unit: pc.rep.size?.baseUnit ?? null,
+    for (let i = 0; i < allVirtuals.length; i += BATCH) {
+      const batch = allVirtuals.slice(i, i + BATCH)
+      const rows = batch.map((vc) => ({
+        name: vc.rep.offName || vc.rep.name,
+        brand: vc.rep.brand,
+        volume_value: vc.rep.size?.baseValue ?? null,
+        volume_unit: vc.rep.size?.baseUnit ?? null,
         source: "auto" as const,
       }))
 
@@ -618,52 +629,43 @@ export async function runPass2(
 
       if (data) {
         for (let j = 0; j < data.length; j++) {
-          const canonical = data[j]
-          const pc = batch[j]
-          pendingLinks.push({ tiId: pc.tiId, canonicalId: canonical.id })
-          canonicalsCreated++
-
-          const newRow: CanonicalRow = {
-            id: canonical.id,
-            name: pc.rep.offName || pc.rep.name,
-            brand: pc.rep.brand,
-            volume_value: pc.rep.size?.baseValue ?? null,
-            volume_unit: pc.rep.size?.baseUnit ?? null,
-            off_name: pc.offName,
+          const realId = data[j].id
+          const vc = batch[j]
+          for (const tiId of vc.tiIds) {
+            pendingLinks.push({ tiId, canonicalId: realId })
           }
-          addToIndex(canonicalsByBrand, newRow)
+          canonicalsCreated++
         }
       }
 
       createdSoFar += batch.length
-      const pct = Math.floor((createdSoFar / pendingCreates.length) * 100)
+      const pct = Math.floor((createdSoFar / allVirtuals.length) * 100)
       if (pct % 5 === 0 && pct !== lastCreatePct) {
         lastCreatePct = pct
-        log(`[Pass 2] Create progress: ${pct}% (${createdSoFar}/${pendingCreates.length})`)
+        log(`[Pass 2] Create progress: ${pct}% (${createdSoFar}/${allVirtuals.length})`)
       }
     }
 
     log(`[Pass 2] Created ${canonicalsCreated} canonical_products. Linking ${pendingLinks.length} trade_items...`)
 
-    // Batch-update trade_items with canonical_product_id
     let linkedSoFar = 0
     let lastLinkPct = -1
 
     for (let i = 0; i < pendingLinks.length; i += BATCH) {
       const batch = pendingLinks.slice(i, i + BATCH)
-      // Group by canonical_product_id for efficient updates
-      const byCanonical = new Map<number, number[]>()
-      for (const link of batch) {
-        const group = byCanonical.get(link.canonicalId) || []
-        group.push(link.tiId)
-        byCanonical.set(link.canonicalId, group)
-      }
+      const tiIds = batch.map((l) => l.tiId)
+      const cpIds = batch.map((l) => l.canonicalId)
 
-      await Promise.all(
-        [...byCanonical.entries()].map(([canonicalId, tiIds]) =>
-          supabase.from("trade_items").update({ canonical_product_id: canonicalId }).in("id", tiIds),
-        ),
-      )
+      const { data: affected, error: linkErr } = await supabase.rpc("bulk_link_trade_items", {
+        ti_ids: tiIds,
+        cp_ids: cpIds,
+      })
+
+      if (linkErr) {
+        log(`[Pass 2] WARN: bulk link batch ${i}-${i + batch.length} failed: ${linkErr.message}`)
+      } else if (affected !== batch.length) {
+        log(`[Pass 2] WARN: bulk link expected ${batch.length} rows, got ${affected}`)
+      }
 
       linkedSoFar += batch.length
       const pct = Math.floor((linkedSoFar / pendingLinks.length) * 100)
@@ -673,7 +675,7 @@ export async function runPass2(
       }
     }
   } else {
-    canonicalsCreated = pendingCreates.length
+    canonicalsCreated = allVirtuals.length
   }
 
   // Denormalize canonical_product_id onto store_products
@@ -688,7 +690,7 @@ export async function runPass2(
 }
 
 // ---------------------------------------------------------------------------
-// Denormalization via SQL function (single bulk UPDATE)
+// Denormalization via batched SQL function (REST-API safe)
 // ---------------------------------------------------------------------------
 
 async function denormalizeCanonicalIds(
@@ -708,16 +710,36 @@ async function denormalizeCanonicalIds(
     return count ?? 0
   }
 
-  const { data, error } = await supabase.rpc("denormalize_canonical_ids")
+  let totalUpdated = 0
+  let batchSize = 2000
+  let consecutiveErrors = 0
 
-  if (error) {
-    log(`[Denormalize] ERROR: ${error.message}`)
-    return 0
+  for (;;) {
+    const { data, error } = await supabase.rpc("denormalize_canonical_ids_batch", {
+      batch_size: batchSize,
+    })
+
+    if (error) {
+      consecutiveErrors++
+      if (consecutiveErrors >= 3) {
+        log(`[Denormalize] ERROR: 3 consecutive failures at ${totalUpdated} rows: ${error.message}`)
+        return totalUpdated
+      }
+      batchSize = Math.max(200, Math.floor(batchSize / 2))
+      log(`[Denormalize] WARN: batch failed, reducing to ${batchSize}: ${error.message}`)
+      continue
+    }
+
+    consecutiveErrors = 0
+    const updated = typeof data === "number" ? data : 0
+    if (updated === 0) break
+
+    totalUpdated += updated
+    log(`[Denormalize] Progress: ${totalUpdated} store_products updated...`)
   }
 
-  const updated = typeof data === "number" ? data : 0
-  log(`[Denormalize] Updated ${updated} store_products.`)
-  return updated
+  log(`[Denormalize] Done. Updated ${totalUpdated} store_products.`)
+  return totalUpdated
 }
 
 // ---------------------------------------------------------------------------
@@ -779,6 +801,69 @@ export function logCounts(counts: TableCounts, log: (msg: string) => void): void
     `  trade_items:      ${counts.tradeItems} total, ${counts.tradeItemsEnriched} OFF-enriched, ${counts.tradeItemsAssigned} assigned to canonical`,
   )
   log(`  canonical_products: ${counts.canonicalProducts} total`)
+}
+
+// ---------------------------------------------------------------------------
+// Integrity verification
+// ---------------------------------------------------------------------------
+
+export interface IntegrityResult {
+  passed: boolean
+  checks: { name: string; expected: string; actual: string; ok: boolean }[]
+}
+
+export async function verifyIntegrity(supabase: SupabaseClient, log: (msg: string) => void): Promise<IntegrityResult> {
+  log("[Verify] Running integrity checks...")
+
+  const [tiLinked, cpTotal, spWithTi, spDenormed, orphanedCp] = await Promise.all([
+    supabase.from("trade_items").select("id", { count: "exact", head: true }).not("canonical_product_id", "is", null),
+    supabase.from("canonical_products").select("id", { count: "exact", head: true }),
+    supabase.from("store_products").select("id", { count: "exact", head: true }).not("trade_item_id", "is", null),
+    supabase
+      .from("store_products")
+      .select("id", { count: "exact", head: true })
+      .not("trade_item_id", "is", null)
+      .not("canonical_product_id", "is", null),
+    supabase.rpc("count_orphaned_canonicals"),
+  ])
+
+  const tiLinkedCount = tiLinked.count ?? 0
+  const cpCount = cpTotal.count ?? 0
+  const spWithTiCount = spWithTi.count ?? 0
+  const spDenormedCount = spDenormed.count ?? 0
+  const orphanedCount = typeof orphanedCp.data === "number" ? orphanedCp.data : -1
+
+  const checks = [
+    {
+      name: "All linked trade_items point to existing canonicals",
+      expected: `trade_items linked (${tiLinkedCount}) >= canonical_products (${cpCount})`,
+      actual: `${tiLinkedCount} >= ${cpCount}`,
+      ok: tiLinkedCount >= cpCount,
+    },
+    {
+      name: "All store_products with trade_item_id are denormalized",
+      expected: `denormalized (${spDenormedCount}) == with trade_item (${spWithTiCount})`,
+      actual: `${spDenormedCount} == ${spWithTiCount}`,
+      ok: spDenormedCount === spWithTiCount,
+    },
+    {
+      name: "No orphaned canonical_products (no trade_items pointing to them)",
+      expected: "0 orphaned",
+      actual: orphanedCount >= 0 ? `${orphanedCount} orphaned` : "RPC unavailable (skipped)",
+      ok: orphanedCount === 0 || orphanedCount < 0,
+    },
+  ]
+
+  const passed = checks.every((c) => c.ok)
+
+  for (const c of checks) {
+    log(`[Verify] ${c.ok ? "PASS" : "FAIL"}: ${c.name}`)
+    if (!c.ok) log(`[Verify]   Expected: ${c.expected}`)
+    log(`[Verify]   Actual: ${c.actual}`)
+  }
+
+  log(`[Verify] ${passed ? "All checks passed." : "SOME CHECKS FAILED."}`)
+  return { passed, checks }
 }
 
 // ---------------------------------------------------------------------------
