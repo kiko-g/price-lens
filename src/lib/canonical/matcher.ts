@@ -681,6 +681,9 @@ export async function runPass2(
   // Denormalize canonical_product_id onto store_products
   await denormalizeCanonicalIds(supabase, log, dryRun)
 
+  // Refresh pre-computed barcode_count / store_count on canonical_products
+  await refreshCanonicalCounts(supabase, log, dryRun)
+
   log(`[Pass 2] Created ${canonicalsCreated} new canonical_products, matched ${canonicalsMatched} to existing.`)
   if (lowConfidenceMatches.length > 0) {
     log(`[Pass 2] ${lowConfidenceMatches.length} low-confidence matches logged for review.`)
@@ -739,6 +742,54 @@ async function denormalizeCanonicalIds(
   }
 
   log(`[Denormalize] Done. Updated ${totalUpdated} store_products.`)
+  return totalUpdated
+}
+
+// ---------------------------------------------------------------------------
+// Refresh pre-computed counts on canonical_products (REST-API safe)
+// ---------------------------------------------------------------------------
+
+async function refreshCanonicalCounts(
+  supabase: SupabaseClient,
+  log: (msg: string) => void,
+  dryRun: boolean,
+): Promise<number> {
+  log("[RefreshCounts] Updating barcode_count / store_count on canonical_products...")
+
+  if (dryRun) {
+    log("[RefreshCounts] [DRY RUN] Skipped.")
+    return 0
+  }
+
+  let totalUpdated = 0
+  let batchSize = 2000
+  let consecutiveErrors = 0
+
+  for (;;) {
+    const { data, error } = await supabase.rpc("refresh_canonical_counts_batch", {
+      batch_size: batchSize,
+    })
+
+    if (error) {
+      consecutiveErrors++
+      if (consecutiveErrors >= 3) {
+        log(`[RefreshCounts] ERROR: 3 consecutive failures at ${totalUpdated} rows: ${error.message}`)
+        return totalUpdated
+      }
+      batchSize = Math.max(200, Math.floor(batchSize / 2))
+      log(`[RefreshCounts] WARN: batch failed, reducing to ${batchSize}: ${error.message}`)
+      continue
+    }
+
+    consecutiveErrors = 0
+    const updated = typeof data === "number" ? data : 0
+    if (updated === 0) break
+
+    totalUpdated += updated
+    log(`[RefreshCounts] Progress: ${totalUpdated} canonical_products updated...`)
+  }
+
+  log(`[RefreshCounts] Done. Updated ${totalUpdated} canonical_products.`)
   return totalUpdated
 }
 
