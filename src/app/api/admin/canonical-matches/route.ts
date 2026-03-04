@@ -22,52 +22,91 @@ async function getMatches(req: NextRequest) {
 
   const supabase = createAdminClient()
 
-  const { data: matches, error } = await supabase.rpc("get_canonical_matches", {
-    min_stores: minStores,
-    search_term: search || null,
-    result_limit: limit,
-    result_offset: offset,
-  })
+  const [{ data: matches, error }, { data: countData }] = await Promise.all([
+    supabase.rpc("get_canonical_matches", {
+      min_stores: minStores,
+      search_term: search || null,
+      result_limit: limit,
+      result_offset: offset,
+    }),
+    supabase.rpc("count_canonical_matches", {
+      min_stores: minStores,
+      search_term: search || null,
+    }),
+  ])
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const { data: countData } = await supabase.rpc("count_canonical_matches", {
-    min_stores: minStores,
-    search_term: search || null,
-  })
+  if (!matches || matches.length === 0) {
+    return NextResponse.json({ data: [], total: countData ?? 0, page, limit })
+  }
 
-  const enriched = await Promise.all(
-    (matches ?? []).map(
-      async (m: { canonical_id: number; name: string; brand: string; barcodes: number; stores: number }) => {
-        const { data: tradeItems } = await supabase
-          .from("trade_items")
-          .select("id, gtin, off_product_name")
-          .eq("canonical_product_id", m.canonical_id)
+  const canonicalIds = matches.map(
+    (m: { canonical_id: number }) => m.canonical_id,
+  )
 
-        const tiIds = (tradeItems ?? []).map((ti: { id: number }) => ti.id)
+  // Batch: all trade_items for these canonicals in one query
+  const { data: allTradeItems } = await supabase
+    .from("trade_items")
+    .select("id, gtin, off_product_name, canonical_product_id")
+    .in("canonical_product_id", canonicalIds)
 
-        const { data: storeProducts } =
-          tiIds.length > 0
-            ? await supabase
-                .from("store_products")
-                .select("id, origin_id, name, brand, barcode, price, image, url")
-                .in("trade_item_id", tiIds)
-                .order("origin_id")
-            : { data: [] }
+  const tiByCanonical = new Map<number, typeof allTradeItems>()
+  const allTiIds: number[] = []
+  for (const ti of allTradeItems ?? []) {
+    const cid = (ti as { canonical_product_id: number }).canonical_product_id
+    const group = tiByCanonical.get(cid) || []
+    group.push(ti)
+    tiByCanonical.set(cid, group)
+    allTiIds.push(ti.id)
+  }
 
-        return {
-          canonicalId: m.canonical_id,
-          name: m.name,
-          brand: m.brand,
-          barcodeCount: m.barcodes,
-          storeCount: m.stores,
-          tradeItems: tradeItems ?? [],
-          storeProducts: storeProducts ?? [],
-        }
-      },
-    ),
+  // Batch: all store_products for those trade_items in one query
+  let allStoreProducts: {
+    id: number
+    origin_id: number
+    name: string
+    brand: string | null
+    barcode: string | null
+    price: number | null
+    image: string | null
+    url: string | null
+    trade_item_id: number
+  }[] = []
+  if (allTiIds.length > 0) {
+    const { data } = await supabase
+      .from("store_products")
+      .select("id, origin_id, name, brand, barcode, price, image, url, trade_item_id")
+      .in("trade_item_id", allTiIds)
+      .order("origin_id")
+    allStoreProducts = (data ?? []) as typeof allStoreProducts
+  }
+
+  const spByTiId = new Map<number, typeof allStoreProducts>()
+  for (const sp of allStoreProducts) {
+    const group = spByTiId.get(sp.trade_item_id) || []
+    group.push(sp)
+    spByTiId.set(sp.trade_item_id, group)
+  }
+
+  const enriched = matches.map(
+    (m: { canonical_id: number; name: string; brand: string; barcodes: number; stores: number }) => {
+      const tradeItems = tiByCanonical.get(m.canonical_id) ?? []
+      const storeProducts = tradeItems.flatMap(
+        (ti: { id: number }) => spByTiId.get(ti.id) ?? [],
+      )
+      return {
+        canonicalId: m.canonical_id,
+        name: m.name,
+        brand: m.brand,
+        barcodeCount: m.barcodes,
+        storeCount: m.stores,
+        tradeItems,
+        storeProducts,
+      }
+    },
   )
 
   return NextResponse.json({

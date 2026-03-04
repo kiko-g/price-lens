@@ -84,30 +84,35 @@ export function CanonicalMatchReview() {
   const limit = 20
   const totalPages = Math.ceil(total / limit)
 
+  const [error, setError] = useState<string | null>(null)
+
   const fetchData = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
+      const params = new URLSearchParams({ page: String(page) })
       if (view === "matches") {
-        const params = new URLSearchParams({
-          page: String(page),
-          minStores: String(minStores),
-        })
-        if (search) params.set("search", search)
-        const res = await fetch(`/api/admin/canonical-matches?${params}`)
-        const json = await res.json()
-        setMatches(json.data ?? [])
-        setTotal(json.total ?? 0)
+        params.set("minStores", String(minStores))
       } else {
-        const params = new URLSearchParams({
-          view: "orphans",
-          page: String(page),
-        })
-        if (search) params.set("search", search)
-        const res = await fetch(`/api/admin/canonical-matches?${params}`)
-        const json = await res.json()
-        setOrphans(json.data ?? [])
-        setTotal(json.total ?? 0)
+        params.set("view", "orphans")
       }
+      if (search) params.set("search", search)
+
+      const res = await fetch(`/api/admin/canonical-matches?${params}`)
+      if (!res.ok) {
+        setError(`Request failed (${res.status})`)
+        return
+      }
+      const json = await res.json()
+
+      if (view === "matches") {
+        setMatches(json.data ?? [])
+      } else {
+        setOrphans(json.data ?? [])
+      }
+      setTotal(json.total ?? 0)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error")
     } finally {
       setLoading(false)
     }
@@ -196,7 +201,7 @@ export function CanonicalMatchReview() {
       </div>
 
       {/* Summary */}
-      {!loading && (
+      {!loading && !error && (
         <p className="text-muted-foreground text-sm">
           {view === "matches"
             ? `${total} canonical product${total !== 1 ? "s" : ""} matched across ${minStores}+ stores`
@@ -205,7 +210,14 @@ export function CanonicalMatchReview() {
       )}
 
       {/* Content */}
-      {loading ? (
+      {error ? (
+        <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3">
+          <p className="text-destructive text-sm">{error}</p>
+          <Button variant="outline" size="sm" onClick={fetchData}>
+            Retry
+          </Button>
+        </div>
+      ) : loading ? (
         <div className="flex min-h-[30vh] items-center justify-center">
           <Loader2 className="size-6 animate-spin" />
         </div>
