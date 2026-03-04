@@ -309,8 +309,5 @@ export function brandsMatch(brand1: string | null, brand2: string | null): boole
   const b2FirstWord = b2.split(" ")[0]
   if (b1FirstWord.length >= 3 && b1FirstWord === b2FirstWord) return true
 
-  const maxDist = Math.max(b1.length, b2.length) > 8 ? 3 : 2
-  if (levenshteinDistance(b1, b2) <= maxDist) return true
-
   return false
 }

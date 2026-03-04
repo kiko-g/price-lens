@@ -4,8 +4,8 @@ import { CanonicalMatchReview } from "@/components/admin/CanonicalMatchReview"
 import { Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Canonical Matches",
-  description: "Review cross-barcode product groupings across stores",
+  title: "Canonical Products",
+  description: "Browse and manage canonical product groupings across stores",
 }
 
 function LoadingFallback() {

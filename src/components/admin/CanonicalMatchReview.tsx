@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { STORE_NAMES, STORE_COLORS, STORE_COLORS_SECONDARY } from "@/types/business"
 
@@ -19,11 +20,14 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExternalLinkIcon,
-  LinkIcon,
   UnlinkIcon,
+  Trash2Icon,
+  ChevronDownIcon,
+  PackageIcon,
+  XIcon,
 } from "lucide-react"
 
-// ─── Shared types ───────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────
 
 interface StoreProductInfo {
   id: number
@@ -42,10 +46,11 @@ interface TradeItemInfo {
   off_product_name: string | null
 }
 
-interface CanonicalMatch {
+interface CanonicalProduct {
   canonicalId: number
   name: string
   brand: string | null
+  source: string
   barcodeCount: number
   storeCount: number
   tradeItems: TradeItemInfo[]
@@ -63,36 +68,35 @@ interface OrphanItem {
   storeProducts: StoreProductInfo[]
 }
 
-type View = "matches" | "orphans"
+type View = "canonicals" | "orphans"
 
 // ─── Main component ─────────────────────────────────────────────────
 
 export function CanonicalMatchReview() {
-  const [view, setView] = useState<View>("matches")
+  const [view, setView] = useState<View>("canonicals")
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
 
-  // Matches state
-  const [matches, setMatches] = useState<CanonicalMatch[]>([])
-  const [minStores, setMinStores] = useState(2)
+  const [canonicals, setCanonicals] = useState<CanonicalProduct[]>([])
+  const [minStores, setMinStores] = useState("1")
+  const [minBarcodes, setMinBarcodes] = useState("1")
 
-  // Orphans state
   const [orphans, setOrphans] = useState<OrphanItem[]>([])
 
   const limit = 20
   const totalPages = Math.ceil(total / limit)
-
-  const [error, setError] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
       const params = new URLSearchParams({ page: String(page) })
-      if (view === "matches") {
-        params.set("minStores", String(minStores))
+      if (view === "canonicals") {
+        params.set("minStores", minStores)
+        params.set("minBarcodes", minBarcodes)
       } else {
         params.set("view", "orphans")
       }
@@ -105,8 +109,8 @@ export function CanonicalMatchReview() {
       }
       const json = await res.json()
 
-      if (view === "matches") {
-        setMatches(json.data ?? [])
+      if (view === "canonicals") {
+        setCanonicals(json.data ?? [])
       } else {
         setOrphans(json.data ?? [])
       }
@@ -116,7 +120,7 @@ export function CanonicalMatchReview() {
     } finally {
       setLoading(false)
     }
-  }, [view, page, search, minStores])
+  }, [view, page, search, minStores, minBarcodes])
 
   useEffect(() => {
     fetchData()
@@ -137,24 +141,24 @@ export function CanonicalMatchReview() {
   return (
     <div className="flex flex-col gap-6 overflow-auto p-4 md:p-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight">Canonical Matches</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Canonical Products</h1>
         <p className="text-muted-foreground text-sm">
-          {view === "matches"
-            ? "Review cross-barcode product groupings. Each card shows a canonical product linked to multiple barcodes across different stores."
-            : "Orphan trade items with no canonical product assigned. Link them to existing canonicals."}
+          {view === "canonicals"
+            ? "Browse and manage canonical product groupings. Delete bad matches, unlink barcodes, or add new ones."
+            : "Orphan trade items with single-barcode canonicals. Link them to multi-barcode canonical products."}
         </p>
       </div>
 
       {/* View tabs */}
       <div className="flex items-center gap-2 border-b pb-3">
         <Button
-          variant={view === "matches" ? "default" : "outline"}
+          variant={view === "canonicals" ? "default" : "outline"}
           size="sm"
-          onClick={() => switchView("matches")}
+          onClick={() => switchView("canonicals")}
           className="gap-1.5"
         >
-          <LinkIcon className="size-3.5" />
-          Matches
+          <PackageIcon className="size-3.5" />
+          Canonicals
         </Button>
         <Button
           variant={view === "orphans" ? "default" : "outline"}
@@ -169,29 +173,49 @@ export function CanonicalMatchReview() {
 
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {view === "matches" && (
+        {view === "canonicals" ? (
           <div className="flex gap-2">
-            {[2, 3].map((n) => (
-              <Button
-                key={n}
-                variant={minStores === n ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setMinStores(n)
-                  setPage(1)
-                }}
-              >
-                {n === 2 ? "2+ Stores" : "All 3 Stores"}
-              </Button>
-            ))}
+            <Select
+              value={minBarcodes}
+              onValueChange={(v) => {
+                setMinBarcodes(v)
+                setPage(1)
+              }}
+            >
+              <SelectTrigger className="w-[130px]">
+                <SelectValue placeholder="Barcodes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1+ Barcodes</SelectItem>
+                <SelectItem value="2">2+ Barcodes</SelectItem>
+                <SelectItem value="3">3+ Barcodes</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={minStores}
+              onValueChange={(v) => {
+                setMinStores(v)
+                setPage(1)
+              }}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Stores" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1+ Stores</SelectItem>
+                <SelectItem value="2">2+ Stores</SelectItem>
+                <SelectItem value="3">All 3 Stores</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+        ) : (
+          <div />
         )}
-        {view === "orphans" && <div />}
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative">
             <SearchIcon className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
             <Input
-              placeholder="Search barcode, product name, or brand..."
+              placeholder="Search name, brand, or barcode..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-64 pl-9"
@@ -203,9 +227,9 @@ export function CanonicalMatchReview() {
       {/* Summary */}
       {!loading && !error && (
         <p className="text-muted-foreground text-sm">
-          {view === "matches"
-            ? `${total} canonical product${total !== 1 ? "s" : ""} matched across ${minStores}+ stores`
-            : `${total} single-barcode canonical${total !== 1 ? "s" : ""} — candidates for re-linking`}
+          {view === "canonicals"
+            ? `${total} canonical product${total !== 1 ? "s" : ""}`
+            : `${total} orphan${total !== 1 ? "s" : ""}`}
         </p>
       )}
 
@@ -221,21 +245,21 @@ export function CanonicalMatchReview() {
         <div className="flex min-h-[30vh] items-center justify-center">
           <Loader2 className="size-6 animate-spin" />
         </div>
-      ) : view === "matches" ? (
-        matches.length === 0 ? (
+      ) : view === "canonicals" ? (
+        canonicals.length === 0 ? (
           <div className="text-muted-foreground flex min-h-[30vh] items-center justify-center text-sm">
-            No matches found.
+            No canonical products found.
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {matches.map((match) => (
-              <MatchCard key={match.canonicalId} match={match} onRefresh={fetchData} />
+            {canonicals.map((cp) => (
+              <CanonicalCard key={cp.canonicalId} canonical={cp} onRefresh={fetchData} />
             ))}
           </div>
         )
       ) : orphans.length === 0 ? (
         <div className="text-muted-foreground flex min-h-[30vh] items-center justify-center text-sm">
-          No single-barcode items found.
+          No orphans found.
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -267,17 +291,54 @@ export function CanonicalMatchReview() {
   )
 }
 
-// ─── Match card ─────────────────────────────────────────────────────
+// ─── Canonical card ─────────────────────────────────────────────────
 
-function MatchCard({ match, onRefresh }: { match: CanonicalMatch; onRefresh: () => void }) {
+function CanonicalCard({ canonical, onRefresh }: { canonical: CanonicalProduct; onRefresh: () => void }) {
+  const [expanded, setExpanded] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [unlinking, setUnlinking] = useState<string | null>(null)
+
   const byStore = new Map<number, StoreProductInfo[]>()
-  for (const sp of match.storeProducts) {
+  for (const sp of canonical.storeProducts) {
     const group = byStore.get(sp.origin_id) || []
     group.push(sp)
     byStore.set(sp.origin_id, group)
   }
-
   const storeIds = [...byStore.keys()].sort()
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      const res = await fetch("/api/admin/canonical-matches", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canonicalId: canonical.canonicalId }),
+      })
+      if (res.ok) {
+        onRefresh()
+      }
+    } finally {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
+
+  const handleUnlink = async (barcode: string) => {
+    setUnlinking(barcode)
+    try {
+      const res = await fetch("/api/admin/canonical-matches/link", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ barcode }),
+      })
+      if (res.ok) {
+        onRefresh()
+      }
+    } finally {
+      setUnlinking(null)
+    }
+  }
 
   return (
     <Card>
@@ -285,67 +346,125 @@ function MatchCard({ match, onRefresh }: { match: CanonicalMatch; onRefresh: () 
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <CardTitle className="flex items-center gap-2 text-base">
-              <LinkIcon className="size-4 shrink-0" />
-              <span className="truncate">{match.name}</span>
+              <PackageIcon className="size-4 shrink-0" />
+              <span className="truncate">{canonical.name}</span>
             </CardTitle>
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              {match.brand && (
+              {canonical.brand && (
                 <Badge variant="secondary" className="text-xs">
-                  {match.brand}
+                  {canonical.brand}
                 </Badge>
               )}
+              <Badge variant="outline" className="text-xs">
+                {canonical.source}
+              </Badge>
               <span className="text-muted-foreground text-xs">
-                {match.barcodeCount} barcodes · {match.storeCount} stores
+                {canonical.barcodeCount} barcode{canonical.barcodeCount !== 1 ? "s" : ""} · {canonical.storeCount} store
+                {canonical.storeCount !== 1 ? "s" : ""}
               </span>
-              <span className="text-muted-foreground text-xs">· canonical #{match.canonicalId}</span>
+              <span className="text-muted-foreground text-xs">· #{canonical.canonicalId}</span>
             </div>
           </div>
-          <div className="flex items-start gap-2">
-            <LinkBarcodeDialog canonicalId={match.canonicalId} canonicalName={match.name} onLinked={onRefresh} />
+          <div className="flex items-center gap-2">
+            <LinkBarcodeDialog
+              canonicalId={canonical.canonicalId}
+              canonicalName={canonical.name}
+              onLinked={onRefresh}
+            />
             <div className="flex gap-1">
               {storeIds.map((sid) => (
                 <StoreBadge key={sid} originId={sid} />
               ))}
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 px-2"
+              onClick={() => setExpanded(!expanded)}
+              aria-label={expanded ? "Collapse" : "Expand"}
+            >
+              <ChevronDownIcon className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+            </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">Barcodes</p>
-          <div className="flex flex-wrap gap-2">
-            {match.tradeItems.map((ti) => (
-              <div key={ti.id} className="rounded-md border px-2 py-1 text-xs">
-                <span className="font-mono">{ti.gtin}</span>
-                {ti.off_product_name && <span className="text-muted-foreground ml-2">({ti.off_product_name})</span>}
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
-          {storeIds.map((sid) => {
-            const products = byStore.get(sid) || []
-            return (
-              <div key={sid} className="rounded-lg border p-3">
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="size-2 rounded-full" style={{ backgroundColor: STORE_COLORS[sid] }} />
-                  <span className="text-sm font-medium">{STORE_NAMES[sid] ?? `Store ${sid}`}</span>
-                  <span className="text-muted-foreground text-xs">({products.length})</span>
+      {expanded && (
+        <CardContent>
+          {/* Barcodes with unlink */}
+          <div className="mb-4">
+            <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">Barcodes</p>
+            <div className="flex flex-wrap gap-2">
+              {canonical.tradeItems.map((ti) => (
+                <div key={ti.id} className="flex items-center gap-1 rounded-md border px-2 py-1 text-xs">
+                  <span className="font-mono">{ti.gtin}</span>
+                  {ti.off_product_name && <span className="text-muted-foreground ml-1">({ti.off_product_name})</span>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive ml-1 h-5 w-5 p-0"
+                    onClick={() => handleUnlink(ti.gtin)}
+                    disabled={unlinking === ti.gtin}
+                    aria-label={`Unlink ${ti.gtin}`}
+                    tabIndex={0}
+                  >
+                    {unlinking === ti.gtin ? <Loader2 className="size-3 animate-spin" /> : <XIcon className="size-3" />}
+                  </Button>
                 </div>
-                <div className="flex flex-col gap-2">
-                  {products.slice(0, 3).map((sp) => (
-                    <StoreProductRow key={sp.id} sp={sp} />
-                  ))}
-                  {products.length > 3 && (
-                    <p className="text-muted-foreground text-[10px]">+{products.length - 3} more</p>
-                  )}
+              ))}
+            </div>
+          </div>
+
+          {/* Store products grouped by store */}
+          <div className="grid gap-3 md:grid-cols-3">
+            {storeIds.map((sid) => {
+              const products = byStore.get(sid) || []
+              return (
+                <div key={sid} className="rounded-lg border p-3">
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="size-2 rounded-full" style={{ backgroundColor: STORE_COLORS[sid] }} />
+                    <span className="text-sm font-medium">{STORE_NAMES[sid] ?? `Store ${sid}`}</span>
+                    <span className="text-muted-foreground text-xs">({products.length})</span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {products.slice(0, 3).map((sp) => (
+                      <StoreProductRow key={sp.id} sp={sp} />
+                    ))}
+                    {products.length > 3 && (
+                      <p className="text-muted-foreground text-[10px]">+{products.length - 3} more</p>
+                    )}
+                  </div>
                 </div>
+              )
+            })}
+          </div>
+
+          {/* Delete section */}
+          <div className="mt-4 flex justify-end border-t pt-3">
+            {confirmDelete ? (
+              <div className="flex items-center gap-2">
+                <span className="text-destructive text-sm">Delete this canonical?</span>
+                <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? <Loader2 className="size-4 animate-spin" /> : "Confirm"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>
+                  Cancel
+                </Button>
               </div>
-            )
-          })}
-        </div>
-      </CardContent>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive gap-1.5"
+                onClick={() => setConfirmDelete(true)}
+              >
+                <Trash2Icon className="size-3.5" />
+                Delete
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      )}
     </Card>
   )
 }
@@ -451,6 +570,7 @@ function StoreProductRow({ sp }: { sp: StoreProductInfo }) {
           rel="noopener noreferrer"
           className="text-muted-foreground hover:text-foreground shrink-0 self-start"
           aria-label="Open product page"
+          tabIndex={0}
         >
           <ExternalLinkIcon className="size-3" />
         </a>

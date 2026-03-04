@@ -90,8 +90,8 @@ interface RepresentativeAttrs {
   size: NormalizedSize | null
 }
 
-const CONFIDENCE_ASSIGN = 80
-const CONFIDENCE_LOG = 60
+const CONFIDENCE_ASSIGN = 95
+const CONFIDENCE_LOG = 80
 const PAGE_SIZE = 1000
 
 // ---------------------------------------------------------------------------
@@ -189,19 +189,11 @@ function scoreCanonicalMatch(
     }
   }
 
-  // Tier 2: Store name similarity
+  // Tier 2: Store name similarity (strict)
   const nameResult = calculateNameSimilarity(rep.name, canonical.name)
-  if (nameResult.similarity >= 0.4) {
+  if (nameResult.similarity >= 0.7) {
     reasons.push(`name_${(nameResult.similarity * 100).toFixed(0)}%`)
     const confidence = 35 + (hasVolumeMatch ? sizeSim * 25 : 0) + nameResult.similarity * 35
-    return { confidence, reasons }
-  }
-
-  // Tier 3: Brand + volume match with weak but non-trivial name overlap
-  const MIN_NAME_FOR_TIER3 = 0.15
-  if (hasVolumeMatch && sizeSim >= 0.95 && nameResult.similarity >= MIN_NAME_FOR_TIER3) {
-    reasons.push(`name_weak_${(nameResult.similarity * 100).toFixed(0)}%`)
-    const confidence = 35 + sizeSim * 25 + nameResult.similarity * 20
     return { confidence, reasons }
   }
 

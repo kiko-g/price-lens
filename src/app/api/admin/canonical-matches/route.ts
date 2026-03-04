@@ -3,18 +3,40 @@ import { createAdminClient } from "@/lib/supabase/server"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
-  const view = searchParams.get("view") ?? "matches"
+  const view = searchParams.get("view") ?? "canonicals"
 
   if (view === "orphans") {
     return getOrphans(req)
   }
 
-  return getMatches(req)
+  return getCanonicals(req)
 }
 
-async function getMatches(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
+  try {
+    const { canonicalId } = (await req.json()) as { canonicalId: number }
+
+    if (!canonicalId) {
+      return NextResponse.json({ error: "canonicalId is required" }, { status: 400 })
+    }
+
+    const supabase = createAdminClient()
+    const { error } = await supabase.rpc("delete_canonical_product", { target_id: canonicalId })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, deletedId: canonicalId })
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+  }
+}
+
+async function getCanonicals(req: NextRequest) {
   const { searchParams } = req.nextUrl
-  const minStores = parseInt(searchParams.get("minStores") ?? "2")
+  const minStores = parseInt(searchParams.get("minStores") ?? "1")
+  const minBarcodes = parseInt(searchParams.get("minBarcodes") ?? "1")
   const search = searchParams.get("search")?.trim() ?? ""
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"))
   const limit = 20
@@ -23,14 +45,16 @@ async function getMatches(req: NextRequest) {
   const supabase = createAdminClient()
 
   const [{ data: matches, error }, { data: countData }] = await Promise.all([
-    supabase.rpc("get_canonical_matches", {
+    supabase.rpc("list_canonical_products", {
       min_stores: minStores,
+      min_barcodes: minBarcodes,
       search_term: search || null,
       result_limit: limit,
       result_offset: offset,
     }),
-    supabase.rpc("count_canonical_matches", {
+    supabase.rpc("count_canonical_products", {
       min_stores: minStores,
+      min_barcodes: minBarcodes,
       search_term: search || null,
     }),
   ])
@@ -43,11 +67,8 @@ async function getMatches(req: NextRequest) {
     return NextResponse.json({ data: [], total: countData ?? 0, page, limit })
   }
 
-  const canonicalIds = matches.map(
-    (m: { canonical_id: number }) => m.canonical_id,
-  )
+  const canonicalIds = matches.map((m: { canonical_id: number }) => m.canonical_id)
 
-  // Batch: all trade_items for these canonicals in one query
   const { data: allTradeItems } = await supabase
     .from("trade_items")
     .select("id, gtin, off_product_name, canonical_product_id")
@@ -63,7 +84,6 @@ async function getMatches(req: NextRequest) {
     allTiIds.push(ti.id)
   }
 
-  // Batch: all store_products for those trade_items in one query
   let allStoreProducts: {
     id: number
     origin_id: number
@@ -92,15 +112,14 @@ async function getMatches(req: NextRequest) {
   }
 
   const enriched = matches.map(
-    (m: { canonical_id: number; name: string; brand: string; barcodes: number; stores: number }) => {
+    (m: { canonical_id: number; name: string; brand: string; source: string; barcodes: number; stores: number }) => {
       const tradeItems = tiByCanonical.get(m.canonical_id) ?? []
-      const storeProducts = tradeItems.flatMap(
-        (ti: { id: number }) => spByTiId.get(ti.id) ?? [],
-      )
+      const storeProducts = tradeItems.flatMap((ti: { id: number }) => spByTiId.get(ti.id) ?? [])
       return {
         canonicalId: m.canonical_id,
         name: m.name,
         brand: m.brand,
+        source: m.source,
         barcodeCount: m.barcodes,
         storeCount: m.stores,
         tradeItems,
@@ -126,17 +145,14 @@ async function getOrphans(req: NextRequest) {
 
   const supabase = createAdminClient()
 
-  // Orphans = trade_items in single-barcode canonicals (no siblings).
-  // These are candidates for manual re-linking to multi-barcode groups.
-  const { data: countData } = await supabase.rpc("count_orphan_trade_items", {
-    search_term: search || null,
-  })
-
-  const { data: orphanTis, error } = await supabase.rpc("get_orphan_trade_items", {
-    search_term: search || null,
-    result_limit: limit,
-    result_offset: offset,
-  })
+  const [{ data: countData }, { data: orphanTis, error }] = await Promise.all([
+    supabase.rpc("count_orphan_trade_items", { search_term: search || null }),
+    supabase.rpc("get_orphan_trade_items", {
+      search_term: search || null,
+      result_limit: limit,
+      result_offset: offset,
+    }),
+  ])
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -146,7 +162,6 @@ async function getOrphans(req: NextRequest) {
     return NextResponse.json({ data: [], total: countData ?? 0, page, limit })
   }
 
-  // Fetch store_products for these trade_items
   const tiIds = orphanTis.map((ti: { trade_item_id: number }) => ti.trade_item_id)
   const { data: storeProducts } = await supabase
     .from("store_products")

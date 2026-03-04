@@ -235,9 +235,11 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                     const isLimited = storeKey ? storeKey.dataPointCount < maxPts * 0.2 : false
                     return (
                       <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
-                        {storeKey?.originId && (
-                          <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />
-                        )}
+                        <div className="min-w-20">
+                          {storeKey?.originId && (
+                            <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />
+                          )}
+                        </div>
                         <svg width="24" height="12" className="shrink-0">
                           <line
                             x1="0"

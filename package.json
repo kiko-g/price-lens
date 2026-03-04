@@ -30,6 +30,8 @@
     "canonical:run:prod": "env-cmd -f .env.production tsx scripts/canonical-pipeline.ts",
     "canonical:stats": "tsx scripts/canonical-pipeline.ts --stats",
     "canonical:dry-run": "tsx scripts/canonical-pipeline.ts --dry-run",
+    "canonical:reset-pass2": "tsx scripts/reset-pass2.ts",
+    "canonical:reset-pass2:prod": "env-cmd -f .env.production tsx scripts/reset-pass2.ts",
     "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts",
     "backfill:pingo-doce-barcodes:prod": "env-cmd -f .env.production tsx scripts/backfill-pingo-doce-barcodes.ts",
     "scraper:local": "tsx scripts/run-scraper-local.ts",
