@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 /**
  * GET /api/admin/analytics
  * Returns the latest precomputed analytics snapshot.
- * Falls back to computing live if no snapshot exists.
+ * Returns 404 if no snapshot exists (user should click Recompute).
  */
 export async function GET() {
   try {
@@ -20,39 +20,17 @@ export async function GET() {
       .limit(1)
       .single()
 
-    if (error && error.code !== "PGRST116") {
+    if (error && error.code === "PGRST116") {
+      return NextResponse.json({ error: "No analytics snapshot exists yet" }, { status: 404 })
+    }
+
+    if (error) {
       throw new Error(`Query error: ${error.message}`)
     }
 
-    if (data) {
-      return NextResponse.json(data as AnalyticsSnapshot)
-    }
-
-    // No snapshot exists yet — compute one synchronously as a bootstrap
-    console.log("[admin/analytics] No snapshot found, computing live…")
-    const { data: rpcData, error: rpcError } = await supabase.rpc("compute_analytics_snapshot", {
-      p_triggered_by: "manual",
-    })
-
-    if (rpcError) {
-      throw new Error(`RPC error: ${rpcError.message}`)
-    }
-
-    const snapshotId = (rpcData as Record<string, unknown>).snapshot_id as number
-
-    const { data: newSnapshot, error: fetchError } = await supabase
-      .from("analytics_snapshots")
-      .select("id, computed_at, duration_ms, triggered_by, data")
-      .eq("id", snapshotId)
-      .single()
-
-    if (fetchError) {
-      throw new Error(`Fetch error: ${fetchError.message}`)
-    }
-
-    return NextResponse.json(newSnapshot as AnalyticsSnapshot)
+    return NextResponse.json(data as AnalyticsSnapshot)
   } catch (error) {
-    console.error("Overview API error:", error)
+    console.error("[admin/analytics] GET error:", error)
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 })
   }
 }

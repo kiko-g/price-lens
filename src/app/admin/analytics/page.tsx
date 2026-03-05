@@ -1,14 +1,15 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
-import { Loader2Icon, NetworkIcon, RefreshCwIcon } from "lucide-react"
+import { Loader2Icon, RefreshCwIcon, DatabaseIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { AnalyticsSnapshot } from "@/types/analytics"
 
@@ -22,53 +23,43 @@ import {
   GrowthSection,
 } from "./_components/analytics-sections"
 
-export default function OverviewPage() {
+export default function AnalyticsPage() {
   const [isRecomputing, setIsRecomputing] = useState(false)
-  const recomputeBaselineRef = useRef<string | null>(null)
 
   const {
     data: snapshot,
     isLoading,
     isFetching,
+    isError,
     refetch,
   } = useQuery({
-    queryKey: ["admin-overview"],
+    queryKey: ["admin-analytics"],
     queryFn: async () => {
       const res = await axios.get("/api/admin/analytics")
       return res.data as AnalyticsSnapshot
     },
     staleTime: 60_000,
-    refetchInterval: isRecomputing ? 3_000 : false,
+    retry: 1,
   })
-
-  useEffect(() => {
-    if (!isRecomputing || !snapshot) return
-    if (snapshot.computed_at !== recomputeBaselineRef.current) {
-      setIsRecomputing(false)
-      recomputeBaselineRef.current = null
-      toast.success("Analytics snapshot recomputed", {
-        description: `Took ${snapshot.duration_ms.toLocaleString()}ms`,
-      })
-    }
-  }, [snapshot, isRecomputing])
 
   const handleRecompute = async () => {
     try {
-      recomputeBaselineRef.current = snapshot?.computed_at ?? ""
       setIsRecomputing(true)
-      const res = await axios.post("/api/admin/analytics/recompute")
-      if (res.data.status === "completed") {
-        await refetch()
-      }
+      await axios.post("/api/admin/analytics/recompute")
+      await refetch()
+      toast.success("Analytics snapshot recomputed")
     } catch {
+      toast.error("Failed to recompute analytics")
+    } finally {
       setIsRecomputing(false)
-      recomputeBaselineRef.current = null
-      toast.error("Failed to queue recompute")
     }
   }
 
   const data = snapshot?.data
-  const computedAgo = snapshot ? formatDistanceToNow(new Date(snapshot.computed_at), { addSuffix: true }) : null
+  const computedAgo = snapshot
+    ? formatDistanceToNow(new Date(snapshot.computed_at), { addSuffix: true })
+    : null
+  const hasData = !!data
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
@@ -85,10 +76,12 @@ export default function OverviewPage() {
                 Computed {computedAgo}
               </Badge>
             )}
-            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching || isRecomputing}>
-              <NetworkIcon className={cn("h-4 w-4", isFetching && "animate-spin")} />
-              Refresh
-            </Button>
+            {hasData && (
+              <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching || isRecomputing}>
+                <RefreshCwIcon className={cn("h-4 w-4", isFetching && "animate-spin")} />
+                Refresh
+              </Button>
+            )}
             <Button size="sm" onClick={handleRecompute} disabled={isRecomputing}>
               {isRecomputing ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <RefreshCwIcon className="h-4 w-4" />}
               {isRecomputing ? "Recomputing…" : "Recompute"}
@@ -96,26 +89,46 @@ export default function OverviewPage() {
           </div>
         </div>
 
-        {/* Row 1: Scrape Status (full width) */}
-        <ScrapeStatusSection data={data} isLoading={isLoading} />
+        {/* Empty / error state */}
+        {!isLoading && !hasData && (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-16">
+              <DatabaseIcon className="text-muted-foreground h-12 w-12" />
+              <div className="text-center">
+                <p className="text-lg font-medium">
+                  {isError ? "Failed to load analytics" : "No analytics data yet"}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {isError
+                    ? "Check that the migration has been applied and try again."
+                    : "Click Recompute to generate the first snapshot."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Row 2: Store Breakdown | Scrape Freshness */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <StoreBreakdownSection data={data} isLoading={isLoading} />
-          <ScrapeFreshnessSection data={data} isLoading={isLoading} />
-        </div>
+        {/* Dashboard sections — only render when loading or have data */}
+        {(isLoading || hasData) && (
+          <>
+            <ScrapeStatusSection data={data} isLoading={isLoading} />
 
-        {/* Row 3: Price Intelligence | Data Quality */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <PriceIntelligenceSection data={data} isLoading={isLoading} />
-          <DataQualitySection data={data} isLoading={isLoading} />
-        </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <StoreBreakdownSection data={data} isLoading={isLoading} />
+              <ScrapeFreshnessSection data={data} isLoading={isLoading} />
+            </div>
 
-        {/* Row 4: Priority Distribution | Growth */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <PriorityDistributionSection data={data} isLoading={isLoading} />
-          <GrowthSection data={data} isLoading={isLoading} />
-        </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <PriceIntelligenceSection data={data} isLoading={isLoading} />
+              <DataQualitySection data={data} isLoading={isLoading} />
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <PriorityDistributionSection data={data} isLoading={isLoading} />
+              <GrowthSection data={data} isLoading={isLoading} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
