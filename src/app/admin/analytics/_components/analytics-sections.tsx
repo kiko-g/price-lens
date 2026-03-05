@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 import {
   CheckCircle2Icon,
   AlertTriangleIcon,
@@ -18,9 +19,12 @@ import {
   ShieldCheckIcon,
   LayersIcon,
   SparklesIcon,
+  GaugeIcon,
+  ZapIcon,
   type LucideIcon,
 } from "lucide-react"
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
+import { PriorityBubble } from "@/components/products/PriorityBubble"
 import type { AnalyticsSnapshotData } from "@/types/analytics"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
@@ -514,6 +518,259 @@ export function GrowthSection({ data, isLoading }: { data?: AnalyticsSnapshotDat
             isLoading={isLoading}
           />
         </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 8. Scheduler Capacity
+// ---------------------------------------------------------------------------
+
+const CAPACITY_STATUS_CONFIG = {
+  healthy: {
+    label: "Healthy",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+    borderColor: "border-emerald-500",
+    badgeVariant: "success" as const,
+  },
+  degraded: {
+    label: "Degraded",
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-50 dark:bg-amber-950/20",
+    borderColor: "border-amber-500",
+    badgeVariant: "warning" as const,
+  },
+  critical: {
+    label: "Critical",
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-50 dark:bg-red-950/20",
+    borderColor: "border-red-500",
+    badgeVariant: "destructive" as const,
+  },
+}
+
+export function SchedulerCapacitySection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
+  const cap = data?.scheduler_capacity
+  const statusCfg = cap ? CAPACITY_STATUS_CONFIG[cap.status] : CAPACITY_STATUS_CONFIG.healthy
+
+  return (
+    <Card className={cn(!isLoading && cap && statusCfg.borderColor, !isLoading && cap && statusCfg.bgColor)}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className={cn("flex items-center gap-2 text-lg", !isLoading && cap && statusCfg.color)}>
+            <GaugeIcon className="size-5" />
+            Scheduler Capacity
+          </CardTitle>
+          {!isLoading && cap && <Badge variant={statusCfg.badgeVariant}>{cap.utilization_pct}% utilization</Badge>}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-20" />
+            ))}
+          </div>
+        ) : cap ? (
+          <div className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <TrendingUpIcon className="h-3.5 w-3.5" />
+                  Required Daily
+                </div>
+                <p className="mt-1 text-xl font-bold">{cap.required_daily_scrapes.toLocaleString()}</p>
+                <p className="text-muted-foreground text-xs">scrapes/day</p>
+              </div>
+              <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <GaugeIcon className="h-3.5 w-3.5" />
+                  Available Capacity
+                </div>
+                <p className="mt-1 text-xl font-bold">{cap.available_daily_capacity.toLocaleString()}</p>
+                <p className="text-muted-foreground text-xs">scrapes/day</p>
+              </div>
+              {cap.deficit > 0 ? (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/30">
+                  <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
+                    <TrendingDownIcon className="h-3.5 w-3.5" />
+                    Daily Deficit
+                  </div>
+                  <p className="mt-1 text-xl font-bold text-red-600 dark:text-red-400">
+                    -{cap.deficit.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-red-600/80 dark:text-red-400/80">scrapes short</p>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2Icon className="h-3.5 w-3.5" />
+                    Surplus
+                  </div>
+                  <p className="mt-1 text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                    +{cap.surplus_pct.toFixed(0)}%
+                  </p>
+                  <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80">extra capacity</p>
+                </div>
+              )}
+              <div className="rounded-lg border bg-white/50 p-3 dark:bg-black/20">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">Config</div>
+                <p className="mt-1 text-sm font-medium">
+                  {cap.config.batch_size} &times; {cap.config.max_batches}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  every {cap.config.cron_frequency_minutes}m ({cap.config.runs_per_day} runs/day)
+                </p>
+              </div>
+            </div>
+            {cap.status === "critical" && (
+              <div className="rounded-lg border border-red-200 bg-red-100 p-3 dark:border-red-900 dark:bg-red-950/50">
+                <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                  System cannot keep up with scraping demands. Products will accumulate staleness.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 9. Scrape Runs (24h)
+// ---------------------------------------------------------------------------
+
+export function ScrapeRunsSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
+  const runs = data?.scrape_runs_24h
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <ZapIcon className="text-foreground size-5" />
+          Actual Throughput (24h)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatBox icon={ActivityIcon} label="Batches Run" value={runs?.total_batches ?? 0} isLoading={isLoading} />
+          <StatBox
+            icon={PackageIcon}
+            label="Products Scraped"
+            value={runs?.total_products ?? 0}
+            detail={
+              runs
+                ? `${runs.total_success.toLocaleString()} ok / ${runs.total_failed.toLocaleString()} failed`
+                : undefined
+            }
+            isLoading={isLoading}
+          />
+          <StatBox
+            icon={CheckCircle2Icon}
+            label="Success Rate"
+            value={runs ? `${runs.success_rate}%` : "0%"}
+            color={
+              runs
+                ? runs.success_rate >= 90
+                  ? "text-emerald-600"
+                  : runs.success_rate >= 70
+                    ? "text-amber-600"
+                    : "text-red-600"
+                : undefined
+            }
+            isLoading={isLoading}
+          />
+          <StatBox
+            icon={ClockIcon}
+            label="Avg Batch Duration"
+            value={runs ? `${(runs.avg_batch_duration_ms / 1000).toFixed(1)}s` : "0s"}
+            isLoading={isLoading}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 10. Staleness Breakdown
+// ---------------------------------------------------------------------------
+
+export function StalenessBreakdownSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
+  const buckets = data?.staleness_breakdown
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <AlertTriangleIcon className="text-foreground size-5" />
+          Staleness Breakdown
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-24" />
+            ))}
+          </div>
+        ) : buckets && buckets.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {buckets.map((bucket, idx) => {
+              const isNever = bucket.min === null && bucket.max === null
+              const severity =
+                isNever || (bucket.min !== null && bucket.min >= 72)
+                  ? "high"
+                  : bucket.min !== null && bucket.min >= 24
+                    ? "medium"
+                    : "low"
+
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    "rounded-lg border p-4",
+                    severity === "high" && "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30",
+                    severity === "medium" && "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30",
+                    severity === "low" &&
+                      "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30",
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{bucket.label}</span>
+                    <span
+                      className={cn(
+                        "text-xl font-bold",
+                        severity === "high" && "text-red-600 dark:text-red-400",
+                        severity === "medium" && "text-amber-600 dark:text-amber-400",
+                        severity === "low" && "text-emerald-600 dark:text-emerald-400",
+                      )}
+                    >
+                      {bucket.count.toLocaleString()}
+                    </span>
+                  </div>
+                  {bucket.count > 0 && (
+                    <div className="mt-2 flex gap-2 text-xs">
+                      {Object.entries(bucket.by_priority)
+                        .filter(([, count]) => count > 0)
+                        .sort(([a], [b]) => Number(b) - Number(a))
+                        .map(([priority, count]) => (
+                          <span key={priority} className="flex items-center gap-1">
+                            <PriorityBubble priority={Number(priority)} size="xs" />
+                            {count}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">No staleness data available.</p>
+        )}
       </CardContent>
     </Card>
   )

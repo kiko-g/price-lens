@@ -1,10 +1,10 @@
 export interface PriorityStats {
   priority: number | null
   total: number
-  fresh: number // available=true AND recently scraped
-  staleActionable: number // available=true AND needs scraping (we can fix this)
-  unavailable: number // available=false (not our problem)
-  neverScraped: number // updated_at IS NULL (informational, overlaps with other categories)
+  fresh: number
+  staleActionable: number
+  unavailable: number
+  neverScraped: number
   stalenessThresholdHours: number | null
 }
 
@@ -43,50 +43,12 @@ export interface ScheduleOverview {
   priorityStats: PriorityStats[]
   totalProducts: number
   totalTracked: number
-  totalStaleActionable: number // Products that need scraping and are available
-  totalUnavailable: number // Products that are unavailable (can't be scraped)
+  totalStaleActionable: number
+  totalUnavailable: number
   totalDueForScrape: number
-  totalPhantomScraped: number // Products that appear scraped (have updated_at) but have no price records
+  totalPhantomScraped: number
   costEstimate: CostEstimate
   capacity: CapacityAnalysis
-}
-
-export interface TimelineProduct {
-  id: number
-  name: string | null
-  priority: number
-  origin_id: number | null
-  updated_at: string | null
-  staleAt: string | null
-  hoursUntilStale: number | null
-  isStale: boolean
-}
-
-export interface TimelineData {
-  date: string
-  hourlyBuckets: {
-    hour: number
-    products: TimelineProduct[]
-  }[]
-}
-
-export interface StaleBreakdown {
-  buckets: {
-    label: string
-    min: number | null
-    max: number | null
-    count: number
-    byPriority: Record<number, number>
-  }[]
-}
-
-export interface ActivityData {
-  windows: {
-    label: string
-    count: number
-    byPriority: Record<number, number>
-  }[]
-  scrapesPerHour: number
 }
 
 export type StalenessStatus = "stale-actionable" | "never-scraped" | "fresh" | "unavailable" | "phantom-scraped"
@@ -101,21 +63,6 @@ export interface ProductsByStalenessResponse {
     hasNextPage: boolean
     hasPreviousPage: boolean
   }
-}
-
-export interface QStashSchedule {
-  scheduleId: string
-  cron: string
-  destination: string
-  isPaused: boolean
-  createdAt: number
-  method: string
-  retries: number
-}
-
-export interface QStashSchedulesResponse {
-  schedules: QStashSchedule[]
-  total: number
 }
 
 export interface SchedulerTestResult {

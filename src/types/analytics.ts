@@ -1,3 +1,13 @@
+export type CapacityHealthStatus = "healthy" | "degraded" | "critical"
+
+export interface StalenessBreakdownBucket {
+  label: string
+  min: number | null
+  max: number | null
+  count: number
+  by_priority: Record<string, number>
+}
+
 export interface AnalyticsSnapshotData {
   scrape_status: {
     total: number
@@ -57,6 +67,30 @@ export interface AnalyticsSnapshotData {
     new_products_7d: number
     new_prices_7d: number
   }
+  scheduler_capacity: {
+    status: CapacityHealthStatus
+    required_daily_scrapes: number
+    available_daily_capacity: number
+    utilization_pct: number
+    deficit: number
+    surplus_pct: number
+    config: {
+      batch_size: number
+      max_batches: number
+      cron_frequency_minutes: number
+      runs_per_day: number
+      active_priorities: number[]
+    }
+  }
+  scrape_runs_24h: {
+    total_batches: number
+    total_products: number
+    total_success: number
+    total_failed: number
+    success_rate: number
+    avg_batch_duration_ms: number
+  }
+  staleness_breakdown: StalenessBreakdownBucket[]
 }
 
 export interface AnalyticsSnapshot {

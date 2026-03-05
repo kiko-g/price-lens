@@ -21,6 +21,9 @@ import {
   DataQualitySection,
   PriorityDistributionSection,
   GrowthSection,
+  SchedulerCapacitySection,
+  ScrapeRunsSection,
+  StalenessBreakdownSection,
 } from "./_components/analytics-sections"
 
 export default function AnalyticsPage() {
@@ -71,9 +74,7 @@ export default function AnalyticsPage() {
   }
 
   const data = snapshot?.data
-  const computedAgo = snapshot
-    ? formatDistanceToNow(new Date(snapshot.computed_at), { addSuffix: true })
-    : null
+  const computedAgo = snapshot ? formatDistanceToNow(new Date(snapshot.computed_at), { addSuffix: true }) : null
   const hasData = !!data
 
   return (
@@ -110,9 +111,7 @@ export default function AnalyticsPage() {
             <CardContent className="flex flex-col items-center justify-center gap-4 py-16">
               <DatabaseIcon className="text-muted-foreground h-12 w-12" />
               <div className="text-center">
-                <p className="text-lg font-medium">
-                  {isError ? "Failed to load analytics" : "No analytics data yet"}
-                </p>
+                <p className="text-lg font-medium">{isError ? "Failed to load analytics" : "No analytics data yet"}</p>
                 <p className="text-muted-foreground text-sm">
                   {isError
                     ? "Check that the migration has been applied and try again."
@@ -140,6 +139,13 @@ export default function AnalyticsPage() {
             <div className="grid gap-6 lg:grid-cols-2">
               <PriorityDistributionSection data={data} isLoading={isLoading} />
               <GrowthSection data={data} isLoading={isLoading} />
+            </div>
+
+            <SchedulerCapacitySection data={data} isLoading={isLoading} />
+
+            <div className="grid grid-cols-1 gap-6">
+              <ScrapeRunsSection data={data} isLoading={isLoading} />
+              <StalenessBreakdownSection data={data} isLoading={isLoading} />
             </div>
           </>
         )}

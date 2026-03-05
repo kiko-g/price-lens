@@ -1,11 +1,19 @@
-import { redirect } from "next/navigation"
-import type { Metadata } from "next"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Admin",
-  description: "Price Lens Admin Dashboard",
-}
+import { ScheduleOverviewSection } from "./_components/schedule-overview-section"
+import { SchedulerTestSection } from "./_components/scheduler-test-section"
+import { PriorityBrowserSection } from "./_components/priority-browser-section"
+import { ScrapeHistorySection } from "./_components/scrape-history-section"
 
-export default function AdminSchedulePage() {
-  redirect("/admin/schedule/overview")
+export default function SchedulePage() {
+  return (
+    <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        <ScheduleOverviewSection />
+        <SchedulerTestSection />
+        <PriorityBrowserSection />
+        <ScrapeHistorySection />
+      </div>
+    </div>
+  )
 }

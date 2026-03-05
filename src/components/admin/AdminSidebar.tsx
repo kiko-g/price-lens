@@ -22,11 +22,6 @@ import {
   UserIcon,
   ScanFaceIcon,
   MoreHorizontalIcon,
-  ActivityIcon,
-  TestTube2Icon,
-  PieChartIcon,
-  ClockIcon,
-  LayoutDashboardIcon,
   MapIcon,
   GaugeIcon,
   PickaxeIcon,
@@ -83,15 +78,8 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     title: "Schedule",
-    href: "admin/schedule",
+    href: "/admin/schedule",
     icon: CalendarClockIcon,
-    items: [
-      { title: "Overview", href: "/admin/schedule/overview", icon: LayoutDashboardIcon },
-      { title: "Activity", href: "/admin/schedule/activity", icon: ActivityIcon },
-      { title: "Distribution", href: "/admin/schedule/distribution", icon: PieChartIcon },
-      { title: "Timeline", href: "/admin/schedule/timeline", icon: ClockIcon },
-      { title: "Test", href: "/admin/schedule/test", icon: TestTube2Icon },
-    ],
   },
   {
     title: "Database",
