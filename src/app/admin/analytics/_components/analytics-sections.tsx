@@ -25,8 +25,10 @@ import {
 } from "lucide-react"
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { AnalyticsSnapshotData } from "@/types/analytics"
-import { PRIORITY_CONFIG } from "@/lib/business/priority"
+import { PRIORITY_CONFIG, formatThreshold } from "@/lib/business/priority"
+import { BanIcon, CircleIcon } from "lucide-react"
 
 const STORE_LOGOS: Record<number, React.ComponentType<{ className?: string }>> = {
   1: ContinenteSvg,
@@ -427,63 +429,173 @@ export function DataQualitySection({ data, isLoading }: { data?: AnalyticsSnapsh
 }
 
 // ---------------------------------------------------------------------------
-// 6. Priority Distribution
+// 6. Priority Health (merged Priority Distribution + Staleness)
 // ---------------------------------------------------------------------------
 
-const PRIORITY_DISTRIBUTION_KEYS: Array<{
-  configKey: string
-  dataKey: keyof AnalyticsSnapshotData["priority_distribution"]
-}> = [
-  { configKey: "5", dataKey: "p5" },
-  { configKey: "4", dataKey: "p4" },
-  { configKey: "3", dataKey: "p3" },
-  { configKey: "2", dataKey: "p2" },
-  { configKey: "1", dataKey: "p1" },
-  { configKey: "0", dataKey: "p0" },
-  { configKey: "null", dataKey: "unassigned" },
-]
+export function PriorityHealthSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
+  const stats = data?.priority_health
 
-export function PriorityDistributionSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
-  const pd = data?.priority_distribution
-  const total = data?.scrape_status?.total ?? 1
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <LayersIcon className="text-foreground size-5" />
+            Priority Health
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-48" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!stats || stats.length === 0) return null
+
+  const numbered = stats.filter((s) => s.priority !== null)
+  const unclassified = stats.find((s) => s.priority === null)
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <LayersIcon className="text-foreground size-5" />
-          Priority Distribution
+          Priority Health
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-full" />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {PRIORITY_DISTRIBUTION_KEYS.map(({ configKey, dataKey }) => {
-              const config = PRIORITY_CONFIG[configKey]
-              const count = pd?.[dataKey] ?? 0
-              const pct = total > 0 ? (count / total) * 100 : 0
-              return (
-                <div key={dataKey} className="flex items-center gap-3">
-                  <span className="text-muted-foreground w-10 text-sm">
-                    {configKey === "null" ? "None" : `P${configKey}`}
-                  </span>
-                  <div className="bg-muted h-5 flex-1 overflow-hidden rounded">
-                    <div className={cn("h-full rounded transition-all", config.bgClass)} style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="w-20 text-right text-sm font-medium tabular-nums">{count.toLocaleString()}</span>
-                </div>
-              )
-            })}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {numbered.map((stat) => (
+            <PriorityHealthCard key={stat.priority} stat={stat} />
+          ))}
+          {unclassified && unclassified.total > 0 && (
+            <div className="bg-accent col-span-1 flex items-center justify-between gap-2 rounded-lg border border-dashed p-4 opacity-80 sm:col-span-2 lg:col-span-3">
+              <div className="flex items-center gap-2">
+                <PriorityBubble priority={null} size="sm" />
+                <span className="font-medium">Unclassified</span>
+                <span className="text-muted-foreground text-sm">({unclassified.total.toLocaleString()} products)</span>
+              </div>
+              <Badge variant="default" className="text-xs" size="xs">
+                Not scheduled
+              </Badge>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
+  )
+}
+
+function PriorityHealthCard({ stat }: { stat: AnalyticsSnapshotData["priority_health"][number] }) {
+  const config = PRIORITY_CONFIG[stat.priority ?? 0]
+  const freshPct = stat.total > 0 ? Math.round((stat.fresh / stat.total) * 100) : 0
+  const stalePct = stat.total > 0 ? Math.round((stat.stale_actionable / stat.total) * 100) : 0
+  const unavailPct = stat.total > 0 ? Math.round((stat.unavailable / stat.total) * 100) : 0
+
+  return (
+    <div className={cn("rounded-lg border p-4", !stat.is_active && "bg-accent border-dashed opacity-80")}>
+      <div className="mb-2 flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <PriorityBubble priority={stat.priority} size="sm" />
+            <span className="font-medium">{config?.description}</span>
+          </div>
+          {!stat.is_active && (
+            <Badge variant="default" className="text-xs" size="xs">
+              Not scheduled
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center justify-between gap-2 text-sm">
+          <span className="font-medium">{stat.total.toLocaleString()} products</span>
+          <span className="text-muted-foreground">Refresh: {formatThreshold(stat.staleness_threshold_hours)}</span>
+        </div>
+      </div>
+
+      <div className="flex h-6 w-full overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+        {stat.fresh > 0 && (
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div
+                  className="flex items-center justify-center bg-emerald-500 text-xs font-medium text-white transition-all"
+                  style={{ width: `${freshPct}%` }}
+                >
+                  {freshPct > 10 && stat.fresh.toLocaleString()}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {stat.fresh.toLocaleString()} fresh ({freshPct}%)
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {stat.stale_actionable > 0 && (
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div
+                  className="flex items-center justify-center bg-orange-500 text-xs font-medium text-white transition-all"
+                  style={{ width: `${stalePct}%` }}
+                >
+                  {stalePct > 10 && stat.stale_actionable.toLocaleString()}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {stat.stale_actionable.toLocaleString()} stale actionable ({stalePct}%)
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {stat.unavailable > 0 && (
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div
+                  className="flex items-center justify-center bg-gray-400 text-xs font-medium text-white transition-all dark:bg-gray-600"
+                  style={{ width: `${unavailPct}%` }}
+                >
+                  {unavailPct > 10 && stat.unavailable.toLocaleString()}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {stat.unavailable.toLocaleString()} unavailable ({unavailPct}%)
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-col gap-1 text-xs font-medium">
+        <span className="text-success flex items-center gap-1">
+          <CheckCircle2Icon className="h-4 w-4" />
+          {stat.fresh.toLocaleString()} fresh ({freshPct}%)
+        </span>
+        {stat.stale_actionable > 0 && (
+          <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+            <AlertTriangleIcon className="h-4 w-4" />
+            {stat.stale_actionable.toLocaleString()} stale actionable ({stalePct}%)
+          </span>
+        )}
+        {stat.unavailable > 0 && (
+          <span className="text-muted-foreground flex items-center gap-1">
+            <BanIcon className="h-4 w-4" />
+            {stat.unavailable.toLocaleString()} unavailable ({unavailPct}%)
+          </span>
+        )}
+        {stat.never_scraped > 0 && (
+          <span className="text-muted-foreground flex items-center gap-1 text-[11px] opacity-70">
+            <CircleIcon className="h-3 w-3" />
+            {stat.never_scraped.toLocaleString()} never scraped
+          </span>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -689,88 +801,6 @@ export function ScrapeRunsSection({ data, isLoading }: { data?: AnalyticsSnapsho
             isLoading={isLoading}
           />
         </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// 10. Staleness Breakdown
-// ---------------------------------------------------------------------------
-
-export function StalenessBreakdownSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
-  const buckets = data?.staleness_breakdown
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <AlertTriangleIcon className="text-foreground size-5" />
-          Staleness Breakdown
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        ) : buckets && buckets.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {buckets.map((bucket, idx) => {
-              const isNever = bucket.min === null && bucket.max === null
-              const severity =
-                isNever || (bucket.min !== null && bucket.min >= 72)
-                  ? "high"
-                  : bucket.min !== null && bucket.min >= 24
-                    ? "medium"
-                    : "low"
-
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    "rounded-lg border p-4",
-                    severity === "high" && "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30",
-                    severity === "medium" && "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30",
-                    severity === "low" &&
-                      "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30",
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{bucket.label}</span>
-                    <span
-                      className={cn(
-                        "text-xl font-bold",
-                        severity === "high" && "text-red-600 dark:text-red-400",
-                        severity === "medium" && "text-amber-600 dark:text-amber-400",
-                        severity === "low" && "text-emerald-600 dark:text-emerald-400",
-                      )}
-                    >
-                      {bucket.count.toLocaleString()}
-                    </span>
-                  </div>
-                  {bucket.count > 0 && (
-                    <div className="mt-2 flex gap-2 text-xs">
-                      {Object.entries(bucket.by_priority)
-                        .filter(([, count]) => count > 0)
-                        .sort(([a], [b]) => Number(b) - Number(a))
-                        .map(([priority, count]) => (
-                          <span key={priority} className="flex items-center gap-1">
-                            <PriorityBubble priority={Number(priority)} size="xs" />
-                            {count}
-                          </span>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-sm">No staleness data available.</p>
-        )}
       </CardContent>
     </Card>
   )

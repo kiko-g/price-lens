@@ -19,11 +19,10 @@ import {
   ScrapeFreshnessSection,
   PriceIntelligenceSection,
   DataQualitySection,
-  PriorityDistributionSection,
+  PriorityHealthSection,
   GrowthSection,
   SchedulerCapacitySection,
   ScrapeRunsSection,
-  StalenessBreakdownSection,
 } from "./_components/analytics-sections"
 
 export default function AnalyticsPage() {
@@ -136,17 +135,13 @@ export default function AnalyticsPage() {
               <DataQualitySection data={data} isLoading={isLoading} />
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <PriorityDistributionSection data={data} isLoading={isLoading} />
-              <GrowthSection data={data} isLoading={isLoading} />
-            </div>
+            <PriorityHealthSection data={data} isLoading={isLoading} />
+
+            <GrowthSection data={data} isLoading={isLoading} />
 
             <SchedulerCapacitySection data={data} isLoading={isLoading} />
 
-            <div className="grid grid-cols-1 gap-6">
-              <ScrapeRunsSection data={data} isLoading={isLoading} />
-              <StalenessBreakdownSection data={data} isLoading={isLoading} />
-            </div>
+            <ScrapeRunsSection data={data} isLoading={isLoading} />
           </>
         )}
       </div>

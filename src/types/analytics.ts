@@ -1,11 +1,14 @@
 export type CapacityHealthStatus = "healthy" | "degraded" | "critical"
 
-export interface StalenessBreakdownBucket {
-  label: string
-  min: number | null
-  max: number | null
-  count: number
-  by_priority: Record<string, number>
+export interface PriorityHealthStats {
+  priority: number | null
+  total: number
+  fresh: number
+  stale_actionable: number
+  unavailable: number
+  never_scraped: number
+  staleness_threshold_hours: number | null
+  is_active: boolean
 }
 
 export interface AnalyticsSnapshotData {
@@ -90,7 +93,7 @@ export interface AnalyticsSnapshotData {
     success_rate: number
     avg_batch_duration_ms: number
   }
-  staleness_breakdown: StalenessBreakdownBucket[]
+  priority_health: PriorityHealthStats[]
 }
 
 export interface AnalyticsSnapshot {
