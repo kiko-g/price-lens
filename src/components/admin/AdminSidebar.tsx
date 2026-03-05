@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
@@ -235,8 +236,9 @@ function SiteNavigationDropup() {
           tooltip="Go to Site"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          {/* TODO: fix here. when collapsed the icon is not centered */}
-          <span className="flex size-8 items-center justify-center rounded-lg bg-linear-to-r from-blue-500 to-blue-600"></span>
+          <span className="flex size-7 shrink-0 items-center justify-center">
+            <Image src="/price-lens.svg" alt="" width={28} height={28} className="size-7" aria-hidden />
+          </span>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">Price Lens</span>
             <span className="text-muted-foreground truncate text-xs">Admin Dashboard</span>
@@ -280,7 +282,7 @@ function UserDropup() {
   if (!user) {
     return (
       <SidebarMenuButton size="lg" tooltip="Sign In" onClick={() => router.push("/login")}>
-        <span className="flex size-8 items-center justify-center rounded-lg border">
+        <span className="bg-background flex size-8 items-center justify-center rounded-lg border">
           <ScanFaceIcon className="size-4" />
         </span>
         <div className="grid flex-1 text-left text-sm leading-tight">

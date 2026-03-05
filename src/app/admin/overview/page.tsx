@@ -102,7 +102,7 @@ export default function OverviewPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <ActivityIcon className="text-primary size-5" />
+              <ActivityIcon className="text-foreground size-5" />
               Scrape Status
             </CardTitle>
           </CardHeader>
@@ -182,7 +182,7 @@ export default function OverviewPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <DatabaseIcon className="text-primary size-5" />
+                <DatabaseIcon className="text-foreground size-5" />
                 Products by Store
               </CardTitle>
             </CardHeader>
@@ -212,9 +212,9 @@ export default function OverviewPage() {
                         <div className="flex flex-col items-start gap-2">
                           {/* Progress */}
                           <div className="flex w-full flex-1 items-center gap-2">
-                            <div className="bg-destructive h-2 flex-1 overflow-hidden rounded-full">
+                            <div className="bg-foreground/20 h-2 flex-1 overflow-hidden rounded-full">
                               <div
-                                className="h-full bg-emerald-500 transition-all"
+                                className="bg-foreground h-full transition-all"
                                 style={{ width: `${availablePercent}%` }}
                               />
                             </div>
@@ -223,14 +223,14 @@ export default function OverviewPage() {
                           {/* Labels */}
                           <div className="flex gap-5 text-xs">
                             <span className="flex items-center gap-1">
-                              <span className="bg-success h-2 w-2 rounded-full" />
+                              <span className="bg-foreground h-2 w-2 rounded-full" />
                               <span className="text-muted-foreground">Available</span>
                               <span className="font-medium">
                                 {origin.available.toLocaleString()} ({availablePercent.toFixed(1)}%)
                               </span>
                             </span>
                             <span className="flex items-center gap-1">
-                              <span className="bg-destructive h-2 w-2 rounded-full" />
+                              <span className="bg-foreground/20 h-2 w-2 rounded-full" />
                               <span className="text-muted-foreground">Unavailable</span>
                               <span className="font-medium">
                                 {origin.unavailable.toLocaleString()} ({(100 - availablePercent).toFixed(1)}%)
@@ -250,7 +250,7 @@ export default function OverviewPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <TrendingUpIcon className="text-primary size-5" />
+                <TrendingUpIcon className="text-foreground size-5" />
                 Quick Stats
               </CardTitle>
             </CardHeader>

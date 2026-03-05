@@ -87,7 +87,7 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 
-const FILTER_DEBOUNCE_MS = 750 // Debounce delay for filter changes
+const FILTER_DEBOUNCE_MS = 500 // Debounce delay for filter changes
 const USE_SORT_GROUPS = false
 
 function DebounceProgressBar({ durationMs }: { durationMs: number }) {
@@ -97,10 +97,10 @@ function DebounceProgressBar({ durationMs }: { durationMs: number }) {
     return () => cancelAnimationFrame(raf)
   }, [])
   return (
-    <div className="bg-primary/20 hidden h-1 w-12 overflow-hidden rounded-full md:block">
+    <div className="bg-foreground/20 hidden h-[5px] w-16 overflow-hidden rounded-full md:block">
       <div
-        className="bg-primary h-full rounded-full transition-[width] ease-linear"
-        style={{ width: filled ? "100%" : "0%", transitionDuration: `${durationMs}ms` }}
+        className="bg-foreground h-full rounded-full transition-[width] ease-linear"
+        style={{ width: filled ? "100%" : "0%", transitionDuration: `${durationMs - 100}ms` }}
       />
     </div>
   )
