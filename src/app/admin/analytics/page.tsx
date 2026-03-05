@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { formatDistanceToNow } from "date-fns"
@@ -25,6 +25,7 @@ import {
 
 export default function AnalyticsPage() {
   const [isRecomputing, setIsRecomputing] = useState(false)
+  const recomputeBaselineRef = useRef<string | null>(null)
 
   const {
     data: snapshot,
@@ -40,18 +41,32 @@ export default function AnalyticsPage() {
     },
     staleTime: 60_000,
     retry: 1,
+    refetchInterval: isRecomputing ? 5_000 : false,
   })
+
+  useEffect(() => {
+    if (!isRecomputing || !snapshot) return
+    if (snapshot.computed_at !== recomputeBaselineRef.current) {
+      setIsRecomputing(false)
+      recomputeBaselineRef.current = null
+      toast.success("Analytics snapshot recomputed", {
+        description: `Took ${snapshot.duration_ms.toLocaleString()}ms`,
+      })
+    }
+  }, [snapshot, isRecomputing])
 
   const handleRecompute = async () => {
     try {
+      recomputeBaselineRef.current = snapshot?.computed_at ?? ""
       setIsRecomputing(true)
-      await axios.post("/api/admin/analytics/recompute")
-      await refetch()
-      toast.success("Analytics snapshot recomputed")
+      const res = await axios.post("/api/admin/analytics/recompute")
+      if (res.data.status === "completed") {
+        await refetch()
+      }
     } catch {
-      toast.error("Failed to recompute analytics")
-    } finally {
       setIsRecomputing(false)
+      recomputeBaselineRef.current = null
+      toast.error("Failed to queue recompute")
     }
   }
 
@@ -108,7 +123,6 @@ export default function AnalyticsPage() {
           </Card>
         )}
 
-        {/* Dashboard sections — only render when loading or have data */}
         {(isLoading || hasData) && (
           <>
             <ScrapeStatusSection data={data} isLoading={isLoading} />

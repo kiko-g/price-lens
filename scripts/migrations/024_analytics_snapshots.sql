@@ -31,6 +31,7 @@ RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
+SET statement_timeout = '120s'
 AS $$
 DECLARE
   v_start  TIMESTAMPTZ;
