@@ -154,8 +154,8 @@ export const TESTABLE_ROUTES: TestableRoute[] = [
 
   // Admin
   {
-    path: "/api/admin/overview",
-    name: "Admin Overview",
+    path: "/api/admin/analytics",
+    name: "Admin Analytics",
     category: "admin",
     description: "Dashboard KPIs and metrics",
   },

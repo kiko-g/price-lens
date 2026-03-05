@@ -77,8 +77,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    title: "Overview",
-    href: "/admin/overview",
+    title: "Analytics",
+    href: "/admin/analytics",
     icon: GaugeIcon,
   },
   {

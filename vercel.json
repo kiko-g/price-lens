@@ -4,6 +4,10 @@
     {
       "path": "/api/scrape/scheduler",
       "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/admin/analytics/compute-worker",
+      "schedule": "0 */12 * * *"
     }
   ]
 }

@@ -28,6 +28,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_snapshots: {
+        Row: {
+          computed_at: string
+          data: Json
+          duration_ms: number | null
+          id: number
+          triggered_by: string
+        }
+        Insert: {
+          computed_at?: string
+          data: Json
+          duration_ms?: number | null
+          id?: never
+          triggered_by?: string
+        }
+        Update: {
+          computed_at?: string
+          data?: Json
+          duration_ms?: number | null
+          id?: never
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       canonical_categories: {
         Row: {
           created_at: string | null
@@ -65,31 +89,37 @@ export type Database = {
       }
       canonical_products: {
         Row: {
+          barcode_count: number
           brand: string | null
           created_at: string
           id: number
           name: string
           source: string
+          store_count: number
           updated_at: string
           volume_unit: string | null
           volume_value: number | null
         }
         Insert: {
+          barcode_count?: number
           brand?: string | null
           created_at?: string
           id?: number
           name: string
           source?: string
+          store_count?: number
           updated_at?: string
           volume_unit?: string | null
           volume_value?: number | null
         }
         Update: {
+          barcode_count?: number
           brand?: string | null
           created_at?: string
           id?: number
           name?: string
           source?: string
+          store_count?: number
           updated_at?: string
           volume_unit?: string | null
           volume_value?: number | null
@@ -589,31 +619,42 @@ export type Database = {
       }
     }
     Functions: {
-      count_canonical_matches: {
-        Args: { min_stores?: number; search_term?: string }
+      bulk_link_trade_items: {
+        Args: { cp_ids: number[]; ti_ids: number[] }
         Returns: number
       }
+      compute_analytics_snapshot: {
+        Args: { p_triggered_by?: string }
+        Returns: Json
+      }
+      count_canonical_products: {
+        Args: {
+          min_barcodes?: number
+          min_stores?: number
+          search_term?: string
+        }
+        Returns: number
+      }
+      count_orphan_trade_items: {
+        Args: { search_term?: string }
+        Returns: number
+      }
+      count_orphaned_canonicals: { Args: never; Returns: number }
       count_phantom_scraped_products: {
         Args: { active_priorities: number[] }
         Returns: number
       }
+      delete_canonical_product: {
+        Args: { target_id: number }
+        Returns: undefined
+      }
+      denormalize_canonical_ids: { Args: never; Returns: number }
+      denormalize_canonical_ids_batch: {
+        Args: { batch_size?: number }
+        Returns: number
+      }
       get_activity_window_stats: { Args: never; Returns: Json }
       get_admin_overview_stats: { Args: never; Returns: Json }
-      get_canonical_matches: {
-        Args: {
-          min_stores?: number
-          result_limit?: number
-          result_offset?: number
-          search_term?: string
-        }
-        Returns: {
-          barcodes: number
-          brand: string
-          canonical_id: number
-          name: string
-          stores: number
-        }[]
-      }
       get_category_mapping_stats: {
         Args: never
         Returns: {
@@ -643,6 +684,22 @@ export type Database = {
           store_category: string
           store_category_2: string
           store_category_3: string
+        }[]
+      }
+      get_orphan_trade_items: {
+        Args: {
+          result_limit?: number
+          result_offset?: number
+          search_term?: string
+        }
+        Returns: {
+          canonical_brand: string
+          canonical_name: string
+          canonical_product_id: number
+          gs1_prefix: string
+          gtin: string
+          off_product_name: string
+          trade_item_id: number
         }[]
       }
       get_phantom_scraped_products: {
@@ -701,6 +758,36 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      list_canonical_products: {
+        Args: {
+          min_barcodes?: number
+          min_stores?: number
+          result_limit?: number
+          result_offset?: number
+          search_term?: string
+        }
+        Returns: {
+          barcodes: number
+          brand: string
+          canonical_id: number
+          name: string
+          source: string
+          stores: number
+        }[]
+      }
+      refresh_canonical_counts_batch: {
+        Args: { batch_size?: number }
+        Returns: number
+      }
+      search_canonical_products: {
+        Args: { result_limit?: number; search_term: string }
+        Returns: {
+          barcode_count: number
+          brand: string
+          id: number
+          name: string
+        }[]
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
