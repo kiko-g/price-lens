@@ -123,7 +123,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={cn(GeistSans.className)}>
+      <body className={cn(GeistSans.className, "bg-background text-foreground")}>
         <Providers>
           <Analytics />
           <ServiceWorkerRegistration />
