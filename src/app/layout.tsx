@@ -22,15 +22,14 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
  */
 const SPLASH_STYLES = `
 #__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding-top:env(safe-area-inset-top,0px);transition:opacity .5s ease-out}
-@media(prefers-color-scheme:dark){#__splash{background:#09090b}#__splash .st{color:#fafafa}#__splash .sd{background:rgba(250,250,249,.3)}}
 #__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
 #__splash .si{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(99,106,215,.4))}
 #__splash .st{font-size:1.125rem;font-weight:700;letter-spacing:-.025em;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-#__splash .sb{position:absolute;bottom:4rem;display:flex;align-items:center;gap:.375rem}
-#__splash .sd{width:6px;height:6px;border-radius:9999px;background:rgba(28,25,23,.3);animation:__sd 1.4s ease-in-out infinite}
-#__splash .sd:nth-child(2){animation-delay:.2s}#__splash .sd:nth-child(3){animation-delay:.4s}
+#__splash .sb{position:absolute;bottom:5rem;width:40px;height:3px;border-radius:9999px;overflow:hidden;background:rgba(28,25,23,.1)}
+#__splash .sb::after{content:'';position:absolute;inset:0;border-radius:9999px;background:rgba(99,106,215,.6);animation:__sl 1.2s ease-in-out infinite}
+@media(prefers-color-scheme:dark){#__splash{background:#09090b}#__splash .st{color:#fafafa}#__splash .sb{background:rgba(250,250,249,.1)}#__splash .sb::after{background:rgba(99,106,215,.8)}}
 @keyframes __sf{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-@keyframes __sd{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1.2)}}
+@keyframes __sl{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 #__splash[data-hidden]{opacity:0;pointer-events:none}
 `
 
@@ -152,11 +151,7 @@ export default function RootLayout({
             <img src="/price-lens.svg" alt="" width={64} height={64} className="si" fetchPriority="high" />
             <span className="st">Price Lens</span>
           </div>
-          <div className="sb">
-            <div className="sd" />
-            <div className="sd" />
-            <div className="sd" />
-          </div>
+          <div className="sb" />
         </div>
         {/* Failsafe: remove splash after 8s even if React never hydrates */}
         <script
