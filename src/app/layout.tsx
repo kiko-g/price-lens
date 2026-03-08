@@ -153,10 +153,10 @@ export default function RootLayout({
           </div>
           <div className="sb" />
         </div>
-        {/* Failsafe: remove splash after 8s even if React never hydrates */}
+        {/* Failsafe: hide splash after 8s even if React never hydrates */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `setTimeout(function(){var s=document.getElementById('__splash');if(s){s.setAttribute('data-hidden','');setTimeout(function(){s.remove()},500)}},8000)`,
+            __html: `setTimeout(function(){var s=document.getElementById('__splash');if(s)s.setAttribute('data-hidden','')},8000)`,
           }}
         />
         <Providers>

@@ -73,6 +73,65 @@ function Subsection({ label, children }: { label: string; children: React.ReactN
   )
 }
 
+function SplashPreview({ mode }: { mode: "light" | "dark" }) {
+  const isDark = mode === "dark"
+
+  return (
+    <div
+      className="relative flex flex-col items-center justify-center overflow-hidden rounded-lg border"
+      style={{
+        height: 400,
+        background: isDark ? "#09090b" : "#fff",
+      }}
+    >
+      <div className="flex flex-col items-center gap-5 p-4" style={{ animation: "__sf .6s ease-out both" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/price-lens.svg"
+          alt=""
+          width={64}
+          height={64}
+          style={{ filter: "drop-shadow(0 0 24px rgba(99,106,215,.4))" }}
+        />
+        <span
+          style={{
+            fontSize: "1.125rem",
+            fontWeight: 700,
+            letterSpacing: "-.025em",
+            color: isDark ? "#fafafa" : "#1c1917",
+            fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif",
+          }}
+        >
+          Price Lens
+        </span>
+      </div>
+
+      {/* Loading bar */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "3rem",
+          width: 40,
+          height: 3,
+          borderRadius: 9999,
+          overflow: "hidden",
+          background: isDark ? "rgba(250,250,249,.1)" : "rgba(28,25,23,.1)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 9999,
+            background: isDark ? "rgba(99,106,215,.8)" : "rgba(99,106,215,.6)",
+            animation: "__sl 1.2s ease-in-out infinite",
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function DebugPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8">
@@ -80,6 +139,20 @@ export default function DebugPage() {
         <h1 className="text-2xl font-bold tracking-tight">UI Showcase</h1>
         <p className="text-muted-foreground text-sm">Preview components and states without breaking the app.</p>
       </div>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Splash Screen */}
+      {/* ----------------------------------------------------------------- */}
+      <Section title="Splash Screen (PWA loading state)">
+        <div className="grid gap-6 md:grid-cols-2">
+          <Subsection label="light mode">
+            <SplashPreview mode="light" />
+          </Subsection>
+          <Subsection label="dark mode">
+            <SplashPreview mode="dark" />
+          </Subsection>
+        </div>
+      </Section>
 
       {/* ----------------------------------------------------------------- */}
       {/* Error States */}

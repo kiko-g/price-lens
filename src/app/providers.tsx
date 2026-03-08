@@ -77,8 +77,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const el = document.getElementById("__splash")
     if (!el) return
     el.setAttribute("data-hidden", "")
-    const t = setTimeout(() => el.remove(), 500)
-    return () => clearTimeout(t)
   }, [])
 
   return (
