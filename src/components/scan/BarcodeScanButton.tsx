@@ -28,11 +28,14 @@ type BarcodeScanButtonProps = {
 export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [isScanning, setIsScanning] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [manualOpen, setManualOpen] = useState(false)
-  const [manualValue, setManualValue] = useState("")
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const [isScanningCamera, setIsScanningCamera] = useState(false)
+  const [isStartingCamera, setIsStartingCamera] = useState(false)
+  const [manualTextOpen, setManualTextOpen] = useState(false)
+  const [manualTextValue, setManualTextValue] = useState("")
+
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -46,7 +49,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       clearInterval(scanIntervalRef.current)
       scanIntervalRef.current = null
     }
-    setIsScanning(false)
+    setIsScanningCamera(false)
   }, [])
 
   const handleScanSuccess = useCallback(
@@ -64,8 +67,8 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       if (!isOpen) {
         stopScanning()
         setError(null)
-        setManualOpen(false)
-        setManualValue("")
+        setManualTextOpen(false)
+        setManualTextValue("")
       }
       setOpen(isOpen)
     },
@@ -75,7 +78,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   const handleManualSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      const digits = manualValue.replace(/\D/g, "")
+      const digits = manualTextValue.replace(/\D/g, "")
       if (!isProductBarcode(digits)) {
         setError("Enter a valid barcode (8–14 digits).")
         return
@@ -83,12 +86,13 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       setOpen(false)
       navigateToCompare(router, digits)
     },
-    [manualValue, router],
+    [manualTextValue, router],
   )
 
   const startScanning = useCallback(async () => {
     try {
       setError(null)
+      setIsStartingCamera(true)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "environment",
@@ -97,15 +101,17 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
         },
       })
       streamRef.current = stream
-      setIsScanning(true)
+      setIsScanningCamera(true)
     } catch (err) {
       console.error("Error accessing camera:", err)
       setError("Unable to access camera. Please ensure you have granted camera permissions.")
+    } finally {
+      setIsStartingCamera(false)
     }
   }, [])
 
   useEffect(() => {
-    if (!isScanning || !streamRef.current) return
+    if (!isScanningCamera || !streamRef.current) return
     const video = videoRef.current
     if (!video) return
 
@@ -148,7 +154,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       streamRef.current?.getTracks().forEach((track) => track.stop())
       streamRef.current = null
     }
-  }, [isScanning, handleScanSuccess, stopScanning])
+  }, [isScanningCamera, handleScanSuccess, stopScanning])
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,6 +198,14 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   )
 
   useEffect(() => {
+    if (open && !isScanningCamera) {
+      startScanning()
+    }
+    // only trigger on open change, not isScanning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  useEffect(() => {
     return () => stopScanning()
   }, [stopScanning])
 
@@ -202,11 +216,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       </Slot>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent
-          className="max-w-[95vw] sm:max-w-md"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={() => handleOpenChange(false)}
-        >
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Scan barcode</DialogTitle>
             <DialogDescription>Scan product barcodes with your camera or upload an image.</DialogDescription>
@@ -219,7 +229,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               </p>
             )}
 
-            {isScanning ? (
+            {isScanningCamera ? (
               <div className="flex flex-col gap-3">
                 <div className="relative aspect-video overflow-hidden rounded-md bg-black">
                   <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />
@@ -241,10 +251,14 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
                   className="w-full"
                   size="lg"
                   onClick={startScanning}
-                  disabled={isProcessing}
+                  disabled={isStartingCamera || isProcessing}
                 >
-                  <CameraIcon className="h-5 w-5" />
-                  Start camera
+                  {isStartingCamera ? (
+                    <Loader2Icon className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <CameraIcon className="h-5 w-5" />
+                  )}
+                  {isStartingCamera ? "Starting camera…" : "Start camera"}
                 </Button>
                 <div className="relative">
                   <span className="border-border absolute inset-0 flex items-center">
@@ -276,19 +290,19 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               </div>
             )}
 
-            {manualOpen ? (
+            {manualTextOpen ? (
               <form onSubmit={handleManualSubmit} className="flex gap-2">
                 <Input
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
                   placeholder="e.g. 5601234567890"
-                  value={manualValue}
-                  onChange={(e) => setManualValue(e.target.value)}
+                  value={manualTextValue}
+                  onChange={(e) => setManualTextValue(e.target.value)}
                   autoFocus
                   className="text-sm"
                 />
-                <Button type="submit" size="sm" disabled={!manualValue.trim()}>
+                <Button type="submit" size="sm" disabled={!manualTextValue.trim()}>
                   Go
                 </Button>
               </form>
@@ -296,7 +310,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               <button
                 type="button"
                 className="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
-                onClick={() => setManualOpen(true)}
+                onClick={() => setManualTextOpen(true)}
               >
                 Type barcode manually
               </button>
