@@ -7,6 +7,7 @@ import { Slot } from "@radix-ui/react-slot"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 import { CameraIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
 
@@ -30,6 +31,8 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   const [isScanning, setIsScanning] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualValue, setManualValue] = useState("")
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -61,10 +64,26 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       if (!isOpen) {
         stopScanning()
         setError(null)
+        setManualOpen(false)
+        setManualValue("")
       }
       setOpen(isOpen)
     },
     [stopScanning],
+  )
+
+  const handleManualSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      const digits = manualValue.replace(/\D/g, "")
+      if (!isProductBarcode(digits)) {
+        setError("Enter a valid barcode (8–14 digits).")
+        return
+      }
+      setOpen(false)
+      navigateToCompare(router, digits)
+    },
+    [manualValue, router],
   )
 
   const startScanning = useCallback(async () => {
@@ -255,6 +274,32 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
                   onChange={handleFileChange}
                 />
               </div>
+            )}
+
+            {manualOpen ? (
+              <form onSubmit={handleManualSubmit} className="flex gap-2">
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="e.g. 5601234567890"
+                  value={manualValue}
+                  onChange={(e) => setManualValue(e.target.value)}
+                  autoFocus
+                  className="text-sm"
+                />
+                <Button type="submit" size="sm" disabled={!manualValue.trim()}>
+                  Go
+                </Button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
+                onClick={() => setManualOpen(true)}
+              >
+                Type barcode manually
+              </button>
             )}
           </div>
         </DialogContent>
