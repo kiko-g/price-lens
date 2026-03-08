@@ -21,7 +21,7 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
  * Uses prefers-color-scheme (not .dark class) because next-themes script may not have run yet.
  */
 const SPLASH_STYLES = `
-#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding-top:env(safe-area-inset-top,0px);transition:opacity .5s ease-out}
+#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;transition:opacity .5s ease-out}
 #__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
 #__splash .si{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(99,106,215,.4))}
 #__splash .st{font-size:1.125rem;font-weight:700;letter-spacing:-.025em;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
