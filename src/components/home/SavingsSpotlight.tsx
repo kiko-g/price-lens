@@ -9,8 +9,8 @@ export function SavingsSpotlight() {
   return (
     <div className="border-primary/20 bg-primary/5 dark:border-primary/15 dark:bg-primary/5 flex flex-col items-center justify-center gap-6 rounded-2xl border p-8 text-center md:row-span-2 md:p-10">
       <h2 className="text-xl font-bold tracking-tight text-balance sm:text-2xl md:text-3xl">
-        The average shopper could save up to <span className="text-primary">€{YEARLY_SAVINGS}/year</span> just by
-        buying at the right time
+        The average shopper could save up to <span className="text-primary">€{YEARLY_SAVINGS}/year</span> just by buying
+        at the right time
       </h2>
 
       <p className="text-muted-foreground max-w-lg text-sm leading-relaxed">

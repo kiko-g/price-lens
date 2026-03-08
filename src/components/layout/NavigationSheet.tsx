@@ -57,7 +57,10 @@ export function NavigationSheet() {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="left" className="flex flex-col gap-0 px-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))]">
+      <SheetContent
+        side="left"
+        className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+      >
         <SheetHeader className="space-y-0 px-5">
           <SheetTitle className="flex items-start text-left">
             <LogoLink />
