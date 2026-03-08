@@ -56,7 +56,8 @@ export function NavigationSheet() {
           <MenuIcon className="size-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="flex flex-col gap-0 px-0 py-4">
+
+      <SheetContent side="left" className="pt- flex flex-col gap-0 px-0 py-4">
         <SheetHeader className="space-y-0 px-5">
           <SheetTitle className="flex items-start text-left">
             <LogoLink />
