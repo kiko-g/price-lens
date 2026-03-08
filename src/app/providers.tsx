@@ -73,6 +73,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const previousPathname = usePrevious(pathname)
   const queryClient = getQueryClient()
 
+  useEffect(() => {
+    const el = document.getElementById("__splash")
+    if (!el) return
+    el.setAttribute("data-hidden", "")
+    const t = setTimeout(() => el.remove(), 500)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <AppContext.Provider value={{ previousPathname }}>
       <QueryClientProvider client={queryClient}>

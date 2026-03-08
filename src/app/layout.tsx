@@ -15,6 +15,25 @@ import { MainLayout } from "@/components/layout/MainLayout"
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration"
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
 
+/**
+ * Inline splash screen CSS — rendered with the HTML before any external CSS/JS loads.
+ * Bridges the gap between the native PWA splash and React hydration.
+ * Uses prefers-color-scheme (not .dark class) because next-themes script may not have run yet.
+ */
+const SPLASH_STYLES = `
+#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding-top:env(safe-area-inset-top,0px);transition:opacity .5s ease-out}
+@media(prefers-color-scheme:dark){#__splash{background:#09090b}#__splash .st{color:#fafafa}#__splash .sd{background:rgba(250,250,249,.3)}}
+#__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
+#__splash .si{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(99,106,215,.4))}
+#__splash .st{font-size:1.125rem;font-weight:700;letter-spacing:-.025em;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+#__splash .sb{position:absolute;bottom:4rem;display:flex;align-items:center;gap:.375rem}
+#__splash .sd{width:6px;height:6px;border-radius:9999px;background:rgba(28,25,23,.3);animation:__sd 1.4s ease-in-out infinite}
+#__splash .sd:nth-child(2){animation-delay:.2s}#__splash .sd:nth-child(3){animation-delay:.4s}
+@keyframes __sf{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes __sd{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1.2)}}
+#__splash[data-hidden]{opacity:0;pointer-events:none}
+`
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -109,6 +128,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: SPLASH_STYLES }} />
+        <link rel="preload" href="/price-lens.svg" as="image" type="image/svg+xml" />
         <link rel="preconnect" href="https://www.continente.pt" />
         <link rel="preconnect" href="https://www.auchan.pt" />
         <link rel="preconnect" href="https://www.pingodoce.pt" />
@@ -124,6 +145,25 @@ export default function RootLayout({
         )}
       </head>
       <body className={cn(GeistSans.className, "bg-background text-foreground")}>
+        {/* Inline splash — visible immediately, before CSS/JS loads. Dismissed by React on hydration. */}
+        <div id="__splash" aria-hidden="true">
+          <div className="sc">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/price-lens.svg" alt="" width={64} height={64} className="si" fetchPriority="high" />
+            <span className="st">Price Lens</span>
+          </div>
+          <div className="sb">
+            <div className="sd" />
+            <div className="sd" />
+            <div className="sd" />
+          </div>
+        </div>
+        {/* Failsafe: remove splash after 8s even if React never hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `setTimeout(function(){var s=document.getElementById('__splash');if(s){s.setAttribute('data-hidden','');setTimeout(function(){s.remove()},500)}},8000)`,
+          }}
+        />
         <Providers>
           <Analytics />
           <ServiceWorkerRegistration />
