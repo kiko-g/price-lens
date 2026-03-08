@@ -11,7 +11,7 @@ import { Kbd } from "@/components/ui/kbd"
 
 import { LogoLink } from "@/components/layout/LogoLink"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
-import { NavigationMenu } from "@/components/layout/NavigationMenu"
+import { NavigationSheet } from "@/components/layout/NavigationSheet"
 import { SearchContainer } from "@/components/layout/search"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
@@ -28,7 +28,7 @@ export function Header() {
     <header className="bg-opacity-80 dark:bg-opacity-80 bg-background/90 sticky top-0 z-50 mx-auto mt-[calc(-1*env(safe-area-inset-top,0px))] h-(--header-height) w-full border-b pt-[env(safe-area-inset-top,0px)] backdrop-blur backdrop-filter xl:px-4">
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
-          <NavigationMenu />
+          <NavigationSheet />
 
           <LogoLink />
           {isEarlyAccess && <EarlyAccessBadge />}

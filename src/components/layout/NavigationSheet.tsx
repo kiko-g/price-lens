@@ -27,7 +27,7 @@ import { BarcodeScanButton } from "@/components/scan"
 
 const primaryNavKeys = new Set(["/", "/products", "/favorites"])
 
-export function NavigationMenu() {
+export function NavigationSheet() {
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
   const { user, isLoading } = useUser()

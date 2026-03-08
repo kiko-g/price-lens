@@ -1,7 +1,7 @@
 export default function RootLoading() {
   return (
     <div
-      className="bg-background fixed inset-0 z-9999 flex min-h-svh w-full flex-col items-center justify-center"
+      className="bg-background fixed inset-0 z-9999 flex min-h-svh w-full flex-col items-center justify-center pt-[env(safe-area-inset-top,0px)]"
       role="status"
       aria-label="Loading"
     >
