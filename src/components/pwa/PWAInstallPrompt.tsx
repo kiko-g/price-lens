@@ -59,7 +59,7 @@ export function PWAInstallPrompt() {
       deferredPrompt.current = e as BeforeInstallPromptEvent
       setTimeout(() => {
         toast("Install Price Lens", {
-          description: "Add to your home screen for a full-screen app experience — no app store needed.",
+          description: "Add to your home screen for a full-screen app experience: no app store needed ✅",
           icon: <DownloadIcon className="h-5 w-5" />,
           duration: 15_000,
           action: { label: "Install", onClick: handleAndroidInstall },

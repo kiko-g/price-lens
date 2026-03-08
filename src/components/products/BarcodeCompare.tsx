@@ -294,7 +294,7 @@ function OffEnrichmentSection({ barcode }: { barcode: string }) {
           }
         }
       } catch {
-        // OFF unavailable — silently ignore
+        // OFF unavailable (silently ignore)
       } finally {
         setLoading(false)
       }
@@ -414,7 +414,7 @@ function StoreComparisonTable({
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase">Price</span>
                 <span className={cn("font-semibold", isCheapest && "text-success")}>
-                  {product.price ? `${product.price.toFixed(2)}€` : "—"}
+                  {product.price ? `${product.price.toFixed(2)}€` : "N/A"}
                 </span>
                 {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
               </div>
@@ -424,7 +424,7 @@ function StoreComparisonTable({
                 <span
                   className={cn(product.price_recommended !== product.price && "text-muted-foreground line-through")}
                 >
-                  {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "—"}
+                  {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "N/A"}
                 </span>
               </div>
 
@@ -433,13 +433,13 @@ function StoreComparisonTable({
                 <span>
                   {product.price_per_major_unit && product.major_unit
                     ? `${product.price_per_major_unit}€${product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}`
-                    : "—"}
+                    : "N/A"}
                 </span>
               </div>
 
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase">Hist. low</span>
-                <span>{historicalLow !== null ? `${historicalLow.toFixed(2)}€` : "—"}</span>
+                <span>{historicalLow !== null ? `${historicalLow.toFixed(2)}€` : "N/A"}</span>
                 <span className="text-muted-foreground ml-1">({dataPoints} pts)</span>
               </div>
             </div>
@@ -566,7 +566,7 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
         <SharedRangeSelector selectedRange={selectedRange} onRangeChange={setSelectedRange} />
       </div>
 
-      {/* Chart + Price Comparison Table — side by side on desktop */}
+      {/* Chart + Price Comparison Table: side by side on desktop */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
         <div className="xl:col-span-3">
           <ComparisonChart productsWithPrices={productsWithPrices} selectedRange={selectedRange} />
@@ -580,7 +580,7 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
         </div>
       </div>
 
-      {/* OFF Enrichment — lazy-loaded on expand */}
+      {/* OFF Enrichment: lazy-loaded on expand */}
       <div className="mt-4">
         <OffEnrichmentSection barcode={barcode} />
       </div>

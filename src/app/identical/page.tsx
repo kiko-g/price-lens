@@ -131,7 +131,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
     )
   }
 
-  // Not in our DB — try OFF with streaming via Suspense (only for barcode lookups)
+  // Not in our DB: try OFF with streaming via Suspense (only for barcode lookups)
   if (barcode) {
     return (
       <Suspense fallback={<OffLookupSkeleton barcode={barcode} />}>
@@ -140,7 +140,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
     )
   }
 
-  // Canonical ID with no products — empty state
+  // Canonical ID with no products: empty state
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -282,7 +282,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
     )
   }
 
-  // Status: "not_found" — barcode genuinely not in OFF either
+  // Status: "not_found": barcode genuinely not in OFF either
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -345,7 +345,7 @@ function OffLookupSkeleton({ barcode }: { barcode: string }) {
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Not found in our stores</h1>
           <p className="text-muted-foreground mt-1.5 max-w-sm text-center">
             Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our database. Checking Open
-            Food Facts — this can take a few seconds.
+            Food Facts. This can take a few seconds.
           </p>
         </div>
 

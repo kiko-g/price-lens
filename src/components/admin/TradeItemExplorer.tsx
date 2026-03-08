@@ -169,15 +169,15 @@ export function TradeItemExplorer() {
               {lookupResult.off ? (
                 <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                   <dt className="text-muted-foreground font-medium">Display Name</dt>
-                  <dd className="font-semibold">{lookupResult.off.displayName ?? "—"}</dd>
+                  <dd className="font-semibold">{lookupResult.off.displayName ?? "N/A"}</dd>
                   <dt className="text-muted-foreground font-medium">Raw Name</dt>
-                  <dd className="text-muted-foreground">{lookupResult.off.productName ?? "—"}</dd>
+                  <dd className="text-muted-foreground">{lookupResult.off.productName ?? "N/A"}</dd>
                   <dt className="text-muted-foreground font-medium">Brands</dt>
-                  <dd>{lookupResult.off.brands ?? "—"}</dd>
+                  <dd>{lookupResult.off.brands ?? "N/A"}</dd>
                   <dt className="text-muted-foreground font-medium">Quantity</dt>
-                  <dd>{lookupResult.off.quantity ?? "—"}</dd>
+                  <dd>{lookupResult.off.quantity ?? "N/A"}</dd>
                   <dt className="text-muted-foreground font-medium">Categories</dt>
-                  <dd className="max-w-lg truncate">{lookupResult.off.categories ?? "—"}</dd>
+                  <dd className="max-w-lg truncate">{lookupResult.off.categories ?? "N/A"}</dd>
                 </dl>
               ) : (
                 <p className="text-muted-foreground text-sm italic">Not found in Open Food Facts.</p>
@@ -257,10 +257,10 @@ export function TradeItemExplorer() {
                       !item.off_product_name && "text-muted-foreground italic",
                     )}
                   >
-                    {item.off_product_name ?? "—"}
+                    {item.off_product_name ?? "N/A"}
                   </TableCell>
                   <TableCell className="font-mono text-sm">
-                    {item.canonical_product_id ?? <span className="text-muted-foreground">—</span>}
+                    {item.canonical_product_id ?? <span className="text-muted-foreground">N/A</span>}
                   </TableCell>
                   <TableCell className="text-center">
                     {item.off_product_name ? (

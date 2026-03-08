@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
@@ -26,14 +27,20 @@ import { ContrastIcon, HeartIcon, LogOut, ScanFaceIcon, UserIcon } from "lucide-
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
   const { resolvedTheme: theme, setTheme } = useTheme()
+
   const router = useRouter()
+  const isMobile = useMediaQuery("(max-width: 768px)")
 
   if (isLoading) return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
 
   if (!user)
-    return (
-      <Button variant="outline" className="relative size-[34px]" onClick={() => router.push("/login")}>
+    return isMobile ? (
+      <Button variant="outline" size="icon" className="relative" onClick={() => router.push("/login")}>
         <ScanFaceIcon />
+      </Button>
+    ) : (
+      <Button variant="primary" className="relative" onClick={() => router.push("/login")}>
+        <span className="hidden md:inline-flex">Sign in</span>
       </Button>
     )
 

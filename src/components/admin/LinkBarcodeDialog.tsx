@@ -194,12 +194,12 @@ export function LinkBarcodeDialog({ canonicalId, canonicalName, onLinked }: Prop
               {preview.tradeItem && (
                 <div className="text-muted-foreground text-xs">
                   Trade item #{preview.tradeItem.id}
-                  {preview.tradeItem.off_product_name && <span> — OFF: {preview.tradeItem.off_product_name}</span>}
+                  {preview.tradeItem.off_product_name && <span> OFF: {preview.tradeItem.off_product_name}</span>}
                 </div>
               )}
 
               {!preview.tradeItem && (
-                <div className="text-muted-foreground text-xs">No existing trade item — one will be created.</div>
+                <div className="text-muted-foreground text-xs">No existing trade item: one will be created.</div>
               )}
 
               {/* Store products */}

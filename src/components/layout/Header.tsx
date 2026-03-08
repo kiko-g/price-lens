@@ -8,7 +8,6 @@ import { usePathname } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
-import { Separator } from "@/components/ui/separator"
 
 import { LogoLink } from "@/components/layout/LogoLink"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
@@ -17,7 +16,8 @@ import { SearchContainer } from "@/components/layout/search"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
 
-import { SearchIcon } from "lucide-react"
+import { ScanBarcodeIcon, SearchIcon } from "lucide-react"
+import { BarcodeScanButton } from "@/components/scan"
 
 export function Header() {
   const pathname = usePathname()
@@ -28,6 +28,8 @@ export function Header() {
     <header className="bg-opacity-80 dark:bg-opacity-80 bg-background/90 sticky top-0 z-50 mx-auto h-(--header-height) w-full border-b pt-[env(safe-area-inset-top,0px)] backdrop-blur backdrop-filter xl:px-4">
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
+          <NavigationMenu />
+
           <LogoLink />
           {isEarlyAccess && <EarlyAccessBadge />}
 
@@ -54,18 +56,26 @@ export function Header() {
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
           {!isMobile && (
             <SearchContainer>
-              <div className="text-muted-foreground hover:border-input hover:text-foreground border-border bg-accent hidden h-[34px] max-w-[280px] min-w-[200px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors md:flex">
+              <button
+                type="button"
+                className="text-muted-foreground hover:border-input hover:text-foreground border-border bg-accent hidden h-[34px] max-w-[280px] min-w-[200px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors md:flex"
+              >
                 <SearchIcon className="h-4 w-4 shrink-0" />
                 <span className="flex-1 truncate text-sm">Search products</span>
                 <Kbd className="bg-muted dark:bg-primary/20 h-5 min-w-5 px-1.5 text-[10px]">⌘K</Kbd>
-              </div>
+              </button>
             </SearchContainer>
           )}
 
-          <ThemeToggle size="icon" variant="outline" />
-          <NavigationMenu />
+          <div className="hidden md:flex">
+            <ThemeToggle size="icon" variant="outline" />
+          </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <BarcodeScanButton>
+            <Button variant="outline" size="icon" aria-label="Scan barcode">
+              <ScanBarcodeIcon className="size-4" />
+            </Button>
+          </BarcodeScanButton>
 
           <UserDropdownMenu />
         </div>

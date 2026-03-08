@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { BrowserMultiFormatReader } from "@zxing/browser"
+import { Slot } from "@radix-ui/react-slot"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -18,7 +19,12 @@ function isProductBarcode(value: string): boolean {
   return digits.length >= 8 && digits.length <= 14
 }
 
-export function BarcodeScanButton() {
+type BarcodeScanButtonProps = {
+  /** A single React element that will receive the trigger props (onClick, onKeyDown). Must be a button or interactive element. */
+  children: React.ReactElement
+}
+
+export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
@@ -172,17 +178,9 @@ export function BarcodeScanButton() {
 
   return (
     <>
-      <Button
-        type="button"
-        variant="default"
-        size="icon-xl"
-        roundedness="circular"
-        className="border-transparent"
-        onClick={() => setOpen(true)}
-        aria-label="Scan barcode"
-      >
-        <CameraIcon className="h-5 w-5" />
-      </Button>
+      <Slot onClick={() => setOpen(true)} onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && setOpen(true)}>
+        {children}
+      </Slot>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent

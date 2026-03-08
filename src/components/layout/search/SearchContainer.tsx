@@ -2,37 +2,15 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { Slot } from "@radix-ui/react-slot"
 
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 
 import { SearchContent } from "./SearchContent"
 
-function useVisualViewportHeight(enabled: boolean): number | null {
-  const [height, setHeight] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (!enabled || typeof window === "undefined" || !window.visualViewport) return
-
-    const vv = window.visualViewport
-    const update = (): void => setHeight(vv.height)
-
-    update()
-    vv.addEventListener("resize", update)
-    vv.addEventListener("scroll", update)
-    return () => {
-      vv.removeEventListener("resize", update)
-      vv.removeEventListener("scroll", update)
-      setHeight(null)
-    }
-  }, [enabled])
-
-  return height
-}
-
 interface SearchContainerProps {
-  children: React.ReactNode
+  /** A single React element that will receive the trigger props (onClick, onKeyDown). Must be a button or interactive element. */
+  children: React.ReactElement
   open?: boolean
   onOpenChange?: (open: boolean) => void
   initialQuery?: string
@@ -48,11 +26,9 @@ export function SearchContainer({
   registerKeyboardShortcut = true,
 }: SearchContainerProps) {
   const [internalOpen, setInternalOpen] = useState(false)
-  const isDesktop = useMediaQuery("(min-width: 768px)")
 
   const open = controlledOpen ?? internalOpen
   const setOpen = onOpenChange ?? setInternalOpen
-  const visualHeight = useVisualViewportHeight(open && !isDesktop)
 
   const handleClose = useCallback((): void => {
     setOpen(false)
@@ -76,44 +52,24 @@ export function SearchContainer({
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [registerKeyboardShortcut, onOpenChange, open])
 
-  // clone children to add onClick handler
   const trigger = (
-    <div onClick={() => setOpen(true)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setOpen(true)}>
+    <Slot onClick={() => setOpen(true)} onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && setOpen(true)}>
       {children}
-    </div>
+    </Slot>
   )
-
-  if (isDesktop) {
-    return (
-      <>
-        {trigger}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-3xl gap-0 overflow-hidden rounded-lg p-0 [&>button]:hidden">
-            <DialogTitle className="sr-only">Search products</DialogTitle>
-            <DialogDescription className="sr-only">Search for supermarket products</DialogDescription>
-            <div className="max-h-[60vh] min-h-[450px]">
-              <SearchContent onClose={handleClose} initialQuery={initialQuery} />
-            </div>
-          </DialogContent>
-        </Dialog>
-      </>
-    )
-  }
-
-  const drawerStyle = visualHeight != null ? { maxHeight: `${visualHeight}px`, height: `${visualHeight}px` } : undefined
 
   return (
     <>
       {trigger}
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="max-h-[85svh]" style={drawerStyle}>
-          <DrawerTitle className="sr-only">Search products</DrawerTitle>
-          <DrawerDescription className="sr-only">Search for supermarket products</DrawerDescription>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-md:data-[state=closed]:slide-out-to-bottom max-md:data-[state=closed]:slide-out-to-left-0 max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=open]:slide-in-from-left-0 w-full flex-1 gap-0 overflow-hidden p-0 max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:h-[85svh] max-md:max-h-[85svh] max-md:w-full max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-t-2xl max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 md:max-w-3xl md:rounded-lg [&>button]:hidden">
+          <DialogTitle className="sr-only">Search products</DialogTitle>
+          <DialogDescription className="sr-only">Search for supermarket products</DialogDescription>
+          <div className="min-h-0 flex-1 overflow-hidden md:max-h-[60vh] md:min-h-[450px]">
             <SearchContent onClose={handleClose} initialQuery={initialQuery} />
           </div>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

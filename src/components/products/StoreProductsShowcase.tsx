@@ -1398,7 +1398,10 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
       <nav className="overflow-hidden">
         <div className="mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
           <SearchContainer initialQuery={query} registerKeyboardShortcut={false}>
-            <div className="active:bg-accent flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5">
+            <button
+              type="button"
+              className="active:bg-accent flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5"
+            >
               {isSearching ? (
                 <Loader2Icon className="text-muted-foreground h-4 w-4 shrink-0 animate-spin" />
               ) : (
@@ -1412,7 +1415,7 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
                   {loadedCount}/{totalCount}
                 </span>
               )}
-            </div>
+            </button>
           </SearchContainer>
         </div>
       </nav>

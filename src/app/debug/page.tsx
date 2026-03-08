@@ -84,7 +84,7 @@ export default function DebugPage() {
       {/* ----------------------------------------------------------------- */}
       {/* Error States */}
       {/* ----------------------------------------------------------------- */}
-      <Section title="ErrorStateView — by error reason">
+      <Section title="ErrorStateView:  by error reason">
         <div className="grid gap-6">
           {(Object.keys(FAKE_ERRORS) as ErrorReason[]).map((reason) => (
             <Subsection key={reason} label={reason}>
@@ -113,9 +113,9 @@ export default function DebugPage() {
       {/* ----------------------------------------------------------------- */}
       {/* Empty States */}
       {/* ----------------------------------------------------------------- */}
-      <Section title="EmptyStateView — various contexts">
+      <Section title="EmptyStateView:  various contexts">
         <div className="grid gap-6">
-          <Subsection label="products — no search results (with query)">
+          <Subsection label="products:  no search results (with query)">
             <EmptyStateView
               title="No results found"
               message='We couldn&apos;t find any products matching "arroz integral". Try a different search term or clear your filters.'
@@ -132,7 +132,7 @@ export default function DebugPage() {
             />
           </Subsection>
 
-          <Subsection label="products — no search results (no query)">
+          <Subsection label="products:  no search results (no query)">
             <EmptyStateView
               title="No results found"
               message="Try adjusting your filters to find what you're looking for."
@@ -144,7 +144,7 @@ export default function DebugPage() {
             />
           </Subsection>
 
-          <Subsection label="favorites — empty">
+          <Subsection label="favorites:  empty">
             <EmptyStateView
               icon={HeartIcon}
               title="No favorites yet"
@@ -158,7 +158,7 @@ export default function DebugPage() {
             />
           </Subsection>
 
-          <Subsection label="favorites — no search match">
+          <Subsection label="favorites:  no search match">
             <EmptyStateView
               icon={HeartIcon}
               title="No favorites match your search"
@@ -171,7 +171,7 @@ export default function DebugPage() {
             />
           </Subsection>
 
-          <Subsection label="compare prices — none available">
+          <Subsection label="compare prices:  none available">
             <EmptyStateView
               icon={ScaleIcon}
               title="No price comparisons available"
@@ -179,14 +179,14 @@ export default function DebugPage() {
             />
           </Subsection>
 
-          <Subsection label="related products — none found">
+          <Subsection label="related products:  none found">
             <EmptyStateView
               title="No related products found"
               message="We couldn't find related products for this item right now. Check back later as our catalog updates regularly."
             />
           </Subsection>
 
-          <Subsection label="identical cross-store — none">
+          <Subsection label="identical cross-store:  none">
             <EmptyStateView
               icon={BrainCogIcon}
               title="No identical products found"
@@ -208,7 +208,7 @@ export default function DebugPage() {
             />
           </Subsection>
 
-          <Subsection label="minimal — title only">
+          <Subsection label="minimal:  title only">
             <EmptyStateView title="Nothing here" />
           </Subsection>
         </div>
