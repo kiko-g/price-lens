@@ -28,8 +28,8 @@ import {
   BarChart3Icon,
   ShieldCheckIcon,
   LayersIcon,
-  InfoIcon,
 } from "lucide-react"
+import { OffIcon } from "@/components/icons/OffIcon"
 
 export interface ProductWithPrices {
   product: StoreProduct
@@ -314,7 +314,7 @@ function OffEnrichmentSection({ barcode }: { barcode: string }) {
     <div className="bg-card rounded-lg border">
       <button onClick={handleToggle} className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium">
         <span className="flex items-center gap-2">
-          <InfoIcon className="text-muted-foreground h-4 w-4" />
+          <OffIcon className="h-4 w-4" />
           Product Details (Open Food Facts)
         </span>
         <ChevronDownIcon className={cn("text-muted-foreground h-4 w-4 transition-transform", isOpen && "rotate-180")} />
@@ -325,7 +325,10 @@ function OffEnrichmentSection({ barcode }: { barcode: string }) {
           {loading && <Loader2Icon className="text-muted-foreground h-5 w-5 animate-spin" />}
 
           {!loading && !offData && fetched && (
-            <p className="text-muted-foreground text-xs">No data found on Open Food Facts for this barcode.</p>
+            <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
+              <OffIcon className="h-3.5 w-3.5 shrink-0" />
+              No data found on Open Food Facts for this barcode.
+            </p>
           )}
 
           {offData && (
@@ -334,9 +337,9 @@ function OffEnrichmentSection({ barcode }: { barcode: string }) {
                 <Image
                   src={offData.imageUrl}
                   alt="Product"
-                  width={56}
-                  height={56}
-                  className="shrink-0 rounded-lg object-contain"
+                  width={80}
+                  height={80}
+                  className="size-20 shrink-0 rounded-lg border object-contain p-1"
                   unoptimized
                 />
               )}
@@ -513,9 +516,9 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
                 </span>
               ))}
             </div>
-          ) : (
+          ) : barcode ? (
             <Barcode value={barcode} height={40} width={1.5} className="hidden sm:flex" />
-          )}
+          ) : null}
         </div>
 
         {savings > 0 && (
@@ -580,10 +583,12 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
         </div>
       </div>
 
-      {/* OFF Enrichment: lazy-loaded on expand */}
-      <div className="mt-4">
-        <OffEnrichmentSection barcode={barcode} />
-      </div>
+      {/* OFF Enrichment: lazy-loaded on expand (only when at least one barcode is available) */}
+      {barcode && (
+        <div className="mt-4">
+          <OffEnrichmentSection barcode={barcode} />
+        </div>
+      )}
     </div>
   )
 }

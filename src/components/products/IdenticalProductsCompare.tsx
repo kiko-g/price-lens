@@ -170,9 +170,9 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   // Build compare page link: prefer canonical, fall back to barcode
   const hasBarcode = currentProduct.barcode && currentProduct.barcode.length > 0
   const compareHref = currentProduct.canonical_product_id
-    ? `/identical?canonical=${currentProduct.canonical_product_id}`
+    ? `/products/compare?canonical=${currentProduct.canonical_product_id}`
     : hasBarcode
-      ? `/identical?barcode=${encodeURIComponent(currentProduct.barcode!)}`
+      ? `/products/barcode/${encodeURIComponent(currentProduct.barcode!)}`
       : null
 
   if (error) {
@@ -236,12 +236,11 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         </p>
       ) : hasUniqueCheapest ? (
         <p className="text-muted-foreground mb-3">
-          <SmilePlusIcon className="text-success mr-1 inline-flex h-4 w-4" />
+          <SmilePlusIcon className="text-warning mr-1 inline-flex h-4 w-4" />
           <span className="text-success font-medium">You are already viewing</span> the cheapest option.
         </p>
       ) : (
         <p className="text-muted-foreground mb-3">
-          <ScaleIcon className="text-muted-foreground mr-1 inline-flex h-4 w-4" />
           All stores have the same price. You&apos;re not missing out on deals.
         </p>
       )}

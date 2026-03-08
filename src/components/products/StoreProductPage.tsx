@@ -15,7 +15,7 @@ import { CategoryBreadcrumb } from "@/components/products/product-page/CategoryB
 import { ProductHeroDesktop } from "@/components/products/product-page/ProductHeroDesktop"
 import { ProductHeroMobile } from "@/components/products/product-page/ProductHeroMobile"
 
-const DEFAULT_RANGE = "Max" as const
+const DEFAULT_RANGE = "1M" as const
 
 function parseRangeParam(value: string | null): DateRange {
   if (value && RANGES.includes(value as DateRange)) return value as DateRange

@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { CameraIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
 
 function navigateToCompare(router: ReturnType<typeof useRouter>, barcode: string) {
-  router.push(`/identical?barcode=${encodeURIComponent(barcode)}`)
+  router.push(`/products/barcode/${encodeURIComponent(barcode)}`)
 }
 
 function isProductBarcode(value: string): boolean {

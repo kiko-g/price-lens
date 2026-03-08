@@ -7,6 +7,9 @@ import type { ErrorReason } from "@/lib/errors"
 import { Button } from "@/components/ui/button"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 
+import { OffIcon } from "@/components/icons/OffIcon"
+import { OffLogo } from "@/components/icons/OffLogo"
+
 import {
   HeartIcon,
   ScaleIcon,
@@ -140,10 +143,17 @@ export default function DebugPage() {
         <p className="text-muted-foreground text-sm">Preview components and states without breaking the app.</p>
       </div>
 
+      <Section title="Debug Tools" defaultOpen={true}>
+        <div className="grid gap-6">
+          <OffIcon className="h-6 w-auto" />
+          <OffLogo className="h-10 w-auto" />
+        </div>
+      </Section>
+
       {/* ----------------------------------------------------------------- */}
       {/* Splash Screen */}
       {/* ----------------------------------------------------------------- */}
-      <Section title="Splash Screen (PWA loading state)">
+      <Section title="Splash Screen (PWA loading state)" defaultOpen={false}>
         <div className="grid gap-6 md:grid-cols-2">
           <Subsection label="light mode">
             <SplashPreview mode="light" />
@@ -157,7 +167,7 @@ export default function DebugPage() {
       {/* ----------------------------------------------------------------- */}
       {/* Error States */}
       {/* ----------------------------------------------------------------- */}
-      <Section title="ErrorStateView:  by error reason">
+      <Section title="ErrorStateView:  by error reason" defaultOpen={false}>
         <div className="grid gap-6">
           {(Object.keys(FAKE_ERRORS) as ErrorReason[]).map((reason) => (
             <Subsection key={reason} label={reason}>

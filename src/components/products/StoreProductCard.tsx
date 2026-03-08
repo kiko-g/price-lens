@@ -377,8 +377,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   <Link
                     href={
                       sp.canonical_product_id
-                        ? `/identical?canonical=${sp.canonical_product_id}`
-                        : `/identical?barcode=${sp.barcode}`
+                        ? `/products/compare?canonical=${sp.canonical_product_id}`
+                        : `/products/barcode/${sp.barcode}`
                     }
                     className="flex w-full items-center justify-between gap-1"
                   >

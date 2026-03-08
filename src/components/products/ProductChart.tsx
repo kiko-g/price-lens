@@ -125,7 +125,7 @@ type RootProps = {
   className?: string
 }
 
-function Root({ children, sp, defaultRange = "Max", onRangeChange, samplingMode = "hybrid", className }: RootProps) {
+function Root({ children, sp, defaultRange = "1M", onRangeChange, samplingMode = "hybrid", className }: RootProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const showDots = samplingMode === "efficient"
   const baseDotRadius = isMobile ? 2 : 0
@@ -971,7 +971,7 @@ const defaultOptions: NonNullable<LegacyProps["options"]> = {
 function ProductChartLegacy({
   sp,
   className,
-  defaultRange = "Max",
+  defaultRange = "1M",
   onRangeChange,
   samplingMode = "hybrid",
   options = defaultOptions,

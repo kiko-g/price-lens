@@ -2,7 +2,9 @@ import Image from "next/image"
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
 import { Badge } from "@/components/ui/badge"
 import { Barcode } from "@/components/ui/combo/barcode"
-import { InfoIcon, TagIcon, PackageIcon, LayersIcon } from "lucide-react"
+import { TagIcon, PackageIcon, LayersIcon } from "lucide-react"
+import { OffIcon } from "@/components/icons/OffIcon"
+import { OffLogo } from "@/components/icons/OffLogo"
 
 interface OffProductCardProps {
   product: OffProduct
@@ -23,9 +25,9 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
           <Image
             src={product.imageUrl}
             alt={product.displayName || "Product image"}
-            width={64}
-            height={64}
-            className="shrink-0 rounded-lg object-contain"
+            width={80}
+            height={80}
+            className="h-24 w-auto shrink-0 rounded-lg border object-cover p-1"
             unoptimized
           />
         ) : (
@@ -47,7 +49,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
           </Badge>
         )}
         <Badge variant="outline" className="gap-1">
-          <InfoIcon className="h-3 w-3" />
+          <OffIcon className="h-3.5 w-3.5" />
           Open Food Facts
         </Badge>
       </div>
@@ -72,9 +74,12 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
         <Barcode value={barcode} height={40} width={1.5} />
       </div>
 
-      <p className="text-muted-foreground mt-4 text-center text-sm">
-        This product was found on Open Food Facts but is not currently tracked in our stores.
-      </p>
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <OffLogo className="h-7 w-auto" />
+        <p className="text-muted-foreground text-center text-sm">
+          This product was found externally but is not currently tracked in our stores.
+        </p>
+      </div>
     </div>
   )
 }
