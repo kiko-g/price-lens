@@ -28,11 +28,11 @@ export async function Hero() {
     <div className="max-w-9xl z-20 mx-auto flex min-h-[calc(100svh-var(--header-height))] w-full flex-col items-center justify-center gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-center lg:gap-12 lg:px-20 lg:py-0">
       <div className="flex w-full max-w-2xl flex-col items-center gap-5 lg:max-w-none lg:flex-1 lg:items-start">
         <h1 className="animate-fade-in z-10 -translate-y-4 bg-linear-to-br from-zinc-950 from-30% to-zinc-950/70 bg-clip-text py-2 text-center text-4xl leading-none font-medium tracking-tighter text-balance text-transparent opacity-0 [--animation-delay:200ms] sm:text-5xl md:text-left md:text-6xl md:font-medium lg:text-7xl dark:from-white dark:to-white/40">
-          See beyond the price tag
+          Turn supermarket price swings into savings
         </h1>
         <p className="animate-fade-in text-muted-foreground max-w-xl -translate-y-4 text-center tracking-tight text-balance opacity-0 [--animation-delay:400ms] md:text-left md:text-lg">
-          Price hikes happen in tiny increments. You barely notice each one, but they add up fast. Price Lens tracks
-          daily price changes across Portuguese supermarkets so you can see what the shelf tag won&apos;t tell you.
+          The average person overspends €500 a year on groceries, in the midst of weekly fluctuating promotions and
+          price hikes. Price Lens tracks daily prices and tells you when to buy and when to wait.
         </p>
 
         <div className="animate-fade-in w-full max-w-lg opacity-0 [--animation-delay:600ms] lg:max-w-md">
