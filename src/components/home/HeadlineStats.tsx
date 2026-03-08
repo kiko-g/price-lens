@@ -44,7 +44,7 @@ export function HeadlineStats({ stats }: { stats: HomeStats }) {
   const items = buildStats(stats)
 
   return (
-    <div className="flex w-full flex-wrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex w-full flex-wrap items-center justify-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:justify-start [&::-webkit-scrollbar]:hidden">
       {items.map((item) => {
         const content = (
           <div className="bg-card hover:bg-accent flex shrink-0 items-center gap-2.5 rounded-full border px-4 py-2 transition-colors">
