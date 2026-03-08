@@ -69,7 +69,7 @@ export function NavigationMenu() {
           <SearchContainer registerKeyboardShortcut={false}>
             <button
               type="button"
-              className="text-muted-foreground hover:border-input hover:text-foreground border-border flex h-10 w-full flex-1 items-center gap-2 rounded-lg border px-3 text-sm transition-colors"
+              className="text-muted-foreground hover:border-input hover:text-foreground border-border flex h-10 w-full flex-1 items-center gap-2 rounded-lg border px-3 text-left text-sm transition-colors"
             >
               <SearchIcon className="size-4 shrink-0" />
               <span>Search products...</span>

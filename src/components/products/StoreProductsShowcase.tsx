@@ -1407,7 +1407,9 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
               ) : (
                 <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
               )}
-              <span className={cn("flex-1 truncate text-sm", query ? "text-foreground" : "text-muted-foreground")}>
+              <span
+                className={cn("flex-1 truncate text-left text-sm", query ? "text-foreground" : "text-muted-foreground")}
+              >
                 {query || "Search products..."}
               </span>
               {loadedCount > 0 && totalCount != null && (

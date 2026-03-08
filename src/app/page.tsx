@@ -105,7 +105,7 @@ export default async function Home() {
               </div>
               <ArrowRight className="text-muted-foreground size-5 shrink-0 transition-transform group-hover:translate-x-1" />
 
-              <div className="from-primary/3 to-secondary/20 absolute inset-0 bg-linear-to-r">
+              <div className="dark:from-primary/10 from-primary/4 to-secondary/6 dark:to-secondary/20 absolute inset-0 bg-linear-to-r">
                 <LightRays />
               </div>
             </Link>
