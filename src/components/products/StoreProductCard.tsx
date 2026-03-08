@@ -19,13 +19,7 @@ import { Barcode } from "@/components/ui/combo/barcode"
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { ResponsiveActionsMenu, ResponsiveActionsMenuItem } from "@/components/ui/combo/responsive-actions-menu"
 import { ShareButton } from "@/components/ui/combo/share-button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -348,109 +342,82 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           </div>
 
           <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <ResponsiveActionsMenu
+              trigger={
                 <Button variant="outline" size="icon-sm" className="bg-background">
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
+              }
+            >
+              <ResponsiveActionsMenuItem asChild>
+                <Link href={sp.url || "#"} target="_blank" className="flex w-full items-center justify-between gap-1">
+                  Open product page
+                  <ArrowUpRightIcon />
+                </Link>
+              </ResponsiveActionsMenuItem>
 
-              <DropdownMenuContent className="min-w-48" align="end">
-                {/* Actions in dropdown menu */}
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Button variant="dropdown-item" asChild>
-                    <Link
-                      href={sp.url || "#"}
-                      target="_blank"
-                      className="flex w-full items-center justify-between gap-1"
-                    >
-                      <span className="flex items-center gap-1">Open product page</span>
-                      <ArrowUpRightIcon />
-                    </Link>
-                  </Button>
-                </DropdownMenuItem>
+              <ResponsiveActionsMenuItem asChild>
+                <Link href={sp.url || "#"} target="_blank" className="flex w-full items-center justify-between gap-1">
+                  Open in {supermarketName}
+                  <ExternalLinkIcon />
+                </Link>
+              </ResponsiveActionsMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Button variant="dropdown-item" asChild>
-                    <Link
-                      href={sp.url || "#"}
-                      target="_blank"
-                      className="flex w-full items-center justify-between gap-1"
-                    >
-                      Open in {supermarketName}
-                      <ExternalLinkIcon />
-                    </Link>
-                  </Button>
-                </DropdownMenuItem>
+              <ShareButton sp={sp} appearAs="responsive-item" />
 
-                <ShareButton sp={sp} appearAs="dropdown-menu-item" />
+              {user && (
+                <ResponsiveActionsMenuItem variant="love" onClick={toggleFavorite} disabled={isFavoritePending}>
+                  {isFavorited ? "Remove from favorites" : "Add to favorites"}
+                  <HeartIcon />
+                </ResponsiveActionsMenuItem>
+              )}
 
-                {user && (
-                  <DropdownMenuItem variant="love" asChild>
-                    <Button variant="dropdown-item" onClick={toggleFavorite} disabled={isFavoritePending}>
-                      {isFavorited ? "Remove from favorites" : "Add to favorites"}
-                      <HeartIcon />
-                    </Button>
-                  </DropdownMenuItem>
-                )}
+              {(sp.canonical_product_id || sp.barcode) && (
+                <ResponsiveActionsMenuItem variant="hype" asChild>
+                  <Link
+                    href={
+                      sp.canonical_product_id
+                        ? `/identical?canonical=${sp.canonical_product_id}`
+                        : `/identical?barcode=${sp.barcode}`
+                    }
+                    className="flex w-full items-center justify-between gap-1"
+                  >
+                    Compare in other stores
+                    <ScaleIcon />
+                  </Link>
+                </ResponsiveActionsMenuItem>
+              )}
 
-                {/* Compare page link: prefer canonical, fall back to barcode */}
-                {(sp.canonical_product_id || sp.barcode) && (
-                  <DropdownMenuItem variant="hype" asChild>
-                    <Button variant="dropdown-item" asChild>
-                      <Link
-                        href={
-                          sp.canonical_product_id
-                            ? `/identical?canonical=${sp.canonical_product_id}`
-                            : `/identical?barcode=${sp.barcode}`
-                        }
-                      >
-                        <span className="mr-2">Compare in other stores</span>
-                        <ScaleIcon />
-                      </Link>
-                    </Button>
-                  </DropdownMenuItem>
-                )}
+              {elevated && (
+                <ResponsiveActionsMenuItem onClick={updateFromSource} disabled={isUpdating}>
+                  <span className="flex items-center gap-1">
+                    Update from {supermarketName}
+                    <DevBadge />
+                  </span>
+                  <RefreshCcwIcon />
+                </ResponsiveActionsMenuItem>
+              )}
 
-                {/* Admin tools in dropdown menu */}
-                {elevated && (
-                  <DropdownMenuItem asChild>
-                    <Button variant="dropdown-item" onClick={updateFromSource} disabled={isUpdating}>
-                      <span className="flex items-center gap-1">
-                        Update from {supermarketName}
-                        <DevBadge />
-                      </span>
-                      <RefreshCcwIcon />
-                    </Button>
-                  </DropdownMenuItem>
-                )}
+              {elevated && (
+                <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
+                  <span className="flex items-center gap-1">
+                    Set priority
+                    <DevBadge />
+                  </span>
+                  <MicroscopeIcon />
+                </ResponsiveActionsMenuItem>
+              )}
 
-                {elevated && (
-                  <DropdownMenuItem asChild>
-                    <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
-                      <span className="flex items-center gap-1">
-                        Set priority
-                        <DevBadge />
-                      </span>
-                      <MicroscopeIcon />
-                    </Button>
-                  </DropdownMenuItem>
-                )}
-
-                {elevated && (
-                  <DropdownMenuItem asChild>
-                    <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
-                      <span className="flex items-center gap-1">
-                        Clear priority
-                        <DevBadge />
-                      </span>
-                      <CircleIcon />
-                    </Button>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              {elevated && (
+                <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
+                  <span className="flex items-center gap-1">
+                    Clear priority
+                    <DevBadge />
+                  </span>
+                  <CircleIcon />
+                </ResponsiveActionsMenuItem>
+              )}
+            </ResponsiveActionsMenu>
 
             <DrawerSheet title={sp.name}>
               <div className="text-muted-foreground -mt-1 mb-2 flex w-full items-start justify-between gap-1.5 border-b pb-2 text-xs">

@@ -35,15 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +47,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
@@ -1206,6 +1197,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         isSearching={isSearching}
         loadedCount={displayProducts.length}
         totalCount={totalCount}
+        activeFilterCount={activeFilterCount}
+        onFilterPress={() => setMobileFiltersOpen(true)}
       />
 
       {/* Mobile Filters Drawer */}
@@ -1382,9 +1375,11 @@ interface MobileNavProps {
   isSearching: boolean
   loadedCount: number
   totalCount: number | null
+  activeFilterCount: number
+  onFilterPress: () => void
 }
 
-function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavProps) {
+function MobileNav({ query, isSearching, loadedCount, totalCount, activeFilterCount, onFilterPress }: MobileNavProps) {
   const scrollDirection = useScrollDirection()
   const hidden = scrollDirection === "down"
 
@@ -1396,7 +1391,7 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
       )}
     >
       <nav className="overflow-hidden">
-        <div className="mx-auto flex w-full flex-col gap-0 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
+        <div className="mx-auto flex w-full items-center gap-2 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
           <SearchContainer initialQuery={query} registerKeyboardShortcut={false}>
             <button
               type="button"
@@ -1419,6 +1414,18 @@ function MobileNav({ query, isSearching, loadedCount, totalCount }: MobileNavPro
               )}
             </button>
           </SearchContainer>
+          <button
+            type="button"
+            onClick={onFilterPress}
+            className="active:bg-accent relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
+          >
+            <FilterIcon className="text-muted-foreground h-4 w-4" />
+            {activeFilterCount > 0 && (
+              <span className="bg-destructive text-destructive-foreground absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[10px] font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
       </nav>
     </div>
@@ -1476,206 +1483,213 @@ function MobileFiltersDrawer({
   onApply,
 }: MobileFiltersDrawerProps) {
   return (
-    <>
-      {/* Floating Button */}
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerTrigger asChild>
-          <Button
-            size="icon-xl"
-            className="fixed right-6 z-40 h-14 w-14 rounded-full shadow-lg lg:hidden"
-            style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
-            variant="default"
-          >
-            <FilterIcon />
-            {activeFilterCount > 0 && (
-              <span className="bg-destructive text-destructive-foreground absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-bold">
-                {activeFilterCount}
-              </span>
-            )}
-            <BorderBeam
-              duration={2}
-              size={60}
-              colorFrom="var(--color-secondary)"
-              colorTo="var(--color-secondary)"
-              borderWidth={3}
-            />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="lg:hidden">
-          <DrawerHeader>
-            <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
-          </DrawerHeader>
-          <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto border-t px-4 pt-4">
-            {/* Categories Filter */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Categories</Label>
-                {localFilters.category && (
-                  <button onClick={onClearCategory} className="text-muted-foreground text-xs hover:underline">
-                    Clear
-                  </button>
-                )}
-              </div>
-              <CanonicalCategoryCascade
-                selectedCategorySlug={localFilters.category}
-                onCategoryChange={onCategoryChange}
-              />
-            </div>
-
-            {/* Sort Options */}
-            <div>
-              <Label className="text-base font-semibold">Sort By</Label>
-              <Select value={localFilters.sortBy} onValueChange={(v) => onSortChange(v as SortByType)}>
-                <SelectTrigger className="mt-1 h-8 w-full">
-                  <SelectValue className="flex items-center gap-2 text-sm" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex items-center gap-2">
-                        <option.icon className="h-4 w-4" />
-                        <span>{option.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Store Origin Filter */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Store Origin</Label>
-                {selectedOrigins.length > 0 && (
-                  <button onClick={onClearOrigins} className="text-muted-foreground text-xs hover:underline">
-                    Clear
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-1 flex flex-col gap-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mobile-origin-continente"
-                    checked={selectedOrigins.includes(1)}
-                    onCheckedChange={() => onOriginToggle(1)}
-                  />
-                  <Label
-                    htmlFor="mobile-origin-continente"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <ContinenteSvg className="h-4 min-h-4 w-auto" />
-                  </Label>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[70svh] lg:hidden">
+        <DrawerHeader>
+          <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
+        </DrawerHeader>
+        <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
+          <Accordion type="multiple" defaultValue={["sort", "store-origin"]}>
+            <AccordionItem value="categories">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-1 items-center justify-between pr-2">
+                  <span className="text-sm font-semibold">Categories</span>
+                  {localFilters.category && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onClearCategory()
+                      }}
+                      className="text-muted-foreground text-xs hover:underline"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mobile-origin-auchan"
-                    checked={selectedOrigins.includes(2)}
-                    onCheckedChange={() => onOriginToggle(2)}
-                  />
-                  <Label
-                    htmlFor="mobile-origin-auchan"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <AuchanSvg className="h-4 min-h-4 w-auto" />
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mobile-origin-pingo-doce"
-                    checked={selectedOrigins.includes(3)}
-                    onCheckedChange={() => onOriginToggle(3)}
-                  />
-                  <Label
-                    htmlFor="mobile-origin-pingo-doce"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                  </Label>
-                </div>
-              </div>
-            </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <CanonicalCategoryCascade
+                  selectedCategorySlug={localFilters.category}
+                  onCategoryChange={onCategoryChange}
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-            {/* Priority Filter */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Priority</Label>
-                {selectedPriorities.length > 0 && (
-                  <button onClick={onClearPriority} className="text-muted-foreground text-xs hover:underline">
-                    Clear
-                  </button>
-                )}
-              </div>
+            <AccordionItem value="sort">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="text-sm font-semibold">Sort By</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <Select value={localFilters.sortBy} onValueChange={(v) => onSortChange(v as SortByType)}>
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue className="flex items-center gap-2 text-sm" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <option.icon className="h-4 w-4" />
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </AccordionContent>
+            </AccordionItem>
 
-              <div className="flex flex-col gap-2">
-                {PRODUCT_PRIORITY_LEVELS.map((level) => (
-                  <div key={level} className="flex items-center space-x-2">
+            <AccordionItem value="store-origin">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-1 items-center justify-between pr-2">
+                  <span className="text-sm font-semibold">Store Origin</span>
+                  {selectedOrigins.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onClearOrigins()
+                      }}
+                      className="text-muted-foreground text-xs hover:underline"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={`mobile-priority-${level}`}
-                      checked={selectedPriorities.includes(level)}
-                      onCheckedChange={() => onPriorityToggle(level)}
+                      id="mobile-origin-continente"
+                      checked={selectedOrigins.includes(1)}
+                      onCheckedChange={() => onOriginToggle(1)}
                     />
                     <Label
-                      htmlFor={`mobile-priority-${level}`}
+                      htmlFor="mobile-origin-continente"
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
-                      <PriorityBubble priority={level} size="sm" useDescription />
+                      <ContinenteSvg className="h-4 min-h-4 w-auto" />
                     </Label>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Filter Options */}
-            <div className="space-y-2">
-              <Label className="text-base font-semibold">Options</Label>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mobile-only-discounted"
-                    checked={localFilters.onlyDiscounted}
-                    onCheckedChange={onToggleDiscounted}
-                  />
-                  <Label
-                    htmlFor="mobile-only-discounted"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <BadgePercentIcon className="h-4 w-4" />
-                    Only discounted
-                  </Label>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-origin-auchan"
+                      checked={selectedOrigins.includes(2)}
+                      onCheckedChange={() => onOriginToggle(2)}
+                    />
+                    <Label
+                      htmlFor="mobile-origin-auchan"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <AuchanSvg className="h-4 min-h-4 w-auto" />
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-origin-pingo-doce"
+                      checked={selectedOrigins.includes(3)}
+                      onCheckedChange={() => onOriginToggle(3)}
+                    />
+                    <Label
+                      htmlFor="mobile-origin-pingo-doce"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <PingoDoceSvg className="h-4 min-h-4 w-auto" />
+                    </Label>
+                  </div>
                 </div>
+              </AccordionContent>
+            </AccordionItem>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mobile-order-by-priority"
-                    checked={localFilters.orderByPriority}
-                    onCheckedChange={onTogglePriorityOrder}
-                  />
-                  <Label
-                    htmlFor="mobile-order-by-priority"
-                    className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                  >
-                    <CrownIcon className="h-4 w-4" />
-                    Order by priority
-                  </Label>
+            <AccordionItem value="priority">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-1 items-center justify-between pr-2">
+                  <span className="text-sm font-semibold">Priority</span>
+                  {selectedPriorities.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onClearPriority()
+                      }}
+                      className="text-muted-foreground text-xs hover:underline"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
-              </div>
-            </div>
-          </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2">
+                  {PRODUCT_PRIORITY_LEVELS.map((level) => (
+                    <div key={level} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`mobile-priority-${level}`}
+                        checked={selectedPriorities.includes(level)}
+                        onCheckedChange={() => onPriorityToggle(level)}
+                      />
+                      <Label
+                        htmlFor={`mobile-priority-${level}`}
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={level} size="sm" useDescription />
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          <DrawerFooter className="flex-row gap-2 border-t px-4">
-            <DrawerClose asChild>
-              <Button variant="outline" className="flex-1">
-                Cancel
-              </Button>
-            </DrawerClose>
-            <Button className="flex-1" onClick={onApply}>
-              Apply Filters
+            <AccordionItem value="options" className="border-b-0">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="text-sm font-semibold">Options</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-only-discounted"
+                      checked={localFilters.onlyDiscounted}
+                      onCheckedChange={onToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="mobile-only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-order-by-priority"
+                      checked={localFilters.orderByPriority}
+                      onCheckedChange={onTogglePriorityOrder}
+                    />
+                    <Label
+                      htmlFor="mobile-order-by-priority"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CrownIcon className="h-4 w-4" />
+                      Order by priority
+                    </Label>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        <DrawerFooter className="flex-row gap-2 border-t px-4">
+          <DrawerClose asChild>
+            <Button variant="outline" className="flex-1">
+              Cancel
             </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    </>
+          </DrawerClose>
+          <Button className="flex-1" onClick={onApply}>
+            Apply Filters
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

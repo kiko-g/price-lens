@@ -75,29 +75,46 @@ const DrawerOverlay = React.forwardRef<
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
+type DrawerDirection = "bottom" | "top" | "left" | "right"
+
+const DIRECTION_CLASSES: Record<DrawerDirection, string> = {
+  bottom:
+    "inset-x-0 bottom-0 mt-24 h-auto max-h-[90svh] touch-pan-y rounded-t-2xl border-t pb-[env(safe-area-inset-bottom,0px)]",
+  top: "inset-x-0 top-0 mb-24 h-auto max-h-[90svh] touch-pan-y rounded-b-2xl border-b pt-[env(safe-area-inset-top,0px)]",
+  left: "inset-y-0 left-0 h-full w-[85%] max-w-sm touch-pan-x rounded-r-2xl border-r",
+  right: "inset-y-0 right-0 h-full w-[85%] max-w-sm touch-pan-x rounded-l-2xl border-l",
+}
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DrawerPortal>
-    <DrawerOverlay />
-    <DrawerPrimitive.Content
-      ref={ref}
-      // "transform-gpu will-change" keep animation smooth, touch-pan-y/overscroll-contain prevent scroll chaining/P2R.
-      className={cn(
-        "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90svh] transform-gpu touch-pan-y flex-col overscroll-contain rounded-t-2xl border-t pb-[env(safe-area-inset-bottom,0px)] will-change-transform",
-        className,
-      )}
-      {...props}
-    >
-      {/* Drag handle - larger touch target for better usability */}
-      <div className="flex w-full cursor-grab items-center justify-center py-5 active:cursor-grabbing md:py-4">
-        <div className="bg-muted-foreground/40 h-1.5 w-12 rounded-full" />
-      </div>
-      {children}
-    </DrawerPrimitive.Content>
-  </DrawerPortal>
-))
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    direction?: DrawerDirection
+  }
+>(({ className, children, direction = "bottom", ...props }, ref) => {
+  const isVertical = direction === "bottom" || direction === "top"
+
+  return (
+    <DrawerPortal>
+      <DrawerOverlay />
+      <DrawerPrimitive.Content
+        ref={ref}
+        className={cn(
+          "bg-background fixed z-50 flex transform-gpu flex-col overscroll-contain will-change-transform",
+          DIRECTION_CLASSES[direction],
+          className,
+        )}
+        {...props}
+      >
+        {isVertical && (
+          <div className="flex w-full cursor-grab items-center justify-center py-5 active:cursor-grabbing md:py-4">
+            <div className="bg-muted-foreground/40 h-1.5 w-12 rounded-full" />
+          </div>
+        )}
+        {children}
+      </DrawerPrimitive.Content>
+    </DrawerPortal>
+  )
+})
 DrawerContent.displayName = "DrawerContent"
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

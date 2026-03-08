@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ResponsiveActionsMenuItem } from "@/components/ui/combo/responsive-actions-menu"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -23,8 +24,8 @@ interface ShareButtonProps {
   description?: string
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg" | "icon"
-  appearAs?: "button" | "dropdown-menu-item"
-  useExternalUrl?: boolean // share from the origin supermarket url
+  appearAs?: "button" | "dropdown-menu-item" | "responsive-item"
+  useExternalUrl?: boolean
 }
 
 export function ShareButton({
@@ -103,6 +104,15 @@ export function ShareButton({
   }
 
   const isWebShareAvailable = typeof navigator !== "undefined" && !!navigator.share
+
+  if (appearAs === "responsive-item") {
+    return (
+      <ResponsiveActionsMenuItem onClick={handleShare}>
+        Share product
+        <Share2Icon />
+      </ResponsiveActionsMenuItem>
+    )
+  }
 
   if (appearAs === "dropdown-menu-item") {
     return (
