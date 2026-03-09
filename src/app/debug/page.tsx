@@ -7,8 +7,8 @@ import type { ErrorReason } from "@/lib/errors"
 import { Button } from "@/components/ui/button"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 
-import { OffIcon } from "@/components/icons/OffIcon"
-import { OffLogo } from "@/components/icons/OffLogo"
+import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
+import { OpenFoodFactsLogo } from "@/components/icons/OpenFoodFacts"
 
 import {
   HeartIcon,
@@ -145,8 +145,8 @@ export default function DebugPage() {
 
       <Section title="Debug Tools" defaultOpen={true}>
         <div className="grid gap-6">
-          <OffIcon className="h-6 w-auto" />
-          <OffLogo className="h-10 w-auto" />
+          <OpenFoodFactsIcon className="h-6 w-auto" />
+          <OpenFoodFactsLogo className="h-10 w-auto" />
         </div>
       </Section>
 

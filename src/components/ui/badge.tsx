@@ -24,33 +24,31 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white hover:bg-destructive/80 dark:border-transparent dark:bg-destructive dark:text-white dark:hover:bg-destructive/80 [&_span.bubble]:bg-destructive",
         gray: "border-transparent bg-gray-500 text-white hover:bg-gray-500/80 dark:border-transparent dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/80 [&_span.bubble]:bg-gray-500 dark:[&_span.bubble]:bg-gray-800",
         success:
-          "border-transparent bg-emerald-600 text-zinc-50 hover:bg-emerald-600/80 dark:border-transparent dark:bg-emerald-800 dark:text-zinc-50 dark:hover:bg-emerald-800/80 [&_span.bubble]:bg-emerald-600",
+          "border-transparent dark:border-transparent bg-success text-white hover:bg-success/80 [&_span.bubble]:bg-success",
         warning:
-          "border-transparent bg-amber-500 text-zinc-50 hover:bg-amber-500/80 dark:border-transparent dark:bg-amber-800 dark:text-zinc-50 dark:hover:bg-amber-800/80 [&_span.bubble]:bg-amber-500",
+          "border-transparent dark:border-transparent bg-warning text-warning-foreground hover:bg-warning/80 [&_span.bubble]:bg-warning",
         retail:
           "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-zinc-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
         light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
-        dark: "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80",
+        dark: "border-transparent bg-zinc-900 text-zinc-50 dark:border-transparent hover:bg-zinc-900/80",
         outline:
           "border-zinc-300 text-zinc-950 dark:border-zinc-300 dark:text-zinc-200 [&_span.bubble]:bg-zinc-300 dark:[&_span.bubble]:bg-zinc-800",
         "outline-white": "border-base-400 border bg-white text-zinc-900 [&_span.bubble]:bg-white dark:border-base-300",
-        "outline-success":
-          "border-emerald-600 bg-emerald-600/5 text-emerald-600 dark:border-emerald-800 dark:text-emerald-50 dark:bg-emerald-600/10 [&_span.bubble]:bg-emerald-500 dark:[&_span.bubble]:bg-emerald-600",
+        "outline-success": "border-success bg-success/5 text-success dark:bg-success/10 [&_span.bubble]:bg-success",
         "outline-destructive":
-          "border-red-500/50 bg-red-500/10 text-red-600 dark:border-red-500/40 dark:text-red-50 dark:bg-red-600/20 [&_span.bubble]:bg-red-500 dark:[&_span.bubble]:bg-red-600",
-        "outline-warning":
-          "border-yellow-600 bg-yellow-600/5 text-yellow-600 dark:border-yellow-800 dark:text-yellow-50 dark:bg-yellow-600/10 [&_span.bubble]:bg-yellow-500 dark:[&_span.bubble]:bg-yellow-800",
+          "border-destructive/50 bg-destructive/10 text-destructive dark:border-destructive/40 dark:bg-destructive/20 [&_span.bubble]:bg-destructive",
+        "outline-warning": "border-warning bg-warning/5 text-warning dark:bg-warning/10 [&_span.bubble]:bg-warning",
         "price-per-unit":
           "border-transparent bg-amber-500 text-white hover:bg-amber-500/80 dark:border-transparent dark:bg-amber-600 dark:text-white dark:hover:bg-amber-600/80 [&_span.bubble]:bg-amber-600 dark:[&_span.bubble]:bg-amber-600",
         unit: "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
-        blue: "border-transparent bg-blue-600 text-zinc-50 hover:bg-blue-600/80 dark:border-transparent dark:bg-blue-800 dark:text-zinc-50 dark:hover:bg-blue-800/80 [&_span.bubble]:bg-blue-600 dark:[&_span.bubble]:bg-blue-800",
+        blue: "border-transparent dark:border-transparent bg-info text-info-foreground hover:bg-info/80 [&_span.bubble]:bg-info",
         sky: "border-transparent bg-sky-600 text-zinc-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-zinc-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
         white:
           "border-transparent bg-white text-zinc-900 hover:bg-white/80 dark:border-transparent dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-zinc-900",
         "glass-primary":
           "border-primary/20 bg-primary/10 text-foreground hover:bg-primary/20 dark:border-primary/40 dark:bg-primary/20 dark:text-foreground dark:hover:bg-primary/30 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         "glass-success":
-          "border-transparent bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20 dark:border-transparent dark:bg-emerald-500/20 dark:text-emerald-50 dark:hover:bg-emerald-500/30 [&_span.bubble]:bg-emerald-600 dark:[&_span.bubble]:bg-emerald-800",
+          "border-transparent dark:border-transparent bg-success/10 text-success hover:bg-success/20 [&_span.bubble]:bg-success",
       },
       size: {
         default: `px-3 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,

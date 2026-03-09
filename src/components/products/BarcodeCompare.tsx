@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -23,13 +23,11 @@ import {
   TagIcon,
   Loader2Icon,
   LinkIcon,
-  ChevronDownIcon,
   TrendingDownIcon,
   BarChart3Icon,
   ShieldCheckIcon,
-  LayersIcon,
 } from "lucide-react"
-import { OffIcon } from "@/components/icons/OffIcon"
+import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 
 export interface ProductWithPrices {
   product: StoreProduct
@@ -264,24 +262,18 @@ interface OffData {
   categories?: string | null
 }
 
-function OffEnrichmentSection({ barcode }: { barcode: string }) {
-  const [isOpen, setIsOpen] = useState(false)
+function ProductInfoSection({ barcode }: { barcode: string }) {
   const [offData, setOffData] = useState<OffData | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [fetched, setFetched] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const handleToggle = async () => {
-    const next = !isOpen
-    setIsOpen(next)
-
-    if (next && !fetched) {
-      setLoading(true)
-      setFetched(true)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
       try {
         const res = await fetch(
           `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url,nutriscore_grade`,
         )
-        if (res.ok) {
+        if (res.ok && !cancelled) {
           const json = await res.json()
           if (json.status === 1 && json.product) {
             const p = json.product
@@ -294,85 +286,77 @@ function OffEnrichmentSection({ barcode }: { barcode: string }) {
           }
         }
       } catch {
-        // OFF unavailable (silently ignore)
+        // silently ignore
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
+    })()
+    return () => {
+      cancelled = true
     }
+  }, [barcode])
+
+  if (loading) {
+    return (
+      <div className="bg-card flex items-center gap-2 rounded-lg border px-3 py-3">
+        <Loader2Icon className="text-muted-foreground h-4 w-4 animate-spin" />
+        <span className="text-muted-foreground text-xs">Loading product information&hellip;</span>
+      </div>
+    )
   }
 
-  const categories = offData?.categories
+  if (!offData) return null
+
+  const categories = offData.categories
     ?.split(",")
     .map((c) => c.trim())
     .filter(Boolean)
     .slice(0, 5)
 
-  const validGrade = offData?.nutriscoreGrade?.toUpperCase()
+  const validGrade = offData.nutriscoreGrade?.toUpperCase()
   const isValidNutriGrade = validGrade && ["A", "B", "C", "D", "E"].includes(validGrade)
 
   return (
     <div className="bg-card rounded-lg border">
-      <button onClick={handleToggle} className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium">
-        <span className="flex items-center gap-2">
-          <OffIcon className="h-4 w-4" />
-          Product Details (Open Food Facts)
-        </span>
-        <ChevronDownIcon className={cn("text-muted-foreground h-4 w-4 transition-transform", isOpen && "rotate-180")} />
-      </button>
+      <div className="px-3 py-2">
+        <h3 className="flex items-center gap-1.5 text-sm font-semibold">
+          <OpenFoodFactsIcon className="h-3.5 w-3.5" />
+          Product information
+        </h3>
+      </div>
+      <div className="flex flex-wrap items-center gap-4 border-t px-3 py-3">
+        {offData.imageUrl && (
+          <Image
+            src={offData.imageUrl}
+            alt="Product"
+            width={80}
+            height={80}
+            className="size-20 shrink-0 rounded-lg border object-contain p-1"
+            unoptimized
+          />
+        )}
 
-      {isOpen && (
-        <div className="flex flex-wrap items-center gap-4 border-t px-3 py-3">
-          {loading && <Loader2Icon className="text-muted-foreground h-5 w-5 animate-spin" />}
+        {isValidNutriGrade && (
+          <NutriScoreBadge grade={validGrade as "A" | "B" | "C" | "D" | "E"} showNewCalculation={false} size={0.65} />
+        )}
 
-          {!loading && !offData && fetched && (
-            <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
-              <OffIcon className="h-3.5 w-3.5 shrink-0" />
-              No data found on Open Food Facts for this barcode.
-            </p>
-          )}
+        {offData.quantity && (
+          <Badge variant="secondary" className="gap-1">
+            <TagIcon className="h-3 w-3" />
+            {offData.quantity}
+          </Badge>
+        )}
 
-          {offData && (
-            <>
-              {offData.imageUrl && (
-                <Image
-                  src={offData.imageUrl}
-                  alt="Product"
-                  width={80}
-                  height={80}
-                  className="size-20 shrink-0 rounded-lg border object-contain p-1"
-                  unoptimized
-                />
-              )}
-
-              {isValidNutriGrade && (
-                <NutriScoreBadge
-                  grade={validGrade as "A" | "B" | "C" | "D" | "E"}
-                  showNewCalculation={false}
-                  size={0.65}
-                />
-              )}
-
-              {offData.quantity && (
-                <Badge variant="secondary" className="gap-1">
-                  <TagIcon className="h-3 w-3" />
-                  {offData.quantity}
-                </Badge>
-              )}
-
-              {categories && categories.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <LayersIcon className="text-muted-foreground h-3.5 w-3.5" />
-                  {categories.map((cat) => (
-                    <Badge key={cat} variant="secondary" className="text-xs font-normal">
-                      {cat}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
+        {categories && categories.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {categories.map((cat) => (
+              <Badge key={cat} variant="secondary" className="text-xs font-normal">
+                {cat}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -395,7 +379,6 @@ function StoreComparisonTable({
       return {
         product,
         historicalLow,
-        dataPoints: pwp?.prices.length ?? 0,
         isCheapest: cheapestPrice !== null && product.price === cheapestPrice,
       }
     })
@@ -407,7 +390,7 @@ function StoreComparisonTable({
         <h3 className="text-sm font-semibold">Price Comparison</h3>
       </div>
       <div className="divide-y">
-        {rows.map(({ product, historicalLow, dataPoints, isCheapest }) => (
+        {rows.map(({ product, historicalLow, isCheapest }) => (
           <div key={product.id} className={cn("flex items-center gap-3 px-3 py-2", isCheapest && "bg-success/5")}>
             <div className="flex w-16 shrink-0 items-center justify-center">
               <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
@@ -441,9 +424,8 @@ function StoreComparisonTable({
               </div>
 
               <div>
-                <span className="text-muted-foreground block text-[10px] uppercase">Hist. low</span>
+                <span className="text-muted-foreground block text-[10px] uppercase">Lowest recorded</span>
                 <span>{historicalLow !== null ? `${historicalLow.toFixed(2)}€` : "N/A"}</span>
-                <span className="text-muted-foreground ml-1">({dataPoints} pts)</span>
               </div>
             </div>
           </div>
@@ -508,17 +490,7 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
             <h1 className="text-xl font-bold md:text-2xl">{firstProduct?.name || "Compare Prices"}</h1>
           </div>
 
-          {isMultiBarcode ? (
-            <div className="hidden flex-col gap-1 sm:flex">
-              {uniqueBarcodes.map((b) => (
-                <span key={b} className="bg-muted rounded px-2 py-0.5 font-mono text-xs">
-                  {b}
-                </span>
-              ))}
-            </div>
-          ) : barcode ? (
-            <Barcode value={barcode} height={40} width={1.5} className="hidden sm:flex" />
-          ) : null}
+          {barcode && <Barcode value={barcode} height={40} width={1.5} className="hidden sm:flex" />}
         </div>
 
         {savings > 0 && (
@@ -583,10 +555,9 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
         </div>
       </div>
 
-      {/* OFF Enrichment: lazy-loaded on expand (only when at least one barcode is available) */}
       {barcode && (
         <div className="mt-4">
-          <OffEnrichmentSection barcode={barcode} />
+          <ProductInfoSection barcode={barcode} />
         </div>
       )}
     </div>

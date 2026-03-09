@@ -1,0 +1,62 @@
+---
+description: Semantic color tokens and themed color usage
+globs: "{src/**/*.tsx,src/**/*.css}"
+alwaysApply: false
+---
+
+## Semantic Color Tokens
+
+The theme defines semantic color tokens in `src/app/globals.css` that automatically adapt to light/dark mode. Always prefer these over hardcoded Tailwind colors.
+
+### Available tokens
+
+| Token | Purpose | Light | Dark |
+|-------|---------|-------|------|
+| `destructive` | Errors, deletions, price increases | Red | Red |
+| `success` | Confirmations, positive states, price drops | Emerald | Emerald |
+| `info` | Informational notices, links, neutral highlights | Blue (primary-600) | Blue (primary-700) |
+| `warning` | Caution banners, allergens, degraded states | Amber | Amber |
+| `primary` / `secondary` | Brand colors | Theme-defined | Theme-defined |
+
+Each token also has a `-foreground` variant for text on solid backgrounds (e.g. `text-info-foreground` on `bg-info`).
+
+### Usage patterns
+
+**Solid backgrounds** (badges, buttons):
+```
+bg-success text-white
+bg-warning text-warning-foreground
+bg-info text-info-foreground
+```
+
+**Subtle/glass backgrounds** (banners, callouts, cards):
+```
+bg-info/10 border-info/20 text-info
+bg-warning/10 border-warning/20 text-warning
+bg-destructive/10 border-destructive/20 text-destructive
+```
+
+Dark mode is handled automatically by the CSS variable swap — no `dark:` prefix needed for semantic tokens.
+
+### Callout component
+
+Use `<Callout>` from `@/components/ui/callout` for info/warning/error banner patterns:
+
+```tsx
+<Callout variant="info" icon={InfoIcon}>Message here</Callout>
+<Callout variant="warning">Warning message</Callout>
+```
+
+### When hardcoded colors are acceptable
+
+- Brand logos and store-specific colors (e.g. Continente red, Auchan green)
+- Chart/data visualization colors (use `--chart-*` tokens when possible)
+- One-off decorative elements that don't carry semantic meaning
+
+### What to avoid
+
+- `bg-blue-*`, `text-blue-*` for info states → use `bg-info`, `text-info`
+- `bg-amber-*`, `text-amber-*` for warnings → use `bg-warning`, `text-warning`
+- `bg-emerald-*`, `bg-green-*` for success → use `bg-success`, `text-success`
+- `bg-red-*` for errors → use `bg-destructive`, `text-destructive`
+- Explicit `dark:` overrides for semantic colors → the token handles it

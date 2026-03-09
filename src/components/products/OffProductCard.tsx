@@ -3,8 +3,8 @@ import type { OffProduct } from "@/lib/canonical/open-food-facts"
 import { Badge } from "@/components/ui/badge"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { TagIcon, PackageIcon, LayersIcon } from "lucide-react"
-import { OffIcon } from "@/components/icons/OffIcon"
-import { OffLogo } from "@/components/icons/OffLogo"
+import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
+import { OpenFoodFactsLogo } from "@/components/icons/OpenFoodFacts"
 
 interface OffProductCardProps {
   product: OffProduct
@@ -49,7 +49,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
           </Badge>
         )}
         <Badge variant="outline" className="gap-1">
-          <OffIcon className="h-3.5 w-3.5" />
+          <OpenFoodFactsIcon className="h-3.5 w-3.5" />
           Open Food Facts
         </Badge>
       </div>
@@ -75,7 +75,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
-        <OffLogo className="h-7 w-auto" />
+        <OpenFoodFactsLogo className="h-7 w-auto" />
         <p className="text-muted-foreground text-center text-sm">
           This product was found externally but is not currently tracked in our stores.
         </p>

@@ -1,22 +1,10 @@
-export function OffIcon(props: React.SVGProps<SVGSVGElement>) {
+export function OpenFoodFactsIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      viewBox="-7.5 0 48 48"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Open Food Facts"
-      {...props}
-    >
+    <svg viewBox="-7.5 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Open Food Facts" {...props}>
       {/* Orange top semicircle, white bottom, brown dots */}
       <g transform="matrix(.33808 0 0 .33808 -33.118 -33.121)">
-        <path
-          d="M97.97 171.55c0-27.05 21.93-48.98 48.98-48.98 27.05 0 48.98 21.93 48.98 48.98z"
-          fill="#ff8c14"
-        />
-        <path
-          d="M183.52 171.55c0 20.2-16.37 36.57-36.57 36.57s-36.57-16.37-36.57-36.57h73.13z"
-          fill="#fff"
-        />
+        <path d="M97.97 171.55c0-27.05 21.93-48.98 48.98-48.98 27.05 0 48.98 21.93 48.98 48.98z" fill="#ff8c14" />
+        <path d="M183.52 171.55c0 20.2-16.37 36.57-36.57 36.57s-36.57-16.37-36.57-36.57h73.13z" fill="#fff" />
         <circle cx={163.54} cy={139.92} r={2.69} fill="#8c3c00" />
         <circle cx={176.66} cy={151.96} r={2.69} fill="#8c3c00" />
         <circle cx={161.82} cy={154.91} r={2.69} fill="#8c3c00" />

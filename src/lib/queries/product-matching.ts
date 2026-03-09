@@ -291,6 +291,157 @@ export async function findIdenticalProducts(
 }
 
 /**
+ * Maps common English OFF category terms to Portuguese search equivalents.
+ * Only includes high-value, unambiguous mappings.
+ */
+const OFF_CATEGORY_TRANSLATIONS: Record<string, string> = {
+  yogurts: "iogurte",
+  yoghurts: "iogurte",
+  milks: "leite",
+  cheeses: "queijo",
+  butters: "manteiga",
+  breads: "pão",
+  juices: "sumo",
+  chocolates: "chocolate",
+  cereals: "cereais",
+  biscuits: "bolacha",
+  cookies: "bolacha",
+  pastas: "massa",
+  rices: "arroz",
+  coffees: "café",
+  teas: "chá",
+  waters: "água",
+  beers: "cerveja",
+  wines: "vinho",
+  oils: "azeite",
+  sugars: "açúcar",
+  honeys: "mel",
+  jams: "compota",
+  soups: "sopa",
+  sauces: "molho",
+  chips: "batata",
+  crackers: "crackers",
+  ice_creams: "gelado",
+  "ice creams": "gelado",
+  frozen: "congelado",
+}
+
+function extractCategoryKeywords(categories: string | null): string[] {
+  if (!categories) return []
+  const keywords: string[] = []
+  const cats = categories
+    .toLowerCase()
+    .split(",")
+    .map((c) => c.trim())
+  for (const cat of cats) {
+    for (const [eng, pt] of Object.entries(OFF_CATEGORY_TRANSLATIONS)) {
+      if (cat.includes(eng)) {
+        keywords.push(pt)
+      }
+    }
+  }
+  return [...new Set(keywords)]
+}
+
+/**
+ * Finds tracked store products related to an Open Food Facts product.
+ * Uses the OFF product's brand, name, and categories to search our database — no OFF API calls.
+ */
+export async function findRelatedByOffProduct(
+  params: { brand: string | null; productName: string | null; categories: string | null },
+  limit: number = 10,
+): Promise<{ data: StoreProduct[] | null; error: unknown }> {
+  const { brand, productName, categories } = params
+  if (!brand && !productName && !categories) return { data: [], error: null }
+
+  const supabase = createClient()
+  const queries = []
+
+  if (brand) {
+    queries.push(
+      supabase
+        .from("store_products")
+        .select("*")
+        .ilike("brand", brand.trim())
+        .eq("available", true)
+        .not("image", "is", null)
+        .limit(50),
+    )
+  }
+
+  // OR-based text search on product name — finds matches for ANY keyword
+  if (productName) {
+    const words = extractWords(productName)
+    if (words.length >= 1) {
+      const searchTerms = words.slice(0, 4).join(" | ")
+      queries.push(
+        supabase
+          .from("store_products")
+          .select("*")
+          .textSearch("name", searchTerms)
+          .eq("available", true)
+          .not("image", "is", null)
+          .limit(50),
+      )
+    }
+  }
+
+  // Category-based search using translated OFF categories
+  const categoryKeywords = extractCategoryKeywords(categories)
+  if (categoryKeywords.length > 0) {
+    const searchTerms = categoryKeywords.slice(0, 3).join(" | ")
+    queries.push(
+      supabase
+        .from("store_products")
+        .select("*")
+        .textSearch("name", searchTerms)
+        .eq("available", true)
+        .not("image", "is", null)
+        .limit(50),
+    )
+  }
+
+  if (queries.length === 0) return { data: [], error: null }
+
+  const results = await Promise.all(queries)
+  const deduped = new Map<number, StoreProduct>()
+
+  for (const result of results) {
+    if (result.error) {
+      console.warn("[findRelatedByOffProduct] query failed:", result.error.code, result.error.message)
+    }
+    if (result.data) {
+      for (const p of result.data) {
+        if (!deduped.has(p.id)) deduped.set(p.id, p)
+      }
+    }
+  }
+
+  // Score: brand match > name word overlap > category match > priority
+  const brandLower = brand?.toLowerCase() ?? null
+  const nameWords = new Set(extractWords(productName).map((w) => w.toLowerCase()))
+
+  const sorted = Array.from(deduped.values()).sort((a, b) => {
+    const aScore = scoreCandidate(a, brandLower, nameWords)
+    const bScore = scoreCandidate(b, brandLower, nameWords)
+    if (aScore !== bScore) return bScore - aScore
+    return (b.priority ?? 0) - (a.priority ?? 0)
+  })
+
+  return { data: sorted.slice(0, limit), error: null }
+}
+
+function scoreCandidate(product: StoreProduct, brandLower: string | null, nameWords: Set<string>): number {
+  let score = 0
+  if (brandLower && product.brand?.toLowerCase() === brandLower) score += 50
+  const candidateWords = extractWords(product.name).map((w) => w.toLowerCase())
+  for (const w of candidateWords) {
+    if (nameWords.has(w)) score += 10
+  }
+  return score
+}
+
+/**
  * Finds related products (same brand, similar type, any store)
  */
 export async function findRelatedProducts(

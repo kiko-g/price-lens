@@ -10,6 +10,7 @@ import { storeProductQueries } from "@/lib/queries/products"
 import { priceQueries } from "@/lib/queries/prices"
 import { generateProductPath } from "@/lib/business/product"
 import { lookupBarcode } from "@/lib/canonical/open-food-facts"
+import { findRelatedByOffProduct } from "@/lib/queries/product-matching"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,19 +18,10 @@ import { BackButton } from "@/components/ui/combo/back-button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { BarcodeCompare } from "@/components/products/BarcodeCompare"
-import { OffProductCard } from "@/components/products/OffProductCard"
-import { StoreProductCard } from "@/components/products/StoreProductCard"
+import { OffProductPage } from "@/components/products/OffProductPage"
 
-import {
-  HomeIcon,
-  SearchIcon,
-  ExternalLinkIcon,
-  WifiOffIcon,
-  RefreshCwIcon,
-  StoreIcon,
-  Loader2Icon,
-} from "lucide-react"
-import { OffIcon } from "@/components/icons/OffIcon"
+import { HomeIcon, SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, Loader2Icon } from "lucide-react"
+import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 
 interface PageProps {
   params: Promise<{ barcode: string }>
@@ -134,63 +126,13 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
 
   if (offResult.status === "found") {
     const primaryBrand = offResult.product.brands?.split(",")[0]?.trim() || null
-    let brandProducts: StoreProduct[] = []
-    if (primaryBrand) {
-      const { data } = await storeProductQueries.getByBrand(primaryBrand)
-      brandProducts = data
-    }
+    const { data: trackedRelated } = await findRelatedByOffProduct({
+      brand: primaryBrand,
+      productName: offResult.product.productName,
+      categories: offResult.product.categories,
+    })
 
-    return (
-      <div className="flex w-full grow flex-col items-center justify-center">
-        <HeroGridPattern
-          withGradient
-          variant="grid"
-          className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
-        />
-
-        <div className="flex w-full flex-col items-center justify-center gap-6 px-4">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product identified</h1>
-            <p className="text-muted-foreground mt-1.5 max-w-sm text-center">
-              We found this product externally but it&apos;s not available in our tracked stores yet.
-            </p>
-          </div>
-
-          <OffProductCard product={offResult.product} barcode={barcode} />
-
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <BackButton />
-            <Button asChild variant="outline">
-              <Link href="/products" prefetch={false}>
-                <SearchIcon className="h-4 w-4" />
-                Browse products
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
-                <OffIcon className="h-4 w-4" />
-                View on Open Food Facts
-                <ExternalLinkIcon className="h-3 w-3" />
-              </a>
-            </Button>
-          </div>
-
-          {brandProducts.length > 0 && (
-            <div className="mt-4 w-full max-w-5xl">
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                <StoreIcon className="h-5 w-5" />
-                Products from {primaryBrand} in our stores
-              </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {brandProducts.map((sp) => (
-                  <StoreProductCard key={sp.id} sp={sp} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    )
+    return <OffProductPage product={offResult.product} barcode={barcode} trackedProducts={trackedRelated ?? []} />
   }
 
   if (offResult.status === "error") {
@@ -220,10 +162,10 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
                 Try again
               </a>
             </Button>
-            <BackButton />
+
             <Button asChild variant="outline">
               <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
-                <OffIcon className="h-4 w-4" />
+                <OpenFoodFactsIcon className="h-4 w-4" />
                 Check Open Food Facts
                 <ExternalLinkIcon className="h-3 w-3" />
               </a>
@@ -244,7 +186,6 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
     )
   }
 
-  // "not_found": barcode genuinely not in OFF either
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -257,11 +198,10 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
         <Barcode value={barcode} height={50} width={2} className="mb-2" />
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
         <p className="text-muted-foreground max-w-sm text-center">
-          We couldn&apos;t find any product with barcode <span className="font-mono font-medium">{barcode}</span> in
-          our stores or external databases.
+          We couldn&apos;t find any product with barcode <span className="font-mono font-medium">{barcode}</span> in our
+          stores or external databases.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <BackButton />
           <Button asChild variant="outline">
             <Link href="/products" prefetch={false}>
               <SearchIcon className="h-4 w-4" />
@@ -294,47 +234,57 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
 
 function OffLookupSkeleton({ barcode }: { barcode: string }) {
   return (
-    <div className="flex w-full grow flex-col items-center justify-center">
-      <HeroGridPattern
-        withGradient
-        variant="grid"
-        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
-      />
+    <div className="mx-auto w-full max-w-5xl px-4 py-4 md:py-6">
+      {/* Breadcrumb skeleton */}
+      <div className="mb-3 flex items-center gap-1">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-3 w-3" />
+        <Skeleton className="h-4 w-24" />
+      </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-6 px-4">
-        <Loader2Icon className="text-primary h-8 w-8 animate-spin" />
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Not found in our stores</h1>
-          <p className="text-muted-foreground mt-1.5 flex max-w-sm flex-wrap items-center justify-center gap-1 text-center">
-            Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our database. Checking
-            <OffIcon className="inline h-4 w-4" />
-            Open Food Facts. This can take a few seconds.
-          </p>
+      {/* Loading indicator */}
+      <div className="mb-6 flex items-center gap-3">
+        <Loader2Icon className="text-primary h-5 w-5 animate-spin" />
+        <p className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm">
+          Looking up <span className="font-mono font-medium">{barcode}</span> on
+          <OpenFoodFactsIcon className="inline h-4 w-4" />
+          Open Food Facts&hellip;
+        </p>
+      </div>
+
+      {/* Hero skeleton matching new layout */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr] md:gap-8">
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="aspect-square w-full max-w-[280px] rounded-xl" />
+          <Skeleton className="hidden h-10 w-48 md:block" />
         </div>
 
-        <div className="border-border/60 bg-card w-full max-w-lg rounded-xl border p-6 shadow-sm">
-          <div className="mb-4 flex items-start gap-3">
-            <Skeleton className="h-16 w-16 shrink-0 rounded-lg" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-8 w-3/4" />
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-6 w-28 rounded-full" />
+          </div>
+          <Skeleton className="h-16 w-48 rounded-xl" />
+          <div className="flex gap-1.5">
+            <Skeleton className="h-5 w-20 rounded-full" />
+            <Skeleton className="h-5 w-28 rounded-full" />
+          </div>
+          <Skeleton className="h-4 w-40" />
+        </div>
+      </div>
+
+      {/* Nutrition skeleton */}
+      <div className="mt-8">
+        <Skeleton className="mb-3 h-6 w-24" />
+        <div className="space-y-0 overflow-hidden rounded-lg border">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between border-b px-4 py-2.5 last:border-b-0">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-16" />
             </div>
-          </div>
-          <div className="mb-4 flex gap-2">
-            <Skeleton className="h-5 w-16 rounded-full" />
-            <Skeleton className="h-5 w-24 rounded-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-16" />
-            <div className="flex flex-wrap gap-1.5">
-              <Skeleton className="h-5 w-20 rounded-full" />
-              <Skeleton className="h-5 w-28 rounded-full" />
-              <Skeleton className="h-5 w-16 rounded-full" />
-            </div>
-          </div>
-          <div className="mt-4 flex justify-center">
-            <Skeleton className="h-10 w-48" />
-          </div>
+          ))}
         </div>
       </div>
     </div>

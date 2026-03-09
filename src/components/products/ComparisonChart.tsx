@@ -253,9 +253,9 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                           <circle cx="12" cy="6" r="3" fill={entry.color} />
                         </svg>
                         <span className="text-muted-foreground text-xs">
-                          {storeKey?.dataPointCount ?? 0} pts
+                          {storeKey?.dataPointCount ?? 0} price points
                           {trackingSinceText ? `, ${trackingSinceText}` : ""}
-                          {isLimited && " · Limited data"}
+                          {isLimited && " · Few price records"}
                         </span>
                       </div>
                     )

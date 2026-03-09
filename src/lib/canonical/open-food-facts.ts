@@ -1,17 +1,36 @@
 /**
- * Open Food Facts barcode lookup.
+ * Open Food Facts barcode lookup and brand search.
  *
- * Rate limit: 100 GET /product requests per minute.
- * We enforce a minimum delay between calls to stay well within that.
+ * Rate limits:
+ *  - 100 GET /product requests per minute (product reads + taxonomy pages)
+ *  - 10 GET /cgi/search.pl per minute (search endpoint — we avoid this)
+ *
+ * We enforce a minimum delay between calls to stay well within the limit.
  */
 
 const OFF_API_BASE = "https://world.openfoodfacts.org/api/v2/product"
+const OFF_BRAND_BASE = "https://world.openfoodfacts.org/brand"
 const USER_AGENT = "PriceLens/1.0 (https://pricelens.pt; contact@pricelens.pt)"
 const MIN_DELAY_MS = 650 // ~92 req/min, safely under the 100/min limit
 const MAX_RETRIES = 2
 const RETRY_DELAY_MS = 3_000
 
+const PRODUCT_FIELDS =
+  "code,product_name,brands,quantity,categories,image_front_url,image_front_small_url,nutriscore_grade,nutriments,serving_size,labels,ingredients_text,allergens"
+
 let lastRequestAt = 0
+
+export interface OffNutriments {
+  energyKcal100g: number | null
+  energyKj100g: number | null
+  fat100g: number | null
+  saturatedFat100g: number | null
+  carbohydrates100g: number | null
+  sugars100g: number | null
+  fiber100g: number | null
+  proteins100g: number | null
+  salt100g: number | null
+}
 
 export interface OffProduct {
   /** Raw product_name from OFF (can be incomplete, e.g. "Strawberry") */
@@ -21,8 +40,18 @@ export interface OffProduct {
   brands: string | null
   quantity: string | null
   categories: string | null
+  /** 400px front image */
   imageUrl: string | null
+  /** 200px front image (for cards/thumbnails) */
+  imageSmallUrl: string | null
   nutriscoreGrade: string | null
+  nutriments: OffNutriments | null
+  servingSize: string | null
+  labels: string | null
+  ingredientsText: string | null
+  allergens: string | null
+  /** EAN/barcode — present when returned from brand search */
+  barcode: string | null
 }
 
 async function throttle(): Promise<void> {
@@ -42,6 +71,57 @@ export type LookupResult =
   | { status: "not_found" }
   | { status: "error"; reason: string }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseNutriments(raw: any): OffNutriments | null {
+  if (!raw || typeof raw !== "object") return null
+  const n: OffNutriments = {
+    energyKcal100g: typeof raw["energy-kcal_100g"] === "number" ? raw["energy-kcal_100g"] : null,
+    energyKj100g: typeof raw["energy_100g"] === "number" ? raw["energy_100g"] : null,
+    fat100g: typeof raw.fat_100g === "number" ? raw.fat_100g : null,
+    saturatedFat100g: typeof raw["saturated-fat_100g"] === "number" ? raw["saturated-fat_100g"] : null,
+    carbohydrates100g: typeof raw.carbohydrates_100g === "number" ? raw.carbohydrates_100g : null,
+    sugars100g: typeof raw.sugars_100g === "number" ? raw.sugars_100g : null,
+    fiber100g: typeof raw.fiber_100g === "number" ? raw.fiber_100g : null,
+    proteins100g: typeof raw.proteins_100g === "number" ? raw.proteins_100g : null,
+    salt100g: typeof raw.salt_100g === "number" ? raw.salt_100g : null,
+  }
+  const hasAny = Object.values(n).some((v) => v !== null)
+  return hasAny ? n : null
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseOffProduct(p: any, barcodeOverride?: string): OffProduct | null {
+  const rawName: string | null = p.product_name || null
+  const rawBrands: string | null = p.brands || null
+
+  if (!rawName) return null
+
+  let displayName: string | null = null
+  const primaryBrand = rawBrands?.split(",")[0]?.trim()
+  if (primaryBrand && !rawName.toLowerCase().startsWith(primaryBrand.toLowerCase())) {
+    displayName = `${primaryBrand} ${rawName}`
+  } else {
+    displayName = rawName
+  }
+
+  return {
+    productName: rawName,
+    displayName,
+    brands: rawBrands,
+    quantity: p.quantity || null,
+    categories: p.categories || null,
+    imageUrl: p.image_front_url || p.image_front_small_url || null,
+    imageSmallUrl: p.image_front_small_url || null,
+    nutriscoreGrade: p.nutriscore_grade || null,
+    nutriments: parseNutriments(p.nutriments),
+    servingSize: p.serving_size || null,
+    labels: p.labels || null,
+    ingredientsText: p.ingredients_text || null,
+    allergens: p.allergens || null,
+    barcode: barcodeOverride || p.code || null,
+  }
+}
+
 /**
  * Look up a barcode in Open Food Facts with retry on transient failures.
  * HTTP 404 is treated as "not found" (OFF uses 404 for unknown barcodes).
@@ -54,22 +134,17 @@ export async function lookupBarcode(
     await throttle()
 
     try {
-      const res = await fetch(
-        `${OFF_API_BASE}/${barcode}.json?fields=product_name,brands,quantity,categories,image_front_small_url,nutriscore_grade`,
-        {
-          headers: { "User-Agent": USER_AGENT },
-          signal: AbortSignal.timeout(15_000),
-          next: { revalidate: 86_400 },
-        },
-      )
+      const res = await fetch(`${OFF_API_BASE}/${barcode}.json?fields=${PRODUCT_FIELDS}`, {
+        headers: { "User-Agent": USER_AGENT },
+        signal: AbortSignal.timeout(15_000),
+        next: { revalidate: 86_400 },
+      })
 
-      // OFF returns 404 for unknown barcodes — that's a genuine "not found"
       if (res.status === 404) {
         return { status: "not_found" }
       }
 
       if (!res.ok) {
-        // 429 / 5xx → transient, retry
         if (attempt < maxRetries) {
           const backoff = RETRY_DELAY_MS * (attempt + 1)
           await sleep(backoff)
@@ -83,34 +158,12 @@ export async function lookupBarcode(
         return { status: "not_found" }
       }
 
-      const p = json.product
-      const rawName: string | null = p.product_name || null
-      const rawBrands: string | null = p.brands || null
-
-      if (!rawName) {
+      const product = parseOffProduct(json.product, barcode)
+      if (!product) {
         return { status: "not_found" }
       }
 
-      let displayName: string | null = null
-      const primaryBrand = rawBrands?.split(",")[0]?.trim()
-      if (primaryBrand && !rawName.toLowerCase().startsWith(primaryBrand.toLowerCase())) {
-        displayName = `${primaryBrand} ${rawName}`
-      } else {
-        displayName = rawName
-      }
-
-      return {
-        status: "found",
-        product: {
-          productName: rawName,
-          displayName,
-          brands: rawBrands,
-          quantity: p.quantity || null,
-          categories: p.categories || null,
-          imageUrl: p.image_front_small_url || null,
-          nutriscoreGrade: p.nutriscore_grade || null,
-        },
-      }
+      return { status: "found", product }
     } catch (err) {
       if (attempt < maxRetries) {
         const backoff = RETRY_DELAY_MS * (attempt + 1)
@@ -123,6 +176,46 @@ export async function lookupBarcode(
   }
 
   return { status: "error", reason: "max retries exceeded" }
+}
+
+/**
+ * Fetch products from the same brand via OFF's taxonomy page.
+ * Uses 24h caching. Excludes a specific barcode (the current product).
+ */
+export async function searchOffByBrand(
+  brand: string,
+  excludeBarcode?: string,
+  { limit = 8 }: { limit?: number } = {},
+): Promise<OffProduct[]> {
+  await throttle()
+
+  try {
+    const encoded = encodeURIComponent(brand.toLowerCase().replace(/\s+/g, "-"))
+    const res = await fetch(`${OFF_BRAND_BASE}/${encoded}.json?fields=${PRODUCT_FIELDS}&page_size=20`, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(15_000),
+      next: { revalidate: 86_400 },
+    })
+
+    if (!res.ok) return []
+
+    const json = await res.json()
+    if (!json.products || !Array.isArray(json.products)) return []
+
+    const products: OffProduct[] = []
+    for (const raw of json.products) {
+      if (excludeBarcode && raw.code === excludeBarcode) continue
+      const parsed = parseOffProduct(raw)
+      if (parsed?.imageSmallUrl) {
+        products.push(parsed)
+      }
+      if (products.length >= limit) break
+    }
+
+    return products
+  } catch {
+    return []
+  }
 }
 
 /**
