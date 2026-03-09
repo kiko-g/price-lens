@@ -1,34 +1,20 @@
 "use client"
 
-import { deleteAccount, signOut } from "@/app/login/actions"
-import { useUser } from "@/hooks/useUser"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { toast } from "sonner"
+import { useUser } from "@/hooks/useUser"
 
-import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
+import { ProfileSidebar } from "@/components/profile/ProfileSidebar"
+import { FavoritesTab } from "@/components/profile/FavoritesTab"
+import { ListsTab } from "@/components/profile/ListsTab"
+import { PlanTab } from "@/components/profile/PlanTab"
+import { SettingsTab } from "@/components/profile/SettingsTab"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { GoogleIcon } from "@/components/icons/GoogleIcon"
-import {
-  ArrowLeftIcon,
-  BellIcon,
-  BugIcon,
-  ChartNetworkIcon,
-  LogOutIcon,
-  MailIcon,
-  PlusIcon,
-  ShoppingBagIcon,
-  TrashIcon,
-} from "lucide-react"
+import { BellIcon, CreditCardIcon, HeartIcon, ListIcon, SettingsIcon } from "lucide-react"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -47,281 +33,122 @@ export default function ProfilePage() {
         className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
       />
 
-      <div className="container mx-auto max-w-6xl space-y-6 p-6">
-        <HeaderActions />
-        {isLoading ? <ProfileContentSkeleton /> : <ProfileContent user={user!} profile={profile} />}
+      <div className="container mx-auto max-w-[1600px] space-y-6 p-4 pt-6 md:p-6 md:pt-8">
+        {isLoading ? (
+          <ProfilePageSkeleton />
+        ) : (
+          <div className="flex grow flex-col gap-6 pb-6 md:flex-row">
+            <ProfileSidebar user={user!} profile={profile} />
+
+            <div className="min-w-0 flex-1">
+              <Tabs defaultValue="favorites">
+                <TabsList className="w-full justify-start overflow-x-auto">
+                  <TabsTrigger value="favorites" className="gap-1.5">
+                    <HeartIcon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Favorites</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="lists" className="gap-1.5">
+                    <ListIcon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Lists</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="alerts" className="gap-1.5">
+                    <BellIcon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Alerts</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="plan" className="gap-1.5">
+                    <CreditCardIcon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Plan</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="settings" className="gap-1.5">
+                    <SettingsIcon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Settings</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="favorites" className="mt-4">
+                  <FavoritesTab />
+                </TabsContent>
+
+                <TabsContent value="lists" className="mt-4">
+                  <ListsTab />
+                </TabsContent>
+
+                <TabsContent value="alerts" className="mt-4">
+                  <AlertsTab />
+                </TabsContent>
+
+                <TabsContent value="plan" className="mt-4">
+                  <PlanTab plan={profile?.plan} />
+                </TabsContent>
+
+                <TabsContent value="settings" className="mt-4">
+                  <SettingsTab />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-function HeaderActions() {
-  const router = useRouter()
-
+function AlertsTab() {
   return (
-    <div className="flex items-center justify-between pb-8">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={() => router.back()}>
-          <ArrowLeftIcon className="h-4 w-4" />
-          Back to core
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-      </div>
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+      <BellIcon className="text-muted-foreground mb-4 h-10 w-10" />
+      <h3 className="text-lg font-semibold">Price alerts</h3>
+      <p className="text-muted-foreground mt-1 max-w-sm text-sm">
+        Get notified when products you track drop in price. Available with Price Lens Plus.
+      </p>
+      <Button variant="outline" size="sm" className="mt-4" disabled>
+        Coming Soon
+      </Button>
     </div>
   )
 }
 
-function ProfileContent({ user, profile }: { user: any; profile: any }) {
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  async function handleDeleteAccount() {
-    if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      return
-    }
-
-    setIsDeleting(true)
-    try {
-      await deleteAccount()
-    } catch (error) {
-      console.error("Error deleting account:", error)
-      toast.error("Failed to delete account. Please try again.")
-      setIsDeleting(false)
-    }
-  }
-
-  function getVerifiedIcon() {
-    const provider = user?.app_metadata?.provider
-
-    switch (provider) {
-      case "google":
-        return <GoogleIcon />
-      default:
-        return <MailIcon className="h-4 w-4" />
-    }
-  }
-
-  const avatarUrl = user.user_metadata?.avatar_url?.replace(/=s96-c/, "=s400-c")
-  const verifiedIcon = getVerifiedIcon()
-  const username = user.user_metadata?.full_name || "User"
-  const userInitial = user.email ? user.email[0].toUpperCase() : "U"
-  const accountCreatedAt = new Date(user.created_at).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  })
-
-  const upgradeNow = [
-    {
-      title: "Full price history",
-      description: (
-        <p className="text-muted-foreground text-sm">
-          No more 14-day limit and access to unlimited custom product tracking
-        </p>
-      ),
-      icon: <ChartNetworkIcon className="h-4 w-4" />,
-    },
-    {
-      title: "Price alerts",
-      description: (
-        <p className="text-muted-foreground text-sm">
-          Get notified of price changes and save money. Get breakdowns of evolutions of price points and campaigns.
-        </p>
-      ),
-      icon: <BellIcon className="h-4 w-4" />,
-    },
-    {
-      title: "Shopping list optimizer",
-      description: (
-        <p className="text-muted-foreground text-sm">
-          Optimize your shopping list across different supermarket sources. Get the best deals and save time.
-        </p>
-      ),
-      icon: <ShoppingBagIcon className="h-4 w-4" />,
-    },
-  ]
-
-  const contactUs = [
-    {
-      title: "Questions?",
-      description: (
-        <p className="text-muted-foreground text-sm">
-          Email Price Lens developer directly at{" "}
-          <span className="text-primary group-hover:underline">kikojpgoncalves@gmail.com</span>
-        </p>
-      ),
-      icon: <MailIcon className="h-4 w-4" />,
-      link: "mailto:kikojpgoncalves@gmail.com",
-    },
-    {
-      title: "Found a bug?",
-      description: <p className="text-muted-foreground text-sm">UI glitches or formatting issues? Report them here!</p>,
-      icon: <BugIcon className="h-4 w-4" />,
-      link: "https://github.com/kiko-g/pricelens/issues",
-    },
-    {
-      title: "Feature request?",
-      description: (
-        <p className="text-muted-foreground text-sm">
-          We&apos;re always looking for new ideas! Let us know what you&apos;d like to see.
-        </p>
-      ),
-      icon: <PlusIcon className="h-4 w-4" />,
-      link: "https://github.com/kiko-g/pricelens/issues",
-    },
-  ]
-
+function ProfilePageSkeleton() {
   return (
-    <div className="flex grow flex-col gap-4 md:flex-row">
-      {/* Profile Card Column */}
-      <div className="hidden flex-col items-center md:flex md:w-1/4">
-        <Avatar className="mx-auto mb-4 h-40 w-40">
-          <AvatarImage src={avatarUrl} alt={user.user_metadata?.full_name || "User avatar"} />
-          <AvatarFallback className="text-2xl">{userInitial}</AvatarFallback>
-        </Avatar>
-
-        <p className="mb-0 text-xl font-bold transition-opacity duration-200">{username}</p>
-
-        <Badge variant="default" size="xs" className="mb-2 flex items-center gap-1">
-          {verifiedIcon}
-          <span className="text-2xs">{user.email}</span>
-        </Badge>
-
+    <div className="flex grow flex-col gap-6 pb-6 md:flex-row">
+      {/* Sidebar skeleton — desktop */}
+      <div className="hidden shrink-0 flex-col items-center md:flex md:w-64">
+        <Skeleton className="mx-auto mb-4 h-32 w-32 rounded-full" />
+        <Skeleton className="mb-2 h-5 w-3/4" />
+        <Skeleton className="mb-3 h-4 w-full" />
         <div className="flex items-center gap-2">
-          {profile?.plan && (
-            <Badge variant="primary" roundedness="sm" className="capitalize">
-              {profile.plan}
-            </Badge>
-          )}
-          {profile?.role && (
-            <Badge variant="secondary" roundedness="sm" className="capitalize">
-              {profile.role}
-            </Badge>
-          )}
+          <Skeleton className="h-5 w-16 rounded-md" />
+          <Skeleton className="h-5 w-14 rounded-md" />
         </div>
+        <Skeleton className="mt-4 h-16 w-full rounded-md" />
+      </div>
 
-        <div className="w-full">
-          <p className="text-2xs text-muted-foreground mx-auto mt-2 border-t pt-2 text-center">
-            Member since {accountCreatedAt}
-          </p>
-        </div>
-
-        <div className="mt-3 flex w-full flex-col gap-2">
-          <Button variant="outline" className="w-full text-sm" onClick={() => signOut()}>
-            <LogOutIcon className="h-4 w-4" />
-            Sign out
-          </Button>
-
-          <Button variant="destructive" className="w-full text-sm" onClick={handleDeleteAccount} disabled={isDeleting}>
-            <TrashIcon className="h-4 w-4" />
-            {isDeleting ? "Deleting..." : "Delete account"}
-          </Button>
+      {/* Sidebar skeleton — mobile */}
+      <div className="flex items-center gap-4 border-b pb-4 md:hidden">
+        <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
+        <div className="flex flex-1 flex-col gap-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-48" />
+          <Skeleton className="h-3 w-24" />
         </div>
       </div>
 
-      {/* Tabs Column */}
-      <div className="md:w-3/4 md:pl-12">
-        <Tabs defaultValue="account">
-          <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="contact-us">Contact us</TabsTrigger>
-            <TabsTrigger value="customization">Customization</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="account" className="mb-8">
-            <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between">
-              <h2 className="text-center text-2xl font-bold md:text-left">Upgrade to Plus</h2>
-              <div className="mt-2 flex flex-col items-center justify-center text-right md:mt-0 md:flex-row md:items-end md:justify-center md:text-right">
-                <div className="text-xl font-bold md:text-3xl">
-                  €5
-                  <span className="text-muted-foreground text-base font-semibold">/month</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {upgradeNow.map((item) => (
-                <Card key={item.title}>
-                  <CardHeader className="p-4 pb-0">
-                    <CardTitle className="flex items-center gap-1 text-base font-semibold">
-                      {item.icon}
-                      {item.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-1.5">{item.description}</CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="mt-4 flex flex-col gap-4 md:flex-row">
-              <Button variant="marketing" className="w-full md:w-1/2">
-                Upgrade Now
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="customization" className="mb-8">
-            <div className="bg-muted max-w-lg rounded-md border p-4 text-center">Coming soon</div>
-          </TabsContent>
-
-          <TabsContent value="contact-us" className="mb-8">
-            <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between">
-              <h2 className="text-center text-2xl font-bold md:text-left">We can help you out more</h2>
-            </div>
-
-            <div className="mt-4 grid w-3/4 gap-3 md:grid-cols-1">
-              {contactUs.map((item) => (
-                <Link key={item.title} href={item.link} className="block">
-                  <Card className="hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <CardHeader className="p-4 pb-0">
-                      <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                        <span>{item.icon}</span>
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-1.5">{item.description}</CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  )
-}
-
-function ProfileContentSkeleton() {
-  return (
-    <div className="flex grow flex-col gap-4 md:flex-row">
-      {/* Profile Card Column */}
-      <div className="hidden flex-col items-center md:flex md:w-1/4">
-        <Skeleton className="mx-auto mb-4 h-40 w-40 rounded-full" />
-
-        <Skeleton className="mb-2 h-6 w-3/4" />
-        <Skeleton className="mb-4 h-4 w-full" />
-
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-6 w-24 rounded-md" />
-          <Skeleton className="h-6 w-20 rounded-md" />
+      {/* Tabs skeleton */}
+      <div className="min-w-0 flex-1">
+        <div className="bg-muted inline-flex h-10 items-center gap-1 rounded-md p-1">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-8 w-20" />
         </div>
-
-        <Skeleton className="mt-2 h-4 w-1/2" />
-      </div>
-
-      {/* Tabs Column */}
-      <div className="md:w-3/4 md:pl-12">
-        <div className="bg-muted inline-flex h-10 items-center justify-center gap-1 rounded-md p-1">
-          <Skeleton className="h-8 w-24" />
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-8 w-28" />
-        </div>
-        <div className="mt-4 rounded-md border">
-          <Skeleton className="h-60 w-full" />
+        <div className="mt-4 space-y-4">
+          <Skeleton className="h-4 w-48" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square w-full rounded-lg" />
+            ))}
+          </div>
         </div>
       </div>
     </div>
