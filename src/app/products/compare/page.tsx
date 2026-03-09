@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 
 import type { StoreProduct, Price } from "@/types"
-import { siteConfig } from "@/lib/config"
+import { siteConfig, pageMetadata } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { priceQueries } from "@/lib/queries/prices"
@@ -49,19 +49,16 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const canonicalId = canonical ? parseInt(canonical) : null
 
   if (!canonicalId) {
-    return {
-      title: "Compare Prices",
-      description: `Compare product prices across supermarkets on ${siteConfig.name}.`,
-    }
+    return pageMetadata("Compare Prices", `Compare product prices across supermarkets on ${siteConfig.name}.`)
   }
 
   const products = await getProductsByCanonical(canonicalId)
 
   if (products.length === 0) {
-    return {
-      title: `Product Lookup - Canonical #${canonicalId}`,
-      description: `Looking up Canonical #${canonicalId} on ${siteConfig.name}.`,
-    }
+    return pageMetadata(
+      `Product Lookup - Canonical #${canonicalId}`,
+      `Looking up Canonical #${canonicalId} on ${siteConfig.name}.`,
+    )
   }
 
   const firstProduct = products[0]

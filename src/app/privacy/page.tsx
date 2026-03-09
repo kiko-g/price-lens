@@ -1,10 +1,11 @@
-import { Layout } from "@/components/layout"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/config"
+import { Layout } from "@/components/layout"
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "Price Lens Privacy Policy",
-}
+export const metadata: Metadata = pageMetadata(
+  "Privacy Policy",
+  "Read the Price Lens privacy policy to learn how we handle your data.",
+)
 
 export default function PrivacyPage() {
   return (

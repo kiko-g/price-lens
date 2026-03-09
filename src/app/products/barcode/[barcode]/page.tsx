@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 
 import type { StoreProduct, Price } from "@/types"
-import { siteConfig } from "@/lib/config"
+import { siteConfig, pageMetadata } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { priceQueries } from "@/lib/queries/prices"
@@ -57,10 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const products = await getProductsByBarcode(barcode)
 
   if (products.length === 0) {
-    return {
-      title: `Product Lookup - ${barcode}`,
-      description: `Looking up ${barcode} on ${siteConfig.name}.`,
-    }
+    return pageMetadata(`Product Lookup - ${barcode}`, `Looking up ${barcode} on ${siteConfig.name}.`)
   }
 
   if (products.length === 1) {

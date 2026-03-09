@@ -1,7 +1,9 @@
+import type { Metadata } from "next"
 import { WifiOffIcon } from "lucide-react"
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Offline",
+  description: "Price Lens needs an internet connection to show the latest prices.",
 }
 
 export default function OfflinePage() {

@@ -6,7 +6,7 @@ export const siteConfig = {
   title: "Price Lens",
   author: "Francisco Goncalves",
   url: "https://price-lens.vercel.app",
-  ogImage: "https://price-lens.vercel.app/og.jpg",
+  ogImage: "https://price-lens.vercel.app/og?title=Price+Lens&description=Monitor+daily+price+changes+on+essential+consumer+goods+that+impact+inflation+metrics.",
   description:
     "Monitor daily price changes on essential consumer goods that impact inflation metrics. See beyond the headlines and tags.",
   links: {
@@ -28,7 +28,7 @@ export const defaultMetadata: Metadata = {
       {
         url: siteConfig.ogImage,
         width: 1200,
-        height: 680,
+        height: 628,
         alt: siteConfig.name,
       },
     ],
@@ -41,6 +41,25 @@ export const defaultMetadata: Metadata = {
       },
     ],
   },
+}
+
+export function pageMetadata(title: string, description: string): Metadata {
+  const ogUrl = `${siteConfig.url}/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: ogUrl, width: 1200, height: 628, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: ogUrl }],
+    },
+  }
 }
 
 export const navigation = [

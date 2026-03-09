@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/config"
 
 import { Layout } from "@/components/layout"
 import { InflationTrends } from "@/components/home/InflationTrends"
@@ -11,11 +12,10 @@ import { PricingSection } from "@/components/home/Pricing"
 
 const InflationContext = dynamic(() => import("@/components/home/InflationContext").then((mod) => mod.InflationContext))
 
-export const metadata: Metadata = {
-  title: "About | Price Lens",
-  description:
-    "Learn about Price Lens and explore 25+ years of historical inflation data for Portugal, the USA, and the Eurozone.",
-}
+export const metadata: Metadata = pageMetadata(
+  "About",
+  "Learn about Price Lens and explore 25+ years of historical inflation data for Portugal, the USA, and the Eurozone.",
+)
 
 export default function AboutPage() {
   const Separator = () => (

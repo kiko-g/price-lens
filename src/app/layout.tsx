@@ -48,7 +48,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
-    template: `${siteConfig.name} | %s`,
+    template: `%s | ${siteConfig.name}`,
   },
   metadataBase: new URL(siteConfig.url),
   description: siteConfig.description,
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "pt_PT",
     url: siteConfig.url,
     title: siteConfig.name,
     description: siteConfig.description,
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
       {
         url: siteConfig.ogImage,
         width: 1200,
-        height: 680,
+        height: 628,
         alt: siteConfig.name,
       },
     ],

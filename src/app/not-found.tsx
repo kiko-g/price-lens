@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -5,6 +6,11 @@ import { BackButton } from "@/components/ui/combo/back-button"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 
 import { HomeIcon } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Page Not Found",
+  description: "The page you're looking for doesn't exist.",
+}
 
 export default function NotFound() {
   return (

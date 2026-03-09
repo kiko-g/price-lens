@@ -1,10 +1,11 @@
-import { Layout } from "@/components/layout"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/config"
+import { Layout } from "@/components/layout"
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "Price Lens Terms of Service",
-}
+export const metadata: Metadata = pageMetadata(
+  "Terms of Service",
+  "Read the Price Lens terms of service and usage conditions.",
+)
 
 export default function TermsPage() {
   return (
