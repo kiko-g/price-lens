@@ -12,7 +12,7 @@ export function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "mx-auto flex w-full items-center justify-between border-t bg-zinc-50 px-4 py-4 pt-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-8 lg:pt-8 dark:bg-inherit",
+        "mx-auto flex w-full items-center justify-between border-t bg-zinc-50 px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl sm:px-6 lg:px-8 lg:pt-8 lg:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] dark:bg-inherit",
         className,
       )}
     >
