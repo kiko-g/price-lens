@@ -17,7 +17,7 @@ import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { XTwitterIcon } from "@/components/icons"
-import { CheckIcon, CopyIcon, MailIcon, Share2Icon, TwitterIcon } from "lucide-react"
+import { CheckIcon, CopyIcon, MailIcon, ShareIcon, TwitterIcon } from "lucide-react"
 
 interface ShareButtonProps {
   sp: StoreProduct
@@ -109,7 +109,7 @@ export function ShareButton({
     return (
       <ResponsiveActionsMenuItem onClick={handleShare}>
         Share product
-        <Share2Icon />
+        <ShareIcon />
       </ResponsiveActionsMenuItem>
     )
   }
@@ -119,7 +119,7 @@ export function ShareButton({
       <DropdownMenuItem asChild>
         <Button variant="dropdown-item" onClick={handleShare}>
           Share product
-          <Share2Icon />
+          <ShareIcon />
         </Button>
       </DropdownMenuItem>
     )
@@ -131,7 +131,7 @@ export function ShareButton({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant={variant} size={size} onClick={handleShare}>
-              <Share2Icon className="h-4 w-4" />
+              <ShareIcon className="h-4 w-4" />
               Share product
             </Button>
           </TooltipTrigger>
@@ -143,7 +143,7 @@ export function ShareButton({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant={variant} size={size}>
-              <Share2Icon className="h-4 w-4" />
+              <ShareIcon className="h-4 w-4" />
               Share product
             </Button>
           </DropdownMenuTrigger>

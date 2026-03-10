@@ -11,7 +11,7 @@ import { ShareButton } from "@/components/ui/combo/share-button"
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ResponsiveActionsMenu, ResponsiveActionsMenuItem } from "@/components/ui/combo/responsive-actions-menu"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { FavoriteButton } from "@/components/products/product-page/FavoriteButton"
 
@@ -33,71 +33,61 @@ export function ProductActions({ sp }: ProductActionsProps) {
     <div className="flex flex-wrap items-center gap-2">
       <FavoriteButton storeProduct={sp} />
       <ShareButton sp={sp} />
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
+      <ResponsiveActionsMenu
+        trigger={
           <Button variant="outline" size="icon-sm">
             <EllipsisVerticalIcon className="h-4 w-4" />
           </Button>
-        </DropdownMenuTrigger>
+        }
+      >
+        <ResponsiveActionsMenuItem asChild>
+          <DrawerSheet
+            title="Details"
+            description="Inspect store product data"
+            trigger={
+              <button type="button" className="flex w-full items-center justify-between gap-2">
+                Store product details
+                <InfoIcon />
+              </button>
+            }
+          >
+            <div className="w-full">
+              <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
+            </div>
+          </DrawerSheet>
+        </ResponsiveActionsMenuItem>
 
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <DrawerSheet
-              title="Details"
-              description="Inspect store product data"
-              trigger={
-                <Button variant="dropdown-item" className="hover:bg-accent flex items-center gap-2 px-2">
-                  Store product details
-                  <InfoIcon className="-ml-1 h-4 w-4" />
-                </Button>
-              }
-            >
-              <div className="w-full">
-                <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
-              </div>
-            </DrawerSheet>
-          </DropdownMenuItem>
+        <ResponsiveActionsMenuItem
+          onClick={() => updateStoreProduct.mutate(sp)}
+          disabled={updateStoreProduct.isPending}
+        >
+          <span className="flex items-center gap-1">
+            Update from {supermarketName}
+            <DevBadge />
+          </span>
+          {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon />}
+        </ResponsiveActionsMenuItem>
 
-          <DropdownMenuItem asChild>
-            <Button
-              variant="dropdown-item"
-              className="hover:bg-accent flex items-center gap-2"
-              onClick={() => updateStoreProduct.mutate(sp)}
-              disabled={updateStoreProduct.isPending}
-            >
-              <span className="flex items-center gap-1">
-                Update from {supermarketName}
-                <DevBadge />
-              </span>
-              {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon className="h-4 w-4" />}
-            </Button>
-          </DropdownMenuItem>
+        {elevated && (
+          <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
+            <span className="flex items-center gap-1">
+              Set priority
+              <DevBadge />
+            </span>
+            <MicroscopeIcon />
+          </ResponsiveActionsMenuItem>
+        )}
 
-          {elevated && (
-            <DropdownMenuItem asChild>
-              <Button variant="dropdown-item" onClick={promptAndSetPriority} disabled={isPriorityPending}>
-                <span className="flex items-center gap-1">
-                  Set priority
-                  <DevBadge />
-                </span>
-                <MicroscopeIcon />
-              </Button>
-            </DropdownMenuItem>
-          )}
-
-          {elevated && (
-            <DropdownMenuItem asChild>
-              <Button variant="dropdown-item" onClick={clearPriority} disabled={isPriorityPending}>
-                <span className="flex items-center gap-1">
-                  Clear priority
-                  <DevBadge />
-                </span>
-                <CircleIcon />
-              </Button>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        {elevated && (
+          <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
+            <span className="flex items-center gap-1">
+              Clear priority
+              <DevBadge />
+            </span>
+            <CircleIcon />
+          </ResponsiveActionsMenuItem>
+        )}
+      </ResponsiveActionsMenu>
     </div>
   )
 }

@@ -54,6 +54,28 @@ export function UserDropdownMenu() {
   const userBadgeText = getUserBadgeText()
   const userInitial = user.email ? user.email.charAt(0).toUpperCase() : "U"
 
+  // On mobile the nav sheet covers profile/favorites/theme/sign-out,
+  // so the avatar just links to /profile instead of opening a dropdown.
+  if (isMobile)
+    return (
+      <Link href="/profile" className="relative flex size-[34px] items-center justify-center rounded-full">
+        <Avatar className="size-[34px]">
+          <AvatarImage
+            src={user.user_metadata.avatar_url || "/placeholder.svg"}
+            alt={user.user_metadata.full_name ?? "User"}
+          />
+          <AvatarFallback>{userInitial}</AvatarFallback>
+        </Avatar>
+        <Badge
+          size="3xs"
+          variant="default"
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 leading-none capitalize"
+        >
+          {userBadgeText}
+        </Badge>
+      </Link>
+    )
+
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()

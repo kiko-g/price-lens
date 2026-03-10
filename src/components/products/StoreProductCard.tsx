@@ -218,7 +218,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   <Badge
                     size="2xs"
                     variant="tertiary"
-                    className="gap-1 opacity-100 transition-opacity duration-300 group-hover:opacity-0"
+                    className="gap-1 opacity-100 transition-opacity duration-300 group-hover:opacity-50"
                   >
                     <CalendarPlusIcon className="h-3 w-3" />
                     {formatRelativeTime(new Date(favoritedAt), "short")}
@@ -236,7 +236,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           <Badge
             size="xs"
             variant="outline-white"
-            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-0"
+            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-50"
           >
             <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
           </Badge>
