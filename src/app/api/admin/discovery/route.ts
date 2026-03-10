@@ -87,11 +87,12 @@ export async function GET(req: NextRequest) {
 
         const totalNew = results.reduce((sum, r) => sum + r.urlsNew, 0)
         const totalFound = results.reduce((sum, r) => sum + r.urlsFound, 0)
+        const totalVetoed = results.reduce((sum, r) => sum + r.urlsVetoed, 0)
 
         return NextResponse.json({
           message: dryRun
-            ? `Dry run complete. Would discover ${totalNew} new products from ${totalFound} URLs.`
-            : `Discovery complete. Found ${totalNew} new products from ${totalFound} URLs.`,
+            ? `Dry run complete. Would discover ${totalNew} new products from ${totalFound} URLs (${totalVetoed} vetoed).`
+            : `Discovery complete. Found ${totalNew} new products from ${totalFound} URLs (${totalVetoed} vetoed).`,
           dryRun,
           results,
         })

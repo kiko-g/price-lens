@@ -49,7 +49,7 @@ export interface Supermarket {
   name: string
 }
 
-export type PrioritySource = "ai" | "manual"
+export type PrioritySource = "ai" | "manual" | "category_default"
 
 export interface StoreProduct {
   id: number

@@ -8,6 +8,14 @@
     {
       "path": "/api/admin/analytics/compute-worker",
       "schedule": "0 */12 * * *"
+    },
+    {
+      "path": "/api/admin/discovery?action=run&origin=all",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/admin/discovery/triage?batch=50",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

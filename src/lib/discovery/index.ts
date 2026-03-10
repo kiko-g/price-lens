@@ -52,6 +52,30 @@ async function fetchAllExistingSkus(
 }
 
 /**
+ * Fetches all vetoed SKUs for a store so discovery can skip them
+ */
+async function fetchVetoedSkus(originId: number, verbose?: boolean): Promise<Set<string>> {
+  const supabase = createAdminClient()
+
+  const { data, error } = await fetchAll(() =>
+    supabase.from("vetoed_store_skus").select("sku").eq("origin_id", originId).order("sku", { ascending: true }),
+  )
+
+  if (error) {
+    if (verbose) {
+      console.log(`[Discovery] vetoed_store_skus table not available yet, skipping veto check`)
+    }
+    return new Set<string>()
+  }
+
+  const skus = new Set(data.map((r) => r.sku as string))
+  if (verbose) {
+    console.log(`[Discovery] Loaded ${skus.size} vetoed SKUs`)
+  }
+  return skus
+}
+
+/**
  * Runs sitemap discovery for a specific store
  * Uses SKU-based comparison for accurate deduplication
  */
@@ -68,6 +92,7 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
       urlsNew: 0,
       urlsExisting: 0,
       urlsInvalid: 0,
+      urlsVetoed: 0,
       errors: [`No discovery config for origin ${originId}`],
       durationMs: Date.now() - startTime,
       sampleNewUrls: [],
@@ -79,23 +104,22 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
   let urlsNew = 0
   let urlsExisting = 0
   let urlsInvalid = 0
+  let urlsVetoed = 0
   const newUrls: string[] = []
 
   try {
-    // Step 1: Fetch all existing SKUs from database
     if (options.verbose) {
       console.log(`[Discovery] Starting sitemap discovery for ${config.name}`)
-      console.log(`[Discovery] Loading existing products from database...`)
+      console.log(`[Discovery] Loading existing products and vetoed SKUs...`)
     }
 
-    const existingSkus = await fetchAllExistingSkus(config.originId, config.skuExtractor, options.verbose)
+    const [existingSkus, vetoedSkus] = await Promise.all([
+      fetchAllExistingSkus(config.originId, config.skuExtractor, options.verbose),
+      fetchVetoedSkus(config.originId, options.verbose),
+    ])
 
     if (options.verbose) {
-      console.log(`[Discovery] Found ${existingSkus.size} existing SKUs in database`)
-    }
-
-    // Step 2: Fetch all product URLs from sitemaps
-    if (options.verbose) {
+      console.log(`[Discovery] Found ${existingSkus.size} existing + ${vetoedSkus.size} vetoed SKUs`)
       console.log(`[Discovery] Fetching sitemap URLs...`)
     }
 
@@ -110,7 +134,6 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
       console.log(`[Discovery] Found ${urlsFound} URLs from ${sitemapResult.sitemapsFetched} sitemaps`)
     }
 
-    // Step 3: Validate, normalize, and filter by SKU
     const validUrls: { url: string; sku: string }[] = []
     let skuExtractionFailed = 0
 
@@ -138,15 +161,15 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
       )
     }
 
-    // Step 4: Compare by SKU and identify new products
     const newProducts: { url: string; sku: string }[] = []
-    const seenSkus = new Set<string>() // Avoid duplicates within sitemap
+    const seenSkus = new Set<string>()
 
     for (const { url, sku } of validUrls) {
-      if (existingSkus.has(sku)) {
+      if (vetoedSkus.has(sku)) {
+        urlsVetoed++
+      } else if (existingSkus.has(sku)) {
         urlsExisting++
       } else if (seenSkus.has(sku)) {
-        // Duplicate within sitemap, skip
         urlsExisting++
       } else {
         seenSkus.add(sku)
@@ -155,13 +178,11 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
     }
 
     if (options.verbose) {
-      console.log(`[Discovery] ${newProducts.length} new products (by SKU), ${urlsExisting} existing`)
+      console.log(`[Discovery] ${newProducts.length} new, ${urlsExisting} existing, ${urlsVetoed} vetoed (by SKU)`)
     }
 
-    // Apply max limit if specified
     const productsToInsert = options.maxUrls ? newProducts.slice(0, options.maxUrls) : newProducts
 
-    // Step 5: Insert new products
     const supabase = createAdminClient()
 
     for (let i = 0; i < productsToInsert.length; i += BATCH_SIZE) {
@@ -180,7 +201,7 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
             origin_id: config.originId,
             created_at: now(),
             available: true,
-            priority: 0, // Unclassified
+            priority: null, // Pending triage
           })),
         )
 
@@ -197,7 +218,9 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
     }
 
     if (options.verbose) {
-      console.log(`[Discovery] Complete: ${urlsNew} new, ${urlsExisting} existing, ${urlsInvalid} invalid`)
+      console.log(
+        `[Discovery] Complete: ${urlsNew} new, ${urlsExisting} existing, ${urlsVetoed} vetoed, ${urlsInvalid} invalid`,
+      )
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error"
@@ -212,6 +235,7 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
     urlsNew,
     urlsExisting,
     urlsInvalid,
+    urlsVetoed,
     errors,
     durationMs: Date.now() - startTime,
     sampleNewUrls: newUrls.slice(0, 20),

@@ -87,6 +87,7 @@ export interface DiscoveryResult {
   urlsNew: number
   urlsExisting: number
   urlsInvalid: number
+  urlsVetoed: number
   errors: string[]
   durationMs: number
   sampleNewUrls: string[]

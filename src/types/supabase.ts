@@ -55,26 +55,32 @@ export type Database = {
       canonical_categories: {
         Row: {
           created_at: string | null
+          default_priority: number
           id: number
           level: number
           name: string
           parent_id: number | null
+          tracked: boolean
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          default_priority?: number
           id?: number
           level: number
           name: string
           parent_id?: number | null
+          tracked?: boolean
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          default_priority?: number
           id?: number
           level?: number
           name?: string
           parent_id?: number | null
+          tracked?: boolean
           updated_at?: string | null
         }
         Relationships: [
@@ -551,6 +557,35 @@ export type Database = {
           },
         ]
       }
+      vetoed_store_skus: {
+        Row: {
+          origin_id: number
+          sku: string
+          store_category: string | null
+          vetoed_at: string
+        }
+        Insert: {
+          origin_id: number
+          sku: string
+          store_category?: string | null
+          vetoed_at?: string
+        }
+        Update: {
+          origin_id?: number
+          sku?: string
+          store_category?: string | null
+          vetoed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vetoed_store_skus_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "supermarkets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       store_products_with_canonical: {
@@ -780,6 +815,20 @@ export type Database = {
         Args: { batch_size?: number }
         Returns: number
       }
+      resolve_category_governance: {
+        Args: {
+          p_category: string
+          p_category_2?: string
+          p_category_3?: string
+          p_origin_id: number
+        }
+        Returns: {
+          canonical_category_id: number
+          canonical_category_name: string
+          default_priority: number
+          tracked: boolean
+        }[]
+      }
       search_canonical_products: {
         Args: { result_limit?: number; search_term: string }
         Returns: {
@@ -806,7 +855,7 @@ export type Database = {
     }
     Enums: {
       plan_tier: "free" | "plus"
-      priority_source_type: "ai" | "manual"
+      priority_source_type: "ai" | "manual" | "category_default"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -931,7 +980,7 @@ export const Constants = {
   public: {
     Enums: {
       plan_tier: ["free", "plus"],
-      priority_source_type: ["ai", "manual"],
+      priority_source_type: ["ai", "manual", "category_default"],
       user_role: ["user", "admin"],
     },
   },
