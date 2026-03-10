@@ -435,7 +435,7 @@
   }
 
   html {
-    @apply overflow-x-clip scroll-smooth;
+    @apply overflow-x-clip;
     scrollbar-width: auto;
     scrollbar-color: auto;
   }

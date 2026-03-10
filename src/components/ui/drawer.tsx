@@ -4,28 +4,15 @@ import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 import { cn } from "@/lib/utils"
 
-let scrollBehaviorTimer: ReturnType<typeof setTimeout> | null = null
-
 function setBodyLocked(locked: boolean) {
   const root = document.documentElement
   const body = document.body
   body.classList.toggle("drawer-open", locked)
 
   if (locked) {
-    if (scrollBehaviorTimer) {
-      clearTimeout(scrollBehaviorTimer)
-      scrollBehaviorTimer = null
-    }
     root.classList.add("drawer-no-overscroll")
-    root.style.scrollBehavior = "auto"
   } else {
     root.classList.remove("drawer-no-overscroll")
-    // Delay restoring scroll-smooth until after the drawer close animation
-    // finishes, otherwise the browser animates the scroll restoration (jiggle).
-    scrollBehaviorTimer = setTimeout(() => {
-      root.style.scrollBehavior = ""
-      scrollBehaviorTimer = null
-    }, 500)
   }
 }
 

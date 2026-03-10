@@ -1225,7 +1225,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       />
 
       {/* Main Content Area */}
-      <div className="relative flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
+      <div data-main-scroll className="relative flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
         {/* Pull-to-refresh indicator (mobile) - absolute overlay, no layout shift */}
         {(pullDistance > 0 || isPullRefreshing) && (
           <div

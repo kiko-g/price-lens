@@ -466,7 +466,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
       />
 
       {/* Main Content Area */}
-      <div className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
+      <div data-main-scroll className="flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
         {showSkeletons ? (
           <LoadingGrid limit={limit} />
         ) : favorites.length > 0 ? (

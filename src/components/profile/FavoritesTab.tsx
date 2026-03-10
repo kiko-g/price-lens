@@ -66,7 +66,7 @@ export function FavoritesTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          Your most recent favorites — <span className="text-foreground font-medium">{totalCount}</span> total
+          Your most recent favorites (<span className="text-foreground font-medium">{totalCount}</span> total)
         </p>
         <Button variant="link" size="sm" asChild className="gap-1 px-0">
           <Link href="/favorites">
