@@ -20,6 +20,26 @@ export interface StoreDiscoveryConfig {
 }
 
 /**
+ * Configuration for a store's category crawl discovery (e.g. SFCC Search-UpdateGrid)
+ */
+export interface CategoryCrawlConfig {
+  originId: StoreOrigin
+  name: string
+  baseUrl: string
+  categoryListUrl: string
+  searchEndpoint: string
+  categoryIdPattern: RegExp
+  productUrlPattern: RegExp
+  /** Only crawl L1 categories (fewest underscore segments) to avoid duplicates */
+  l1SegmentCount: number
+  pageSize: number
+  delayMs: number
+  urlValidator: (url: string) => boolean
+  urlNormalizer: (url: string) => string
+  skuExtractor: (url: string) => string | null
+}
+
+/**
  * A single URL entry from a sitemap
  */
 export interface SitemapUrl {

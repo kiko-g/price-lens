@@ -27,6 +27,10 @@ import {
   SearchIcon,
   ExternalLinkIcon,
   Loader2Icon,
+  FilterIcon,
+  ShieldBanIcon,
+  PackageOpenIcon,
+  AlertTriangleIcon,
 } from "lucide-react"
 
 interface StoreStatus {
@@ -39,9 +43,26 @@ interface StoreStatus {
   error: string | null
 }
 
+interface TriageStats {
+  untriagedCount: number
+  totalVetoed: number
+  vetoedByOrigin: Record<number, number>
+}
+
 interface DiscoveryStatus {
   stores: StoreStatus[]
   availableOrigins: { id: number; name: string }[]
+  triage: TriageStats
+}
+
+interface TriageResult {
+  processed: number
+  kept: number
+  vetoed: number
+  errors: number
+  notFound: number
+  unmappedCategories: { originId: number; category: string; category2: string | null; category3: string | null }[]
+  durationMs: number
 }
 
 interface DiscoveryResult {
@@ -62,6 +83,7 @@ export default function DiscoveryPage() {
   const [dryRun, setDryRun] = useState(true)
   const [runningOrigin, setRunningOrigin] = useState<number | "all" | null>(null)
   const [lastResults, setLastResults] = useState<DiscoveryResult[] | null>(null)
+  const [lastTriageResult, setLastTriageResult] = useState<TriageResult | null>(null)
 
   const {
     data: status,
@@ -99,6 +121,26 @@ export default function DiscoveryPage() {
     },
     onSettled: () => {
       setRunningOrigin(null)
+    },
+  })
+
+  const runTriageMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.get(`/api/admin/discovery/triage?batch=50&dry=${dryRun}&verbose=true`)
+      return res.data as { message: string; dryRun: boolean; result: TriageResult }
+    },
+    onSuccess: (data) => {
+      setLastTriageResult(data.result)
+
+      if (dryRun) {
+        toast.info(data.message)
+      } else {
+        toast.success(data.message)
+        queryClient.invalidateQueries({ queryKey: ["discovery-status"] })
+      }
+    },
+    onError: (error) => {
+      toast.error(`Triage failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     },
   })
 
@@ -360,6 +402,147 @@ export default function DiscoveryPage() {
           </Card>
         )}
 
+        {/* Triage Section */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FilterIcon className="text-primary size-5" />
+                  Product Triage
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Classify newly discovered products — scrape, categorize, then keep or veto based on governance rules
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => {
+                  setLastTriageResult(null)
+                  runTriageMutation.mutate()
+                }}
+                disabled={runTriageMutation.isPending}
+              >
+                {runTriageMutation.isPending ? (
+                  <>
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                    Running Triage...
+                  </>
+                ) : (
+                  <>
+                    <PlayIcon className="h-4 w-4" />
+                    Run Triage
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Triage Stats */}
+            {isLoading ? (
+              <div className="grid grid-cols-3 gap-3">
+                <Skeleton className="h-20" />
+                <Skeleton className="h-20" />
+                <Skeleton className="h-20" />
+              </div>
+            ) : status?.triage ? (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-muted/50 rounded-md p-3">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <PackageOpenIcon className="h-3.5 w-3.5" />
+                    Awaiting Triage
+                  </div>
+                  <p className={cn("mt-1 text-2xl font-bold", status.triage.untriagedCount > 0 && "text-amber-500")}>
+                    {status.triage.untriagedCount.toLocaleString()}
+                  </p>
+                  <p className="text-muted-foreground text-xs">products pending</p>
+                </div>
+                <div className="bg-muted/50 rounded-md p-3">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <ShieldBanIcon className="h-3.5 w-3.5" />
+                    Total Vetoed
+                  </div>
+                  <p className="mt-1 text-2xl font-bold">{status.triage.totalVetoed.toLocaleString()}</p>
+                  <p className="text-muted-foreground text-xs">SKUs permanently excluded</p>
+                </div>
+                <div className="bg-muted/50 rounded-md p-3">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <DatabaseIcon className="h-3.5 w-3.5" />
+                    Vetoed by Store
+                  </div>
+                  <div className="mt-1 space-y-0.5">
+                    {status.availableOrigins.map((origin) => (
+                      <div key={origin.id} className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{origin.name}</span>
+                        <span className="font-medium">
+                          {(status.triage.vetoedByOrigin[origin.id] ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Last Triage Result */}
+            {lastTriageResult && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2Icon className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm font-medium">Triage Results</span>
+                  {dryRun && (
+                    <Badge variant="outline" className="text-xs">
+                      Dry Run
+                    </Badge>
+                  )}
+                  <span className="text-muted-foreground text-xs">
+                    {(lastTriageResult.durationMs / 1000).toFixed(1)}s
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="text-center">
+                    <p className="text-muted-foreground text-xs">Processed</p>
+                    <p className="text-lg font-bold">{lastTriageResult.processed}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-muted-foreground text-xs">Kept</p>
+                    <p className="text-lg font-bold text-emerald-500">{lastTriageResult.kept}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-muted-foreground text-xs">Vetoed</p>
+                    <p className={cn("text-lg font-bold", lastTriageResult.vetoed > 0 && "text-amber-500")}>
+                      {lastTriageResult.vetoed}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-muted-foreground text-xs">Errors</p>
+                    <p className={cn("text-lg font-bold", lastTriageResult.errors > 0 && "text-red-500")}>
+                      {lastTriageResult.errors}
+                    </p>
+                  </div>
+                </div>
+
+                {lastTriageResult.unmappedCategories.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="flex items-center gap-1 text-xs font-medium text-amber-500">
+                      <AlertTriangleIcon className="h-3.5 w-3.5" />
+                      Unmapped Categories ({lastTriageResult.unmappedCategories.length})
+                    </p>
+                    <div className="max-h-32 overflow-y-auto rounded-md bg-amber-500/10 p-2">
+                      {lastTriageResult.unmappedCategories.map((cat, i) => (
+                        <p key={i} className="text-xs text-amber-700 dark:text-amber-400">
+                          [{status?.availableOrigins.find((o) => o.id === cat.originId)?.name ?? cat.originId}]{" "}
+                          {[cat.category, cat.category2, cat.category3].filter(Boolean).join(" > ")}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Instructions Card */}
         <Card>
           <CardHeader className="pb-2">
@@ -377,14 +560,18 @@ export default function DiscoveryPage() {
               <strong>3. Validation:</strong> Filters URLs to ensure they match the expected product URL pattern.
             </p>
             <p>
-              <strong>4. Deduplication:</strong> Compares against existing products in the database.
+              <strong>4. Deduplication:</strong> Compares against existing products in the database. Vetoed SKUs are
+              automatically skipped.
             </p>
             <p>
-              <strong>5. Insert:</strong> New products are added with priority 0 (unclassified) for later AI
-              classification.
+              <strong>5. Insert:</strong> New products are added as untriaged (null priority) pending triage.
+            </p>
+            <p>
+              <strong>6. Triage:</strong> Untriaged products are scraped, categorized, and either kept with a default
+              priority or vetoed based on category governance rules.
             </p>
             <p className="pt-2 font-medium text-amber-500">
-              💡 Tip: Run in dry-run mode first to preview what would be discovered without making changes.
+              Tip: Run in dry-run mode first to preview what would be discovered without making changes.
             </p>
           </CardContent>
         </Card>

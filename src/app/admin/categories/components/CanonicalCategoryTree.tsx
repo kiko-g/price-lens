@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import {
   PlusIcon,
@@ -28,10 +31,20 @@ import {
   EditIcon,
   Trash2Icon,
   LayersIcon,
+  EyeOffIcon,
 } from "lucide-react"
 
 import type { CanonicalCategory, CreateCanonicalCategoryInput } from "@/types"
 import { cn } from "@/lib/utils"
+
+const PRIORITY_LABELS: Record<number, string> = {
+  0: "P0 – Never",
+  1: "P1 – Low",
+  2: "P2 – Normal",
+  3: "P3 – High",
+  4: "P4 – Very High",
+  5: "P5 – Critical",
+}
 
 interface CanonicalCategoryTreeProps {
   categories: CanonicalCategory[]
@@ -151,9 +164,34 @@ interface CategoryNodeProps {
 function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: CategoryNodeProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const queryClient = useQueryClient()
   const hasChildren = category.children && category.children.length > 0
   const isExpanded = expandedIds.has(category.id)
   const canAddChild = category.level < 3
+  const isL1 = category.level === 1
+  const isUntracked = !category.tracked
+
+  const governanceMutation = useMutation({
+    mutationFn: async (update: { tracked?: boolean; default_priority?: number }) => {
+      const res = await axios.put(`/api/admin/categories/canonical/${category.id}`, update)
+      return res.data.data
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["canonical-categories-tree"] })
+      if (variables.tracked !== undefined) {
+        toast.success(variables.tracked ? "Category tracked" : "Category untracked", {
+          description: `"${category.name}" and descendants updated.`,
+        })
+      } else if (variables.default_priority !== undefined) {
+        toast.success("Priority updated", {
+          description: `"${category.name}" set to P${variables.default_priority}.`,
+        })
+      }
+    },
+    onError: (error: any) => {
+      toast.error("Error", { description: error.response?.data?.error || "Failed to update governance" })
+    },
+  })
 
   return (
     <div>
@@ -161,13 +199,14 @@ function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: Ca
         className={cn(
           "hover:bg-muted/50 group flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
           depth > 0 && "ml-6",
+          isUntracked && "opacity-50",
         )}
       >
         {/* Expand/Collapse button */}
         <button
           onClick={() => hasChildren && onToggle(category.id)}
           className={cn(
-            "flex h-6 w-6 items-center justify-center rounded",
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded",
             hasChildren ? "hover:bg-muted cursor-pointer" : "cursor-default",
           )}
         >
@@ -184,13 +223,82 @@ function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: Ca
 
         {/* Folder icon */}
         {hasChildren && isExpanded ? (
-          <FolderOpenIcon className="text-primary h-4 w-4" />
+          <FolderOpenIcon className="text-primary h-4 w-4 shrink-0" />
         ) : (
-          <FolderIcon className="text-muted-foreground h-4 w-4" />
+          <FolderIcon className="text-muted-foreground h-4 w-4 shrink-0" />
         )}
 
         {/* Name */}
-        <span className="flex-1 text-sm font-medium">{category.name}</span>
+        <span className={cn("flex-1 text-sm font-medium", isUntracked && "line-through")}>{category.name}</span>
+
+        {/* Governance controls (L1 only) */}
+        {isL1 && (
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      checked={category.tracked}
+                      onCheckedChange={(checked) => governanceMutation.mutate({ tracked: checked })}
+                      disabled={governanceMutation.isPending}
+                      className="scale-75"
+                    />
+                    {isUntracked && <EyeOffIcon className="text-muted-foreground h-3.5 w-3.5" />}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {category.tracked
+                      ? "Tracked — products discovered & triaged"
+                      : "Untracked — products vetoed on triage"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Select
+                value={String(category.default_priority)}
+                onValueChange={(val) => governanceMutation.mutate({ default_priority: parseInt(val, 10) })}
+                disabled={governanceMutation.isPending}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SelectTrigger className="h-7 w-[70px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Default scraping priority for new products in this category</p>
+                  </TooltipContent>
+                </Tooltip>
+                <SelectContent>
+                  {Object.entries(PRIORITY_LABELS).map(([val, label]) => (
+                    <SelectItem key={val} value={val}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </TooltipProvider>
+        )}
+
+        {/* Inherited governance badge (L2/L3) */}
+        {!isL1 && isUntracked && (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <EyeOffIcon className="h-3 w-3" /> Untracked
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Inherited from parent category</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {!isL1 && !isUntracked && <span className="text-muted-foreground text-xs">P{category.default_priority}</span>}
 
         {/* Level badge */}
         <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">L{category.level}</span>

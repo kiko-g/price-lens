@@ -2,11 +2,12 @@ import { createAdminClient } from "@/lib/supabase/server"
 import { fetchAll } from "@/lib/supabase/fetch-all"
 import type { DiscoveryResult, DiscoveryOptions, StoreDiscoveryConfig, DiscoveryRun } from "./types"
 import { fetchProductUrlsFromSitemaps } from "./sitemap"
-import { getStoreConfig, getAllStoreConfigs } from "./stores"
+import { runCategoryCrawlDiscovery } from "./category-crawl"
+import { getStoreConfig, getCategoryCrawlConfig, getAllStoreConfigs } from "./stores"
 import { now } from "@/lib/utils"
 
 export type { DiscoveryResult, DiscoveryOptions, StoreDiscoveryConfig }
-export { getStoreConfig, getAllStoreConfigs }
+export { getStoreConfig, getCategoryCrawlConfig, getAllStoreConfigs }
 
 const BATCH_SIZE = 500
 
@@ -73,6 +74,20 @@ async function fetchVetoedSkus(originId: number, verbose?: boolean): Promise<Set
     console.log(`[Discovery] Loaded ${skus.size} vetoed SKUs`)
   }
   return skus
+}
+
+/**
+ * Runs discovery for a specific store. Dispatches to sitemap or category crawl
+ * based on available config.
+ */
+export async function runDiscovery(originId: number, options: DiscoveryOptions = {}): Promise<DiscoveryResult> {
+  // Check if this store uses category crawl instead of sitemap
+  const crawlConfig = getCategoryCrawlConfig(originId)
+  if (crawlConfig) {
+    return runCategoryCrawlDiscovery(originId, options)
+  }
+
+  return runSitemapDiscovery(originId, options)
 }
 
 /**
@@ -243,19 +258,27 @@ export async function runSitemapDiscovery(originId: number, options: DiscoveryOp
 }
 
 /**
- * Runs sitemap discovery for all configured stores
+ * Runs discovery for all configured stores (sitemap + category crawl)
  */
-export async function runAllSitemapDiscovery(options: DiscoveryOptions = {}): Promise<DiscoveryResult[]> {
-  const configs = getAllStoreConfigs()
+export async function runAllDiscovery(options: DiscoveryOptions = {}): Promise<DiscoveryResult[]> {
+  const { sitemapConfigs, categoryCrawlConfigs } = await import("./stores")
   const results: DiscoveryResult[] = []
 
-  for (const config of configs) {
+  for (const config of Object.values(sitemapConfigs)) {
     const result = await runSitemapDiscovery(config.originId, options)
+    results.push(result)
+  }
+
+  for (const config of Object.values(categoryCrawlConfigs)) {
+    const result = await runCategoryCrawlDiscovery(config.originId, options)
     results.push(result)
   }
 
   return results
 }
+
+/** @deprecated Use runAllDiscovery instead */
+export const runAllSitemapDiscovery = runAllDiscovery
 
 /**
  * Saves a discovery run to the database for metrics tracking
@@ -315,12 +338,12 @@ export async function getDiscoveryCoverage(originId: number): Promise<{
       return { totalProducts: 0, fromSitemap: 0, lastDiscoveryRun: null, error: countError.message }
     }
 
-    // Get last discovery run
+    // Get last discovery run (from any source — sitemap or category_crawl)
     const { data: lastRun, error: runError } = await supabase
       .from("discovery_runs")
       .select("completed_at")
       .eq("origin_id", originId)
-      .eq("discovery_source", "sitemap")
+      .in("discovery_source", ["sitemap", "category_crawl"])
       .eq("status", "completed")
       .order("completed_at", { ascending: false })
       .limit(1)

@@ -11,7 +11,15 @@ import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { RefreshCwIcon, LayersIcon, LinkIcon, AlertCircleIcon, CheckCircle2Icon } from "lucide-react"
+import {
+  RefreshCwIcon,
+  LayersIcon,
+  LinkIcon,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  ShieldCheckIcon,
+  EyeOffIcon,
+} from "lucide-react"
 
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 import type { CategoryMappingStats, CanonicalCategory } from "@/types"
@@ -60,6 +68,10 @@ export default function AdminCategoriesPage() {
   const totalMapped = stats?.stores.reduce((sum, s) => sum + s.mapped_tuples, 0) ?? 0
   const totalUnmapped = totalTuples - totalMapped
   const overallCoverage = totalTuples > 0 ? (totalMapped / totalTuples) * 100 : 0
+
+  const l1Categories = canonicalTree ?? []
+  const trackedL1 = l1Categories.filter((c) => c.tracked)
+  const untrackedL1 = l1Categories.filter((c) => !c.tracked)
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
@@ -163,6 +175,48 @@ export default function AdminCategoriesPage() {
               </div>
               <Progress value={overallCoverage} className="h-3" />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Discovery Governance */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ShieldCheckIcon className="text-primary h-5 w-5" />
+              Discovery Governance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {treeLoading ? (
+              <Skeleton className="h-16 w-full" />
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-md bg-emerald-500/10 p-2">
+                    <CheckCircle2Icon className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{trackedL1.length}</p>
+                    <p className="text-muted-foreground text-sm">Tracked L1 categories</p>
+                    {trackedL1.length > 0 && (
+                      <p className="mt-1 text-xs text-emerald-600">{trackedL1.map((c) => c.name).join(", ")}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="rounded-md bg-amber-500/10 p-2">
+                    <EyeOffIcon className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-amber-500">{untrackedL1.length}</p>
+                    <p className="text-muted-foreground text-sm">Untracked (vetoed on triage)</p>
+                    {untrackedL1.length > 0 && (
+                      <p className="mt-1 text-xs text-amber-600">{untrackedL1.map((c) => c.name).join(", ")}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

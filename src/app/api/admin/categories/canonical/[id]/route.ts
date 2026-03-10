@@ -49,7 +49,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 /**
  * PUT /api/admin/categories/canonical/[id]
  * Update a canonical category
- * Body: { name?: string, parent_id?: number | null }
+ * Body: { name?, parent_id?, tracked?, default_priority? }
+ * When tracked or default_priority changes, propagates to all descendants.
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   const { id } = await params
@@ -66,7 +67,14 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 })
     }
 
-    const { data, error } = await canonicalCategoryQueries.update(categoryId, body)
+    const hasGovernanceChange = body.tracked !== undefined || body.default_priority !== undefined
+
+    const { data, error } = hasGovernanceChange
+      ? await canonicalCategoryQueries.updateGovernance(categoryId, {
+          tracked: body.tracked,
+          default_priority: body.default_priority,
+        })
+      : await canonicalCategoryQueries.update(categoryId, body)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })

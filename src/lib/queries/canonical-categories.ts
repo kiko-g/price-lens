@@ -167,6 +167,14 @@ export const canonicalCategoryQueries = {
       updateData.parent_id = input.parent_id
     }
 
+    if (input.tracked !== undefined) {
+      updateData.tracked = input.tracked
+    }
+
+    if (input.default_priority !== undefined) {
+      updateData.default_priority = input.default_priority
+    }
+
     const { data, error } = await supabase
       .from("canonical_categories")
       .update(updateData)
@@ -175,6 +183,42 @@ export const canonicalCategoryQueries = {
       .single()
 
     return { data: data as CanonicalCategory | null, error }
+  },
+
+  /**
+   * Update tracked/default_priority for a category and all its descendants
+   */
+  async updateGovernance(id: number, governance: { tracked?: boolean; default_priority?: number }) {
+    const supabase = createClient()
+    const now = new Date().toISOString()
+
+    const updateData: Record<string, unknown> = { updated_at: now }
+    if (governance.tracked !== undefined) updateData.tracked = governance.tracked
+    if (governance.default_priority !== undefined) updateData.default_priority = governance.default_priority
+
+    // Update the target category
+    const { data, error } = await supabase
+      .from("canonical_categories")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single()
+
+    if (error) return { data: null, error }
+
+    // Propagate to direct children (level 2)
+    await supabase.from("canonical_categories").update(updateData).eq("parent_id", id)
+
+    // Propagate to grandchildren (level 3) via a subquery approach:
+    // get child IDs first, then update their children
+    const { data: children } = await supabase.from("canonical_categories").select("id").eq("parent_id", id)
+
+    if (children && children.length > 0) {
+      const childIds = children.map((c) => c.id)
+      await supabase.from("canonical_categories").update(updateData).in("parent_id", childIds)
+    }
+
+    return { data: data as CanonicalCategory | null, error: null }
   },
 
   /**

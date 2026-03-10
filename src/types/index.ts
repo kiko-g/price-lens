@@ -164,6 +164,8 @@ export interface CanonicalCategory {
   name: string
   parent_id: number | null
   level: 1 | 2 | 3
+  tracked: boolean
+  default_priority: number
   created_at: string
   updated_at: string
   children?: CanonicalCategory[]
@@ -214,6 +216,8 @@ export interface CreateCanonicalCategoryInput {
 export interface UpdateCanonicalCategoryInput {
   name?: string
   parent_id?: number | null
+  tracked?: boolean
+  default_priority?: number
 }
 
 export interface CreateCategoryMappingInput {

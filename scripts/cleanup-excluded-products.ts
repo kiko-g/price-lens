@@ -2,19 +2,29 @@
  * One-time cleanup: delete existing store_products in untracked canonical categories
  * and populate vetoed_store_skus to prevent re-discovery.
  *
- * Run with: pnpm tsx scripts/cleanup-excluded-products.ts
- * Dry run:  pnpm tsx scripts/cleanup-excluded-products.ts --dry
+ * Usage:
+ *   pnpm tsx scripts/cleanup-excluded-products.ts [flags]
+ *
+ * Flags:
+ *   --dry             Preview only, no changes
+ *   --prod            Target production DB (.env.production) instead of local (.env.local)
+ *   --skip-unmapped   Skip phase 2 (unmapped categories) -- use when mappings are incomplete
+ *
+ * Recommended first run:
+ *   pnpm tsx scripts/cleanup-excluded-products.ts --prod --dry --skip-unmapped
  *
  * Prerequisites:
- * - Migration 027_discovery_governance.sql must be applied
- * - Run against LOCAL or PRODUCTION depending on .env.local config
+ * - Migration 027_discovery_governance.sql must be applied on the target DB
  */
 
 import * as fs from "fs"
 import * as path from "path"
 import { createClient } from "@supabase/supabase-js"
 
-const envPath = path.resolve(process.cwd(), ".env.local")
+const useProd = process.argv.includes("--prod")
+const envFile = useProd ? ".env.production" : ".env.local"
+const envPath = path.resolve(process.cwd(), envFile)
+
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, "utf-8")
   for (const line of envContent.split("\n")) {
@@ -27,6 +37,9 @@ if (fs.existsSync(envPath)) {
       }
     }
   }
+} else {
+  console.error(`Env file not found: ${envFile}`)
+  process.exit(1)
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -39,8 +52,11 @@ if (!supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 const dryRun = process.argv.includes("--dry")
+const skipUnmapped = process.argv.includes("--skip-unmapped")
 
-const BATCH_SIZE = 500
+const INITIAL_BATCH_SIZE = 100
+const MIN_BATCH_SIZE = 10
+const DELAY_BETWEEN_BATCHES_MS = 1000
 
 const ORIGIN_SKU_PATTERNS: Record<number, RegExp> = {
   1: /-(\d+)\.html$/, // Continente
@@ -196,6 +212,51 @@ async function fetchProductsWithNoMapping(): Promise<ProductToCleanup[]> {
   return allUnmapped
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * Deletes a batch of IDs from a table with adaptive sizing.
+ * Halves batch size on timeout, retries. Returns count of deleted rows.
+ */
+async function deleteBatchAdaptive(
+  table: string,
+  column: string,
+  ids: number[],
+  label: string,
+): Promise<{ deleted: number; errors: number }> {
+  let batchSize = Math.min(ids.length, INITIAL_BATCH_SIZE)
+  let offset = 0
+  let totalDeleted = 0
+  let totalErrors = 0
+
+  while (offset < ids.length) {
+    const chunk = ids.slice(offset, offset + batchSize)
+
+    const { error, count } = await supabase.from(table).delete({ count: "exact" }).in(column, chunk)
+
+    if (error) {
+      if (error.message.includes("statement timeout") && batchSize > MIN_BATCH_SIZE) {
+        batchSize = Math.max(MIN_BATCH_SIZE, Math.floor(batchSize / 2))
+        console.log(`    ${label}: timeout, reducing batch to ${batchSize}`)
+        await delay(2000)
+        continue // retry same offset with smaller batch
+      }
+      console.error(`    ${label}: error (batch ${batchSize}): ${error.message}`)
+      totalErrors += chunk.length
+      offset += batchSize
+    } else {
+      totalDeleted += count ?? chunk.length
+      offset += batchSize
+    }
+
+    await delay(200)
+  }
+
+  return { deleted: totalDeleted, errors: totalErrors }
+}
+
 async function cleanupProducts(products: ProductToCleanup[], label: string) {
   console.log(`\n--- Cleaning up ${products.length} products (${label}) ---`)
 
@@ -204,7 +265,6 @@ async function cleanupProducts(products: ProductToCleanup[], label: string) {
     return { vetoed: 0, deleted: 0, errors: 0 }
   }
 
-  // Group by origin for SKU extraction
   const byOrigin: Record<number, ProductToCleanup[]> = {}
   for (const p of products) {
     if (!byOrigin[p.origin_id]) byOrigin[p.origin_id] = []
@@ -215,7 +275,6 @@ async function cleanupProducts(products: ProductToCleanup[], label: string) {
     console.log(`  Origin ${originId}: ${prods.length} products`)
   }
 
-  // Category breakdown
   const categoryBreakdown: Record<string, number> = {}
   for (const p of products) {
     const cat = p.category ?? "NULL"
@@ -236,14 +295,11 @@ async function cleanupProducts(products: ProductToCleanup[], label: string) {
   let deleted = 0
   let errors = 0
 
-  // Process in batches
-  for (let i = 0; i < products.length; i += BATCH_SIZE) {
-    const batch = products.slice(i, i + BATCH_SIZE)
-    const batchNum = Math.floor(i / BATCH_SIZE) + 1
-    const totalBatches = Math.ceil(products.length / BATCH_SIZE)
-    console.log(`  Batch ${batchNum}/${totalBatches} (${batch.length} products)`)
+  // Step 1: Insert all vetoed SKUs (small rows, unlikely to timeout)
+  console.log("\n  Step 1/3: Recording vetoed SKUs...")
+  for (let i = 0; i < products.length; i += INITIAL_BATCH_SIZE) {
+    const batch = products.slice(i, i + INITIAL_BATCH_SIZE)
 
-    // 1. Extract SKUs and insert into vetoed_store_skus
     const vetoRows = batch
       .filter((p) => p.url)
       .map((p) => {
@@ -260,59 +316,70 @@ async function cleanupProducts(products: ProductToCleanup[], label: string) {
         .upsert(vetoRows, { onConflict: "origin_id,sku", ignoreDuplicates: true })
 
       if (vetoError) {
-        console.error(`  Veto insert error: ${vetoError.message}`)
+        console.error(`    Veto insert error: ${vetoError.message}`)
         errors += vetoRows.length
       } else {
         vetoed += vetoRows.length
       }
     }
 
-    // 2. Delete dependent rows (prices, favorites)
-    const ids = batch.map((p) => p.id)
-
-    const { error: priceError } = await supabase.from("prices").delete().in("store_product_id", ids)
-    if (priceError) {
-      console.error(`  Price delete error: ${priceError.message}`)
-    }
-
-    const { error: favError } = await supabase.from("user_favorites").delete().in("store_product_id", ids)
-    if (favError) {
-      console.error(`  Favorites delete error: ${favError.message}`)
-    }
-
-    // 3. Delete the store_products
-    const { error: deleteError, count } = await supabase.from("store_products").delete({ count: "exact" }).in("id", ids)
-
-    if (deleteError) {
-      console.error(`  Delete error: ${deleteError.message}`)
-      errors += batch.length
-    } else {
-      deleted += count ?? batch.length
+    if (i % 1000 === 0 && i > 0) {
+      console.log(`    ${i}/${products.length} SKUs recorded`)
     }
   }
+  console.log(`    ${vetoed} SKUs recorded`)
 
-  console.log(`  Done: ${vetoed} SKUs vetoed, ${deleted} products deleted, ${errors} errors`)
+  // Step 2: Delete prices (the heaviest table - products can have many price points)
+  const allIds = products.map((p) => p.id)
+  console.log(`\n  Step 2/3: Deleting prices for ${allIds.length} products...`)
+  const priceResult = await deleteBatchAdaptive("prices", "store_product_id", allIds, "prices")
+  console.log(`    ${priceResult.deleted} price rows deleted (${priceResult.errors} errors)`)
+
+  // Step 3a: Delete favorites
+  console.log(`\n  Step 3/3: Deleting favorites + store_products...`)
+  const favResult = await deleteBatchAdaptive("user_favorites", "store_product_id", allIds, "favorites")
+  if (favResult.deleted > 0) {
+    console.log(`    ${favResult.deleted} favorites deleted`)
+  }
+
+  // Step 3b: Delete store_products
+  const spResult = await deleteBatchAdaptive("store_products", "id", allIds, "store_products")
+  deleted = spResult.deleted
+  errors += spResult.errors
+  console.log(`    ${deleted} store_products deleted (${spResult.errors} errors)`)
+
+  console.log(`\n  Done: ${vetoed} SKUs vetoed, ${deleted} products deleted, ${errors} errors`)
   return { vetoed, deleted, errors }
 }
 
 async function main() {
-  console.log(`Cleanup Excluded Products ${dryRun ? "(DRY RUN)" : "(LIVE)"}`)
+  const flags = [dryRun && "DRY RUN", skipUnmapped && "SKIP UNMAPPED"].filter(Boolean).join(", ")
+  console.log(`Cleanup Excluded Products ${flags ? `(${flags})` : "(LIVE)"}`)
   console.log(`Target: ${supabaseUrl}\n`)
 
-  // Phase 1: Products in untracked categories
+  // Phase 1: Products in untracked categories (safe - these have confirmed bad mappings)
   const untrackedProducts = await fetchProductsInUntrackedCategories()
   const untrackedResult = await cleanupProducts(untrackedProducts, "untracked categories")
 
-  // Phase 2: Products with no category mapping (unmapped)
-  const unmappedProducts = await fetchProductsWithNoMapping()
-  // Filter out any that were already handled in phase 1
-  const handledIds = new Set(untrackedProducts.map((p) => p.id))
-  const newUnmapped = unmappedProducts.filter((p) => !handledIds.has(p.id))
-  const unmappedResult = await cleanupProducts(newUnmapped, "unmapped categories")
+  // Phase 2: Products with no category mapping (risky - may include valid food products)
+  let unmappedResult = { vetoed: 0, deleted: 0, errors: 0 }
+  let newUnmapped: ProductToCleanup[] = []
+
+  if (skipUnmapped) {
+    console.log("\n--- Skipping unmapped categories (--skip-unmapped) ---")
+    console.log("  Run without --skip-unmapped after adding missing category_mappings.")
+  } else {
+    const unmappedProducts = await fetchProductsWithNoMapping()
+    const handledIds = new Set(untrackedProducts.map((p) => p.id))
+    newUnmapped = unmappedProducts.filter((p) => !handledIds.has(p.id))
+    unmappedResult = await cleanupProducts(newUnmapped, "unmapped categories")
+  }
 
   console.log("\n=== SUMMARY ===")
   console.log(`Untracked categories: ${untrackedProducts.length} products found, ${untrackedResult.deleted} deleted`)
-  console.log(`Unmapped categories: ${newUnmapped.length} products found, ${unmappedResult.deleted} deleted`)
+  if (!skipUnmapped) {
+    console.log(`Unmapped categories: ${newUnmapped.length} products found, ${unmappedResult.deleted} deleted`)
+  }
   console.log(`Total SKUs vetoed: ${untrackedResult.vetoed + unmappedResult.vetoed}`)
   console.log(`Total products deleted: ${untrackedResult.deleted + unmappedResult.deleted}`)
 

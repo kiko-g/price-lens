@@ -23,3 +23,8 @@ alwaysApply: false
 
 - Interactive elements need: `tabIndex={0}`, `aria-label`, keyboard handlers
 - Semantic HTML: `<button>` for actions, `<a>` for navigation
+
+## Business Logic
+
+- Use this file `src/types/business.ts` when in need of general business stuff operations.
+- Use this file `src/lib/business/priority.ts` when in need of priority related operations.

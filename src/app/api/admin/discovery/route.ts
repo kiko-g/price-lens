@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import {
-  runSitemapDiscovery,
-  runAllSitemapDiscovery,
+  runDiscovery,
+  runAllDiscovery,
   getDiscoveryCoverage,
   getAllStoreConfigs,
   saveDiscoveryRun,
 } from "@/lib/discovery"
+import { createAdminClient } from "@/lib/supabase/server"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { now } from "@/lib/utils"
 import type { DiscoveryRun } from "@/lib/discovery/types"
 
@@ -30,23 +32,28 @@ export async function GET(req: NextRequest) {
     const maxUrls = searchParams.get("max") ? parseInt(searchParams.get("max")!, 10) : undefined
 
     if (action === "status") {
-      // Get coverage stats for all configured stores
       const configs = getAllStoreConfigs()
-      const stats = await Promise.all(
-        configs.map(async (config) => {
-          const coverage = await getDiscoveryCoverage(config.originId)
-          return {
-            originId: config.originId,
-            name: config.name,
-            sitemapIndexUrl: config.sitemapIndexUrl,
-            ...coverage,
-          }
-        }),
-      )
+      const supabase = createAdminClient()
+
+      const [storeStats, triageStats] = await Promise.all([
+        Promise.all(
+          configs.map(async (config) => {
+            const coverage = await getDiscoveryCoverage(config.originId)
+            return {
+              originId: config.originId,
+              name: config.name,
+              sitemapIndexUrl: config.sitemapIndexUrl,
+              ...coverage,
+            }
+          }),
+        ),
+        getTriageStats(supabase, configs),
+      ])
 
       return NextResponse.json({
-        stores: stats,
+        stores: storeStats,
         availableOrigins: configs.map((c) => ({ id: c.originId, name: c.name })),
+        triage: triageStats,
       })
     }
 
@@ -61,16 +68,14 @@ export async function GET(req: NextRequest) {
       const options = { dryRun, verbose, maxUrls }
 
       if (originParam === "all") {
-        // Run for all stores
         const startedAt = now()
-        const results = await runAllSitemapDiscovery(options)
+        const results = await runAllDiscovery(options)
 
-        // Save discovery runs (skip if table doesn't exist yet)
         for (const result of results) {
           const run: DiscoveryRun = {
             origin_id: result.originId,
-            discovery_source: "sitemap",
-            status: result.errors.length > 0 ? "completed" : "completed",
+            discovery_source: result.source,
+            status: result.errors.length > 0 && result.urlsNew === 0 ? "failed" : "completed",
             started_at: startedAt,
             completed_at: now(),
             urls_found: result.urlsFound,
@@ -80,9 +85,7 @@ export async function GET(req: NextRequest) {
             errors: result.errors,
             metadata: { dryRun },
           }
-          await saveDiscoveryRun(run).catch(() => {
-            // Table might not exist yet
-          })
+          await saveDiscoveryRun(run).catch(() => {})
         }
 
         const totalNew = results.reduce((sum, r) => sum + r.urlsNew, 0)
@@ -98,19 +101,18 @@ export async function GET(req: NextRequest) {
         })
       }
 
-      // Run for specific store
+      // Run for specific store (auto-dispatches to sitemap or category crawl)
       const originId = parseInt(originParam, 10)
       if (isNaN(originId)) {
         return NextResponse.json({ error: "Invalid origin ID" }, { status: 400 })
       }
 
       const startedAt = now()
-      const result = await runSitemapDiscovery(originId, options)
+      const result = await runDiscovery(originId, options)
 
-      // Save discovery run
       const run: DiscoveryRun = {
         origin_id: result.originId,
-        discovery_source: "sitemap",
+        discovery_source: result.source,
         status: result.errors.length > 0 && result.urlsNew === 0 ? "failed" : "completed",
         started_at: startedAt,
         completed_at: now(),
@@ -121,9 +123,7 @@ export async function GET(req: NextRequest) {
         errors: result.errors,
         metadata: { dryRun },
       }
-      await saveDiscoveryRun(run).catch(() => {
-        // Table might not exist yet
-      })
+      await saveDiscoveryRun(run).catch(() => {})
 
       return NextResponse.json({
         message: dryRun
@@ -163,13 +163,13 @@ export async function POST(req: NextRequest) {
 
     if (origin === "all") {
       const startedAt = now()
-      const results = await runAllSitemapDiscovery(options)
+      const results = await runAllDiscovery(options)
 
       for (const result of results) {
         const run: DiscoveryRun = {
           origin_id: result.originId,
-          discovery_source: "sitemap",
-          status: "completed",
+          discovery_source: result.source,
+          status: result.errors.length > 0 && result.urlsNew === 0 ? "failed" : "completed",
           started_at: startedAt,
           completed_at: now(),
           urls_found: result.urlsFound,
@@ -191,12 +191,12 @@ export async function POST(req: NextRequest) {
     }
 
     const startedAt = now()
-    const result = await runSitemapDiscovery(originId, options)
+    const result = await runDiscovery(originId, options)
 
     const run: DiscoveryRun = {
       origin_id: result.originId,
-      discovery_source: "sitemap",
-      status: "completed",
+      discovery_source: result.source,
+      status: result.errors.length > 0 && result.urlsNew === 0 ? "failed" : "completed",
       started_at: startedAt,
       completed_at: now(),
       urls_found: result.urlsFound,
@@ -215,5 +215,32 @@ export async function POST(req: NextRequest) {
       { error: "Discovery failed", details: error instanceof Error ? error.message : "Unknown" },
       { status: 500 },
     )
+  }
+}
+
+async function getTriageStats(supabase: SupabaseClient, configs: { originId: number; name: string }[]) {
+  // Count untriaged products and vetoed SKUs per origin in parallel
+  const vetoedCountPromises = configs.map((config) =>
+    supabase
+      .from("vetoed_store_skus")
+      .select("*", { count: "exact", head: true })
+      .eq("origin_id", config.originId)
+      .then((res) => ({ originId: config.originId, count: res.count ?? 0 })),
+  )
+
+  const [untriagedRes, ...vetoedCounts] = await Promise.all([
+    supabase.from("store_products").select("*", { count: "exact", head: true }).is("priority", null).is("name", null),
+    ...vetoedCountPromises,
+  ])
+
+  const vetoedByOrigin: Record<number, number> = {}
+  for (const { originId, count } of vetoedCounts) {
+    vetoedByOrigin[originId] = count
+  }
+
+  return {
+    untriagedCount: untriagedRes.count ?? 0,
+    totalVetoed: vetoedCounts.reduce((sum, v) => sum + v.count, 0),
+    vetoedByOrigin,
   }
 }
