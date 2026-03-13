@@ -4,10 +4,6 @@ export const metadata: Metadata = {
   title: "Categories | Admin",
 }
 
-export default function CategoriesLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function CategoriesLayout({ children }: { children: React.ReactNode }) {
   return children
 }

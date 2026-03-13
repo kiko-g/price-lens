@@ -424,7 +424,7 @@ export default function DiscoveryPage() {
         {/* Triage Section */}
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <FilterIcon className="text-primary size-5" />
@@ -436,37 +436,6 @@ export default function DiscoveryPage() {
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <div className="border-secondary flex items-center rounded-lg border">
-                  <Button
-                    variant={auditScope === "parked" ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setAuditScope("parked")}
-                    className="h-7 rounded-r-none text-xs"
-                  >
-                    Parked
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={auditScope === "full" ? "secondary" : "ghost"}
-                    onClick={() => setAuditScope("full")}
-                    className="h-7 rounded-l-none text-xs"
-                  >
-                    Full
-                  </Button>
-                </div>
-                {auditScope === "full" && (
-                  <div className="flex items-center gap-1.5">
-                    <Switch
-                      id="audit-force"
-                      checked={auditForce}
-                      onCheckedChange={setAuditForce}
-                      className="scale-75"
-                    />
-                    <Label htmlFor="audit-force" className="text-xs">
-                      Override all
-                    </Label>
-                  </div>
-                )}
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -487,6 +456,7 @@ export default function DiscoveryPage() {
                     </>
                   )}
                 </Button>
+
                 <Button
                   onClick={() => {
                     setLastTriageResult(null)
@@ -506,6 +476,39 @@ export default function DiscoveryPage() {
                     </>
                   )}
                 </Button>
+
+                <div className="border-secondary flex items-center rounded-lg border">
+                  <Button
+                    variant={auditScope === "parked" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setAuditScope("parked")}
+                    className="h-7 rounded-r-none text-xs"
+                  >
+                    Parked
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={auditScope === "full" ? "secondary" : "ghost"}
+                    onClick={() => setAuditScope("full")}
+                    className="h-7 rounded-l-none text-xs"
+                  >
+                    Full
+                  </Button>
+                </div>
+
+                {auditScope === "full" && (
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      id="audit-force"
+                      checked={auditForce}
+                      onCheckedChange={setAuditForce}
+                      className="scale-75"
+                    />
+                    <Label htmlFor="audit-force" className="text-xs">
+                      Override all
+                    </Label>
+                  </div>
+                )}
               </div>
             </div>
           </CardHeader>

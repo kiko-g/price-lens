@@ -42,8 +42,7 @@ export const pingoDoceConfig: CategoryCrawlConfig = {
   name: "Pingo Doce",
   baseUrl: "https://www.pingodoce.pt",
   categoryListUrl: "https://www.pingodoce.pt/home/produtos",
-  searchEndpoint:
-    "https://www.pingodoce.pt/on/demandware.store/Sites-pingo-doce-Site/default/Search-UpdateGrid",
+  searchEndpoint: "https://www.pingodoce.pt/on/demandware.store/Sites-pingo-doce-Site/default/Search-UpdateGrid",
   categoryIdPattern: /Search-Show\?cgid=(ec_[a-zA-Z0-9_]+)/g,
   productUrlPattern: /href="(\/home\/produtos\/[^"]*\.html)"/g,
   // L1 categories have 3 segments when split by "_": ec, name, number (e.g. "ec_mercearia_1300")

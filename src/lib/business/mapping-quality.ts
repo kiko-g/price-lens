@@ -9,11 +9,7 @@ function normalizeWords(text: string): Set<string> {
 }
 
 function getStorePath(tuple: StoreCategoryTuple): string {
-  const parts = [
-    tuple.store_category,
-    tuple.store_category_2,
-    tuple.store_category_3,
-  ].filter(Boolean) as string[]
+  const parts = [tuple.store_category, tuple.store_category_2, tuple.store_category_3].filter(Boolean) as string[]
   return parts.join(" > ")
 }
 
@@ -21,10 +17,7 @@ function getStorePath(tuple: StoreCategoryTuple): string {
  * Heuristics to flag potentially bad store → canonical category mappings.
  * Returns an array of reason codes; empty means no issues flagged.
  */
-export function flagMappingReasons(
-  tuple: StoreCategoryTuple,
-  canonicalPath: string,
-): string[] {
+export function flagMappingReasons(tuple: StoreCategoryTuple, canonicalPath: string): string[] {
   const reasons: string[] = []
   const storePath = getStorePath(tuple)
   const storeWords = normalizeWords(storePath)
@@ -40,10 +33,11 @@ export function flagMappingReasons(
     reasons.push("Low word overlap with canonical")
   }
 
-  const storeLevels = [tuple.store_category, tuple.store_category_2, tuple.store_category_3].filter(
-    Boolean,
-  ).length
-  const canonicalLevels = canonicalPath.split(">").map((s) => s.trim()).filter(Boolean).length
+  const storeLevels = [tuple.store_category, tuple.store_category_2, tuple.store_category_3].filter(Boolean).length
+  const canonicalLevels = canonicalPath
+    .split(">")
+    .map((s) => s.trim())
+    .filter(Boolean).length
   if (storeLevels >= 2 && canonicalLevels === 1) {
     reasons.push("Store category more specific than canonical (possible over-generalization)")
   }

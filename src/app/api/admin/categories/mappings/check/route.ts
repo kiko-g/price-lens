@@ -3,10 +3,7 @@ import { flagMappingReasons } from "@/lib/business/mapping-quality"
 import type { CanonicalCategory, StoreCategoryTuple } from "@/types"
 import { NextResponse } from "next/server"
 
-function buildIdToPath(
-  cats: CanonicalCategory[],
-  parentPath: string[] = [],
-): Map<number, string> {
+function buildIdToPath(cats: CanonicalCategory[], parentPath: string[] = []): Map<number, string> {
   const out = new Map<number, string>()
   for (const c of cats) {
     const path = [...parentPath, c.name]

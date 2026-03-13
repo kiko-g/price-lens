@@ -4,10 +4,6 @@ export const metadata: Metadata = {
   title: "Schedule | Admin",
 }
 
-export default function ScheduleLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function ScheduleLayout({ children }: { children: React.ReactNode }) {
   return children
 }

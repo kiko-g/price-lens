@@ -4,10 +4,6 @@ export const metadata: Metadata = {
   title: "Discovery | Admin",
 }
 
-export default function DiscoveryLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function DiscoveryLayout({ children }: { children: React.ReactNode }) {
   return children
 }
