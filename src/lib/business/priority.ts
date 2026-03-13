@@ -110,6 +110,19 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
 export const PRODUCT_PRIORITY_LEVELS = [0, 1, 2, 3, 4, 5] as const
 export type ProductPriorityLevel = (typeof PRODUCT_PRIORITY_LEVELS)[number]
 
+/** Label for priority selects/dropdowns (e.g. "P0 (Niche)"). */
+export function getPrioritySelectLabel(priority: number): string {
+  const config = PRIORITY_CONFIG[String(priority)]
+  const text = config?.description ?? "?"
+  return `P${priority} (${text})`
+}
+
+/** Options for priority dropdowns (value + label from business config). */
+export const PRIORITY_SELECT_OPTIONS: { value: number; label: string }[] = PRODUCT_PRIORITY_LEVELS.map((value) => ({
+  value,
+  label: getPrioritySelectLabel(value),
+}))
+
 export function formatThreshold(hours: number | null): string {
   if (hours === null) return "-"
   if (hours < 24) return `${hours}h`

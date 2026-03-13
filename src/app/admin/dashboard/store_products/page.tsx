@@ -4,7 +4,7 @@ import { AdminDashboardStoreProducts } from "@/components/admin/AdminDashboardSt
 import { Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Dashboard Store Products",
+  title: "Store Products | Admin",
   description: "Admin view of store products in the database",
 }
 

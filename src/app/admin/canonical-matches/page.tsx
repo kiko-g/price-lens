@@ -4,7 +4,7 @@ import { CanonicalMatchReview } from "@/components/admin/CanonicalMatchReview"
 import { Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Canonical Products",
+  title: "Canonical Products | Admin",
   description: "Browse and manage canonical product groupings across stores",
 }
 

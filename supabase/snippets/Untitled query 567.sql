@@ -1,0 +1,1 @@
+select count(*) from store_products where priority_source = 'category_default';

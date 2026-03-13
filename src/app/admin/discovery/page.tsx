@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -31,6 +32,8 @@ import {
   ShieldBanIcon,
   PackageOpenIcon,
   AlertTriangleIcon,
+  ParkingCircleIcon,
+  ScaleIcon,
 } from "lucide-react"
 
 interface StoreStatus {
@@ -47,6 +50,8 @@ interface TriageStats {
   untriagedCount: number
   totalVetoed: number
   vetoedByOrigin: Record<number, number>
+  parkedCount: number
+  parkedByOrigin: Record<number, number>
 }
 
 interface DiscoveryStatus {
@@ -59,6 +64,7 @@ interface TriageResult {
   processed: number
   kept: number
   vetoed: number
+  parked: number
   errors: number
   notFound: number
   unmappedCategories: { originId: number; category: string; category2: string | null; category3: string | null }[]
@@ -84,6 +90,9 @@ export default function DiscoveryPage() {
   const [runningOrigin, setRunningOrigin] = useState<number | "all" | null>(null)
   const [lastResults, setLastResults] = useState<DiscoveryResult[] | null>(null)
   const [lastTriageResult, setLastTriageResult] = useState<TriageResult | null>(null)
+  const [lastTriageMode, setLastTriageMode] = useState<"triage" | "audit">("triage")
+  const [auditScope, setAuditScope] = useState<"parked" | "full">("parked")
+  const [auditForce, setAuditForce] = useState(false)
 
   const {
     data: status,
@@ -127,10 +136,11 @@ export default function DiscoveryPage() {
   const runTriageMutation = useMutation({
     mutationFn: async () => {
       const res = await axios.get(`/api/admin/discovery/triage?batch=50&dry=${dryRun}&verbose=true`)
-      return res.data as { message: string; dryRun: boolean; result: TriageResult }
+      return res.data as { message: string; mode: string; dryRun: boolean; result: TriageResult }
     },
     onSuccess: (data) => {
       setLastTriageResult(data.result)
+      setLastTriageMode("triage")
 
       if (dryRun) {
         toast.info(data.message)
@@ -144,17 +154,36 @@ export default function DiscoveryPage() {
     },
   })
 
+  const runAuditMutation = useMutation({
+    mutationFn: async ({ scope, force }: { scope: "parked" | "full"; force: boolean }) => {
+      const res = await axios.get(
+        `/api/admin/discovery/triage?mode=audit&scope=${scope}&force=${force}&dry=${dryRun}&verbose=true`,
+      )
+      return res.data as { message: string; mode: string; scope: string; dryRun: boolean; result: TriageResult }
+    },
+    onSuccess: (data) => {
+      setLastTriageResult(data.result)
+      setLastTriageMode("audit")
+
+      if (dryRun) {
+        toast.info(data.message)
+      } else {
+        toast.success(data.message)
+        queryClient.invalidateQueries({ queryKey: ["discovery-status"] })
+      }
+    },
+    onError: (error) => {
+      toast.error(`Audit failed: ${error instanceof Error ? error.message : "Unknown error"}`)
+    },
+  })
+
   const handleRunDiscovery = (origin: number | "all") => {
     setRunningOrigin(origin)
     setLastResults(null)
     runDiscoveryMutation.mutate(origin)
   }
 
-  const storeColors: Record<string, string> = {
-    Continente: "bg-red-500",
-    Auchan: "bg-green-500",
-    "Pingo Doce": "bg-yellow-500",
-  }
+  const isTriageRunning = runTriageMutation.isPending || runAuditMutation.isPending
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-6">
@@ -189,11 +218,7 @@ export default function DiscoveryPage() {
 
               <div className="flex-1" />
 
-              <Button
-                onClick={() => handleRunDiscovery("all")}
-                disabled={runningOrigin !== null}
-                className="bg-primary"
-              >
+              <Button onClick={() => handleRunDiscovery("all")} disabled={runningOrigin !== null}>
                 {runningOrigin === "all" ? (
                   <>
                     <Loader2Icon className="h-4 w-4 animate-spin" />
@@ -223,7 +248,7 @@ export default function DiscoveryPage() {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={cn("h-3 w-3 rounded-full", storeColors[store.name] || "bg-gray-500")} />
+                      <SupermarketChainBadge originId={store.originId} variant="logoSmall" />
                       <CardTitle className="text-base">{store.name}</CardTitle>
                     </div>
                     <Button
@@ -308,9 +333,7 @@ export default function DiscoveryPage() {
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex w-full items-center justify-between pr-4">
                         <div className="flex items-center gap-2">
-                          <div
-                            className={cn("h-2.5 w-2.5 rounded-full", storeColors[result.originName] || "bg-gray-500")}
-                          />
+                          <SupermarketChainBadge originId={result.originId} variant="logoSmall" />
                           <span className="font-medium">{result.originName}</span>
                         </div>
                         <div className="flex items-center gap-4 text-sm">
@@ -322,10 +345,9 @@ export default function DiscoveryPage() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-4 pt-2">
-                        {/* Stats */}
                         <div className="grid grid-cols-4 gap-3">
                           <div className="text-center">
-                            <p className="text-muted-foreground text-xs">Found in Sitemap</p>
+                            <p className="text-muted-foreground text-xs">Found in Source</p>
                             <p className="text-lg font-bold">{result.urlsFound.toLocaleString()}</p>
                           </div>
                           <div className="text-center">
@@ -344,7 +366,6 @@ export default function DiscoveryPage() {
                           </div>
                         </div>
 
-                        {/* Coverage Progress */}
                         {result.urlsFound > 0 && (
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs">
@@ -357,7 +378,6 @@ export default function DiscoveryPage() {
                           </div>
                         )}
 
-                        {/* Sample New URLs */}
                         {result.sampleNewUrls.length > 0 && (
                           <div className="space-y-2">
                             <p className="text-muted-foreground text-xs font-medium">
@@ -379,7 +399,6 @@ export default function DiscoveryPage() {
                           </div>
                         )}
 
-                        {/* Errors */}
                         {result.errors.length > 0 && (
                           <div className="space-y-1">
                             <p className="flex items-center gap-1 text-xs font-medium text-red-500">
@@ -412,40 +431,95 @@ export default function DiscoveryPage() {
                   Product Triage
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Classify newly discovered products — scrape, categorize, then keep or veto based on governance rules
+                  Classify newly discovered products: scrape, categorize, then keep, park, or veto based on governance
+                  rules
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => {
-                  setLastTriageResult(null)
-                  runTriageMutation.mutate()
-                }}
-                disabled={runTriageMutation.isPending}
-              >
-                {runTriageMutation.isPending ? (
-                  <>
-                    <Loader2Icon className="h-4 w-4 animate-spin" />
-                    Running Triage...
-                  </>
-                ) : (
-                  <>
-                    <PlayIcon className="h-4 w-4" />
-                    Run Triage
-                  </>
+              <div className="flex items-center gap-2">
+                <div className="border-secondary flex items-center rounded-lg border">
+                  <Button
+                    variant={auditScope === "parked" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setAuditScope("parked")}
+                    className="h-7 rounded-r-none text-xs"
+                  >
+                    Parked
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={auditScope === "full" ? "secondary" : "ghost"}
+                    onClick={() => setAuditScope("full")}
+                    className="h-7 rounded-l-none text-xs"
+                  >
+                    Full
+                  </Button>
+                </div>
+                {auditScope === "full" && (
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      id="audit-force"
+                      checked={auditForce}
+                      onCheckedChange={setAuditForce}
+                      className="scale-75"
+                    />
+                    <Label htmlFor="audit-force" className="text-xs">
+                      Override all
+                    </Label>
+                  </div>
                 )}
-              </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setLastTriageResult(null)
+                    runAuditMutation.mutate({ scope: auditScope, force: auditForce })
+                  }}
+                  disabled={isTriageRunning}
+                >
+                  {runAuditMutation.isPending ? (
+                    <>
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                      Auditing...
+                    </>
+                  ) : (
+                    <>
+                      <ScaleIcon className="h-4 w-4" />
+                      Run Audit
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setLastTriageResult(null)
+                    runTriageMutation.mutate()
+                  }}
+                  disabled={isTriageRunning}
+                >
+                  {runTriageMutation.isPending ? (
+                    <>
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                      Triaging...
+                    </>
+                  ) : (
+                    <>
+                      <PlayIcon className="h-4 w-4" />
+                      Run Triage
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Triage Stats */}
             {isLoading ? (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
+                <Skeleton className="h-20" />
                 <Skeleton className="h-20" />
                 <Skeleton className="h-20" />
                 <Skeleton className="h-20" />
               </div>
             ) : status?.triage ? (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 <div className="bg-muted/50 rounded-md p-3">
                   <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                     <PackageOpenIcon className="h-3.5 w-3.5" />
@@ -454,7 +528,31 @@ export default function DiscoveryPage() {
                   <p className={cn("mt-1 text-2xl font-bold", status.triage.untriagedCount > 0 && "text-amber-500")}>
                     {status.triage.untriagedCount.toLocaleString()}
                   </p>
-                  <p className="text-muted-foreground text-xs">products pending</p>
+                  <p className="text-muted-foreground text-xs">unscraped products</p>
+                </div>
+                <div className="bg-muted/50 rounded-md p-3">
+                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <ParkingCircleIcon className="h-3.5 w-3.5" />
+                    Parked
+                  </div>
+                  <p className={cn("mt-1 text-2xl font-bold", status.triage.parkedCount > 0 && "text-blue-500")}>
+                    {status.triage.parkedCount.toLocaleString()}
+                  </p>
+                  <p className="text-muted-foreground text-xs">unmapped categories</p>
+                  {status.triage.parkedCount > 0 && (
+                    <div className="mt-1.5 space-y-0.5">
+                      {status.availableOrigins.map((origin) => {
+                        const count = status.triage.parkedByOrigin[origin.id] ?? 0
+                        if (count === 0) return null
+                        return (
+                          <div key={origin.id} className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">{origin.name}</span>
+                            <span className="font-medium">{count.toLocaleString()}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div className="bg-muted/50 rounded-md p-3">
                   <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
@@ -483,30 +581,39 @@ export default function DiscoveryPage() {
               </div>
             ) : null}
 
-            {/* Last Triage Result */}
+            {/* Last Triage/Audit Result */}
             {lastTriageResult && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <CheckCircle2Icon className="h-4 w-4 text-emerald-500" />
-                  <span className="text-sm font-medium">Triage Results</span>
+                  <span className="text-sm font-medium">{lastTriageMode === "audit" ? "Audit" : "Triage"} Results</span>
                   {dryRun && (
                     <Badge variant="outline" className="text-xs">
                       Dry Run
                     </Badge>
                   )}
+                  <Badge variant="secondary" className="text-xs">
+                    {lastTriageMode === "audit" ? "Audit" : "Triage"}
+                  </Badge>
                   <span className="text-muted-foreground text-xs">
                     {(lastTriageResult.durationMs / 1000).toFixed(1)}s
                   </span>
                 </div>
 
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-5 gap-3">
                   <div className="text-center">
                     <p className="text-muted-foreground text-xs">Processed</p>
                     <p className="text-lg font-bold">{lastTriageResult.processed}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-muted-foreground text-xs">Kept</p>
+                    <p className="text-muted-foreground text-xs">{lastTriageMode === "audit" ? "Promoted" : "Kept"}</p>
                     <p className="text-lg font-bold text-emerald-500">{lastTriageResult.kept}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-muted-foreground text-xs">Parked</p>
+                    <p className={cn("text-lg font-bold", lastTriageResult.parked > 0 && "text-blue-500")}>
+                      {lastTriageResult.parked}
+                    </p>
                   </div>
                   <div className="text-center">
                     <p className="text-muted-foreground text-xs">Vetoed</p>
@@ -546,32 +653,35 @@ export default function DiscoveryPage() {
         {/* Instructions Card */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">How Discovery Works</CardTitle>
+            <CardTitle className="text-sm font-medium">How It Works</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground space-y-2 text-sm">
             <p>
-              <strong>1. Sitemap Fetch:</strong> Downloads the store&apos;s sitemap index and identifies
-              product-specific sitemaps.
+              <strong>1. Discovery:</strong> Fetches product URLs from store sitemaps (Continente, Auchan) or category
+              crawls (Pingo Doce). New products are inserted with null priority.
             </p>
             <p>
-              <strong>2. URL Extraction:</strong> Parses all product URLs from the sitemaps.
+              <strong>2. Triage:</strong> Scrapes untriaged products to get name and categories. Based on category
+              governance:
             </p>
+            <ul className="ml-4 list-disc space-y-1">
+              <li>
+                <strong>Mapped + Tracked</strong>: kept with the category&apos;s default priority
+              </li>
+              <li>
+                <strong>Mapped + Untracked</strong>: vetoed (deleted + SKU recorded permanently)
+              </li>
+              <li>
+                <strong>Unmapped</strong>: parked (priority=0, stays in DB). Add the mapping, then audit.
+              </li>
+            </ul>
             <p>
-              <strong>3. Validation:</strong> Filters URLs to ensure they match the expected product URL pattern.
-            </p>
-            <p>
-              <strong>4. Deduplication:</strong> Compares against existing products in the database. Vetoed SKUs are
-              automatically skipped.
-            </p>
-            <p>
-              <strong>5. Insert:</strong> New products are added as untriaged (null priority) pending triage.
-            </p>
-            <p>
-              <strong>6. Triage:</strong> Untriaged products are scraped, categorized, and either kept with a default
-              priority or vetoed based on category governance rules.
+              <strong>3. Audit:</strong> Re-evaluates parked products against current category mappings. No scraping
+              needed (uses existing data). Promotes, vetoes, or leaves parked.
             </p>
             <p className="pt-2 font-medium text-amber-500">
-              Tip: Run in dry-run mode first to preview what would be discovered without making changes.
+              Workflow: Map categories first, then run Triage. If unmapped categories appear, add mappings and run
+              Audit.
             </p>
           </CardContent>
         </Card>

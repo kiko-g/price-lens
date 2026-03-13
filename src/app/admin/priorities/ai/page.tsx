@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { AiPriorityClassifier } from "@/components/admin/AiPriorityClassifier"
 
 export const metadata: Metadata = {
-  title: "AI Priority Classifier",
+  title: "AI Priority Classifier | Admin",
   description: "Run the AI priority classifier to classify products into priorities.",
 }
 

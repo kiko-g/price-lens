@@ -16,7 +16,7 @@ import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistr
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
 
 /**
- * Inline splash screen CSS — rendered with the HTML before any external CSS/JS loads.
+ * Inline splash screen CSS: rendered with the HTML before any external CSS/JS loads.
  * Bridges the gap between the native PWA splash and React hydration.
  * Uses prefers-color-scheme (not .dark class) because next-themes script may not have run yet.
  */
@@ -144,7 +144,7 @@ export default function RootLayout({
         )}
       </head>
       <body className={cn(GeistSans.className, "bg-background text-foreground")}>
-        {/* Inline splash — visible immediately, before CSS/JS loads. Dismissed by React on hydration. */}
+        {/* Inline splash: visible immediately, before CSS/JS loads. Dismissed by React on hydration. */}
         <div id="__splash" aria-hidden="true">
           <div className="sc">
             {/* eslint-disable-next-line @next/next/no-img-element */}

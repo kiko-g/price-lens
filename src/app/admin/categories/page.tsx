@@ -199,7 +199,16 @@ export default function AdminCategoriesPage() {
                     <p className="text-2xl font-bold">{trackedL1.length}</p>
                     <p className="text-muted-foreground text-sm">Tracked L1 categories</p>
                     {trackedL1.length > 0 && (
-                      <p className="mt-1 text-xs text-emerald-600">{trackedL1.map((c) => c.name).join(", ")}</p>
+                      <p className="mt-1 flex flex-wrap gap-1">
+                        {trackedL1.map((c) => (
+                          <span
+                            key={c.id}
+                            className="rounded bg-emerald-600/20 px-1 py-0.5 text-xs dark:bg-emerald-500/40"
+                          >
+                            {c.name}
+                          </span>
+                        ))}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -211,7 +220,13 @@ export default function AdminCategoriesPage() {
                     <p className="text-2xl font-bold text-amber-500">{untrackedL1.length}</p>
                     <p className="text-muted-foreground text-sm">Untracked (vetoed on triage)</p>
                     {untrackedL1.length > 0 && (
-                      <p className="mt-1 text-xs text-amber-600">{untrackedL1.map((c) => c.name).join(", ")}</p>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {untrackedL1.map((c) => (
+                          <span key={c.id} className="rounded bg-amber-600/20 px-1 py-0.5 text-xs dark:bg-amber-500/60">
+                            {c.name}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>

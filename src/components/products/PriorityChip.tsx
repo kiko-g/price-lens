@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
-
 import { cn } from "@/lib/utils"
+import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
 interface Props {
   priority: number | null
@@ -10,59 +10,11 @@ interface Props {
 }
 
 export function PriorityChip({ priority, size = "2xs", variant = "compact", className }: Props) {
-  const getPriorityConfig = (priority: number | null) => {
-    switch (priority) {
-      case null:
-        return {
-          label: "Unset",
-          tooltip: "Unset",
-          className: `bg-neutral-500 dark:text-neutral-50`,
-        }
-      case 0:
-        return {
-          label: "0/5",
-          tooltip: "Useless",
-          className: `bg-gray-800 dark:text-white`,
-        }
-      case 1:
-        return {
-          label: "1/5",
-          tooltip: "Minor",
-          className: `bg-rose-600 dark:text-white`,
-        }
-      case 2:
-        return {
-          label: "2/5",
-          tooltip: "Low",
-          className: `bg-orange-600 dark:text-white`,
-        }
-      case 3:
-        return {
-          label: "3/5",
-          tooltip: "Medium",
-          className: `bg-amber-600 dark:text-white`,
-        }
-      case 4:
-        return {
-          label: "4/5",
-          tooltip: "Important",
-          className: `bg-sky-600 dark:text-white`,
-        }
-      case 5:
-        return {
-          label: "5/5",
-          tooltip: "Essential",
-          className: `bg-emerald-700 dark:text-white`,
-        }
-      default:
-        return {
-          label: "Unknown",
-          className: `bg-gray-800 dark:text-white`,
-        }
-    }
-  }
-
-  const config = getPriorityConfig(priority)
+  const key = priority === null ? "null" : String(priority)
+  const config = PRIORITY_CONFIG[key]
+  const label = priority === null ? (config?.label ?? "?") : `${priority}/5`
+  const tooltip = config?.description ?? "?"
+  const bgClass = config?.bgClass ?? "bg-gray-800 dark:text-white"
 
   return (
     <Badge
@@ -71,16 +23,17 @@ export function PriorityChip({ priority, size = "2xs", variant = "compact", clas
       variant="outline"
       className={cn(
         "gap-0.5 border-transparent text-white opacity-100 transition-all duration-300 group-hover:opacity-0 hover:opacity-100 dark:border-transparent",
-        config.className,
+        bgClass,
         className,
       )}
+      title={tooltip}
     >
       {variant === "compact" ? (
-        <span>{config.label}</span>
+        <span>{label}</span>
       ) : (
         <>
           Priority
-          <span>{config.label}</span>
+          <span>{label}</span>
         </>
       )}
     </Badge>

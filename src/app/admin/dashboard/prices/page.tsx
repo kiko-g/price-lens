@@ -4,7 +4,7 @@ import { AdminDashboardPrices } from "@/components/admin/AdminDashboardPrices"
 import { Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Dashboard Prices",
+  title: "Prices | Admin",
   description: "Price Lens lets you see through prices. Get a real sense of what's going on. You are awake now.",
 }
 

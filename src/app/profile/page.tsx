@@ -111,7 +111,7 @@ function AlertsTab() {
 function ProfilePageSkeleton() {
   return (
     <div className="flex grow flex-col gap-6 pb-6 md:flex-row">
-      {/* Sidebar skeleton — desktop */}
+      {/* Sidebar skeleton: desktop */}
       <div className="hidden shrink-0 flex-col items-center md:flex md:w-64">
         <Skeleton className="mx-auto mb-4 h-32 w-32 rounded-full" />
         <Skeleton className="mb-2 h-5 w-3/4" />
@@ -123,7 +123,7 @@ function ProfilePageSkeleton() {
         <Skeleton className="mt-4 h-16 w-full rounded-md" />
       </div>
 
-      {/* Sidebar skeleton — mobile */}
+      {/* Sidebar skeleton: mobile */}
       <div className="flex items-center gap-4 border-b pb-4 md:hidden">
         <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
         <div className="flex flex-1 flex-col gap-2">

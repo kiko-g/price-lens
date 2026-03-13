@@ -78,7 +78,7 @@ export function InflationContext() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <TrendingUpIcon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-              Cumulative Inflation (1999–2024)
+              Cumulative Inflation (1999 to 2024)
             </CardTitle>
             <CardDescription className="text-sm">
               What €100 from 1999 looks like today for Portugal, the USA, and the Eurozone.

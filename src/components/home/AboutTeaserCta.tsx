@@ -23,7 +23,7 @@ const painPoints = [
 export function AboutTeaserCta() {
   return (
     <section className="w-full px-4 py-10 md:py-16">
-      <div className="mx-auto flex max-w-3xl flex-col gap-8">
+      <div className="mx-auto flex max-w-5xl flex-col gap-8">
         <div className="flex flex-col gap-2 text-center">
           <h2 className="text-xl font-bold tracking-tight sm:text-2xl">You&apos;re paying more than you need to</h2>
           <p className="text-muted-foreground mx-auto max-w-lg text-sm text-balance">
@@ -50,7 +50,7 @@ export function AboutTeaserCta() {
         >
           <div className="flex flex-col gap-1">
             <span className="text-sm font-semibold">Understand the bigger picture</span>
-            <span className="text-muted-foreground text-xs text-balance">
+            <span className="text-muted-foreground max-w-xl text-xs text-balance">
               Portuguese grocery inflation hit 20%+ over the last 5 years. See the data, understand the impact, and
               learn how Price Lens helps you fight back.
             </span>

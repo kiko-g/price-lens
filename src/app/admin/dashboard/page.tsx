@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { DollarSignIcon, ShoppingCartIcon } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard",
+  title: "Admin Dashboard | Admin",
   description: "Admin dashboard hub for Price Lens",
 }
 

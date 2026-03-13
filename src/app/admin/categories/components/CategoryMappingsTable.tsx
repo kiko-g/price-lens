@@ -33,6 +33,9 @@ import {
   CheckIcon,
   XIcon,
   FilterIcon,
+  AlertTriangleIcon,
+  Loader2Icon,
+  DownloadIcon,
 } from "lucide-react"
 
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
@@ -58,6 +61,13 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
   const [page, setPage] = useState(1)
   const [selectedTuples, setSelectedTuples] = useState<Set<string>>(new Set())
   const [mapDialogOpen, setMapDialogOpen] = useState(false)
+  const [checkDialogOpen, setCheckDialogOpen] = useState(false)
+  const [checkResult, setCheckResult] = useState<{
+    totalChecked: number
+    flaggedCount: number
+    flagged: { tuple: StoreCategoryTuple; canonicalPath: string; reasons: string[] }[]
+  } | null>(null)
+  const [checkLoading, setCheckLoading] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -140,6 +150,58 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
     return tuples.filter((t) => selectedTuples.has(getTupleKey(t)))
   }, [tuples, selectedTuples])
 
+  const exportCheckCsv = () => {
+    if (!checkResult) return
+    const escape = (v: string | number | null | undefined): string => {
+      const s = String(v ?? "")
+      if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
+        return `"${s.replace(/"/g, '""')}"`
+      }
+      return s
+    }
+    const headers = ["Store", "Store category", "Canonical", "Reasons"]
+    const rows = checkResult.flagged.map((item) => {
+      const storePath = [item.tuple.store_category, item.tuple.store_category_2, item.tuple.store_category_3]
+        .filter(Boolean)
+        .join(" > ")
+      return [
+        escape(item.tuple.origin_name ?? item.tuple.origin_id),
+        escape(storePath),
+        escape(item.canonicalPath),
+        escape(item.reasons.join("; ")),
+      ]
+    })
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n")
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `mapping-check-flagged-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleRunCheck = async () => {
+    setCheckLoading(true)
+    setCheckResult(null)
+    setCheckDialogOpen(true)
+    try {
+      const res = await axios.get<{
+        totalChecked: number
+        flaggedCount: number
+        flagged: { tuple: StoreCategoryTuple; canonicalPath: string; reasons: string[] }[]
+      }>("/api/admin/categories/mappings/check")
+      setCheckResult(res.data)
+    } catch (err: unknown) {
+      toast.error("Check failed", {
+        description: err instanceof Error ? err.message : "Could not run mapping check",
+      })
+      setCheckResult(null)
+    } finally {
+      setCheckLoading(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -148,10 +210,21 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
             <LinkIcon className="text-primary h-5 w-5" />
             Store Category Mappings
           </CardTitle>
-          <Button onClick={() => setMapDialogOpen(true)} disabled={selectedTuples.size === 0}>
-            <LinkIcon className="mr-2 h-4 w-4" />
-            Map {selectedTuples.size} Selected
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleRunCheck} disabled={checkLoading}>
+              {checkLoading ? (
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <AlertTriangleIcon className="mr-2 h-4 w-4" />
+              )}
+              Check mappings (dry run)
+            </Button>
+            <Button onClick={() => setMapDialogOpen(true)} disabled={selectedTuples.size === 0}>
+              <LinkIcon className="mr-2 h-4 w-4" />
+              Map {selectedTuples.size} Selected
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -230,7 +303,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
         </div>
 
         {/* Table */}
-        <div className="rounded-md border">
+        <div className="overflow-hidden rounded-md border">
           <Table>
             <TableHeader>
               <TableRow className="bg-accent">
@@ -250,6 +323,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                 <TableHead className="w-[200px]">Canonical</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 10 }).map((_, i) => (
@@ -299,7 +373,12 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                           checked={isSelected}
                           onCheckedChange={(checked) => handleSelectTuple(tuple, !!checked)}
                           disabled={tuple.is_mapped}
-                          aria-label={`Select ${tuple.store_category}`}
+                          title={tuple.is_mapped ? "Already mapped" : undefined}
+                          aria-label={
+                            tuple.is_mapped
+                              ? `${tuple.store_category} (already mapped)`
+                              : `Select ${tuple.store_category}`
+                          }
                         />
                       </TableCell>
                       <TableCell>{Logo && <Logo className="h-3 w-16" />}</TableCell>
@@ -316,7 +395,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                             Mapped
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="border-amber-500 text-amber-500">
+                          <Badge variant="glass-warning">
                             <Link2OffIcon className="mr-1 h-3 w-3" />
                             Unmapped
                           </Badge>
@@ -397,6 +476,105 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
             queryClient.invalidateQueries({ queryKey: ["admin-categories-stats"] })
           }}
         />
+
+        {/* Check mappings (dry run) dialog */}
+        <Dialog open={checkDialogOpen} onOpenChange={setCheckDialogOpen}>
+          <DialogContent className="max-w-7xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
+                Mapping check (dry run)
+              </DialogTitle>
+              <DialogDescription>Potentially bad mappings flagged by heuristics. No data is changed.</DialogDescription>
+            </DialogHeader>
+            {checkLoading ? (
+              <div className="flex items-center justify-center gap-2 py-12">
+                <Loader2Icon className="h-6 w-6 animate-spin" />
+                <span className="text-muted-foreground">Checking all mapped tuples…</span>
+              </div>
+            ) : checkResult ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex gap-4 text-sm">
+                    <span className="text-muted-foreground">
+                      Checked <span className="text-foreground font-medium">{checkResult.totalChecked}</span> mapped
+                      tuples
+                    </span>
+                    <span>
+                      Flagged{" "}
+                      <span
+                        className={cn(
+                          "font-medium",
+                          checkResult.flaggedCount > 0 ? "text-amber-600" : "text-emerald-600",
+                        )}
+                      >
+                        {checkResult.flaggedCount}
+                      </span>
+                    </span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={exportCheckCsv}>
+                    <DownloadIcon className="mr-2 h-4 w-4" />
+                    Export as CSV
+                  </Button>
+                </div>
+                {checkResult.flaggedCount === 0 ? (
+                  <p className="text-muted-foreground py-4 text-center text-sm">
+                    No mappings flagged. Heuristics did not find obvious mismatches.
+                  </p>
+                ) : (
+                  <div className="overflow-hidden rounded-md border">
+                    <div className="h-[400px] overflow-auto">
+                      <Table className="w-full min-w-[640px] table-fixed border-separate border-spacing-0">
+                        <TableHeader>
+                          <TableRow className="bg-accent">
+                            <TableHead className="rounded-bl-0 w-[10%] rounded-tl-md">Store</TableHead>
+                            <TableHead className="w-[30%]">Store category</TableHead>
+                            <TableHead className="w-[15%]">Canonical</TableHead>
+                            <TableHead className="rounded-br-0 min-w-[55%] rounded-tr-md">Reasons</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {checkResult.flagged.map((item) => {
+                            const Logo = STORE_LOGOS[item.tuple.origin_id]
+                            const storePath = [
+                              item.tuple.store_category,
+                              item.tuple.store_category_2,
+                              item.tuple.store_category_3,
+                            ]
+                              .filter(Boolean)
+                              .join(" > ")
+                            return (
+                              <TableRow key={getTupleKey(item.tuple)}>
+                                <TableCell
+                                  className="truncate"
+                                  title={item.tuple.origin_name ?? String(item.tuple.origin_id)}
+                                >
+                                  {Logo && <Logo className="h-3 w-16" />}
+                                </TableCell>
+                                <TableCell className="truncate text-xs font-medium tracking-tight" title={storePath}>
+                                  {storePath}
+                                </TableCell>
+                                <TableCell
+                                  className="text-muted-foreground truncate text-xs tracking-tight"
+                                  title={item.canonicalPath}
+                                >
+                                  {item.canonicalPath}
+                                </TableCell>
+                                <TableCell className="text-xs tracking-tighter text-amber-600">
+                                  {item.reasons.join("; ")}
+                                </TableCell>
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )

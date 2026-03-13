@@ -80,7 +80,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       e.preventDefault()
       const digits = manualTextValue.replace(/\D/g, "")
       if (!isProductBarcode(digits)) {
-        setError("Enter a valid barcode (8–14 digits).")
+        setError("Enter a valid barcode (8 to 14 digits).")
         return
       }
       setOpen(false)

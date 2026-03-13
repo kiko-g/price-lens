@@ -1,13 +1,11 @@
 import { Suspense } from "react"
-
-import { defaultMetadata } from "@/lib/config"
 import type { Metadata } from "next"
+import { defaultMetadata } from "@/lib/config"
 
 import { Layout } from "@/components/layout"
 import { Hero } from "@/components/home/Hero"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
-import { SavingsSpotlight } from "@/components/home/SavingsSpotlight"
-import { FeaturePreviewCards } from "@/components/home/FeaturePreviewCards"
+import { SavingsSpotlightWithFeatures } from "@/components/home/SavingsSpotlightWithFeatures"
 import { AboutTeaserCta } from "@/components/home/AboutTeaserCta"
 
 export const revalidate = 3600
@@ -41,16 +39,8 @@ export default async function Home() {
         >
           <Hero />
         </Suspense>
-
-        <section className="w-full px-4 py-16 md:py-24">
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-2 md:grid-rows-2">
-            <SavingsSpotlight />
-            <FeaturePreviewCards />
-          </div>
-        </section>
-
+        <SavingsSpotlightWithFeatures />
         <Separator />
-
         <AboutTeaserCta />
       </main>
     </Layout>

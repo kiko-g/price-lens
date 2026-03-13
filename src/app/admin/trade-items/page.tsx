@@ -4,7 +4,7 @@ import { TradeItemExplorer } from "@/components/admin/TradeItemExplorer"
 import { Loader2 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Trade Items",
+  title: "Trade Items | Admin",
   description: "Explore trade items and Open Food Facts enrichment data",
 }
 

@@ -1,0 +1,14 @@
+---
+description: Use SupermarketChainBadge for store identity; no hardcoded store colors or names
+alwaysApply: true
+---
+
+# Supermarket / store identity in the UI
+
+Always use the shared component for showing which supermarket a product or row belongs to.
+
+- **Use** `SupermarketChainBadge` from `@/components/products/SupermarketChainBadge` with `originId` (number). Variants: `logo`, `logoSmall`, `badge`.
+- **Do not** hardcode store colors (e.g. `bg-red-500` for Continente) or `Record<string, string>` maps keyed by store name.
+- **Do not** render a colored dot + store name when you have `originId`; use `SupermarketChainBadge` instead.
+
+For display names from `originId`, use `getSupermarketChainName(originId)` from the same file when you need the string only (e.g. labels, aria).

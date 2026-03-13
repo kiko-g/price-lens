@@ -1997,7 +1997,7 @@ function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: 
   const router = useRouter()
 
   return (
-    <div className="flex flex-1 items-center justify-center p-4">
+    <div className="flex flex-1 items-start justify-center p-4">
       <EmptyStateView
         title="No results found"
         message={

@@ -9,28 +9,11 @@ import { updateProductPriority } from "@/app/admin/priorities/actions"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { PRIORITY_CONFIG, PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 
 type Props = {
   product: StoreProduct
   onUpdate: (product: StoreProduct) => void
-}
-
-const priorityLabels: Record<number, string> = {
-  0: "Niche",
-  1: "Rare",
-  2: "Occasional",
-  3: "Moderate",
-  4: "Frequent",
-  5: "Essential",
-}
-
-const priorityColors: Record<number, string> = {
-  0: "bg-gray-500",
-  1: "bg-blue-500",
-  2: "bg-cyan-500",
-  3: "bg-green-500",
-  4: "bg-yellow-500",
-  5: "bg-red-500",
 }
 
 function resolveImageUrlForCard(image: string, size = 300) {
@@ -103,7 +86,7 @@ export function AdminProductPriorityCard({ product, onUpdate }: Props) {
             <div className="absolute top-1 left-1">
               <Badge
                 variant="secondary"
-                className={cn("text-xs font-semibold text-white", priorityColors[product.priority])}
+                className={cn("text-xs font-semibold text-white", PRIORITY_CONFIG[String(product.priority)]?.bgClass)}
               >
                 P{product.priority}
               </Badge>
@@ -129,16 +112,19 @@ export function AdminProductPriorityCard({ product, onUpdate }: Props) {
             <SelectItem value="null" disabled>
               <span className="text-muted-foreground">Not set</span>
             </SelectItem>
-            {Object.entries(priorityLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                <div className="flex items-center gap-2">
-                  <div className={cn("h-2 w-2 rounded-full", priorityColors[parseInt(value)])} />
-                  <span>
-                    {value} - {label}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
+            {PRODUCT_PRIORITY_LEVELS.map((value) => {
+              const config = PRIORITY_CONFIG[String(value)]
+              return (
+                <SelectItem key={value} value={String(value)}>
+                  <div className="flex items-center gap-2">
+                    <div className={cn("h-2 w-2 rounded-full", config?.bgClass)} />
+                    <span>
+                      {value} - {config?.description ?? "?"}
+                    </span>
+                  </div>
+                </SelectItem>
+              )
+            })}
           </SelectContent>
         </Select>
 

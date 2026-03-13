@@ -855,7 +855,7 @@ export type Database = {
     }
     Enums: {
       plan_tier: "free" | "plus"
-      priority_source_type: "ai" | "manual" | "category_default"
+      priority_source_type: "ai" | "manual" | "category_default" | "unmapped"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -980,7 +980,7 @@ export const Constants = {
   public: {
     Enums: {
       plan_tier: ["free", "plus"],
-      priority_source_type: ["ai", "manual", "category_default"],
+      priority_source_type: ["ai", "manual", "category_default", "unmapped"],
       user_role: ["user", "admin"],
     },
   },

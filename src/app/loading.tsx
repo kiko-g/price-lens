@@ -8,10 +8,12 @@ export default function RootLoading() {
       <div className="flex animate-[fadeInScale_0.6s_ease-out_both] flex-col items-center gap-5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/price-lens.svg"
+          src="/price-lens-64.svg"
           alt=""
           width={64}
           height={64}
+          fetchPriority="high"
+          loading="eager"
           className="size-16 drop-shadow-[0_0_24px_rgba(99,106,215,0.4)]"
         />
         <span className="text-foreground text-lg font-bold tracking-tight">Price Lens</span>

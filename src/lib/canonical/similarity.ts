@@ -188,7 +188,7 @@ export function parseSize(pack: string | null, majorUnit: string | null): Normal
 }
 
 /**
- * Returns 0–1 indicating how similar two sizes are.
+ * Returns 0-1 indicating how similar two sizes are.
  * 1 = exact match, 0 = incompatible units or >20 % difference.
  */
 export function calculateSizeSimilarity(size1: NormalizedSize | null, size2: NormalizedSize | null): number {

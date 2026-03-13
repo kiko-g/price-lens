@@ -219,7 +219,6 @@ export async function POST(req: NextRequest) {
 }
 
 async function getTriageStats(supabase: SupabaseClient, configs: { originId: number; name: string }[]) {
-  // Count untriaged products and vetoed SKUs per origin in parallel
   const vetoedCountPromises = configs.map((config) =>
     supabase
       .from("vetoed_store_skus")
@@ -228,19 +227,40 @@ async function getTriageStats(supabase: SupabaseClient, configs: { originId: num
       .then((res) => ({ originId: config.originId, count: res.count ?? 0 })),
   )
 
-  const [untriagedRes, ...vetoedCounts] = await Promise.all([
+  const parkedCountPromises = configs.map((config) =>
+    supabase
+      .from("store_products")
+      .select("*", { count: "exact", head: true })
+      .eq("priority_source", "unmapped")
+      .eq("origin_id", config.originId)
+      .then((res) => ({ originId: config.originId, count: res.count ?? 0 })),
+  )
+
+  const [untriagedRes, parkedRes, ...restCounts] = await Promise.all([
     supabase.from("store_products").select("*", { count: "exact", head: true }).is("priority", null).is("name", null),
+    supabase.from("store_products").select("*", { count: "exact", head: true }).eq("priority_source", "unmapped"),
     ...vetoedCountPromises,
+    ...parkedCountPromises,
   ])
+
+  const vetoedCounts = restCounts.slice(0, configs.length)
+  const parkedCounts = restCounts.slice(configs.length)
 
   const vetoedByOrigin: Record<number, number> = {}
   for (const { originId, count } of vetoedCounts) {
     vetoedByOrigin[originId] = count
   }
 
+  const parkedByOrigin: Record<number, number> = {}
+  for (const { originId, count } of parkedCounts) {
+    parkedByOrigin[originId] = count
+  }
+
   return {
     untriagedCount: untriagedRes.count ?? 0,
     totalVetoed: vetoedCounts.reduce((sum, v) => sum + v.count, 0),
     vetoedByOrigin,
+    parkedCount: parkedRes.count ?? 0,
+    parkedByOrigin,
   }
 }

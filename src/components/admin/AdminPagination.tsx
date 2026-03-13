@@ -77,7 +77,7 @@ export function AdminPagination({ page, limit, totalCount, totalPages, hasNextPa
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-sm">Rows:</span>
             <Select value={String(limit)} onValueChange={changeLimit}>
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-auto">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

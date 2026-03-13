@@ -49,6 +49,8 @@ const badgeVariants = cva(
           "border-primary/20 bg-primary/10 text-foreground hover:bg-primary/20 dark:border-primary/40 dark:bg-primary/20 dark:text-foreground dark:hover:bg-primary/30 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         "glass-success":
           "border-transparent dark:border-transparent bg-success/10 text-success hover:bg-success/20 [&_span.bubble]:bg-success",
+        "glass-warning":
+          "border-transparent dark:border-transparent bg-warning/10 text-warning hover:bg-warning/20 [&_span.bubble]:bg-warning",
       },
       size: {
         default: `px-3 py-1 [&_span.bubble]:size-2 [&_svg]:size-3`,

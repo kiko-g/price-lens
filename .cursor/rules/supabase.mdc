@@ -31,4 +31,11 @@ Dump files are gitignored. Restore writes only to local (`127.0.0.1:54322`), nev
 
 - **Types:** `pnpm supabase:generate:types` generates from the **local** DB (`--local`) so `src/types/supabase.ts` matches the running schema (e.g. includes `trade_items`, `canonical_products` if migrations were applied locally). Remote project is used only for dump/restore and linking.
 
-- Supabase has a limit of 1000 when presenting results sometimes. When making queries we need to handle this as if results can be way more than that hard limit, using pagination perhaps.
+### Supabase 1000-row limit
+
+The Supabase JS client / PostgREST API returns **at most 1000 rows per request by default**. This is a hard ceiling — `.limit(2000)` still returns 1000. Any query that could match more than 1000 rows **must** paginate:
+
+- **Cursor-based** (preferred): `query.gt("id", lastId).order("id").limit(900)` in a loop until the batch returns fewer rows than the limit. Use 900 (not 1000) as page size to stay safely under the cap.
+- **Range-based** (alternative): `query.range(offset, offset + 999)` but this is slower for large offsets.
+- **Never assume a single `.select()` returns all rows** — always check if `data.length === pageSize` and continue if so.
+- For count-only queries, use `.select("*", { count: "exact", head: true })` which returns the count without the row limit.

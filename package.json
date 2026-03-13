@@ -26,6 +26,7 @@
     "db:dump:schema": "npx supabase db dump --linked -f supabase/schema.sql",
     "db:dump:data": "npx supabase db dump --linked --data-only -f supabase/data.sql",
     "db:restore": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres, anon, authenticated, service_role;' && psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/schema.sql && psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/data.sql",
+    "db:sync": "bash scripts/db-sync-with-progress.sh",
     "supabase:generate:types": "npx supabase gen types typescript --local > src/types/supabase.ts",
     "canonical:run": "tsx scripts/canonical-pipeline.ts",
     "canonical:run:prod": "env-cmd -f .env.production tsx scripts/canonical-pipeline.ts",
