@@ -1,6 +1,6 @@
 -- Auto-generated: category mappings + governance export
 -- Source: local DB
--- Generated: 2026-03-13T01:41:07.262Z
+-- Generated: 2026-03-13T01:46:45.146Z
 -- Total mappings: 2220
 
 -- ============================================================================
@@ -1364,51 +1364,6 @@ INSERT INTO category_mappings (origin_id, store_category, store_category_2, stor
 INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Chás e Infusões', 192);
 INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Cereais e Barras', NULL, 63);
 INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Chocolate Solúvel', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Chás e Infusões', 192);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Café Torrado', 189);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Café Solúvel', 191);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Café em Cápsulas', 190);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Chocolate Solúvel', 'Bebidas de Cereais', 193);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Bebidas Solúveis', 'Chocolate Solúvel', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Bebidas Solúveis', 'Café Torrado', 189);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Bebidas Solúveis', 'Café Solúvel', 191);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Bebidas Solúveis', 'Café em Cápsulas', 190);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Bebidas Solúveis', 'Bebidas de Cereais', 193);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Tortitas de Arroz e Milho', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Sortidos de Bolachas', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Maria, Torrada e Biscoitos', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolos, Napolitanas, Queques', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolachas Infantis', 265);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolachas Fibra e Sem Açúcar', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolachas e Biscoitos Salgados', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolachas de Manteiga', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolachas de Chocolate', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Bolachas, Biscoitos e Tostas', 'Bolachas com Cobertura e Recheio', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Azeite, Óleo e Vinagre', 'Vinagre', 273);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Azeite, Óleo e Vinagre', 'Óleo Alimentar', 272);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Azeite, Óleo e Vinagre', 'Azeite', 271);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Até 50% nos melhores chocolates, gomas e rebuçados', NULL, 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Puré', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Noodles', 269);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Massa', 268);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Feijão, Grão de Bico e Lentilhas', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Farinha e Pão Ralado', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Couscous, Quinoa, Bulgur e Outros', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Arroz, Massa e Farinha', 'Arroz', 267);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Alimentação Infantil', 'Snacks e Bolachinhas', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Alimentação Infantil', 'Refeições', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Alimentação Infantil', 'Papas Infantis', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Alimentação Infantil', 'Leites em Pó e Bebidas Lácteas', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Alimentação Infantil', 'Boiões, Saquetas e Puré de Fruta', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Alimentação Infantil', 'Alimentos Lácteos', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Preparados para Mousses e Bolos', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Leite Condensado e Leite de Coco', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Gelatinas e Pudins', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Fermento', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Cacau e Chocolates de Culinária', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Aromas e Toppings', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Açúcar e Sobremesas', 'Açúcar e Adoçante', 7);
-INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Café, Chá e Bebidas Solúveis', 'Chás e Infusões', 192);
 INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Cereais e Barras', 'Flocos e Papas de Aveia', 63);
 INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Mercearia', 'Cereais e Barras', 'Muesli e Granola', 63);
 INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (1, 'Negócios', 'Escritório', NULL, 149);

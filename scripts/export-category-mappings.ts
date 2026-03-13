@@ -144,12 +144,25 @@ async function main() {
     "",
   )
 
+  const seen = new Set<string>()
+  let deduped = 0
+
   for (const m of allMappings) {
     const cat2 = m.store_category_2 ? `'${escapeSQL(m.store_category_2)}'` : "NULL"
     const cat3 = m.store_category_3 ? `'${escapeSQL(m.store_category_3)}'` : "NULL"
+    const key = `${m.origin_id}|${m.store_category}|${m.store_category_2 ?? ""}|${m.store_category_3 ?? ""}`
+    if (seen.has(key)) {
+      deduped++
+      continue
+    }
+    seen.add(key)
     lines.push(
       `INSERT INTO category_mappings (origin_id, store_category, store_category_2, store_category_3, canonical_category_id) VALUES (${m.origin_id}, '${escapeSQL(m.store_category)}', ${cat2}, ${cat3}, ${m.canonical_category_id});`,
     )
+  }
+
+  if (deduped > 0) {
+    console.log(`  Deduplicated ${deduped} duplicate mapping rows`)
   }
 
   lines.push("")
