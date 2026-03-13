@@ -6,4 +6,4 @@
 ALTER TYPE priority_source_type ADD VALUE IF NOT EXISTS 'unmapped';
 
 -- 2. Clear incorrectly vetoed Pingo Doce SKUs from the premature triage run
-DELETE FROM vetoed_store_skus WHERE origin_id = 3;
+DELETE FROM vetoed_store_skus;
