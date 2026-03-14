@@ -116,11 +116,11 @@ interface EnhancedStats {
 }
 
 const SETTINGS = {
-  origins: [1],
+  origins: [1, 2, 3],
   priorities: [],
   missingBarcode: true,
   available: true,
-  onlyUrl: false,
+  onlyUrl: true,
   batchSize: 5,
   jobLimit: null,
   useAntiBlock: false,
