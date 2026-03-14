@@ -1355,7 +1355,7 @@ export default function BulkScrapePage() {
                   const Logo = origin?.Logo
 
                   return (
-                    <div key={product.id} className="flex items-center gap-3 rounded-lg border p-3 transition-colors">
+                    <div key={product.id} className="flex items-start gap-3 rounded-lg border p-3 transition-colors">
                       {product.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -1390,7 +1390,11 @@ export default function BulkScrapePage() {
                             <span className="text-amber-600">No barcode</span>
                           )}
                           {product.url && (
-                            <Link href={product.url} target="_blank" className="flex items-center gap-1 text-blue-600">
+                            <Link
+                              href={product.url}
+                              target="_blank"
+                              className="text-muted-foreground hover:text-foreground flex max-w-[600px] items-center gap-1 truncate"
+                            >
                               <ExternalLinkIcon className="h-3 w-3" />
                               {product.url}
                             </Link>
@@ -1407,12 +1411,12 @@ export default function BulkScrapePage() {
                           {Logo && <Logo className="h-4 w-auto" />}
                         </Link>
                         <span className="text-sm font-semibold">
-                          {product.price != null
+                          {product.price !== null
                             ? product.price.toLocaleString("pt-PT", { style: "currency", currency: "EUR" })
-                            : "—"}
+                            : "No price"}
                         </span>
                         <div className="flex items-center gap-1">
-                          {product.last_http_status != null && (
+                          {product.last_http_status !== null && (
                             <Badge variant="outline" size="2xs" title="Last HTTP status from scrape">
                               HTTP {product.last_http_status}
                             </Badge>
