@@ -120,7 +120,7 @@ export function CanonicalCategoryTree({ categories, isLoading }: CanonicalCatego
               normalizing store-specific categories.
             </p>
             <Button className="mt-4" onClick={() => handleAddChild(null)}>
-              <PlusIcon className="mr-2 h-4 w-4" />
+              <PlusIcon className="h-4 w-4" />
               Create First Category
             </Button>
           </div>

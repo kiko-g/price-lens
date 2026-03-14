@@ -42,6 +42,15 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Allow Vercel cron invocations to admin API cron targets (CRON_SECRET is sent by Vercel)
+  const cronPaths = ["/api/admin/analytics/compute-worker", "/api/admin/discovery", "/api/admin/discovery/triage"]
+  if (process.env.CRON_SECRET && cronPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    const authHeader = request.headers.get("authorization")
+    if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
+      return supabaseResponse
+    }
+  }
+
   // Define protected routes that require authentication
   const protectedRoutes = ["/profile", "/admin", "/api/admin"]
 

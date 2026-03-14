@@ -214,14 +214,14 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleRunCheck} disabled={checkLoading}>
               {checkLoading ? (
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2Icon className="h-4 w-4 animate-spin" />
               ) : (
-                <AlertTriangleIcon className="mr-2 h-4 w-4" />
+                <AlertTriangleIcon className="h-4 w-4" />
               )}
               Check mappings (dry run)
             </Button>
             <Button onClick={() => setMapDialogOpen(true)} disabled={selectedTuples.size === 0}>
-              <LinkIcon className="mr-2 h-4 w-4" />
+              <LinkIcon className="h-4 w-4" />
               Map {selectedTuples.size} Selected
             </Button>
           </div>
@@ -513,7 +513,7 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
                     </span>
                   </div>
                   <Button variant="outline" size="sm" onClick={exportCheckCsv}>
-                    <DownloadIcon className="mr-2 h-4 w-4" />
+                    <DownloadIcon className="h-4 w-4" />
                     Export as CSV
                   </Button>
                 </div>

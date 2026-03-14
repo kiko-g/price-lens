@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+
+## Vercel
+
+- **Plan:** Vercel Pro. Do not assume Hobby plan or suggest cron limits (e.g. "once per day") as causes for failures.
+
+### Cron authentication
+
+Admin cron routes (`/api/admin/analytics/compute-worker`, `/api/admin/discovery`, `/api/admin/discovery/triage`) bypass auth when `Authorization: Bearer ${CRON_SECRET}` matches. **`CRON_SECRET` must be set in Vercel env vars** (Project Settings → Environment Variables) or cron requests get 401 before the handler runs.
