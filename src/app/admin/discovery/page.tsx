@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 
 import {
@@ -93,6 +94,7 @@ export default function DiscoveryPage() {
   const [lastTriageMode, setLastTriageMode] = useState<"triage" | "audit">("triage")
   const [auditScope, setAuditScope] = useState<"parked" | "full">("parked")
   const [auditForce, setAuditForce] = useState(false)
+  const [auditOrigin, setAuditOrigin] = useState<number | "all">("all")
 
   const {
     data: status,
@@ -165,9 +167,29 @@ export default function DiscoveryPage() {
   })
 
   const runAuditMutation = useMutation({
-    mutationFn: async ({ scope, force }: { scope: "parked" | "full"; force: boolean }) => {
+    mutationFn: async ({ scope, force, origin }: { scope: "parked" | "full"; force: boolean; origin: number | "all" }) => {
+      if (origin === "all" && scope === "full") {
+        const originIds = status?.availableOrigins.map((o) => o.id) ?? [1, 2, 3]
+        const merged: TriageResult = { processed: 0, kept: 0, vetoed: 0, parked: 0, errors: 0, notFound: 0, unmappedCategories: [], durationMs: 0 }
+        for (const oid of originIds) {
+          const res = await axios.get(
+            `/api/admin/discovery/triage?mode=audit&scope=${scope}&force=${force}&dry=${dryRun}&verbose=true&origin=${oid}`,
+          )
+          const r = res.data.result as TriageResult
+          merged.processed += r.processed
+          merged.kept += r.kept
+          merged.vetoed += r.vetoed
+          merged.parked += r.parked
+          merged.errors += r.errors
+          merged.notFound += r.notFound
+          merged.unmappedCategories.push(...r.unmappedCategories)
+          merged.durationMs += r.durationMs
+        }
+        return { message: `Audit complete across all origins`, mode: "audit", scope, dryRun, result: merged }
+      }
+      const originParam = origin === "all" ? "" : `&origin=${origin}`
       const res = await axios.get(
-        `/api/admin/discovery/triage?mode=audit&scope=${scope}&force=${force}&dry=${dryRun}&verbose=true`,
+        `/api/admin/discovery/triage?mode=audit&scope=${scope}&force=${force}&dry=${dryRun}&verbose=true${originParam}`,
       )
       return res.data as { message: string; mode: string; scope: string; dryRun: boolean; result: TriageResult }
     },
@@ -450,7 +472,7 @@ export default function DiscoveryPage() {
                   variant="outline"
                   onClick={() => {
                     setLastTriageResult(null)
-                    runAuditMutation.mutate({ scope: auditScope, force: auditForce })
+                    runAuditMutation.mutate({ scope: auditScope, force: auditForce, origin: auditScope === "full" ? auditOrigin : "all" })
                   }}
                   disabled={isTriageRunning}
                 >
@@ -507,6 +529,18 @@ export default function DiscoveryPage() {
                 </div>
 
                 {auditScope === "full" && (
+                  <>
+                  <Select value={String(auditOrigin)} onValueChange={(v) => setAuditOrigin(v === "all" ? "all" : parseInt(v, 10))}>
+                    <SelectTrigger className="h-7 w-[110px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All stores</SelectItem>
+                      {status?.availableOrigins.map((o) => (
+                        <SelectItem key={o.id} value={String(o.id)}>{o.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <div className="flex items-center gap-1.5">
                     <Switch
                       id="audit-force"
@@ -518,6 +552,7 @@ export default function DiscoveryPage() {
                       Override all
                     </Label>
                   </div>
+                  </>
                 )}
               </div>
             </div>
