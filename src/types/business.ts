@@ -77,7 +77,7 @@ export const getSortByType = (sortBy: string) => {
 
 export type SortByType = (typeof sortByTypes)[number]
 
-export const RANGES = ["1W", "2W", "1M", "3M", "6M", "1Y", "5Y", "Max"] as const
+export const RANGES = ["1W", "2W", "1M", "3M", "6M", "1Y", "Max"] as const
 export type DateRange = (typeof RANGES)[number]
 
 export const daysAmountInRange: {
@@ -89,8 +89,7 @@ export const daysAmountInRange: {
   "3M": 90,
   "6M": 180,
   "1Y": 365,
-  "5Y": 1825,
-  Max: 36500, // 100 years
+  Max: 365 * 5, // 5 years (for now)
 }
 
 export const STORE_PRODUCT_FILTER_DEFAULTS_MAP = {

@@ -82,7 +82,6 @@ export function buildChartData(
       "3M": 90,
       "6M": 180,
       "1Y": 365,
-      "5Y": 365 * 5,
     }
     start.setUTCDate(end.getUTCDate() - (daysMap[range] || 30))
   }
