@@ -1393,10 +1393,10 @@ export default function BulkScrapePage() {
                             <Link
                               href={product.url}
                               target="_blank"
-                              className="text-muted-foreground hover:text-foreground flex max-w-[600px] items-center gap-1 truncate"
+                              className="text-muted-foreground hover:text-foreground line-clamp-2 flex max-w-[600px] items-start gap-1 truncate"
                             >
-                              <ExternalLinkIcon className="h-3 w-3" />
-                              {product.url}
+                              <ExternalLinkIcon className="size-3 shrink-0" />
+                              <span className="underline">{product.url}</span>
                             </Link>
                           )}
                         </div>
