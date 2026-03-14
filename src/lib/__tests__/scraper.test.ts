@@ -89,6 +89,42 @@ describe("cleanUrl", () => {
 
     expect(cleanedUrl).not.toContain("gclid")
   })
+
+  it("should fix unescaped % in path (e.g. 25%-gordura -> 25%25-gordura)", () => {
+    const badUrl =
+      "https://www.pingodoce.pt/home/produtos/charcutaria-e-queijos/queijos/nacional/queijo-de-vaca--25%-gordura-paiva-745002.html"
+    const cleanedUrl = scraper.cleanUrl(badUrl)
+
+    expect(cleanedUrl).toContain("25%25-gordura")
+    expect(cleanedUrl).not.toMatch(/25%-gordura/)
+  })
+
+  it("should fix all unescaped % variants from real failing URLs", () => {
+    const cases = [
+      "00%-melancia",
+      "0%-frutos",
+      "72%-cacau",
+      "100%-laranja",
+      "+50%-gullon",
+      "52%-cacau",
+      "60%-lindor",
+    ]
+    for (const slug of cases) {
+      const url = `https://www.pingodoce.pt/home/produtos/test/${slug}-123.html`
+      const cleaned = scraper.cleanUrl(url)
+      expect(cleaned).not.toMatch(/%(?![0-9A-Fa-f]{2})/, `Expected ${slug} to have lone % fixed`)
+      expect(cleaned).toContain("%25")
+    }
+  })
+
+  it("should encode zero-width chars (e.g. U+200B in nacional​/)", () => {
+    const zwsp = "\u200B"
+    const url = `https://www.pingodoce.pt/home/produtos/nacional${zwsp}/queijo-25%-gordura-745002.html`
+    const cleaned = scraper.cleanUrl(url)
+
+    expect(cleaned).toContain("%E2%80%8B")
+    expect(cleaned).toContain("25%25-gordura")
+  })
 })
 
 // ============================================================================

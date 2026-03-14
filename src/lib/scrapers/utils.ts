@@ -79,12 +79,27 @@ export const httpClient = axios.create({
   decompress: true,
 })
 
+/** Zero-width and other invisible chars that can cause 400 when unencoded (e.g. from decodeURIComponent). */
+const INVISIBLE_CHARS = /[\u200B\u200C\u200D\uFEFF]/g
+
 /**
- * Strips tracking/analytics parameters from URLs
+ * Fixes malformed percent-encoding and invisible chars that break requests.
+ * - Lone % not followed by 2 hex digits -> %25 (e.g. "25%-gordura" -> "25%25-gordura")
+ * - Zero-width space etc. -> percent-encoded (e.g. "nacional​/" -> "nacional%E2%80%8B/")
+ */
+function normalizeUrlEncoding(url: string): string {
+  let s = url.replace(INVISIBLE_CHARS, (c) => encodeURIComponent(c))
+  s = s.replace(/%(?![0-9A-Fa-f]{2})/g, "%25")
+  return s
+}
+
+/**
+ * Strips tracking/analytics parameters from URLs and normalizes malformed encoding.
  */
 export function cleanUrl(url: string): string {
   try {
-    const urlObj = new URL(url)
+    const normalized = normalizeUrlEncoding(url)
+    const urlObj = new URL(normalized)
     TRACKING_PARAMS.forEach((param) => urlObj.searchParams.delete(param))
     return urlObj.toString()
   } catch {

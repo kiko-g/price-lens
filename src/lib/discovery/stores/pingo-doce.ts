@@ -21,8 +21,7 @@ function urlNormalizer(url: string): string {
     parsed.search = ""
     parsed.hash = ""
     parsed.protocol = "https:"
-    // Decode percent-encoded characters for consistent storage
-    return decodeURIComponent(parsed.href)
+    return parsed.href
   } catch {
     return url
   }
