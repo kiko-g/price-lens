@@ -23,7 +23,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { BorderBeam } from "@/components/ui/magic/border-beam"
 
 import { ChevronLeft, ChevronRight, TrendingUp, ImageIcon, ScanBarcodeIcon } from "lucide-react"
 
@@ -340,7 +339,14 @@ const ShowcaseChart = memo(function ShowcaseChart({
                   content={<ChartTooltipContent />}
                   {...(isMobile ? { active: isTooltipActive } : {})}
                 />
-                <Line yAxisId="price" dataKey="price" type="linear" stroke="var(--chart-1)" strokeWidth={3} dot={false} />
+                <Line
+                  yAxisId="price"
+                  dataKey="price"
+                  type="linear"
+                  stroke="var(--chart-1)"
+                  strokeWidth={3}
+                  dot={false}
+                />
                 <Line
                   yAxisId="price"
                   dataKey="price-recommended"

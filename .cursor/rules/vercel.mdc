@@ -5,6 +5,7 @@ alwaysApply: true
 ## Vercel
 
 - **Plan:** Vercel Pro. Do not assume Hobby plan or suggest cron limits (e.g. "once per day") as causes for failures.
+- **Log retention:** 24 hours (no Observability Plus). For older debugging, use Log Drains or code analysis.
 
 ### Cron authentication
 
