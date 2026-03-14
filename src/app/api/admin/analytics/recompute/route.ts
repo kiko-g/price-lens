@@ -13,10 +13,7 @@ export async function POST() {
   try {
     const supabase = createAdminClient()
 
-    const useQStash =
-      process.env.NODE_ENV === "production" &&
-      process.env.CRON_SECRET &&
-      process.env.QSTASH_TOKEN
+    const useQStash = process.env.NODE_ENV === "production" && process.env.CRON_SECRET && process.env.QSTASH_TOKEN
 
     if (useQStash) {
       const baseUrl = getBaseUrl()

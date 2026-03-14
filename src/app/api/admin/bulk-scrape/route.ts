@@ -57,7 +57,9 @@ export async function GET(req: NextRequest) {
     // Get products with pagination
     let query = supabase
       .from("store_products")
-      .select("id, url, name, brand, barcode, price, image, origin_id, priority, available, category, updated_at")
+      .select(
+        "id, url, name, brand, barcode, price, image, origin_id, priority, available, category, updated_at, last_http_status",
+      )
 
     query = applyFilters(query, filters)
 
@@ -363,9 +365,7 @@ export async function PATCH(req: NextRequest) {
               status: "error",
               statusCode: response.status,
               error: json.error || `HTTP ${response.status}`,
-              details: details
-                ? `${details.message || ""} (code: ${details.code || "?"})`
-                : undefined,
+              details: details ? `${details.message || ""} (code: ${details.code || "?"})` : undefined,
               url: product.url,
               lastHttpStatus: json.last_http_status ?? null,
             }

@@ -48,7 +48,11 @@ function normalizeCategory(raw: string | null): string | null {
  * Extracts store categories from Pingo Doce URL path:
  *   /home/produtos/{cat1}/{cat2}/{cat3?}/{slug}-{SKU}.html
  */
-function categoryExtractor(url: string): { category: string | null; category2: string | null; category3: string | null } {
+function categoryExtractor(url: string): {
+  category: string | null
+  category2: string | null
+  category3: string | null
+} {
   try {
     const urlObj = new URL(url)
     const pathParts = urlObj.pathname.split("/").filter(Boolean)

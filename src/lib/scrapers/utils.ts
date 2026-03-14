@@ -156,7 +156,7 @@ export async function fetchHtml(url: string, useAntiBlock = false): Promise<Fetc
     return {
       html: null,
       status: "error",
-      httpStatus: axios.isAxiosError(error) ? error.response?.status ?? null : null,
+      httpStatus: axios.isAxiosError(error) ? (error.response?.status ?? null) : null,
     }
   }
 }

@@ -239,7 +239,12 @@ export async function runTriage(options: TriageOptions = {}): Promise<TriageResu
         if (!options.dryRun) {
           await supabase
             .from("store_products")
-            .update({ available: false, priority: 0, scraped_at: now(), last_http_status: scrapeResult.httpStatus ?? null })
+            .update({
+              available: false,
+              priority: 0,
+              scraped_at: now(),
+              last_http_status: scrapeResult.httpStatus ?? null,
+            })
             .eq("id", productId)
         }
         result.notFound++

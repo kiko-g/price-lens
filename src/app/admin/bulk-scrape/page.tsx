@@ -55,6 +55,8 @@ import {
   StoreIcon,
   MicroscopeIcon,
   PickaxeIcon,
+  ExternalLinkIcon,
+  ArrowRightIcon,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -270,6 +272,7 @@ export default function BulkScrapePage() {
           available: boolean
           category: string | null
           updated_at: string
+          last_http_status: number | null
         }>
         total: number
         page: number
@@ -1394,6 +1397,12 @@ export default function BulkScrapePage() {
                           ) : (
                             <span className="text-amber-600">No barcode</span>
                           )}
+                          {product.url && (
+                            <Link href={product.url} target="_blank" className="flex items-center gap-1 text-blue-600">
+                              <ExternalLinkIcon className="h-3 w-3" />
+                              {product.url}
+                            </Link>
+                          )}
                         </div>
                       </div>
 
@@ -1405,16 +1414,24 @@ export default function BulkScrapePage() {
                         >
                           {Logo && <Logo className="h-4 w-auto" />}
                         </Link>
-                        {product.price !== null && (
-                          <span className="text-sm font-semibold">
-                            {product.price.toLocaleString("pt-PT", { style: "currency", currency: "EUR" })}
-                          </span>
-                        )}
-                        <Link href="/products/[id]" as={`/products/${product.id}`} target="_blank">
-                          <Badge variant={product.available ? "secondary" : "destructive"} size="2xs">
-                            {product.available ? "Available" : "Unavailable"}
-                          </Badge>
-                        </Link>
+                        <span className="text-sm font-semibold">
+                          {product.price != null
+                            ? product.price.toLocaleString("pt-PT", { style: "currency", currency: "EUR" })
+                            : "—"}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {product.last_http_status != null && (
+                            <Badge variant="outline" size="2xs" title="Last HTTP status from scrape">
+                              HTTP {product.last_http_status}
+                            </Badge>
+                          )}
+                          <Link href={`/products/${product.id}`} target="_blank">
+                            <Badge variant={product.available ? "secondary" : "destructive"} size="2xs">
+                              {product.available ? "Available" : "Unavailable"}
+                              <ArrowRightIcon className="h-3 w-3" />
+                            </Badge>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   )

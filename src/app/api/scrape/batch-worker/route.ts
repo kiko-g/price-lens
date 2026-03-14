@@ -131,9 +131,7 @@ async function handler(req: NextRequest) {
         if (response.status !== 200) {
           failCount++
           const errorMsg = json.error || "Scrape failed"
-          const details = json.details
-            ? ` | ${json.details.message || ""} (code: ${json.details.code || "?"})`
-            : ""
+          const details = json.details ? ` | ${json.details.message || ""} (code: ${json.details.code || "?"})` : ""
           results.push({
             id: product.id,
             success: false,

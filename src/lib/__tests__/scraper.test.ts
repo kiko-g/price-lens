@@ -100,15 +100,7 @@ describe("cleanUrl", () => {
   })
 
   it("should fix all unescaped % variants from real failing URLs", () => {
-    const cases = [
-      "00%-melancia",
-      "0%-frutos",
-      "72%-cacau",
-      "100%-laranja",
-      "+50%-gullon",
-      "52%-cacau",
-      "60%-lindor",
-    ]
+    const cases = ["00%-melancia", "0%-frutos", "72%-cacau", "100%-laranja", "+50%-gullon", "52%-cacau", "60%-lindor"]
     for (const slug of cases) {
       const url = `https://www.pingodoce.pt/home/produtos/test/${slug}-123.html`
       const cleaned = scraper.cleanUrl(url)
