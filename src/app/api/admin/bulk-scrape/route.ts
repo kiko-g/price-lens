@@ -12,12 +12,12 @@ import {
 } from "@/lib/kv"
 import type { StoreProduct } from "@/types"
 
-export const maxDuration = 120
+export const maxDuration = 300
 
 // Page size for cursor-based pagination.
-// Kept small (200) to avoid Supabase statement timeouts on filtered queries.
-// 200 rows / 40 per batch = 5 QStash messages per page — very fast per iteration.
-const FETCH_PAGE_SIZE = 200
+// 400 rows per page balances query speed vs iteration count.
+// 63k products / 400 = ~158 iterations. Each page produces ~10 QStash messages.
+const FETCH_PAGE_SIZE = 400
 
 // QStash batchJSON supports up to 100 messages per call
 const QSTASH_BATCH_LIMIT = 100
