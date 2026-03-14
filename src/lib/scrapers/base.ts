@@ -27,13 +27,13 @@ export abstract class BaseProductScraper implements StoreScraper {
       // Handle 404 - product definitively doesn't exist
       if (fetchResult.status === "not_found") {
         console.warn(`[${this.name}] Product not found (404): ${ctx.url}`)
-        return { type: "not_found", product: null }
+        return { type: "not_found", product: null, httpStatus: fetchResult.httpStatus }
       }
 
       // Handle other fetch errors - don't change availability
       if (!fetchResult.html) {
         console.warn(`[${this.name}] Failed to fetch HTML from: ${ctx.url}`)
-        return { type: "error", product: null }
+        return { type: "error", product: null, httpStatus: fetchResult.httpStatus }
       }
 
       const $ = parseHtml(fetchResult.html)
@@ -41,23 +41,24 @@ export abstract class BaseProductScraper implements StoreScraper {
       // Check for soft 404 (page returns 200 but shows "not found" content)
       if (this.isSoftNotFound($)) {
         console.warn(`[${this.name}] Product not found (soft 404): ${ctx.url}`)
-        return { type: "not_found", product: null }
+        return { type: "not_found", product: null, httpStatus: 200 }
       }
 
       const rawProduct = await this.extractRawProduct($, cleanedUrl)
 
       if (!rawProduct) {
         console.warn(`[${this.name}] Failed to extract product data from: ${ctx.url}`)
-        return { type: "error", product: null }
+        return { type: "error", product: null, httpStatus: fetchResult.httpStatus }
       }
 
       return {
         type: "success",
         product: transformRawProduct(rawProduct, this.originId, priorityInfo),
+        httpStatus: fetchResult.httpStatus,
       }
     } catch (error) {
       console.error(`[${this.name}] Unexpected error scraping ${ctx.url}:`, error)
-      return { type: "error", product: null }
+      return { type: "error", product: null, httpStatus: undefined }
     }
   }
 

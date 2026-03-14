@@ -418,59 +418,63 @@ export const storeProductQueries = {
 
   /**
    * Records a scrape attempt for a URL (typically after a non-404 error like 500)
-   * - For existing records: only updates scraped_at
-   * - For new records: creates with url, created_at, and scraped_at
+   * - For existing records: only updates scraped_at and last_http_status
+   * - For new records: creates with url, created_at, scraped_at, and last_http_status
    * Note: Does NOT update updated_at - we want that to reflect last successful scrape
    */
-  async upsertBlank({ url }: { url: string }) {
+  async upsertBlank({ url, lastHttpStatus }: { url: string; lastHttpStatus?: number | null }) {
     const supabase = createClient()
     const timestamp = now()
+    const updatePayload: Record<string, unknown> = { scraped_at: timestamp }
+    if (lastHttpStatus != null) updatePayload.last_http_status = lastHttpStatus
 
     // First try to update scraped_at on existing record
     const { data: existingProduct } = await supabase
       .from("store_products")
-      .update({ scraped_at: timestamp })
+      .update(updatePayload)
       .eq("url", url)
       .select("id")
       .maybeSingle()
 
-    // If record exists, we're done (only updated scraped_at)
+    // If record exists, we're done (only updated scraped_at, last_http_status)
     if (existingProduct) {
       return { data: existingProduct, error: null }
     }
 
     // Record doesn't exist - create a new blank one
-    return supabase.from("store_products").insert({
+    const insertPayload: Record<string, unknown> = {
       url,
       created_at: timestamp,
       scraped_at: timestamp,
-    })
+    }
+    if (lastHttpStatus != null) insertPayload.last_http_status = lastHttpStatus
+    return supabase.from("store_products").insert(insertPayload)
   },
 
   /**
    * Marks a product as unavailable (typically after receiving a 404)
-   * Sets available = false and scraped_at = now, returns the product ID for further processing
+   * Sets available = false, scraped_at = now, and last_http_status; returns the product ID for further processing
    * Note: Does NOT update updated_at - we want that to reflect last successful scrape
    * Note: Caller should close the price point separately using priceQueries.closeLatestPricePoint
    */
-  async markUnavailable({ url }: { url: string }) {
+  async markUnavailable({ url, lastHttpStatus }: { url: string; lastHttpStatus?: number | null }) {
     const supabase = createClient()
 
     // First, get the product to find its ID
     const { data: existingProduct } = await supabase.from("store_products").select("id").eq("url", url).maybeSingle()
 
+    const upsertPayload: Record<string, unknown> = {
+      url,
+      available: false,
+      scraped_at: now(), // Track when we last attempted to scrape (404 case)
+    }
+    if (lastHttpStatus != null) upsertPayload.last_http_status = lastHttpStatus
+
     // Mark as unavailable and update scraped_at
-    await supabase.from("store_products").upsert(
-      {
-        url,
-        available: false,
-        scraped_at: now(), // Track when we last attempted to scrape (404 case)
-      },
-      {
-        onConflict: "url",
-        ignoreDuplicates: false,
-      },
-    )
+    await supabase.from("store_products").upsert(upsertPayload, {
+      onConflict: "url",
+      ignoreDuplicates: false,
+    })
 
     // Return the product ID so caller can close the price point
     return { productId: existingProduct?.id ?? null }

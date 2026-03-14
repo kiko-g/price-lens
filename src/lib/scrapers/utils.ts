@@ -100,7 +100,7 @@ export function cleanUrl(url: string): string {
 export async function fetchHtml(url: string, useAntiBlock = false): Promise<FetchResult> {
   if (!url) {
     console.warn("URL is required. Skipping product.")
-    return { html: null, status: "error" }
+    return { html: null, status: "error", httpStatus: null }
   }
 
   // Add random delay before request to avoid rate limiting (only for bulk scraping)
@@ -115,27 +115,34 @@ export async function fetchHtml(url: string, useAntiBlock = false): Promise<Fetc
     const response = await httpClient.get(cleanedUrl, { headers })
     if (!response.data || typeof response.data !== "string") {
       console.warn("Empty or invalid response received. Skipping product.")
-      return { html: null, status: "error" }
+      return { html: null, status: "error", httpStatus: null }
     }
-    return { html: response.data, status: "success" }
+    return { html: response.data, status: "success", httpStatus: response.status }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      // Product doesn't exist (404, or Continente's 474 which means product hidden/removed)
-      if (error.response?.status === 404 || error.response?.status === 474) {
+      // Product doesn't exist or is unlisted
+      // 404 = standard not found, 474/471 = Continente custom codes for hidden/unlisted products
+      const notFoundStatuses = [404, 471, 474]
+      if (error.response?.status && notFoundStatuses.includes(error.response.status)) {
         console.warn(`[${error.response.status}] Product not found at URL: ${cleanedUrl}`)
-        return { html: null, status: "not_found" }
+        return { html: null, status: "not_found", httpStatus: error.response.status }
       }
       // Rate limiting / blocking responses (429, 403, etc.)
       if (error.response?.status && [429, 403].includes(error.response.status)) {
         console.warn(`[${error.response.status}] Rate limited/blocked at URL: ${cleanedUrl}`)
-        return { html: null, status: "error" }
+        return { html: null, status: "error", httpStatus: error.response.status }
       }
       if (error.code === "ECONNABORTED") {
         console.warn("Request timed out. Skipping product.")
+        return { html: null, status: "error", httpStatus: null }
       }
     }
     console.warn(`Failed to fetch HTML for URL ${cleanedUrl}:`, error)
-    return { html: null, status: "error" }
+    return {
+      html: null,
+      status: "error",
+      httpStatus: axios.isAxiosError(error) ? error.response?.status ?? null : null,
+    }
   }
 }
 

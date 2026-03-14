@@ -8,6 +8,7 @@ export type FetchStatus = "success" | "not_found" | "error"
 export interface FetchResult {
   html: string | null
   status: FetchStatus
+  httpStatus?: number | null
 }
 
 /**
@@ -18,6 +19,7 @@ export type ScrapeResultType = "success" | "not_found" | "error"
 export interface ScrapeResult {
   type: ScrapeResultType
   product: ScrapedProduct | null
+  httpStatus?: number | null
 }
 
 /**

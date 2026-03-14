@@ -112,7 +112,10 @@ export async function scrapeAndReplaceProduct(
   // Handle 404 - product definitively doesn't exist
   // Mark as unavailable AND close the price point (price is no longer valid)
   if (result.type === "not_found") {
-    const { productId } = await storeProductQueries.markUnavailable({ url })
+    const { productId } = await storeProductQueries.markUnavailable({
+      url,
+      lastHttpStatus: result.httpStatus ?? null,
+    })
 
     // Close the latest price point - the product is gone, so its price is no longer valid
     if (productId) {
@@ -124,7 +127,10 @@ export async function scrapeAndReplaceProduct(
 
   // Handle other errors - don't change availability status
   if (result.type === "error" || !result.product) {
-    await storeProductQueries.upsertBlank({ url })
+    await storeProductQueries.upsertBlank({
+      url,
+      lastHttpStatus: result.httpStatus ?? null,
+    })
     return NextResponse.json({ error: "StoreProduct scraping failed", url }, { status: 500 })
   }
 
@@ -148,7 +154,10 @@ export async function scrapeAndReplaceProduct(
     : undefined
 
   const { data, error } = await storeProductQueries.createOrUpdateProduct(
-    result.product as unknown as import("@/types").StoreProduct,
+    {
+      ...(result.product as unknown as import("@/types").StoreProduct),
+      last_http_status: result.httpStatus ?? 200,
+    },
     prefetchedExisting,
   )
 

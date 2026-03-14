@@ -75,6 +75,7 @@ export interface StoreProduct {
   created_at: string
   updated_at: string
   scraped_at?: string | null
+  last_http_status?: number | null
   is_favorited?: boolean
   canonical_category_id?: number | null
   canonical_category_name?: string | null
