@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { qstash, getBaseUrl, BATCH_SIZE } from "@/lib/qstash"
+import { qstash, getBaseUrl, WORKER_BATCH_SIZE } from "@/lib/qstash"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { updatePricePoint } from "@/lib/business/pricing"
 import {
@@ -12,7 +12,13 @@ import {
 } from "@/lib/kv"
 import type { StoreProduct } from "@/types"
 
-export const maxDuration = 60
+export const maxDuration = 120
+
+// Page size for cursor-based pagination (under Supabase 1000-row cap)
+const FETCH_PAGE_SIZE = 900
+
+// QStash batchJSON supports up to 100 messages per call
+const QSTASH_BATCH_LIMIT = 100
 
 // Direct mode batch size (smaller for direct processing)
 const DIRECT_BATCH_SIZE = 5
@@ -100,115 +106,174 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/admin/bulk-scrape
- * Starts a new bulk scrape job
+ * Starts a QStash bulk scrape job. Fetches all matching products via cursor-based
+ * pagination, groups them into batches of WORKER_BATCH_SIZE, and fans out to
+ * /api/scrape/batch-worker via QStash. Each batch runs on a separate Vercel
+ * function (different IP), giving natural IP rotation for large scrapes.
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const filters: BulkScrapeFilters = {
-      origins: body.origins || [1, 2], // Default to Continente + Auchan
+      origins: body.origins || [1, 2],
       priorities: body.priorities || [],
       missingBarcode: body.missingBarcode ?? true,
       available: body.available ?? null,
       onlyUrl: body.onlyUrl ?? false,
       category: body.category,
     }
+    const limit: number | null = body.limit ?? null
 
     const supabase = createClient()
     const baseUrl = getBaseUrl()
-    const workerUrl = `${baseUrl}/api/scrape/worker`
+    const batchWorkerUrl = `${baseUrl}/api/scrape/batch-worker`
 
-    // Fetch matching products
-    let query = supabase.from("store_products").select("id, url, name, origin_id, priority").not("url", "is", null)
+    // Wide column set so batch-worker skips per-product SELECTs
+    const COLUMNS =
+      "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at"
 
-    query = applyFilters(query, filters)
-
-    const { data: products, error } = await query.limit(10000) // Safety limit
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    // --- Cursor-based pagination to fetch ALL matching products (no 10k cap) ---
+    type ProductRow = {
+      id: number
+      url: string
+      name: string | null
+      origin_id: number
+      priority: number
+      priority_source: string | null
+      barcode: string | null
+      brand: string | null
+      image: string | null
+      pack: string | null
+      category: string | null
+      category_2: string | null
+      category_3: string | null
+      created_at: string | null
+      updated_at: string | null
     }
 
-    if (!products || products.length === 0) {
+    const allProducts: ProductRow[] = []
+    let lastId = 0
+    const maxProducts = limit ?? Infinity
+
+    while (allProducts.length < maxProducts) {
+      let q = supabase
+        .from("store_products")
+        .select(COLUMNS)
+        .not("url", "is", null)
+        .gt("id", lastId)
+        .order("id", { ascending: true })
+        .limit(Math.min(FETCH_PAGE_SIZE, maxProducts - allProducts.length))
+
+      q = applyFilters(q, filters)
+
+      const { data: page, error } = await q
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      if (!page || page.length === 0) break
+
+      allProducts.push(...(page as ProductRow[]))
+      lastId = page[page.length - 1].id
+
+      if (page.length < FETCH_PAGE_SIZE) break
+    }
+
+    if (allProducts.length === 0) {
       return NextResponse.json({ error: "No matching products found" }, { status: 400 })
     }
 
-    // Create job record
+    console.log(`[BulkScrape] Fetched ${allProducts.length} products for QStash fan-out`)
+
+    // --- Create job record ---
     const jobId = crypto.randomUUID().slice(0, 10)
     const job: BulkScrapeJob = {
       id: jobId,
       status: "running",
       filters,
-      total: products.length,
+      total: allProducts.length,
       processed: 0,
       failed: 0,
       barcodesFound: 0,
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
-
     await createBulkScrapeJob(job)
 
-    // Queue products to QStash in batches
-    let queuedCount = 0
+    // --- Build batch-worker payloads ---
+    const batchMessages: { url: string; body: Record<string, unknown>; retries: number }[] = []
+    for (let i = 0; i < allProducts.length; i += WORKER_BATCH_SIZE) {
+      const chunk = allProducts.slice(i, i + WORKER_BATCH_SIZE)
+      const batchId = `${jobId}-${Math.floor(i / WORKER_BATCH_SIZE)}`
 
-    for (let i = 0; i < products.length; i += BATCH_SIZE) {
-      const batch = products.slice(i, i + BATCH_SIZE)
-
-      const messages = batch.map((product) => ({
-        url: workerUrl,
-        body: JSON.stringify({
-          productId: product.id,
-          url: product.url,
-          name: product.name,
-          originId: product.origin_id,
-          priority: product.priority,
-          bulkJobId: jobId, // Track which job this belongs to
-        }),
-        headers: {
-          "Content-Type": "application/json",
+      batchMessages.push({
+        url: batchWorkerUrl,
+        body: {
+          batchId,
+          bulkJobId: jobId,
+          products: chunk.map((p) => ({
+            id: p.id,
+            url: p.url,
+            name: p.name,
+            originId: p.origin_id,
+            priority: p.priority,
+            prioritySource: p.priority_source,
+            barcode: p.barcode,
+            brand: p.brand,
+            image: p.image,
+            pack: p.pack,
+            category: p.category,
+            category2: p.category_2,
+            category3: p.category_3,
+            createdAt: p.created_at,
+            updatedAt: p.updated_at,
+          })),
         },
         retries: 2,
-      }))
+      })
+    }
 
+    console.log(`[BulkScrape] Sending ${batchMessages.length} batch messages to QStash`)
+
+    // --- Send to QStash (respecting 100-message-per-call limit) ---
+    let queuedBatches = 0
+    let queuedProducts = 0
+
+    for (let i = 0; i < batchMessages.length; i += QSTASH_BATCH_LIMIT) {
+      const slice = batchMessages.slice(i, i + QSTASH_BATCH_LIMIT)
       try {
-        await qstash.batchJSON(messages)
-        queuedCount += batch.length
-      } catch (qstashError) {
-        console.error(`QStash batch error:`, qstashError)
-        // Continue with remaining batches
+        await qstash.batchJSON(slice)
+        queuedBatches += slice.length
+        queuedProducts += slice.reduce(
+          (sum, msg) => sum + ((msg.body as { products?: unknown[] }).products?.length ?? 0),
+          0,
+        )
+      } catch (err) {
+        console.error(`[BulkScrape] QStash batch error (offset ${i}):`, err)
       }
     }
 
-    // Update job with queued count
-    if (queuedCount < products.length) {
-      await updateBulkScrapeJob(jobId, {
-        total: queuedCount,
-      })
-    }
-
-    // Check if we successfully queued anything
-    if (queuedCount === 0) {
-      // QStash failed - likely localhost issue
-      // Don't update total to 0, keep original count for potential direct mode retry
+    if (queuedBatches === 0) {
       await updateBulkScrapeJob(jobId, {
         status: "failed",
-        error: "QStash failed to queue products. Use Direct Mode for local development.",
+        error: "QStash failed to queue any batches. Check QSTASH_TOKEN and NEXT_PUBLIC_SITE_URL.",
       })
+      return NextResponse.json(
+        { jobId, total: allProducts.length, queued: 0, error: "QStash failed to deliver messages", mode: "qstash" },
+        { status: 502 },
+      )
+    }
 
-      return NextResponse.json({
-        jobId,
-        total: products.length,
-        queued: 0,
-        error: "QStash cannot reach localhost. Use Direct Mode for local development.",
-        mode: "qstash_failed",
-      })
+    // Adjust total to only count products we actually queued
+    if (queuedProducts < allProducts.length) {
+      await updateBulkScrapeJob(jobId, { total: queuedProducts })
     }
 
     return NextResponse.json({
       jobId,
-      total: queuedCount,
-      message: `Queued ${queuedCount} products for re-scraping`,
+      total: queuedProducts,
+      batches: queuedBatches,
+      batchSize: WORKER_BATCH_SIZE,
+      message: `Queued ${queuedProducts} products in ${queuedBatches} batches`,
       mode: "qstash",
     })
   } catch (error) {

@@ -10,6 +10,7 @@ import type {
   BulkScrapeResult,
   BulkScrapeJobCreated,
   BulkScrapeBatchResult,
+  BulkScrapeQStashResult,
   BulkScrapeError,
 } from "@/lib/scrapers/types"
 
@@ -306,15 +307,45 @@ export default function BulkScrapePage() {
     }
   }, [jobsData, activeJobId])
 
-  // Clear active job when completed
+  // React to job completion/cancellation (both direct and QStash modes)
+  const prevJobStatusRef = useRef<string | null>(null)
   useEffect(() => {
-    if (jobProgress?.status === "completed" || jobProgress?.status === "cancelled") {
+    const status = jobProgress?.status
+    const prev = prevJobStatusRef.current
+    prevJobStatusRef.current = status ?? null
+
+    if (!status || status === prev) return
+
+    if (status === "completed" && prev === "running") {
+      addLog(
+        "success",
+        `Job ${jobProgress.id} completed: ${jobProgress.processed} processed, ${jobProgress.failed} failed, ${jobProgress.barcodesFound} barcodes found`,
+      )
+      invalidateCount()
+    }
+    if (status === "cancelled" && prev === "running") {
+      addLog("warning", `Job ${jobProgress.id} cancelled`)
+    }
+    if (status === "failed" && prev === "running") {
+      addLog("error", `Job ${jobProgress.id} failed`)
+    }
+
+    if (status === "completed" || status === "cancelled" || status === "failed") {
       const timer = setTimeout(() => {
         refetchJobs()
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [jobProgress?.status, refetchJobs])
+  }, [
+    jobProgress?.status,
+    jobProgress?.id,
+    jobProgress?.processed,
+    jobProgress?.failed,
+    jobProgress?.barcodesFound,
+    refetchJobs,
+    addLog,
+    invalidateCount,
+  ])
 
   // Start job mutation (QStash mode)
   const startJobMutation = useMutation({
@@ -325,13 +356,20 @@ export default function BulkScrapePage() {
         missingBarcode: filters.missingBarcode,
         available: filters.available,
         onlyUrl: filters.onlyUrl,
+        limit: jobLimit,
       })
-      return res.data as { jobId: string; total: number }
+      return res.data as BulkScrapeQStashResult
     },
     onSuccess: (data) => {
       setActiveJobId(data.jobId)
+      setEnhancedStats((prev) => ({ ...prev, startTime: new Date() }))
+      addLog("success", `QStash job ${data.jobId} started: ${data.total} products in ${data.batches} batches`)
       refetchJobs()
       invalidateCount()
+    },
+    onError: (error) => {
+      const msg = axios.isAxiosError(error) ? (error.response?.data?.error ?? error.message) : String(error)
+      addLog("error", `QStash job failed: ${msg}`)
     },
   })
 
@@ -629,9 +667,23 @@ export default function BulkScrapePage() {
     if (useDirectMode) {
       startDirectMode()
     } else {
+      setLogs([])
+      setEnhancedStats({
+        totalProcessed: 0,
+        totalFailed: 0,
+        totalRetries: 0,
+        networkErrors: 0,
+        scrapeErrors: 0,
+        barcodesFound: 0,
+        startTime: null,
+        avgTimePerProduct: 0,
+        productsPerMinute: 0,
+        successRate: 100,
+      })
+      addLog("info", "Starting QStash bulk scrape...")
       startJobMutation.mutate()
     }
-  }, [useDirectMode, startDirectMode, startJobMutation])
+  }, [useDirectMode, startDirectMode, startJobMutation, addLog])
 
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
@@ -1482,7 +1534,7 @@ function StatCard({
   small?: boolean
 }) {
   return (
-    <div className={cn("rounded-md p-3", small ? "bg-muted/30" : "bg-muted/50")}>
+    <div className={cn("rounded-md p-2", small ? "bg-muted/30" : "bg-muted/50")}>
       <div className={`flex items-center gap-1.5 ${color}`}>
         {icon}
         <span className={cn("font-medium uppercase", small ? "text-[10px]" : "text-xs")}>{label}</span>

@@ -138,10 +138,7 @@ async function migrateFavorites(winnerId: number, loserIds: number[]): Promise<{
   if (fetchErr || !loserFavs?.length) return { migrated: 0, deduped: 0 }
 
   // Find favorites already pointing to the winner (same user)
-  const { data: winnerFavs } = await supabase
-    .from("user_favorites")
-    .select("user_id")
-    .eq("store_product_id", winnerId)
+  const { data: winnerFavs } = await supabase.from("user_favorites").select("user_id").eq("store_product_id", winnerId)
 
   const winnerUserIds = new Set((winnerFavs ?? []).map((f) => f.user_id))
 
@@ -164,10 +161,7 @@ async function migrateFavorites(winnerId: number, loserIds: number[]): Promise<{
   }
 
   if (toUpdate.length) {
-    const { error } = await supabase
-      .from("user_favorites")
-      .update({ store_product_id: winnerId })
-      .in("id", toUpdate)
+    const { error } = await supabase.from("user_favorites").update({ store_product_id: winnerId }).in("id", toUpdate)
     if (error) console.error(`  Error migrating favorites to winner ${winnerId}:`, error)
   }
 
@@ -224,8 +218,7 @@ async function main() {
 
   for (const entry of dirtySinglesAll) {
     const [normalizedUrl, [row]] = entry
-    const looksCorrupted =
-      normalizedUrl.endsWith("=") && !row.url.endsWith("=")
+    const looksCorrupted = normalizedUrl.endsWith("=") && !row.url.endsWith("=")
     if (looksCorrupted) {
       skippedCorrupted.push(entry)
     } else {
@@ -242,9 +235,7 @@ async function main() {
     }
   }
   console.log(`Duplicate groups to merge: ${duplicateGroups.length}`)
-  console.log(
-    `Total loser rows to delete: ${duplicateGroups.reduce((sum, [, g]) => sum + g.length - 1, 0)}`,
-  )
+  console.log(`Total loser rows to delete: ${duplicateGroups.reduce((sum, [, g]) => sum + g.length - 1, 0)}`)
 
   // ---- Process duplicate groups ----
   let totalPricesMigrated = 0
@@ -281,7 +272,9 @@ async function main() {
         await updateUrl(winner.id, normalizedUrl)
       }
 
-      console.log(`  -> Migrated ${priceCount} prices, ${favResult.migrated} favs (${favResult.deduped} deduped), deleted ${loserIds.length} losers`)
+      console.log(
+        `  -> Migrated ${priceCount} prices, ${favResult.migrated} favs (${favResult.deduped} deduped), deleted ${loserIds.length} losers`,
+      )
     }
   }
 
@@ -321,7 +314,9 @@ async function main() {
   // ---- Summary ----
   console.log(`\n--- Summary ---`)
   console.log(`Duplicate groups:       ${duplicateGroups.length}`)
-  console.log(`Losers deleted:         ${dryRun ? duplicateGroups.reduce((s, [, g]) => s + g.length - 1, 0) + " (would be)" : totalLosersDeleted}`)
+  console.log(
+    `Losers deleted:         ${dryRun ? duplicateGroups.reduce((s, [, g]) => s + g.length - 1, 0) + " (would be)" : totalLosersDeleted}`,
+  )
   console.log(`Prices migrated:        ${dryRun ? "(skipped in dry run)" : totalPricesMigrated}`)
   console.log(`Favorites migrated:     ${dryRun ? "(skipped in dry run)" : totalFavsMigrated}`)
   console.log(`Favorites deduped:      ${dryRun ? "(skipped in dry run)" : totalFavsDeduped}`)

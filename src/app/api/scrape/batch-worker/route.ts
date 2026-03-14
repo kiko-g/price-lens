@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { updatePricePoint } from "@/lib/business/pricing"
+import { incrementBulkScrapeProgress, getBulkScrapeJob } from "@/lib/kv"
 import type { StoreProduct } from "@/types"
 
 // 5 minutes max for batch processing
@@ -29,6 +30,7 @@ interface BatchProduct {
 
 interface BatchRequest {
   batchId: string
+  bulkJobId?: string
   products: BatchProduct[]
 }
 
@@ -82,10 +84,19 @@ async function handler(req: NextRequest) {
     }
 
     console.log(`[BatchWorker] Batch ID: ${body.batchId}, Products: ${body.products?.length || 0}`)
-    const { batchId, products } = body
+    const { batchId, bulkJobId, products } = body
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return NextResponse.json({ error: "No products in batch" }, { status: 400 })
+    }
+
+    // If part of a bulk job, check if it was cancelled before starting
+    if (bulkJobId) {
+      const job = await getBulkScrapeJob(bulkJobId)
+      if (job?.status === "cancelled") {
+        console.info(`[BatchWorker] Skipping batch ${batchId} - bulk job ${bulkJobId} cancelled`)
+        return NextResponse.json({ batchId, skipped: true, reason: "Job cancelled" })
+      }
     }
 
     console.info(`🛜 [BatchWorker] Starting batch ${batchId} with ${products.length} products`)
@@ -95,14 +106,10 @@ async function handler(req: NextRequest) {
     let successCount = 0
     let failCount = 0
 
-    // Process each product sequentially
-    // (Parallel would be faster but risks rate limiting from stores)
     for (const product of products) {
       const productStartTime = Date.now()
 
       try {
-        // Build existing product data from the scheduler payload (no DB read needed).
-        // The scheduler pre-fetches these fields so we skip a SELECT per product.
         const existingData =
           product.prioritySource !== undefined
             ? {
@@ -119,6 +126,8 @@ async function handler(req: NextRequest) {
                 updated_at: product.updatedAt ?? null,
               }
             : undefined
+
+        const hadBarcode = !!product.barcode
 
         const response = await scrapeAndReplaceProduct(
           product.url,
@@ -140,21 +149,29 @@ async function handler(req: NextRequest) {
             details: json.details,
           })
           console.warn(`[BatchWorker] ✗ Failed: ${product.name} - ${errorMsg}${details}`)
+
+          if (bulkJobId) {
+            await incrementBulkScrapeProgress(bulkJobId, { failed: true })
+          }
           continue
         }
 
-        // Update price point
         await updatePricePoint({
           ...json.data,
           id: product.id,
         })
 
+        const barcodeFound = !hadBarcode && !!json.data?.barcode
         successCount++
         results.push({
           id: product.id,
           success: true,
           duration: Date.now() - productStartTime,
         })
+
+        if (bulkJobId) {
+          await incrementBulkScrapeProgress(bulkJobId, { barcodeFound })
+        }
 
         console.info(`🛜 [BatchWorker] ✓ Scraped: ${product.name} (${Date.now() - productStartTime}ms)`)
       } catch (error) {
@@ -166,6 +183,10 @@ async function handler(req: NextRequest) {
           error: error instanceof Error ? error.message : "Unknown error",
         })
         console.error(`🛜 [BatchWorker] ✗ Error for ${product.name}:`, error)
+
+        if (bulkJobId) {
+          await incrementBulkScrapeProgress(bulkJobId, { failed: true })
+        }
       }
     }
 

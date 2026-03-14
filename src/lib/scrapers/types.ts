@@ -101,7 +101,7 @@ export interface BulkScrapeError {
   lastHttpStatus?: number | null
 }
 
-/** Response when creating a new bulk scrape job (first PATCH call) */
+/** Response when creating a new direct-mode job (first PATCH call) */
 export interface BulkScrapeJobCreated {
   jobId: string
   total: number
@@ -110,7 +110,7 @@ export interface BulkScrapeJobCreated {
   mode: "direct"
 }
 
-/** Response when processing a batch (subsequent PATCH calls) */
+/** Response when processing a direct-mode batch (subsequent PATCH calls) */
 export interface BulkScrapeBatchResult {
   jobId: string
   status: "running" | "completed"
@@ -125,5 +125,16 @@ export interface BulkScrapeBatchResult {
   mode: "direct"
 }
 
-/** Combined type for PATCH /api/admin/bulk-scrape response */
+/** Combined type for PATCH /api/admin/bulk-scrape response (direct mode) */
 export type BulkScrapeResult = BulkScrapeJobCreated | BulkScrapeBatchResult
+
+/** Response from POST /api/admin/bulk-scrape (QStash mode) */
+export interface BulkScrapeQStashResult {
+  jobId: string
+  total: number
+  batches: number
+  batchSize: number
+  message: string
+  mode: "qstash"
+  error?: string
+}
