@@ -26,7 +26,9 @@ import {
 import { ContinenteSvg, AuchanSvg, PingoDoceSvg } from "@/components/logos"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import type { AnalyticsSnapshotData } from "@/types/analytics"
+import { Cell, Pie, PieChart } from "recharts"
 import { PRIORITY_CONFIG, formatThreshold } from "@/lib/business/priority"
 import { BanIcon, CircleIcon } from "lucide-react"
 
@@ -237,12 +239,13 @@ export function StoreBreakdownSection({ data, isLoading }: { data?: AnalyticsSna
 // ---------------------------------------------------------------------------
 
 const FRESHNESS_BANDS = [
-  { key: "last_1h" as const, label: "< 1h", className: "bg-emerald-500" },
-  { key: "last_1h_to_6h" as const, label: "1-6h", className: "bg-emerald-400" },
-  { key: "last_6h_to_24h" as const, label: "6-24h", className: "bg-amber-400" },
-  { key: "last_24h_to_48h" as const, label: "24-48h", className: "bg-amber-500" },
-  { key: "older_48h" as const, label: "> 48h", className: "bg-red-400" },
-  { key: "never" as const, label: "Never", className: "bg-muted-foreground/30" },
+  { key: "within_24h" as const, label: "< 24h", detail: "P5", className: "bg-emerald-600", fill: "#059669" },
+  { key: "within_48h" as const, label: "1-2d", detail: "P4", className: "bg-sky-500", fill: "#0ea5e9" },
+  { key: "within_3d" as const, label: "2-3d", detail: "P3", className: "bg-amber-500", fill: "#f59e0b" },
+  { key: "within_7d" as const, label: "3-7d", detail: "P2", className: "bg-orange-500", fill: "#f97316" },
+  { key: "within_14d" as const, label: "7-14d", detail: "P1", className: "bg-fuchsia-500", fill: "#d946ef" },
+  { key: "older_14d" as const, label: "> 14d", detail: null, className: "bg-red-600", fill: "#dc2626" },
+  { key: "never" as const, label: "Never", detail: null, className: "bg-slate-600", fill: "#475569" },
 ]
 
 export function ScrapeFreshnessSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
@@ -265,25 +268,68 @@ export function ScrapeFreshnessSection({ data, isLoading }: { data?: AnalyticsSn
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Stacked horizontal bar */}
-            <div className="flex h-6 w-full overflow-hidden rounded-full">
-              {FRESHNESS_BANDS.map((band) => {
-                const count = freshness?.[band.key] ?? 0
-                const pct = total > 0 ? (count / total) * 100 : 0
-                if (pct === 0) return null
-                return (
-                  <div
-                    key={band.key}
-                    className={cn("h-full transition-all", band.className)}
-                    style={{ width: `${pct}%` }}
-                    title={`${band.label}: ${count.toLocaleString()} (${pct.toFixed(1)}%)`}
+            {/* Pie chart with tooltips */}
+            {total > 0 ? (
+              <ChartContainer
+                config={Object.fromEntries(
+                  FRESHNESS_BANDS.map((b) => [
+                    b.key,
+                    { label: b.detail ? `${b.label} (${b.detail})` : b.label, color: b.fill },
+                  ]),
+                )}
+                className="aspect-square h-44 w-full max-w-44"
+              >
+                <PieChart>
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value, _name, _item, _index, payload) => {
+                          console.info(value, _name, _item, _index, payload)
+                          const pct = (payload as { pct?: number } | undefined)?.pct
+                          return (
+                            <span>
+                              {typeof value === "number" ? value.toLocaleString() : value}
+                              {pct != null && ` (${pct.toFixed(1)}%)`}
+                            </span>
+                          )
+                        }}
+                      />
+                    }
                   />
-                )
-              })}
-            </div>
+                  <Pie
+                    data={FRESHNESS_BANDS.filter((b) => (freshness?.[b.key] ?? 0) > 0).map((band) => {
+                      const count = freshness?.[band.key] ?? 0
+                      const pct = total > 0 ? (count / total) * 100 : 0
+                      return {
+                        name: band.detail ? `${band.label} (${band.detail})` : band.label,
+                        value: count,
+                        key: band.key,
+                        fill: band.fill,
+                        pct,
+                      }
+                    })}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="40%"
+                    strokeWidth={1}
+                    stroke="var(--background)"
+                  >
+                    {FRESHNESS_BANDS.filter((b) => (freshness?.[b.key] ?? 0) > 0).map((band) => (
+                      <Cell key={band.key} fill={band.fill} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+            ) : (
+              <div className="bg-muted/30 flex h-44 w-full max-w-44 items-center justify-center rounded-lg">
+                <span className="text-muted-foreground text-sm">No data</span>
+              </div>
+            )}
 
             {/* Legend */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-3 xl:grid-cols-2">
               {FRESHNESS_BANDS.map((band) => {
                 const count = freshness?.[band.key] ?? 0
                 const pct = total > 0 ? (count / total) * 100 : 0
@@ -291,7 +337,10 @@ export function ScrapeFreshnessSection({ data, isLoading }: { data?: AnalyticsSn
                   <div key={band.key} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <span className={cn("h-2.5 w-2.5 rounded-full", band.className)} />
-                      <span className="text-muted-foreground">{band.label}</span>
+                      <span className="text-muted-foreground">
+                        {band.label}
+                        {band.detail && <span className="text-muted-foreground/60 ml-1 text-xs">({band.detail})</span>}
+                      </span>
                     </div>
                     <span className="font-medium tabular-nums">
                       {count.toLocaleString()}{" "}

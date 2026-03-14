@@ -28,11 +28,12 @@ export interface AnalyticsSnapshotData {
     availability_rate: number
   }>
   scrape_freshness: {
-    last_1h: number
-    last_1h_to_6h: number
-    last_6h_to_24h: number
-    last_24h_to_48h: number
-    older_48h: number
+    within_24h: number
+    within_48h: number
+    within_3d: number
+    within_7d: number
+    within_14d: number
+    older_14d: number
     never: number
   }
   scrape_velocity: {

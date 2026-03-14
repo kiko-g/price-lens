@@ -10,6 +10,7 @@ import { ListsTab } from "@/components/profile/ListsTab"
 import { PlanTab } from "@/components/profile/PlanTab"
 import { SettingsTab } from "@/components/profile/SettingsTab"
 
+import { EmptyStateView } from "@/components/ui/combo/state-views"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -95,16 +96,16 @@ export default function ProfilePage() {
 
 function AlertsTab() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-      <BellIcon className="text-muted-foreground mb-4 h-10 w-10" />
-      <h3 className="text-lg font-semibold">Price alerts</h3>
-      <p className="text-muted-foreground mt-1 max-w-sm text-sm">
-        Get notified when products you track drop in price. Available with Price Lens Plus.
-      </p>
-      <Button variant="outline" size="sm" className="mt-4" disabled>
-        Coming Soon
-      </Button>
-    </div>
+    <EmptyStateView
+      icon={BellIcon}
+      title="Price alerts"
+      message="Get notified when products you track drop in price. Available with Price Lens Plus."
+      actions={
+        <Button variant="outline" size="sm" disabled>
+          Coming Soon
+        </Button>
+      }
+    />
   )
 }
 
