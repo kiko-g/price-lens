@@ -572,9 +572,9 @@ export const storeProductQueries = {
 
     // CONSERVATIVE UPSERT: preserve existing values when the new scrape returns null.
     // updated_at should ONLY be set by touchUpdatedAt() when a valid price is recorded.
+    // Priority fields are NEVER set here — governance/triage owns those.
     const productToUpsert = {
       ...sp,
-      priority: sp.priority || 1,
       created_at: sp.created_at || existingProduct?.created_at || new Date().toISOString(),
       updated_at: existingProduct?.updated_at ?? null,
       scraped_at: now(),
@@ -586,6 +586,11 @@ export const storeProductQueries = {
       category_2: sp.category_2 || existingProduct?.category_2 || null,
       category_3: sp.category_3 || existingProduct?.category_3 || null,
     }
+
+    // Scraping must not overwrite governance-managed fields
+    delete (productToUpsert as Record<string, unknown>).priority
+    delete (productToUpsert as Record<string, unknown>).priority_source
+    delete (productToUpsert as Record<string, unknown>).priority_updated_at
 
     const { data, error } = await supabase
       .from("store_products")

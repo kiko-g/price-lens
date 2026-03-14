@@ -153,6 +153,7 @@ export async function scrapeAndReplaceProduct(
   )
 
   if (error) {
+    console.error(`[Scraper] Upsert failed for ${url}:`, error.message, error.code, error.details)
     return NextResponse.json(
       { data, error: "StoreProduct upsert failed", details: error, product: result.product },
       { status: 500 },

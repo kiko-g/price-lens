@@ -37,6 +37,7 @@ interface ProductResult {
   success: boolean
   duration: number
   error?: string
+  details?: Record<string, unknown>
 }
 
 /**
@@ -129,13 +130,18 @@ async function handler(req: NextRequest) {
 
         if (response.status !== 200) {
           failCount++
+          const errorMsg = json.error || "Scrape failed"
+          const details = json.details
+            ? ` | ${json.details.message || ""} (code: ${json.details.code || "?"})`
+            : ""
           results.push({
             id: product.id,
             success: false,
             duration: Date.now() - productStartTime,
-            error: json.error || "Scrape failed",
+            error: errorMsg,
+            details: json.details,
           })
-          console.warn(`[BatchWorker] ✗ Failed: ${product.name} - ${json.error}`)
+          console.warn(`[BatchWorker] ✗ Failed: ${product.name} - ${errorMsg}${details}`)
           continue
         }
 

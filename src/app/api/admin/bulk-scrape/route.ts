@@ -354,13 +354,16 @@ export async function PATCH(req: NextRequest) {
           }
 
           if (response.status !== 200) {
-            // Other error (blocked, network error, etc.)
+            const details = json.details
             return {
               success: false,
               productId: product.id,
               status: "error",
               statusCode: response.status,
               error: json.error || `HTTP ${response.status}`,
+              details: details
+                ? `${details.message || ""} (code: ${details.code || "?"})`
+                : undefined,
             }
           }
 
@@ -391,6 +394,7 @@ export async function PATCH(req: NextRequest) {
         status: r.status,
         statusCode: (r as { statusCode?: number }).statusCode,
         error: (r as { error?: string }).error,
+        details: (r as { details?: string }).details,
       }))
 
     // Update job progress with cursor for next batch
