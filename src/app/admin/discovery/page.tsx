@@ -109,6 +109,16 @@ export default function DiscoveryPage() {
 
   const runDiscoveryMutation = useMutation({
     mutationFn: async (origin: number | "all") => {
+      if (origin === "all") {
+        const originIds = status?.availableOrigins.map((o) => o.id) ?? [1, 2, 3]
+        const allResults: DiscoveryResult[] = []
+        for (const oid of originIds) {
+          setRunningOrigin(oid)
+          const res = await axios.get(`/api/admin/discovery?action=run&origin=${oid}&dry=${dryRun}&verbose=true`)
+          allResults.push(res.data.result)
+        }
+        return { results: allResults }
+      }
       const res = await axios.get(`/api/admin/discovery?action=run&origin=${origin}&dry=${dryRun}&verbose=true`)
       return res.data
     },
@@ -135,7 +145,7 @@ export default function DiscoveryPage() {
 
   const runTriageMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.get(`/api/admin/discovery/triage?batch=50&dry=${dryRun}&verbose=true`)
+      const res = await axios.get(`/api/admin/discovery/triage?batch=80&dry=${dryRun}&verbose=true`)
       return res.data as { message: string; mode: string; dryRun: boolean; result: TriageResult }
     },
     onSuccess: (data) => {

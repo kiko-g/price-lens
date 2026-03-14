@@ -300,13 +300,19 @@ export async function runCategoryCrawlDiscovery(
 
       if (!options.dryRun) {
         const { error: insertError } = await supabase.from("store_products").insert(
-          batch.map(({ url }) => ({
-            url,
-            origin_id: config.originId,
-            created_at: now(),
-            available: true,
-            priority: null,
-          })),
+          batch.map(({ url }) => {
+            const cats = config.categoryExtractor?.(url)
+            return {
+              url,
+              origin_id: config.originId,
+              created_at: now(),
+              available: true,
+              priority: null,
+              ...(cats?.category && { category: cats.category }),
+              ...(cats?.category2 && { category_2: cats.category2 }),
+              ...(cats?.category3 && { category_3: cats.category3 }),
+            }
+          }),
         )
 
         if (insertError) {

@@ -3,7 +3,7 @@ import { getScraper } from "@/lib/scrapers"
 import { getStoreConfig, getCategoryCrawlConfig } from "@/lib/discovery/stores"
 import { now } from "@/lib/utils"
 
-const TRIAGE_BATCH_SIZE = 50
+const TRIAGE_BATCH_SIZE = 80
 const AUDIT_PAGE_SIZE = 900
 const DELAY_BETWEEN_SCRAPES_MS = 500
 
@@ -233,17 +233,16 @@ export async function runTriage(options: TriageOptions = {}): Promise<TriageResu
       const scrapeResult = await scraper.scrape({ url, useAntiBlock: true })
 
       if (scrapeResult.type === "not_found") {
-        if (sku) {
-          if (!options.dryRun) {
-            await vetoProduct(productId, originId, sku, null)
-          }
-          result.vetoed++
-        } else {
-          if (!options.dryRun) {
-            await deleteProduct(supabase, productId)
-          }
-          result.notFound++
+        if (verbose) {
+          console.log(`[Triage] Soft unavailable (404): ${url}`)
         }
+        if (!options.dryRun) {
+          await supabase
+            .from("store_products")
+            .update({ available: false, priority: 0, scraped_at: now() })
+            .eq("id", productId)
+        }
+        result.notFound++
         result.processed++
         await delay(DELAY_BETWEEN_SCRAPES_MS)
         continue

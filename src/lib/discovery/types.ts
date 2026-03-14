@@ -37,6 +37,8 @@ export interface CategoryCrawlConfig {
   urlValidator: (url: string) => boolean
   urlNormalizer: (url: string) => string
   skuExtractor: (url: string) => string | null
+  /** Extracts store categories from a product URL (avoids needing to scrape for category info) */
+  categoryExtractor?: (url: string) => { category: string | null; category2: string | null; category3: string | null }
 }
 
 /**
