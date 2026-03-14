@@ -538,26 +538,36 @@ export default function BulkScrapePage() {
             if (errorDetails.length > 0) {
               const unavailableItems = errorDetails.filter((e: BulkScrapeError) => e.status === "unavailable")
               const errorItems = errorDetails.filter((e: BulkScrapeError) => e.status === "error")
+              const MAX_DETAIL = 5
 
-              // Log unavailable as warning (expected - products removed from store)
-              if (unavailableItems.length > 0) {
-                addLog("warning", `  └─ ${unavailableItems.length}x unavailable (404)`)
+              const formatUnavailable = (e: BulkScrapeError) => {
+                const parts = [`id=${e.productId}`, `last_http_status=${e.lastHttpStatus ?? "?"}`]
+                if (e.url) parts.push(`url=${e.url}`)
+                return `unavailable: ${parts.join(", ")}`
               }
 
-              // Log actual errors (blocks, timeouts, etc.)
+              const formatError = (e: BulkScrapeError) => {
+                const parts = [`id=${e.productId}`]
+                if (e.statusCode) parts.push(`HTTP ${e.statusCode}`)
+                if (e.error) parts.push(e.error)
+                if (e.details) parts.push(`(${e.details})`)
+                if (e.lastHttpStatus != null) parts.push(`fetch_status=${e.lastHttpStatus}`)
+                if (e.url) parts.push(`url=${e.url}`)
+                return `error: ${parts.join(" | ")}`
+              }
+
+              if (unavailableItems.length > 0) {
+                unavailableItems.slice(0, MAX_DETAIL).forEach((e) => addLog("warning", `  └─ ${formatUnavailable(e)}`))
+                if (unavailableItems.length > MAX_DETAIL) {
+                  addLog("warning", `  └─ +${unavailableItems.length - MAX_DETAIL} more unavailable`)
+                }
+              }
+
               if (errorItems.length > 0) {
-                const errorsByType = errorItems.reduce(
-                  (acc, err) => {
-                    const key = err.statusCode ? `HTTP ${err.statusCode}` : "error"
-                    acc[key] = (acc[key] || 0) + 1
-                    return acc
-                  },
-                  {} as Record<string, number>,
-                )
-                const errorSummary = Object.entries(errorsByType)
-                  .map(([type, count]) => `${count}x ${type}`)
-                  .join(", ")
-                addLog("error", `  └─ ${errorSummary}`)
+                errorItems.slice(0, MAX_DETAIL).forEach((e) => addLog("error", `  └─ ${formatError(e)}`))
+                if (errorItems.length > MAX_DETAIL) {
+                  addLog("error", `  └─ +${errorItems.length - MAX_DETAIL} more errors`)
+                }
               }
             }
 

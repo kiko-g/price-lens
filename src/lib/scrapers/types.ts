@@ -96,6 +96,9 @@ export interface BulkScrapeError {
   status: "unavailable" | "error"
   statusCode?: number
   error?: string
+  details?: string
+  url?: string
+  lastHttpStatus?: number | null
 }
 
 /** Response when creating a new bulk scrape job (first PATCH call) */

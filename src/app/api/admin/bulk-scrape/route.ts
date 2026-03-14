@@ -350,6 +350,8 @@ export async function PATCH(req: NextRequest) {
               productId: product.id,
               status: "unavailable",
               error: json.error || "Product not found (404)",
+              url: product.url,
+              lastHttpStatus: json.last_http_status ?? null,
             }
           }
 
@@ -364,6 +366,8 @@ export async function PATCH(req: NextRequest) {
               details: details
                 ? `${details.message || ""} (code: ${details.code || "?"})`
                 : undefined,
+              url: product.url,
+              lastHttpStatus: json.last_http_status ?? null,
             }
           }
 
@@ -375,7 +379,13 @@ export async function PATCH(req: NextRequest) {
 
           return { success: true, productId: product.id, status: "success", barcodeFound, barcode: newBarcode }
         } catch (err) {
-          return { success: false, productId: product.id, status: "error", error: String(err) }
+          return {
+            success: false,
+            productId: product.id,
+            status: "error",
+            error: String(err),
+            url: product.url,
+          }
         }
       }),
     )
@@ -395,6 +405,8 @@ export async function PATCH(req: NextRequest) {
         statusCode: (r as { statusCode?: number }).statusCode,
         error: (r as { error?: string }).error,
         details: (r as { details?: string }).details,
+        url: (r as { url?: string }).url,
+        lastHttpStatus: (r as { lastHttpStatus?: number | null }).lastHttpStatus,
       }))
 
     // Update job progress with cursor for next batch

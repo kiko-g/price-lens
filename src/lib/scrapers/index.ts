@@ -122,7 +122,10 @@ export async function scrapeAndReplaceProduct(
       await priceQueries.closeLatestPricePoint(productId)
     }
 
-    return NextResponse.json({ error: "Product not found (404)", url, available: false }, { status: 404 })
+    return NextResponse.json(
+      { error: "Product not found (404)", url, available: false, last_http_status: result.httpStatus ?? null },
+      { status: 404 },
+    )
   }
 
   // Handle other errors - don't change availability status
@@ -131,7 +134,10 @@ export async function scrapeAndReplaceProduct(
       url,
       lastHttpStatus: result.httpStatus ?? null,
     })
-    return NextResponse.json({ error: "StoreProduct scraping failed", url }, { status: 500 })
+    return NextResponse.json(
+      { error: "StoreProduct scraping failed", url, last_http_status: result.httpStatus ?? null },
+      { status: 500 },
+    )
   }
 
   if (!isValidProduct(result.product)) {
