@@ -213,12 +213,34 @@ async function main() {
   }
 
   const duplicateGroups = Array.from(groups.entries()).filter(([, g]) => g.length > 1)
-  const dirtysingles = Array.from(groups.entries()).filter(
+
+  // Skip single-row updates where cleanUrl corrupts the URL
+  // (e.g. literal '?' in the path gets treated as query string, appending '=')
+  const dirtySinglesAll = Array.from(groups.entries()).filter(
     ([normalizedUrl, g]) => g.length === 1 && g[0].url !== normalizedUrl,
   )
+  const dirtysingles: typeof dirtySinglesAll = []
+  const skippedCorrupted: typeof dirtySinglesAll = []
+
+  for (const entry of dirtySinglesAll) {
+    const [normalizedUrl, [row]] = entry
+    const looksCorrupted =
+      normalizedUrl.endsWith("=") && !row.url.endsWith("=")
+    if (looksCorrupted) {
+      skippedCorrupted.push(entry)
+    } else {
+      dirtysingles.push(entry)
+    }
+  }
 
   console.log(`URLs already clean: ${urlsAlreadyClean}`)
   console.log(`Single-row URL updates needed: ${dirtysingles.length}`)
+  if (skippedCorrupted.length > 0) {
+    console.log(`Skipped (cleanUrl corrupts URL): ${skippedCorrupted.length}`)
+    for (const [, [row]] of skippedCorrupted) {
+      console.log(`  id=${row.id}: ${row.url}`)
+    }
+  }
   console.log(`Duplicate groups to merge: ${duplicateGroups.length}`)
   console.log(
     `Total loser rows to delete: ${duplicateGroups.reduce((sum, [, g]) => sum + g.length - 1, 0)}`,
