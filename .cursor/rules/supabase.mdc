@@ -11,12 +11,12 @@ alwaysApply: true
 
 ### Local ports (config.toml)
 
-| Port  | Service   | Use for |
-|-------|-----------|--------|
-| 54321 | API       | `NEXT_PUBLIC_SUPABASE_URL` and all client/SDK usage — **must be 54321, not 54322** |
-| 54322 | Database  | Direct Postgres (restore script, server-side `DATABASE_URL`, Studio backend) |
-| 54323 | Studio    | http://127.0.0.1:54323 |
-| 54324 | Mailpit   | Email testing UI |
+| Port  | Service  | Use for                                                                            |
+| ----- | -------- | ---------------------------------------------------------------------------------- |
+| 54321 | API      | `NEXT_PUBLIC_SUPABASE_URL` and all client/SDK usage — **must be 54321, not 54322** |
+| 54322 | Database | Direct Postgres (restore script, server-side `DATABASE_URL`, Studio backend)       |
+| 54323 | Studio   | http://127.0.0.1:54323                                                             |
+| 54324 | Mailpit  | Email testing UI                                                                   |
 
 - Local stack uses `project_id = "price-lens-local"` in `supabase/config.toml` (distinct from remote). If port 54322 is in use, stop the other project: `supabase stop --project-id <other-project-id>` (e.g. `srpjxzydhsumqbrzpisa` or `price-lens`) then `pnpm db:start` again.
 - "Stopped services: imgproxy, pooler" in `pnpm db:status` is expected when those are disabled in `supabase/config.toml`.
@@ -39,3 +39,10 @@ The Supabase JS client / PostgREST API returns **at most 1000 rows per request b
 - **Range-based** (alternative): `query.range(offset, offset + 999)` but this is slower for large offsets.
 - **Never assume a single `.select()` returns all rows** — always check if `data.length === pageSize` and continue if so.
 - For count-only queries, use `.select("*", { count: "exact", head: true })` which returns the count without the row limit.
+
+### Supabase free tier constraints (production)
+
+Production runs on Supabase free tier with strict limits. **Always consider these before proposing schema or query changes:**
+
+- **Database: 500MB max.** Price Lens stores 100k–200k products with periodic price history. Tables like `prices`, `store_products`, and `scrape_runs` grow continuously. New indexes consume disk — weigh each index against remaining headroom. Prefer query/application changes over new indexes when storage is tight.
+- **Egress: 5GB/month.** Periodic scraping and bulk reads drive egress. Minimize large SELECTs, avoid unbounded pagination, and use RPCs that process data server-side instead of returning large result sets to the app.
