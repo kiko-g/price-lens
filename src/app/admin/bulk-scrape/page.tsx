@@ -636,15 +636,7 @@ export default function BulkScrapePage() {
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   // Accordion default open values
-  const defaultAccordionValues = [
-    "batch-size",
-    "job-limit",
-    "more-options",
-    "availability",
-    "store-origin",
-    "priority",
-    "processing-mode",
-  ]
+  const defaultAccordionValues = ["batch-size", "job-limit", "more-options", "availability", "store-origin"]
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden xl:flex-row">
