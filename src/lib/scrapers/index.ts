@@ -159,13 +159,17 @@ export async function scrapeAndReplaceProduct(
       }
     : undefined
 
-  const { data, error } = await storeProductQueries.createOrUpdateProduct(
-    {
-      ...(result.product as unknown as import("@/types").StoreProduct),
-      last_http_status: result.httpStatus ?? 200,
-    },
-    prefetchedExisting,
-  )
+  const scrapedProduct = result.product as unknown as import("@/types").StoreProduct
+  const productToUpsert = {
+    ...scrapedProduct,
+    last_http_status: result.httpStatus ?? 200,
+    // Use original URL when updating existing product so we update the correct row.
+    // The scraper returns cleanedUrl; if DB has URL with tracking params, upsert by cleanedUrl
+    // would insert a new row instead of updating the skeleton.
+    ...(prevSp?.url && prevSp.url !== scrapedProduct.url ? { url: prevSp.url } : {}),
+  }
+
+  const { data, error } = await storeProductQueries.createOrUpdateProduct(productToUpsert, prefetchedExisting)
 
   if (error) {
     console.error(`[Scraper] Upsert failed for ${url}:`, error.message, error.code, error.details)
