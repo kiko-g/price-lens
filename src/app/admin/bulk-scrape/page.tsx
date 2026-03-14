@@ -603,12 +603,23 @@ export default function BulkScrapePage() {
       setInFlightCount(0)
       releaseWakeLock()
       refetchJobs()
+      invalidateCount()
       if (currentJobId) {
         queryClient.invalidateQueries({ queryKey: ["bulk-scrape-progress", currentJobId] })
       }
       addLog("info", "Processing finished")
     }
-  }, [batchSize, processDirectBatch, refetchJobs, queryClient, requestWakeLock, releaseWakeLock, addLog, updateStats])
+  }, [
+    batchSize,
+    processDirectBatch,
+    refetchJobs,
+    queryClient,
+    invalidateCount,
+    requestWakeLock,
+    releaseWakeLock,
+    addLog,
+    updateStats,
+  ])
 
   // Handle start button click
   const handleStart = useCallback(() => {
