@@ -6,7 +6,9 @@ import { Separator } from "@/components/ui/separator"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider className="min-h-screen xl:h-screen xl:overflow-hidden">
+    <SidebarProvider
+      className="min-h-screen xl:h-screen xl:overflow-hidden pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
+    >
       <AdminSidebar />
       <SidebarInset className="flex flex-col">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
