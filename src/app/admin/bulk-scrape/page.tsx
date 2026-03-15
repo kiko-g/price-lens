@@ -168,7 +168,7 @@ export default function BulkScrapePage() {
   const [isDirectProcessing, setIsDirectProcessing] = useState(false)
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [productsPage, setProductsPage] = useState(1)
-  const [useDirectMode, setUseDirectMode] = useState(true) // "direct" for local development
+  const [useDirectMode, setUseDirectMode] = useState(false) // "direct" for local development
   const [matchingProductsDialogOpen, setMatchingProductsDialogOpen] = useState(false)
 
   // Cancel state
