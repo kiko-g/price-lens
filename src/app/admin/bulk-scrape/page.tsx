@@ -688,7 +688,14 @@ export default function BulkScrapePage() {
   const isJobRunning = jobProgress?.status === "running" || isDirectProcessing
 
   // Accordion default open values
-  const defaultAccordionValues = ["batch-size", "job-limit", "more-options", "availability", "store-origin"]
+  const defaultAccordionValues = [
+    "processing-mode",
+    "batch-size",
+    "job-limit",
+    "more-options",
+    "availability",
+    "store-origin",
+  ]
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden xl:flex-row">
@@ -708,6 +715,50 @@ export default function BulkScrapePage() {
           </div>
 
           <Accordion type="multiple" defaultValue={defaultAccordionValues} className="w-full">
+            {/* Processing Mode - Always at top */}
+            <AccordionItem value="processing-mode">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <SettingsIcon className="h-4 w-4" />
+                  Processing Mode
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setUseDirectMode(true)}
+                  >
+                    <MonitorIcon className="h-4 w-4" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">Direct</span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs" size="2xs">
+                      Local
+                    </Badge>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      !useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                    )}
+                    onClick={() => setUseDirectMode(false)}
+                  >
+                    <ServerIcon className="h-4 w-4" />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium">QStash</span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs" size="2xs">
+                      Prod
+                    </Badge>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Batch Size */}
             <AccordionItem value="batch-size">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -985,52 +1036,6 @@ export default function BulkScrapePage() {
                 )}
               </AccordionContent>
             </AccordionItem>
-
-            {/* Processing Mode - Always at top */}
-            <AccordionItem value="processing-mode">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <SettingsIcon className="h-4 w-4" />
-                  Processing Mode
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
-                      useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setUseDirectMode(true)}
-                  >
-                    <MonitorIcon className="h-4 w-4" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium">Direct Mode</span>
-                      <p className="text-muted-foreground text-xs">Processes in browser. Best for local development.</p>
-                    </div>
-                    <Badge variant="secondary" className="text-xs" size="2xs">
-                      Local Dev
-                    </Badge>
-                  </div>
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
-                      !useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-                    )}
-                    onClick={() => setUseDirectMode(false)}
-                  >
-                    <ServerIcon className="h-4 w-4" />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium">QStash Mode</span>
-                      <p className="text-muted-foreground text-xs">Async queue processing. Requires public URL.</p>
-                    </div>
-                    <Badge variant="secondary" className="text-xs" size="2xs">
-                      Production
-                    </Badge>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
           </Accordion>
         </ScrollArea>
 
@@ -1081,7 +1086,7 @@ export default function BulkScrapePage() {
 
       {/* Main Content */}
       <main className="min-h-96 flex-1 overflow-y-auto p-4 xl:min-h-0 xl:p-6">
-        <div className="mx-auto max-w-5xl space-y-6">
+        <div className="mx-auto max-w-5xl space-y-4">
           {/* Live Progress */}
           {(jobProgress || isDirectProcessing) && (
             <Card className="border-primary/50">
