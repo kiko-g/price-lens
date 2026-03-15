@@ -135,16 +135,16 @@ export async function fetchHtml(url: string, useAntiBlock = false): Promise<Fetc
     return { html: response.data, status: "success", httpStatus: response.status }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      // Product doesn't exist or is unlisted
-      // 404 = standard not found, 474/471 = Continente custom codes for hidden/unlisted products
-      const notFoundStatuses = [404, 471, 474]
-      if (error.response?.status && notFoundStatuses.includes(error.response.status)) {
-        console.warn(`[${error.response.status}] Product not found at URL: ${cleanedUrl}`)
-        return { html: null, status: "not_found", httpStatus: error.response.status }
+      // Product definitively doesn't exist
+      if (error.response?.status === 404) {
+        console.warn(`[404] Product not found at URL: ${cleanedUrl}`)
+        return { html: null, status: "not_found", httpStatus: 404 }
       }
-      // Rate limiting / blocking responses (429, 403, etc.)
-      if (error.response?.status && [429, 403].includes(error.response.status)) {
-        console.warn(`[${error.response.status}] Rate limited/blocked at URL: ${cleanedUrl}`)
+      // Transient / blocking responses — don't change availability
+      // 471/474 = Continente custom codes for hidden/unlisted products (may come back)
+      // 429 = rate limited, 403 = blocked
+      if (error.response?.status && [429, 403, 471, 474].includes(error.response.status)) {
+        console.warn(`[${error.response.status}] Transient error at URL: ${cleanedUrl}`)
         return { html: null, status: "error", httpStatus: error.response.status }
       }
       if (error.code === "ECONNABORTED") {

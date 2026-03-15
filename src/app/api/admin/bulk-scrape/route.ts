@@ -183,7 +183,9 @@ export async function POST(req: NextRequest) {
     console.log(`[BulkScrape] Job ${jobId}: ${jobTotal} products to queue`)
 
     // --- Stream: paginate + send to QStash page by page ---
-    let lastId = 0
+    // Ordered by scraped_at ASC (nulls first) so never-attempted and stalest products are queued first.
+    // Uses offset-based pagination (acceptable for one-time job creation).
+    let offset = 0
     let totalQueued = 0
     let totalBatches = 0
     let batchIndex = 0
@@ -196,23 +198,28 @@ export async function POST(req: NextRequest) {
         .from("store_products")
         .select(COLUMNS)
         .not("url", "is", null)
-        .gt("id", lastId)
+        .order("scraped_at", { ascending: true, nullsFirst: true })
         .order("id", { ascending: true })
-        .limit(pageLimit)
+        .range(offset, offset + pageLimit - 1)
 
       q = applyFilters(q, filters)
 
       const { data: page, error } = await q
       if (error) {
-        console.error(`[BulkScrape] Page query error (cursor=${lastId}):`, error.message)
+        console.error(`[BulkScrape] Page query error (offset=${offset}):`, error.message)
         break
       }
       if (!page || page.length === 0) break
 
-      lastId = page[page.length - 1].id
+      offset += page.length
 
       // Build batch-worker messages for this page
-      const messages: { url: string; body: Record<string, unknown>; retries: number }[] = []
+      const messages: {
+        url: string
+        body: Record<string, unknown>
+        retries: number
+        flowControl: { key: string; parallelism: number }
+      }[] = []
 
       for (let i = 0; i < page.length; i += WORKER_BATCH_SIZE) {
         const chunk = (page as ProductRow[]).slice(i, i + WORKER_BATCH_SIZE)
@@ -240,6 +247,7 @@ export async function POST(req: NextRequest) {
             })),
           },
           retries: 2,
+          flowControl: { key: "bulk-scrape", parallelism: 20 },
         })
       }
 
@@ -251,7 +259,7 @@ export async function POST(req: NextRequest) {
           await qstash.batchJSON(slice)
           pageBatchesSent += slice.length
         } catch (err) {
-          console.error(`[BulkScrape] QStash error (page cursor=${lastId}):`, err)
+          console.error(`[BulkScrape] QStash error (offset=${offset}):`, err)
         }
       }
 

@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useSidebar } from "@/components/ui/sidebar"
 
 import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
@@ -131,6 +132,7 @@ const SETTINGS = {
 
 export default function BulkScrapePage() {
   const queryClient = useQueryClient()
+  const { state: sidebarState } = useSidebar()
 
   // Use shared admin filters hook
   const {
@@ -1040,7 +1042,12 @@ export default function BulkScrapePage() {
         </ScrollArea>
 
         {/* Fixed Count & Start Button */}
-        <div className="bg-accent bottom-0 z-50 flex shrink-0 flex-col border-t! p-4 xl:fixed xl:bottom-0 xl:left-0 xl:ml-(--sidebar-width) xl:w-[400px] xl:border-t-0 xl:border-r">
+        <div
+          className={cn(
+            "bg-accent bottom-0 z-50 flex shrink-0 flex-col border-t! p-4 xl:fixed xl:bottom-0 xl:left-0 xl:w-[400px] xl:border-t-0 xl:border-r",
+            sidebarState === "collapsed" ? "xl:ml-(--sidebar-width-icon)" : "xl:ml-(--sidebar-width)",
+          )}
+        >
           <button
             onClick={() => {
               setProductsPage(1)

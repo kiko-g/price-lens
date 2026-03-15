@@ -456,6 +456,27 @@ export async function updateBulkScrapeJob(jobId: string, updates: Partial<BulkSc
   }
 }
 
+const INCREMENT_PROGRESS_LUA = `
+local job = redis.call('GET', KEYS[1])
+if not job then return nil end
+local data = cjson.decode(job)
+data.processed = data.processed + 1
+if ARGV[1] == '1' then data.failed = data.failed + 1 end
+if ARGV[2] == '1' then data.barcodesFound = data.barcodesFound + 1 end
+if data.processed >= data.total then
+  data.status = 'completed'
+  data.completedAt = ARGV[3]
+end
+data.updatedAt = ARGV[3]
+local ttl = redis.call('TTL', KEYS[1])
+if ttl > 0 then
+  redis.call('SETEX', KEYS[1], ttl, cjson.encode(data))
+else
+  redis.call('SET', KEYS[1], cjson.encode(data))
+end
+return data.processed
+`
+
 export async function incrementBulkScrapeProgress(
   jobId: string,
   options: { failed?: boolean; barcodeFound?: boolean } = {},
@@ -465,28 +486,17 @@ export async function incrementBulkScrapeProgress(
   }
 
   try {
-    const job = await getBulkScrapeJob(jobId)
-    if (!job) return
-
-    const updates: Partial<BulkScrapeJob> = {
-      processed: job.processed + 1,
-    }
-
-    if (options.failed) {
-      updates.failed = job.failed + 1
-    }
-
-    if (options.barcodeFound) {
-      updates.barcodesFound = job.barcodesFound + 1
-    }
-
-    if (updates.processed === job.total) {
-      updates.status = "completed"
-      updates.completedAt = new Date().toISOString()
-    }
-
-    await updateBulkScrapeJob(jobId, updates)
+    const key = `${BULK_SCRAPE_JOB_PREFIX}${jobId}`
+    const now = new Date().toISOString()
+    await rTimeout(
+      redis.eval(INCREMENT_PROGRESS_LUA, {
+        keys: [key],
+        arguments: [options.failed ? "1" : "0", options.barcodeFound ? "1" : "0", now],
+      }),
+    )
+    breaker.recordSuccess()
   } catch (error) {
+    breaker.recordFailure()
     console.error("Error incrementing bulk scrape progress:", error)
   }
 }
