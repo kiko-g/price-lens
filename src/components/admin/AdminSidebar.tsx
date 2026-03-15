@@ -70,62 +70,44 @@ interface NavItem {
   items?: { title: string; href: string; icon?: LucideIcon }[]
 }
 
-const NAV_ITEMS: NavItem[] = [
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
-    title: "Analytics",
-    href: "/admin/analytics",
-    icon: GaugeIcon,
-  },
-  {
-    title: "Schedule",
-    href: "/admin/schedule",
-    icon: CalendarClockIcon,
-  },
-  {
-    title: "Database",
-    href: "/admin/dashboard",
-    icon: DatabaseIcon,
+    label: "Analytics",
     items: [
-      { title: "Prices", href: "/admin/dashboard/prices", icon: DollarSignIcon },
-      { title: "Store Products", href: "/admin/dashboard/store_products", icon: ShoppingCartIcon },
-      { title: "Trade Items", href: "/admin/trade-items", icon: ScanBarcodeIcon },
-      { title: "Canonical Matches", href: "/admin/canonical-matches", icon: GitMergeIcon },
+      { title: "Analytics", href: "/admin/analytics", icon: GaugeIcon },
+      { title: "Performance", href: "/admin/performance", icon: TimerIcon },
     ],
   },
   {
-    title: "Discovery",
-    href: "/admin/discovery",
-    icon: MapIcon,
+    label: "Product & Catalog",
+    items: [
+      {
+        title: "Database",
+        href: "/admin/dashboard",
+        icon: DatabaseIcon,
+        items: [
+          { title: "Prices", href: "/admin/dashboard/prices", icon: DollarSignIcon },
+          { title: "Store Products", href: "/admin/dashboard/store_products", icon: ShoppingCartIcon },
+          { title: "Trade Items", href: "/admin/trade-items", icon: ScanBarcodeIcon },
+          { title: "Canonical Matches", href: "/admin/canonical-matches", icon: GitMergeIcon },
+        ],
+      },
+      { title: "Categories", href: "/admin/categories", icon: LayersIcon },
+      { title: "Priorities", href: "/admin/priorities", icon: CrownIcon },
+      { title: "AI Classifier", href: "/admin/priorities/ai", icon: SparklesIcon },
+    ],
   },
   {
-    title: "Categories",
-    href: "/admin/categories",
-    icon: LayersIcon,
+    label: "Discovery & Scraping",
+    items: [
+      { title: "Discovery", href: "/admin/discovery", icon: MapIcon },
+      { title: "Bulk Scrape", href: "/admin/bulk-scrape", icon: PickaxeIcon },
+      { title: "Test Scrapers", href: "/admin/test", icon: FlaskConicalIcon },
+    ],
   },
   {
-    title: "Priorities",
-    href: "/admin/priorities",
-    icon: CrownIcon,
-  },
-  {
-    title: "Bulk Scrape",
-    href: "/admin/bulk-scrape",
-    icon: PickaxeIcon,
-  },
-  {
-    title: "AI Classifier",
-    href: "/admin/priorities/ai",
-    icon: SparklesIcon,
-  },
-  {
-    title: "Test Scrapers",
-    href: "/admin/test",
-    icon: FlaskConicalIcon,
-  },
-  {
-    title: "Performance",
-    href: "/admin/performance",
-    icon: TimerIcon,
+    label: "Operations",
+    items: [{ title: "Schedule", href: "/admin/schedule", icon: CalendarClockIcon }],
   },
 ]
 
@@ -133,7 +115,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -143,27 +125,29 @@ export function AdminSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="pt-2">
-        <SidebarGroup>
-          <SidebarGroupLabel>Utilities</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_ITEMS.map((item) =>
-                item.items ? (
-                  <CollapsibleNavItem key={item.href} item={item} pathname={pathname} />
-                ) : (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.title}>
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ),
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {NAV_GROUPS.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) =>
+                  item.items ? (
+                    <CollapsibleNavItem key={item.href} item={item} pathname={pathname} />
+                  ) : (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.title}>
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ),
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter>
