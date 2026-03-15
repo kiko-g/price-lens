@@ -81,17 +81,6 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Product & Catalog",
     items: [
-      {
-        title: "Database",
-        href: "/admin/dashboard",
-        icon: DatabaseIcon,
-        items: [
-          { title: "Prices", href: "/admin/dashboard/prices", icon: DollarSignIcon },
-          { title: "Store Products", href: "/admin/dashboard/store_products", icon: ShoppingCartIcon },
-          { title: "Trade Items", href: "/admin/trade-items", icon: ScanBarcodeIcon },
-          { title: "Canonical Matches", href: "/admin/canonical-matches", icon: GitMergeIcon },
-        ],
-      },
       { title: "Categories", href: "/admin/categories", icon: LayersIcon },
       { title: "Priorities", href: "/admin/priorities", icon: CrownIcon },
       { title: "AI Classifier", href: "/admin/priorities/ai", icon: SparklesIcon },
@@ -103,6 +92,15 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Discovery", href: "/admin/discovery", icon: MapIcon },
       { title: "Bulk Scrape", href: "/admin/bulk-scrape", icon: PickaxeIcon },
       { title: "Test Scrapers", href: "/admin/test", icon: FlaskConicalIcon },
+    ],
+  },
+  {
+    label: "Database",
+    items: [
+      { title: "Prices", href: "/admin/dashboard/prices", icon: DollarSignIcon },
+      { title: "Store Products", href: "/admin/dashboard/store_products", icon: ShoppingCartIcon },
+      { title: "Trade Items", href: "/admin/trade-items", icon: ScanBarcodeIcon },
+      { title: "Canonical Matches", href: "/admin/canonical-matches", icon: GitMergeIcon },
     ],
   },
   {
