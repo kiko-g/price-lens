@@ -244,20 +244,20 @@ export async function POST(req: NextRequest) {
       }
 
       // Send this page's batches to QStash immediately (max 100 per call)
+      let pageBatchesSent = 0
       for (let i = 0; i < messages.length; i += QSTASH_BATCH_LIMIT) {
         const slice = messages.slice(i, i + QSTASH_BATCH_LIMIT)
         try {
           await qstash.batchJSON(slice)
-          const productsInSlice = slice.reduce(
-            (sum, msg) => sum + ((msg.body as { products?: unknown[] }).products?.length ?? 0),
-            0,
-          )
-          totalQueued += productsInSlice
-          totalBatches += slice.length
+          pageBatchesSent += slice.length
         } catch (err) {
           console.error(`[BulkScrape] QStash error (page cursor=${lastId}):`, err)
         }
       }
+
+      // Count from page data directly (QStash SDK may consume message bodies)
+      totalQueued += page.length
+      totalBatches += pageBatchesSent
 
       console.log(`[BulkScrape] Progress: ${totalQueued} products queued in ${totalBatches} batches`)
 
