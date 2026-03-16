@@ -1065,7 +1065,7 @@ export default function BulkScrapePage() {
               setProductsPage(1)
               setMatchingProductsDialogOpen(true)
             }}
-            className="hover:bg-primary/20 hover:border-primary/50 bg-background flex flex-1 cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2"
+            className="hover:bg-primary/20 hover:border-primary/50 bg-background flex flex-1 cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-1"
           >
             <div className="flex items-center gap-2">
               <PackageIcon className="text-muted-foreground h-4 w-4" />

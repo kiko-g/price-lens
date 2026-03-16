@@ -123,53 +123,59 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
+const PAGE_SIZE = 900
+
 /**
- * Fetch Pingo Doce products without barcodes
+ * Fetch Pingo Doce products without barcodes (paginated; Supabase returns max 1000 per request).
  */
 async function fetchProductsWithoutBarcodes(): Promise<StoreProduct[]> {
   console.log("📦 Fetching Pingo Doce products without barcodes...")
 
-  // Load failed IDs to skip
   const failedIds = skipFailed ? loadFailedIds() : new Set<number>()
   if (skipFailed && failedIds.size > 0) {
     console.log(`   Skipping ${failedIds.size} previously failed products`)
   }
 
-  // Fetch more than needed to account for filtering
-  // Using simple query to avoid timeout issues with NOT IN clauses
-  const fetchLimit = limit ? limit + failedIds.size + offset : 1000
+  const allRows: StoreProduct[] = []
+  let lastId = 0
+  const needCount = limit != null ? offset + limit : undefined
 
-  const { data, error } = await supabase
-    .from("store_products")
-    .select("id, url, name, barcode")
-    .eq("origin_id", PINGO_DOCE_ORIGIN_ID)
-    .is("barcode", null)
-    .eq("available", true)
-    .order("id", { ascending: true })
-    .limit(fetchLimit)
+  while (true) {
+    let query = supabase
+      .from("store_products")
+      .select("id, url, name, barcode")
+      .eq("origin_id", PINGO_DOCE_ORIGIN_ID)
+      .is("barcode", null)
+      .eq("available", true)
+      .order("id", { ascending: true })
+      .limit(PAGE_SIZE)
 
-  if (error) {
-    throw new Error(`Failed to fetch products: ${error.message}`)
+    if (lastId > 0) {
+      query = query.gt("id", lastId)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      throw new Error(`Failed to fetch products: ${error.message}`)
+    }
+
+    const chunk = data || []
+    if (chunk.length === 0) break
+
+    for (const p of chunk) {
+      if (skipFailed && failedIds.has(p.id)) continue
+      allRows.push(p)
+      if (needCount != null && allRows.length >= needCount) break
+    }
+
+    lastId = chunk[chunk.length - 1].id
+    if (chunk.length < PAGE_SIZE || (needCount != null && allRows.length >= needCount)) break
   }
 
-  // Filter out failed IDs and apply offset in JavaScript
-  // (NOT IN queries were causing timeouts on Supabase)
-  let filteredData = data || []
-
-  if (skipFailed && failedIds.size > 0) {
-    filteredData = filteredData.filter((p) => !failedIds.has(p.id))
-  }
-
-  if (offset > 0) {
-    filteredData = filteredData.slice(offset)
-  }
-
-  if (limit) {
-    filteredData = filteredData.slice(0, limit)
-  }
-
-  console.log(`   Found ${filteredData.length} products to process`)
-  return filteredData
+  const filtered = allRows.slice(offset, limit != null ? offset + limit : undefined)
+  console.log(`   Found ${filtered.length} products to process`)
+  return filtered
 }
 
 interface BVDebugInfo {

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/scrape/scheduler",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/admin/analytics/compute-worker",
+      "schedule": "0 */12 * * *"
+    },
+    {
+      "path": "/api/admin/discovery?action=run&origin=1",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/admin/discovery?action=run&origin=2",
+      "schedule": "5 3 * * 0"
+    },
+    {
+      "path": "/api/admin/discovery?action=run&origin=3",
+      "schedule": "10 3 * * 0"
+    },
+    {
+      "path": "/api/admin/discovery/triage?batch=80",
+      "schedule": "0 */2 * * *"
+    }
+  ]
+}
