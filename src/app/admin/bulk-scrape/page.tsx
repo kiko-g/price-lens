@@ -1,10 +1,10 @@
 "use client"
 
 import axios from "axios"
+import Link from "next/link"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAdminStoreProductFilters } from "@/hooks/useAdminStoreProductFilters"
-
 import { cn } from "@/lib/utils"
 import type {
   BulkScrapeResult,
@@ -14,6 +14,7 @@ import type {
   BulkScrapeError,
 } from "@/lib/scrapers/types"
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -23,7 +24,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useSidebar } from "@/components/ui/sidebar"
 
@@ -59,8 +60,8 @@ import {
   PickaxeIcon,
   ExternalLinkIcon,
   ArrowRightIcon,
+  InfoIcon,
 } from "lucide-react"
-import Link from "next/link"
 
 /** Type guard to check if result is a batch result (not job creation) */
 function isBatchResult(result: BulkScrapeResult): result is BulkScrapeBatchResult {
@@ -704,14 +705,14 @@ export default function BulkScrapePage() {
       {/* Sidebar - Filters */}
       <aside className="flex h-auto min-h-0 flex-col border-b xl:h-full xl:w-[400px] xl:min-w-[400px] xl:shrink-0 xl:overflow-hidden xl:border-r xl:border-b-0">
         {/* Scrollable filters section */}
-        <ScrollArea className="h-0 flex-1 p-4 xl:pb-36">
-          <div className="mb-4 flex items-center justify-between">
+        <ScrollArea className="h-0 flex-1 px-4 pt-3 pb-8 xl:pb-36">
+          <div className="flex items-center justify-between border-b pb-3">
             <div className="flex items-center gap-2">
               <PickaxeIcon className="text-primary size-5" />
               <h2 className="text-lg font-bold">Bulk Scrape</h2>
             </div>
 
-            <Button variant="outline" size="icon" onClick={() => refetchCount()}>
+            <Button variant="outline" size="icon-sm" onClick={() => refetchCount()}>
               <RefreshCwIcon className="h-4 w-4" />
             </Button>
           </div>
@@ -729,7 +730,7 @@ export default function BulkScrapePage() {
                 <div className="grid grid-cols-2 gap-2">
                   <div
                     className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
                       useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
                     )}
                     onClick={() => setUseDirectMode(true)}
@@ -744,7 +745,7 @@ export default function BulkScrapePage() {
                   </div>
                   <div
                     className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 transition-colors",
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors",
                       !useDirectMode ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
                     )}
                     onClick={() => setUseDirectMode(false)}
@@ -803,6 +804,16 @@ export default function BulkScrapePage() {
                 <div className="flex flex-1 items-center gap-2">
                   <PackageIcon className="h-4 w-4" />
                   Job Limit
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-4 w-4" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>The maximum number of products to process in a single job. Leave empty for no limit.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 {jobLimit !== null && (
                   <Badge variant="secondary" size="2xs">
@@ -845,10 +856,6 @@ export default function BulkScrapePage() {
                       ))}
                     </div>
                   </div>
-
-                  <p className="text-muted-foreground text-xs">
-                    Maximum products to process in this job. Leave empty for no limit.
-                  </p>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -867,7 +874,7 @@ export default function BulkScrapePage() {
                 )}
               </AccordionTrigger>
               <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   <label className="flex cursor-pointer items-center gap-2">
                     <Checkbox checked={onlyUrl} onCheckedChange={() => setOnlyUrl(!onlyUrl)} />
                     <span className="text-sm">Only products with URL (no data scraped)</span>
@@ -876,16 +883,21 @@ export default function BulkScrapePage() {
                     <Checkbox checked={missingBarcode} onCheckedChange={() => setMissingBarcode(!missingBarcode)} />
                     <span className="text-sm">Only products missing barcode</span>
                   </label>
-                  <div className="border-t pt-3">
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <Checkbox checked={useAntiBlock} onCheckedChange={() => setUseAntiBlock(!useAntiBlock)} />
-                      <span className="text-sm">Anti-blocking (slower but safer)</span>
-                    </label>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      Adds random delays and rotates User-Agent to avoid IP blocks. Disable for faster scraping if not
-                      getting blocked.
-                    </p>
-                  </div>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <Checkbox checked={useAntiBlock} onCheckedChange={() => setUseAntiBlock(!useAntiBlock)} />
+                    <span className="text-sm">Anti-blocking (slower but safer)</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <InfoIcon className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Adds random delays and rotates User-Agent to avoid IP blocks. Disable for faster scraping if
+                          not getting blocked.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </label>
                 </div>
               </AccordionContent>
             </AccordionItem>
