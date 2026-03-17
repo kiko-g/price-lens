@@ -29,7 +29,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import type { AnalyticsSnapshotData } from "@/types/analytics"
 import { Cell, Pie, PieChart } from "recharts"
-import { PRIORITY_CONFIG, formatThreshold } from "@/lib/business/priority"
+import {
+  PRIORITY_CONFIG,
+  PRIORITY_DISTRIBUTION_KEYS,
+  formatThreshold,
+  getPriorityDistributionStyle,
+} from "@/lib/business/priority"
 import { BanIcon, CircleIcon } from "lucide-react"
 
 const STORE_LOGOS: Record<number, React.ComponentType<{ className?: string }>> = {
@@ -248,118 +253,194 @@ const FRESHNESS_BANDS = [
   { key: "never" as const, label: "Never", detail: null, className: "bg-slate-600", fill: "#475569" },
 ]
 
-export function ScrapeFreshnessSection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
+function pieTooltipFormatter(value: unknown, _name: unknown, _item: unknown, _index: unknown, payload: unknown) {
+  const pct = (payload as { pct?: number } | undefined)?.pct
+  return (
+    <span>
+      {typeof value === "number" ? value.toLocaleString() : String(value)}
+      {pct != null && ` (${pct.toFixed(1)}%)`}
+    </span>
+  )
+}
+
+export function ScrapeFreshnessSection({
+  data,
+  isLoading,
+  className,
+}: {
+  data?: AnalyticsSnapshotData
+  isLoading: boolean
+  className?: string
+}) {
   const freshness = data?.scrape_freshness
-  const total = freshness ? Object.values(freshness).reduce((a, b) => a + b, 0) : 0
+  const totalFreshness = freshness ? Object.values(freshness).reduce((a, b) => a + b, 0) : 0
+  const dist = data?.priority_distribution
+  const totalPriority = dist != null ? dist.p0 + dist.p1 + dist.p2 + dist.p3 + dist.p4 + dist.p5 + dist.unassigned : 0
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <ClockIcon className="text-foreground size-5" />
-          Scrape Freshness
+          Scrape Freshness & Priority
         </CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-32 w-full" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Pie chart with tooltips */}
-            {total > 0 ? (
-              <ChartContainer
-                config={Object.fromEntries(
-                  FRESHNESS_BANDS.map((b) => [
-                    b.key,
-                    { label: b.detail ? `${b.label} (${b.detail})` : b.label, color: b.fill },
-                  ]),
-                )}
-                className="aspect-square h-44 w-full max-w-44"
-              >
-                <PieChart>
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value, _name, _item, _index, payload) => {
-                          console.info(value, _name, _item, _index, payload)
-                          const pct = (payload as { pct?: number } | undefined)?.pct
-                          return (
-                            <span>
-                              {typeof value === "number" ? value.toLocaleString() : value}
-                              {pct != null && ` (${pct.toFixed(1)}%)`}
-                            </span>
-                          )
-                        }}
-                      />
-                    }
-                  />
-                  <Pie
-                    data={FRESHNESS_BANDS.filter((b) => (freshness?.[b.key] ?? 0) > 0).map((band) => {
-                      const count = freshness?.[band.key] ?? 0
-                      const pct = total > 0 ? (count / total) * 100 : 0
-                      return {
-                        name: band.detail ? `${band.label} (${band.detail})` : band.label,
-                        value: count,
-                        key: band.key,
-                        fill: band.fill,
-                        pct,
-                      }
-                    })}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="40%"
-                    strokeWidth={1}
-                    stroke="var(--background)"
-                  >
-                    {FRESHNESS_BANDS.filter((b) => (freshness?.[b.key] ?? 0) > 0).map((band) => (
-                      <Cell key={band.key} fill={band.fill} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ChartContainer>
-            ) : (
-              <div className="bg-muted/30 flex h-44 w-full max-w-44 items-center justify-center rounded-lg">
-                <span className="text-muted-foreground text-sm">No data</span>
-              </div>
-            )}
-
-            {/* Legend */}
-            <div className="grid grid-cols-1 gap-x-6 gap-y-3 xl:grid-cols-2">
-              {FRESHNESS_BANDS.map((band) => {
-                const count = freshness?.[band.key] ?? 0
-                const pct = total > 0 ? (count / total) * 100 : 0
-                return (
-                  <div key={band.key} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className={cn("h-2.5 w-2.5 rounded-full", band.className)} />
-                      <span className="text-muted-foreground">
-                        {band.label}
-                        {band.detail && <span className="text-muted-foreground/60 ml-1 text-xs">({band.detail})</span>}
+          <div className="grid gap-8 md:grid-cols-2">
+            {/* Scrape Freshness */}
+            <div className="space-y-4">
+              <h4 className="text-muted-foreground text-sm font-medium">Scrape Freshness</h4>
+              {totalFreshness > 0 ? (
+                <ChartContainer
+                  config={Object.fromEntries(
+                    FRESHNESS_BANDS.map((b) => [
+                      b.key,
+                      { label: b.detail ? `${b.label} (${b.detail})` : b.label, color: b.fill },
+                    ]),
+                  )}
+                  className="aspect-square h-44 w-full max-w-44"
+                >
+                  <PieChart>
+                    <ChartTooltip content={<ChartTooltipContent formatter={pieTooltipFormatter} />} />
+                    <Pie
+                      data={FRESHNESS_BANDS.filter((b) => (freshness?.[b.key] ?? 0) > 0).map((band) => {
+                        const count = freshness?.[band.key] ?? 0
+                        const pct = totalFreshness > 0 ? (count / totalFreshness) * 100 : 0
+                        return {
+                          name: band.detail ? `${band.label} (${band.detail})` : band.label,
+                          value: count,
+                          key: band.key,
+                          fill: band.fill,
+                          pct,
+                        }
+                      })}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="40%"
+                      strokeWidth={1}
+                      stroke="var(--background)"
+                    >
+                      {FRESHNESS_BANDS.filter((b) => (freshness?.[b.key] ?? 0) > 0).map((band) => (
+                        <Cell key={band.key} fill={band.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+              ) : (
+                <div className="bg-muted/30 flex h-44 w-full max-w-44 items-center justify-center rounded-lg">
+                  <span className="text-muted-foreground text-sm">No data</span>
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+                {FRESHNESS_BANDS.map((band) => {
+                  const count = freshness?.[band.key] ?? 0
+                  const pct = totalFreshness > 0 ? (count / totalFreshness) * 100 : 0
+                  return (
+                    <div key={band.key} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("h-2.5 w-2.5 rounded-full", band.className)} />
+                        <span className="text-muted-foreground">
+                          {band.label}
+                          {band.detail && (
+                            <span className="text-muted-foreground/60 ml-1 text-xs">({band.detail})</span>
+                          )}
+                        </span>
+                      </div>
+                      <span className="font-medium tabular-nums">
+                        {count.toLocaleString()}{" "}
+                        <span className="text-muted-foreground font-normal">({pct.toFixed(1)}%)</span>
                       </span>
                     </div>
-                    <span className="font-medium tabular-nums">
-                      {count.toLocaleString()}{" "}
-                      <span className="text-muted-foreground font-normal">({pct.toFixed(1)}%)</span>
-                    </span>
+                  )
+                })}
+              </div>
+              {data?.scrape_velocity && (
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Avg scrape velocity (24h)</span>
+                    <span className="font-semibold">{data.scrape_velocity.avg_per_hour_24h.toLocaleString()} / hr</span>
                   </div>
-                )
-              })}
+                </div>
+              )}
             </div>
 
-            {/* Velocity */}
-            {data?.scrape_velocity && (
-              <div className="bg-muted/50 mt-2 rounded-lg p-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Avg scrape velocity (24h)</span>
-                  <span className="font-semibold">{data.scrape_velocity.avg_per_hour_24h.toLocaleString()} / hr</span>
+            {/* Priority Distribution */}
+            <div className="space-y-4">
+              <h4 className="text-muted-foreground text-sm font-medium">Priority Distribution</h4>
+              {totalPriority > 0 && dist ? (
+                <>
+                  <ChartContainer
+                    config={Object.fromEntries(
+                      PRIORITY_DISTRIBUTION_KEYS.map((key) => {
+                        const style = getPriorityDistributionStyle(key)
+                        return [key, { label: style.label, color: style.fill }]
+                      }),
+                    )}
+                    className="aspect-square h-44 w-full max-w-44"
+                  >
+                    <PieChart>
+                      <ChartTooltip content={<ChartTooltipContent formatter={pieTooltipFormatter} />} />
+                      <Pie
+                        data={PRIORITY_DISTRIBUTION_KEYS.filter((key) => (dist[key] ?? 0) > 0).map((key) => {
+                          const style = getPriorityDistributionStyle(key)
+                          const count = dist[key] ?? 0
+                          const pct = totalPriority > 0 ? (count / totalPriority) * 100 : 0
+                          return {
+                            name: style.label,
+                            value: count,
+                            key,
+                            fill: style.fill,
+                            pct,
+                          }
+                        })}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="40%"
+                        strokeWidth={1}
+                        stroke="var(--background)"
+                      >
+                        {PRIORITY_DISTRIBUTION_KEYS.filter((key) => (dist[key] ?? 0) > 0).map((key) => (
+                          <Cell key={key} fill={getPriorityDistributionStyle(key).fill} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                  <div className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+                    {PRIORITY_DISTRIBUTION_KEYS.map((key) => {
+                      const style = getPriorityDistributionStyle(key)
+                      const count = dist[key] ?? 0
+                      const pct = totalPriority > 0 ? (count / totalPriority) * 100 : 0
+                      return (
+                        <div key={key} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className={cn("h-2.5 w-2.5 rounded-full", style.className)} />
+                            <span className="text-muted-foreground">{style.label}</span>
+                          </div>
+                          <span className="font-medium tabular-nums">
+                            {count.toLocaleString()}{" "}
+                            <span className="text-muted-foreground font-normal">({pct.toFixed(1)}%)</span>
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="bg-muted/30 flex h-44 w-full max-w-44 items-center justify-center rounded-lg">
+                  <span className="text-muted-foreground text-sm">No data</span>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </CardContent>
@@ -429,12 +510,20 @@ export function PriceIntelligenceSection({ data, isLoading }: { data?: Analytics
 // 5. Data Quality
 // ---------------------------------------------------------------------------
 
-export function DataQualitySection({ data, isLoading }: { data?: AnalyticsSnapshotData; isLoading: boolean }) {
+export function DataQualitySection({
+  data,
+  isLoading,
+  className,
+}: {
+  data?: AnalyticsSnapshotData
+  isLoading: boolean
+  className?: string
+}) {
   const dq = data?.data_quality
   const total = data?.scrape_status?.total ?? 0
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <ShieldCheckIcon className="text-foreground size-5" />

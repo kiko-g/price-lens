@@ -12,7 +12,7 @@ import { type BadgeKind } from "@/components/ui/badge"
  * NOTE: P1/P2 temporarily paused to reduce egress while over Supabase free-tier limit.
  * Restore to [5,4,3,2,1] once billing period resets (~20 Mar 2026).
  */
-export const ACTIVE_PRIORITIES = [5, 4] as const
+export const ACTIVE_PRIORITIES = [5, 4, 3, 2] as const
 
 /** Default grace period before showing staleness warning (24 hours) */
 export const DEFAULT_STALENESS_LENIENCE_HOURS = 24
@@ -46,6 +46,8 @@ type PriorityConfig = {
   period: string | null
   badgeKind: BadgeKind
   bgClass: string
+  /** Hex color for charts (e.g. Recharts pie). */
+  chartFill: string
 }
 
 export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
@@ -56,6 +58,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: null,
     badgeKind: "gray",
     bgClass: "bg-neutral-500/70 border-neutral-500",
+    chartFill: "#64748b",
   },
   "0": {
     label: "0",
@@ -64,6 +67,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: null,
     badgeKind: "gray",
     bgClass: "bg-gray-800/70  border-gray-800",
+    chartFill: "#4b5563",
   },
   "1": {
     label: "1",
@@ -72,6 +76,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: formatHoursDuration(PRIORITY_REFRESH_HOURS[1] ?? 0),
     badgeKind: "destructive",
     bgClass: "bg-rose-600/70 border-rose-600",
+    chartFill: "#e11d48",
   },
   "2": {
     label: "2",
@@ -80,6 +85,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: formatHoursDuration(PRIORITY_REFRESH_HOURS[2] ?? 0),
     badgeKind: "retail",
     bgClass: "bg-orange-600/70 border-orange-600",
+    chartFill: "#ea580c",
   },
   "3": {
     label: "3",
@@ -88,6 +94,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: formatHoursDuration(PRIORITY_REFRESH_HOURS[3] ?? 0),
     badgeKind: "warning",
     bgClass: "bg-amber-600/70 border-amber-600",
+    chartFill: "#d97706",
   },
   "4": {
     label: "4",
@@ -96,6 +103,7 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: formatHoursDuration(PRIORITY_REFRESH_HOURS[4] ?? 0),
     badgeKind: "sky",
     bgClass: "bg-sky-600/70 border-sky-600",
+    chartFill: "#0284c7",
   },
   "5": {
     label: "5",
@@ -104,7 +112,31 @@ export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
     period: formatHoursDuration(PRIORITY_REFRESH_HOURS[5] ?? 0),
     badgeKind: "success",
     bgClass: "bg-emerald-700/70 border-emerald-700",
+    chartFill: "#059669",
   },
+}
+
+/** Keys for analytics priority_distribution, in display order (P5 first, then unassigned last). */
+export const PRIORITY_DISTRIBUTION_KEYS = ["p5", "p4", "p3", "p2", "p1", "p0", "unassigned"] as const
+export type PriorityDistributionKey = (typeof PRIORITY_DISTRIBUTION_KEYS)[number]
+
+/** Style for priority distribution charts/legends. Key matches analytics snapshot priority_distribution. */
+export function getPriorityDistributionStyle(key: PriorityDistributionKey): {
+  label: string
+  fill: string
+  className: string
+} {
+  if (key === "unassigned") {
+    const c = PRIORITY_CONFIG.null
+    return { label: c.description, fill: c.chartFill, className: "bg-neutral-500" }
+  }
+  const num = parseInt(key.slice(1), 10)
+  const c = PRIORITY_CONFIG[String(num)]
+  return {
+    label: `P${num} ${c.description}`,
+    fill: c.chartFill,
+    className: c.bgClass.split(" ")[0] ?? "bg-gray-500",
+  }
 }
 
 export const PRODUCT_PRIORITY_LEVELS = [0, 1, 2, 3, 4, 5] as const

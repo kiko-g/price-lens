@@ -104,7 +104,7 @@ describe("cleanUrl", () => {
     for (const slug of cases) {
       const url = `https://www.pingodoce.pt/home/produtos/test/${slug}-123.html`
       const cleaned = scraper.cleanUrl(url)
-      expect(cleaned).not.toMatch(/%(?![0-9A-Fa-f]{2})/, `Expected ${slug} to have lone % fixed`)
+      expect(cleaned).not.toMatch(/%(?![0-9A-Fa-f]{2})/)
       expect(cleaned).toContain("%25")
     }
   })
@@ -150,6 +150,38 @@ describe("fetchHtml", () => {
     const result = await scraper.fetchHtml("https://example.com/missing-product")
 
     expect(result.status).toBe("not_found")
+    expect(result.html).toBeNull()
+  })
+
+  it("should return not_found status on 471 response (Continente unlisted)", async () => {
+    const axios471Error = new Error("Request failed with status code 471") as any
+    axios471Error.response = { status: 471 }
+    axios471Error.isAxiosError = true
+    mockAxiosGet.mockRejectedValue(axios471Error)
+
+    const axiosModule = await import("axios")
+    vi.spyOn(axiosModule.default, "isAxiosError").mockReturnValue(true)
+
+    const result = await scraper.fetchHtml("https://example.com/unlisted-product")
+
+    expect(result.status).toBe("not_found")
+    expect(result.httpStatus).toBe(471)
+    expect(result.html).toBeNull()
+  })
+
+  it("should return not_found status on 474 response (Continente hidden)", async () => {
+    const axios474Error = new Error("Request failed with status code 474") as any
+    axios474Error.response = { status: 474 }
+    axios474Error.isAxiosError = true
+    mockAxiosGet.mockRejectedValue(axios474Error)
+
+    const axiosModule = await import("axios")
+    vi.spyOn(axiosModule.default, "isAxiosError").mockReturnValue(true)
+
+    const result = await scraper.fetchHtml("https://example.com/hidden-product")
+
+    expect(result.status).toBe("not_found")
+    expect(result.httpStatus).toBe(474)
     expect(result.html).toBeNull()
   })
 

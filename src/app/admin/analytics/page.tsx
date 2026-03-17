@@ -133,10 +133,8 @@ export default function AnalyticsPage() {
           <>
             <ScrapeStatusSection data={data} isLoading={isLoading} />
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <StoreBreakdownSection data={data} isLoading={isLoading} />
-              <ScrapeFreshnessSection data={data} isLoading={isLoading} />
-            </div>
+            <StoreBreakdownSection data={data} isLoading={isLoading} />
+            <ScrapeFreshnessSection data={data} isLoading={isLoading} className="lg:col-span-2" />
 
             <div className="grid gap-6 lg:grid-cols-2">
               <PriceIntelligenceSection data={data} isLoading={isLoading} />

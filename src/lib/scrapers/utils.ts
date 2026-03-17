@@ -140,10 +140,14 @@ export async function fetchHtml(url: string, useAntiBlock = false): Promise<Fetc
         console.warn(`[404] Product not found at URL: ${cleanedUrl}`)
         return { html: null, status: "not_found", httpStatus: 404 }
       }
+      // Continente custom codes: product unlisted/hidden (not reachable); resurrection recheck will retry
+      if (error.response?.status === 471 || error.response?.status === 474) {
+        console.warn(`[${error.response.status}] Product not reachable at URL: ${cleanedUrl}`)
+        return { html: null, status: "not_found", httpStatus: error.response.status }
+      }
       // Transient / blocking responses — don't change availability
-      // 471/474 = Continente custom codes for hidden/unlisted products (may come back)
       // 429 = rate limited, 403 = blocked
-      if (error.response?.status && [429, 403, 471, 474].includes(error.response.status)) {
+      if (error.response?.status && [429, 403].includes(error.response.status)) {
         console.warn(`[${error.response.status}] Transient error at URL: ${cleanedUrl}`)
         return { html: null, status: "error", httpStatus: error.response.status }
       }
