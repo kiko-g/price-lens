@@ -1,22 +1,21 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { CanonicalCategory, PrioritySource } from "@/types"
+import { CanonicalCategory } from "@/types"
 import { type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
-import { SORT_OPTIONS_GROUPS } from "@/lib/business/filters"
+import { SORT_OPTIONS_GROUPS, ALL_SORT_LABELS } from "@/lib/business/filters"
 import { cn } from "@/lib/utils"
+import { getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { toCategorySlug, parseCategoryId } from "./url-state"
 import { useCanonicalCategories, useFlatCategories, type FlatCategory } from "./CategoryFilter"
 import { PriceRangeFilter } from "./FilterControls"
 
 import { useScrollDirection } from "@/hooks/useScrollDirection"
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
-import { Button } from "@/components/ui/button"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
@@ -24,6 +23,7 @@ import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { SearchContainer } from "@/components/layout/search"
 import {
   BadgePercentIcon,
+  ChevronDownIcon,
   CircleCheckIcon,
   CrownIcon,
   FilterIcon,
@@ -107,8 +107,92 @@ export function MobileNav({
 }
 
 // ============================================================================
+// Shared sub-view header
+// ============================================================================
+
+function SubViewHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  return (
+    <div className="flex items-center gap-3 px-4 pb-3">
+      <button
+        type="button"
+        onClick={onBack}
+        className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
+        aria-label="Go back"
+      >
+        <ChevronLeftIcon className="h-5 w-5" />
+      </button>
+      <h2 className="text-lg font-semibold">{title}</h2>
+    </div>
+  )
+}
+
+// ============================================================================
+// Summary row (used on the main filters view)
+// ============================================================================
+
+function FilterSummaryRow({
+  label,
+  value,
+  onClick,
+  isLast,
+}: {
+  label: string
+  value: string
+  onClick: () => void
+  isLast?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn("flex w-full items-center justify-between py-4", !isLast && "border-b")}
+    >
+      <div className="flex flex-col items-start gap-0.5">
+        <span className="text-sm font-semibold">{label}</span>
+        <span className="text-muted-foreground text-xs">{value}</span>
+      </div>
+      <ChevronRightIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+    </button>
+  )
+}
+
+// ============================================================================
+// Helper: price range summary text
+// ============================================================================
+
+const PRICE_CHIPS = [
+  { label: "Under 2€", min: "", max: "2" },
+  { label: "2–5€", min: "2", max: "5" },
+  { label: "5–10€", min: "5", max: "10" },
+  { label: "10€+", min: "10", max: "" },
+] as const
+
+function priceRangeSummary(min: string, max: string): string {
+  if (!min && !max) return "Any price"
+  const chip = PRICE_CHIPS.find((c) => c.min === min && c.max === max)
+  if (chip) return chip.label
+  if (min && max) return `${min}€ – ${max}€`
+  if (min) return `From ${min}€`
+  return `Up to ${max}€`
+}
+
+// ============================================================================
+// Helper: store origin summary text
+// ============================================================================
+
+function storeOriginSummary(selectedOrigins: number[]): string {
+  if (selectedOrigins.length === 0) return "All stores"
+  return selectedOrigins
+    .map((id) => getSupermarketChainName(id))
+    .filter(Boolean)
+    .join(", ")
+}
+
+// ============================================================================
 // MobileFiltersDrawer
 // ============================================================================
+
+type DrawerView = "filters" | "categories" | "sort" | "stores" | "price"
 
 export interface MobileFiltersDrawerProps {
   open: boolean
@@ -129,26 +213,21 @@ export interface MobileFiltersDrawerProps {
   }
   selectedOrigins: number[]
   selectedPriorities: number[]
-  selectedSources: PrioritySource[]
   onOriginToggle: (origin: number) => void
   onClearOrigins: () => void
   onPriorityToggle: (level: number) => void
   onClearPriority: () => void
-  onSourceToggle: (source: PrioritySource) => void
-  onClearSources: () => void
   onCategoryChange: (categorySlug: string) => void
   onSortChange: (sort: SortByType) => void
   onTogglePriorityOrder: () => void
   onToggleAvailable: () => void
   onToggleDiscounted: () => void
   onPriceRangeChange: (min: string, max: string) => void
-  onApply: () => void
 }
 
 export function MobileFiltersDrawer({
   open,
   onOpenChange,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   activeFilterCount,
   localFilters,
   selectedOrigins,
@@ -163,10 +242,8 @@ export function MobileFiltersDrawer({
   onToggleAvailable,
   onToggleDiscounted,
   onPriceRangeChange,
-  onApply,
 }: MobileFiltersDrawerProps) {
-  const DEFAULT_ACCORDION_VALUES_MOBILE = ["sort", "store-origin", "price-range"]
-  const [view, setView] = useState<"filters" | "categories">("filters")
+  const [view, setView] = useState<DrawerView>("filters")
   const { categories } = useCanonicalCategories()
   const flatCategories = useFlatCategories(categories)
   const selectedCatId = parseCategoryId(localFilters.category)
@@ -175,6 +252,8 @@ export function MobileFiltersDrawer({
   useEffect(() => {
     if (!open) setView("filters")
   }, [open])
+
+  const sortLabel = ALL_SORT_LABELS[localFilters.sortBy]?.label ?? "Most Relevant"
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -190,267 +269,331 @@ export function MobileFiltersDrawer({
             }}
             onBack={() => setView("filters")}
           />
+        ) : view === "sort" ? (
+          <MobileSortPickerView
+            currentSort={localFilters.sortBy}
+            onSelect={(sort) => {
+              onSortChange(sort)
+              setView("filters")
+            }}
+            onBack={() => setView("filters")}
+          />
+        ) : view === "stores" ? (
+          <MobileStorePickerView
+            selectedOrigins={selectedOrigins}
+            onOriginToggle={onOriginToggle}
+            onClearOrigins={onClearOrigins}
+            onBack={() => setView("filters")}
+          />
+        ) : view === "price" ? (
+          <MobilePriceRangeView
+            priceMin={localFilters.priceMin}
+            priceMax={localFilters.priceMax}
+            onChange={onPriceRangeChange}
+            onBack={() => setView("filters")}
+          />
         ) : (
-          <>
-            <DrawerHeader>
-              <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
-            </DrawerHeader>
-            <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
-              {/* Category — opens dedicated full-screen picker */}
-              <button
-                type="button"
-                onClick={() => setView("categories")}
-                className="flex w-full items-center justify-between border-b py-4"
-              >
-                <div className="flex flex-col items-start gap-0.5">
-                  <span className="text-sm font-semibold">Category</span>
-                  <span className="text-muted-foreground text-xs">
-                    {selectedCat ? selectedCat.breadcrumb : "All categories"}
-                  </span>
-                </div>
-                <ChevronRightIcon className="text-muted-foreground h-4 w-4 shrink-0" />
-              </button>
-
-              <Accordion type="multiple" defaultValue={DEFAULT_ACCORDION_VALUES_MOBILE}>
-                <AccordionItem value="sort">
-                  <AccordionTrigger className="hover:no-underline">
-                    <span className="text-sm font-semibold">Sort By</span>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <RadioGroup
-                      value={localFilters.sortBy}
-                      onValueChange={(v) => onSortChange(v as SortByType)}
-                      className="gap-0"
-                    >
-                      {SORT_OPTIONS_GROUPS.map((group, gi) => (
-                        <div key={group.label} className={cn(gi > 0 && "border-border mt-2 border-t pt-2")}>
-                          <span className="text-muted-foreground mb-1.5 block text-[11px] font-medium tracking-wider uppercase">
-                            {group.label}
-                          </span>
-                          {group.options.map((option) => {
-                            console.info(option.value, localFilters.sortBy)
-                            return (
-                              <label
-                                key={option.value}
-                                className={cn(
-                                  "hover:bg-accent flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 transition-colors",
-                                  localFilters.sortBy === option.value && "bg-accent dark:bg-accent/50",
-                                )}
-                              >
-                                <option.icon className="text-muted-foreground h-4 w-4 shrink-0" />
-                                <span className="flex-1 text-sm">{option.label}</span>
-                                <RadioGroupItem value={option.value} className="shrink-0" />
-                              </label>
-                            )
-                          })}
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="store-origin">
-                  <AccordionTrigger className="hover:no-underline">
-                    <div className="flex flex-1 items-center justify-between pr-2">
-                      <span className="text-sm font-semibold">Store Origin</span>
-                      {selectedOrigins.length > 0 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onClearOrigins()
-                          }}
-                          className="text-muted-foreground text-xs hover:underline"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="mobile-origin-continente"
-                          checked={selectedOrigins.includes(1)}
-                          onCheckedChange={() => onOriginToggle(1)}
-                        />
-                        <Label
-                          htmlFor="mobile-origin-continente"
-                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                        >
-                          <ContinenteSvg className="h-4 min-h-4 w-auto" />
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="mobile-origin-auchan"
-                          checked={selectedOrigins.includes(2)}
-                          onCheckedChange={() => onOriginToggle(2)}
-                        />
-                        <Label
-                          htmlFor="mobile-origin-auchan"
-                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                        >
-                          <AuchanSvg className="h-4 min-h-4 w-auto" />
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="mobile-origin-pingo-doce"
-                          checked={selectedOrigins.includes(3)}
-                          onCheckedChange={() => onOriginToggle(3)}
-                        />
-                        <Label
-                          htmlFor="mobile-origin-pingo-doce"
-                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                        >
-                          <PingoDoceSvg className="h-4 min-h-4 w-auto" />
-                        </Label>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-
-                {/* Price Range Mobile */}
-                <AccordionItem value="price-range">
-                  <AccordionTrigger className="hover:no-underline">
-                    <div className="flex flex-1 items-center justify-between pr-2">
-                      <span className="text-sm font-semibold">Price Range</span>
-                      {(localFilters.priceMin || localFilters.priceMax) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onPriceRangeChange("", "")
-                          }}
-                          className="text-muted-foreground text-xs hover:underline"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <PriceRangeFilter
-                      priceMin={localFilters.priceMin}
-                      priceMax={localFilters.priceMax}
-                      onChange={onPriceRangeChange}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-
-                {/* Insiders (dev only) */}
-                {process.env.NODE_ENV === "development" && (
-                  <AccordionItem value="insiders" className="border-b-0">
-                    <AccordionTrigger className="hover:no-underline">
-                      <span className="flex items-center gap-1 text-sm font-semibold">
-                        Insiders
-                        <DevBadge />
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-2">
-                          <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                            Options
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="mobile-order-by-priority"
-                              checked={localFilters.orderByPriority}
-                              onCheckedChange={onTogglePriorityOrder}
-                            />
-                            <Label
-                              htmlFor="mobile-order-by-priority"
-                              className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                            >
-                              <CrownIcon className="h-4 w-4" />
-                              Order by priority
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="mobile-only-available"
-                              checked={localFilters.onlyAvailable}
-                              onCheckedChange={onToggleAvailable}
-                            />
-                            <Label
-                              htmlFor="mobile-only-available"
-                              className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                            >
-                              <CircleCheckIcon className="h-4 w-4" />
-                              Only available
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="mobile-only-discounted"
-                              checked={localFilters.onlyDiscounted}
-                              onCheckedChange={onToggleDiscounted}
-                            />
-                            <Label
-                              htmlFor="mobile-only-discounted"
-                              className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                            >
-                              <BadgePercentIcon className="h-4 w-4" />
-                              Only discounted
-                            </Label>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                              Priority
-                            </span>
-                            {selectedPriorities.length > 0 && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  onClearPriority()
-                                }}
-                                className="text-muted-foreground text-xs hover:underline"
-                              >
-                                Clear
-                              </button>
-                            )}
-                          </div>
-                          {PRODUCT_PRIORITY_LEVELS.map((level) => (
-                            <div key={level} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`mobile-priority-${level}`}
-                                checked={selectedPriorities.includes(level)}
-                                onCheckedChange={() => onPriorityToggle(level)}
-                              />
-                              <Label
-                                htmlFor={`mobile-priority-${level}`}
-                                className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                              >
-                                <PriorityBubble priority={level} size="sm" useDescription />
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-              </Accordion>
-            </div>
-
-            <DrawerFooter className="flex-row gap-2 border-t px-4">
-              <DrawerClose asChild>
-                <Button variant="outline" className="flex-1">
-                  Cancel
-                </Button>
-              </DrawerClose>
-              <Button className="flex-1" onClick={onApply}>
-                Apply Filters
-              </Button>
-            </DrawerFooter>
-          </>
+          <MainFiltersView
+            sortLabel={sortLabel}
+            categorySummary={selectedCat ? selectedCat.breadcrumb : "All categories"}
+            storeSummary={storeOriginSummary(selectedOrigins)}
+            priceSummary={priceRangeSummary(localFilters.priceMin, localFilters.priceMax)}
+            activeFilterCount={activeFilterCount}
+            localFilters={localFilters}
+            selectedPriorities={selectedPriorities}
+            onViewChange={setView}
+            onTogglePriorityOrder={onTogglePriorityOrder}
+            onToggleAvailable={onToggleAvailable}
+            onToggleDiscounted={onToggleDiscounted}
+            onPriorityToggle={onPriorityToggle}
+            onClearPriority={onClearPriority}
+          />
         )}
       </DrawerContent>
     </Drawer>
+  )
+}
+
+// ============================================================================
+// Main filters view (summary rows)
+// ============================================================================
+
+function MainFiltersView({
+  sortLabel,
+  categorySummary,
+  storeSummary,
+  priceSummary,
+  activeFilterCount,
+  localFilters,
+  selectedPriorities,
+  onViewChange,
+  onTogglePriorityOrder,
+  onToggleAvailable,
+  onToggleDiscounted,
+  onPriorityToggle,
+  onClearPriority,
+}: {
+  sortLabel: string
+  categorySummary: string
+  storeSummary: string
+  priceSummary: string
+  activeFilterCount: number
+  localFilters: MobileFiltersDrawerProps["localFilters"]
+  selectedPriorities: number[]
+  onViewChange: (view: DrawerView) => void
+  onTogglePriorityOrder: () => void
+  onToggleAvailable: () => void
+  onToggleDiscounted: () => void
+  onPriorityToggle: (level: number) => void
+  onClearPriority: () => void
+}) {
+  const [insidersOpen, setInsidersOpen] = useState(false)
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between px-4 pb-2">
+        <h2 className="text-lg font-semibold">Filters & Sort</h2>
+        {activeFilterCount > 0 && (
+          <span className="text-foreground bg-accent dark:bg-primary/20 rounded-full px-1.5 py-0.5 text-xs font-medium">
+            {activeFilterCount} active
+          </span>
+        )}
+      </div>
+      <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
+        <FilterSummaryRow label="Category" value={categorySummary} onClick={() => onViewChange("categories")} />
+        <FilterSummaryRow label="Sort By" value={sortLabel} onClick={() => onViewChange("sort")} />
+        <FilterSummaryRow label="Store" value={storeSummary} onClick={() => onViewChange("stores")} />
+        <FilterSummaryRow
+          label="Price Range"
+          value={priceSummary}
+          onClick={() => onViewChange("price")}
+          isLast={process.env.NODE_ENV !== "development"}
+        />
+
+        {/* Insiders (dev only) */}
+        {process.env.NODE_ENV === "development" && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setInsidersOpen((v) => !v)}
+              className="flex w-full items-center justify-between py-4"
+            >
+              <span className="flex items-center gap-1 text-sm font-semibold">
+                Insiders
+                <DevBadge />
+              </span>
+              <ChevronDownIcon
+                className={cn("text-muted-foreground h-4 w-4 transition-transform", insidersOpen && "rotate-180")}
+              />
+            </button>
+            {insidersOpen && (
+              <div className="flex flex-col gap-3 pb-4">
+                <div className="flex flex-col gap-2">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">Options</span>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-order-by-priority"
+                      checked={localFilters.orderByPriority}
+                      onCheckedChange={onTogglePriorityOrder}
+                    />
+                    <Label
+                      htmlFor="mobile-order-by-priority"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CrownIcon className="h-4 w-4" />
+                      Order by priority
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-only-available"
+                      checked={localFilters.onlyAvailable}
+                      onCheckedChange={onToggleAvailable}
+                    />
+                    <Label
+                      htmlFor="mobile-only-available"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <CircleCheckIcon className="h-4 w-4" />
+                      Only available
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-only-discounted"
+                      checked={localFilters.onlyDiscounted}
+                      onCheckedChange={onToggleDiscounted}
+                    />
+                    <Label
+                      htmlFor="mobile-only-discounted"
+                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                    >
+                      <BadgePercentIcon className="h-4 w-4" />
+                      Only discounted
+                    </Label>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">Priority</span>
+                    {selectedPriorities.length > 0 && (
+                      <button onClick={onClearPriority} className="text-muted-foreground text-xs hover:underline">
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  {PRODUCT_PRIORITY_LEVELS.map((level) => (
+                    <div key={level} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`mobile-priority-${level}`}
+                        checked={selectedPriorities.includes(level)}
+                        onCheckedChange={() => onPriorityToggle(level)}
+                      />
+                      <Label
+                        htmlFor={`mobile-priority-${level}`}
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <PriorityBubble priority={level} size="sm" useDescription />
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// Sort Picker sub-view
+// ============================================================================
+
+function MobileSortPickerView({
+  currentSort,
+  onSelect,
+  onBack,
+}: {
+  currentSort: SortByType
+  onSelect: (sort: SortByType) => void
+  onBack: () => void
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      <SubViewHeader title="Sort By" onBack={onBack} />
+      <div className="flex-1 overflow-y-auto overscroll-contain px-4">
+        <RadioGroup value={currentSort} onValueChange={(v) => onSelect(v as SortByType)} className="gap-0">
+          {SORT_OPTIONS_GROUPS.map((group, gi) => (
+            <div key={group.label} className={cn(gi > 0 && "border-border mt-2 border-t pt-2")}>
+              <span className="text-muted-foreground mb-1.5 block text-[11px] font-medium tracking-wider uppercase">
+                {group.label}
+              </span>
+              {group.options.map((option) => (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "hover:bg-accent flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-2.5 transition-colors",
+                    currentSort === option.value && "bg-accent dark:bg-primary/20",
+                  )}
+                >
+                  <option.icon className="text-muted-foreground h-4 w-4 shrink-0" />
+                  <span className="flex-1 text-[15px]">{option.label}</span>
+                  <RadioGroupItem value={option.value} className="shrink-0" />
+                </label>
+              ))}
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// Store Picker sub-view
+// ============================================================================
+
+const STORE_OPTIONS = [
+  { id: 1, Logo: ContinenteSvg },
+  { id: 2, Logo: AuchanSvg },
+  { id: 3, Logo: PingoDoceSvg },
+] as const
+
+function MobileStorePickerView({
+  selectedOrigins,
+  onOriginToggle,
+  onClearOrigins,
+  onBack,
+}: {
+  selectedOrigins: number[]
+  onOriginToggle: (origin: number) => void
+  onClearOrigins: () => void
+  onBack: () => void
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-3 px-4 pb-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
+          aria-label="Go back"
+        >
+          <ChevronLeftIcon className="h-5 w-5" />
+        </button>
+        <h2 className="flex-1 text-lg font-semibold">Store</h2>
+        {selectedOrigins.length > 0 && (
+          <button onClick={onClearOrigins} className="text-muted-foreground text-xs font-medium hover:underline">
+            Clear
+          </button>
+        )}
+      </div>
+      <div className="flex-1 overflow-y-auto overscroll-contain px-4">
+        {STORE_OPTIONS.map(({ id, Logo }) => {
+          const checked = selectedOrigins.includes(id)
+          return (
+            <label
+              key={id}
+              className={cn(
+                "flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-3.5 transition-colors",
+                checked ? "bg-accent dark:bg-primary/20" : "hover:bg-accent",
+              )}
+            >
+              <Checkbox checked={checked} onCheckedChange={() => onOriginToggle(id)} />
+              <Logo className="h-5 min-h-5 w-auto" />
+            </label>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// Price Range sub-view
+// ============================================================================
+
+function MobilePriceRangeView({
+  priceMin,
+  priceMax,
+  onChange,
+  onBack,
+}: {
+  priceMin: string
+  priceMax: string
+  onChange: (min: string, max: string) => void
+  onBack: () => void
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      <SubViewHeader title="Price Range" onBack={onBack} />
+      <div className="flex-1 overflow-y-auto overscroll-contain px-4">
+        <PriceRangeFilter priceMin={priceMin} priceMax={priceMax} onChange={onChange} />
+      </div>
+    </div>
   )
 }
 
@@ -524,18 +667,7 @@ function MobileCategoryPickerView({
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 pb-3">
-        <button
-          type="button"
-          onClick={handleGoBack}
-          className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
-          aria-label="Go back"
-        >
-          <ChevronLeftIcon className="h-5 w-5" />
-        </button>
-        <h2 className="text-lg font-semibold">{title}</h2>
-      </div>
+      <SubViewHeader title={title} onBack={handleGoBack} />
 
       {/* Search */}
       <div className="px-4 pb-3">

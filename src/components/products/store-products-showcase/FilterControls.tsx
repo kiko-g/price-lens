@@ -111,7 +111,7 @@ export function SmartViewPresets({
               "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
               active
                 ? "from-primary/80 to-secondary/80 text-primary-foreground shadow-primary/25 dark:from-primary/60 dark:to-secondary/60 dark:shadow-primary/15 bg-linear-to-br shadow-none"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground dark:bg-muted/30 dark:hover:bg-muted/60",
+                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:text-foreground dark:bg-muted dark:hover:bg-accent",
             )}
           >
             {active && isLoading ? (

@@ -301,7 +301,6 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   // ============================================================================
 
   const handleSearch = () => {
-    setMobileFiltersOpen(false)
     debouncedUpdateUrl.cancel()
 
     updateUrlWithOverlay({
@@ -360,30 +359,30 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   const handleSortChange = (newSort: SortByType) => {
     setLocalFilters((prev) => ({ ...prev, sortBy: newSort }))
-    if (isDesktop) debouncedUpdateUrl({ sort: newSort, page: 1 })
+    debouncedUpdateUrl({ sort: newSort, page: 1 })
   }
 
   const handleSearchTypeChange = (newType: SearchType) => {
     setLocalFilters((prev) => ({ ...prev, searchType: newType }))
-    if (isDesktop) debouncedUpdateUrl({ t: newType })
+    debouncedUpdateUrl({ t: newType })
   }
 
   const handleTogglePriorityOrder = () => {
     const newValue = !localFilters.orderByPriority
     setLocalFilters((prev) => ({ ...prev, orderByPriority: newValue }))
-    if (isDesktop) debouncedUpdateUrl({ priority_order: newValue, page: 1 })
+    debouncedUpdateUrl({ priority_order: newValue, page: 1 })
   }
 
   const handleToggleDiscounted = () => {
     const newValue = !localFilters.onlyDiscounted
     setLocalFilters((prev) => ({ ...prev, onlyDiscounted: newValue }))
-    if (isDesktop) debouncedUpdateUrl({ discounted: newValue, page: 1 })
+    debouncedUpdateUrl({ discounted: newValue, page: 1 })
   }
 
   const handleToggleAvailable = () => {
     const newValue = !localFilters.onlyAvailable
     setLocalFilters((prev) => ({ ...prev, onlyAvailable: newValue }))
-    if (isDesktop) debouncedUpdateUrl({ available: newValue, page: 1 })
+    debouncedUpdateUrl({ available: newValue, page: 1 })
   }
 
   const handleOriginToggle = (originId: number) => {
@@ -391,12 +390,12 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     const updated = isSelected ? selectedOrigins.filter((v) => v !== originId) : [...selectedOrigins, originId]
     const serialized = serializeArray(updated) ?? ""
     setLocalFilters((prev) => ({ ...prev, origin: serialized }))
-    if (isDesktop) debouncedUpdateUrl({ origin: serialized || null, page: 1 })
+    debouncedUpdateUrl({ origin: serialized || null, page: 1 })
   }
 
   const handleClearOrigins = () => {
     setLocalFilters((prev) => ({ ...prev, origin: "" }))
-    if (isDesktop) debouncedUpdateUrl({ origin: null, page: 1 })
+    debouncedUpdateUrl({ origin: null, page: 1 })
   }
 
   const handlePriorityToggle = (level: number) => {
@@ -404,12 +403,12 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     const updated = isSelected ? selectedPriorities.filter((v) => v !== level) : [...selectedPriorities, level]
     const serialized = serializeArray(updated) ?? ""
     setLocalFilters((prev) => ({ ...prev, priority: serialized }))
-    if (isDesktop) debouncedUpdateUrl({ priority: serialized || null, page: 1 })
+    debouncedUpdateUrl({ priority: serialized || null, page: 1 })
   }
 
   const handleClearPriority = () => {
     setLocalFilters((prev) => ({ ...prev, priority: "" }))
-    if (isDesktop) debouncedUpdateUrl({ priority: null, page: 1 })
+    debouncedUpdateUrl({ priority: null, page: 1 })
   }
 
   const handleSourceToggle = (source: PrioritySource) => {
@@ -417,22 +416,22 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     const updated = isSelected ? selectedSources.filter((v) => v !== source) : [...selectedSources, source]
     const serialized = updated.length > 0 ? updated.join(",") : ""
     setLocalFilters((prev) => ({ ...prev, source: serialized }))
-    if (isDesktop) debouncedUpdateUrl({ source: serialized || null, page: 1 })
+    debouncedUpdateUrl({ source: serialized || null, page: 1 })
   }
 
   const handleClearSources = () => {
     setLocalFilters((prev) => ({ ...prev, source: "" }))
-    if (isDesktop) debouncedUpdateUrl({ source: null, page: 1 })
+    debouncedUpdateUrl({ source: null, page: 1 })
   }
 
   const handleCategoryChange = (categorySlug: string) => {
     setLocalFilters((prev) => ({ ...prev, category: categorySlug }))
-    if (isDesktop) debouncedUpdateUrl({ category: categorySlug || null, page: 1 })
+    debouncedUpdateUrl({ category: categorySlug || null, page: 1 })
   }
 
   const handleClearCategory = () => {
     setLocalFilters((prev) => ({ ...prev, category: "" }))
-    if (isDesktop) debouncedUpdateUrl({ category: null, page: 1 })
+    debouncedUpdateUrl({ category: null, page: 1 })
   }
 
   const handleClearFilters = () => {
@@ -1015,13 +1014,10 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         localFilters={localFilters}
         selectedOrigins={selectedOrigins}
         selectedPriorities={selectedPriorities}
-        selectedSources={selectedSources}
         onOriginToggle={handleOriginToggle}
         onClearOrigins={handleClearOrigins}
         onPriorityToggle={handlePriorityToggle}
         onClearPriority={handleClearPriority}
-        onSourceToggle={handleSourceToggle}
-        onClearSources={handleClearSources}
         onCategoryChange={handleCategoryChange}
         onSortChange={handleSortChange}
         onTogglePriorityOrder={handleTogglePriorityOrder}
@@ -1029,8 +1025,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         onToggleDiscounted={handleToggleDiscounted}
         onPriceRangeChange={(min, max) => {
           setLocalFilters((prev) => ({ ...prev, priceMin: min, priceMax: max }))
+          debouncedUpdateUrl({ price_min: min || null, price_max: max || null, page: 1 })
         }}
-        onApply={handleSearch}
       />
 
       {/* Main Content Area */}
