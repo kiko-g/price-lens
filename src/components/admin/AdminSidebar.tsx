@@ -105,7 +105,10 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
   {
     label: "Operations",
-    items: [{ title: "Schedule", href: "/admin/schedule", icon: CalendarClockIcon }],
+    items: [
+      { title: "Schedule", href: "/admin/schedule", icon: CalendarClockIcon },
+      { title: "Scrape History", href: "/admin/scrape-history", icon: TimerIcon },
+    ],
   },
 ]
 
