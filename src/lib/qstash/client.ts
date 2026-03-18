@@ -38,6 +38,5 @@ export const CRON_FREQUENCY_MINUTES = 30
 // Legacy: Batch size for QStash fan-out (used by bulk-scrape)
 export const BATCH_SIZE = 100
 
-// Cost estimation (USD per scrape - includes Vercel function, QStash, external API)
-// Adjust this based on your actual costs
-export const ESTIMATED_COST_PER_SCRAPE = 0.0005 // $0.0005 per scrape (~$0.50 per 1000)
+// QStash pay-as-you-go: $1 per 100k messages. Scheduler sends 1 message per batch (WORKER_BATCH_SIZE products).
+export const QSTASH_USD_PER_100K_MESSAGES = 1

@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import {
   ACTIVE_PRIORITIES,
-  ESTIMATED_COST_PER_SCRAPE,
   WORKER_BATCH_SIZE,
   MAX_BATCHES_PER_RUN,
   CRON_FREQUENCY_MINUTES,
+  QSTASH_USD_PER_100K_MESSAGES,
 } from "@/lib/qstash"
 import { PRIORITY_REFRESH_HOURS, analyzeSchedulerCapacity, type CapacityAnalysis } from "@/lib/business/priority"
 
@@ -153,11 +153,13 @@ export async function GET(req: NextRequest) {
 
       const dailyScrapes = calculateDailyScrapes(priorityStats)
       const monthlyScrapes = dailyScrapes * 30
+      const monthlyMessages = monthlyScrapes / WORKER_BATCH_SIZE
       const costEstimate: CostEstimate = {
         dailyScrapes,
         monthlyScrapes,
-        costPerScrape: ESTIMATED_COST_PER_SCRAPE,
-        estimatedMonthlyCost: Math.round(monthlyScrapes * ESTIMATED_COST_PER_SCRAPE * 100) / 100,
+        costPerScrape: (QSTASH_USD_PER_100K_MESSAGES / 100_000) / WORKER_BATCH_SIZE,
+        estimatedMonthlyCost:
+          Math.round(monthlyMessages * (QSTASH_USD_PER_100K_MESSAGES / 100_000) * 100) / 100,
       }
 
       const productCountsByPriority: Record<number, number> = {}
