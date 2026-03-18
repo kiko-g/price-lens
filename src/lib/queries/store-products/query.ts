@@ -461,8 +461,10 @@ function applyPriorityFilter<Q extends { [key: string]: any }>(
 
 /**
  * Fast path for quick search (e.g. header autocomplete).
- * Uses tsvector search on name+brand+category (via search_vector), ordered by
- * priority then name. Available products only, all priority levels discoverable.
+ * Uses the search_products_ranked RPC for relevance-ordered results via
+ * ts_rank_cd. PostgreSQL inlines the STABLE SQL function so LIMIT is pushed
+ * down — only a top-N heapsort over the GIN-filtered rows, not a full sort.
+ * Falls back to ILIKE for zero FTS results (partial/mid-word queries).
  */
 export async function queryStoreProductsQuick(
   searchQuery: string,
@@ -488,24 +490,14 @@ export async function queryStoreProductsQuick(
     }
   }
 
-  const tsq = toTsqueryString(sanitized)
-  let query = supabase
-    .from("store_products")
+  // Use RPC for relevance-ranked results (no .order() — preserves ts_rank_cd)
+  const query = supabase
+    .rpc("search_products_ranked", { query_text: sanitized })
     .select(LISTING_COLUMNS)
     .eq("available", true)
     .not("name", "eq", "")
     .not("name", "is", null)
-    .order("priority", { ascending: false, nullsFirst: false })
-    .order("name", { ascending: true })
     .range(0, safeLimit - 1)
-
-  if (tsq) {
-    query = query.textSearch("search_vector", tsq, { config: FTS_CONFIG })
-  } else {
-    // Very short/non-word input: fall back to ILIKE
-    const pattern = `%${sanitized.replace(/ /g, "%")}%`
-    query = query.ilike("name", pattern)
-  }
 
   const { data, error } = await withTimeout(
     Promise.resolve(query) as Promise<{
@@ -525,8 +517,8 @@ export async function queryStoreProductsQuick(
 
   const rows = data ?? []
 
-  // Fallback: if tsvector returned nothing, retry with ILIKE (mid-word matches)
-  if (rows.length === 0 && tsq) {
+  // Fallback: if RPC returned nothing, retry with ILIKE (mid-word matches)
+  if (rows.length === 0) {
     const pattern = `%${sanitized.replace(/ /g, "%")}%`
     const fallbackQuery = supabase
       .from("store_products")
