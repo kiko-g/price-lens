@@ -30,6 +30,8 @@ const LISTING_COLUMNS = [
   "priority_updated_at",
   "available",
   "updated_at",
+  "price_change_pct",
+  "last_price_change_at",
 ].join(", ")
 
 const LISTING_COLUMNS_CANONICAL = [
@@ -162,6 +164,14 @@ export async function queryStoreProducts(
 
   // 8. Source filter (priority_source)
   query = applySourceFilter(query, params)
+
+  // 9. Price range filter
+  if (params.priceRange?.min != null) {
+    query = query.gte("price", params.priceRange.min)
+  }
+  if (params.priceRange?.max != null) {
+    query = query.lte("price", params.priceRange.max)
+  }
 
   // ============================================================================
   // Apply Sorting
@@ -476,8 +486,13 @@ function applySorting<Q extends { [key: string]: any }>(query: Q, sortBy: string
       return query.order("updated_at", { ascending: false, nullsFirst: false })
     case "updated-oldest":
       return query.order("updated_at", { ascending: true, nullsFirst: true })
+    case "price-drop":
+      return query.order("price_change_pct", { ascending: true, nullsFirst: false })
+    case "price-increase":
+      return query.order("price_change_pct", { ascending: false, nullsFirst: false })
+    case "best-discount":
+      return query.order("discount", { ascending: false, nullsFirst: false })
     case "only-nulls":
-      // Special sort for invalid products
       return query.is("name", null).order("url", { ascending: true })
     default:
       return query.order("name", { ascending: true })

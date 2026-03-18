@@ -70,9 +70,9 @@ interface NavItem {
   items?: { title: string; href: string; icon?: LucideIcon }[]
 }
 
-const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   {
-    label: "Analytics",
+    label: null,
     items: [
       { title: "Analytics", href: "/admin/analytics", icon: GaugeIcon },
       { title: "Performance", href: "/admin/performance", icon: TimerIcon },
@@ -128,7 +128,7 @@ export function AdminSidebar() {
       <SidebarContent className="gap-0 pt-2">
         {NAV_GROUPS.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) =>

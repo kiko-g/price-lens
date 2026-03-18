@@ -19,7 +19,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
-import { SORT_OPTIONS_GROUPS } from "@/lib/business/filters"
+import { SORT_OPTIONS_GROUPS, SMART_VIEW_PRESETS } from "@/lib/business/filters"
 import { buildPageTitle } from "@/lib/business/page-title"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
@@ -114,6 +114,8 @@ const FILTER_CONFIG = {
   priority: { key: "priority", default: "" },
   source: { key: "source", default: "" },
   category: { key: "category", default: "" },
+  priceMin: { key: "price_min", default: "" },
+  priceMax: { key: "price_max", default: "" },
 } as const
 
 /**
@@ -167,6 +169,8 @@ function useUrlState() {
       priority: searchParams.get(FILTER_CONFIG.priority.key) ?? FILTER_CONFIG.priority.default,
       source: searchParams.get(FILTER_CONFIG.source.key) ?? FILTER_CONFIG.source.default,
       category: searchParams.get(FILTER_CONFIG.category.key) ?? FILTER_CONFIG.category.default,
+      priceMin: searchParams.get(FILTER_CONFIG.priceMin.key) ?? FILTER_CONFIG.priceMin.default,
+      priceMax: searchParams.get(FILTER_CONFIG.priceMax.key) ?? FILTER_CONFIG.priceMax.default,
     }),
     [searchParams],
   )
@@ -275,6 +279,15 @@ function buildQueryParams(
     }
   }
 
+  const priceMin = urlState.priceMin ? parseFloat(urlState.priceMin) : undefined
+  const priceMax = urlState.priceMax ? parseFloat(urlState.priceMax) : undefined
+  if ((priceMin != null && !isNaN(priceMin)) || (priceMax != null && !isNaN(priceMax))) {
+    params.priceRange = {
+      ...(priceMin != null && !isNaN(priceMin) ? { min: priceMin } : {}),
+      ...(priceMax != null && !isNaN(priceMax) ? { max: priceMax } : {}),
+    }
+  }
+
   return params
 }
 
@@ -316,6 +329,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     priority: urlState.priority,
     source: urlState.source,
     category: urlState.category,
+    priceMin: urlState.priceMin,
+    priceMax: urlState.priceMax,
   })
 
   // Check if there are pending filter changes (local differs from URL)
@@ -330,7 +345,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       localFilters.onlyDiscounted !== urlState.onlyDiscounted ||
       localFilters.priority !== urlState.priority ||
       localFilters.source !== urlState.source ||
-      localFilters.category !== urlState.category
+      localFilters.category !== urlState.category ||
+      localFilters.priceMin !== urlState.priceMin ||
+      localFilters.priceMax !== urlState.priceMax
     )
   }, [queryInput, localFilters, urlState])
 
@@ -504,6 +521,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       priority: urlState.priority,
       source: urlState.source,
       category: urlState.category,
+      priceMin: urlState.priceMin,
+      priceMax: urlState.priceMax,
     })
   }, [urlState])
 
@@ -526,6 +545,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       priority_order: localFilters.orderByPriority,
       available: localFilters.onlyAvailable,
       discounted: localFilters.onlyDiscounted,
+      price_min: localFilters.priceMin || null,
+      price_max: localFilters.priceMax || null,
       page: 1,
     })
   }
@@ -671,6 +692,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       priority: FILTER_CONFIG.priority.default,
       source: FILTER_CONFIG.source.default,
       category: FILTER_CONFIG.category.default,
+      priceMin: FILTER_CONFIG.priceMin.default,
+      priceMax: FILTER_CONFIG.priceMax.default,
     })
     router.push(window.location.pathname)
   }
@@ -743,6 +766,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     if (urlState.source) count++
     if (urlState.onlyDiscounted) count++
     if (urlState.sortBy !== FILTER_CONFIG.sortBy.default) count++
+    if (urlState.priceMin || urlState.priceMax) count++
     return count
   }, [urlState])
 
@@ -834,12 +858,14 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
           </DropdownMenu>
         </div>
 
-        <TrackingInformationDialog>
-          <button className="text-muted-foreground mb-4 text-left text-sm hover:opacity-80">
-            <InfoIcon className="mb-px inline-block size-3.5" /> Procuts have priority levels from 0 to 5. When
-            favorited, products are assigned 5
-          </button>
-        </TrackingInformationDialog>
+        {process.env.NODE_ENV === "development" && (
+          <TrackingInformationDialog>
+            <button className="text-muted-foreground mb-4 text-left text-sm hover:opacity-80">
+              <InfoIcon className="mb-px inline-block size-3.5" /> Products have priority levels from 0 to 5. When
+              favorited, products are assigned 5
+            </button>
+          </TrackingInformationDialog>
+        )}
 
         {/* Search Input (debounced, no button on desktop) */}
         <div className="relative w-full">
@@ -1029,6 +1055,41 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
+            {/* Price Range Filter */}
+            <AccordionItem value="price-range">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Price Range
+                {(localFilters.priceMin || localFilters.priceMax) && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setLocalFilters((prev) => ({ ...prev, priceMin: "", priceMax: "" }))
+                      debouncedUpdateUrl({ price_min: null, price_max: null, page: 1 })
+                    }}
+                    className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                  >
+                    Clear
+                  </span>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="pb-3">
+                <PriceRangeFilter
+                  priceMin={localFilters.priceMin}
+                  priceMax={localFilters.priceMax}
+                  onChange={(min, max) => {
+                    setLocalFilters((prev) => ({ ...prev, priceMin: min, priceMax: max }))
+                    debouncedUpdateUrl({
+                      price_min: min || null,
+                      price_max: max || null,
+                      page: 1,
+                    })
+                  }}
+                />
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Checkbox Filter Options */}
             <AccordionItem value="options">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -1036,20 +1097,23 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="order-by-priority"
-                      checked={localFilters.orderByPriority}
-                      onCheckedChange={handleTogglePriorityOrder}
-                    />
-                    <Label
-                      htmlFor="order-by-priority"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CrownIcon className="h-4 w-4" />
-                      Order by priority
-                    </Label>
-                  </div>
+                  {process.env.NODE_ENV === "development" && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="order-by-priority"
+                        checked={localFilters.orderByPriority}
+                        onCheckedChange={handleTogglePriorityOrder}
+                      />
+                      <Label
+                        htmlFor="order-by-priority"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <CrownIcon className="h-4 w-4" />
+                        Order by priority
+                        <DevBadge />
+                      </Label>
+                    </div>
+                  )}
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -1084,49 +1148,54 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
-            {/* Priority Filter */}
-            <AccordionItem value="priority">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Priority
-                {selectedPriorities.length > 0 && (
-                  <>
-                    <span className="text-muted-foreground text-xs">({selectedPriorities.length})</span>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleClearPriority()
-                      }}
-                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
-                    >
-                      Clear
-                    </span>
-                  </>
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  {PRODUCT_PRIORITY_LEVELS.filter((level) => level !== 0)
-                    .sort((a, b) => (b ?? 0) - (a ?? 0))
-                    .map((level) => (
-                      <div key={level} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`priority-${level}`}
-                          checked={selectedPriorities.includes(level)}
-                          onCheckedChange={() => handlePriorityToggle(level)}
-                        />
-                        <Label
-                          htmlFor={`priority-${level}`}
-                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                        >
-                          <PriorityBubble priority={level} size="sm" useDescription usePeriod />
-                        </Label>
-                      </div>
-                    ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+            {/* Priority Filter (dev only) */}
+            {process.env.NODE_ENV === "development" && (
+              <AccordionItem value="priority">
+                <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                  <span className="flex flex-1 items-center gap-1">
+                    Priority
+                    <DevBadge />
+                  </span>
+                  {selectedPriorities.length > 0 && (
+                    <>
+                      <span className="text-muted-foreground text-xs">({selectedPriorities.length})</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleClearPriority()
+                        }}
+                        className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                      >
+                        Clear
+                      </span>
+                    </>
+                  )}
+                </AccordionTrigger>
+                <AccordionContent className="pb-3">
+                  <div className="flex flex-col gap-2">
+                    {PRODUCT_PRIORITY_LEVELS.filter((level) => level !== 0)
+                      .sort((a, b) => (b ?? 0) - (a ?? 0))
+                      .map((level) => (
+                        <div key={level} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`priority-${level}`}
+                            checked={selectedPriorities.includes(level)}
+                            onCheckedChange={() => handlePriorityToggle(level)}
+                          />
+                          <Label
+                            htmlFor={`priority-${level}`}
+                            className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                          >
+                            <PriorityBubble priority={level} size="sm" useDescription usePeriod />
+                          </Label>
+                        </div>
+                      ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
             {/* Dev Filters */}
             {process.env.NODE_ENV === "development" && (
@@ -1221,6 +1290,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         onSortChange={handleSortChange}
         onTogglePriorityOrder={handleTogglePriorityOrder}
         onToggleDiscounted={handleToggleDiscounted}
+        onPriceRangeChange={(min, max) => {
+          setLocalFilters((prev) => ({ ...prev, priceMin: min, priceMax: max }))
+        }}
         onApply={handleSearch}
       />
 
@@ -1256,6 +1328,28 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
           </div>
         ) : displayProducts.length > 0 ? (
           <>
+            {/* Smart View Presets */}
+            <SmartViewPresets
+              urlState={urlState}
+              onApply={(presetParams) => {
+                debouncedUpdateUrl.cancel()
+                const resetParams: Record<string, string | number | boolean | null> = {
+                  q: null,
+                  t: null,
+                  origin: null,
+                  priority: null,
+                  source: null,
+                  category: null,
+                  priority_order: null,
+                  available: true,
+                  discounted: null,
+                  sort: null,
+                  page: 1,
+                }
+                updateUrlWithOverlay({ ...resetParams, ...presetParams })
+              }}
+            />
+
             {/* Status Bar - Desktop */}
             <div className="text-muted-foreground mb-4 hidden w-full items-center justify-between text-sm lg:flex">
               <span>
@@ -1338,9 +1432,12 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   )}
                 </Button>
               ) : (
-                <p className="text-muted-foreground text-xs">No more products to load</p>
+                <p className="text-muted-foreground text-xs">
+                  Showing all <span className="text-foreground font-semibold">{totalCount}</span> products matching
+                  filters
+                </p>
               )}
-              {totalCount != null && (
+              {mobileHasMore && totalCount != null && (
                 <p className="text-muted-foreground text-xs">
                   Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> of{" "}
                   <span className="text-foreground font-semibold">{totalCount}</span> products
@@ -1361,6 +1458,119 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 // ============================================================================
 // Sub-Components
 // ============================================================================
+
+const PRICE_RANGE_CHIPS = [
+  { label: "Under 2€", min: "", max: "2" },
+  { label: "2–5€", min: "2", max: "5" },
+  { label: "5–10€", min: "5", max: "10" },
+  { label: "10€+", min: "10", max: "" },
+] as const
+
+function PriceRangeFilter({
+  priceMin,
+  priceMax,
+  onChange,
+}: {
+  priceMin: string
+  priceMax: string
+  onChange: (min: string, max: string) => void
+}) {
+  const activeChipIdx = PRICE_RANGE_CHIPS.findIndex((c) => c.min === priceMin && c.max === priceMax)
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1.5">
+        {PRICE_RANGE_CHIPS.map((chip, idx) => (
+          <button
+            key={chip.label}
+            onClick={() => {
+              if (activeChipIdx === idx) {
+                onChange("", "")
+              } else {
+                onChange(chip.min, chip.max)
+              }
+            }}
+            className={cn(
+              "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+              activeChipIdx === idx
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-foreground hover:bg-accent border-border",
+            )}
+          >
+            {chip.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <Input
+          type="number"
+          placeholder="Min"
+          className="h-7 text-xs"
+          value={priceMin}
+          min={0}
+          step={0.5}
+          onChange={(e) => onChange(e.target.value, priceMax)}
+        />
+        <span className="text-muted-foreground text-xs">–</span>
+        <Input
+          type="number"
+          placeholder="Max"
+          className="h-7 text-xs"
+          value={priceMax}
+          min={0}
+          step={0.5}
+          onChange={(e) => onChange(priceMin, e.target.value)}
+        />
+      </div>
+    </div>
+  )
+}
+
+function SmartViewPresets({
+  urlState,
+  onApply,
+}: {
+  urlState: { sortBy: SortByType; onlyDiscounted: boolean; priority: string; query: string }
+  onApply: (params: Record<string, string | number | boolean | null>) => void
+}) {
+  const isPresetActive = (preset: (typeof SMART_VIEW_PRESETS)[number]) => {
+    return Object.entries(preset.params).every(([key, value]) => {
+      if (key === "sort") return urlState.sortBy === value
+      if (key === "discounted") return urlState.onlyDiscounted === (value === "true")
+      if (key === "priority") return urlState.priority === value
+      return false
+    })
+  }
+
+  return (
+    <div className="no-scrollbar mb-3 flex h-8 min-h-8 flex-1 gap-2 self-stretch overflow-x-auto">
+      {SMART_VIEW_PRESETS.map((preset) => {
+        const active = isPresetActive(preset)
+        return (
+          <button
+            key={preset.label}
+            onClick={() => {
+              if (active) {
+                onApply({ sort: "updated-newest" })
+              } else {
+                onApply(preset.params as Record<string, string>)
+              }
+            }}
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              active
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-foreground hover:bg-accent border-border",
+            )}
+          >
+            <preset.icon className="h-3.5 w-3.5" />
+            {preset.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 function MobileProgressBar() {
   return (
@@ -1446,6 +1656,8 @@ interface MobileFiltersDrawerProps {
     priority: string
     source: string
     category: string
+    priceMin: string
+    priceMax: string
   }
   selectedOrigins: number[]
   selectedPriorities: number[]
@@ -1461,12 +1673,14 @@ interface MobileFiltersDrawerProps {
   onSortChange: (sort: SortByType) => void
   onTogglePriorityOrder: () => void
   onToggleDiscounted: () => void
+  onPriceRangeChange: (min: string, max: string) => void
   onApply: () => void
 }
 
 function MobileFiltersDrawer({
   open,
   onOpenChange,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   activeFilterCount,
   localFilters,
   selectedOrigins,
@@ -1480,6 +1694,7 @@ function MobileFiltersDrawer({
   onSortChange,
   onTogglePriorityOrder,
   onToggleDiscounted,
+  onPriceRangeChange,
   onApply,
 }: MobileFiltersDrawerProps) {
   return (
@@ -1600,15 +1815,15 @@ function MobileFiltersDrawer({
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="priority">
+            <AccordionItem value="price-range">
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex flex-1 items-center justify-between pr-2">
-                  <span className="text-sm font-semibold">Priority</span>
-                  {selectedPriorities.length > 0 && (
+                  <span className="text-sm font-semibold">Price Range</span>
+                  {(localFilters.priceMin || localFilters.priceMax) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        onClearPriority()
+                        onPriceRangeChange("", "")
                       }}
                       className="text-muted-foreground text-xs hover:underline"
                     >
@@ -1618,25 +1833,56 @@ function MobileFiltersDrawer({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="flex flex-col gap-2">
-                  {PRODUCT_PRIORITY_LEVELS.map((level) => (
-                    <div key={level} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`mobile-priority-${level}`}
-                        checked={selectedPriorities.includes(level)}
-                        onCheckedChange={() => onPriorityToggle(level)}
-                      />
-                      <Label
-                        htmlFor={`mobile-priority-${level}`}
-                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                      >
-                        <PriorityBubble priority={level} size="sm" useDescription />
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                <PriceRangeFilter
+                  priceMin={localFilters.priceMin}
+                  priceMax={localFilters.priceMax}
+                  onChange={onPriceRangeChange}
+                />
               </AccordionContent>
             </AccordionItem>
+
+            {process.env.NODE_ENV === "development" && (
+              <AccordionItem value="priority">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex flex-1 items-center justify-between pr-2">
+                    <span className="flex items-center gap-1 text-sm font-semibold">
+                      Priority
+                      <DevBadge />
+                    </span>
+                    {selectedPriorities.length > 0 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onClearPriority()
+                        }}
+                        className="text-muted-foreground text-xs hover:underline"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-2">
+                    {PRODUCT_PRIORITY_LEVELS.map((level) => (
+                      <div key={level} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`mobile-priority-${level}`}
+                          checked={selectedPriorities.includes(level)}
+                          onCheckedChange={() => onPriorityToggle(level)}
+                        />
+                        <Label
+                          htmlFor={`mobile-priority-${level}`}
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <PriorityBubble priority={level} size="sm" useDescription />
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
             <AccordionItem value="options" className="border-b-0">
               <AccordionTrigger className="hover:no-underline">
@@ -1658,20 +1904,23 @@ function MobileFiltersDrawer({
                       Only discounted
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="mobile-order-by-priority"
-                      checked={localFilters.orderByPriority}
-                      onCheckedChange={onTogglePriorityOrder}
-                    />
-                    <Label
-                      htmlFor="mobile-order-by-priority"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CrownIcon className="h-4 w-4" />
-                      Order by priority
-                    </Label>
-                  </div>
+                  {process.env.NODE_ENV === "development" && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="mobile-order-by-priority"
+                        checked={localFilters.orderByPriority}
+                        onCheckedChange={onTogglePriorityOrder}
+                      />
+                      <Label
+                        htmlFor="mobile-order-by-priority"
+                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                      >
+                        <CrownIcon className="h-4 w-4" />
+                        Order by priority
+                        <DevBadge />
+                      </Label>
+                    </div>
+                  )}
                 </div>
               </AccordionContent>
             </AccordionItem>

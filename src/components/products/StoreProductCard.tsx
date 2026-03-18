@@ -39,6 +39,7 @@ import {
   CalendarPlusIcon,
   ScaleIcon,
   TriangleAlertIcon,
+  TriangleIcon,
   ExternalLinkIcon,
 } from "lucide-react"
 
@@ -330,12 +331,18 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     -{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
                   </Badge>
                 </div>
-                <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
+                  <PriceChangeBadge pct={sp.price_change_pct} />
+                </div>
               </div>
             ) : null}
 
             {isNormalPrice ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
+                <PriceChangeBadge pct={sp.price_change_pct} />
+              </div>
             ) : null}
 
             {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
@@ -518,5 +525,33 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
         )}
       </div>
     </div>
+  )
+}
+
+const PRICE_CHANGE_THRESHOLD = 0.01
+
+function PriceChangeBadge({ pct }: { pct: number | null | undefined }) {
+  if (pct == null || Math.abs(pct) < PRICE_CHANGE_THRESHOLD) return null
+
+  const isSignificant = Math.abs(pct) >= 0.05
+  const isNegative = pct < 0
+  const formatted = `${pct > 0 ? "+" : ""}${(pct * 100).toFixed(1)}%`
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] leading-none font-semibold",
+        isNegative
+          ? isSignificant
+            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+            : "text-green-600 dark:text-green-500"
+          : isSignificant
+            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+            : "text-red-600 dark:text-red-500",
+      )}
+    >
+      <TriangleIcon className={cn("h-2 w-2", isNegative ? "rotate-180 fill-current" : "fill-current")} />
+      {formatted}
+    </span>
   )
 }

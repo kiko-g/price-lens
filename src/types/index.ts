@@ -86,6 +86,8 @@ export interface StoreProduct {
   canonical_category_name_3?: string | null
   trade_item_id?: number | null
   canonical_product_id?: number | null
+  price_change_pct?: number | null
+  last_price_change_at?: string | null
 }
 
 export interface StoreProductWithSimilarity extends StoreProduct {

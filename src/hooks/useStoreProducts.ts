@@ -61,6 +61,14 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
     searchParams.canonicalCat = String(params.canonicalCategory.categoryId)
   }
 
+  // Price range
+  if (params.priceRange?.min != null) {
+    searchParams.priceMin = String(params.priceRange.min)
+  }
+  if (params.priceRange?.max != null) {
+    searchParams.priceMax = String(params.priceRange.max)
+  }
+
   // Sort
   if (params.sort?.sortBy) {
     searchParams.sort = params.sort.sortBy

@@ -263,6 +263,18 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
     }
   }
 
+  // Price range filter
+  const priceMinParam = params.get("priceMin")
+  const priceMaxParam = params.get("priceMax")
+  if (priceMinParam || priceMaxParam) {
+    const min = priceMinParam ? parseFloat(priceMinParam) : undefined
+    const max = priceMaxParam ? parseFloat(priceMaxParam) : undefined
+    queryParams.priceRange = {
+      ...(min != null && !isNaN(min) ? { min } : {}),
+      ...(max != null && !isNaN(max) ? { max } : {}),
+    }
+  }
+
   // Sort options
   const sort = params.get("sort") as SortByType | null
   const orderByPriority = params.get("orderByPriority") === "true"

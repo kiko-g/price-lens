@@ -117,6 +117,14 @@ export interface SourceFilter {
 }
 
 /**
+ * Price range filter options
+ */
+export interface PriceRangeFilter {
+  min?: number
+  max?: number
+}
+
+/**
  * Canonical category filter options
  * Filters products by their mapped canonical category
  * Selecting a parent category includes all products from its children
@@ -194,6 +202,9 @@ export interface StoreProductsQueryParams {
 
   /** Pagination options (defaults to page 1, limit 36) */
   pagination?: PaginationOptions
+
+  /** Price range filter */
+  priceRange?: PriceRangeFilter
 
   /** Additional filter flags */
   flags?: FilterFlags
@@ -350,6 +361,9 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     params.flags?.onlyDiscounted ?? false,
     params.flags?.onlyTracked ?? false,
     params.flags?.onlyAvailable ?? true,
+    // Price range
+    params.priceRange?.min ?? null,
+    params.priceRange?.max ?? null,
     // User
     params.userId ?? null,
   ]

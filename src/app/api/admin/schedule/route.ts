@@ -157,9 +157,8 @@ export async function GET(req: NextRequest) {
       const costEstimate: CostEstimate = {
         dailyScrapes,
         monthlyScrapes,
-        costPerScrape: (QSTASH_USD_PER_100K_MESSAGES / 100_000) / WORKER_BATCH_SIZE,
-        estimatedMonthlyCost:
-          Math.round(monthlyMessages * (QSTASH_USD_PER_100K_MESSAGES / 100_000) * 100) / 100,
+        costPerScrape: QSTASH_USD_PER_100K_MESSAGES / 100_000 / WORKER_BATCH_SIZE,
+        estimatedMonthlyCost: Math.round(monthlyMessages * (QSTASH_USD_PER_100K_MESSAGES / 100_000) * 100) / 100,
       }
 
       const productCountsByPriority: Record<number, number> = {}
