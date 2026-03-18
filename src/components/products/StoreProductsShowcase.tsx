@@ -47,6 +47,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
@@ -311,6 +312,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
 
+  const DEFAULT_ACCORDION_VALUES = ["sort", "store-origin", "price-range", "categories"]
+
   // Desktop detection (lg breakpoint = 1024px) - debounce only applies on desktop
   const isDesktop = useMediaQuery("(min-width: 1024px)")
 
@@ -357,9 +360,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   const updateUrlWithOverlay = useCallback(
     (updates: Record<string, string | number | boolean | null | undefined>) => {
+      urlStateKeyWhenNavigatingRef.current = JSON.stringify(urlState)
+      setIsNavigating(true)
       if (isDesktop) {
-        urlStateKeyWhenNavigatingRef.current = JSON.stringify(urlState)
-        setIsNavigating(true)
         startTransition(() => updateUrl(updates))
       } else {
         updateUrl(updates)
@@ -927,7 +930,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
           )}
 
           {/* Filters Accordion */}
-          <Accordion type="multiple" className="w-full border-t" defaultValue={["sort", "categories", "store-origin"]}>
+          <Accordion type="multiple" className="w-full border-t" defaultValue={DEFAULT_ACCORDION_VALUES}>
             {/* Sort Options */}
             <AccordionItem value="sort">
               <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -1026,35 +1029,6 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
-            {/* Categories Filter */}
-            <AccordionItem value="categories">
-              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Categories
-                {localFilters.category && (
-                  <>
-                    <span className="text-muted-foreground text-xs">(1)</span>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleClearCategory()
-                      }}
-                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
-                    >
-                      Clear
-                    </span>
-                  </>
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="pb-3">
-                <CanonicalCategoryCascade
-                  selectedCategorySlug={localFilters.category}
-                  onCategoryChange={handleCategoryChange}
-                />
-              </AccordionContent>
-            </AccordionItem>
-
             {/* Price Range Filter */}
             <AccordionItem value="price-range">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
@@ -1090,167 +1064,172 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               </AccordionContent>
             </AccordionItem>
 
-            {/* Checkbox Filter Options */}
-            <AccordionItem value="options">
+            {/* Categories Filter */}
+            <AccordionItem value="categories">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Options
+                Categories
+                {localFilters.category && (
+                  <>
+                    <span className="text-muted-foreground text-xs">(1)</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleClearCategory()
+                      }}
+                      className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                    >
+                      Clear
+                    </span>
+                  </>
+                )}
               </AccordionTrigger>
               <AccordionContent className="pb-3">
-                <div className="flex flex-col gap-2">
-                  {process.env.NODE_ENV === "development" && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="order-by-priority"
-                        checked={localFilters.orderByPriority}
-                        onCheckedChange={handleTogglePriorityOrder}
-                      />
-                      <Label
-                        htmlFor="order-by-priority"
-                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                      >
-                        <CrownIcon className="h-4 w-4" />
-                        Order by priority
-                        <DevBadge />
-                      </Label>
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-available"
-                      checked={localFilters.onlyAvailable}
-                      onCheckedChange={handleToggleAvailable}
-                    />
-                    <Label
-                      htmlFor="only-available"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <CircleCheckIcon className="h-4 w-4" />
-                      <span>Only available</span>
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="only-discounted"
-                      checked={localFilters.onlyDiscounted}
-                      onCheckedChange={handleToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
-                    </Label>
-                  </div>
-                </div>
+                <CanonicalCategoryCascade
+                  selectedCategorySlug={localFilters.category}
+                  onCategoryChange={handleCategoryChange}
+                />
               </AccordionContent>
             </AccordionItem>
 
-            {/* Priority Filter (dev only) */}
+            {/* Insiders (dev only) — consolidated admin controls */}
             {process.env.NODE_ENV === "development" && (
-              <AccordionItem value="priority">
-                <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                  <span className="flex flex-1 items-center gap-1">
-                    Priority
-                    <DevBadge />
-                  </span>
-                  {selectedPriorities.length > 0 && (
-                    <>
-                      <span className="text-muted-foreground text-xs">({selectedPriorities.length})</span>
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleClearPriority()
-                        }}
-                        className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
-                      >
-                        Clear
-                      </span>
-                    </>
-                  )}
-                </AccordionTrigger>
-                <AccordionContent className="pb-3">
-                  <div className="flex flex-col gap-2">
-                    {PRODUCT_PRIORITY_LEVELS.filter((level) => level !== 0)
-                      .sort((a, b) => (b ?? 0) - (a ?? 0))
-                      .map((level) => (
-                        <div key={level} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`priority-${level}`}
-                            checked={selectedPriorities.includes(level)}
-                            onCheckedChange={() => handlePriorityToggle(level)}
-                          />
-                          <Label
-                            htmlFor={`priority-${level}`}
-                            className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                          >
-                            <PriorityBubble priority={level} size="sm" useDescription usePeriod />
-                          </Label>
-                        </div>
-                      ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            )}
-
-            {/* Dev Filters */}
-            {process.env.NODE_ENV === "development" && (
-              <AccordionItem value="source">
+              <AccordionItem value="insiders">
                 <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                   <span className="flex flex-1 items-center gap-1">
                     Insiders
                     <DevBadge />
                   </span>
-                  {selectedSources.length > 0 && (
-                    <>
-                      <span className="text-muted-foreground text-xs">({selectedSources.length})</span>
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleClearSources()
-                        }}
-                        className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
-                      >
-                        Clear
-                      </span>
-                    </>
-                  )}
                 </AccordionTrigger>
                 <AccordionContent className="pb-3">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="source-ai"
-                        checked={selectedSources.includes("ai")}
-                        onCheckedChange={() => handleSourceToggle("ai")}
-                      />
-                      <Label
-                        htmlFor="source-ai"
-                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                      >
-                        <BotIcon className="h-4 w-4" />
-                        Priority Source AI
-                      </Label>
+                  <div className="flex flex-col gap-3">
+                    {/* Toggle options */}
+                    <div className="flex flex-col gap-2">
+                      <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                        Options
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="order-by-priority"
+                          checked={localFilters.orderByPriority}
+                          onCheckedChange={handleTogglePriorityOrder}
+                        />
+                        <Label
+                          htmlFor="order-by-priority"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <CrownIcon className="h-4 w-4" />
+                          Order by priority
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="only-available"
+                          checked={localFilters.onlyAvailable}
+                          onCheckedChange={handleToggleAvailable}
+                        />
+                        <Label
+                          htmlFor="only-available"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <CircleCheckIcon className="h-4 w-4" />
+                          Only available
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="only-discounted"
+                          checked={localFilters.onlyDiscounted}
+                          onCheckedChange={handleToggleDiscounted}
+                        />
+                        <Label
+                          htmlFor="only-discounted"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <BadgePercentIcon className="h-4 w-4" />
+                          Only discounted
+                        </Label>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="source-manual"
-                        checked={selectedSources.includes("manual")}
-                        onCheckedChange={() => handleSourceToggle("manual")}
-                      />
-                      <Label
-                        htmlFor="source-manual"
-                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                      >
-                        <HandIcon className="h-4 w-4" />
-                        Priority Source Manual
-                      </Label>
+
+                    {/* Priority filter */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                          Priority
+                        </span>
+                        {selectedPriorities.length > 0 && (
+                          <button
+                            onClick={handleClearPriority}
+                            className="text-muted-foreground hover:text-foreground text-xs hover:underline"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      {PRODUCT_PRIORITY_LEVELS.filter((level) => level !== 0)
+                        .sort((a, b) => (b ?? 0) - (a ?? 0))
+                        .map((level) => (
+                          <div key={level} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`priority-${level}`}
+                              checked={selectedPriorities.includes(level)}
+                              onCheckedChange={() => handlePriorityToggle(level)}
+                            />
+                            <Label
+                              htmlFor={`priority-${level}`}
+                              className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                            >
+                              <PriorityBubble priority={level} size="sm" useDescription usePeriod />
+                            </Label>
+                          </div>
+                        ))}
+                    </div>
+
+                    {/* Priority source filter */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                          Priority Source
+                        </span>
+                        {selectedSources.length > 0 && (
+                          <button
+                            onClick={handleClearSources}
+                            className="text-muted-foreground hover:text-foreground text-xs hover:underline"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="source-ai"
+                          checked={selectedSources.includes("ai")}
+                          onCheckedChange={() => handleSourceToggle("ai")}
+                        />
+                        <Label
+                          htmlFor="source-ai"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <BotIcon className="h-4 w-4" />
+                          AI
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="source-manual"
+                          checked={selectedSources.includes("manual")}
+                          onCheckedChange={() => handleSourceToggle("manual")}
+                        />
+                        <Label
+                          htmlFor="source-manual"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <HandIcon className="h-4 w-4" />
+                          Manual
+                        </Label>
+                      </div>
                     </div>
                   </div>
                 </AccordionContent>
@@ -1289,6 +1268,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         onClearCategory={handleClearCategory}
         onSortChange={handleSortChange}
         onTogglePriorityOrder={handleTogglePriorityOrder}
+        onToggleAvailable={handleToggleAvailable}
         onToggleDiscounted={handleToggleDiscounted}
         onPriceRangeChange={(min, max) => {
           setLocalFilters((prev) => ({ ...prev, priceMin: min, priceMax: max }))
@@ -1331,6 +1311,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             {/* Smart View Presets */}
             <SmartViewPresets
               urlState={urlState}
+              isLoading={isSearching}
               onApply={(presetParams) => {
                 debouncedUpdateUrl.cancel()
                 const resetParams: Record<string, string | number | boolean | null> = {
@@ -1380,7 +1361,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             <div className="relative">
               {showOverlay && (
                 <>
-                  {/* Desktop: blur overlay */}
+                  {/* Desktop: blur overlay with centered label */}
                   <div className="bg-background/60 absolute inset-0 z-10 hidden items-start justify-center pt-24 backdrop-blur-[2px] lg:flex">
                     <div className="bg-background flex flex-col items-center gap-1 rounded-lg border px-4 py-3 shadow-lg">
                       <div className="flex items-center gap-2">
@@ -1391,13 +1372,18 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                       </div>
                     </div>
                   </div>
-                  {/* Mobile: thin progress bar at top edge */}
-                  <MobileProgressBar />
+                  {/* Mobile: progress bar + fade overlay */}
+                  <div className="absolute inset-0 z-10 lg:hidden">
+                    <div className="absolute inset-x-0 top-0 h-1 overflow-hidden">
+                      <div className="bg-primary h-full w-1/3 animate-[progressSlide_1s_ease-in-out_infinite] rounded-full" />
+                    </div>
+                    <div className="bg-background/40 absolute inset-0" />
+                  </div>
                 </>
               )}
 
               <ProductGridWrapper
-                className={cn("w-full transition-opacity duration-200", showOverlay && "lg:pointer-events-none")}
+                className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
               >
                 {displayProducts.map((product, idx) => (
                   <StoreProductCard key={product.id} sp={product} imagePriority={isDesktop ? idx < 20 : idx < 10} />
@@ -1505,7 +1491,7 @@ function PriceRangeFilter({
         <Input
           type="number"
           placeholder="Min"
-          className="h-7 text-xs"
+          className="h-8 max-w-[33%] text-xs md:h-7 md:max-w-full"
           value={priceMin}
           min={0}
           step={0.5}
@@ -1515,7 +1501,7 @@ function PriceRangeFilter({
         <Input
           type="number"
           placeholder="Max"
-          className="h-7 text-xs"
+          className="h-8 max-w-[33%] text-xs md:h-7 md:max-w-full"
           value={priceMax}
           min={0}
           step={0.5}
@@ -1528,9 +1514,11 @@ function PriceRangeFilter({
 
 function SmartViewPresets({
   urlState,
+  isLoading,
   onApply,
 }: {
   urlState: { sortBy: SortByType; onlyDiscounted: boolean; priority: string; query: string }
+  isLoading?: boolean
   onApply: (params: Record<string, string | number | boolean | null>) => void
 }) {
   const isPresetActive = (preset: (typeof SMART_VIEW_PRESETS)[number]) => {
@@ -1559,11 +1547,11 @@ function SmartViewPresets({
             className={cn(
               "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
               active
-                ? "bg-primary text-primary-foreground border-primary"
+                ? "from-primary/80 to-secondary/80 dark:from-primary/50 dark:to-secondary/50 text-primary-foreground border-transparent bg-linear-to-br"
                 : "bg-background text-foreground hover:bg-accent border-border",
             )}
           >
-            <preset.icon className="h-3.5 w-3.5" />
+            {active && isLoading ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <preset.icon className="h-3.5 w-3.5" />}
             {preset.label}
           </button>
         )
@@ -1572,13 +1560,6 @@ function SmartViewPresets({
   )
 }
 
-function MobileProgressBar() {
-  return (
-    <div className="absolute inset-x-0 top-0 z-10 h-1 overflow-hidden lg:hidden">
-      <div className="bg-primary h-full w-1/3 animate-[progressSlide_1s_ease-in-out_infinite] rounded-full" />
-    </div>
-  )
-}
 
 interface MobileNavProps {
   query: string
@@ -1672,6 +1653,7 @@ interface MobileFiltersDrawerProps {
   onClearCategory: () => void
   onSortChange: (sort: SortByType) => void
   onTogglePriorityOrder: () => void
+  onToggleAvailable: () => void
   onToggleDiscounted: () => void
   onPriceRangeChange: (min: string, max: string) => void
   onApply: () => void
@@ -1693,10 +1675,13 @@ function MobileFiltersDrawer({
   onClearCategory,
   onSortChange,
   onTogglePriorityOrder,
+  onToggleAvailable,
   onToggleDiscounted,
   onPriceRangeChange,
   onApply,
 }: MobileFiltersDrawerProps) {
+  const DEFAULT_ACCORDION_VALUES_MOBILE = ["sort", "store-origin", "price-range"]
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[70svh] lg:hidden">
@@ -1704,7 +1689,7 @@ function MobileFiltersDrawer({
           <DrawerTitle className="text-left">Filters & Sort</DrawerTitle>
         </DrawerHeader>
         <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
-          <Accordion type="multiple" defaultValue={["sort", "store-origin"]}>
+          <Accordion type="multiple" defaultValue={DEFAULT_ACCORDION_VALUES_MOBILE}>
             <AccordionItem value="categories">
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex flex-1 items-center justify-between pr-2">
@@ -1735,21 +1720,29 @@ function MobileFiltersDrawer({
                 <span className="text-sm font-semibold">Sort By</span>
               </AccordionTrigger>
               <AccordionContent>
-                <Select value={localFilters.sortBy} onValueChange={(v) => onSortChange(v as SortByType)}>
-                  <SelectTrigger className="h-8 w-full">
-                    <SelectValue className="flex items-center gap-2 text-sm" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          <option.icon className="h-4 w-4" />
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <RadioGroup
+                  value={localFilters.sortBy}
+                  onValueChange={(v) => onSortChange(v as SortByType)}
+                  className="gap-0"
+                >
+                  {SORT_OPTIONS_GROUPS.map((group, gi) => (
+                    <div key={group.label} className={cn(gi > 0 && "border-border mt-2 border-t pt-2")}>
+                      <span className="text-muted-foreground mb-1.5 block text-[11px] font-medium tracking-wider uppercase">
+                        {group.label}
+                      </span>
+                      {group.options.map((option) => (
+                        <label
+                          key={option.value}
+                          className="hover:bg-accent flex cursor-pointer items-center gap-3 rounded-md px-1 py-2 transition-colors"
+                        >
+                          <option.icon className="text-muted-foreground h-4 w-4 shrink-0" />
+                          <span className="flex-1 text-sm">{option.label}</span>
+                          <RadioGroupItem value={option.value} className="shrink-0" />
+                        </label>
+                      ))}
+                    </div>
+                  ))}
+                </RadioGroup>
               </AccordionContent>
             </AccordionItem>
 
@@ -1815,6 +1808,7 @@ function MobileFiltersDrawer({
               </AccordionContent>
             </AccordionItem>
 
+            {/* Price Range Mobile */}
             <AccordionItem value="price-range">
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex flex-1 items-center justify-between pr-2">
@@ -1841,89 +1835,102 @@ function MobileFiltersDrawer({
               </AccordionContent>
             </AccordionItem>
 
+            {/* Insiders (dev only) — consolidated admin controls */}
             {process.env.NODE_ENV === "development" && (
-              <AccordionItem value="priority">
+              <AccordionItem value="insiders" className="border-b-0">
                 <AccordionTrigger className="hover:no-underline">
-                  <div className="flex flex-1 items-center justify-between pr-2">
-                    <span className="flex items-center gap-1 text-sm font-semibold">
-                      Priority
-                      <DevBadge />
-                    </span>
-                    {selectedPriorities.length > 0 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onClearPriority()
-                        }}
-                        className="text-muted-foreground text-xs hover:underline"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
+                  <span className="flex items-center gap-1 text-sm font-semibold">
+                    Insiders
+                    <DevBadge />
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="flex flex-col gap-2">
-                    {PRODUCT_PRIORITY_LEVELS.map((level) => (
-                      <div key={level} className="flex items-center space-x-2">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                        Options
+                      </span>
+                      <div className="flex items-center space-x-2">
                         <Checkbox
-                          id={`mobile-priority-${level}`}
-                          checked={selectedPriorities.includes(level)}
-                          onCheckedChange={() => onPriorityToggle(level)}
+                          id="mobile-order-by-priority"
+                          checked={localFilters.orderByPriority}
+                          onCheckedChange={onTogglePriorityOrder}
                         />
                         <Label
-                          htmlFor={`mobile-priority-${level}`}
+                          htmlFor="mobile-order-by-priority"
                           className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                         >
-                          <PriorityBubble priority={level} size="sm" useDescription />
+                          <CrownIcon className="h-4 w-4" />
+                          Order by priority
                         </Label>
                       </div>
-                    ))}
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="mobile-only-available"
+                          checked={localFilters.onlyAvailable}
+                          onCheckedChange={onToggleAvailable}
+                        />
+                        <Label
+                          htmlFor="mobile-only-available"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <CircleCheckIcon className="h-4 w-4" />
+                          Only available
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="mobile-only-discounted"
+                          checked={localFilters.onlyDiscounted}
+                          onCheckedChange={onToggleDiscounted}
+                        />
+                        <Label
+                          htmlFor="mobile-only-discounted"
+                          className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                        >
+                          <BadgePercentIcon className="h-4 w-4" />
+                          Only discounted
+                        </Label>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                          Priority
+                        </span>
+                        {selectedPriorities.length > 0 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onClearPriority()
+                            }}
+                            className="text-muted-foreground text-xs hover:underline"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      {PRODUCT_PRIORITY_LEVELS.map((level) => (
+                        <div key={level} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`mobile-priority-${level}`}
+                            checked={selectedPriorities.includes(level)}
+                            onCheckedChange={() => onPriorityToggle(level)}
+                          />
+                          <Label
+                            htmlFor={`mobile-priority-${level}`}
+                            className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
+                          >
+                            <PriorityBubble priority={level} size="sm" useDescription />
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </AccordionContent>
               </AccordionItem>
             )}
-
-            <AccordionItem value="options" className="border-b-0">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-semibold">Options</span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="mobile-only-discounted"
-                      checked={localFilters.onlyDiscounted}
-                      onCheckedChange={onToggleDiscounted}
-                    />
-                    <Label
-                      htmlFor="mobile-only-discounted"
-                      className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                    >
-                      <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
-                    </Label>
-                  </div>
-                  {process.env.NODE_ENV === "development" && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="mobile-order-by-priority"
-                        checked={localFilters.orderByPriority}
-                        onCheckedChange={onTogglePriorityOrder}
-                      />
-                      <Label
-                        htmlFor="mobile-order-by-priority"
-                        className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
-                      >
-                        <CrownIcon className="h-4 w-4" />
-                        Order by priority
-                        <DevBadge />
-                      </Label>
-                    </div>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
           </Accordion>
         </div>
 
@@ -2207,7 +2214,7 @@ function PaginationControls({
           </SelectContent>
         </Select>
       ) : (
-        <span className="bg-foreground text-background flex size-4 items-center justify-center rounded-full text-xs font-medium">
+        <span className="bg-foreground text-background flex h-4 w-auto min-w-4 items-center justify-center rounded-full px-1 text-xs font-medium">
           {currentPage}
         </span>
       )}
