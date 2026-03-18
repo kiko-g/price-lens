@@ -19,7 +19,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { searchTypes, type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import { cn, getCenteredArray, serializeArray } from "@/lib/utils"
-import { SORT_OPTIONS_GROUPS, SMART_VIEW_PRESETS } from "@/lib/business/filters"
+import { SORT_OPTIONS_GROUPS, SMART_VIEW_PRESETS, UTILITY_SORT_OPTIONS, ALL_SORT_LABELS } from "@/lib/business/filters"
 import { buildPageTitle } from "@/lib/business/page-title"
 
 import { DevBadge } from "@/components/ui/combo/dev-badge"
@@ -83,7 +83,6 @@ import {
 } from "lucide-react"
 
 const FILTER_DEBOUNCE_MS = 500 // Debounce delay for filter changes
-const USE_SORT_GROUPS = false
 
 function DebounceProgressBar({ durationMs }: { durationMs: number }) {
   const [filled, setFilled] = useState(false)
@@ -108,7 +107,7 @@ function DebounceProgressBar({ durationMs }: { durationMs: number }) {
  */
 const FILTER_CONFIG = {
   page: { key: "page", default: 1 },
-  sortBy: { key: "sort", default: "updated-newest" },
+  sortBy: { key: "sort", default: "relevance" },
   origin: { key: "origin", default: "" },
   searchType: { key: "t", default: "any" },
   query: { key: "q", default: "" },
@@ -535,20 +534,6 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   // Auto-switch sort to "relevance" when a search query becomes active, and
   // back to the default when cleared. Only triggers on query transitions
   // (empty→non-empty or non-empty→empty), not every keystroke.
-  const prevUrlQueryRef = useRef(urlState.query)
-  useEffect(() => {
-    const prevQuery = prevUrlQueryRef.current
-    prevUrlQueryRef.current = urlState.query
-
-    const queryBecameActive = !prevQuery && urlState.query
-    const queryBecameEmpty = prevQuery && !urlState.query
-
-    if (queryBecameActive && urlState.sortBy === (FILTER_CONFIG.sortBy.default as string)) {
-      updateUrl({ sort: "relevance" })
-    } else if (queryBecameEmpty && urlState.sortBy === "relevance") {
-      updateUrl({ sort: null })
-    }
-  }, [urlState.query, urlState.sortBy, updateUrl])
 
   // ============================================================================
   // Handlers
@@ -559,20 +544,10 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     setMobileFiltersOpen(false)
     debouncedUpdateUrl.cancel()
 
-    // Auto-switch to relevance when searching with default sort
-    let effectiveSort: string = localFilters.sortBy
-    if (queryInput.trim() && localFilters.sortBy === (FILTER_CONFIG.sortBy.default as string)) {
-      effectiveSort = "relevance"
-      setLocalFilters((prev) => ({ ...prev, sortBy: "relevance" as SortByType }))
-    } else if (!queryInput.trim() && localFilters.sortBy === "relevance") {
-      effectiveSort = FILTER_CONFIG.sortBy.default
-      setLocalFilters((prev) => ({ ...prev, sortBy: FILTER_CONFIG.sortBy.default as SortByType }))
-    }
-
     updateUrlWithOverlay({
       q: queryInput,
       t: localFilters.searchType,
-      sort: effectiveSort,
+      sort: localFilters.sortBy,
       origin: localFilters.origin || null,
       priority: localFilters.priority || null,
       source: localFilters.source || null,
@@ -982,26 +957,27 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                 </span>
               </AccordionTrigger>
               <AccordionContent className="p-px pb-3">
-                <Select value={localFilters.sortBy} onValueChange={(v) => handleSortChange(v as SortByType)}>
-                  <SelectTrigger className="h-8 w-full">
-                    <SelectValue className="flex items-center gap-2 text-sm" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {USE_SORT_GROUPS
-                      ? SORT_OPTIONS_GROUPS.map((group) => (
-                          <SelectGroup key={group.label}>
-                            <SelectLabel>{group.label}</SelectLabel>
-                            {group.options.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                <div className="flex items-center gap-2">
-                                  <option.icon className="h-4 w-4" />
-                                  <span>{option.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        ))
-                      : SORT_OPTIONS_GROUPS.flatMap((group) => group.options).map((option) => (
+                {(() => {
+                  const info = ALL_SORT_LABELS[localFilters.sortBy]
+                  const SortIcon = info?.icon
+                  const isPresetControlled = !UTILITY_SORT_OPTIONS.some((o) => o.value === localFilters.sortBy)
+                  // const isNonDefault = localFilters.sortBy !== FILTER_CONFIG.sortBy.default
+                  return (
+                    <Select value={localFilters.sortBy} onValueChange={(v) => handleSortChange(v as SortByType)}>
+                      <SelectTrigger
+                        className={cn(
+                          "h-8 w-full",
+                          isPresetControlled && "text-muted-foreground",
+                          "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+                        )}
+                      >
+                        <div className="flex w-full items-center gap-2 truncate text-sm">
+                          {SortIcon && <SortIcon className="h-4 w-4 shrink-0" />}
+                          <span>{info?.label ?? localFilters.sortBy}</span>
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UTILITY_SORT_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             <div className="flex items-center gap-2">
                               <option.icon className="h-4 w-4" />
@@ -1009,8 +985,10 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                             </div>
                           </SelectItem>
                         ))}
-                  </SelectContent>
-                </Select>
+                      </SelectContent>
+                    </Select>
+                  )
+                })()}
               </AccordionContent>
             </AccordionItem>
 
@@ -1357,20 +1335,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               isLoading={isSearching}
               onApply={(presetParams) => {
                 debouncedUpdateUrl.cancel()
-                const resetParams: Record<string, string | number | boolean | null> = {
-                  q: null,
-                  t: null,
-                  origin: null,
-                  priority: null,
-                  source: null,
-                  category: null,
-                  priority_order: null,
-                  available: true,
-                  discounted: null,
-                  sort: null,
-                  page: 1,
-                }
-                updateUrlWithOverlay({ ...resetParams, ...presetParams })
+                updateUrlWithOverlay({ ...presetParams, page: 1 })
               }}
             />
 
@@ -1582,7 +1547,11 @@ function SmartViewPresets({
             key={preset.label}
             onClick={() => {
               if (active) {
-                onApply({ sort: "updated-newest" })
+                const revert: Record<string, null> = {}
+                for (const key of Object.keys(preset.params)) {
+                  revert[key] = null
+                }
+                onApply(revert)
               } else {
                 onApply(preset.params as Record<string, string>)
               }
@@ -1758,6 +1727,7 @@ function MobileFiltersDrawer({
                   selectedCategorySlug={localFilters.category}
                   onCategoryChange={onCategoryChange}
                   variant="inline"
+                  className="max-w-50%"
                 />
               </AccordionContent>
             </AccordionItem>
@@ -1777,16 +1747,22 @@ function MobileFiltersDrawer({
                       <span className="text-muted-foreground mb-1.5 block text-[11px] font-medium tracking-wider uppercase">
                         {group.label}
                       </span>
-                      {group.options.map((option) => (
-                        <label
-                          key={option.value}
-                          className="hover:bg-accent flex cursor-pointer items-center gap-3 rounded-md px-1 py-2 transition-colors"
-                        >
-                          <option.icon className="text-muted-foreground h-4 w-4 shrink-0" />
-                          <span className="flex-1 text-sm">{option.label}</span>
-                          <RadioGroupItem value={option.value} className="shrink-0" />
-                        </label>
-                      ))}
+                      {group.options.map((option) => {
+                        console.info(option.value, localFilters.sortBy)
+                        return (
+                          <label
+                            key={option.value}
+                            className={cn(
+                              "hover:bg-accent flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 transition-colors",
+                              localFilters.sortBy === option.value && "bg-accent dark:bg-accent/50",
+                            )}
+                          >
+                            <option.icon className="text-muted-foreground h-4 w-4 shrink-0" />
+                            <span className="flex-1 text-sm">{option.label}</span>
+                            <RadioGroupItem value={option.value} className="shrink-0" />
+                          </label>
+                        )
+                      })}
                     </div>
                   ))}
                 </RadioGroup>
@@ -2005,6 +1981,7 @@ interface CategoryFilterProps {
   onCategoryChange: (categorySlug: string) => void
   /** "popover" for desktop sidebar, "inline" for mobile drawer */
   variant?: "popover" | "inline"
+  className?: string
 }
 
 type FlatCategory = {
@@ -2099,6 +2076,7 @@ function CanonicalCategoryCascade({
   selectedCategorySlug,
   onCategoryChange,
   variant = "popover",
+  className,
 }: CategoryFilterProps) {
   const { categories, isLoading } = useCanonicalCategories()
   const flatCategories = useFlatCategories(categories)
@@ -2141,7 +2119,7 @@ function CanonicalCategoryCascade({
           <ChevronDownIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-lg min-w-(--radix-popover-trigger-width) p-0" align="start">
+      <PopoverContent className={cn("w-lg min-w-(--radix-popover-trigger-width) p-0", className)} align="start">
         <CategorySearchList
           flatCategories={flatCategories}
           selectedSlug={selectedCategorySlug}
