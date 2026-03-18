@@ -88,7 +88,11 @@ async function getDescendantCategoryIds(
 
 /**
  * Main query function for fetching store products
- * Handles all filtering, sorting, pagination, and user-specific augmentation
+ * Handles all filtering, sorting, pagination, and user-specific augmentation.
+ *
+ * When sort is "relevance" and a search query is present, delegates to the
+ * `search_products_ranked` RPC for ts_rank ordering. Otherwise uses PostgREST
+ * with tsvector textSearch. Falls back to ILIKE on zero tsvector results.
  *
  * @param params - Query parameters (filters, sort, pagination)
  * @param client - Optional Supabase client (avoids duplicate createClient() on cold start)
@@ -99,10 +103,15 @@ export async function queryStoreProducts(
 ): Promise<StoreProductsQueryResult> {
   const supabase = client ?? createClient()
 
-  // Apply defaults
   const pagination = { ...DEFAULT_PAGINATION, ...params.pagination }
   const sort = { ...DEFAULT_SORT, ...params.sort }
   const flags = { ...DEFAULT_FLAGS, ...params.flags }
+
+  // Route to relevance-ranked RPC when searching with relevance sort
+  const hasSearchQuery = !!params.search?.query && sanitizeSearchQuery(params.search.query).length > 0
+  if (hasSearchQuery && sort.sortBy === "relevance") {
+    return queryWithRelevanceRanking(params, supabase, pagination, sort, flags)
+  }
 
   const offset = (pagination.page - 1) * pagination.limit
 
@@ -126,7 +135,6 @@ export async function queryStoreProducts(
       : LISTING_COLUMNS
   let query = supabase.from(tableName).select(columns)
 
-  // Apply canonical category filter if present (must use the view)
   if (canonicalCategoryIds.length > 0) {
     query = query.in("canonical_category_id", canonicalCategoryIds)
   }
@@ -135,37 +143,24 @@ export async function queryStoreProducts(
   // Apply Filters
   // ============================================================================
 
-  // 1. Empty names filter
   if (flags.excludeEmptyNames) {
     query = query.not("name", "eq", "").not("name", "is", null)
   }
 
-  // 2. Priority filter
   query = applyPriorityFilter(query, params, flags)
-
-  // 3. Origin filter
   query = applyOriginFilter(query, params)
-
-  // 4. Category filter
   query = applyCategoryFilter(query, params)
-
-  // 5. Text search filter
   query = applySearchFilter(query, params)
 
-  // 6. Discount filter
   if (flags.onlyDiscounted) {
     query = query.gt("discount", 0)
   }
-
-  // 7. Availability filter
   if (flags.onlyAvailable) {
     query = query.eq("available", true)
   }
 
-  // 8. Source filter (priority_source)
   query = applySourceFilter(query, params)
 
-  // 9. Price range filter
   if (params.priceRange?.min != null) {
     query = query.gte("price", params.priceRange.min)
   }
@@ -177,12 +172,10 @@ export async function queryStoreProducts(
   // Apply Sorting
   // ============================================================================
 
-  // Priority ordering (if enabled, sort by priority first)
   if (sort.prioritizeByPriority) {
     query = query.order("priority", { ascending: false, nullsFirst: false })
   }
 
-  // Main sort
   query = applySorting(query, sort.sortBy)
 
   // ============================================================================
@@ -192,7 +185,7 @@ export async function queryStoreProducts(
   query = query.range(offset, offset + pagination.limit)
 
   // ============================================================================
-  // Execute Query (with timeout to prevent indefinite hangs)
+  // Execute Query
   // ============================================================================
 
   const { data, error } = await withTimeout(
@@ -212,26 +205,209 @@ export async function queryStoreProducts(
   }
 
   // ============================================================================
+  // ILIKE Fallback: if tsvector search returned 0 results, retry with ILIKE
+  // ============================================================================
+
+  const rows = data ?? []
+  if (rows.length === 0 && hasSearchQuery && params.search?.searchIn !== "url") {
+    return queryWithIlikeFallback(params, supabase, pagination, sort, flags)
+  }
+
+  // ============================================================================
   // Determine pagination from limit+1 pattern
   // ============================================================================
+
+  const hasNextPage = rows.length > pagination.limit
+  const pageData = hasNextPage ? rows.slice(0, pagination.limit) : rows
+
+  let augmentedData: StoreProductWithMeta[] = pageData
+  if (params.userId && augmentedData.length > 0) {
+    augmentedData = await augmentWithFavorites(supabase, augmentedData, params.userId)
+  }
+
+  return {
+    data: augmentedData,
+    pagination: {
+      page: pagination.page,
+      limit: pagination.limit,
+      totalCount: null,
+      totalPages: null,
+      hasNextPage,
+      hasPreviousPage: pagination.page > 1,
+    },
+    error: null,
+  }
+}
+
+// ============================================================================
+// Relevance-ranked search via RPC
+// ============================================================================
+
+/**
+ * Uses the `search_products_ranked` RPC which orders by ts_rank_cd.
+ * PostgREST preserves the function's ORDER BY when no client .order() is set.
+ * All existing filters are chained on the RPC result via PostgREST.
+ */
+async function queryWithRelevanceRanking(
+  params: StoreProductsQueryParams,
+  supabase: SupabaseClient,
+  pagination: { page: number; limit: number },
+  sort: { sortBy: string; prioritizeByPriority?: boolean },
+  flags: typeof DEFAULT_FLAGS,
+): Promise<StoreProductsQueryResult> {
+  const queryText = sanitizeSearchQuery(params.search!.query)
+  const offset = (pagination.page - 1) * pagination.limit
+
+  let query = supabase.rpc("search_products_ranked", { query_text: queryText }).select(LISTING_COLUMNS)
+
+  if (flags.excludeEmptyNames) {
+    query = query.not("name", "eq", "").not("name", "is", null)
+  }
+
+  query = applyPriorityFilter(query, params, flags)
+  query = applyOriginFilter(query, params)
+  query = applyCategoryFilter(query, params)
+
+  if (flags.onlyDiscounted) {
+    query = query.gt("discount", 0)
+  }
+  if (flags.onlyAvailable) {
+    query = query.eq("available", true)
+  }
+
+  query = applySourceFilter(query, params)
+
+  if (params.priceRange?.min != null) {
+    query = query.gte("price", params.priceRange.min)
+  }
+  if (params.priceRange?.max != null) {
+    query = query.lte("price", params.priceRange.max)
+  }
+
+  // Do NOT add .order() — PostgREST preserves the RPC's ORDER BY ts_rank_cd
+  query = query.range(offset, offset + pagination.limit)
+
+  const { data, error } = await withTimeout(
+    Promise.resolve(query) as Promise<{
+      data: StoreProductWithMeta[] | null
+      error: { message: string; code?: string } | null
+    }>,
+    SUPABASE_QUERY_TIMEOUT_MS,
+  )
+
+  if (error) {
+    return {
+      data: [],
+      pagination: createEmptyPagination(pagination),
+      error: { message: error.message, code: error.code },
+    }
+  }
+
+  const rows = data ?? []
+
+  // Fallback to ILIKE if RPC returned nothing (partial/mid-word match)
+  if (rows.length === 0) {
+    return queryWithIlikeFallback(params, supabase, pagination, sort, flags)
+  }
+
+  const hasNextPage = rows.length > pagination.limit
+  const pageData = hasNextPage ? rows.slice(0, pagination.limit) : rows
+
+  let augmentedData: StoreProductWithMeta[] = pageData
+  if (params.userId && augmentedData.length > 0) {
+    augmentedData = await augmentWithFavorites(supabase, augmentedData, params.userId)
+  }
+
+  return {
+    data: augmentedData,
+    pagination: {
+      page: pagination.page,
+      limit: pagination.limit,
+      totalCount: null,
+      totalPages: null,
+      hasNextPage,
+      hasPreviousPage: pagination.page > 1,
+    },
+    error: null,
+  }
+}
+
+// ============================================================================
+// ILIKE Fallback (trigram-indexed fuzzy search)
+// ============================================================================
+
+/**
+ * Retries the query using ILIKE pattern matching when tsvector returned 0 results.
+ * Catches partial/mid-word matches like "mim" → "Mimosa" via the existing
+ * idx_store_products_name_gin trigram index.
+ */
+async function queryWithIlikeFallback(
+  params: StoreProductsQueryParams,
+  supabase: SupabaseClient,
+  pagination: { page: number; limit: number },
+  sort: { sortBy: string; prioritizeByPriority?: boolean },
+  flags: typeof DEFAULT_FLAGS,
+): Promise<StoreProductsQueryResult> {
+  const offset = (pagination.page - 1) * pagination.limit
+
+  let query = supabase.from("store_products").select(LISTING_COLUMNS)
+
+  if (flags.excludeEmptyNames) {
+    query = query.not("name", "eq", "").not("name", "is", null)
+  }
+
+  query = applyPriorityFilter(query, params, flags)
+  query = applyOriginFilter(query, params)
+  query = applyCategoryFilter(query, params)
+  query = applyIlikeSearchFallback(query, params)
+
+  if (flags.onlyDiscounted) {
+    query = query.gt("discount", 0)
+  }
+  if (flags.onlyAvailable) {
+    query = query.eq("available", true)
+  }
+
+  query = applySourceFilter(query, params)
+
+  if (params.priceRange?.min != null) {
+    query = query.gte("price", params.priceRange.min)
+  }
+  if (params.priceRange?.max != null) {
+    query = query.lte("price", params.priceRange.max)
+  }
+
+  if (sort.prioritizeByPriority) {
+    query = query.order("priority", { ascending: false, nullsFirst: false })
+  }
+  query = applySorting(query, sort.sortBy === "relevance" ? "a-z" : sort.sortBy)
+
+  query = query.range(offset, offset + pagination.limit)
+
+  const { data, error } = await withTimeout(
+    Promise.resolve(query) as Promise<{
+      data: StoreProductWithMeta[] | null
+      error: { message: string; code?: string } | null
+    }>,
+    SUPABASE_QUERY_TIMEOUT_MS,
+  )
+
+  if (error) {
+    return {
+      data: [],
+      pagination: createEmptyPagination(pagination),
+      error: { message: error.message, code: error.code },
+    }
+  }
 
   const rows = data ?? []
   const hasNextPage = rows.length > pagination.limit
   const pageData = hasNextPage ? rows.slice(0, pagination.limit) : rows
 
-  // ============================================================================
-  // Augment with User Data (favorites)
-  // ============================================================================
-
   let augmentedData: StoreProductWithMeta[] = pageData
-
   if (params.userId && augmentedData.length > 0) {
     augmentedData = await augmentWithFavorites(supabase, augmentedData, params.userId)
   }
-
-  // ============================================================================
-  // Build Response
-  // ============================================================================
 
   return {
     data: augmentedData,
@@ -285,8 +461,8 @@ function applyPriorityFilter<Q extends { [key: string]: any }>(
 
 /**
  * Fast path for quick search (e.g. header autocomplete).
- * Name-only ilike, tracked + available, no favorites, no count.
- * Use when limit is small (e.g. 7) for lower latency.
+ * Uses tsvector search on name+brand+category (via search_vector), ordered by
+ * priority then name. Available products only, all priority levels discoverable.
  */
 export async function queryStoreProductsQuick(
   searchQuery: string,
@@ -296,7 +472,7 @@ export async function queryStoreProductsQuick(
   const supabase = client ?? createClient()
   const safeLimit = Math.min(Math.max(1, limit), 20)
 
-  const sanitized = searchQuery.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
+  const sanitized = sanitizeSearchQuery(searchQuery)
   if (!sanitized) {
     return {
       data: [],
@@ -312,16 +488,24 @@ export async function queryStoreProductsQuick(
     }
   }
 
-  const pattern = `%${sanitized.replace(/ /g, "%")}%`
-  const query = supabase
+  const tsq = toTsqueryString(sanitized)
+  let query = supabase
     .from("store_products")
     .select(LISTING_COLUMNS)
-    .ilike("name", pattern)
     .eq("available", true)
-    .in("priority", [1, 2, 3, 4, 5])
+    .not("name", "eq", "")
+    .not("name", "is", null)
     .order("priority", { ascending: false, nullsFirst: false })
     .order("name", { ascending: true })
     .range(0, safeLimit - 1)
+
+  if (tsq) {
+    query = query.textSearch("search_vector", tsq, { config: FTS_CONFIG })
+  } else {
+    // Very short/non-word input: fall back to ILIKE
+    const pattern = `%${sanitized.replace(/ /g, "%")}%`
+    query = query.ilike("name", pattern)
+  }
 
   const { data, error } = await withTimeout(
     Promise.resolve(query) as Promise<{
@@ -339,14 +523,61 @@ export async function queryStoreProductsQuick(
     }
   }
 
+  const rows = data ?? []
+
+  // Fallback: if tsvector returned nothing, retry with ILIKE (mid-word matches)
+  if (rows.length === 0 && tsq) {
+    const pattern = `%${sanitized.replace(/ /g, "%")}%`
+    const fallbackQuery = supabase
+      .from("store_products")
+      .select(LISTING_COLUMNS)
+      .ilike("name", pattern)
+      .eq("available", true)
+      .not("name", "eq", "")
+      .not("name", "is", null)
+      .order("priority", { ascending: false, nullsFirst: false })
+      .order("name", { ascending: true })
+      .range(0, safeLimit - 1)
+
+    const { data: fallbackData, error: fallbackError } = await withTimeout(
+      Promise.resolve(fallbackQuery) as Promise<{
+        data: StoreProductWithMeta[] | null
+        error: { message: string; code?: string } | null
+      }>,
+      Math.min(SUPABASE_QUERY_TIMEOUT_MS, 5000),
+    )
+
+    if (fallbackError) {
+      return {
+        data: [],
+        pagination: createEmptyPagination({ page: 1, limit: safeLimit }),
+        error: { message: fallbackError.message, code: fallbackError.code },
+      }
+    }
+
+    const fallbackRows = fallbackData ?? []
+    return {
+      data: fallbackRows.map((row) => ({ ...row, is_favorited: false })),
+      pagination: {
+        page: 1,
+        limit: safeLimit,
+        totalCount: null,
+        totalPages: null,
+        hasNextPage: fallbackRows.length >= safeLimit,
+        hasPreviousPage: false,
+      },
+      error: null,
+    }
+  }
+
   return {
-    data: (data ?? []).map((row) => ({ ...row, is_favorited: false })),
+    data: rows.map((row) => ({ ...row, is_favorited: false })),
     pagination: {
       page: 1,
       limit: safeLimit,
       totalCount: null,
       totalPages: null,
-      hasNextPage: (data ?? []).length >= safeLimit,
+      hasNextPage: rows.length >= safeLimit,
       hasPreviousPage: false,
     },
     error: null,
@@ -426,41 +657,39 @@ function applyCategoryFilter<Q extends { [key: string]: any }>(query: Q, params:
   return query
 }
 
+const FTS_CONFIG = "portuguese_unaccent"
+
+function sanitizeSearchQuery(raw: string): string {
+  return raw.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
+}
+
+function toTsqueryString(sanitized: string): string {
+  return sanitized.split(/\s+/).filter(Boolean).join(" & ")
+}
+
 function applySearchFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
   if (!params.search?.query) return query
 
-  const searchQuery = params.search.query
   const searchIn = params.search.searchIn
-
-  // Sanitize query: remove special characters except alphanumeric and accented chars
-  const sanitizedQuery = searchQuery.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
-  if (!sanitizedQuery) return query
+  const sanitized = sanitizeSearchQuery(params.search.query)
+  if (!sanitized) return query
 
   switch (searchIn) {
     case "url":
-      return query.ilike("url", `%${sanitizedQuery}%`)
+      return query.ilike("url", `%${sanitized}%`)
 
     case "any": {
-      // Joint search within brand, url, name and category
-      const pattern = `%${sanitizedQuery.replace(/ /g, "%")}%`
-      const conditions = [
-        `brand.ilike.${pattern}`,
-        `url.ilike.${pattern}`,
-        `name.ilike.${pattern}`,
-        `category.ilike.${pattern}`,
-      ]
-      return query.or(conditions.join(","))
+      const tsq = toTsqueryString(sanitized)
+      if (!tsq) return query
+      return query.textSearch("search_vector", tsq, { config: FTS_CONFIG })
     }
 
     case "name":
     case "brand":
     case "category": {
-      // Full-text search on specific field
-      const formattedQuery = sanitizedQuery.split(/\s+/).filter(Boolean).join(" & ")
-      if (formattedQuery) {
-        return query.textSearch(searchIn, formattedQuery)
-      }
-      return query
+      const tsq = toTsqueryString(sanitized)
+      if (!tsq) return query
+      return query.textSearch(searchIn, tsq, { config: FTS_CONFIG })
     }
 
     default:
@@ -468,8 +697,27 @@ function applySearchFilter<Q extends { [key: string]: any }>(query: Q, params: S
   }
 }
 
+/**
+ * ILIKE fallback for when tsvector search returns 0 results.
+ * Catches partial/mid-word matches (e.g. "mim" → "Mimosa") via trigram GIN index.
+ */
+function applyIlikeSearchFallback<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
+  if (!params.search?.query) return query
+
+  const sanitized = sanitizeSearchQuery(params.search.query)
+  if (!sanitized) return query
+
+  const pattern = `%${sanitized.replace(/ /g, "%")}%`
+  const conditions = [`name.ilike.${pattern}`, `brand.ilike.${pattern}`, `category.ilike.${pattern}`]
+  return query.or(conditions.join(","))
+}
+
 function applySorting<Q extends { [key: string]: any }>(query: Q, sortBy: string): Q {
   switch (sortBy) {
+    case "relevance":
+      // Relevance sort is handled by the RPC path; fall back to name for
+      // non-RPC queries (e.g. when there's no search query).
+      return query.order("name", { ascending: true })
     case "a-z":
       return query.order("name", { ascending: true })
     case "z-a":

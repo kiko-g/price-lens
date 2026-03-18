@@ -23,6 +23,7 @@ export const STORE_COLORS_SECONDARY: Record<number, string> = {
 }
 
 export const SORT_LABELS: Record<string, string> = {
+  relevance: "Most Relevant",
   "a-z": "A to Z",
   "z-a": "Z to A",
   "price-low-high": "Cheapest",
@@ -48,6 +49,7 @@ export function getSearchType(searchType: string): SearchType {
 export type SearchType = (typeof searchTypes)[number]
 
 export const sortByTypes = [
+  "relevance",
   "a-z",
   "z-a",
   "price-low-high",
@@ -65,6 +67,7 @@ export const sortByTypes = [
 export const sortTypesLabels: {
   [key in SortByType]: string
 } = {
+  relevance: "Most Relevant",
   "a-z": "A to Z",
   "z-a": "Z to A",
   "price-low-high": "High to Low",
@@ -81,7 +84,7 @@ export const sortTypesLabels: {
 
 export const getSortByType = (sortBy: string) => {
   if (sortByTypes.includes(sortBy as SortByType)) return sortBy as SortByType
-  return sortByTypes[0]
+  return "a-z" as SortByType
 }
 
 export type SortByType = (typeof sortByTypes)[number]

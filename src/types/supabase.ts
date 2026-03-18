@@ -370,17 +370,20 @@ export type Database = {
           id: number
           image: string | null
           last_http_status: number | null
+          last_price_change_at: string | null
           major_unit: string | null
           name: string | null
           origin_id: number | null
           pack: string | null
           price: number | null
+          price_change_pct: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
           priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           scraped_at: string | null
+          search_vector: unknown
           trade_item_id: number | null
           updated_at: string | null
           url: string | null
@@ -398,17 +401,20 @@ export type Database = {
           id?: number
           image?: string | null
           last_http_status?: number | null
+          last_price_change_at?: string | null
           major_unit?: string | null
           name?: string | null
           origin_id?: number | null
           pack?: string | null
           price?: number | null
+          price_change_pct?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
           priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           scraped_at?: string | null
+          search_vector?: unknown
           trade_item_id?: number | null
           updated_at?: string | null
           url?: string | null
@@ -426,17 +432,20 @@ export type Database = {
           id?: number
           image?: string | null
           last_http_status?: number | null
+          last_price_change_at?: string | null
           major_unit?: string | null
           name?: string | null
           origin_id?: number | null
           pack?: string | null
           price?: number | null
+          price_change_pct?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
           priority?: number | null
           priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
           scraped_at?: string | null
+          search_vector?: unknown
           trade_item_id?: number | null
           updated_at?: string | null
           url?: string | null
@@ -603,6 +612,7 @@ export type Database = {
           canonical_level: number | null
           canonical_parent_id: number | null
           canonical_parent_id_2: number | null
+          canonical_product_id: number | null
           category: string | null
           category_2: string | null
           category_3: string | null
@@ -610,17 +620,22 @@ export type Database = {
           discount: number | null
           id: number | null
           image: string | null
+          last_http_status: number | null
+          last_price_change_at: string | null
           major_unit: string | null
           name: string | null
           origin_id: number | null
           pack: string | null
           price: number | null
+          price_change_pct: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
           priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           scraped_at: string | null
+          search_vector: unknown
+          trade_item_id: number | null
           updated_at: string | null
           url: string | null
         }
@@ -651,6 +666,20 @@ export type Database = {
             columns: ["origin_id"]
             isOneToOne: false
             referencedRelation: "supermarkets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_canonical_product_id_fkey"
+            columns: ["canonical_product_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_trade_item_id_fkey"
+            columns: ["trade_item_id"]
+            isOneToOne: false
+            referencedRelation: "trade_items"
             referencedColumns: ["id"]
           },
         ]
@@ -776,17 +805,20 @@ export type Database = {
           id: number
           image: string | null
           last_http_status: number | null
+          last_price_change_at: string | null
           major_unit: string | null
           name: string | null
           origin_id: number | null
           pack: string | null
           price: number | null
+          price_change_pct: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
           priority: number | null
           priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
           scraped_at: string | null
+          search_vector: unknown
           trade_item_id: number | null
           updated_at: string | null
           url: string | null
@@ -798,6 +830,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      immutable_unaccent: { Args: { "": string }; Returns: string }
       list_canonical_products: {
         Args: {
           min_barcodes?: number
@@ -841,6 +874,46 @@ export type Database = {
           id: number
           name: string
         }[]
+      }
+      search_products_ranked: {
+        Args: { query_text: string }
+        Returns: {
+          available: boolean
+          barcode: string | null
+          brand: string | null
+          canonical_product_id: number | null
+          category: string | null
+          category_2: string | null
+          category_3: string | null
+          created_at: string | null
+          discount: number | null
+          id: number
+          image: string | null
+          last_http_status: number | null
+          last_price_change_at: string | null
+          major_unit: string | null
+          name: string | null
+          origin_id: number | null
+          pack: string | null
+          price: number | null
+          price_change_pct: number | null
+          price_per_major_unit: number | null
+          price_recommended: number | null
+          priority: number | null
+          priority_source: Database["public"]["Enums"]["priority_source_type"] | null
+          priority_updated_at: string | null
+          scraped_at: string | null
+          search_vector: unknown
+          trade_item_id: number | null
+          updated_at: string | null
+          url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "store_products"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

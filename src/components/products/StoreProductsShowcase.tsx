@@ -529,6 +529,24 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     })
   }, [urlState])
 
+  // Auto-switch sort to "relevance" when a search query becomes active, and
+  // back to the default when cleared. Only triggers on query transitions
+  // (empty→non-empty or non-empty→empty), not every keystroke.
+  const prevUrlQueryRef = useRef(urlState.query)
+  useEffect(() => {
+    const prevQuery = prevUrlQueryRef.current
+    prevUrlQueryRef.current = urlState.query
+
+    const queryBecameActive = !prevQuery && urlState.query
+    const queryBecameEmpty = prevQuery && !urlState.query
+
+    if (queryBecameActive && urlState.sortBy === (FILTER_CONFIG.sortBy.default as string)) {
+      updateUrl({ sort: "relevance" })
+    } else if (queryBecameEmpty && urlState.sortBy === "relevance") {
+      updateUrl({ sort: null })
+    }
+  }, [urlState.query, urlState.sortBy, updateUrl])
+
   // ============================================================================
   // Handlers
   // ============================================================================
@@ -537,10 +555,21 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const handleSearch = () => {
     setMobileFiltersOpen(false)
     debouncedUpdateUrl.cancel()
+
+    // Auto-switch to relevance when searching with default sort
+    let effectiveSort: string = localFilters.sortBy
+    if (queryInput.trim() && localFilters.sortBy === (FILTER_CONFIG.sortBy.default as string)) {
+      effectiveSort = "relevance"
+      setLocalFilters((prev) => ({ ...prev, sortBy: "relevance" as SortByType }))
+    } else if (!queryInput.trim() && localFilters.sortBy === "relevance") {
+      effectiveSort = FILTER_CONFIG.sortBy.default
+      setLocalFilters((prev) => ({ ...prev, sortBy: FILTER_CONFIG.sortBy.default as SortByType }))
+    }
+
     updateUrlWithOverlay({
       q: queryInput,
       t: localFilters.searchType,
-      sort: localFilters.sortBy,
+      sort: effectiveSort,
       origin: localFilters.origin || null,
       priority: localFilters.priority || null,
       source: localFilters.source || null,
@@ -879,8 +908,19 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             className="pr-16 text-base md:text-sm"
             value={queryInput}
             onChange={(e) => {
-              setQueryInput(e.target.value)
-              debouncedUpdateUrl({ q: e.target.value || null, page: 1 })
+              const value = e.target.value
+              setQueryInput(value)
+              const updates: Record<string, string | number | boolean | null> = { q: value || null, page: 1 }
+
+              if (value.trim() && localFilters.sortBy === (FILTER_CONFIG.sortBy.default as string)) {
+                setLocalFilters((prev) => ({ ...prev, sortBy: "relevance" as SortByType }))
+                updates.sort = "relevance"
+              } else if (!value.trim() && localFilters.sortBy === "relevance") {
+                setLocalFilters((prev) => ({ ...prev, sortBy: FILTER_CONFIG.sortBy.default as SortByType }))
+                updates.sort = null
+              }
+
+              debouncedUpdateUrl(updates)
             }}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
@@ -1531,7 +1571,7 @@ function SmartViewPresets({
   }
 
   return (
-    <div className="no-scrollbar mb-3 flex h-8 min-h-8 flex-1 gap-2 self-stretch overflow-x-auto">
+    <div className="no-scrollbar mb-3 flex h-8 max-h-8 min-h-8 flex-1 gap-2 self-stretch overflow-x-auto">
       {SMART_VIEW_PRESETS.map((preset) => {
         const active = isPresetActive(preset)
         return (
@@ -1551,7 +1591,11 @@ function SmartViewPresets({
                 : "bg-background text-foreground hover:bg-accent border-border",
             )}
           >
-            {active && isLoading ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <preset.icon className="h-3.5 w-3.5" />}
+            {active && isLoading ? (
+              <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <preset.icon className="h-3.5 w-3.5" />
+            )}
             {preset.label}
           </button>
         )
@@ -1559,7 +1603,6 @@ function SmartViewPresets({
     </div>
   )
 }
-
 
 interface MobileNavProps {
   query: string

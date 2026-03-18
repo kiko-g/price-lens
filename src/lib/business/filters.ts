@@ -10,9 +10,14 @@ import {
   TrendingDownIcon,
   TrendingUpIcon,
   BadgePercentIcon,
+  SearchIcon,
 } from "lucide-react"
 
 export const SORT_OPTIONS_GROUPS = [
+  {
+    label: "Search",
+    options: [{ label: "Most Relevant", value: "relevance", icon: SearchIcon }],
+  },
   {
     label: "Price Intelligence",
     options: [
