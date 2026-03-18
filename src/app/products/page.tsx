@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { Metadata } from "next"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
-import { StoreProductsShowcase } from "@/components/products/StoreProductsShowcase"
+import { StoreProductsShowcase } from "@/components/products/store-products-showcase"
 import { queryStoreProducts, generateQueryKey } from "@/lib/queries/store-products"
 import type { StoreProductsQueryParams, StoreProductsQueryResult } from "@/lib/queries/store-products"
 import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProducts } from "@/lib/kv"
