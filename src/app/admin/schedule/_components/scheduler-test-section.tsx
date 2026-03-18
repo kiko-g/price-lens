@@ -5,7 +5,6 @@ import axios from "axios"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
@@ -27,7 +26,7 @@ import {
 import type { SchedulerTestResult } from "@/app/admin/schedule/types"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
-export function SchedulerTestSection() {
+export function SchedulerTestContent() {
   const [result, setResult] = useState<SchedulerTestResult | null>(null)
   const [isTesting, setIsTesting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,33 +46,25 @@ export function SchedulerTestSection() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <TestTube2Icon className="h-5 w-5 text-violet-500" />
-              Scheduler Test
-            </CardTitle>
-            <CardDescription>Dry run to see what the scheduler would do on next execution</CardDescription>
-          </div>
-          <Button variant="outline" size="sm" onClick={runTest} disabled={isTesting}>
-            {isTesting ? (
-              <>
-                <RefreshCwIcon className="h-4 w-4 animate-spin" />
-                Testing...
-              </>
-            ) : (
-              <>
-                <PlayCircleIcon className="h-4 w-4" />
-                Run Test
-              </>
-            )}
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {error && (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <p className="text-muted-foreground text-sm">Dry run to see what the scheduler would do on next execution</p>
+        <Button variant="outline" size="sm" onClick={runTest} disabled={isTesting}>
+          {isTesting ? (
+            <>
+              <RefreshCwIcon className="h-4 w-4 animate-spin" />
+              Testing...
+            </>
+          ) : (
+            <>
+              <PlayCircleIcon className="h-4 w-4" />
+              Run Test
+            </>
+          )}
+        </Button>
+      </div>
+
+      {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30">
             <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangleIcon className="h-4 w-4" />
@@ -310,7 +301,6 @@ export function SchedulerTestSection() {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   )
 }

@@ -7,6 +7,7 @@ import { format } from "date-fns"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -20,10 +21,12 @@ import {
   InfoIcon,
   DollarSignIcon,
   ActivityIcon,
+  TestTube2Icon,
 } from "lucide-react"
 
 import type { ScheduleOverview } from "@/app/admin/schedule/types"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
+import { SchedulerTestContent } from "./scheduler-test-section"
 
 export function ScheduleOverviewSection() {
   const {
@@ -57,10 +60,28 @@ export function ScheduleOverviewSection() {
             <CalendarIcon className="text-primary size-5" />
             Scrape Schedule
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCwIcon className="h-4 w-4" />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Drawer direction="right">
+              <DrawerTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="Open scheduler test">
+                  <TestTube2Icon className="h-4 w-4" />
+                  Scheduler test
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent direction="right" className="max-w-xl overflow-y-auto rounded-l-none">
+                <DrawerHeader className="pt-4 text-left">
+                  <DrawerTitle>Scheduler Test</DrawerTitle>
+                </DrawerHeader>
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
+                  <SchedulerTestContent />
+                </div>
+              </DrawerContent>
+            </Drawer>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCwIcon className="h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
