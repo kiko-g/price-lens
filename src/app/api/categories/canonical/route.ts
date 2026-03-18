@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ data })
     }
 
-    // Default: tree format
-    const { data, error } = await canonicalCategoryQueries.getTree()
+    // Default: tree format (consumer-facing: only tracked categories)
+    const { data, error } = await canonicalCategoryQueries.getTree({ trackedOnly: true })
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }

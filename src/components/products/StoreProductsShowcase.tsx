@@ -44,6 +44,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -75,6 +77,7 @@ import {
   RefreshCcwIcon,
   SearchIcon,
   InfoIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
@@ -1754,6 +1757,7 @@ function MobileFiltersDrawer({
                 <CanonicalCategoryCascade
                   selectedCategorySlug={localFilters.category}
                   onCategoryChange={onCategoryChange}
+                  variant="inline"
                 />
               </AccordionContent>
             </AccordionItem>
@@ -1993,14 +1997,22 @@ function MobileFiltersDrawer({
 }
 
 // ============================================================================
-// Canonical Category Cascade Filter
+// Canonical Category Search Filter
 // ============================================================================
 
-interface CanonicalCategoryCascadeProps {
-  /** Category slug in ID-slug format (e.g., "72-vinhos-tintos") */
+interface CategoryFilterProps {
   selectedCategorySlug: string
-  /** Called with the new slug when category changes */
   onCategoryChange: (categorySlug: string) => void
+  /** "popover" for desktop sidebar, "inline" for mobile drawer */
+  variant?: "popover" | "inline"
+}
+
+type FlatCategory = {
+  id: number
+  name: string
+  breadcrumb: string
+  level: 1 | 2 | 3
+  slug: string
 }
 
 function useCanonicalCategories() {
@@ -2010,204 +2022,133 @@ function useCanonicalCategories() {
       const res = await axios.get("/api/categories/canonical")
       return res.data.data as CanonicalCategory[]
     },
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60,
   })
 
   return { categories: data ?? [], isLoading }
 }
 
-function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange }: CanonicalCategoryCascadeProps) {
-  const { categories, isLoading } = useCanonicalCategories()
-
-  // Parse the category ID from the slug (e.g., "72-vinhos-tintos" -> 72)
-  const selectedId = parseCategoryId(selectedCategorySlug)
-
-  // Find the selected category and its ancestors
-  const findCategoryPath = useMemo(() => {
-    if (!selectedId || !categories.length) return { level1: null, level2: null, level3: null }
-
-    // Build a flat map for quick lookup
-    const flatMap = new Map<number, CanonicalCategory>()
-    const addToMap = (cats: CanonicalCategory[]) => {
+function useFlatCategories(categories: CanonicalCategory[]) {
+  return useMemo(() => {
+    const flat: FlatCategory[] = []
+    const walk = (cats: CanonicalCategory[], ancestors: string[]) => {
       for (const cat of cats) {
-        flatMap.set(cat.id, cat)
-        if (cat.children?.length) addToMap(cat.children)
+        const path = [...ancestors, cat.name]
+        flat.push({
+          id: cat.id,
+          name: cat.name,
+          breadcrumb: path.join(" > "),
+          level: cat.level,
+          slug: toCategorySlug(cat.id, cat.name),
+        })
+        if (cat.children?.length) walk(cat.children, path)
       }
     }
-    addToMap(categories)
+    walk(categories, [])
+    return flat
+  }, [categories])
+}
 
-    const selected = flatMap.get(selectedId)
-    if (!selected) return { level1: null, level2: null, level3: null }
+function CategorySearchList({
+  flatCategories,
+  selectedSlug,
+  onSelect,
+}: {
+  flatCategories: FlatCategory[]
+  selectedSlug: string
+  onSelect: (slug: string) => void
+}) {
+  const selectedId = parseCategoryId(selectedSlug)
 
-    // Walk up the tree to find ancestors
-    if (selected.level === 1) {
-      return { level1: selected, level2: null, level3: null }
-    } else if (selected.level === 2) {
-      const parent = selected.parent_id ? flatMap.get(selected.parent_id) : null
-      return { level1: parent ?? null, level2: selected, level3: null }
-    } else if (selected.level === 3) {
-      const parent = selected.parent_id ? flatMap.get(selected.parent_id) : null
-      const grandparent = parent?.parent_id ? flatMap.get(parent.parent_id) : null
-      return { level1: grandparent ?? null, level2: parent ?? null, level3: selected }
-    }
+  return (
+    <Command className="rounded-md border" shouldFilter>
+      <CommandInput placeholder="Search categories..." className="h-9 border-0 focus:ring-0" />
+      <CommandList className="max-h-[280px]">
+        <CommandEmpty>No categories found.</CommandEmpty>
+        <CommandGroup>
+          {flatCategories.map((cat) => (
+            <CommandItem
+              key={cat.id}
+              value={cat.breadcrumb}
+              onSelect={() => onSelect(cat.id === selectedId ? "" : cat.slug)}
+              className="gap-2"
+            >
+              <CircleCheckIcon
+                className={cn("h-3.5 w-3.5 shrink-0", cat.id === selectedId ? "text-primary opacity-100" : "opacity-0")}
+              />
+              <span className="flex-1 truncate">
+                {cat.level === 1 ? (
+                  <span className="font-medium">{cat.name}</span>
+                ) : (
+                  <span className="text-muted-foreground">
+                    {cat.breadcrumb.split(" > ").slice(0, -1).join(" > ")}
+                    {" > "}
+                    <span className="text-foreground">{cat.name}</span>
+                  </span>
+                )}
+              </span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  )
+}
 
-    return { level1: null, level2: null, level3: null }
-  }, [selectedId, categories])
+function CanonicalCategoryCascade({
+  selectedCategorySlug,
+  onCategoryChange,
+  variant = "popover",
+}: CategoryFilterProps) {
+  const { categories, isLoading } = useCanonicalCategories()
+  const flatCategories = useFlatCategories(categories)
+  const [popoverOpen, setPopoverOpen] = useState(false)
 
-  // Get level 1 options (root categories)
-  const level1Options = categories
+  const selectedId = parseCategoryId(selectedCategorySlug)
+  const selectedCategory = flatCategories.find((c) => c.id === selectedId)
 
-  // Get level 2 options (children of selected level 1)
-  const level2Options = useMemo(() => {
-    if (!findCategoryPath.level1) return []
-    return findCategoryPath.level1.children ?? []
-  }, [findCategoryPath.level1])
-
-  // Get level 3 options (children of selected level 2)
-  const level3Options = useMemo(() => {
-    if (!findCategoryPath.level2) return []
-    return findCategoryPath.level2.children ?? []
-  }, [findCategoryPath.level2])
-
-  // Helper to create slug from category
-  const getCategorySlug = (cat: CanonicalCategory) => toCategorySlug(cat.id, cat.name)
-
-  // Handler for level 1 change - resets level 2 and 3
-  const handleLevel1Change = (value: string) => {
-    if (value === "_all") {
-      onCategoryChange("")
-    } else {
-      // Find the category to get its name for the slug
-      const cat = level1Options.find((c) => String(c.id) === value)
-      onCategoryChange(cat ? getCategorySlug(cat) : "")
-    }
-  }
-
-  // Handler for level 2 change - resets level 3
-  const handleLevel2Change = (value: string) => {
-    if (value === "_all" && findCategoryPath.level1) {
-      // Go back to level 1 selection
-      onCategoryChange(getCategorySlug(findCategoryPath.level1))
-    } else {
-      const cat = level2Options.find((c) => String(c.id) === value)
-      onCategoryChange(cat ? getCategorySlug(cat) : "")
-    }
-  }
-
-  // Handler for level 3 change
-  const handleLevel3Change = (value: string) => {
-    if (value === "_all" && findCategoryPath.level2) {
-      // Go back to level 2 selection
-      onCategoryChange(getCategorySlug(findCategoryPath.level2))
-    } else {
-      const cat = level3Options.find((c) => String(c.id) === value)
-      onCategoryChange(cat ? getCategorySlug(cat) : "")
-    }
-  }
+  const handleSelect = useCallback(
+    (slug: string) => {
+      onCategoryChange(slug)
+      setPopoverOpen(false)
+    },
+    [onCategoryChange],
+  )
 
   if (isLoading) {
+    return <Skeleton className="h-9 w-full" />
+  }
+
+  if (variant === "inline") {
     return (
-      <div className="flex flex-col gap-3 p-px">
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-      </div>
+      <CategorySearchList flatCategories={flatCategories} selectedSlug={selectedCategorySlug} onSelect={handleSelect} />
     )
   }
 
   return (
-    <div className="flex flex-col gap-3 p-px">
-      {/* Level 1: Main Category */}
-      <div className="p-px">
-        <Label className="text-muted-foreground mb-1 block text-xs">Category</Label>
-        <Select
-          value={findCategoryPath.level1 ? String(findCategoryPath.level1.id) : "_all"}
-          onValueChange={handleLevel1Change}
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={popoverOpen}
+          className={cn(
+            "h-8 w-full justify-between text-sm font-normal",
+            selectedCategory && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+          )}
         >
-          <SelectTrigger
-            className={cn(
-              "h-8 w-full text-sm",
-              findCategoryPath.level1 && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
-            )}
-          >
-            <SelectValue placeholder="All categories" />
-          </SelectTrigger>
-          <SelectContent className="max-h-[300px]">
-            <SelectItem value="_all">All categories</SelectItem>
-            <SelectSeparator />
-            {level1Options.map((cat) => (
-              <SelectItem key={cat.id} value={String(cat.id)}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Level 2: Subcategory */}
-      <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Subcategory</Label>
-        <Select
-          value={findCategoryPath.level2 ? String(findCategoryPath.level2.id) : "_all"}
-          onValueChange={handleLevel2Change}
-          disabled={!findCategoryPath.level1}
-        >
-          <SelectTrigger
-            className={cn(
-              "h-8 w-full text-sm",
-              findCategoryPath.level2 && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
-            )}
-          >
-            <SelectValue placeholder={findCategoryPath.level1 ? "All subcategories" : "Select category first"} />
-          </SelectTrigger>
-          <SelectContent className="max-h-[240px]">
-            <SelectItem value="_all">All subcategories</SelectItem>
-            {level2Options.length > 0 && <SelectSeparator />}
-            {level2Options.map((cat) => (
-              <SelectItem key={cat.id} value={String(cat.id)}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Level 3: Sub-subcategory */}
-      <div>
-        <Label className="text-muted-foreground mb-1 block text-xs">Sub-subcategory</Label>
-        <Select
-          value={findCategoryPath.level3 ? String(findCategoryPath.level3.id) : "_all"}
-          onValueChange={handleLevel3Change}
-          disabled={!findCategoryPath.level2 || level3Options.length === 0}
-        >
-          <SelectTrigger
-            className={cn(
-              "h-8 w-full text-sm",
-              findCategoryPath.level3 && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
-            )}
-          >
-            <SelectValue
-              placeholder={
-                !findCategoryPath.level2
-                  ? "Select subcategory first"
-                  : level3Options.length === 0
-                    ? "No sub-subcategories"
-                    : "All sub-subcategories"
-              }
-            />
-          </SelectTrigger>
-          <SelectContent className="max-h-[240px]">
-            <SelectItem value="_all">All sub-subcategories</SelectItem>
-            {level3Options.length > 0 && <SelectSeparator />}
-            {level3Options.map((cat) => (
-              <SelectItem key={cat.id} value={String(cat.id)}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+          <span className="truncate">{selectedCategory ? selectedCategory.breadcrumb : "All categories"}</span>
+          <ChevronDownIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-lg min-w-(--radix-popover-trigger-width) p-0" align="start">
+        <CategorySearchList
+          flatCategories={flatCategories}
+          selectedSlug={selectedCategorySlug}
+          onSelect={handleSelect}
+        />
+      </PopoverContent>
+    </Popover>
   )
 }
 

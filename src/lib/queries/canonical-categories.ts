@@ -31,10 +31,15 @@ export const canonicalCategoryQueries = {
 
   /**
    * Get canonical categories as a hierarchical tree structure
+   * @param trackedOnly - if true, only return categories where tracked = true
    */
-  async getTree(): Promise<{ data: CanonicalCategory[] | null; error: any }> {
+  async getTree(opts: { trackedOnly?: boolean } = {}): Promise<{ data: CanonicalCategory[] | null; error: any }> {
     const supabase = createClient()
-    const { data, error } = await supabase.from("canonical_categories").select("*").order("name", { ascending: true })
+    let query = supabase.from("canonical_categories").select("*").order("name", { ascending: true })
+    if (opts.trackedOnly) {
+      query = query.eq("tracked", true)
+    }
+    const { data, error } = await query
 
     if (error || !data) {
       return { data: null, error }
