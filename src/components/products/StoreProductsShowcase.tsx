@@ -1557,10 +1557,10 @@ function SmartViewPresets({
               }
             }}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
               active
-                ? "from-primary/80 to-secondary/80 dark:from-primary/50 dark:to-secondary/50 text-primary-foreground border-transparent bg-linear-to-br"
-                : "bg-background text-foreground hover:bg-accent border-border",
+                ? "border-transparent bg-linear-to-br from-primary/80 to-secondary/80 text-primary-foreground shadow-md shadow-primary/25 dark:from-primary/60 dark:to-secondary/60 dark:shadow-primary/15"
+                : "border-border/40 bg-muted/50 text-muted-foreground hover:border-border/70 hover:bg-muted hover:text-foreground dark:border-border/25 dark:bg-muted/30 dark:hover:border-border/50 dark:hover:bg-muted/60",
             )}
           >
             {active && isLoading ? (
