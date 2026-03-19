@@ -1,13 +1,7 @@
 import { CircleCheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function FreshnessBadge({
-  computedAt,
-  className,
-}: {
-  computedAt: string | null
-  className?: string
-}) {
+export function FreshnessBadge({ computedAt, className }: { computedAt: string | null; className?: string }) {
   const label = computedAt ? getRelativeLabel(computedAt) : "Updated recently"
 
   return (

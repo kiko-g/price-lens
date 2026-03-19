@@ -15,9 +15,7 @@ export async function SavingsEvidence() {
   const stats = await getHomeStats()
 
   const hasEuroStat = stats.totalDiscountSavingsEuros > 0 || stats.totalSavingsEuros24h > 0
-  const euroValue = stats.totalDiscountSavingsEuros > 0
-    ? stats.totalDiscountSavingsEuros
-    : stats.totalSavingsEuros24h
+  const euroValue = stats.totalDiscountSavingsEuros > 0 ? stats.totalDiscountSavingsEuros : stats.totalSavingsEuros24h
   const storeCount = stats.perStore.length
 
   return (
@@ -46,8 +44,8 @@ export async function SavingsEvidence() {
         )}
 
         <p className="text-muted-foreground max-w-lg text-sm leading-relaxed text-balance">
-          Prices shift every week across {storeCount > 0 ? `${storeCount} major chains` : "supermarkets"}.
-          What costs €6.99 today was €4.49 last month. Price Lens tracks it all so you buy at the right time.
+          Prices shift every week across {storeCount > 0 ? `${storeCount} major chains` : "supermarkets"}. What costs
+          €6.99 today was €4.49 last month. Price Lens tracks it all so you buy at the right time.
         </p>
 
         <Link
