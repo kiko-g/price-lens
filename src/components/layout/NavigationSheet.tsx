@@ -51,10 +51,13 @@ export function NavigationSheet() {
 
   return (
     <Drawer direction="left" open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerTrigger className="flex items-center justify-center rounded-md p-2 md:hidden" asChild>
-        <Button variant="outline" size="icon">
-          <MenuIcon className="size-4" />
-        </Button>
+      <DrawerTrigger className="md:hidden" asChild>
+        <button
+          type="button"
+          className="hover:bg-accent/60 flex size-10 cursor-pointer items-center justify-center rounded-lg transition-colors active:scale-[0.95]"
+        >
+          <MenuIcon className="size-5" />
+        </button>
       </DrawerTrigger>
 
       <DrawerContent

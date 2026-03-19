@@ -11,9 +11,9 @@ function Blobs() {
   return (
     <>
       {/* Primary: centered on mobile, top-right on desktop */}
-      <div className="bg-primary-400/30 dark:bg-primary-500/30 pointer-events-none absolute -top-20 left-0 h-[350px] w-[120vw] -translate-x-1/2 rounded-full blur-[100px] md:-top-60 md:right-0 md:left-auto md:h-[500px] md:w-[800px] md:translate-x-0 md:blur-[128px]" />
+      <div className="bg-primary-400/20 dark:bg-primary-500/20 pointer-events-none absolute -top-20 left-0 h-[350px] w-[120vw] -translate-x-1/2 rounded-full blur-[120px] md:-top-60 md:right-0 md:left-auto md:h-[500px] md:w-[800px] md:translate-x-0 md:blur-[160px]" />
       {/* Secondary: centered on mobile, inset on desktop */}
-      <div className="bg-secondary-400/30 dark:bg-secondary-400/30 pointer-events-none absolute -top-8 left-2/3 h-[250px] w-[80vw] -translate-x-1/2 rounded-full blur-[100px] md:-top-32 md:right-[20%] md:left-2/5 md:h-[400px] md:w-[600px] md:translate-x-0 md:blur-[128px]" />
+      <div className="bg-secondary-400/20 dark:bg-secondary-400/20 pointer-events-none absolute -top-8 left-2/3 h-[250px] w-[80vw] -translate-x-1/2 rounded-full blur-[120px] md:-top-32 md:right-[20%] md:left-2/5 md:h-[400px] md:w-[600px] md:translate-x-0 md:blur-[160px]" />
     </>
   )
 }
@@ -35,7 +35,7 @@ export function HeroGridPattern({ withGradient, ...props }: HeroGridPatternProps
             {...props}
             className={cn(
               "mask-[linear-gradient(to_bottom,white_0%,white_80%,transparent_100%)]",
-              "stroke-gray-400/25 dark:stroke-gray-400/10",
+              "stroke-gray-400/15 dark:stroke-gray-400/8",
               props.className,
             )}
           />

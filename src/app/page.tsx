@@ -5,7 +5,7 @@ import { defaultMetadata } from "@/lib/config"
 import { Layout } from "@/components/layout"
 import { Hero } from "@/components/home/Hero"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
-import { SavingsSpotlightWithFeatures } from "@/components/home/SavingsSpotlightWithFeatures"
+import { SavingsEvidence } from "@/components/home/SavingsEvidence"
 import { AboutTeaserCta } from "@/components/home/AboutTeaserCta"
 
 export const revalidate = 3600
@@ -32,14 +32,15 @@ export default async function Home() {
       <main className="flex w-full flex-col items-center justify-center">
         <Suspense
           fallback={
-            <div className="max-w-9xl z-20 mx-auto flex min-h-[calc(100svh-var(--header-height))] w-full items-center justify-center px-4 py-12 lg:px-20">
+            <div className="z-20 mx-auto flex min-h-[50vh] w-full items-center justify-center px-4 py-12">
               <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
             </div>
           }
         >
           <Hero />
         </Suspense>
-        <SavingsSpotlightWithFeatures />
+        <Separator />
+        <SavingsEvidence />
         <Separator />
         <AboutTeaserCta />
       </main>

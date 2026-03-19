@@ -1,42 +1,40 @@
 import Link from "next/link"
 import { ArrowRight, TrendingUpIcon, EyeIcon, PiggyBankIcon } from "lucide-react"
-import { LightRays } from "@/components/ui/magic/light-rays"
 
 const painPoints = [
   {
     icon: EyeIcon,
     title: "Invisible price creep",
-    text: "A few cents here, a few cents there. Over a year, small hikes on everyday products add up to hundreds of euros you never noticed losing.",
+    text: "Small hikes on everyday products add up to hundreds of euros you never noticed losing.",
   },
   {
     icon: TrendingUpIcon,
     title: "Full price history",
-    text: "See exactly how a product's price has moved over weeks and months. No more guessing whether today's price is actually a deal.",
+    text: "See exactly how a product's price has moved over weeks and months across stores.",
   },
   {
     icon: PiggyBankIcon,
     title: "Buy at the right time",
-    text: "Most products cycle through discounts. Price Lens shows you when prices drop so you can stock up when it matters.",
+    text: "Most products cycle through discounts. Price Lens shows you when prices drop.",
   },
 ]
 
 export function AboutTeaserCta() {
   return (
     <section className="w-full px-4 py-10 md:py-16">
-      <div className="mx-auto flex max-w-5xl flex-col gap-8">
-        <div className="flex flex-col gap-2 text-center">
-          <h2 className="text-xl font-bold tracking-tight sm:text-2xl">You&apos;re paying more than you need to</h2>
-          <p className="text-muted-foreground mx-auto max-w-lg text-sm text-balance">
-            Prices shift every week. Without tracking and monitoring, it&apos;s hard to notice but your wallet feels the
-            pain.
+      <div className="mx-auto flex max-w-4xl flex-col gap-6">
+        <div className="flex flex-col gap-1.5 text-center">
+          <h2 className="text-lg font-bold tracking-tight sm:text-xl">Why track prices?</h2>
+          <p className="text-muted-foreground mx-auto max-w-md text-sm text-balance">
+            Portuguese grocery inflation hit 20%+ over the last 5 years. Small savings compound.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {painPoints.map((item) => (
             <div key={item.title} className="bg-card flex flex-col gap-2 rounded-xl border p-4">
-              <div className="bg-primary/10 flex size-9 items-center justify-center rounded-lg">
-                <item.icon className="text-primary size-4.5" />
+              <div className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
+                <item.icon className="text-primary size-4" />
               </div>
               <h3 className="text-sm font-semibold">{item.title}</h3>
               <p className="text-muted-foreground text-xs leading-relaxed">{item.text}</p>
@@ -46,20 +44,15 @@ export function AboutTeaserCta() {
 
         <Link
           href="/about"
-          className="bg-card hover:bg-accent group relative flex items-center justify-between overflow-hidden rounded-xl border p-5 transition-colors"
+          className="bg-card hover:bg-accent group flex items-center justify-between rounded-xl border p-4 transition-colors"
         >
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             <span className="text-sm font-semibold">Understand the bigger picture</span>
-            <span className="text-muted-foreground max-w-xl text-xs text-balance">
-              Portuguese grocery inflation hit 20%+ over the last 5 years. See the data, understand the impact, and
-              learn how Price Lens helps you fight back.
+            <span className="text-muted-foreground text-xs">
+              See the data behind Portuguese grocery inflation and how Price Lens helps.
             </span>
           </div>
-          <ArrowRight className="text-muted-foreground size-5 shrink-0 transition-transform group-hover:translate-x-1" />
-
-          <div className="dark:from-primary/10 from-primary/4 to-secondary/6 dark:to-secondary/20 absolute inset-0 bg-linear-to-r">
-            <LightRays />
-          </div>
+          <ArrowRight className="text-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
     </section>

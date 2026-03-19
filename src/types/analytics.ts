@@ -25,6 +25,7 @@ export interface AnalyticsSnapshotData {
     total: number
     available: number
     unavailable: number
+    on_discount: number
     availability_rate: number
   }>
   scrape_freshness: {
@@ -47,6 +48,8 @@ export interface AnalyticsSnapshotData {
     decreases_24h: number
     unchanged_24h: number
     products_with_discount: number
+    total_savings_euros_24h: number
+    total_discount_savings_euros: number
   }
   data_quality: {
     with_barcode: number
