@@ -327,6 +327,16 @@
     }
   }
 
+  @keyframes pwa-fab-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 var(--primary);
+    }
+    50% {
+      box-shadow: 0 0 0 8px transparent;
+    }
+  }
+
   @keyframes accordion-down {
     from {
       height: 0;

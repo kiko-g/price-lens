@@ -2,6 +2,7 @@
   "name": "Price Lens",
   "short_name": "Price Lens",
   "description": "Track supermarket prices across Portugal. Compare products, spot discounts, and monitor price history.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,6 +11,7 @@
   "background_color": "#09090b",
   "categories": ["shopping", "finance", "food"],
   "lang": "en",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/android-chrome-192x192.png",
