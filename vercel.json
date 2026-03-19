@@ -8,6 +8,10 @@
     {
       "path": "/api/admin/analytics/compute-worker",
       "schedule": "0 */12 * * *"
+    },
+    {
+      "path": "/api/admin/alerts/scrape-health",
+      "schedule": "0 */8 * * *"
     }
   ]
 }

@@ -17,6 +17,7 @@ export interface AnalyticsSnapshotData {
     available: number
     unavailable: number
     never_scraped: number
+    vetoed: number
     availability_rate: number
   }
   per_store: Array<{
@@ -26,6 +27,7 @@ export interface AnalyticsSnapshotData {
     available: number
     unavailable: number
     on_discount: number
+    vetoed: number
     availability_rate: number
   }>
   scrape_freshness: {

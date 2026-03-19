@@ -35,7 +35,7 @@ import {
   formatThreshold,
   getPriorityDistributionStyle,
 } from "@/lib/business/priority"
-import { BanIcon, CircleIcon } from "lucide-react"
+import { BanIcon, CircleIcon, FilterXIcon } from "lucide-react"
 
 const STORE_LOGOS: Record<number, React.ComponentType<{ className?: string }>> = {
   1: ContinenteSvg,
@@ -129,7 +129,7 @@ export function ScrapeStatusSection({ data, isLoading }: { data?: AnalyticsSnaps
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <StatBox
             icon={CheckCircle2Icon}
             label="Available"
@@ -144,6 +144,14 @@ export function ScrapeStatusSection({ data, isLoading }: { data?: AnalyticsSnaps
             value={ss?.unavailable ?? 0}
             detail="404'd / removed"
             color="text-amber-500"
+            isLoading={isLoading}
+          />
+          <StatBox
+            icon={FilterXIcon}
+            label="Vetoed products"
+            value={ss?.vetoed ?? 0}
+            detail="Excluded products by canonical category"
+            color="text-zinc-500"
             isLoading={isLoading}
           />
           <StatBox
@@ -214,19 +222,29 @@ export function StoreBreakdownSection({ data, isLoading }: { data?: AnalyticsSna
                   </div>
                   <div className="flex flex-col items-start gap-2">
                     <Progress value={store.availability_rate} className="h-2" />
-                    <div className="flex gap-5 text-xs">
-                      <span className="flex items-center gap-1">
-                        <span className="text-muted-foreground">Available</span>
-                        <span className="font-medium">
-                          {store.available.toLocaleString()} ({store.availability_rate}%)
+                    <div className="flex w-full flex-wrap justify-between gap-x-5 gap-y-1 text-xs">
+                      <div className="flex items-start gap-2">
+                        <span className="flex items-center gap-1">
+                          <span className="text-muted-foreground">Available</span>
+                          <span className="font-medium">
+                            {store.available.toLocaleString()} ({store.availability_rate}%)
+                          </span>
                         </span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-muted-foreground">Unavailable</span>
-                        <span className="font-medium">
-                          {store.unavailable.toLocaleString()} ({(100 - store.availability_rate).toFixed(1)}%)
+
+                        <span className="flex items-center gap-1">
+                          <span className="text-muted-foreground">Unavailable</span>
+                          <span className="font-medium">
+                            {store.unavailable.toLocaleString()} ({(100 - store.availability_rate).toFixed(1)}%)
+                          </span>
                         </span>
-                      </span>
+                      </div>
+
+                      {(store.vetoed ?? 0) > 0 && (
+                        <span className="text-warning flex items-center gap-1">
+                          <span className="text-muted-foreground">Vetoed</span>
+                          <span className="font-medium">{store.vetoed.toLocaleString()}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

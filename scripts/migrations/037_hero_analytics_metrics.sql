@@ -60,6 +60,16 @@ BEGIN
     FROM store_products
   ),
 
+  vetoed_counts AS (
+    SELECT origin_id, count(*)::INT AS vetoed
+    FROM vetoed_store_skus
+    GROUP BY origin_id
+  ),
+
+  vetoed_total AS (
+    SELECT coalesce(sum(vetoed), 0)::INT AS total_vetoed FROM vetoed_counts
+  ),
+
   per_store AS (
     SELECT jsonb_agg(
       jsonb_build_object(
@@ -69,6 +79,7 @@ BEGIN
         'available', sub.available,
         'unavailable', sub.unavailable,
         'on_discount', sub.on_discount,
+        'vetoed', coalesce(vc.vetoed, 0),
         'availability_rate', CASE WHEN sub.total > 0
           THEN round((sub.available::numeric / sub.total) * 100, 1) ELSE 0 END
       ) ORDER BY sub.origin_id
@@ -86,6 +97,7 @@ BEGIN
       WHERE sp.origin_id IS NOT NULL
       GROUP BY sp.origin_id, s.name
     ) sub
+    LEFT JOIN vetoed_counts vc ON vc.origin_id = sub.origin_id
   ),
 
   price_totals AS (
@@ -250,6 +262,7 @@ BEGIN
       'available', c.available,
       'unavailable', c.unavailable,
       'never_scraped', c.never_scraped,
+      'vetoed', vt.total_vetoed,
       'availability_rate', CASE WHEN c.total > 0
         THEN round((c.available::numeric / c.total) * 100, 1) ELSE 0 END
     ),
@@ -333,6 +346,7 @@ BEGIN
   ) INTO v_data
   FROM sp_counts c
   CROSS JOIN per_store ps
+  CROSS JOIN vetoed_total vt
   CROSS JOIN price_totals pt
   CROSS JOIN price_changes pc
   CROSS JOIN runs_24h r24
