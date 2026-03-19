@@ -73,7 +73,7 @@ export function AuchanSvg(props: React.SVGProps<SVGSVGElement>) {
 
 export function PingoDoceSvg(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1088 246" width="100%" height="auto" fill="none" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1088 246" fill="none" {...props}>
       <g clipPath="url(#a)">
         <path
           fill="#75DE20"

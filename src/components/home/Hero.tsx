@@ -20,7 +20,7 @@ async function HeroContent() {
     <div className="z-20 mx-auto w-full max-w-7xl px-4 lg:px-8">
       {/* ─── Mobile layout ─── */}
       <div className="lg:hidden">
-        <div className="flex flex-col items-center gap-3 pt-6 pb-4">
+        <div className="flex flex-col items-center pt-6 pb-6">
           <h1
             className={cn(
               "animate-fade-in",
@@ -29,20 +29,22 @@ async function HeroContent() {
               "w-full max-w-full text-center text-3xl leading-[1.1] font-bold tracking-tight opacity-0 [--animation-delay:100ms] sm:w-full sm:max-w-full sm:text-4xl",
             )}
           >
-            Price tracking for Portuguese supermarkets
+            Price tracking for
+            <br />
+            Portuguese supermarkets
           </h1>
 
-          <p className="text-muted-foreground animate-fade-in text-center text-sm opacity-0 [--animation-delay:150ms]">
+          <p className="text-muted-foreground animate-fade-in my-2.5 text-center text-sm opacity-0 [--animation-delay:150ms]">
             Turn price swings into savings.{" "}
             <strong className="text-primary-900 dark:text-primary-300/70 font-semibold">Money in your pocket</strong>.
           </p>
 
-          <div className="animate-fade-in mb-3 w-full max-w-md opacity-0 [--animation-delay:200ms] md:mb-0">
-            <HomeSearchBar totalProducts={stats.totalProducts} />
+          <div className="animate-fade-in mb-4 w-full opacity-0 [--animation-delay:250ms]">
+            <MarketPulseCard stats={stats} />
           </div>
 
-          <div className="animate-fade-in w-full opacity-0 [--animation-delay:250ms]">
-            <MarketPulseCard stats={stats} />
+          <div className="animate-fade-in w-full max-w-md opacity-0 [--animation-delay:200ms] md:mb-0">
+            <HomeSearchBar totalProducts={stats.totalProducts} />
           </div>
         </div>
 

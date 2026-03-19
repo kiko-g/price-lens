@@ -5,14 +5,20 @@ import { generateProductPath } from "@/lib/business/product"
 import type { StoreProduct } from "@/types"
 
 export const HERO_PRODUCT_IDS = [
+  // CONTINENTE
   16258, // Monster White (Continente)
   5913, // Starbucks Latte (Continente)
   4455, // Chocapic cereal (Continente)
   20406, // Yopro Danone (Continente)
+  // AUCHAN
   97842, // Coca Cola Zero 1L (Auchan)
   95119, // Ice Tea Lipton Pessego Zero 2L (Auchan)
   95008, // Nectar Compal Classico Tutti Frutti 1L (Auchan)
   79981, // Prozis Peanut Butter (Auchan)
+  // PINGO DOCE
+  2266777, // OIKOS Grego Pessego (Pingo Doce)
+  2267052, // Haagen dazs chocolate belga (Pingo Doce)
+  165722, // Ruffles Presunto (Pingo Doce)
 ]
 
 export type HeroProduct = {

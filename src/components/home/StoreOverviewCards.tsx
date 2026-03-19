@@ -29,7 +29,7 @@ export function StoreOverviewCards({
             key={store.originId}
             href={`/products?origin=${store.originId}`}
             className={cn(
-              "group hover:bg-foreground/5 dark:hover:bg-foreground/10 bg-foreground/1 dark:bg-foreground/1 flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-3 text-center transition-colors",
+              "group hover:bg-foreground/5 dark:hover:bg-foreground/10 flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl bg-transparent px-3 py-3 text-center transition-colors dark:bg-transparent",
             )}
           >
             <SupermarketChainBadge originId={store.originId} variant="logo" className="h-4 w-auto" />

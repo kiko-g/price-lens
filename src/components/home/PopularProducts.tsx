@@ -118,20 +118,20 @@ export function PopularProducts({ products, className }: { products: HeroProduct
   const row2 = products.slice(mid)
 
   return (
-    <div className={cn("flex h-full flex-col", className)}>
-      <p className="text-muted-foreground mb-3 text-center text-[11px] font-semibold tracking-widest uppercase md:text-left">
+    <div className={cn("flex h-full flex-col gap-2 md:gap-1", className)}>
+      <p className="text-muted-foreground order-2 mb-3 text-center text-[11px] font-semibold tracking-widest uppercase md:order-1 md:text-left">
         Popular products
       </p>
 
-      <div className="relative">
+      <div className="relative order-1 md:order-2">
         {/* Mobile: compact marquee */}
         <div className="flex flex-col gap-2 lg:hidden">
-          <Marquee className="p-0 [--duration:80s] [--gap:0.75rem]">
+          <Marquee className="p-0 [--duration:70s] [--gap:0.75rem]">
             {row1.map((product) => (
               <ProductCard key={product.id} product={product} compact />
             ))}
           </Marquee>
-          <Marquee reverse className="p-0 [--duration:80s] [--gap:0.75rem]">
+          <Marquee reverse className="p-0 [--duration:70s] [--gap:0.75rem]">
             {row2.map((product) => (
               <ProductCard key={product.id} product={product} compact />
             ))}
@@ -153,8 +153,8 @@ export function PopularProducts({ products, className }: { products: HeroProduct
         </div>
 
         {/* Edge fades */}
-        <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r lg:w-16" />
-        <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l lg:w-16" />
+        <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r lg:w-16" />
+        <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l lg:w-16" />
       </div>
     </div>
   )

@@ -93,7 +93,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
   const supermarketName = getSupermarketChainName(sp?.origin_id)
   const supermarketBadge = (
-    <span className="flex w-fit items-center justify-center rounded-full bg-white px-1.5 py-0.5">
+    <span className="flex w-fit items-center justify-center rounded-full bg-white px-1.5 py-0.5 [--background:var(--color-white)] [--foreground:var(--base-800)]">
       <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
     </span>
   )
@@ -237,7 +237,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           <Badge
             size="xs"
             variant="outline-white"
-            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-50"
+            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 group-hover:opacity-50 [--background:var(--color-white)] [--foreground:var(--base-800)]"
           >
             <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
           </Badge>

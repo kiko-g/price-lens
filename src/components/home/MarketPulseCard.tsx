@@ -17,6 +17,7 @@ type PulseStat = {
   icon: typeof TrendingDownIcon
   value: string
   label: string
+  shortLabel: string
   href: string
   iconColor: string
   bgTint: string
@@ -28,17 +29,19 @@ function buildPulseStats(stats: HomeStats): PulseStat[] {
       icon: TrendingDownIcon,
       value: formatNumber(stats.priceDropsToday),
       label: "price drops today",
+      shortLabel: "price drops",
       href: "/products?sort=price-drop",
       iconColor: "text-primary-800 dark:text-primary-300",
-      bgTint: "bg-primary/4 dark:bg-primary-400/6 md:bg-primary/6 md:dark:bg-primary-400/5",
+      bgTint: "bg-primary/4 dark:bg-primary-400/6 md:bg-primary/8 md:dark:bg-primary-400/10",
     },
     {
       icon: TagIcon,
       value: formatNumber(stats.productsOnDiscount),
       label: "on discount now",
+      shortLabel: "on discount",
       href: "/products?discounted=true&sort=best-discount",
       iconColor: "text-secondary-800 dark:text-secondary-300",
-      bgTint: "bg-secondary/4 dark:bg-secondary/6 md:bg-secondary/6 md:dark:bg-secondary/5",
+      bgTint: "bg-secondary/4 dark:bg-secondary/6 md:bg-secondary/8 md:dark:bg-secondary/10",
     },
   ]
 
@@ -47,9 +50,10 @@ function buildPulseStats(stats: HomeStats): PulseStat[] {
       icon: WalletIcon,
       value: formatEuros(stats.totalDiscountSavingsEuros),
       label: "in savings on sale",
+      shortLabel: "savings",
       href: "/products?discounted=true&sort=best-discount",
       iconColor: "dark:text-pink-200 text-pink-800",
-      bgTint: "bg-pink-400/4 dark:bg-pink-400/6 md:bg-pink-400/6 md:dark:bg-pink-400/5",
+      bgTint: "bg-pink-400/4 dark:bg-pink-400/6 md:bg-pink-400/8 md:dark:bg-pink-400/10",
     })
   }
 
@@ -81,18 +85,11 @@ export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats;
   }
 
   return (
-    <div className="flex flex-row justify-center gap-3 self-center md:justify-start">
+    <div className="flex flex-row items-start justify-center gap-6 self-center md:justify-start">
       {items.map((item) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          className={cn(
-            "group active:bg-accent/40 flex flex-col justify-center gap-0 rounded-xl px-3 py-2 transition-colors",
-            item.bgTint,
-          )}
-        >
-          <span className="text-muted-foreground text-[11px]">{item.label}</span>
-          <span className="text-center text-xl font-bold tracking-tight tabular-nums md:text-left">{item.value}</span>
+        <Link key={item.label} href={item.href} className="group flex flex-col items-center gap-0 active:opacity-70">
+          <span className="text-lg font-bold tracking-tight tabular-nums">{item.value}</span>
+          <span className="text-muted-foreground text-[11px] leading-none">{item.shortLabel}</span>
         </Link>
       ))}
     </div>
