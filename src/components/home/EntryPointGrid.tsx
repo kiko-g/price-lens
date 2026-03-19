@@ -52,7 +52,7 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
             href={entry.href}
             className="text-foreground hover:bg-accent bg-accent/50 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors"
           >
-            <entry.icon className="text-primary-900 dark:text-primary/60 size-3.5" />
+            <entry.icon className="text-primary-900 dark:text-primary-200/60 size-3.5" />
             <span>{entry.label}</span>
           </Link>
         ))}
@@ -66,9 +66,9 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
         <Link
           key={entry.label}
           href={entry.href}
-          className="active:bg-accent bg-accent/50 flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors"
+          className="active:bg-accent bg-accent/50 flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors"
         >
-          <entry.icon className="text-primary-900 dark:text-primary/60 size-4 shrink-0" />
+          <entry.icon className="text-primary-900 dark:text-primary-200/60 size-4 shrink-0" />
           <div className="ml-0.5 flex min-w-0 flex-col items-start">
             <span className="text-sm font-semibold tracking-tight">{entry.label}</span>
             <span className="text-muted-foreground text-[11px]">{entry.description}</span>

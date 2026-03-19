@@ -87,7 +87,7 @@ export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats;
           key={item.label}
           href={item.href}
           className={cn(
-            "group active:bg-accent/40 flex flex-col justify-center gap-1 rounded-xl p-3 transition-colors",
+            "group active:bg-accent/40 flex flex-col justify-center gap-0 rounded-xl px-3 py-2 transition-colors",
             item.bgTint,
           )}
         >

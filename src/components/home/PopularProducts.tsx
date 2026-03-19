@@ -119,7 +119,9 @@ export function PopularProducts({ products, className }: { products: HeroProduct
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-widest uppercase">Popular products</p>
+      <p className="text-muted-foreground mb-3 text-center text-[11px] font-semibold tracking-widest uppercase md:text-left">
+        Popular products
+      </p>
 
       <div className="relative">
         {/* Mobile: compact marquee */}

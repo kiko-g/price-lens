@@ -20,7 +20,7 @@ async function HeroContent() {
     <div className="z-20 mx-auto w-full max-w-7xl px-4 lg:px-8">
       {/* ─── Mobile layout ─── */}
       <div className="lg:hidden">
-        <div className="flex flex-col items-center gap-3 pt-10 pb-6">
+        <div className="flex flex-col items-center gap-3 pt-6 pb-4">
           <h1
             className={cn(
               "animate-fade-in",
@@ -33,10 +33,8 @@ async function HeroContent() {
           </h1>
 
           <p className="text-muted-foreground animate-fade-in text-center text-sm opacity-0 [--animation-delay:150ms]">
-            Turn supermarket swings into savings.
-            <br />
-            More{" "}
-            <strong className="text-primary-900 dark:text-primary-300/70 font-semibold">money in your pocket</strong>.
+            Turn price swings into savings.{" "}
+            <strong className="text-primary-900 dark:text-primary-300/70 font-semibold">Money in your pocket</strong>.
           </p>
 
           <div className="animate-fade-in mb-3 w-full max-w-md opacity-0 [--animation-delay:200ms] md:mb-0">
@@ -52,15 +50,18 @@ async function HeroContent() {
           <div className="animate-fade-in opacity-0 [--animation-delay:300ms]">
             <EntryPointGrid />
           </div>
+
           <div className="animate-fade-in opacity-0 [--animation-delay:350ms]">
             <ChainQuickFilters perStore={stats.perStore} />
           </div>
+
           <FreshnessBadge
             computedAt={stats.computedAt}
-            className="animate-fade-in justify-center opacity-0 [--animation-delay:400ms]"
+            className="animate-fade-in -mt-2 justify-center opacity-0 [--animation-delay:400ms] md:mt-0"
           />
+
           {heroProducts.length > 0 && (
-            <div className="animate-fade-in opacity-0 [--animation-delay:450ms]">
+            <div className="animate-fade-in -mt-2 opacity-0 [--animation-delay:450ms] md:mt-0">
               <PopularProducts products={heroProducts} />
             </div>
           )}

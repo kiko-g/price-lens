@@ -7,7 +7,15 @@ import { useTheme } from "next-themes"
 import type { NavigationItem } from "@/types"
 import { GithubIcon } from "@/components/icons"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
-import { ContrastIcon, MenuIcon, ScanBarcodeIcon, SearchIcon } from "lucide-react"
+import {
+  ContrastIcon,
+  MenuIcon,
+  ScanBarcodeIcon,
+  SearchIcon,
+  TrendingDownIcon,
+  TicketPercentIcon,
+  AppleIcon,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useUser } from "@/hooks/useUser"
@@ -26,6 +34,12 @@ import { SearchContainer } from "@/components/layout/search"
 import { BarcodeScanButton } from "@/components/scan"
 
 const primaryNavKeys = new Set(["/", "/products", "/favorites"])
+
+const productQuickFilters = [
+  { label: "Price Drops", href: "/products?sort=price-drop", icon: TrendingDownIcon },
+  { label: "Discounts", href: "/products?discounted=true&sort=best-discount", icon: TicketPercentIcon },
+  { label: "Essential", href: "/products?priority=5", icon: AppleIcon },
+] as const
 
 export function NavigationSheet() {
   const pathname = usePathname()
@@ -134,7 +148,24 @@ export function NavigationSheet() {
           <nav className="flex flex-col gap-4 py-3">
             <NavSection label="Navigation">
               {primaryNav.map((item) => (
-                <NavEntry key={item.href} item={item} isActive={pathname === item.href} onClose={handleClose} />
+                <div key={item.href}>
+                  <NavEntry item={item} isActive={pathname === item.href} onClose={handleClose} />
+                  {item.href === "/products" && (
+                    <div className="ml-2 flex flex-wrap gap-1.5 pt-0.5 pb-2">
+                      {productQuickFilters.map((chip) => (
+                        <Link
+                          key={chip.label}
+                          href={chip.href}
+                          onClick={handleClose}
+                          className="bg-secondary/5 dark:bg-secondary/10 hover:bg-accent flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors"
+                        >
+                          <chip.icon className="text-muted-foreground size-3" />
+                          {chip.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </NavSection>
 
@@ -196,11 +227,11 @@ function NavEntry({ item, isActive, onClose }: { item: NavigationItem; isActive:
       onClick={onClose}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors",
-        isActive ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-accent",
+        isActive ? "bg-accent font-medium" : "text-foreground hover:bg-accent/60",
       )}
     >
       {item.icon && (
-        <item.icon className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+        <item.icon className={cn("size-4 shrink-0", isActive ? "text-foreground" : "text-muted-foreground")} />
       )}
       <span>{item.label}</span>
     </Link>
