@@ -18,13 +18,11 @@ import { SupermarketChainBadge } from "@/components/products/SupermarketChainBad
 import { ComparisonChart } from "@/components/products/ComparisonChart"
 
 import {
-  ArrowUpRightIcon,
   TrophyIcon,
   TagIcon,
   Loader2Icon,
   LinkIcon,
   TrendingDownIcon,
-  BarChart3Icon,
   ShieldCheckIcon,
 } from "lucide-react"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
@@ -129,57 +127,54 @@ function CompareCard({
   const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
 
   return (
-    <div
+    <Link
+      href={generateProductPath(product)}
       className={cn(
-        "bg-card relative flex flex-col overflow-hidden rounded-xl border",
+        "bg-card group relative flex flex-col overflow-hidden rounded-xl border transition-colors",
+        "hover:border-foreground/20 dark:hover:border-foreground/30",
         isCheapest && "border-success/30 bg-success/5 dark:border-success/40",
       )}
     >
-      <div className="flex items-start gap-2 p-2.5">
-        <Link
-          href={generateProductPath(product)}
-          className="relative size-20 shrink-0 overflow-hidden rounded-lg border bg-white"
-        >
+      {isCheapest && (
+        <Badge variant="success" size="xs" className="absolute top-0 right-0 z-10 rounded-none rounded-bl-md">
+          <TrophyIcon className="h-3 w-3" />
+          Best
+        </Badge>
+      )}
+      {product.available === false && (
+        <Badge variant="destructive" size="xs" className="absolute top-0 right-0 z-10 rounded-none rounded-bl-md">
+          Unavailable
+        </Badge>
+      )}
+
+      <div className="flex items-start gap-3 p-3">
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border bg-white sm:size-20">
           {product.image ? (
             <Image
               src={resolveImageUrl(product.image, 500)}
               alt={product.name || "Product"}
               fill
               className="object-contain p-1"
-              sizes="48px"
+              sizes="80px"
             />
           ) : (
             <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center text-[10px]">
               N/A
             </div>
           )}
-        </Link>
+        </div>
 
-        <div className="flex flex-1 flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center rounded-full border bg-white px-1.5 py-0.5">
-              <SupermarketChainBadge originId={product.origin_id} variant="logo" />
-            </span>
+        <div className="flex flex-1 flex-col gap-1.5">
+          <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
 
-            {isCheapest && (
-              <Badge variant="success" size="xs" className="absolute top-0 right-0 rounded-none rounded-bl-md">
-                <TrophyIcon className="h-3 w-3" />
-                Best
-              </Badge>
-            )}
-            {product.available === false && (
-              <Badge variant="destructive" size="xs">
-                Out
-              </Badge>
-            )}
-          </div>
-
-          {product.name && <p className="text-muted-foreground line-clamp-1 text-xs">{product.name}</p>}
+          {product.name && (
+            <p className="text-muted-foreground line-clamp-1 text-xs leading-tight">{product.name}</p>
+          )}
 
           <div className="flex items-baseline gap-2">
             {hasDiscount ? (
               <>
-                <span className={cn("text-lg font-bold", isCheapest && "text-success")}>
+                <span className={cn("text-xl font-bold", isCheapest && "text-success")}>
                   {product.price?.toFixed(2)}€
                 </span>
                 <span className="text-muted-foreground text-sm line-through">{product.price_recommended}€</span>
@@ -190,9 +185,11 @@ function CompareCard({
                 )}
               </>
             ) : product.price ? (
-              <span className="text-lg font-bold">{product.price?.toFixed(2)}€</span>
+              <span className={cn("text-xl font-bold", isCheapest && "text-success")}>
+                {product.price?.toFixed(2)}€
+              </span>
             ) : (
-              <span className="text-muted-foreground text-lg font-bold">--.--€</span>
+              <span className="text-muted-foreground text-xl font-bold">--.--€</span>
             )}
           </div>
 
@@ -211,47 +208,23 @@ function CompareCard({
             )}
           </div>
 
-          {/* Deal insight badges */}
           <div className="flex flex-wrap items-center gap-1">
             {insights.isHistoricalLow && (
               <Badge variant="success" size="xs" className="gap-0.5">
                 <TrendingDownIcon className="h-2.5 w-2.5" />
-                Historical low
-              </Badge>
-            )}
-            {insights.belowAveragePct !== null && insights.belowAveragePct > 0 && (
-              <Badge variant="success" size="xs" className="gap-0.5">
-                <BarChart3Icon className="h-2.5 w-2.5" />
-                {insights.belowAveragePct}% below avg
+                Lowest ever
               </Badge>
             )}
             {insights.stableDays !== null && (
               <Badge variant="secondary" size="xs" className="gap-0.5">
                 <ShieldCheckIcon className="h-2.5 w-2.5" />
-                Stable {insights.stableDays}d
+                Stable {insights.stableDays} days
               </Badge>
             )}
           </div>
         </div>
       </div>
-
-      <div
-        className={cn(
-          "flex items-center justify-end gap-2 border-t p-2",
-          isCheapest && "border-success/30 dark:border-success/40",
-        )}
-      >
-        <Button asChild variant="outline" size="sm" className="h-8 bg-white text-xs dark:bg-white/10">
-          <Link href={generateProductPath(product)}>View details</Link>
-        </Button>
-
-        <Button asChild variant="outline" size="icon-sm" className="h-8 w-8">
-          <Link href={product.url || "#"} target="_blank" rel="noopener noreferrer" title="Open in store">
-            <ArrowUpRightIcon className="h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
-    </div>
+    </Link>
   )
 }
 
@@ -318,13 +291,13 @@ function ProductInfoSection({ barcode }: { barcode: string }) {
 
   return (
     <div className="bg-card rounded-lg border">
-      <div className="px-3 py-2">
+      <div className="border-b px-3 py-2.5">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
           <OpenFoodFactsIcon className="h-3.5 w-3.5" />
-          Product information
+          Product Information
         </h3>
       </div>
-      <div className="flex flex-wrap items-center gap-4 border-t px-3 py-3">
+      <div className="flex flex-wrap items-center gap-4 px-3 py-3">
         {offData.imageUrl && (
           <Image
             src={offData.imageUrl}
@@ -386,47 +359,75 @@ function StoreComparisonTable({
 
   return (
     <div className="bg-card overflow-hidden rounded-lg border">
-      <div className="border-b px-3 py-2">
+      <div className="border-b px-3 py-2.5">
         <h3 className="text-sm font-semibold">Price Comparison</h3>
       </div>
-      <div className="divide-y">
-        {rows.map(({ product, historicalLow, isCheapest }) => (
-          <div key={product.id} className={cn("flex items-center gap-3 px-3 py-2", isCheapest && "bg-success/5")}>
-            <div className="flex w-16 shrink-0 items-center justify-center">
-              <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
-            </div>
 
-            <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-0.5 text-xs sm:grid-cols-4">
-              <div>
-                <span className="text-muted-foreground block text-[10px] uppercase">Price</span>
-                <span className={cn("font-semibold", isCheapest && "text-success")}>
-                  {product.price ? `${product.price.toFixed(2)}€` : "N/A"}
-                </span>
-                {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
-              </div>
-
-              <div>
-                <span className="text-muted-foreground block text-[10px] uppercase">Recommended</span>
-                <span
-                  className={cn(product.price_recommended !== product.price && "text-muted-foreground line-through")}
-                >
-                  {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "N/A"}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-muted-foreground block text-[10px] uppercase">Per unit</span>
-                <span>
+      {/* Desktop table */}
+      <div className="hidden sm:block">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-muted/50 border-b">
+              <th className="px-3 py-2 text-left text-xs font-medium">Store</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">Price</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">Recommended</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">Per unit</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">Lowest</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {rows.map(({ product, historicalLow, isCheapest }) => (
+              <tr key={product.id} className={cn(isCheapest && "bg-success/5")}>
+                <td className="px-3 py-2.5">
+                  <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
+                </td>
+                <td className="px-3 py-2.5 text-right tabular-nums">
+                  <span className={cn("font-semibold", isCheapest && "text-success")}>
+                    {product.price ? `${product.price.toFixed(2)}€` : "—"}
+                  </span>
+                  {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
+                </td>
+                <td className={cn("px-3 py-2.5 text-right tabular-nums", product.price_recommended !== product.price && "text-muted-foreground line-through")}>
+                  {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "—"}
+                </td>
+                <td className="px-3 py-2.5 text-right tabular-nums">
                   {product.price_per_major_unit && product.major_unit
                     ? `${product.price_per_major_unit}€${product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}`
-                    : "N/A"}
-                </span>
-              </div>
+                    : "—"}
+                </td>
+                <td className="px-3 py-2.5 text-right tabular-nums">
+                  {historicalLow !== null ? `${historicalLow.toFixed(2)}€` : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
+      {/* Mobile list */}
+      <div className="divide-y sm:hidden">
+        {rows.map(({ product, historicalLow, isCheapest }) => (
+          <div key={product.id} className={cn("flex items-center gap-3 px-3 py-3", isCheapest && "bg-success/5")}>
+            <div className="w-14 shrink-0">
+              <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
+            </div>
+            <div className="flex flex-1 items-center justify-between gap-2">
               <div>
-                <span className="text-muted-foreground block text-[10px] uppercase">Lowest recorded</span>
-                <span>{historicalLow !== null ? `${historicalLow.toFixed(2)}€` : "N/A"}</span>
+                <span className={cn("text-base font-semibold tabular-nums", isCheapest && "text-success")}>
+                  {product.price ? `${product.price.toFixed(2)}€` : "—"}
+                </span>
+                {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
+                {product.price_per_major_unit && product.major_unit && (
+                  <span className="text-muted-foreground ml-2 text-xs tabular-nums">
+                    {product.price_per_major_unit}€{product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}
+                  </span>
+                )}
               </div>
+              {historicalLow !== null && (
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  Low: {historicalLow.toFixed(2)}€
+                </span>
+              )}
             </div>
           </div>
         ))}
@@ -506,10 +507,9 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
       {/* Store Cards Grid */}
       <div
         className={cn(
-          "mb-4 grid gap-3",
-          "grid grid-cols-1 gap-3 sm:grid-cols-2",
-          products.length <= 3 && "md:grid-cols-3",
-          products.length >= 4 && "md:grid-cols-4",
+          "mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2",
+          products.length === 2 && "md:grid-cols-2",
+          products.length >= 3 && "md:grid-cols-3",
         )}
       >
         {products.map((product) => {
@@ -536,12 +536,12 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
         })}
       </div>
 
-      {/* Range Selector */}
-      <div className="bg-muted/20 mb-4 flex items-center gap-2 rounded-lg border p-2">
+      {/* Price History section */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-semibold">Price History</h2>
         <SharedRangeSelector selectedRange={selectedRange} onRangeChange={setSelectedRange} />
       </div>
 
-      {/* Chart + Price Comparison Table: side by side on desktop */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
         <div className="xl:col-span-3">
           <ComparisonChart productsWithPrices={productsWithPrices} selectedRange={selectedRange} />

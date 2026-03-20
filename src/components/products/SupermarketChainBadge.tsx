@@ -72,7 +72,7 @@ export function SupermarketChainBadge({ originId, variant = "logo", className }:
       )
     case "logoSmall":
       if (info.SvgLogo) {
-        return <info.SvgLogo aria-label={info.name} className={cn("!h-3.5 !w-auto md:!h-3.5 md:!w-min", className)} />
+        return <info.SvgLogo aria-label={info.name} className={cn("h-3.5! w-auto! md:h-3.5! md:w-min", className)} />
       }
       return (
         <Image

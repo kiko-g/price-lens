@@ -49,22 +49,23 @@ interface NutriScoreBadgeProps {
   className?: string
   /** Controls badge scale. Default is 1. */
   size?: number
+  /** When false, renders with a rounded border and inner padding (official logo style). Default true. */
+  compact?: boolean
 }
 
-export function NutriScoreBadge({ grade, showNewCalculation = true, className, size = 1 }: NutriScoreBadgeProps) {
-  return (
-    <div
-      className={cn("inline-flex shrink-0 flex-col items-center", className)}
-      role="img"
-      aria-label={`Nutri-Score ${grade}`}
-      style={{ fontSize: `${size}rem` }}
-    >
-      {/* NUTRI-SCORE header */}
-      <span className="mb-[0.2em] text-[1.05em] leading-none font-extrabold tracking-wide" style={{ color: "#2d2d2d" }}>
+export function NutriScoreBadge({
+  grade,
+  showNewCalculation = true,
+  className,
+  size = 1,
+  compact = true,
+}: NutriScoreBadgeProps) {
+  const content = (
+    <>
+      <span className="mb-[0.15em] text-[1em] leading-none font-extrabold tracking-wider text-[#7b7b7b] dark:text-neutral-300">
         NUTRI-SCORE
       </span>
 
-      {/* Grade pills row */}
       <div className="relative flex items-center">
         {GRADES.map((g) => {
           const isActive = g === grade
@@ -74,16 +75,17 @@ export function NutriScoreBadge({ grade, showNewCalculation = true, className, s
             return (
               <div
                 key={g}
-                className="relative z-10 flex items-center justify-center rounded-full font-bold text-white shadow-md"
+                className="relative z-10 flex items-center justify-center font-bold text-white"
                 style={{
                   backgroundColor: color,
-                  width: "2.6em",
-                  height: "2.6em",
-                  fontSize: "1.1em",
-                  margin: "0 -0.1em",
+                  width: "2.2em",
+                  height: "2.8em",
+                  borderRadius: "1.1em",
+                  margin: "0 -0.05em",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
                 }}
               >
-                <span style={{ fontSize: "1.3em", lineHeight: 1 }}>{g}</span>
+                <span style={{ fontSize: "1.35em", lineHeight: 1 }}>{g}</span>
               </div>
             )
           }
@@ -94,10 +96,9 @@ export function NutriScoreBadge({ grade, showNewCalculation = true, className, s
               className="flex items-center justify-center font-bold"
               style={{
                 backgroundColor: color,
-                width: "2em",
-                height: "2em",
-                fontSize: "1em",
-                color: "rgba(255,255,255,0.65)",
+                width: "1.85em",
+                height: "1.85em",
+                color: "rgba(255,255,255,0.55)",
                 borderRadius:
                   g === "A" && grade !== "A"
                     ? "0.25em 0 0 0.25em"
@@ -106,13 +107,12 @@ export function NutriScoreBadge({ grade, showNewCalculation = true, className, s
                       : "0",
               }}
             >
-              <span style={{ fontSize: "0.95em", lineHeight: 1 }}>{g}</span>
+              <span style={{ fontSize: "0.9em", lineHeight: 1 }}>{g}</span>
             </div>
           )
         })}
       </div>
 
-      {/* NEW CALCULATION footer */}
       {showNewCalculation && (
         <div
           className="mt-[-0.15em] flex items-center justify-center rounded-b-lg"
@@ -133,6 +133,22 @@ export function NutriScoreBadge({ grade, showNewCalculation = true, className, s
           </span>
         </div>
       )}
+    </>
+  )
+
+  return (
+    <div
+      className={cn(
+        "inline-flex shrink-0 flex-col items-center",
+        !compact &&
+          "border-border bg-foreground/2 dark:border-border dark:bg-foreground/5 rounded-2xl border-2 px-[0.8em] pt-[0.65em] pb-[0.55em]",
+        className,
+      )}
+      role="img"
+      aria-label={`Nutri-Score ${grade}`}
+      style={{ fontSize: `${size}rem` }}
+    >
+      {content}
     </div>
   )
 }
@@ -140,13 +156,13 @@ export function NutriScoreBadge({ grade, showNewCalculation = true, className, s
 // ---------------------------------------------------------------------------
 // Full section component (badge + label + description inside a tinted card)
 // ---------------------------------------------------------------------------
-interface NutriScoreProps {
+interface NutriScoreCalloutProps {
   grade: NutriScoreGrade
   showNewCalculation?: boolean
   className?: string
 }
 
-export function NutriScore({ grade, showNewCalculation = true, className }: NutriScoreProps) {
+export function NutriScoreCallout({ grade, showNewCalculation = true, className }: NutriScoreCalloutProps) {
   const info = GRADE_DESCRIPTIONS[grade]
   const color = GRADE_COLORS[grade]
 

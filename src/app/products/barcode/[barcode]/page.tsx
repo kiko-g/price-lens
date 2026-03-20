@@ -13,14 +13,14 @@ import { lookupBarcode } from "@/lib/canonical/open-food-facts"
 import { findRelatedByOffProduct } from "@/lib/queries/product-matching"
 
 import { Button } from "@/components/ui/button"
+import { Callout } from "@/components/ui/callout"
 import { Skeleton } from "@/components/ui/skeleton"
-import { BackButton } from "@/components/ui/combo/back-button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { BarcodeCompare } from "@/components/products/BarcodeCompare"
 import { OffProductPage } from "@/components/products/OffProductPage"
 
-import { HomeIcon, SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, Loader2Icon } from "lucide-react"
+import { SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, Loader2Icon, BrainIcon } from "lucide-react"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 
 interface PageProps {
@@ -143,38 +143,29 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
           className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
         />
 
-        <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
+        <div className="flex w-full flex-col items-center justify-center gap-5 px-4">
           <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
             <WifiOffIcon className="text-muted-foreground h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Lookup unavailable</h1>
-          <p className="text-muted-foreground max-w-sm text-center">
-            We couldn&apos;t find barcode <span className="font-mono font-medium">{barcode}</span> in our stores, and
-            the external product database is temporarily unreachable.
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Lookup unavailable</h1>
+            <p className="text-muted-foreground max-w-sm text-center text-sm">
+              Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our tracked stores, and the
+              external database is temporarily unreachable.
+            </p>
+          </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button asChild variant="outline">
+            <Button asChild>
               <a href={`/products/barcode/${encodeURIComponent(barcode)}`}>
                 <RefreshCwIcon className="h-4 w-4" />
                 Try again
               </a>
             </Button>
-
             <Button asChild variant="outline">
               <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
                 <OpenFoodFactsIcon className="h-4 w-4" />
-                Check Open Food Facts
+                Open Food Facts
                 <ExternalLinkIcon className="h-3 w-3" />
-              </a>
-            </Button>
-            <Button asChild variant="outline">
-              <a
-                href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLinkIcon className="h-4 w-4" />
-                Search on Google
               </a>
             </Button>
           </div>
@@ -191,15 +182,18 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
         className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
       />
 
-      <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
-        <Barcode value={barcode} height={50} width={2} className="mb-2" />
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
-        <p className="text-muted-foreground max-w-sm text-center">
-          We couldn&apos;t find any product with barcode <span className="font-mono font-medium">{barcode}</span> in our
-          stores or external databases.
-        </p>
+      <div className="flex w-full flex-col items-center justify-center gap-5 px-4">
+        <Barcode value={barcode} height={50} width={2} />
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
+          <p className="text-muted-foreground max-w-sm text-center text-sm">
+            Barcode <span className="font-mono font-medium">{barcode}</span> doesn&apos;t match any product in our
+            tracked stores or Open Food Facts. It may be a non-food item, a regional product, or a newly released
+            barcode.
+          </p>
+        </div>
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button asChild variant="outline">
+          <Button asChild>
             <Link href="/products" prefetch={false}>
               <SearchIcon className="h-4 w-4" />
               Browse products
@@ -215,12 +209,6 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
               Search on Google
             </a>
           </Button>
-          <Button asChild>
-            <Link href="/" prefetch={false}>
-              <HomeIcon className="h-4 w-4" />
-              Go home
-            </Link>
-          </Button>
         </div>
       </div>
     </div>
@@ -231,58 +219,70 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
 
 function OffLookupSkeleton({ barcode }: { barcode: string }) {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-4 md:py-6">
-      {/* Breadcrumb skeleton */}
-      <div className="mb-3 flex items-center gap-1">
+    <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col px-4 pt-4 lg:py-4">
+      {/* Loading indicator */}
+      <div className="mb-4 flex w-full max-w-full flex-col gap-2 md:max-w-md">
+        <Callout variant="info" icon={BrainIcon} className="mb-4 w-full">
+          <p className="text-sm">
+            This product was not found in our tracked stores, but we can try to find it elswhere
+          </p>
+        </Callout>
+
+        <div className="flex items-center gap-3 rounded-lg border px-3 py-2.5">
+          <Loader2Icon className="text-primary h-4 w-4 animate-spin" />
+          <p className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm">
+            Looking up <span className="font-mono font-medium">{barcode}</span> on
+            <OpenFoodFactsIcon className="inline h-4 w-4" />
+            <span>Open Food Facts&hellip;</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="mb-2 flex items-center gap-1 md:mb-3">
         <Skeleton className="h-4 w-16" />
         <Skeleton className="h-3 w-3" />
         <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-3 w-3" />
+        <Skeleton className="h-4 w-28" />
       </div>
 
-      {/* Loading indicator */}
-      <div className="mb-6 flex items-center gap-3">
-        <Loader2Icon className="text-primary h-5 w-5 animate-spin" />
-        <p className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm">
-          Looking up <span className="font-mono font-medium">{barcode}</span> on
-          <OpenFoodFactsIcon className="inline h-4 w-4" />
-          Open Food Facts&hellip;
-        </p>
-      </div>
-
-      {/* Hero skeleton matching new layout */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr] md:gap-8">
-        <div className="flex flex-col items-center gap-4">
-          <Skeleton className="aspect-square w-full max-w-[280px] rounded-xl" />
-          <Skeleton className="hidden h-10 w-48 md:block" />
+      {/* Desktop skeleton */}
+      <div className="hidden w-full grid-cols-20 gap-8 md:grid">
+        <div className="col-span-6 flex flex-col items-center">
+          <Skeleton className="aspect-8/7 w-full rounded-lg" />
+          <Skeleton className="mt-4 h-10 w-48" />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-8 w-3/4" />
+        <div className="col-span-14 flex flex-col gap-2">
+          <Skeleton className="h-7 w-20 rounded-full" />
+          <Skeleton className="h-6 w-3/4" />
           <div className="flex gap-2">
             <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-28 rounded-full" />
+            <Skeleton className="h-6 w-32 rounded-full" />
           </div>
-          <Skeleton className="h-16 w-48 rounded-xl" />
-          <div className="flex gap-1.5">
+          <Skeleton className="h-12 w-44 rounded-lg" />
+          <div className="flex flex-wrap gap-1.5">
             <Skeleton className="h-5 w-20 rounded-full" />
             <Skeleton className="h-5 w-28 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-full" />
           </div>
-          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-9 w-32 rounded-md" />
+          <Skeleton className="h-16 max-w-md rounded-lg" />
         </div>
       </div>
 
-      {/* Nutrition skeleton */}
-      <div className="mt-8">
-        <Skeleton className="mb-3 h-6 w-24" />
-        <div className="space-y-0 overflow-hidden rounded-lg border">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between border-b px-4 py-2.5 last:border-b-0">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-16" />
-            </div>
-          ))}
+      {/* Mobile skeleton */}
+      <div className="flex flex-col gap-2.5 md:hidden">
+        <Skeleton className="aspect-6/5 w-full max-w-lg rounded-lg" />
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-6 w-3/4" />
+        <div className="flex gap-2">
+          <Skeleton className="h-6 w-16 rounded-full" />
+          <Skeleton className="h-6 w-32 rounded-full" />
         </div>
+        <Skeleton className="h-12 w-44 rounded-lg" />
+        <Skeleton className="h-9 w-32 rounded-md" />
       </div>
     </div>
   )

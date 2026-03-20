@@ -61,7 +61,7 @@ function CompactStoreCard({
 
       {/* Store Logo */}
       <div className="mt-2">
-        <span className="flex items-center justify-center rounded-full border bg-white px-1.5 py-0.5">
+        <span className="flex items-center justify-center rounded-full border bg-white px-1.5 py-0.5 [--background:var(--color-white)] [--foreground:var(--base-800)]">
           <SupermarketChainBadge originId={product.origin_id} variant="logo" />
         </span>
       </div>

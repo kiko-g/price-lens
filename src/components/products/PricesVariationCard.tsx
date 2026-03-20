@@ -112,7 +112,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
             variant="outline"
             size="sm"
             asChild
-            className="max-w-28 gap-0.5 bg-white text-black hover:bg-white/90 dark:bg-white dark:hover:bg-white/90 [&_svg]:size-3"
+            className="max-w-28 gap-0.5 bg-white text-black hover:bg-white/90 dark:bg-white dark:hover:bg-white/90 [&_svg]:size-3 [--background:var(--color-white)] [--foreground:var(--base-800)]"
           >
             <Link href={onlineUrl} target="_blank">
               <SupermarketChainBadge originId={origin} variant="logoSmall" />

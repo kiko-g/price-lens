@@ -223,46 +223,37 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
           <Legend
             verticalAlign="bottom"
             height={44}
-            content={({ payload }) => {
-              const maxPts = Math.max(...storeKeys.map((s) => s.dataPointCount), 1)
-              return (
-                <div className="flex flex-col flex-wrap items-start justify-start gap-x-6 gap-y-1 pt-2">
-                  {payload?.map((entry, index) => {
-                    const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
-                    const trackingSinceText = storeKey?.trackingSince
-                      ? `since ${formatTrackingSince(storeKey.trackingSince)}`
-                      : ""
-                    const isLimited = storeKey ? storeKey.dataPointCount < maxPts * 0.2 : false
-                    return (
-                      <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
-                        <div className="min-w-20">
-                          {storeKey?.originId && (
-                            <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />
-                          )}
-                        </div>
-                        <svg width="24" height="12" className="shrink-0">
-                          <line
-                            x1="0"
-                            y1="6"
-                            x2="24"
-                            y2="6"
-                            stroke={entry.color}
-                            strokeWidth={2.5}
-                            strokeDasharray={storeKey?.dashPattern || "0"}
-                          />
-                          <circle cx="12" cy="6" r="3" fill={entry.color} />
-                        </svg>
-                        <span className="text-muted-foreground text-xs">
-                          {storeKey?.dataPointCount ?? 0} price points
-                          {trackingSinceText ? `, ${trackingSinceText}` : ""}
-                          {isLimited && " · Few price records"}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            }}
+            content={({ payload }) => (
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-3">
+                {payload?.map((entry, index) => {
+                  const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
+                  const trackingSinceText = storeKey?.trackingSince
+                    ? `since ${formatTrackingSince(storeKey.trackingSince)}`
+                    : ""
+                  return (
+                    <div key={`legend-${index}`} className="flex items-center gap-1.5">
+                      <svg width="20" height="10" className="shrink-0">
+                        <line
+                          x1="0"
+                          y1="5"
+                          x2="20"
+                          y2="5"
+                          stroke={entry.color}
+                          strokeWidth={2.5}
+                          strokeDasharray={storeKey?.dashPattern || "0"}
+                        />
+                      </svg>
+                      {storeKey?.originId && (
+                        <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />
+                      )}
+                      {trackingSinceText && (
+                        <span className="text-muted-foreground text-[11px]">{trackingSinceText}</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           />
           {storeKeys.map(({ key, color, dashPattern }) => (
             <Line
