@@ -17,14 +17,7 @@ import { NutriScoreBadge } from "@/components/ui/combo/nutri-score"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { ComparisonChart } from "@/components/products/ComparisonChart"
 
-import {
-  TrophyIcon,
-  TagIcon,
-  Loader2Icon,
-  LinkIcon,
-  TrendingDownIcon,
-  ShieldCheckIcon,
-} from "lucide-react"
+import { TrophyIcon, TagIcon, Loader2Icon, LinkIcon, TrendingDownIcon, ShieldCheckIcon } from "lucide-react"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 
 export interface ProductWithPrices {
@@ -167,9 +160,7 @@ function CompareCard({
         <div className="flex flex-1 flex-col gap-1.5">
           <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
 
-          {product.name && (
-            <p className="text-muted-foreground line-clamp-1 text-xs leading-tight">{product.name}</p>
-          )}
+          {product.name && <p className="text-muted-foreground line-clamp-1 text-xs leading-tight">{product.name}</p>}
 
           <div className="flex items-baseline gap-2">
             {hasDiscount ? (
@@ -387,7 +378,12 @@ function StoreComparisonTable({
                   </span>
                   {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
                 </td>
-                <td className={cn("px-3 py-2.5 text-right tabular-nums", product.price_recommended !== product.price && "text-muted-foreground line-through")}>
+                <td
+                  className={cn(
+                    "px-3 py-2.5 text-right tabular-nums",
+                    product.price_recommended !== product.price && "text-muted-foreground line-through",
+                  )}
+                >
                   {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "—"}
                 </td>
                 <td className="px-3 py-2.5 text-right tabular-nums">
@@ -419,14 +415,13 @@ function StoreComparisonTable({
                 {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
                 {product.price_per_major_unit && product.major_unit && (
                   <span className="text-muted-foreground ml-2 text-xs tabular-nums">
-                    {product.price_per_major_unit}€{product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}
+                    {product.price_per_major_unit}€
+                    {product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}
                   </span>
                 )}
               </div>
               {historicalLow !== null && (
-                <span className="text-muted-foreground text-xs tabular-nums">
-                  Low: {historicalLow.toFixed(2)}€
-                </span>
+                <span className="text-muted-foreground text-xs tabular-nums">Low: {historicalLow.toFixed(2)}€</span>
               )}
             </div>
           </div>

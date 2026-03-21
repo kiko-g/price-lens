@@ -292,7 +292,6 @@ export async function findIdenticalProducts(
 
 /**
  * Maps common English OFF category terms to Portuguese search equivalents.
- * Only includes high-value, unambiguous mappings.
  */
 const OFF_CATEGORY_TRANSLATIONS: Record<string, string> = {
   yogurts: "iogurte",
@@ -324,6 +323,36 @@ const OFF_CATEGORY_TRANSLATIONS: Record<string, string> = {
   ice_creams: "gelado",
   "ice creams": "gelado",
   frozen: "congelado",
+  fruits: "fruta",
+  vegetables: "legume",
+  meats: "carne",
+  poultry: "frango",
+  chicken: "frango",
+  pork: "porco",
+  fish: "peixe",
+  tuna: "atum",
+  cod: "bacalhau",
+  snacks: "snack",
+  drinks: "bebida",
+  sodas: "refrigerante",
+  "soft drinks": "refrigerante",
+  "baby foods": "bebé",
+  "baby food": "infantil",
+  cream: "nata",
+  "fresh cheeses": "queijo fresco",
+  ham: "fiambre",
+  sausages: "salsicha",
+  eggs: "ovos",
+  flour: "farinha",
+  olive: "azeite",
+  vinegar: "vinagre",
+  mustard: "mostarda",
+  ketchup: "ketchup",
+  "plant-based": "vegetal",
+  tofu: "tofu",
+  "fruit purees": "puré fruta",
+  compotes: "compota fruta",
+  "fruit compotes": "compota fruta",
 }
 
 function extractCategoryKeywords(categories: string | null): string[] {
@@ -343,102 +372,69 @@ function extractCategoryKeywords(categories: string | null): string[] {
   return [...new Set(keywords)]
 }
 
-/**
- * Finds tracked store products related to an Open Food Facts product.
- * Uses the OFF product's brand, name, and categories to search our database — no OFF API calls.
- */
-export async function findRelatedByOffProduct(
-  params: { brand: string | null; productName: string | null; categories: string | null },
-  limit: number = 10,
-): Promise<{ data: StoreProduct[] | null; error: unknown }> {
-  const { brand, productName, categories } = params
-  if (!brand && !productName && !categories) return { data: [], error: null }
-
-  const supabase = createClient()
-  const queries = []
-
-  if (brand) {
-    queries.push(
-      supabase
-        .from("store_products")
-        .select("*")
-        .ilike("brand", brand.trim())
-        .eq("available", true)
-        .not("image", "is", null)
-        .limit(50),
-    )
-  }
-
-  // OR-based text search on product name — finds matches for ANY keyword
-  if (productName) {
-    const words = extractWords(productName)
-    if (words.length >= 1) {
-      const searchTerms = words.slice(0, 4).join(" | ")
-      queries.push(
-        supabase
-          .from("store_products")
-          .select("*")
-          .textSearch("name", searchTerms)
-          .eq("available", true)
-          .not("image", "is", null)
-          .limit(50),
-      )
-    }
-  }
-
-  // Category-based search using translated OFF categories
-  const categoryKeywords = extractCategoryKeywords(categories)
-  if (categoryKeywords.length > 0) {
-    const searchTerms = categoryKeywords.slice(0, 3).join(" | ")
-    queries.push(
-      supabase
-        .from("store_products")
-        .select("*")
-        .textSearch("name", searchTerms)
-        .eq("available", true)
-        .not("image", "is", null)
-        .limit(50),
-    )
-  }
-
-  if (queries.length === 0) return { data: [], error: null }
-
-  const results = await Promise.all(queries)
-  const deduped = new Map<number, StoreProduct>()
-
-  for (const result of results) {
-    if (result.error) {
-      console.warn("[findRelatedByOffProduct] query failed:", result.error.code, result.error.message)
-    }
-    if (result.data) {
-      for (const p of result.data) {
-        if (!deduped.has(p.id)) deduped.set(p.id, p)
+function extractCategoryKeywordsFromTags(tags: string[]): string[] {
+  const keywords: string[] = []
+  for (const tag of tags) {
+    const clean = tag
+      .replace(/^\w{2}:/, "")
+      .replace(/-/g, " ")
+      .toLowerCase()
+    for (const [eng, pt] of Object.entries(OFF_CATEGORY_TRANSLATIONS)) {
+      if (clean.includes(eng)) {
+        keywords.push(pt)
       }
     }
   }
-
-  // Score: brand match > name word overlap > category match > priority
-  const brandLower = brand?.toLowerCase() ?? null
-  const nameWords = new Set(extractWords(productName).map((w) => w.toLowerCase()))
-
-  const sorted = Array.from(deduped.values()).sort((a, b) => {
-    const aScore = scoreCandidate(a, brandLower, nameWords)
-    const bScore = scoreCandidate(b, brandLower, nameWords)
-    if (aScore !== bScore) return bScore - aScore
-    return (b.priority ?? 0) - (a.priority ?? 0)
-  })
-
-  return { data: sorted.slice(0, limit), error: null }
+  return [...new Set(keywords)]
 }
 
-function scoreCandidate(product: StoreProduct, brandLower: string | null, nameWords: Set<string>): number {
-  let score = 0
-  if (brandLower && product.brand?.toLowerCase() === brandLower) score += 50
-  const candidateWords = extractWords(product.name).map((w) => w.toLowerCase())
-  for (const w of candidateWords) {
-    if (nameWords.has(w)) score += 10
+/**
+ * Finds tracked store products related to an Open Food Facts product.
+ * Uses the search_products_ranked RPC (GIN-indexed, Portuguese stemming)
+ * for fast relevance-ranked results instead of multiple unindexed queries.
+ */
+export async function findRelatedByOffProduct(
+  params: {
+    brand: string | null
+    productName: string | null
+    categories: string | null
+    categoriesTags?: string[] | null
+  },
+  limit: number = 10,
+): Promise<{ data: StoreProduct[] | null; error: unknown }> {
+  const { brand, productName, categories, categoriesTags } = params
+  if (!brand && !productName && !categories && !categoriesTags?.length) return { data: [], error: null }
+
+  const supabase = createClient()
+
+  const parts: string[] = []
+  if (brand) parts.push(brand.trim())
+  if (productName) {
+    parts.push(...extractWords(productName).slice(0, 4))
   }
-  return score
+
+  const categoryKeywords = categoriesTags?.length
+    ? extractCategoryKeywordsFromTags(categoriesTags)
+    : extractCategoryKeywords(categories)
+  parts.push(...categoryKeywords.slice(0, 3))
+
+  const unique = [...new Set(parts.filter(Boolean))]
+  if (unique.length === 0) return { data: [], error: null }
+
+  const queryText = unique.join(" OR ")
+
+  const { data, error } = await supabase
+    .rpc("search_products_ranked", { query_text: queryText })
+    .eq("available", true)
+    .not("image", "is", null)
+    .limit(limit)
+
+  if (error) {
+    console.warn("[findRelatedByOffProduct] RPC failed:", error.code, error.message)
+    return { data: null, error }
+  }
+
+  return { data: data ?? [], error: null }
 }
 
 /**

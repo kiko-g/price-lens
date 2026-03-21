@@ -1,88 +1,202 @@
 "use client"
 
+import Image from "next/image"
+
 import type { OffNutriments } from "@/lib/canonical/open-food-facts"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Callout } from "@/components/ui/callout"
+import { Separator } from "@/components/ui/separator"
 import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 
-import { WheatIcon, TriangleAlertIcon } from "lucide-react"
+const VALID_ECO_GRADES = new Set(["A", "B", "C", "D", "E"])
 
 interface OffProductDetailsProps {
   nutriments: OffNutriments | null
   servingSize: string | null
   ingredientsText: string | null
   allergens: string | null
+  imageNutritionUrl?: string | null
+  imageIngredientsUrl?: string | null
+  packagingText?: string | null
+  completeness?: number | null
+  ecoscoreGrade?: string | null
+  nutrientLevels?: Record<string, string> | null
+  labels?: string[]
 }
 
-export function OffProductDetails({ nutriments, servingSize, ingredientsText, allergens }: OffProductDetailsProps) {
+export function OffProductDetails({
+  nutriments,
+  servingSize,
+  ingredientsText,
+  allergens,
+  imageNutritionUrl,
+  imageIngredientsUrl,
+  packagingText,
+  completeness,
+  ecoscoreGrade,
+  nutrientLevels,
+  labels,
+}: OffProductDetailsProps) {
   const hasNutrition = nutriments !== null
   const hasIngredients = !!ingredientsText
   const hasAllergens = !!allergens
+  const hasNutritionImage = !!imageNutritionUrl
+  const hasIngredientsImage = !!imageIngredientsUrl
+  const hasPackaging = !!packagingText
+  const hasEcoScore = VALID_ECO_GRADES.has(ecoscoreGrade?.toUpperCase() ?? "")
+  const hasNutrientLevels = nutrientLevels && Object.keys(nutrientLevels).length > 0
+  const hasLabels = labels && labels.length > 0
+  const hasAny =
+    hasNutrition ||
+    hasIngredients ||
+    hasAllergens ||
+    hasNutritionImage ||
+    hasIngredientsImage ||
+    hasPackaging ||
+    hasEcoScore ||
+    hasNutrientLevels ||
+    hasLabels
 
-  if (!hasNutrition && !hasIngredients && !hasAllergens) return null
+  if (!hasAny) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {hasNutrition && (
-        <DrawerSheet
-          title="Nutrition"
-          description="Per 100g nutritional values"
-          trigger={
-            <Button variant="outline" size="sm">
-              <OpenFoodFactsIcon className="size-4 shrink-0" />
-              Product Details
-            </Button>
-          }
-        >
-          <NutritionTable nutriments={nutriments} servingSize={servingSize} />
-        </DrawerSheet>
-      )}
+    <DrawerSheet
+      title="Product Details"
+      description="From Open Food Facts"
+      trigger={
+        <Button variant="outline" size="sm">
+          <OpenFoodFactsIcon className="size-4 shrink-0" />
+          Product Details
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-5">
+        {hasNutrition && (
+          <section>
+            <NutritionTable nutriments={nutriments} servingSize={servingSize} />
+          </section>
+        )}
 
-      {hasIngredients && (
-        <DrawerSheet
-          title="Ingredients"
-          trigger={
-            <Button variant="outline" size="sm">
-              <WheatIcon className="size-4 shrink-0" />
-              Ingredients
-            </Button>
-          }
-        >
-          <div className="flex flex-col gap-3">
-            <p className="text-muted-foreground text-sm leading-relaxed">{ingredientsText}</p>
-            {hasAllergens && (
-              <Callout variant="warning">
-                <p className="text-sm">
-                  <span className="font-semibold">Allergens: </span>
-                  {allergens}
-                </p>
-              </Callout>
-            )}
-          </div>
-        </DrawerSheet>
-      )}
+        {hasNutrientLevels && (
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">Nutrient Levels</h3>
+            <NutrientLevelIndicators levels={nutrientLevels!} />
+          </section>
+        )}
 
-      {!hasIngredients && hasAllergens && (
-        <DrawerSheet
-          title="Allergens"
-          trigger={
-            <Button variant="outline" size="sm">
-              <TriangleAlertIcon className="size-4 shrink-0" />
-              Allergens
-            </Button>
-          }
-        >
-          <Callout variant="warning">
-            <p className="text-sm">
-              <span className="font-semibold">Allergens: </span>
-              {allergens}
-            </p>
-          </Callout>
-        </DrawerSheet>
-      )}
-    </div>
+        {hasNutritionImage && (
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">Nutrition Label</h3>
+            <div className="relative aspect-4/3 w-full max-w-sm overflow-hidden rounded-lg border bg-white">
+              <Image
+                src={imageNutritionUrl!}
+                alt="Nutrition label"
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 640px) 100vw, 400px"
+                unoptimized
+              />
+            </div>
+          </section>
+        )}
+
+        {(hasEcoScore || hasLabels) && (
+          <>
+            <Separator />
+            <section className="flex flex-col gap-3">
+              {hasEcoScore && (
+                <div>
+                  <h3 className="mb-1.5 text-sm font-semibold">Environmental Impact</h3>
+                  <Badge variant="secondary" className="gap-1 text-xs font-medium">
+                    Eco-Score {ecoscoreGrade!.toUpperCase()}
+                  </Badge>
+                </div>
+              )}
+              {hasLabels && (
+                <div>
+                  <h3 className="mb-1.5 text-sm font-semibold">Labels</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {labels!.map((label) => (
+                      <Badge key={label} variant="outline" className="text-xs font-normal">
+                        {label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          </>
+        )}
+
+        {(hasIngredients || hasAllergens) && (
+          <>
+            <Separator />
+            <section>
+              <h3 className="mb-2 text-sm font-semibold">Ingredients</h3>
+              {hasIngredients && <p className="text-muted-foreground text-sm leading-relaxed">{ingredientsText}</p>}
+              {hasAllergens && (
+                <Callout variant="warning" className="mt-2">
+                  <p className="text-sm">
+                    <span className="font-semibold">Allergens: </span>
+                    {allergens}
+                  </p>
+                </Callout>
+              )}
+            </section>
+          </>
+        )}
+
+        {hasIngredientsImage && (
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">Ingredients Label</h3>
+            <div className="relative aspect-4/3 w-full max-w-sm overflow-hidden rounded-lg border bg-white">
+              <Image
+                src={imageIngredientsUrl!}
+                alt="Ingredients label"
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 640px) 100vw, 400px"
+                unoptimized
+              />
+            </div>
+          </section>
+        )}
+
+        {hasPackaging && (
+          <>
+            <Separator />
+            <section>
+              <h3 className="mb-2 text-sm font-semibold">Packaging</h3>
+              <p className="text-muted-foreground text-sm">{packagingText}</p>
+            </section>
+          </>
+        )}
+
+        {completeness != null && (
+          <>
+            <Separator />
+            <section>
+              <h3 className="mb-2 text-sm font-semibold">Data Quality</h3>
+              <div className="flex items-center gap-2">
+                <div className="bg-muted h-2 w-32 overflow-hidden rounded-full">
+                  <div
+                    className="bg-primary h-full rounded-full transition-all"
+                    style={{ width: `${Math.round(completeness * 100)}%` }}
+                  />
+                </div>
+                <Badge variant="secondary" size="xs">
+                  {Math.round(completeness * 100)}% complete
+                </Badge>
+              </div>
+              <p className="text-muted-foreground mt-1 text-xs">Based on Open Food Facts data completeness score</p>
+            </section>
+          </>
+        )}
+      </div>
+    </DrawerSheet>
   )
 }
 
@@ -140,6 +254,39 @@ function NutritionTable({ nutriments, servingSize }: { nutriments: OffNutriments
         </table>
       </div>
       {servingSize && <p className="text-muted-foreground mt-2 text-xs">Serving size: {servingSize}</p>}
+    </div>
+  )
+}
+
+// ─── Nutrient level traffic lights ──────────────────────────────────
+
+const LEVEL_COLORS: Record<string, string> = {
+  low: "bg-green-500",
+  moderate: "bg-amber-500",
+  high: "bg-red-500",
+}
+
+const LEVEL_LABEL_MAP: Record<string, string> = {
+  fat: "Fat",
+  "saturated-fat": "Saturated fat",
+  sugars: "Sugars",
+  salt: "Salt",
+}
+
+function NutrientLevelIndicators({ levels }: { levels: Record<string, string> }) {
+  const entries = Object.entries(levels).filter(([key]) => key in LEVEL_LABEL_MAP)
+  if (entries.length === 0) return null
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      {entries.map(([key, level]) => (
+        <span key={key} className="flex items-center gap-1.5 text-xs">
+          <span className={`inline-block h-2.5 w-2.5 rounded-full ${LEVEL_COLORS[level] ?? "bg-gray-400"}`} />
+          <span className="text-muted-foreground">
+            {LEVEL_LABEL_MAP[key]}: <span className="font-medium capitalize">{level}</span>
+          </span>
+        </span>
+      ))}
     </div>
   )
 }

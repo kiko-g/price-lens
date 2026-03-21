@@ -62,7 +62,7 @@ export function NutriScoreBadge({
 }: NutriScoreBadgeProps) {
   const content = (
     <>
-      <span className="mb-[0.15em] text-[1em] leading-none font-extrabold tracking-wider text-[#7b7b7b] dark:text-neutral-300">
+      <span className="text-foreground/70 dark:text-foreground/80 mb-[0.15em] text-[1em] leading-none font-extrabold tracking-wider">
         NUTRI-SCORE
       </span>
 
@@ -141,7 +141,7 @@ export function NutriScoreBadge({
       className={cn(
         "inline-flex shrink-0 flex-col items-center",
         !compact &&
-          "border-border bg-foreground/2 dark:border-border dark:bg-foreground/5 rounded-2xl border-2 px-[0.8em] pt-[0.65em] pb-[0.55em]",
+          "border-border bg-foreground/2 dark:border-border dark:bg-foreground/5 rounded-2xl border px-2 py-2",
         className,
       )}
       role="img"

@@ -243,9 +243,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                           strokeDasharray={storeKey?.dashPattern || "0"}
                         />
                       </svg>
-                      {storeKey?.originId && (
-                        <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />
-                      )}
+                      {storeKey?.originId && <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />}
                       {trackingSinceText && (
                         <span className="text-muted-foreground text-[11px]">{trackingSinceText}</span>
                       )}

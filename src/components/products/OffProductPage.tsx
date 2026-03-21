@@ -1,7 +1,7 @@
+import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
-import type { StoreProduct } from "@/types"
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
 
 import { Badge } from "@/components/ui/badge"
@@ -9,24 +9,37 @@ import { Callout } from "@/components/ui/callout"
 import { Separator } from "@/components/ui/separator"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { NutriScoreBadge } from "@/components/ui/combo/nutri-score"
-import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
-import { OffBrandSection } from "@/components/products/OffBrandSection"
 import { OffProductActions } from "@/components/products/OffProductActions"
 import { OffProductDetails } from "@/components/products/OffProductDetails"
+import { OffSearchCta } from "@/components/products/OffSearchCta"
 
-import { ChevronRightIcon, InfoIcon, StoreIcon, UtensilsIcon } from "lucide-react"
+import { ChevronRightIcon, InfoIcon } from "lucide-react"
 
 type NutriScoreGrade = "A" | "B" | "C" | "D" | "E"
 const VALID_GRADES = new Set<string>(["A", "B", "C", "D", "E"])
 
+const NOVA_LABELS: Record<number, string> = {
+  1: "Unprocessed",
+  2: "Processed ingredients",
+  3: "Processed",
+  4: "Ultra-processed",
+}
+
+function humanizeTag(tag: string): string {
+  return tag
+    .replace(/^\w{2}:/, "")
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
 interface OffProductPageProps {
   product: OffProduct
   barcode: string
-  trackedProducts?: StoreProduct[]
+  children?: ReactNode
 }
 
-export function OffProductPage({ product, barcode, trackedProducts }: OffProductPageProps) {
+export function OffProductPage({ product, barcode, children }: OffProductPageProps) {
   const rawLabels = product.labels?.split(",").map((l) => l.trim()) ?? []
   const nutriGradeFromField = product.nutriscoreGrade?.toUpperCase() ?? ""
   const nutriGradeFromLabel =
@@ -36,13 +49,24 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
       .toUpperCase() ?? ""
   const nutriGrade = VALID_GRADES.has(nutriGradeFromField) ? nutriGradeFromField : nutriGradeFromLabel
   const hasValidNutriScore = VALID_GRADES.has(nutriGrade)
-  const categories = product.categories
-    ?.split(",")
-    .map((c) => c.trim())
-    .filter((c) => c && !/^\w{2}:/.test(c))
-    .slice(0, 6)
-  const labels = rawLabels.filter((l) => l && !/^\w{2}:/.test(l)).slice(0, 5)
+
+  const rawCategories = (product.categoriesTags ?? product.categories?.split(","))?.map((c) => c.trim()) ?? []
+  const categories = [...new Set(rawCategories.map(humanizeTag).filter((c) => c.length > 0))].slice(0, 6)
+
+  const labels = [
+    ...new Set(
+      rawLabels
+        .filter((l) => l && !/^en:nutri-?score/i.test(l))
+        .map(humanizeTag)
+        .filter((l) => l.length > 0),
+    ),
+  ].slice(0, 5)
+
   const primaryBrand = product.brands?.split(",")[0]?.trim() || null
+  const hasNova = product.novaGroup != null && product.novaGroup >= 1 && product.novaGroup <= 4
+  const hasEcoScore = VALID_GRADES.has(product.ecoscoreGrade?.toUpperCase() ?? "")
+  const nutrientLevels = product.nutrientLevels
+  const isSparseData = !hasNova && !hasEcoScore && !nutrientLevels && categories.length === 0 && labels.length === 0
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col px-4 pt-4 lg:py-4">
@@ -119,10 +143,13 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
             <h1 className="line-clamp-2 max-w-160 text-xl leading-5 font-bold xl:text-2xl xl:leading-6">
               {product.displayName}
             </h1>
-            {product.servingSize && (
-              <p className="text-muted-foreground line-clamp-2 text-sm">{product.servingSize} per serving</p>
+            {product.genericName && product.genericName !== product.productName && (
+              <p className="text-muted-foreground line-clamp-2 text-sm">{product.genericName}</p>
             )}
-            {product.quantity && <p className="text-muted-foreground line-clamp-3 text-base">{product.quantity}</p>}
+            {product.quantity && <p className="text-muted-foreground line-clamp-3 text-sm">{product.quantity}</p>}
+            {product.servingSize && (
+              <p className="text-muted-foreground line-clamp-2 text-xs">{product.servingSize} per serving</p>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -132,30 +159,35 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
               servingSize={product.servingSize}
               ingredientsText={product.ingredientsText}
               allergens={product.allergens}
+              imageNutritionUrl={product.imageNutritionUrl}
+              imageIngredientsUrl={product.imageIngredientsUrl}
+              packagingText={product.packagingText}
+              completeness={product.completeness}
+              ecoscoreGrade={product.ecoscoreGrade}
+              nutrientLevels={nutrientLevels}
+              labels={labels}
             />
           </div>
 
-          {hasValidNutriScore && (
-            <NutriScoreBadge
-              size={0.85}
-              grade={nutriGrade as NutriScoreGrade}
-              showNewCalculation={false}
-              compact={false}
-              className="mt-2 w-fit"
-            />
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {hasValidNutriScore && (
+              <NutriScoreBadge
+                size={0.85}
+                grade={nutriGrade as NutriScoreGrade}
+                showNewCalculation={false}
+                compact={false}
+                className="w-fit"
+              />
+            )}
+            {hasNova && (
+              <Badge variant="secondary" className="gap-1 text-xs font-medium">
+                NOVA {product.novaGroup}
+                <span className="text-muted-foreground font-normal">&middot; {NOVA_LABELS[product.novaGroup!]}</span>
+              </Badge>
+            )}
+          </div>
 
-          {labels && labels.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              {labels?.map((label) => (
-                <Badge key={label} variant="outline" className="text-xs font-normal">
-                  {label}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {categories && categories.length > 0 && (
+          {categories.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {categories.map((cat) => (
                 <Badge key={cat} variant="boring" className="text-xs font-normal">
@@ -164,6 +196,8 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
               ))}
             </div>
           )}
+
+          {isSparseData && <SparseDataNote barcode={barcode} />}
         </section>
       </div>
 
@@ -175,7 +209,7 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
               src={product.imageUrl}
               alt={product.displayName || "Product image"}
               fill
-              className="o max-h-full max-w-full object-contain object-center"
+              className="max-h-full max-w-full object-contain object-center"
               sizes="100vw"
               unoptimized
               priority
@@ -199,33 +233,54 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
 
         <div className="flex flex-col gap-0">
           <h1 className="line-clamp-3 text-xl leading-6 font-bold">{product.displayName}</h1>
-          {product.servingSize && (
-            <p className="text-muted-foreground line-clamp-2 text-sm">{product.servingSize} per serving</p>
+          {product.genericName && product.genericName !== product.productName && (
+            <p className="text-muted-foreground line-clamp-2 text-sm">{product.genericName}</p>
           )}
-          {product.quantity && <p className="text-muted-foreground line-clamp-2 text-sm">{product.quantity}</p>}
+          {(product.quantity || product.servingSize) && (
+            <p className="text-muted-foreground line-clamp-2 text-sm">
+              {[product.quantity, product.servingSize && `${product.servingSize} per serving`]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
         </div>
 
-        {labels && labels.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            {labels?.map((label) => (
-              <Badge key={label} variant="outline" className="text-xs font-normal">
-                {label}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {hasValidNutriScore && (
-          <NutriScoreBadge
-            size={0.85}
-            grade={nutriGrade as NutriScoreGrade}
-            showNewCalculation={false}
-            compact={false}
-            className="w-fit"
+        <div className="flex flex-wrap items-center gap-2">
+          <OffProductActions productName={product.displayName ?? barcode} />
+          <OffProductDetails
+            nutriments={product.nutriments}
+            servingSize={product.servingSize}
+            ingredientsText={product.ingredientsText}
+            allergens={product.allergens}
+            imageNutritionUrl={product.imageNutritionUrl}
+            imageIngredientsUrl={product.imageIngredientsUrl}
+            packagingText={product.packagingText}
+            completeness={product.completeness}
+            ecoscoreGrade={product.ecoscoreGrade}
+            nutrientLevels={nutrientLevels}
+            labels={labels}
           />
-        )}
+        </div>
 
-        {categories && categories.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {hasValidNutriScore && (
+            <NutriScoreBadge
+              size={0.6}
+              grade={nutriGrade as NutriScoreGrade}
+              showNewCalculation={false}
+              compact={false}
+              className="w-fit"
+            />
+          )}
+          {hasNova && (
+            <Badge variant="secondary" size="sm" className="gap-1 text-xs font-medium">
+              NOVA {product.novaGroup}
+              <span className="text-muted-foreground font-normal">&middot; {NOVA_LABELS[product.novaGroup!]}</span>
+            </Badge>
+          )}
+        </div>
+
+        {categories.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">
             {categories.map((cat) => (
               <Badge key={cat} variant="boring" className="text-xs font-normal">
@@ -235,42 +290,39 @@ export function OffProductPage({ product, barcode, trackedProducts }: OffProduct
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <OffProductActions productName={product.displayName ?? barcode} />
-          <OffProductDetails
-            nutriments={product.nutriments}
-            servingSize={product.servingSize}
-            ingredientsText={product.ingredientsText}
-            allergens={product.allergens}
-          />
-        </div>
+        {isSparseData && <SparseDataNote barcode={barcode} />}
       </article>
 
-      {/* Tracked products from our stores */}
-      {trackedProducts && trackedProducts.length > 0 && (
-        <>
-          <Separator className="mt-8 mb-4" />
-          <section>
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <StoreIcon className="h-5 w-5" />
-              Similar products in our stores
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {trackedProducts.map((sp) => (
-                <StoreProductCard key={sp.id} sp={sp} />
-              ))}
-            </div>
-          </section>
-        </>
-      )}
+      {/* Search CTA — shown before similar products so users see it early */}
+      <Separator className="mt-6 mb-4" />
+      <OffSearchCta product={product} />
 
-      {/* On-demand OFF brand products */}
-      {primaryBrand && (
+      {/* Streamed tracked products from our stores (nested Suspense) */}
+      {children && (
         <>
-          <Separator className="mt-8 mb-4" />
-          <OffBrandSection brand={primaryBrand} excludeBarcode={barcode} />
+          <Separator className="mt-6 mb-4" />
+          {children}
         </>
       )}
     </div>
   )
 }
+
+// ─── Sparse data note ───────────────────────────────────────────────
+
+function SparseDataNote({ barcode }: { barcode: string }) {
+  return (
+    <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+      Open Food Facts has limited data for this product.{" "}
+      <a
+        href={`https://world.openfoodfacts.org/cgi/product.pl?type=edit&code=${barcode}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary hover:underline"
+      >
+        Help improve it
+      </a>
+    </p>
+  )
+}
+

@@ -71,7 +71,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
           href={sp.url}
           target="_blank"
           rel="noreferrer noopener"
-          className="border-border inline-flex rounded-full border px-2 py-0.5 dark:border-transparent dark:bg-white dark:hover:bg-white/90 [--background:var(--color-white)] [--foreground:var(--base-800)]"
+          className="border-border inline-flex rounded-full border px-2 py-0.5 [--background:var(--color-white)] [--foreground:var(--base-800)] dark:border-transparent dark:bg-white dark:hover:bg-white/90"
         >
           <SupermarketChainBadge originId={sp?.origin_id} variant="logo" />
         </Link>

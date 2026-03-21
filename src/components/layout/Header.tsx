@@ -33,7 +33,7 @@ export function Header() {
           <LogoLink />
           {isEarlyAccess && <EarlyAccessBadge />}
 
-          <nav className="ml-3 hidden items-center gap-1.5 md:flex">
+          <nav className="ml-3 hidden items-center gap-1.5 lg:flex">
             {navigation
               .filter((item) => item.shown)
               .map((item) => {
@@ -70,7 +70,7 @@ export function Header() {
           <BarcodeScanButton>
             <button
               type="button"
-              className="bg-primary/5 border-primary/20 dark:bg-primary/10 dark:border-primary/30 text-foreground hover:bg-primary/20 dark:hover:bg-primary/40 flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors active:scale-[0.97]"
+              className="bg-primary/10 border-primary/25 dark:bg-primary/20 dark:border-primary/30 text-foreground hover:bg-primary/20 dark:hover:bg-primary/40 inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors active:scale-[0.97] lg:hidden"
             >
               <ScanBarcodeIcon className="size-3.5" />
               Scan

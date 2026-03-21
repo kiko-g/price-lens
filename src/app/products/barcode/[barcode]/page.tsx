@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 
 import type { StoreProduct, Price } from "@/types"
+import type { OffProduct } from "@/lib/canonical/open-food-facts"
 import { siteConfig, pageMetadata } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
@@ -13,15 +14,16 @@ import { lookupBarcode } from "@/lib/canonical/open-food-facts"
 import { findRelatedByOffProduct } from "@/lib/queries/product-matching"
 
 import { Button } from "@/components/ui/button"
-import { Callout } from "@/components/ui/callout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { BarcodeCompare } from "@/components/products/BarcodeCompare"
 import { OffProductPage } from "@/components/products/OffProductPage"
+import { StoreProductCard } from "@/components/products/StoreProductCard"
 
-import { SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, Loader2Icon, BrainIcon } from "lucide-react"
+import { SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, StoreIcon } from "lucide-react"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
+import { OffLookupSkeleton } from "@/components/products/OffLookupSkeleton"
 
 interface PageProps {
   params: Promise<{ barcode: string }>
@@ -122,14 +124,13 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
   const offResult = await lookupBarcode(barcode, { maxRetries: 1 })
 
   if (offResult.status === "found") {
-    const primaryBrand = offResult.product.brands?.split(",")[0]?.trim() || null
-    const { data: trackedRelated } = await findRelatedByOffProduct({
-      brand: primaryBrand,
-      productName: offResult.product.productName,
-      categories: offResult.product.categories,
-    })
-
-    return <OffProductPage product={offResult.product} barcode={barcode} trackedProducts={trackedRelated ?? []} />
+    return (
+      <OffProductPage product={offResult.product} barcode={barcode}>
+        <Suspense fallback={<RelatedProductsSkeleton />}>
+          <RelatedProductsSection product={offResult.product} />
+        </Suspense>
+      </OffProductPage>
+    )
   }
 
   if (offResult.status === "error") {
@@ -192,98 +193,74 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
             barcode.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button asChild>
-            <Link href="/products" prefetch={false}>
-              <SearchIcon className="h-4 w-4" />
-              Browse products
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <a
-              href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLinkIcon className="h-4 w-4" />
-              Search on Google
-            </a>
-          </Button>
-        </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button asChild>
+              <Link href="/products" prefetch={false}>
+                <SearchIcon className="h-4 w-4" />
+                Search our products
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLinkIcon className="h-4 w-4" />
+                Search on Google
+              </a>
+            </Button>
+          </div>
       </div>
     </div>
   )
 }
 
-// ─── Suspense fallback ──────────────────────────────────────────────
+// ─── Streamed related products (nested Suspense) ────────────────────
 
-function OffLookupSkeleton({ barcode }: { barcode: string }) {
+async function RelatedProductsSection({ product }: { product: OffProduct }) {
+  const primaryBrand = product.brands?.split(",")[0]?.trim() || null
+  const { data: trackedRelated } = await findRelatedByOffProduct({
+    brand: primaryBrand,
+    productName: product.productName,
+    categories: product.categories,
+    categoriesTags: product.categoriesTags,
+  })
+
+  if (!trackedRelated || trackedRelated.length === 0) return null
+
   return (
-    <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col px-4 pt-4 lg:py-4">
-      {/* Loading indicator */}
-      <div className="mb-4 flex w-full max-w-full flex-col gap-2 md:max-w-md">
-        <Callout variant="info" icon={BrainIcon} className="mb-4 w-full">
-          <p className="text-sm">
-            This product was not found in our tracked stores, but we can try to find it elswhere
-          </p>
-        </Callout>
-
-        <div className="flex items-center gap-3 rounded-lg border px-3 py-2.5">
-          <Loader2Icon className="text-primary h-4 w-4 animate-spin" />
-          <p className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm">
-            Looking up <span className="font-mono font-medium">{barcode}</span> on
-            <OpenFoodFactsIcon className="inline h-4 w-4" />
-            <span>Open Food Facts&hellip;</span>
-          </p>
-        </div>
+    <section>
+      <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+        <StoreIcon className="h-5 w-5" />
+        Similar products in our stores
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {trackedRelated.map((sp) => (
+          <StoreProductCard key={sp.id} sp={sp} />
+        ))}
       </div>
+    </section>
+  )
+}
 
-      {/* Breadcrumb */}
-      <div className="mb-2 flex items-center gap-1 md:mb-3">
-        <Skeleton className="h-4 w-16" />
-        <Skeleton className="h-3 w-3" />
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-3 w-3" />
-        <Skeleton className="h-4 w-28" />
+function RelatedProductsSkeleton() {
+  return (
+    <section>
+      <div className="mb-4 flex items-center gap-2">
+        <Skeleton className="h-5 w-5 rounded" />
+        <Skeleton className="h-6 w-64" />
       </div>
-
-      {/* Desktop skeleton */}
-      <div className="hidden w-full grid-cols-20 gap-8 md:grid">
-        <div className="col-span-6 flex flex-col items-center">
-          <Skeleton className="aspect-8/7 w-full rounded-lg" />
-          <Skeleton className="mt-4 h-10 w-48" />
-        </div>
-
-        <div className="col-span-14 flex flex-col gap-2">
-          <Skeleton className="h-7 w-20 rounded-full" />
-          <Skeleton className="h-6 w-3/4" />
-          <div className="flex gap-2">
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-32 rounded-full" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-2">
+            <Skeleton className="aspect-8/7 w-full rounded-md" />
+            <Skeleton className="h-4 w-16 rounded-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-5 w-12" />
           </div>
-          <Skeleton className="h-12 w-44 rounded-lg" />
-          <div className="flex flex-wrap gap-1.5">
-            <Skeleton className="h-5 w-20 rounded-full" />
-            <Skeleton className="h-5 w-28 rounded-full" />
-            <Skeleton className="h-5 w-16 rounded-full" />
-          </div>
-          <Skeleton className="h-9 w-32 rounded-md" />
-          <Skeleton className="h-16 max-w-md rounded-lg" />
-        </div>
+        ))}
       </div>
-
-      {/* Mobile skeleton */}
-      <div className="flex flex-col gap-2.5 md:hidden">
-        <Skeleton className="aspect-6/5 w-full max-w-lg rounded-lg" />
-        <Skeleton className="h-7 w-20 rounded-full" />
-        <Skeleton className="h-6 w-3/4" />
-        <div className="flex gap-2">
-          <Skeleton className="h-6 w-16 rounded-full" />
-          <Skeleton className="h-6 w-32 rounded-full" />
-        </div>
-        <Skeleton className="h-12 w-44 rounded-lg" />
-        <Skeleton className="h-9 w-32 rounded-md" />
-      </div>
-    </div>
+    </section>
   )
 }

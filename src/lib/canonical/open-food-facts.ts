@@ -12,11 +12,34 @@ const OFF_API_BASE = "https://world.openfoodfacts.org/api/v2/product"
 const OFF_BRAND_BASE = "https://world.openfoodfacts.org/brand"
 const USER_AGENT = "PriceLens/1.0 (https://pricelens.pt; contact@pricelens.pt)"
 const MIN_DELAY_MS = 650 // ~92 req/min, safely under the 100/min limit
+const THROTTLE_STALE_MS = 10_000 // skip throttle if last request was >10s ago
 const MAX_RETRIES = 2
-const RETRY_DELAY_MS = 3_000
+const RETRY_DELAY_MS = 1_500
 
-const PRODUCT_FIELDS =
-  "code,product_name,brands,quantity,categories,image_front_url,image_front_small_url,nutriscore_grade,nutriments,serving_size,labels,ingredients_text,allergens"
+const PRODUCT_FIELDS = [
+  "code",
+  "product_name",
+  "generic_name",
+  "brands",
+  "quantity",
+  "categories",
+  "categories_tags",
+  "image_front_url",
+  "image_front_small_url",
+  "nutriscore_grade",
+  "nova_group",
+  "ecoscore_grade",
+  "nutriments",
+  "nutrient_levels",
+  "serving_size",
+  "labels",
+  "ingredients_text",
+  "allergens",
+  "image_nutrition_url",
+  "image_ingredients_url",
+  "completeness",
+  "packaging_text",
+].join(",")
 
 let lastRequestAt = 0
 
@@ -37,26 +60,58 @@ export interface OffProduct {
   productName: string | null
   /** First brand + product_name combined (e.g. "Milka Strawberry") */
   displayName: string | null
+  /** Clean generic description (e.g. "Puré de fruta") */
+  genericName: string | null
   brands: string | null
   quantity: string | null
   categories: string | null
+  /** Structured category tags (e.g. ["en:dairies", "en:yogurts"]) */
+  categoriesTags: string[] | null
   /** 400px front image */
   imageUrl: string | null
   /** 200px front image (for cards/thumbnails) */
   imageSmallUrl: string | null
   nutriscoreGrade: string | null
+  /** NOVA food processing classification (1-4) */
+  novaGroup: number | null
+  /** Environmental impact grade (a-e) */
+  ecoscoreGrade: string | null
   nutriments: OffNutriments | null
+  /** Traffic light levels: { fat: "low", sugars: "high", ... } */
+  nutrientLevels: Record<string, string> | null
   servingSize: string | null
   labels: string | null
   ingredientsText: string | null
   allergens: string | null
+  /** Photo of the nutrition label */
+  imageNutritionUrl: string | null
+  /** Photo of the ingredients label */
+  imageIngredientsUrl: string | null
+  /** Data quality score (0-1) */
+  completeness: number | null
+  /** Packaging description */
+  packagingText: string | null
   /** EAN/barcode — present when returned from brand search */
   barcode: string | null
 }
 
 async function throttle(): Promise<void> {
-  const elapsed = Date.now() - lastRequestAt
-  if (elapsed < MIN_DELAY_MS) {
+  const now = Date.now()
+  const elapsed = now - lastRequestAt
+  if (lastRequestAt > 0 && elapsed < MIN_DELAY_MS) {
+    await new Promise((r) => setTimeout(r, MIN_DELAY_MS - elapsed))
+  }
+  lastRequestAt = Date.now()
+}
+
+/**
+ * Throttle variant that skips the delay if the last request was long ago.
+ * Used for interactive paths where the first request shouldn't be penalized.
+ */
+async function throttleInteractive(): Promise<void> {
+  const now = Date.now()
+  const elapsed = now - lastRequestAt
+  if (lastRequestAt > 0 && elapsed < THROTTLE_STALE_MS && elapsed < MIN_DELAY_MS) {
     await new Promise((r) => setTimeout(r, MIN_DELAY_MS - elapsed))
   }
   lastRequestAt = Date.now()
@@ -71,7 +126,6 @@ export type LookupResult =
   | { status: "not_found" }
   | { status: "error"; reason: string }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseNutriments(raw: any): OffNutriments | null {
   if (!raw || typeof raw !== "object") return null
   const n: OffNutriments = {
@@ -89,7 +143,18 @@ function parseNutriments(raw: any): OffNutriments | null {
   return hasAny ? n : null
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseNutrientLevels(raw: any): Record<string, string> | null {
+  if (!raw || typeof raw !== "object") return null
+  const valid = ["low", "moderate", "high"]
+  const result: Record<string, string> = {}
+  for (const [key, val] of Object.entries(raw)) {
+    if (typeof val === "string" && valid.includes(val)) {
+      result[key] = val
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null
+}
+
 function parseOffProduct(p: any, barcodeOverride?: string): OffProduct | null {
   const rawName: string | null = p.product_name || null
   const rawBrands: string | null = p.brands || null
@@ -104,20 +169,31 @@ function parseOffProduct(p: any, barcodeOverride?: string): OffProduct | null {
     displayName = rawName
   }
 
+  const novaGroup = typeof p.nova_group === "number" ? p.nova_group : null
+
   return {
     productName: rawName,
     displayName,
+    genericName: p.generic_name || null,
     brands: rawBrands,
     quantity: p.quantity || null,
     categories: p.categories || null,
+    categoriesTags: Array.isArray(p.categories_tags) ? p.categories_tags : null,
     imageUrl: p.image_front_url || p.image_front_small_url || null,
     imageSmallUrl: p.image_front_small_url || null,
     nutriscoreGrade: p.nutriscore_grade || null,
+    novaGroup,
+    ecoscoreGrade: p.ecoscore_grade || null,
     nutriments: parseNutriments(p.nutriments),
+    nutrientLevels: parseNutrientLevels(p.nutrient_levels),
     servingSize: p.serving_size || null,
     labels: p.labels || null,
     ingredientsText: p.ingredients_text || null,
     allergens: p.allergens || null,
+    imageNutritionUrl: p.image_nutrition_url || null,
+    imageIngredientsUrl: p.image_ingredients_url || null,
+    completeness: typeof p.completeness === "number" ? p.completeness : null,
+    packagingText: p.packaging_text || null,
     barcode: barcodeOverride || p.code || null,
   }
 }
@@ -125,13 +201,14 @@ function parseOffProduct(p: any, barcodeOverride?: string): OffProduct | null {
 /**
  * Look up a barcode in Open Food Facts with retry on transient failures.
  * HTTP 404 is treated as "not found" (OFF uses 404 for unknown barcodes).
+ * Uses interactive throttle: skips delay if no recent requests (first scan is instant).
  */
 export async function lookupBarcode(
   barcode: string,
   { maxRetries = MAX_RETRIES }: { maxRetries?: number } = {},
 ): Promise<LookupResult> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    await throttle()
+    await throttleInteractive()
 
     try {
       const res = await fetch(`${OFF_API_BASE}/${barcode}.json?fields=${PRODUCT_FIELDS}`, {
