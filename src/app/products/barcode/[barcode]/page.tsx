@@ -193,24 +193,24 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
             barcode.
           </p>
         </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button asChild>
-              <Link href="/products" prefetch={false}>
-                <SearchIcon className="h-4 w-4" />
-                Search our products
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <a
-                href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLinkIcon className="h-4 w-4" />
-                Search on Google
-              </a>
-            </Button>
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button asChild>
+            <Link href="/products" prefetch={false}>
+              <SearchIcon className="h-4 w-4" />
+              Search our products
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLinkIcon className="h-4 w-4" />
+              Search on Google
+            </a>
+          </Button>
+        </div>
       </div>
     </div>
   )

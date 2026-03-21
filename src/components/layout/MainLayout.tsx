@@ -12,7 +12,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   if (isAdmin) return <>{children}</>
 
   return (
-    <div className="flex min-h-screen flex-col pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="flex min-h-screen flex-col">
       <ScrollToTop />
       <Header />
       <div className="flex flex-1 flex-col">{children}</div>

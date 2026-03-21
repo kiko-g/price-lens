@@ -76,7 +76,7 @@ export function NavigationSheet() {
 
       <DrawerContent
         direction="left"
-        className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+        className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))]"
       >
         {/* header: logo + profile */}
         <div className="px-5">
@@ -194,7 +194,7 @@ export function NavigationSheet() {
         <Separator className="mx-5 w-auto" />
 
         {/* footer */}
-        <div className="flex items-center px-5 pt-3">
+        <div className="flex items-center px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
           <Link
             href={siteConfig.links.repo}
             target="_blank"

@@ -325,4 +325,3 @@ function SparseDataNote({ barcode }: { barcode: string }) {
     </p>
   )
 }
-

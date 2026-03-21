@@ -47,7 +47,7 @@ export function ResponsiveActionsMenu({ trigger, title = "Actions", children }: 
             <DrawerHeader>
               <DrawerTitle className="text-left">{title}</DrawerTitle>
             </DrawerHeader>
-            <div className="flex flex-col gap-0.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">{children}</div>
+            <div className="flex flex-col gap-0.5 pb-4">{children}</div>
           </DrawerContent>
         </Drawer>
       )}
