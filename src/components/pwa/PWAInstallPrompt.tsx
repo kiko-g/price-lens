@@ -3,34 +3,37 @@
 import { usePWAInstall } from "@/hooks/usePWAInstall"
 import { PWAInstallBanner } from "@/components/pwa/PWAInstallBanner"
 import { PWAInstallFAB } from "@/components/pwa/PWAInstallFAB"
-import { PWAIOSGuide } from "@/components/pwa/PWAIOSGuide"
 
 export function PWAInstallPrompt() {
   const {
     installed,
     showBanner,
     showFAB,
-    showIOSGuide,
+    hasNativePrompt,
     debugMode,
     triggerInstall,
     dismiss,
     dismissFAB,
     openBannerFromFAB,
-    closeIOSGuide,
   } = usePWAInstall()
 
   if (installed) return null
 
   return (
     <>
-      <PWAInstallBanner visible={showBanner} forceDesktop={debugMode} onInstall={triggerInstall} onDismiss={dismiss} />
+      <PWAInstallBanner
+        visible={showBanner}
+        forceDesktop={debugMode}
+        onInstall={triggerInstall}
+        onDismiss={dismiss}
+        hasNativePrompt={hasNativePrompt}
+      />
       <PWAInstallFAB
-        visible={showFAB && !showBanner && !showIOSGuide}
+        visible={showFAB && !showBanner}
         forceDesktop={debugMode}
         onClick={openBannerFromFAB}
         onDismiss={dismissFAB}
       />
-      <PWAIOSGuide visible={showIOSGuide} forceDesktop={debugMode} onClose={closeIOSGuide} />
     </>
   )
 }

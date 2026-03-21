@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { DownloadIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -9,9 +10,16 @@ interface PWAInstallBannerProps {
   forceDesktop?: boolean
   onInstall: () => void
   onDismiss: () => void
+  hasNativePrompt: boolean
 }
 
-export function PWAInstallBanner({ visible, forceDesktop, onInstall, onDismiss }: PWAInstallBannerProps) {
+export function PWAInstallBanner({
+  visible,
+  forceDesktop,
+  onInstall,
+  onDismiss,
+  hasNativePrompt,
+}: PWAInstallBannerProps) {
   const [mounted, setMounted] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
 
@@ -43,28 +51,34 @@ export function PWAInstallBanner({ visible, forceDesktop, onInstall, onDismiss }
     >
       <div className="border-border bg-background/95 mx-3 mb-3 rounded-xl border shadow-lg backdrop-blur-sm">
         <div className="flex items-center gap-3 px-3.5 py-3">
-          {/* icon */}
           <div className="bg-primary/10 dark:bg-primary/15 flex size-9 shrink-0 items-center justify-center rounded-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/price-lens.svg" alt="" width={20} height={20} className="size-5" />
           </div>
 
-          {/* copy */}
           <div className="min-w-0 flex-1">
             <p className="text-[13px] leading-tight font-semibold">Get the app</p>
             <p className="text-muted-foreground text-[11px] leading-tight">Faster, offline, full-screen</p>
           </div>
 
-          {/* install cta */}
-          <button
-            onClick={onInstall}
-            className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity active:opacity-80"
-          >
-            <DownloadIcon className="size-3.5" />
-            Install
-          </button>
+          {hasNativePrompt ? (
+            <button
+              onClick={onInstall}
+              className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity active:opacity-80"
+            >
+              <DownloadIcon className="size-3.5" />
+              Install
+            </button>
+          ) : (
+            <Link
+              href="/app"
+              onClick={onDismiss}
+              className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity active:opacity-80"
+            >
+              How to install
+            </Link>
+          )}
 
-          {/* dismiss */}
           <button
             onClick={onDismiss}
             className="text-muted-foreground/60 hover:text-muted-foreground -mr-1 shrink-0 rounded-full p-1 transition-colors"

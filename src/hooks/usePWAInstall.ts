@@ -82,8 +82,8 @@ function hasBeenDismissedBefore(): boolean {
 export function usePWAInstall() {
   const [showBanner, setShowBanner] = useState(false)
   const [showFAB, setShowFAB] = useState(false)
-  const [showIOSGuide, setShowIOSGuide] = useState(false)
   const [installed, setInstalled] = useState(false)
+  const [hasNativePrompt, setHasNativePrompt] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
   const platform = useRef<Platform>("desktop")
   const debugRef = useRef(false)
@@ -118,6 +118,7 @@ export function usePWAInstall() {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
       deferredPrompt.current = e as BeforeInstallPromptEvent
+      setHasNativePrompt(true)
 
       if (!hasBeenDismissedBefore()) {
         setTimeout(() => setShowBanner(true), SHOW_DELAY_MS)
@@ -131,12 +132,12 @@ export function usePWAInstall() {
       setInstalled(true)
       setShowBanner(false)
       setShowFAB(false)
-      setShowIOSGuide(false)
       deferredPrompt.current = null
     }
 
     window.addEventListener("appinstalled", handleInstalled)
 
+    // on iOS (no beforeinstallprompt), show the banner pointing to /app
     if (platform.current === "ios" && !hasBeenDismissedBefore()) {
       setTimeout(() => setShowBanner(true), SHOW_DELAY_MS)
     }
@@ -148,12 +149,6 @@ export function usePWAInstall() {
   }, [])
 
   const triggerInstall = useCallback(async () => {
-    if (platform.current === "ios") {
-      setShowIOSGuide(true)
-      setShowBanner(false)
-      return
-    }
-
     const prompt = deferredPrompt.current
     if (!prompt) return
     const { outcome } = await prompt.prompt()
@@ -183,29 +178,19 @@ export function usePWAInstall() {
   }, [])
 
   const openBannerFromFAB = useCallback(() => {
-    if (platform.current === "ios") {
-      setShowIOSGuide(true)
-    } else {
-      setShowBanner(true)
-    }
+    setShowBanner(true)
   }, [])
-
-  const closeIOSGuide = useCallback(() => {
-    setShowIOSGuide(false)
-    dismiss()
-  }, [dismiss])
 
   return {
     platform: platform.current,
     installed,
     showBanner,
     showFAB,
-    showIOSGuide,
+    hasNativePrompt,
     debugMode: debugRef.current,
     triggerInstall,
     dismiss,
     dismissFAB,
     openBannerFromFAB,
-    closeIOSGuide,
   }
 }
