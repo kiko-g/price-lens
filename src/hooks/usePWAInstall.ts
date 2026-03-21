@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 
-const STORAGE_KEY = "pwa-install-state"
+const DISMISS_KEY = "pwa-install-state"
+const INSTALLED_KEY = "pwa-installed"
 const SHOW_DELAY_MS = 4_000
 const COOLDOWN_TIERS_DAYS = [1, 3, 7, 30]
+const MAX_DISMISSALS = 4
 
 export interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<{ outcome: "accepted" | "dismissed" }>
@@ -29,9 +31,23 @@ function isStandalone(): boolean {
   )
 }
 
+function wasInstalledBefore(): boolean {
+  try {
+    return localStorage.getItem(INSTALLED_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
+function markInstalled(): void {
+  try {
+    localStorage.setItem(INSTALLED_KEY, "1")
+  } catch {}
+}
+
 function getDismissState(): DismissState | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(DISMISS_KEY)
     return raw ? (JSON.parse(raw) as DismissState) : null
   } catch {
     return null
@@ -40,8 +56,13 @@ function getDismissState(): DismissState | null {
 
 function saveDismissState(state: DismissState): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(state))
   } catch {}
+}
+
+function isPermanentlyDismissed(): boolean {
+  const state = getDismissState()
+  return state !== null && state.count >= MAX_DISMISSALS
 }
 
 function isCoolingDown(): boolean {
@@ -68,30 +89,29 @@ export function usePWAInstall() {
   const debugRef = useRef(false)
 
   useEffect(() => {
-    // ?pwa-debug or ?pwa-debug=ios — force-show on any browser for testing
     const params = new URLSearchParams(window.location.search)
     const debugParam = params.get("pwa-debug")
     if (debugParam !== null) {
-      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(DISMISS_KEY)
+      localStorage.removeItem(INSTALLED_KEY)
       debugRef.current = true
       platform.current = debugParam === "ios" ? "ios" : "android"
       setTimeout(() => setShowBanner(true), 500)
       return
     }
 
-    if (isStandalone()) {
+    if (isStandalone() || wasInstalledBefore()) {
       setInstalled(true)
       return
     }
 
+    if (isPermanentlyDismissed()) return
+
     platform.current = getPlatform()
 
-    if (isCoolingDown()) {
-      setShowFAB(true)
-      return
-    }
+    if (isCoolingDown()) return
 
-    if (hasBeenDismissedBefore() && !isCoolingDown()) {
+    if (hasBeenDismissedBefore()) {
       setShowFAB(true)
     }
 
@@ -99,7 +119,7 @@ export function usePWAInstall() {
       e.preventDefault()
       deferredPrompt.current = e as BeforeInstallPromptEvent
 
-      if (!isCoolingDown() && !hasBeenDismissedBefore()) {
+      if (!hasBeenDismissedBefore()) {
         setTimeout(() => setShowBanner(true), SHOW_DELAY_MS)
       }
     }
@@ -107,6 +127,7 @@ export function usePWAInstall() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstall)
 
     const handleInstalled = () => {
+      markInstalled()
       setInstalled(true)
       setShowBanner(false)
       setShowFAB(false)
@@ -137,6 +158,7 @@ export function usePWAInstall() {
     if (!prompt) return
     const { outcome } = await prompt.prompt()
     if (outcome === "accepted") {
+      markInstalled()
       setInstalled(true)
       setShowBanner(false)
       setShowFAB(false)
@@ -146,12 +168,18 @@ export function usePWAInstall() {
 
   const dismiss = useCallback(() => {
     const prev = getDismissState()
-    saveDismissState({
-      count: (prev?.count ?? 0) + 1,
-      lastAt: new Date().toISOString(),
-    })
+    const newCount = (prev?.count ?? 0) + 1
+    saveDismissState({ count: newCount, lastAt: new Date().toISOString() })
     setShowBanner(false)
-    setShowFAB(true)
+    if (newCount >= MAX_DISMISSALS) {
+      setShowFAB(false)
+    } else {
+      setShowFAB(true)
+    }
+  }, [])
+
+  const dismissFAB = useCallback(() => {
+    setShowFAB(false)
   }, [])
 
   const openBannerFromFAB = useCallback(() => {
@@ -176,6 +204,7 @@ export function usePWAInstall() {
     debugMode: debugRef.current,
     triggerInstall,
     dismiss,
+    dismissFAB,
     openBannerFromFAB,
     closeIOSGuide,
   }

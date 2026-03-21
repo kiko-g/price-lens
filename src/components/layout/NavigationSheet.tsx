@@ -74,10 +74,7 @@ export function NavigationSheet() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent
-        direction="left"
-        className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))]"
-      >
+      <DrawerContent direction="left" className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))]">
         {/* header: logo + profile */}
         <div className="px-5">
           <LogoLink />

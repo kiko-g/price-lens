@@ -14,6 +14,7 @@ export function PWAInstallPrompt() {
     debugMode,
     triggerInstall,
     dismiss,
+    dismissFAB,
     openBannerFromFAB,
     closeIOSGuide,
   } = usePWAInstall()
@@ -27,6 +28,7 @@ export function PWAInstallPrompt() {
         visible={showFAB && !showBanner && !showIOSGuide}
         forceDesktop={debugMode}
         onClick={openBannerFromFAB}
+        onDismiss={dismissFAB}
       />
       <PWAIOSGuide visible={showIOSGuide} forceDesktop={debugMode} onClose={closeIOSGuide} />
     </>
