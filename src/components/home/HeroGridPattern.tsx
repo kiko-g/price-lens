@@ -21,7 +21,7 @@ function Blobs() {
 export function HeroGridPattern({ withGradient, ...props }: HeroGridPatternProps) {
   if (withGradient) {
     return (
-      <div className="absolute inset-x-0 -top-24 z-[-1] h-[calc(100svh+12rem)] overflow-hidden">
+      <div className="absolute inset-x-0 -top-24 bottom-0 z-[-1] h-[calc(100svh)] overflow-hidden">
         <div className="bg-background absolute top-0 -left-20 h-full w-[calc(100%+10rem)]">
           <Blobs />
 
