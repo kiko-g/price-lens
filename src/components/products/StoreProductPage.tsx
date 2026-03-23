@@ -80,7 +80,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:py-4">
-      {/* Category Breadcrumb - shown on both breakpoints */}
+      {/* Category Breadcrumb shown on both breakpoints */}
       <CategoryBreadcrumb sp={sp} className="mb-2 px-0 md:mb-3" />
 
       {/* Desktop hero (hidden below md) - chart lives inside the right column */}
@@ -91,7 +91,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       {/* Mobile hero (hidden at md+) */}
       <ProductHeroMobile sp={sp} />
 
-      {/* Mobile chart - full width, hidden on desktop (already rendered inside hero) */}
+      {/* Mobile chart full width, hidden on desktop (already rendered inside hero) */}
       <div className="mt-4 md:hidden">
         <ChartSection sp={sp} rangeFromUrl={rangeFromUrl} onRangeChange={handleRangeChange} />
       </div>

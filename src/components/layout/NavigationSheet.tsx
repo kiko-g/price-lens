@@ -59,7 +59,7 @@ export function NavigationSheet() {
     setIsOpen(false)
   }
 
-  const shownNav = navigation.filter((item) => item.shown)
+  const shownNav = navigation.filter((item) => item.shownOnMobile)
   const primaryNav = shownNav.filter((item) => primaryNavKeys.has(item.href))
   const secondaryNav = shownNav.filter((item) => !primaryNavKeys.has(item.href))
 

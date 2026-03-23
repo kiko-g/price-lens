@@ -36,7 +36,7 @@ async function HeroContent() {
 
           <p className="text-muted-foreground animate-fade-in my-2.5 text-center text-sm opacity-0 [--animation-delay:150ms]">
             Turn price swings into savings.{" "}
-            <strong className="text-primary-900 dark:text-primary-300/70 font-semibold">Money in your pocket</strong>.
+            <strong className="text-foreground dark:text-foreground font-semibold">Money in your pocket</strong>.
           </p>
 
           <div className="animate-fade-in mb-4 w-full opacity-0 [--animation-delay:250ms]">
@@ -50,7 +50,7 @@ async function HeroContent() {
 
         <div className="flex flex-col gap-5 pb-6">
           <div className="animate-fade-in opacity-0 [--animation-delay:300ms]">
-            <EntryPointGrid />
+            <EntryPointGrid variant="row" />
           </div>
 
           <div className="animate-fade-in opacity-0 [--animation-delay:350ms]">
@@ -70,9 +70,9 @@ async function HeroContent() {
         </div>
       </div>
 
-      {/* ─── Desktop layout (matches mockup) ─── */}
+      {/* Desktop layout */}
       <div className="hidden lg:block">
-        {/* Row 1: Two-column — left: title/subtitle/search/stats, right: store cards */}
+        {/* Row 1: Two-column left: title/subtitle/search/stats, right: store cards */}
         <div className="flex gap-10 pt-20 pb-6">
           <div className="animate-fade-in flex flex-1 flex-col gap-5 opacity-0 [--animation-delay:100ms]">
             <h1
@@ -89,7 +89,7 @@ async function HeroContent() {
               Daily price monitoring across Continente, Auchan and Pingo Doce.
               <br />
               Turn supermarket swings into strong. More{" "}
-              <strong className="text-primary-900 dark:text-primary-300/70 font-bold">money in your pocket</strong>.
+              <strong className="text-foreground dark:text-foreground font-bold">money in your pocket</strong>.
             </p>
 
             <div className="w-full max-w-lg">
@@ -104,12 +104,12 @@ async function HeroContent() {
           </div>
         </div>
 
-        {/* Row 2: Entry points — clean links */}
+        {/* Row 2: Entry points clean links */}
         <div className="animate-fade-in pb-8 opacity-0 [--animation-delay:300ms]">
           <EntryPointGrid variant="row" />
         </div>
 
-        {/* Row 4: Popular products — full width */}
+        {/* Row 4: Popular products full width */}
         {heroProducts.length > 0 && (
           <div className="animate-fade-in pb-6 opacity-0 [--animation-delay:400ms]">
             <PopularProducts products={heroProducts} />

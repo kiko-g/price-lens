@@ -35,7 +35,7 @@ export function Header() {
 
           <nav className="ml-3 hidden items-center gap-1.5 lg:flex">
             {navigation
-              .filter((item) => item.shown)
+              .filter((item) => item.shownOnDesktop)
               .map((item) => {
                 const hrefSanitized = item.href.split("?")[0]
                 return (

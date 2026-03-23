@@ -289,7 +289,9 @@ export function OffSearchCta({ product }: OffSearchCtaProps) {
 
   return (
     <section className="flex flex-col items-start gap-3">
-      <p className="text-muted-foreground text-sm">Looking for something similar? Try searching our tracked stores.</p>
+      <p className="text-muted-foreground text-sm">
+        Looking for something similar? Try searching our tracked stores with similar keywords.
+      </p>
       <div className="flex flex-wrap items-center gap-2">
         {queries.map((query, i) => (
           <Button key={query} asChild variant={i === 0 ? "default" : "outline"} size="sm">

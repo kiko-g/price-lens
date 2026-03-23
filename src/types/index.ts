@@ -32,7 +32,8 @@ export interface ProductChartEntry {
 export interface NavigationItem {
   href: string
   label: string
-  shown?: boolean
+  shownOnDesktop?: boolean
+  shownOnMobile?: boolean
   icon?: React.ElementType
 }
 

@@ -1,15 +1,11 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback } from "react"
-import Link from "next/link"
 import {
   DownloadIcon,
   ShareIcon,
   PlusSquareIcon,
   SmartphoneIcon,
-  WifiOffIcon,
-  ZapIcon,
-  GaugeIcon,
   CheckCircle2Icon,
   MonitorIcon,
   ChromeIcon,
@@ -35,13 +31,6 @@ function isStandalone(): boolean {
     (navigator as unknown as { standalone?: boolean }).standalone === true
   )
 }
-
-const BENEFITS = [
-  { icon: ZapIcon, title: "Instant launch", desc: "Opens from your home screen like a native app" },
-  { icon: GaugeIcon, title: "Faster experience", desc: "Cached assets mean less loading time" },
-  { icon: WifiOffIcon, title: "Works offline", desc: "Browse previously loaded products without internet" },
-  { icon: SmartphoneIcon, title: "Full screen", desc: "No browser chrome — more space for what matters" },
-] as const
 
 export function AppInstallContent() {
   const [platform, setPlatform] = useState<Platform>("desktop")
@@ -81,52 +70,63 @@ export function AppInstallContent() {
     <main className="flex w-full flex-col items-center justify-center">
       <section className="w-full px-4 pt-12 pb-6 md:pt-16 lg:pt-24">
         <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 text-center">
-          <div className="bg-primary/10 dark:bg-primary/15 flex size-16 items-center justify-center rounded-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/price-lens.svg" alt="" width={36} height={36} className="size-9" />
+          <div className="flex items-center gap-4">
+            <div className="bg-primary/10 dark:bg-primary/15 flex size-16 items-center justify-center rounded-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/price-lens.svg" alt="" width={36} height={36} className="size-9" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">Get the App</h1>
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">Get the App</h1>
           <p className="text-muted-foreground max-w-lg text-sm md:text-base/relaxed">
-            Price Lens is a free progressive web app. Install it on your device for a faster, offline-ready, full-screen
-            experience — no app store needed.
+            Price Lens works better as an app outside the browser. Install it on your device for a{" "}
+            <strong>faster</strong>, <strong>offline-ready</strong>, <strong>full-screen</strong> experience without
+            going through an App Store.
           </p>
 
           {installed && (
             <div className="bg-primary/10 text-primary mt-2 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
               <CheckCircle2Icon className="size-4" />
-              Already installed — you&apos;re all set!
+              Already installed. You&apos;re all set!
             </div>
           )}
-        </div>
-      </section>
-
-      {/* benefits */}
-      <section className="w-full px-4 py-6">
-        <div className="mx-auto grid max-w-2xl gap-3 sm:grid-cols-2">
-          {BENEFITS.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="border-border/50 flex items-start gap-3 rounded-xl border p-4">
-              <div className="bg-primary/10 dark:bg-primary/15 flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Icon className="text-primary size-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{title}</p>
-                <p className="text-muted-foreground text-xs leading-snug">{desc}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
       {/* platform-specific instructions */}
       <section className="w-full px-4 py-6">
         <div className="mx-auto flex max-w-2xl flex-col gap-6">
+          {/* ios */}
+          <InstructionCard
+            id="ios"
+            title="iPhone & iPad"
+            icon={SmartphoneIcon}
+            expanded={platform === "ios"}
+            className={platform === "ios" ? "order-first" : ""}
+            steps={[
+              <>
+                Open this page in <strong>Safari</strong> (required for iOS)
+              </>,
+              <>
+                Tap the <ShareIcon className="mb-0.5 inline size-3.5" /> <strong>Share</strong> button in the toolbar
+              </>,
+              <>
+                Scroll down and tap <strong>&quot;Add to Home Screen&quot;</strong>
+              </>,
+              <>
+                Make sure <strong>&quot;Open as Web App&quot;</strong> is enabled, then tap{" "}
+                <PlusSquareIcon className="mb-0.5 inline size-3.5" /> <strong>Add</strong>
+              </>,
+            ]}
+          />
+
           {/* android / chromium */}
           <InstructionCard
             id="android"
             title="Android & Chrome"
             icon={ChromeIcon}
             expanded={platform === "android"}
+            className={platform === "android" ? "order-first" : ""}
             installButton={
               !installed &&
               platform === "android" && (
@@ -149,35 +149,13 @@ export function AppInstallContent() {
             ]}
           />
 
-          {/* ios */}
-          <InstructionCard
-            id="ios"
-            title="iPhone & iPad"
-            icon={SmartphoneIcon}
-            expanded={platform === "ios"}
-            steps={[
-              <>
-                Open this page in <strong>Safari</strong> (required for iOS)
-              </>,
-              <>
-                Tap the <ShareIcon className="mb-0.5 inline size-3.5" /> <strong>Share</strong> button in the toolbar
-              </>,
-              <>
-                Scroll down and tap <strong>&quot;Add to Home Screen&quot;</strong>
-              </>,
-              <>
-                Make sure <strong>&quot;Open as Web App&quot;</strong> is enabled, then tap{" "}
-                <PlusSquareIcon className="mb-0.5 inline size-3.5" /> <strong>Add</strong>
-              </>,
-            ]}
-          />
-
           {/* desktop */}
           <InstructionCard
             id="desktop"
             title="Desktop (Chrome, Edge)"
             icon={MonitorIcon}
             expanded={platform === "desktop"}
+            className={platform === "desktop" ? "order-first" : ""}
             installButton={
               !installed &&
               platform === "desktop" && (
@@ -198,18 +176,6 @@ export function AppInstallContent() {
           />
         </div>
       </section>
-
-      <section className="w-full px-4 pt-2 pb-12">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground text-xs">
-            Price Lens is a{" "}
-            <Link href="https://web.dev/progressive-web-apps/" target="_blank" className="underline underline-offset-2">
-              Progressive Web App
-            </Link>
-            . It installs directly from your browser — no app store, no fees, no tracking.
-          </p>
-        </div>
-      </section>
     </main>
   )
 }
@@ -221,6 +187,7 @@ function InstructionCard({
   steps,
   expanded,
   installButton,
+  className,
 }: {
   id: string
   title: string
@@ -228,11 +195,12 @@ function InstructionCard({
   steps: React.ReactNode[]
   expanded: boolean
   installButton?: React.ReactNode
+  className?: string
 }) {
   const [open, setOpen] = useState(expanded)
 
   return (
-    <div className="border-border/50 overflow-hidden rounded-xl border">
+    <div className={cn("border-border/50 overflow-hidden rounded-xl border", className)}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

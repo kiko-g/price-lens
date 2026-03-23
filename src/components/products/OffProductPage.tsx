@@ -71,7 +71,7 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col px-4 pt-4 lg:py-4">
       {/* Not tracked disclaimer */}
-      <Callout variant="warning" icon={InfoIcon} className="mb-4 w-full max-w-full md:w-fit md:max-w-3xl">
+      <Callout variant="warning" icon={InfoIcon} className="mb-4 w-full max-w-full">
         <p className="text-sm">
           This product was not found in our tracked stores, but we found it on{" "}
           <a
@@ -293,10 +293,6 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
         {isSparseData && <SparseDataNote barcode={barcode} />}
       </article>
 
-      {/* Search CTA — shown before similar products so users see it early */}
-      <Separator className="mt-6 mb-4" />
-      <OffSearchCta product={product} />
-
       {/* Streamed tracked products from our stores (nested Suspense) */}
       {children && (
         <>
@@ -304,6 +300,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
           {children}
         </>
       )}
+
+      <Separator className="mt-6 mb-4" />
+      <OffSearchCta product={product} />
     </div>
   )
 }

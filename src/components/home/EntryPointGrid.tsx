@@ -31,15 +31,6 @@ const entryPoints = [
     iconBg: "bg-amber-500/10 dark:bg-amber-500/20",
     border: "border-amber-200/50 dark:border-amber-500/20",
   },
-  {
-    label: "Essential",
-    description: "Top tracked",
-    href: "/products?priority=5",
-    icon: AppleIcon,
-    iconColor: "text-rose-600 dark:text-rose-400",
-    iconBg: "bg-rose-500/10 dark:bg-rose-500/20",
-    border: "border-rose-200/50 dark:border-rose-500/20",
-  },
 ] as const
 
 export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" }) {

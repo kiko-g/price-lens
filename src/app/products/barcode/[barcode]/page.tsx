@@ -87,12 +87,12 @@ export default async function ProductByBarcodePage({ params }: PageProps) {
   const { barcode } = await params
   const products = await getProductsByBarcode(barcode)
 
-  // Single product — redirect to its detail page
+  // Single product redirect to its detail page
   if (products.length === 1) {
     redirect(generateProductPath(products[0]))
   }
 
-  // Multiple products — render comparison inline
+  // Multiple products render comparison inline
   if (products.length > 1) {
     const barcodes = [...new Set(products.map((p) => p.barcode).filter(Boolean))] as string[]
     const displayBarcode = barcodes[0] ?? barcode
@@ -110,7 +110,7 @@ export default async function ProductByBarcodePage({ params }: PageProps) {
     )
   }
 
-  // Not in our DB — try Open Food Facts with streaming
+  // Not in our DB try Open Food Facts with streaming
   return (
     <Suspense fallback={<OffLookupSkeleton barcode={barcode} />}>
       <OffLookupResult barcode={barcode} />
@@ -151,7 +151,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Lookup unavailable</h1>
             <p className="text-muted-foreground max-w-sm text-center text-sm">
-              Barcode <span className="font-mono font-medium">{barcode}</span> isn&apos;t in our tracked stores, and the
+              Barcode <span className="font-mono font-medium">{barcode}</span> is not in our tracked stores, and the
               external database is temporarily unreachable.
             </p>
           </div>
@@ -188,9 +188,16 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
           <p className="text-muted-foreground max-w-sm text-center text-sm">
-            Barcode <span className="font-mono font-medium">{barcode}</span> doesn&apos;t match any product in our
-            tracked stores or Open Food Facts. It may be a non-food item, a regional product, or a newly released
-            barcode.
+            Barcode <span className="font-mono font-medium">{barcode}</span> does not match any product in our tracked
+            stores.
+          </p>
+
+          <p className="text-muted-foreground mt-1 max-w-sm text-center text-sm">
+            We also searched on{" "}
+            <span className="inline-flex items-center gap-1 font-bold">
+              <OpenFoodFactsIcon className="inline h-4 w-4" /> Open Food Facts
+            </span>
+            . It may be a non-food item, a regional product, or a newly released barcode.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2">

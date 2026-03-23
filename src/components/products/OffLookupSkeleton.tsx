@@ -25,8 +25,8 @@ export function OffLookupSkeleton({ barcode }: OffLookupSkeletonProps) {
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col px-4 pt-4 lg:py-4">
-      <div className="mb-4 flex w-full max-w-full flex-col gap-2 md:max-w-md">
-        <Callout variant="info" icon={BrainIcon} className="mb-4 w-full">
+      <div className="mb-4 flex w-full max-w-full flex-col gap-2">
+        <Callout variant="info" icon={BrainIcon} className="mb-3 w-full">
           <p className="text-sm">
             This product was not found in our tracked stores, but we can try to find it elsewhere
           </p>
