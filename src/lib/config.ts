@@ -6,8 +6,7 @@ export const siteConfig = {
   title: "Price Lens",
   author: "Francisco Goncalves",
   url: "https://price-lens.vercel.app",
-  ogImage:
-    "https://price-lens.vercel.app/og?title=Price+Lens&description=Monitor+daily+price+changes+on+essential+consumer+goods+that+impact+inflation+metrics.",
+  ogImage: "https://price-lens.vercel.app/og?stats=true",
   description:
     "Monitor daily price changes on essential consumer goods that impact inflation metrics. See beyond the headlines and tags.",
   links: {
