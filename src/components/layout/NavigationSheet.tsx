@@ -26,7 +26,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 import { LogoLink } from "@/components/layout/LogoLink"
@@ -75,6 +75,7 @@ export function NavigationSheet() {
       </DrawerTrigger>
 
       <DrawerContent direction="left" className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))]">
+        <DrawerTitle className="sr-only">Navigation menu</DrawerTitle>
         {/* header: logo + profile */}
         <div className="px-5">
           <LogoLink />
@@ -173,17 +174,24 @@ export function NavigationSheet() {
             </NavSection>
 
             <NavSection label="Preferences">
-              <button
-                type="button"
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setTheme(isDark ? "light" : "dark")}
-                className="hover:bg-accent flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    setTheme(isDark ? "light" : "dark")
+                  }
+                }}
+                className="hover:bg-accent flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors"
               >
                 <ContrastIcon className="text-muted-foreground size-4 shrink-0 dark:rotate-180" />
                 <span>Dark mode</span>
                 {mounted && (
                   <Switch checked={isDark} className="pointer-events-none ml-auto" tabIndex={-1} aria-hidden />
                 )}
-              </button>
+              </div>
             </NavSection>
           </nav>
         </ScrollArea>

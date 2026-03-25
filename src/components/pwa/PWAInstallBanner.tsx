@@ -75,7 +75,7 @@ export function PWAInstallBanner({
               onClick={onDismiss}
               className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity active:opacity-80"
             >
-              How to install
+              Install
             </Link>
           )}
 

@@ -15,7 +15,8 @@ const entryPoints = [
     iconColor: "text-blue-600 dark:text-blue-400",
     iconBg: "bg-blue-500/10 dark:bg-blue-500/20",
     border: "border-blue-200/50 dark:border-blue-500/20",
-    mobileTint: "bg-linear-to-br from-blue-500/5 to-blue-600/10 dark:from-blue-500/10 dark:to-blue-600/10",
+    mobileBg: "bg-foreground/5 dark:bg-foreground/5",
+    mobileTint: "bg-linear-to-br from-blue-400/5 to-blue-500/10 dark:from-blue-400/15 dark:to-blue-500/15",
     shownOnDesktop: true,
     shownOnMobile: true,
   },
@@ -27,7 +28,8 @@ const entryPoints = [
     iconColor: "text-emerald-600 dark:text-emerald-400",
     iconBg: "bg-emerald-500/10 dark:bg-emerald-500/20",
     border: "border-emerald-200/50 dark:border-emerald-500/20",
-    mobileTint: "bg-linear-to-br from-emerald-500/5 to-emerald-600/10 dark:from-emerald-500/10 dark:to-emerald-600/10",
+    mobileBg: "bg-foreground/5 dark:bg-foreground/5",
+    mobileTint: "bg-linear-to-br from-indigo-400/5 to-indigo-500/10 dark:from-indigo-400/15 dark:to-indigo-500/15",
     shownOnDesktop: true,
     shownOnMobile: true,
   },
@@ -39,7 +41,8 @@ const entryPoints = [
     iconColor: "text-violet-600 dark:text-violet-400",
     iconBg: "bg-violet-500/10 dark:bg-violet-500/20",
     border: "border-violet-200/50 dark:border-violet-500/20",
-    mobileTint: "bg-linear-to-br from-violet-500/5 to-violet-600/10 dark:from-violet-500/10 dark:to-violet-600/10",
+    mobileBg: "bg-foreground/5 dark:bg-foreground/5",
+    mobileTint: "bg-linear-to-br from-violet-400/5 to-violet-500/10 dark:from-violet-400/15 dark:to-violet-500/15",
     shownOnDesktop: true,
     shownOnMobile: true,
   },
@@ -51,7 +54,8 @@ const entryPoints = [
     iconColor: "text-rose-600 dark:text-rose-400",
     iconBg: "bg-rose-500/10 dark:bg-rose-500/20",
     border: "border-rose-200/50 dark:border-rose-500/20",
-    mobileTint: "bg-linear-to-br from-rose-500/5 to-rose-600/10 dark:from-rose-500/10 dark:to-rose-600/10",
+    mobileBg: "bg-foreground/5 dark:bg-foreground/5",
+    mobileTint: "bg-linear-to-br from-rose-400/5 to-rose-500/10 dark:from-rose-400/15 dark:to-rose-500/15",
     shownOnDesktop: true,
     shownOnMobile: false,
   },
@@ -64,14 +68,14 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
 
   if (variant === "row") {
     return (
-      <div className="flex w-full items-center justify-center gap-2 lg:justify-start">
+      <div className="flex w-full items-center justify-center gap-2.5 lg:justify-start lg:gap-2.5">
         {entryPointsFiltered.map((entry) => (
           <Link
             key={entry.label}
             href={entry.href}
             className={cn(
-              "text-foreground hover:bg-accent bg-accent/50 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
-              isMobile ? entry.mobileTint : "",
+              "text-foreground hover:bg-accent bg-accent/50 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
+              isMobile ? entry.mobileBg : "",
             )}
           >
             <entry.icon className="text-foreground size-3.5" />
