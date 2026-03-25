@@ -31,7 +31,7 @@ function formatPrice(n: number): string {
 function ProductCard({ product, compact = false }: { product: HeroProduct; compact?: boolean }) {
   const [loaded, setLoaded] = useState(false)
   const hasDiscount = product.discount != null && product.discount > 0
-  const imgSize = compact ? 48 : 72
+  const imgSize = compact ? 56 : 80
 
   return (
     <Link
@@ -119,11 +119,11 @@ export function PopularProducts({ products, className }: { products: HeroProduct
 
   return (
     <div className={cn("flex h-full flex-col gap-2 md:gap-1", className)}>
-      <p className="text-muted-foreground order-2 mb-3 text-center text-[11px] font-semibold tracking-widest uppercase md:order-1 md:text-left">
+      <p className="text-muted-foreground mb-3 text-center text-[11px] font-semibold tracking-widest uppercase md:text-left">
         Popular products
       </p>
 
-      <div className="relative order-1 md:order-2">
+      <div className="relative">
         {/* Mobile: compact marquee */}
         <div className="flex flex-col gap-2 lg:hidden">
           <Marquee className="p-0 [--duration:70s] [--gap:0.75rem]">

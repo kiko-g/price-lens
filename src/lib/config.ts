@@ -8,7 +8,7 @@ export const siteConfig = {
   url: "https://price-lens.vercel.app",
   ogImage: "https://price-lens.vercel.app/og?stats=true",
   description:
-    "Monitor daily price changes on essential consumer goods that impact inflation metrics. See beyond the headlines and tags.",
+    "Daily price monitoring for Portuguese supermarkets (Continente, Auchan and Pingo Doce). Turn price swings into savings. More money in your pocket. All in Price Lens.",
   links: {
     linkedin: "https://www.linkedin.com/in/kikogoncalves/",
     instagram: "https://www.instagram.com/kikogoncalves_",
