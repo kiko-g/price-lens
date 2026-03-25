@@ -3,8 +3,11 @@ import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
 import { buildPageTitle } from "@/lib/business/page-title"
 import { siteConfig } from "@/lib/config"
-import { getSearchType, STORE_COLORS, STORE_NAMES, type SortByType } from "@/types/business"
+import { getSearchType, STORE_COLORS, STORE_LOGO_PATHS, STORE_NAMES, type SortByType } from "@/types/business"
+import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 import type { PrioritySource } from "@/types"
+
+export const runtime = "nodejs"
 
 const PRODUCTS_AMOUNT = 4
 
@@ -69,132 +72,114 @@ export async function GET(request: Request) {
   const fonts = await loadGeistFontsLight()
 
   return new ImageResponse(
-    <div tw="flex h-full w-full flex-col" style={{ fontFamily: "Geist", backgroundColor: "#f5f5f7" }}>
-      {/* Header */}
-      <div tw="flex items-center justify-between px-10 pt-6 pb-4">
-        <div tw="flex flex-col flex-1">
-          <h1 tw="text-4xl font-semibold m-0" style={{ letterSpacing: "-0.02em", color: "#18181b" }}>
-            {title}
-          </h1>
-          {query && <p tw="text-base text-zinc-500 m-0 mt-1">Results for &quot;{query}&quot;</p>}
+    <OGFrame>
+      <div tw="flex flex-col w-full h-full">
+        {/* Header */}
+        <div tw="flex items-center px-10 pt-8 pb-4">
+          <div tw="flex flex-col flex-1">
+            <h1 tw="text-4xl font-semibold m-0 text-white" style={{ letterSpacing: "-0.02em" }}>
+              {title}
+            </h1>
+            {query && <p tw="text-base text-zinc-500 m-0 mt-1">Results for &quot;{query}&quot;</p>}
+          </div>
         </div>
 
-        {/* Logo Badge */}
-        <div
-          tw="flex items-center px-4 py-2.5 rounded-xl border border-zinc-200 bg-white"
-          style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${siteConfig.url}/price-lens.svg`}
-            alt=""
-            width={36}
-            height={36}
-            tw="w-9 h-9"
-            style={{ objectFit: "contain" }}
-          />
-          <span tw="ml-2.5 text-xl font-semibold text-zinc-700" style={{ letterSpacing: "-0.02em" }}>
-            Price Lens
-          </span>
-        </div>
-      </div>
-
-      {/* Products Grid - 3x3 */}
-      <div tw="flex flex-1 px-10 pb-4">
-        {products.length > 0 ? (
-          <div tw="flex items-start justify-start flex-wrap w-full">
-            {products.slice(0, PRODUCTS_AMOUNT).map((product, i) => (
-              <div key={i} tw="flex w-1/2 p-2">
-                <div
-                  tw="flex w-full bg-white rounded-xl border border-zinc-200"
-                  style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
-                >
-                  {/* Product image */}
-                  <div tw="flex w-48 h-48 items-center justify-center p-4 bg-white rounded-l-xl">
-                    {product.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={product.image}
-                        alt=""
-                        tw="w-full h-full border border-zinc-200 rounded-lg p-1"
-                        style={{ objectFit: "contain" }}
-                      />
-                    ) : (
-                      <div tw="flex w-full h-full bg-zinc-100 rounded items-center justify-center">
-                        <span tw="text-zinc-300 text-xs">No img</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product info - fixed height with consistent alignment */}
-                  <div tw="flex flex-col h-full self-stretch flex-1 py-4 pr-3 h-48">
-                    {/* Top: Brand */}
-                    <span
-                      tw="text-sm font-semibold text-blue-600"
-                      style={{ lineHeight: "16px", letterSpacing: "-0.01em" }}
-                    >
-                      {product.brand
-                        ? product.brand.length > 22
-                          ? product.brand.slice(0, 20) + "..."
-                          : product.brand
-                        : " "}
-                    </span>
-
-                    {/* Middle: Name (flex-1 to take remaining space) */}
-                    <div tw="flex flex-1 items-start mt-0.5">
-                      <span
-                        tw="text-sm font-medium text-zinc-700"
-                        style={{
-                          lineHeight: "18px",
-                          letterSpacing: "-0.01em",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {product.name || "Unknown"}
-                      </span>
+        {/* Products Grid */}
+        <div tw="flex flex-1 px-10 pb-16">
+          {products.length > 0 ? (
+            <div tw="flex items-start justify-start flex-wrap w-full">
+              {products.slice(0, PRODUCTS_AMOUNT).map((product, i) => (
+                <div key={i} tw="flex w-1/2 p-2">
+                  <div
+                    tw="flex w-full bg-[#18181b] rounded-xl border border-[#27272a]"
+                    style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}
+                  >
+                    <div tw="flex w-48 h-48 items-center justify-center p-4 bg-white rounded-l-xl">
+                      {product.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={product.image}
+                          alt=""
+                          tw="w-full h-full rounded-lg p-1"
+                          style={{ objectFit: "contain" }}
+                        />
+                      ) : (
+                        <div tw="flex w-full h-full bg-zinc-100 rounded items-center justify-center">
+                          <span tw="text-zinc-400 text-xs">No img</span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Bottom: Price + Store - always at bottom */}
-                    <div tw="flex items-center justify-between mt-auto">
+                    <div tw="flex flex-col h-full self-stretch flex-1 py-4 pr-3 h-48">
                       <span
-                        tw="text-lg font-bold"
-                        style={{ color: product.discount ? "#16a34a" : "#18181b", letterSpacing: "-0.02em" }}
+                        tw="text-sm font-semibold text-blue-400"
+                        style={{ lineHeight: "16px", letterSpacing: "-0.01em" }}
                       >
-                        {product.price != null ? `${product.price.toFixed(2)}€` : "-"}
+                        {product.brand
+                          ? product.brand.length > 22
+                            ? product.brand.slice(0, 20) + "..."
+                            : product.brand
+                          : " "}
                       </span>
 
-                      {product.origin_id && (
+                      <div tw="flex flex-1 items-start mt-0.5">
                         <span
-                          tw="text-xs font-semibold px-2 py-1 rounded-xl text-white"
-                          style={{ backgroundColor: STORE_COLORS[product.origin_id] || "#71717a" }}
+                          tw="text-sm font-medium text-zinc-300"
+                          style={{
+                            lineHeight: "18px",
+                            letterSpacing: "-0.01em",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
                         >
-                          {STORE_NAMES[product.origin_id]}
+                          {product.name || "Unknown"}
                         </span>
-                      )}
+                      </div>
+
+                      <div tw="flex items-center justify-between mt-auto">
+                        <span
+                          tw="text-lg font-bold"
+                          style={{ color: product.discount ? "#4ade80" : "#e4e4e7", letterSpacing: "-0.02em" }}
+                        >
+                          {product.price != null ? `${product.price.toFixed(2)}€` : "-"}
+                        </span>
+
+                        {product.origin_id && STORE_LOGO_PATHS[product.origin_id] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={`${siteConfig.url}${STORE_LOGO_PATHS[product.origin_id]}`}
+                            alt={STORE_NAMES[product.origin_id] || ""}
+                            height={20}
+                            tw="h-5 w-auto"
+                            style={{ objectFit: "contain" }}
+                          />
+                        ) : product.origin_id ? (
+                          <span
+                            tw="text-xs font-semibold px-2 py-1 rounded-xl text-white"
+                            style={{ backgroundColor: STORE_COLORS[product.origin_id] || "#71717a" }}
+                          >
+                            {STORE_NAMES[product.origin_id]}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div tw="flex flex-1 items-center justify-center">
-            <p tw="text-xl text-zinc-500">No products found</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div tw="flex flex-1 items-center justify-center">
+              <p tw="text-xl text-zinc-500">No products found</p>
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Footer */}
-      <div tw="flex items-center justify-end px-10 pb-4">
-        <span tw="text-sm font-medium text-zinc-500">Compare prices across Portuguese supermarkets</span>
-      </div>
-    </div>,
+    </OGFrame>,
     {
-      width: 1200,
-      height: 630,
+      width: OG_WIDTH,
+      height: OG_HEIGHT,
       fonts,
     },
   )

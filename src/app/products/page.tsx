@@ -51,13 +51,21 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 
   const ogImageUrl = `${siteConfig.url}/api/og/products${ogParams.toString() ? `?${ogParams}` : ""}`
+  const ogTitle = `Price Lens | ${title}`
+  const description = `Browse and compare prices${params.q ? ` for "${params.q}"` : ""} across supermarkets`
 
   return {
     title,
-    description: `Browse and compare prices${params.q ? ` for "${params.q}"` : ""} across supermarkets`,
+    description,
     openGraph: {
-      title: `Price Lens | ${title}`,
-      description: `Browse and compare prices${params.q ? ` for "${params.q}"` : ""} across supermarkets`,
+      title: ogTitle,
+      description,
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: ogTitle }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
       images: [ogImageUrl],
     },
   }

@@ -16,6 +16,12 @@ export const STORE_COLORS: Record<number, string> = {
   [SupermarketChain.PingoDoce]: "#71a82b",
 }
 
+export const STORE_LOGO_PATHS: Record<number, string> = {
+  [SupermarketChain.Continente]: "/logos/continente.svg",
+  [SupermarketChain.Auchan]: "/logos/auchan.svg",
+  [SupermarketChain.PingoDoce]: "/logos/pingo-doce.svg",
+}
+
 export const STORE_COLORS_SECONDARY: Record<number, string> = {
   [SupermarketChain.Continente]: "#ffffff",
   [SupermarketChain.Auchan]: "#2f9c5c",

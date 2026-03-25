@@ -71,16 +71,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const firstProduct = products[0]
   const storeCount = new Set(products.map((p) => p.origin_id)).size
+  const title = `Compare Prices - ${firstProduct.name || barcode}`
+  const description = `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`
 
-  return {
-    title: `Compare Prices - ${firstProduct.name || barcode}`,
-    description: `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`,
-    openGraph: {
-      title: `Compare Prices - ${firstProduct.name || barcode}`,
-      description: `Compare prices across ${storeCount} stores.`,
-      type: "website",
-    },
-  }
+  return pageMetadata(title, description)
 }
 
 export default async function ProductByBarcodePage({ params }: PageProps) {

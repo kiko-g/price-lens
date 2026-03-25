@@ -63,16 +63,10 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
   const firstProduct = products[0]
   const storeCount = new Set(products.map((p) => p.origin_id)).size
+  const title = `Compare Prices - ${firstProduct.name || "Product"}`
+  const description = `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`
 
-  return {
-    title: `Compare Prices - ${firstProduct.name || "Product"}`,
-    description: `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`,
-    openGraph: {
-      title: `Compare Prices - ${firstProduct.name || "Product"}`,
-      description: `Compare prices across ${storeCount} stores.`,
-      type: "website",
-    },
-  }
+  return pageMetadata(title, description)
 }
 
 export default async function CanonicalComparePage({ searchParams }: PageProps) {

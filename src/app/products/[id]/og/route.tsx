@@ -2,8 +2,9 @@ import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { storeProductQueries } from "@/lib/queries/products"
 import { extractProductIdFromSlug } from "@/lib/business/product"
+import { STORE_NAMES, STORE_LOGO_PATHS } from "@/types/business"
 import { siteConfig } from "@/lib/config"
-import { STORE_NAMES } from "@/types/business"
+import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 
 export const runtime = "nodejs"
 
@@ -29,8 +30,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const fonts = await loadGeistFontsLight()
   const storeName = product.origin_id ? STORE_NAMES[product.origin_id] : null
+  const storeLogoPath = product.origin_id ? STORE_LOGO_PATHS[product.origin_id] : null
 
-  // Format prices
   const currentPrice = product.price?.toFixed(2) ?? "-"
   const originalPrice = product.price_recommended?.toFixed(2)
   const pricePerUnit = product.price_per_major_unit?.toFixed(2)
@@ -38,8 +39,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const discountPercent = product.discount ? Math.round(product.discount * 1000) / 10 : null
 
   return new ImageResponse(
-    <div tw="flex h-full w-full bg-[#0a0a0a]" style={{ fontFamily: "Geist" }}>
-      {/* Product Image Section */}
+    <OGFrame>
       <div tw="flex w-[500px] h-full items-center justify-center bg-[#111] p-8">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -54,19 +54,27 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         )}
       </div>
 
-      {/* Product Info Section */}
-      <div tw="flex flex-1 flex-col justify-between p-10">
-        {/* Top: Brand & Store */}
+      <div tw="flex flex-1 flex-col justify-between p-10 pb-20">
         <div tw="flex items-center justify-between gap-4 w-full">
-          {product.brand && <span tw="flex text-3xl font-semibold text-blue-600">{truncate(product.brand, 30)}</span>}
-          {storeName && (
+          {product.brand && <span tw="flex text-3xl font-semibold text-blue-500">{truncate(product.brand, 30)}</span>}
+          {storeLogoPath ? (
+            <div tw="flex items-center justify-end h-10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${siteConfig.url}${storeLogoPath}`}
+                alt={storeName || ""}
+                height={40}
+                tw="h-10 w-auto"
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+          ) : storeName ? (
             <div tw="flex items-center justify-end w-fit px-4 py-2 bg-emerald-900/30 rounded-full border border-emerald-700/50">
               <span tw="text-2xl text-emerald-400">{storeName}</span>
             </div>
-          )}
+          ) : null}
         </div>
 
-        {/* Category breadcrumb */}
         {product.category && (
           <div tw="flex mt-4 pt-4 border-t border-[#333]">
             <span tw="text-xl text-[#666]">
@@ -75,7 +83,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           </div>
         )}
 
-        {/* Middle: Name & Pack */}
         <div tw="flex flex-col mt-1 mb-8">
           <h1 tw="text-5xl font-semibold text-white leading-tight" style={{ fontWeight: 600 }}>
             {truncate(product.name, 54) || "Product"}
@@ -83,10 +90,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           {product.pack && <span tw="text-3xl text-[#888] mt-0">{truncate(product.pack, 70)}</span>}
         </div>
 
-        {/* Bottom: Prices */}
         <div tw="flex flex-col">
           <div tw="flex items-center">
-            {/* Price per unit */}
             {pricePerUnit && (
               <div tw="flex items-center justify-center">
                 <span tw="text-2xl text-amber-600 bg-amber-700/30 rounded-lg px-2 py-1">
@@ -96,7 +101,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             )}
           </div>
 
-          {/* Main Price Row */}
           <div tw="mt-4 flex items-baseline">
             <span tw="text-6xl text-emerald-400" style={{ fontWeight: 600 }}>
               {currentPrice}€
@@ -110,30 +114,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           </div>
         </div>
       </div>
-
-      <div tw="absolute bottom-6 right-6 flex items-center">
-        <div
-          tw="flex items-center px-4 py-2.5 rounded-xl bg-white/10"
-          style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${siteConfig.url}/price-lens.svg`}
-            alt=""
-            width={36}
-            height={36}
-            tw="w-9 h-9"
-            style={{ objectFit: "contain" }}
-          />
-          <span tw="ml-2.5 text-xl font-semibold text-zinc-50" style={{ letterSpacing: "-0.02em" }}>
-            Price Lens
-          </span>
-        </div>
-      </div>
-    </div>,
+    </OGFrame>,
     {
-      width: 1200,
-      height: 630,
+      width: OG_WIDTH,
+      height: OG_HEIGHT,
       fonts,
     },
   )
