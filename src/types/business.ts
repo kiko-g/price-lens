@@ -16,10 +16,10 @@ export const STORE_COLORS: Record<number, string> = {
   [SupermarketChain.PingoDoce]: "#71a82b",
 }
 
-export const STORE_LOGO_PATHS: Record<number, string> = {
-  [SupermarketChain.Continente]: "/logos/continente.svg",
-  [SupermarketChain.Auchan]: "/logos/auchan.svg",
-  [SupermarketChain.PingoDoce]: "/logos/pingo-doce.svg",
+export const STORE_LOGO_PATHS: Record<number, { src: string; width: number; height: number }> = {
+  [SupermarketChain.Continente]: { src: "/logos/continente.png", width: 442, height: 80 },
+  [SupermarketChain.Auchan]: { src: "/logos/auchan.png", width: 234, height: 80 },
+  [SupermarketChain.PingoDoce]: { src: "/logos/pingo-doce.png", width: 354, height: 80 },
 }
 
 export const STORE_COLORS_SECONDARY: Record<number, string> = {

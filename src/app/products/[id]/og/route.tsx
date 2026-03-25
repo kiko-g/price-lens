@@ -3,7 +3,6 @@ import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { storeProductQueries } from "@/lib/queries/products"
 import { extractProductIdFromSlug } from "@/lib/business/product"
 import { STORE_NAMES, STORE_LOGO_PATHS } from "@/types/business"
-import { siteConfig } from "@/lib/config"
 import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 
 export const runtime = "nodejs"
@@ -15,6 +14,7 @@ function truncate(str: string | null | undefined, maxLen: number): string {
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const baseUrl = new URL(request.url).origin
   const { id: idParam } = await params
   const productId = extractProductIdFromSlug(idParam)
 
@@ -39,7 +39,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const discountPercent = product.discount ? Math.round(product.discount * 1000) / 10 : null
 
   return new ImageResponse(
-    <OGFrame>
+    <OGFrame baseUrl={baseUrl}>
       <div tw="flex w-[500px] h-full items-center justify-center bg-[#111] p-8">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -61,10 +61,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             <div tw="flex items-center justify-end h-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`${siteConfig.url}${storeLogoPath}`}
+                src={`${baseUrl}${storeLogoPath.src}`}
                 alt={storeName || ""}
+                width={Math.round((storeLogoPath.width / storeLogoPath.height) * 40)}
                 height={40}
-                tw="h-10 w-auto"
+                tw="h-10"
                 style={{ objectFit: "contain" }}
               />
             </div>

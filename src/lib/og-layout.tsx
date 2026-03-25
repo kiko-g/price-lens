@@ -3,16 +3,17 @@ import { siteConfig } from "@/lib/config"
 export const OG_WIDTH = 1200
 export const OG_HEIGHT = 630
 
-export function OGFrame({ children }: { children: React.ReactNode }) {
+export function OGFrame({ children, baseUrl }: { children: React.ReactNode; baseUrl?: string }) {
   return (
     <div tw="flex h-full w-full bg-[#0a0a0a] text-white" style={{ fontFamily: "Geist" }}>
       {children}
-      <PriceLensBadge />
+      <PriceLensBadge baseUrl={baseUrl} />
     </div>
   )
 }
 
-function PriceLensBadge() {
+function PriceLensBadge({ baseUrl }: { baseUrl?: string }) {
+  const origin = baseUrl ?? siteConfig.url
   return (
     <div tw="absolute bottom-6 right-6 flex items-center">
       <div
@@ -21,7 +22,7 @@ function PriceLensBadge() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${siteConfig.url}/price-lens.svg`}
+          src={`${origin}/price-lens.svg`}
           alt=""
           width={36}
           height={36}

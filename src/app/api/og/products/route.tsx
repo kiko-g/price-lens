@@ -2,7 +2,6 @@ import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
 import { buildPageTitle } from "@/lib/business/page-title"
-import { siteConfig } from "@/lib/config"
 import { getSearchType, STORE_COLORS, STORE_LOGO_PATHS, STORE_NAMES, type SortByType } from "@/types/business"
 import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 import type { PrioritySource } from "@/types"
@@ -17,7 +16,9 @@ function parseCategoryId(slug: string): number | null {
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
+  const url = new URL(request.url)
+  const baseUrl = url.origin
+  const { searchParams } = url
   const query = searchParams.get("q") || undefined
   const searchIn = getSearchType(searchParams.get("t") ?? "any")
   const sortBy = searchParams.get("sort") || undefined
@@ -72,7 +73,7 @@ export async function GET(request: Request) {
   const fonts = await loadGeistFontsLight()
 
   return new ImageResponse(
-    <OGFrame>
+    <OGFrame baseUrl={baseUrl}>
       <div tw="flex flex-col w-full h-full">
         {/* Header */}
         <div tw="flex items-center px-10 pt-8 pb-4">
@@ -110,7 +111,7 @@ export async function GET(request: Request) {
                       )}
                     </div>
 
-                    <div tw="flex flex-col h-full self-stretch flex-1 py-4 pr-3 h-48">
+                    <div tw="flex flex-col h-full self-stretch flex-1 py-4 px-4 h-48">
                       <span
                         tw="text-sm font-semibold text-blue-400"
                         style={{ lineHeight: "16px", letterSpacing: "-0.01em" }}
@@ -149,10 +150,11 @@ export async function GET(request: Request) {
                         {product.origin_id && STORE_LOGO_PATHS[product.origin_id] ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={`${siteConfig.url}${STORE_LOGO_PATHS[product.origin_id]}`}
+                            src={`${baseUrl}${STORE_LOGO_PATHS[product.origin_id].src}`}
                             alt={STORE_NAMES[product.origin_id] || ""}
+                            width={Math.round((STORE_LOGO_PATHS[product.origin_id].width / STORE_LOGO_PATHS[product.origin_id].height) * 20)}
                             height={20}
-                            tw="h-5 w-auto"
+                            tw="h-5"
                             style={{ objectFit: "contain" }}
                           />
                         ) : product.origin_id ? (
