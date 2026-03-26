@@ -22,7 +22,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { GithubIcon } from "@/components/icons"
-import { ContrastIcon, HeartIcon, LogOut, ScanFaceIcon, UserIcon } from "lucide-react"
+import { ContrastIcon, HeartIcon, LogOut, UserIcon } from "lucide-react"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
@@ -35,8 +35,8 @@ export function UserDropdownMenu() {
 
   if (!user)
     return isMobile ? (
-      <Button variant="outline" size="icon" className="relative" onClick={() => router.push("/login")}>
-        <ScanFaceIcon />
+      <Button variant="outline" size="md" className="relative" onClick={() => router.push("/login")}>
+        Sign in
       </Button>
     ) : (
       <Button variant="primary" className="relative" onClick={() => router.push("/login")}>

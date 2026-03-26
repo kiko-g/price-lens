@@ -46,18 +46,23 @@ export async function signup(formData: FormData) {
   redirect("/")
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
   const supabase = await createClient()
-  let origin = (await headers()).get("origin")
+  const origin = (await headers()).get("origin")
+  const next = formData.get("next") as string | null
 
   if (!origin) {
     return redirect("/login?error=origin-missing")
   }
 
+  const callbackUrl = next
+    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${origin}/auth/callback`
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: callbackUrl,
     },
   })
 

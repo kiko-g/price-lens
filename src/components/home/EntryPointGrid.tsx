@@ -74,7 +74,7 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
             key={entry.label}
             href={entry.href}
             className={cn(
-              "text-foreground hover:bg-accent bg-accent/50 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
+              "text-foreground hover:bg-accent bg-accent/50 flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
               isMobile ? entry.mobileBg : "",
             )}
           >
