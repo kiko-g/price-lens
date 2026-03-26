@@ -6,6 +6,7 @@ import { Layout } from "@/components/layout"
 import { Hero } from "@/components/home/Hero"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { SavingsEvidence } from "@/components/home/SavingsEvidence"
+import { PersonalTrackingCta } from "@/components/home/PersonalTrackingCta"
 import { AboutTeaserCta } from "@/components/home/AboutTeaserCta"
 
 export const revalidate = 3600
@@ -41,6 +42,8 @@ export default async function Home() {
         </Suspense>
         <Separator />
         <SavingsEvidence />
+        <Separator />
+        <PersonalTrackingCta />
         <Separator />
         <AboutTeaserCta />
       </main>

@@ -14,6 +14,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { NavigationSheet } from "@/components/layout/NavigationSheet"
 import { SearchContainer } from "@/components/layout/search"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
+import { FavoritesLink } from "@/components/layout/FavoritesLink"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
 
 import { ScanBarcodeIcon, SearchIcon } from "lucide-react"
@@ -81,6 +82,7 @@ export function Header() {
             <ThemeToggle size="icon" variant="outline" />
           </div>
 
+          <FavoritesLink />
           <UserDropdownMenu />
         </div>
       </div>

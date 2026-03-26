@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { verifySignatureAppRouter } from "@upstash/qstash/nextjs"
 import { createClient } from "@/lib/supabase/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { updatePricePoint } from "@/lib/business/pricing"
@@ -248,7 +249,4 @@ async function handler(req: NextRequest) {
   }
 }
 
-// Wrap with QStash signature verification in production
-// TODO: Re-enable once we confirm QStash is working
-// export const POST = process.env.NODE_ENV === "production" ? verifySignatureAppRouter(handler) : handler
-export const POST = handler // Temporarily disabled for debugging
+export const POST = process.env.NODE_ENV === "production" ? verifySignatureAppRouter(handler) : handler

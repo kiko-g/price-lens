@@ -50,11 +50,9 @@ export async function GET(req: NextRequest) {
     nodeEnv: process.env.NODE_ENV,
   })
 
-  // NOTE: CRON_SECRET check temporarily disabled for debugging
-  // Once cron is working, re-enable with:
-  // if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  // }
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   try {
     const supabase = createClient()
