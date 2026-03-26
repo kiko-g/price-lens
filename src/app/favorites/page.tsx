@@ -40,6 +40,7 @@ function buildServerQueryParams(params: { [key: string]: string | undefined }, l
     },
     flags: {
       onlyDiscounted: params.discounted === "true",
+      ...((params.pc === "drop" || params.pc === "increase") && { priceChange: params.pc }),
     },
   }
 

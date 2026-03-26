@@ -130,3 +130,21 @@ export const FAVORITES_SORT_OPTIONS_GROUPS = [
     ],
   },
 ]
+
+export const FAVORITES_SMART_VIEW_PRESETS = [
+  {
+    label: "On Sale",
+    icon: TicketPercentIcon,
+    params: { discounted: "true" },
+  },
+  {
+    label: "Price Drops",
+    icon: TrendingDownIcon,
+    params: { pc: "drop" },
+  },
+  {
+    label: "Price Increases",
+    icon: TrendingUpIcon,
+    params: { pc: "increase" },
+  },
+] as const

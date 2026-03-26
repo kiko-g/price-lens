@@ -142,8 +142,12 @@ function parseSearchParams(params: URLSearchParams): FavoritesQueryParams {
 
   // Flags
   const onlyDiscounted = params.get("onlyDiscounted") === "true"
-  if (onlyDiscounted) {
-    queryParams.flags = { onlyDiscounted }
+  const priceChange = params.get("priceChange") as "drop" | "increase" | null
+  if (onlyDiscounted || priceChange) {
+    queryParams.flags = {
+      ...(onlyDiscounted && { onlyDiscounted }),
+      ...(priceChange && (priceChange === "drop" || priceChange === "increase") && { priceChange }),
+    }
   }
 
   return queryParams

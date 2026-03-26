@@ -5,6 +5,7 @@ import type {
   FavoriteWithProduct,
   FavoritesQueryResult,
   FavoritesSortType,
+  FavoritesSummary,
 } from "@/lib/queries/favorites"
 import { SupermarketChain } from "@/types/business"
 
@@ -42,6 +43,9 @@ function paramsToSearchParams(params: FavoritesQueryParams): Record<string, stri
   // Flags
   if (params.flags?.onlyDiscounted) {
     searchParams.onlyDiscounted = "true"
+  }
+  if (params.flags?.priceChange) {
+    searchParams.priceChange = params.flags.priceChange
   }
 
   return searchParams
@@ -86,6 +90,7 @@ export function generateQueryKey(params: FavoritesQueryParams): QueryKeyValue[] 
     params.pagination?.page ?? 1,
     params.pagination?.limit ?? 24,
     params.flags?.onlyDiscounted ?? false,
+    params.flags?.priceChange ?? null,
   ]
 }
 
@@ -150,6 +155,7 @@ export function useFavoritesFiltered(params: FavoritesQueryParams = {}, options:
     // Data
     data: result?.data ?? [],
     pagination: result?.pagination ?? null,
+    summary: result?.summary ?? null,
 
     // Raw query result
     rawResult: result,
@@ -170,7 +176,7 @@ export type UseFavoritesFilteredReturn = ReturnType<typeof useFavoritesFiltered>
 // ============================================================================
 
 export { SupermarketChain }
-export type { FavoritesQueryParams, FavoriteWithProduct, FavoritesSortType }
+export type { FavoritesQueryParams, FavoriteWithProduct, FavoritesSortType, FavoritesSummary }
 
 // ============================================================================
 // Utility Hook: Invalidate Favorites

@@ -34,6 +34,7 @@ export interface FavoritesQueryParams {
   /** Flags */
   flags?: {
     onlyDiscounted?: boolean
+    priceChange?: "drop" | "increase"
   }
 }
 
@@ -42,6 +43,11 @@ export interface FavoriteWithProduct {
   created_at: string
   store_product_id: number
   store_products: StoreProduct & { is_favorited: true }
+}
+
+export interface FavoritesSummary {
+  onSale: number
+  priceDrops: number
 }
 
 export interface FavoritesQueryResult {
@@ -54,6 +60,7 @@ export interface FavoritesQueryResult {
     hasNextPage: boolean
     hasPreviousPage: boolean
   }
+  summary: FavoritesSummary | null
   error: { message: string; code?: string } | null
 }
 
@@ -243,6 +250,13 @@ export const favoriteQueries = {
   /**
    * Get filtered and paginated favorites for a user
    * Supports search, origin filtering, sorting, and pagination
+   *
+   * PostgREST's `referencedTable` ordering only sorts embedded data, not
+   * parent rows. To get correct ordering we flip the query direction:
+   *   - Date sorts (recently-added, oldest-first): query FROM user_favorites
+   *     so `created_at` is on the main table.
+   *   - Product-column sorts (a-z, price, etc.): query FROM store_products
+   *     so the sort column is on the main table.
    */
   async getUserFavoritesFiltered(
     userId: string,
@@ -253,100 +267,29 @@ export const favoriteQueries = {
     const pagination = { ...DEFAULT_FAVORITES_PAGINATION, ...params.pagination }
     const offset = (pagination.page - 1) * pagination.limit
 
-    // Build base query with join to store_products
-    let query = supabase
-      .from("user_favorites")
-      .select(
-        `
-        id,
-        created_at,
-        store_product_id,
-        store_products!inner (*)
-      `,
-        { count: "exact" },
-      )
-      .eq("user_id", userId)
-
-    // Apply origin filter on the joined store_products
-    if (params.origin?.originIds) {
-      const ids = params.origin.originIds
-      if (Array.isArray(ids)) {
-        if (ids.length === 1) {
-          query = query.eq("store_products.origin_id", ids[0])
-        } else if (ids.length > 1) {
-          query = query.in("store_products.origin_id", ids)
-        }
-      } else {
-        query = query.eq("store_products.origin_id", ids)
-      }
-    }
-
-    // Apply discount filter
-    if (params.flags?.onlyDiscounted) {
-      query = query.gt("store_products.discount", 0)
-    }
-
-    // Apply search filter on store_products fields
-    if (params.search?.query) {
-      const searchQuery = params.search.query
-      const searchIn = params.search.searchIn
-      const sanitizedQuery = searchQuery.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
-
-      if (sanitizedQuery) {
-        switch (searchIn) {
-          case "url":
-            query = query.ilike("store_products.url", `%${sanitizedQuery}%`)
-            break
-          case "any": {
-            const pattern = `%${sanitizedQuery.replace(/ /g, "%")}%`
-            query = query.or(
-              `name.ilike.${pattern},brand.ilike.${pattern},url.ilike.${pattern},category.ilike.${pattern}`,
-              { referencedTable: "store_products" },
-            )
-            break
-          }
-          case "name":
-            query = query.ilike("store_products.name", `%${sanitizedQuery}%`)
-            break
-          case "brand":
-            query = query.ilike("store_products.brand", `%${sanitizedQuery}%`)
-            break
-          case "category":
-            query = query.ilike("store_products.category", `%${sanitizedQuery}%`)
-            break
-        }
-      }
-    }
-
-    // Apply sorting
     const sortBy = params.sort?.sortBy ?? "recently-added"
-    switch (sortBy) {
-      case "recently-added":
-        query = query.order("created_at", { ascending: false })
-        break
-      case "oldest-first":
-        query = query.order("created_at", { ascending: true })
-        break
-      case "a-z":
-        query = query.order("name", { ascending: true, referencedTable: "store_products" })
-        break
-      case "z-a":
-        query = query.order("name", { ascending: false, referencedTable: "store_products" })
-        break
-      case "price-low-high":
-        query = query.order("price", { ascending: true, referencedTable: "store_products" })
-        break
-      case "price-high-low":
-        query = query.order("price", { ascending: false, referencedTable: "store_products" })
-        break
-      default:
-        query = query.order("created_at", { ascending: false })
-    }
+    const isFavColumnSort = sortBy === "recently-added" || sortBy === "oldest-first"
 
-    // Apply pagination
-    query = query.range(offset, offset + pagination.limit - 1)
+    // Global summary counts (unfiltered, head-only — cheap)
+    const onSaleQuery = supabase
+      .from("user_favorites")
+      .select("id, store_products!inner(id)", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gt("store_products.discount", 0)
 
-    const { data, error, count } = await query
+    const priceDropsQuery = supabase
+      .from("user_favorites")
+      .select("id, store_products!inner(id)", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .lt("store_products.price_change_pct", 0)
+
+    const mainQuery = isFavColumnSort
+      ? this._buildFavoritesFromFavorites(supabase, userId, params, sortBy, offset, pagination.limit)
+      : this._buildFavoritesFromProducts(supabase, userId, params, sortBy, offset, pagination.limit)
+
+    const [mainResult, onSaleResult, priceDropsResult] = await Promise.all([mainQuery, onSaleQuery, priceDropsQuery])
+
+    const { data, error, count } = mainResult
 
     if (error) {
       return {
@@ -359,6 +302,7 @@ export const favoriteQueries = {
           hasNextPage: false,
           hasPreviousPage: false,
         },
+        summary: null,
         error: { message: error.message, code: "DATABASE_ERROR" },
       }
     }
@@ -366,16 +310,24 @@ export const favoriteQueries = {
     const totalCount = count || 0
     const totalPages = Math.ceil(totalCount / pagination.limit)
 
-    // Transform and augment data - mark all as favorited since this is favorites list
-    const transformedData: FavoriteWithProduct[] = (data || []).map((item: any) => ({
-      id: item.id,
-      created_at: item.created_at,
-      store_product_id: item.store_product_id,
-      store_products: {
-        ...item.store_products,
-        is_favorited: true,
-      },
-    }))
+    const transformedData: FavoriteWithProduct[] = (data || []).map((item: any) => {
+      if (isFavColumnSort) {
+        return {
+          id: item.id,
+          created_at: item.created_at,
+          store_product_id: item.store_product_id,
+          store_products: { ...item.store_products, is_favorited: true },
+        }
+      }
+      const fav = Array.isArray(item.user_favorites) ? item.user_favorites[0] : item.user_favorites
+      const productFields = Object.fromEntries(Object.entries(item).filter(([k]) => k !== "user_favorites"))
+      return {
+        id: fav.id,
+        created_at: fav.created_at,
+        store_product_id: fav.store_product_id,
+        store_products: { ...productFields, is_favorited: true },
+      }
+    })
 
     return {
       data: transformedData,
@@ -387,7 +339,188 @@ export const favoriteQueries = {
         hasNextPage: pagination.page < totalPages,
         hasPreviousPage: pagination.page > 1,
       },
+      summary: {
+        onSale: onSaleResult.count ?? 0,
+        priceDrops: priceDropsResult.count ?? 0,
+      },
       error: null,
     }
+  },
+
+  /**
+   * Query from user_favorites — used when sorting by created_at (main table column).
+   * Filters reference store_products via the join prefix.
+   */
+  _buildFavoritesFromFavorites(
+    supabase: ReturnType<typeof createClient>,
+    userId: string,
+    params: FavoritesQueryParams,
+    sortBy: FavoritesSortType,
+    offset: number,
+    limit: number,
+  ) {
+    let query = supabase
+      .from("user_favorites")
+      .select("id, created_at, store_product_id, store_products!inner(*)", { count: "exact" })
+      .eq("user_id", userId)
+
+    query = this._applyFiltersFromFavorites(query, params)
+
+    if (sortBy === "oldest-first") {
+      query = query.order("created_at", { ascending: true })
+    } else {
+      query = query.order("created_at", { ascending: false })
+    }
+
+    return query.range(offset, offset + limit - 1)
+  },
+
+  /**
+   * Query from store_products — used when sorting by a product column (main table).
+   * Filters reference store_products columns directly (no prefix needed).
+   */
+  _buildFavoritesFromProducts(
+    supabase: ReturnType<typeof createClient>,
+    userId: string,
+    params: FavoritesQueryParams,
+    sortBy: FavoritesSortType,
+    offset: number,
+    limit: number,
+  ) {
+    let query = supabase
+      .from("store_products")
+      .select("*, user_favorites!inner(id, created_at, store_product_id)", { count: "exact" })
+      .eq("user_favorites.user_id", userId)
+
+    query = this._applyFiltersFromProducts(query, params)
+
+    switch (sortBy) {
+      case "a-z":
+        query = query.order("name", { ascending: true })
+        break
+      case "z-a":
+        query = query.order("name", { ascending: false })
+        break
+      case "price-low-high":
+        query = query.order("price", { ascending: true })
+        break
+      case "price-high-low":
+        query = query.order("price", { ascending: false })
+        break
+      case "price-drop":
+        query = query.order("price_change_pct", { ascending: true, nullsFirst: false })
+        break
+      case "price-increase":
+        query = query.order("price_change_pct", { ascending: false, nullsFirst: false })
+        break
+      case "best-discount":
+        query = query.order("discount", { ascending: false, nullsFirst: false })
+        break
+      default:
+        query = query.order("name", { ascending: true })
+    }
+
+    return query.range(offset, offset + limit - 1)
+  },
+
+  /** Apply filters when querying FROM user_favorites (store_products columns need prefix). */
+  _applyFiltersFromFavorites(query: any, params: FavoritesQueryParams) {
+    if (params.origin?.originIds) {
+      const ids = params.origin.originIds
+      if (Array.isArray(ids)) {
+        query =
+          ids.length === 1 ? query.eq("store_products.origin_id", ids[0]) : query.in("store_products.origin_id", ids)
+      } else {
+        query = query.eq("store_products.origin_id", ids)
+      }
+    }
+
+    if (params.flags?.onlyDiscounted) {
+      query = query.gt("store_products.discount", 0)
+    }
+    if (params.flags?.priceChange === "drop") {
+      query = query.lt("store_products.price_change_pct", 0)
+    } else if (params.flags?.priceChange === "increase") {
+      query = query.gt("store_products.price_change_pct", 0)
+    }
+
+    if (params.search?.query) {
+      const sanitized = params.search.query.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
+      if (sanitized) {
+        const searchIn = params.search.searchIn
+        switch (searchIn) {
+          case "url":
+            query = query.ilike("store_products.url", `%${sanitized}%`)
+            break
+          case "any": {
+            const p = `%${sanitized.replace(/ /g, "%")}%`
+            query = query.or(`name.ilike.${p},brand.ilike.${p},url.ilike.${p},category.ilike.${p}`, {
+              referencedTable: "store_products",
+            })
+            break
+          }
+          case "name":
+            query = query.ilike("store_products.name", `%${sanitized}%`)
+            break
+          case "brand":
+            query = query.ilike("store_products.brand", `%${sanitized}%`)
+            break
+          case "category":
+            query = query.ilike("store_products.category", `%${sanitized}%`)
+            break
+        }
+      }
+    }
+
+    return query
+  },
+
+  /** Apply filters when querying FROM store_products (columns are on main table, no prefix). */
+  _applyFiltersFromProducts(query: any, params: FavoritesQueryParams) {
+    if (params.origin?.originIds) {
+      const ids = params.origin.originIds
+      if (Array.isArray(ids)) {
+        query = ids.length === 1 ? query.eq("origin_id", ids[0]) : query.in("origin_id", ids)
+      } else {
+        query = query.eq("origin_id", ids)
+      }
+    }
+
+    if (params.flags?.onlyDiscounted) {
+      query = query.gt("discount", 0)
+    }
+    if (params.flags?.priceChange === "drop") {
+      query = query.lt("price_change_pct", 0)
+    } else if (params.flags?.priceChange === "increase") {
+      query = query.gt("price_change_pct", 0)
+    }
+
+    if (params.search?.query) {
+      const sanitized = params.search.query.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
+      if (sanitized) {
+        const searchIn = params.search.searchIn
+        switch (searchIn) {
+          case "url":
+            query = query.ilike("url", `%${sanitized}%`)
+            break
+          case "any": {
+            const p = `%${sanitized.replace(/ /g, "%")}%`
+            query = query.or(`name.ilike.${p},brand.ilike.${p},url.ilike.${p},category.ilike.${p}`)
+            break
+          }
+          case "name":
+            query = query.ilike("name", `%${sanitized}%`)
+            break
+          case "brand":
+            query = query.ilike("brand", `%${sanitized}%`)
+            break
+          case "category":
+            query = query.ilike("category", `%${sanitized}%`)
+            break
+        }
+      }
+    }
+
+    return query
   },
 }
