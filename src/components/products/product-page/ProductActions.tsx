@@ -61,8 +61,8 @@ export function ProductActions({ sp }: ProductActionsProps) {
           onClick={() => updateStoreProduct.mutate(sp)}
           disabled={updateStoreProduct.isPending}
         >
-          <span className="flex items-center gap-1">
-            Update from {supermarketName}
+          <span className="flex w-full items-center gap-1">
+            <span>Update from {supermarketName}</span>
             <DevBadge />
           </span>
           {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon />}
@@ -70,8 +70,8 @@ export function ProductActions({ sp }: ProductActionsProps) {
 
         {elevated && (
           <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
-            <span className="flex items-center gap-1">
-              Set priority
+            <span className="flex w-full items-center gap-1">
+              <span>Set priority</span>
               <DevBadge />
             </span>
             <MicroscopeIcon />
@@ -80,8 +80,8 @@ export function ProductActions({ sp }: ProductActionsProps) {
 
         {elevated && (
           <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
-            <span className="flex items-center gap-1">
-              Clear priority
+            <span className="flex w-full items-center gap-1">
+              <span>Clear priority</span>
               <DevBadge />
             </span>
             <CircleIcon />

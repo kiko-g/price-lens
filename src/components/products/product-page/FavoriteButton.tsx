@@ -8,12 +8,14 @@ import { useUser } from "@/hooks/useUser"
 import { useFavoriteToggle } from "@/hooks/useFavoriteToggle"
 
 import { Button } from "@/components/ui/button"
+import { LoginPrompt } from "@/components/auth/LoginPrompt"
 import { HeartIcon } from "lucide-react"
 
 export function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
   const { user } = useUser()
   const { toggleFavorite, isLoading } = useFavoriteToggle()
   const [isFavorited, setIsFavorited] = useState(storeProduct.is_favorited ?? false)
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false)
 
   const favoriteLoading = isLoading(storeProduct.id ?? 0)
 
@@ -28,10 +30,13 @@ export function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct })
 
   if (!user) {
     return (
-      <Button variant="outline" size="sm" disabled title="Log in to add favorites">
-        <HeartIcon className="h-4 w-4" />
-        Add to favorites
-      </Button>
+      <>
+        <Button variant="outline" size="sm" onClick={() => setLoginPromptOpen(true)} title="Sign in to add favorites">
+          <HeartIcon className="h-4 w-4" />
+          Add to favorites
+        </Button>
+        <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
+      </>
     )
   }
 

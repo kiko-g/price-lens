@@ -35,7 +35,7 @@ export function ResponsiveActionsMenu({ trigger, title = "Actions", children }: 
       {isDesktop ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-          <DropdownMenuContent className="min-w-48" align="end">
+          <DropdownMenuContent className="min-w-[300px]" align="end">
             <DropdownMenuLabel>{title}</DropdownMenuLabel>
             {children}
           </DropdownMenuContent>

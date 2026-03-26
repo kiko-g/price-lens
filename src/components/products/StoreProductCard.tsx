@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import Image from "next/image"
@@ -23,6 +24,7 @@ import { ResponsiveActionsMenu, ResponsiveActionsMenuItem } from "@/components/u
 import { ShareButton } from "@/components/ui/combo/share-button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
+import { LoginPrompt } from "@/components/auth/LoginPrompt"
 import { PriorityChip } from "@/components/products/PriorityChip"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { StoreProductCardDrawerChartSkeleton } from "@/components/products/skeletons/StoreProductCardDrawerChartSkeleton"
@@ -82,6 +84,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   } = useStoreProductCard(sp)
 
   const { user, profile } = useUser()
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false)
 
   if (!sp || !sp.url) {
     return null
@@ -119,14 +122,14 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   const isError = hasUpdateError || !sp.available
 
   return (
-    <div className="flex h-full w-full flex-col rounded-lg bg-transparent transition-transform duration-150 active:scale-[0.97]">
+    <div className="flex h-full w-full flex-col rounded-lg bg-transparent transition-transform duration-150">
       <div
         className={cn(
           "group relative mb-2 flex items-center justify-between gap-2 overflow-hidden rounded-md border",
           sp.image ? "border-border" : "border-transparent",
         )}
       >
-        <Link href={generateProductPath(sp)} className="h-full w-full">
+        <Link href={generateProductPath(sp)} className="h-full w-full active:scale-[0.97]">
           {sp.image ? (
             <div className="relative aspect-8/7 w-full">
               <Image
@@ -188,28 +191,27 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           )}
         </div>
 
-        {user ? (
-          <div className="absolute bottom-1.5 left-1.5 z-5 flex items-end gap-0 md:gap-1">
-            <Button
-              variant="outline"
-              size="icon-sm"
+        <div className="absolute bottom-1.5 left-1.5 z-5 flex items-end gap-0 md:gap-1">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className={cn(
+              "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
+              isFavoritePending && "disabled:opacity-50",
+            )}
+            onClick={user ? toggleFavorite : () => setLoginPromptOpen(true)}
+            disabled={isFavoritePending}
+            title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Sign in to add favorites"}
+          >
+            <HeartIcon
               className={cn(
-                "bg-background dark:bg-background cursor-pointer disabled:cursor-not-allowed disabled:opacity-100",
-                isFavoritePending && "disabled:opacity-50",
+                "h-4 w-4",
+                user && isFavorited ? "fill-destructive stroke-destructive" : "stroke-foreground fill-none",
               )}
-              onClick={toggleFavorite}
-              disabled={isFavoritePending || !user}
-              title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Log in to add favorites"}
-            >
-              <HeartIcon
-                className={cn(
-                  "h-4 w-4",
-                  isFavorited ? "fill-destructive stroke-destructive" : "stroke-foreground fill-none",
-                )}
-              />
-            </Button>
-          </div>
-        ) : null}
+            />
+          </Button>
+          {!user && <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />}
+        </div>
 
         <div className="absolute right-1.5 bottom-1.5 flex flex-col items-end">
           {favoritedAt && (
@@ -309,7 +311,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           </div>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
-            <Link href={generateProductPath(sp)} target="_blank" className="hover:underline">
+            <Link href={generateProductPath(sp)} target="_blank" className="hover:underline active:scale-[0.97]">
               {sp.name || "Untitled"}
             </Link>
           </h2>
@@ -357,14 +359,22 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               }
             >
               <ResponsiveActionsMenuItem asChild>
-                <Link href={sp.url || "#"} target="_blank" className="flex w-full items-center justify-between gap-1">
+                <Link
+                  href={sp.url || "#"}
+                  target="_blank"
+                  className="flex w-full items-center justify-between gap-1 active:scale-[0.97]"
+                >
                   Open product page
                   <ArrowUpRightIcon />
                 </Link>
               </ResponsiveActionsMenuItem>
 
               <ResponsiveActionsMenuItem asChild>
-                <Link href={sp.url || "#"} target="_blank" className="flex w-full items-center justify-between gap-1">
+                <Link
+                  href={sp.url || "#"}
+                  target="_blank"
+                  className="flex w-full items-center justify-between gap-1 active:scale-[0.97]"
+                >
                   Open in {supermarketName}
                   <ExternalLinkIcon />
                 </Link>
@@ -372,22 +382,24 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
               <ShareButton sp={sp} appearAs="responsive-item" />
 
-              {user && (
-                <ResponsiveActionsMenuItem variant="love" onClick={toggleFavorite} disabled={isFavoritePending}>
-                  {isFavorited ? "Remove from favorites" : "Add to favorites"}
-                  <HeartIcon />
-                </ResponsiveActionsMenuItem>
-              )}
+              <ResponsiveActionsMenuItem
+                variant="love"
+                onClick={user ? toggleFavorite : () => setLoginPromptOpen(true)}
+                disabled={user ? isFavoritePending : false}
+              >
+                {user && isFavorited ? "Remove from favorites" : "Add to favorites"}
+                <HeartIcon />
+              </ResponsiveActionsMenuItem>
 
               {(sp.canonical_product_id || sp.barcode) && (
-                <ResponsiveActionsMenuItem variant="hype" asChild>
+                <ResponsiveActionsMenuItem asChild>
                   <Link
+                    className="flex w-full items-center justify-between gap-1 active:scale-[0.97]"
                     href={
                       sp.canonical_product_id
                         ? `/products/compare?canonical=${sp.canonical_product_id}`
                         : `/products/barcode/${sp.barcode}`
                     }
-                    className="flex w-full items-center justify-between gap-1"
                   >
                     Compare in other stores
                     <ScaleIcon />
@@ -397,8 +409,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
               {elevated && (
                 <ResponsiveActionsMenuItem onClick={updateFromSource} disabled={isUpdating}>
-                  <span className="flex items-center gap-1">
-                    Update from {supermarketName}
+                  <span className="flex w-full items-center gap-1">
+                    <span>Update from {supermarketName}</span>
                     <DevBadge />
                   </span>
                   <RefreshCcwIcon />
@@ -407,8 +419,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
               {elevated && (
                 <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
-                  <span className="flex items-center gap-1">
-                    Set priority
+                  <span className="flex w-full items-center gap-1">
+                    <span>Set priority</span>
                     <DevBadge />
                   </span>
                   <MicroscopeIcon />
@@ -417,8 +429,8 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
               {elevated && (
                 <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
-                  <span className="flex items-center gap-1">
-                    Clear priority
+                  <span className="flex w-full items-center gap-1">
+                    <span>Clear priority</span>
                     <DevBadge />
                   </span>
                   <CircleIcon />
@@ -535,7 +547,7 @@ function PriceChangeBadge({ pct }: { pct: number | null | undefined }) {
 
   const isSignificant = Math.abs(pct) >= 0.05
   const isNegative = pct < 0
-  const formatted = `${pct > 0 ? "+" : ""}${(pct * 100).toFixed(1)}%`
+  const formatted = `${pct > 0 ? "+" : ""}${(pct * 100).toFixed(0)}%`
 
   return (
     <span
@@ -543,11 +555,11 @@ function PriceChangeBadge({ pct }: { pct: number | null | undefined }) {
         "inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] leading-none font-semibold",
         isNegative
           ? isSignificant
-            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-            : "text-green-600 dark:text-green-500"
+            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+            : "text-emerald-600 dark:text-emerald-500"
           : isSignificant
-            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-            : "text-red-600 dark:text-red-500",
+            ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400"
+            : "text-rose-600 dark:text-rose-500",
       )}
     >
       <TriangleIcon className={cn("h-2 w-2", isNegative ? "rotate-180 fill-current" : "fill-current")} />

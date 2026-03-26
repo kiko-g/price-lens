@@ -118,7 +118,7 @@ export function ShareButton({
     return (
       <DropdownMenuItem asChild>
         <Button variant="dropdown-item" onClick={handleShare}>
-          Share product
+          <span className="w-full">Share product</span>
           <ShareIcon />
         </Button>
       </DropdownMenuItem>
