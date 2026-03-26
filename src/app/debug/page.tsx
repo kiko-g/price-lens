@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
+import { toPng } from "html-to-image"
 import { AxiosError } from "axios"
 import type { ErrorReason } from "@/lib/errors"
 
@@ -19,6 +20,9 @@ import {
   PackageIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  DownloadIcon,
+  CheckIcon,
+  CheckCircleIcon,
 } from "lucide-react"
 
 // ---------------------------------------------------------------------------
@@ -135,6 +139,240 @@ function SplashPreview({ mode }: { mode: "light" | "dark" }) {
   )
 }
 
+const BANNER_W = 1584
+const BANNER_H = 396
+
+const LINKEDIN_KPIS = [
+  { value: "126k+", label: "products tracked" },
+  { value: "€79k+", label: "in savings across catalog" },
+  { value: "17k+", label: "on discount" },
+  { value: "~29k", label: "daily price checks" },
+  // { value: "2k+", label: "daily price changes" },
+  // { value: "192k+", label: "price points" },
+]
+
+const LINKEDIN_TRACKING_TEXT = "Tracking since Mar/2025. Data as of Feb/2026."
+
+function LinkedInBanner() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  const handleDownload = useCallback(async () => {
+    if (!ref.current) return
+    setDownloading(true)
+    try {
+      const dataUrl = await toPng(ref.current, {
+        width: BANNER_W,
+        height: BANNER_H,
+        pixelRatio: 1,
+        cacheBust: true,
+        skipFonts: true,
+      })
+      const a = document.createElement("a")
+      a.href = dataUrl
+      a.download = "price-lens-linkedin-banner.png"
+      a.click()
+    } finally {
+      setDownloading(false)
+    }
+  }, [])
+
+  return (
+    <div className="space-y-3">
+      {/* Scaled-down preview wrapper */}
+      <div className="border-border overflow-hidden rounded-lg border">
+        <div
+          style={{
+            transform: `scale(${1 / 2})`,
+            transformOrigin: "top left",
+            width: BANNER_W / 2,
+            height: BANNER_H / 2,
+          }}
+        >
+          {/* Actual banner at native resolution */}
+          <div
+            ref={ref}
+            style={{ width: BANNER_W, height: BANNER_H, fontFamily: "'Inter', system-ui, sans-serif" }}
+            className="relative overflow-hidden bg-[#08080a]"
+          >
+            {/* Ambient glow — centered in the content area */}
+            <div
+              className="pointer-events-none absolute"
+              style={{
+                top: -180,
+                left: 400,
+                width: 900,
+                height: 600,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(ellipse at center, rgba(99,106,215,0.11) 0%, rgba(59,138,236,0.04) 50%, transparent 70%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute"
+              style={{
+                bottom: -100,
+                right: 200,
+                width: 500,
+                height: 400,
+                borderRadius: "50%",
+                background: "radial-gradient(ellipse at center, rgba(99,106,215,0.06) 0%, transparent 60%)",
+              }}
+            />
+
+            {/* Subtle grid */}
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute top-[50px] right-0 left-0 h-px bg-white/3" />
+              <div className="absolute right-0 bottom-[50px] left-0 h-px bg-white/3" />
+              <div className="absolute top-0 bottom-0 left-[320px] w-px bg-white/3" />
+              <div className="absolute top-0 bottom-0 left-[792px] w-px bg-white/3" />
+              <div className="absolute top-0 right-[120px] bottom-0 w-px bg-white/3" />
+            </div>
+
+            {/*
+              LinkedIn safe zone considerations:
+              - Left ~300px: profile photo overlaps bottom-left
+              - Top-right ~60px: edit pencil button
+              - Bottom ~20px: can get clipped on some viewports
+              Content is centered in the right ~75% of the banner.
+            */}
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ paddingLeft: 360, paddingRight: 120 }}
+            >
+              <div className="flex items-center gap-10">
+                {/* Logo */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/price-lens.svg"
+                  alt=""
+                  width={96}
+                  height={96}
+                  className="shrink-0"
+                  style={{ filter: "drop-shadow(0 0 36px rgba(99,106,215,0.4))" }}
+                />
+
+                {/* Divider */}
+                <div className="h-28 w-px shrink-0 bg-white/8" />
+
+                {/* Brand + subtitle */}
+                <div className="flex shrink-0 flex-col">
+                  <h1
+                    className="font-semibold text-white"
+                    style={{ fontSize: 48, lineHeight: 1, letterSpacing: "-0.045em" }}
+                  >
+                    Price Lens
+                  </h1>
+                  <p
+                    className="mt-2 text-zinc-400"
+                    style={{ fontSize: 20, letterSpacing: "-0.015em", lineHeight: 1.3 }}
+                  >
+                    Price tracking for Portuguese supermarkets
+                  </p>
+                  <p className="mt-1 text-zinc-500" style={{ fontSize: 15, letterSpacing: "-0.01em" }}>
+                    Continente · Auchan · Pingo Doce
+                  </p>
+                </div>
+
+                {/* Divider */}
+                <div className="h-24 w-px shrink-0 bg-white/6" />
+
+                <div className="flex flex-col gap-4">
+                  {/* KPIs — 3x2 grid */}
+                  <div className="grid shrink-0 grid-cols-2 gap-2">
+                    {LINKEDIN_KPIS.map((kpi) => (
+                      <div
+                        key={kpi.label}
+                        className="flex flex-col items-center rounded-lg px-4 py-2.5"
+                        style={{ backgroundColor: "rgba(255,255,255,0.05)", minWidth: 118 }}
+                      >
+                        <span
+                          className="font-semibold text-white"
+                          style={{ fontSize: 20, letterSpacing: "-0.03em", lineHeight: 1 }}
+                        >
+                          {kpi.value}
+                        </span>
+                        <span className="mt-1 text-zinc-500" style={{ fontSize: 11 }}>
+                          {kpi.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-center text-zinc-200" style={{ fontSize: 13 }}>
+                    <CheckCircleIcon className="mr-1 inline size-3.5 text-emerald-400" />
+                    {LINKEDIN_TRACKING_TEXT}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground text-xs">
+          {BANNER_W} x {BANNER_H}px · 4.0:1
+        </p>
+        <Button size="sm" onClick={handleDownload} disabled={downloading}>
+          <DownloadIcon className="size-3.5" />
+          {downloading ? "Downloading…" : "Download PNG"}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function OGPreview({ src, filename, width, height }: { src: string; filename: string; width: number; height: number }) {
+  const [imgSrc, setImgSrc] = useState(src)
+  const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    setImgSrc(`${src}?t=${Date.now()}`)
+  }, [src])
+
+  const handleDownload = async () => {
+    setDownloading(true)
+    try {
+      const res = await fetch(imgSrc)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="bg-muted/30 border-border overflow-hidden rounded-lg border">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={imgSrc} alt={filename} className="block w-full" style={{ aspectRatio: `${width}/${height}` }} />
+      </div>
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground text-xs">
+          {width} x {height}px · {(width / height).toFixed(1)}:1
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setImgSrc(`${src}?t=${Date.now()}`)}>
+            Refresh
+          </Button>
+          <Button size="sm" onClick={handleDownload} disabled={downloading}>
+            <DownloadIcon className="size-3.5" />
+            {downloading ? "Downloading…" : "Download PNG"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DebugPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8">
@@ -143,7 +381,29 @@ export default function DebugPage() {
         <p className="text-muted-foreground text-sm">Preview components and states without breaking the app.</p>
       </div>
 
-      <Section title="Debug Tools" defaultOpen={true}>
+      {/* ----------------------------------------------------------------- */}
+      {/* OG / Social Images */}
+      {/* ----------------------------------------------------------------- */}
+      <Section title="Social Images" defaultOpen={true}>
+        <div className="grid gap-8">
+          <Subsection label="linkedin banner (4:1)">
+            <LinkedInBanner />
+          </Subsection>
+          <Subsection label="og image — with stats (1.9:1)">
+            <OGPreview src="/og?stats=true" filename="price-lens-og-stats.png" width={1200} height={630} />
+          </Subsection>
+          <Subsection label="og image — default (1.9:1)">
+            <OGPreview
+              src="/og?title=Price+Lens&description=Price+tracking+for+Portuguese+supermarkets"
+              filename="price-lens-og.png"
+              width={1200}
+              height={630}
+            />
+          </Subsection>
+        </div>
+      </Section>
+
+      <Section title="Debug Tools" defaultOpen={false}>
         <div className="grid gap-6">
           <OpenFoodFactsIcon className="h-6 w-auto" />
           <OpenFoodFactsLogo className="h-10 w-auto" />

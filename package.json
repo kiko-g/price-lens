@@ -86,6 +86,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "geist": "^1.7.0",
+    "html-to-image": "^1.11.13",
     "html5-qrcode": "^2.3.8",
     "https-proxy-agent": "^7.0.6",
     "immer": "^11.1.4",

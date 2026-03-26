@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og"
 import { loadGeistFonts } from "@/lib/og-fonts"
 import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
+import { siteConfig } from "@/lib/config"
 import { getHomeStats } from "@/lib/queries/home-stats"
 
 export const runtime = "nodejs"
@@ -14,141 +15,190 @@ export async function GET(request: Request) {
   const title = url.searchParams.get("title")
   const description = url.searchParams.get("description")
   const showStats = url.searchParams.get("stats") === "true"
+  const origin = url.origin ?? siteConfig.url
 
   const [fonts, stats] = await Promise.all([loadGeistFonts(), showStats ? getHomeStats() : null])
 
   const kpis = stats
     ? [
-        { value: formatNumber(stats.priceDropsToday), label: "price drops" },
+        { value: "126k+", label: "products tracked" },
+        { value: `€${formatNumber(Math.round(stats.totalDiscountSavingsEuros))}`, label: "in savings" },
         { value: formatNumber(stats.productsOnDiscount), label: "on discount" },
-        { value: `€${formatNumber(Math.round(stats.totalDiscountSavingsEuros))}`, label: "savings" },
+        { value: formatNumber(stats.priceDropsToday), label: "price drops today" },
       ]
     : null
 
-  return new ImageResponse(
-    <OGFrame baseUrl={url.origin}>
-      {/* Subtle radial glow */}
-      <div
-        tw="absolute"
-        style={{
-          top: -100,
-          right: -60,
-          width: 700,
-          height: 500,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(ellipse at center, rgba(59,138,236,0.10) 0%, rgba(99,106,215,0.06) 40%, transparent 70%)",
-        }}
-      />
-      <div
-        tw="absolute"
-        style={{
-          bottom: -80,
-          left: -40,
-          width: 500,
-          height: 400,
-          borderRadius: "50%",
-          background: "radial-gradient(ellipse at center, rgba(99,106,215,0.08) 0%, transparent 60%)",
-        }}
-      />
+  if (kpis) {
+    return new ImageResponse(
+      <div tw="flex h-full w-full bg-[#08080a] text-white" style={{ fontFamily: "Geist" }}>
+        {/* Ambient glows */}
+        <div
+          tw="absolute"
+          style={{
+            top: -150,
+            left: 100,
+            width: 900,
+            height: 600,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(ellipse at center, rgba(99,106,215,0.11) 0%, rgba(59,138,236,0.04) 50%, transparent 70%)",
+          }}
+        />
+        <div
+          tw="absolute"
+          style={{
+            bottom: -100,
+            right: 50,
+            width: 500,
+            height: 400,
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse at center, rgba(99,106,215,0.06) 0%, transparent 60%)",
+          }}
+        />
 
-      {/* Faint grid lines */}
-      <div tw="absolute" style={{ left: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.06)" }} />
-      <div
-        tw="absolute"
-        style={{ left: 400, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.06)" }}
-      />
-      <div
-        tw="absolute"
-        style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.06)" }}
-      />
-      <div tw="absolute" style={{ top: 80, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.06)" }} />
-      <div
-        tw="absolute"
-        style={{ bottom: 80, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.06)" }}
-      />
+        {/* Grid lines */}
+        <div tw="absolute" style={{ left: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+        <div tw="absolute" style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+        <div tw="absolute" style={{ left: 600, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+        <div tw="absolute" style={{ top: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+        <div tw="absolute" style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
 
-      {/* Content */}
-      {kpis ? (
-        <div tw="flex flex-col absolute" style={{ inset: 0, padding: "64px 80px 56px" }}>
-          {/* Text group — vertically centered in remaining space */}
-          <div tw="flex flex-col flex-1 justify-center" style={{ paddingRight: 120 }}>
-            <div
-              tw="text-white"
-              style={{
-                fontSize: 88,
-                fontWeight: 600,
-                letterSpacing: "-0.05em",
-                lineHeight: 1,
-              }}
-            >
-              Price Lens
-            </div>
+        {/* Content */}
+        <div tw="flex flex-col absolute items-center justify-center" style={{ inset: 0, padding: "60px 80px" }}>
+          {/* Top: Logo + divider + text */}
+          <div tw="flex items-center" style={{ gap: 36 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${origin}/price-lens.svg`}
+              alt=""
+              width={96}
+              height={96}
+              style={{ objectFit: "contain" }}
+            />
 
-            <div
-              tw="text-zinc-300 mt-5"
-              style={{ fontSize: 32, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.25 }}
-            >
-              Price tracking for Portuguese supermarkets
-            </div>
+            {/* Divider */}
+            <div tw="flex" style={{ width: 1, height: 110, backgroundColor: "rgba(255,255,255,0.08)" }} />
 
-            <div
-              tw="text-zinc-500 mt-3"
-              style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.01em", lineHeight: 1.4 }}
-            >
-              Turn price swings into savings. More money in your pocket.
+            {/* Text */}
+            <div tw="flex flex-col">
+              <div
+                tw="text-white"
+                style={{ fontSize: 56, fontWeight: 600, letterSpacing: "-0.045em", lineHeight: 1 }}
+              >
+                Price Lens
+              </div>
+              <div
+                tw="text-zinc-400 mt-2"
+                style={{ fontSize: 24, fontWeight: 400, letterSpacing: "-0.015em", lineHeight: 1.3 }}
+              >
+                Price tracking for Portuguese supermarkets
+              </div>
+              <div
+                tw="text-zinc-500 mt-1"
+                style={{ fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}
+              >
+                Continente · Auchan · Pingo Doce
+              </div>
             </div>
           </div>
 
-          {/* KPI row — pinned to bottom */}
-          <div tw="flex mt-4" style={{ gap: 20 }}>
+          {/* KPI grid — 4 across */}
+          <div tw="flex mt-12" style={{ gap: 12 }}>
             {kpis.map((kpi) => (
               <div
                 key={kpi.label}
-                tw="flex flex-col px-7 py-4 rounded-2xl"
-                style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+                tw="flex flex-col items-center px-8 py-5 rounded-2xl"
+                style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
               >
                 <span
                   tw="text-white"
-                  style={{ fontSize: 36, fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1 }}
+                  style={{ fontSize: 32, fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1 }}
                 >
                   {kpi.value}
                 </span>
-                <span tw="text-zinc-500 mt-1.5" style={{ fontSize: 16, fontWeight: 400 }}>
+                <span tw="text-zinc-500 mt-2" style={{ fontSize: 15, fontWeight: 400 }}>
                   {kpi.label}
                 </span>
               </div>
             ))}
           </div>
         </div>
-      ) : (
-        <div tw="flex flex-col absolute justify-center" style={{ inset: 0, padding: "72px 80px", paddingRight: 200 }}>
-          <div
-            tw="text-white"
-            style={{
-              fontSize: title && title.length > 30 ? 56 : 68,
-              fontWeight: 600,
-              letterSpacing: "-0.04em",
-              lineHeight: 1.15,
-            }}
-          >
-            {title}
-          </div>
-          {description && (
+      </div>,
+      { width: OG_WIDTH, height: OG_HEIGHT, fonts },
+    )
+  }
+
+  return new ImageResponse(
+    <div tw="flex h-full w-full bg-[#08080a] text-white" style={{ fontFamily: "Geist" }}>
+      {/* Ambient glows */}
+      <div
+        tw="absolute"
+        style={{
+          top: -150,
+          left: 100,
+          width: 900,
+          height: 600,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(ellipse at center, rgba(99,106,215,0.11) 0%, rgba(59,138,236,0.04) 50%, transparent 70%)",
+        }}
+      />
+      <div
+        tw="absolute"
+        style={{
+          bottom: -100,
+          right: 50,
+          width: 500,
+          height: 400,
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse at center, rgba(99,106,215,0.06) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* Grid lines */}
+      <div tw="absolute" style={{ left: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+      <div tw="absolute" style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+      <div tw="absolute" style={{ top: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+      <div tw="absolute" style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+
+      {/* Content — centered */}
+      <div tw="flex absolute items-center justify-center" style={{ inset: 0, padding: "60px 80px" }}>
+        <div tw="flex items-center" style={{ gap: 36 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${origin}/price-lens.svg`}
+            alt=""
+            width={96}
+            height={96}
+            style={{ objectFit: "contain" }}
+          />
+
+          <div tw="flex" style={{ width: 1, height: 110, backgroundColor: "rgba(255,255,255,0.08)" }} />
+
+          <div tw="flex flex-col" style={{ maxWidth: 700 }}>
             <div
-              tw="mt-5 text-zinc-400"
-              style={{ fontSize: 30, fontWeight: 400, lineHeight: 1.4, letterSpacing: "-0.01em" }}
+              tw="text-white"
+              style={{
+                fontSize: title && title.length > 30 ? 48 : 56,
+                fontWeight: 600,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.15,
+              }}
             >
-              {description}
+              {title || "Price Lens"}
             </div>
-          )}
+            {description && (
+              <div
+                tw="mt-3 text-zinc-400"
+                style={{ fontSize: 24, fontWeight: 400, lineHeight: 1.4, letterSpacing: "-0.01em" }}
+              >
+                {description}
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </OGFrame>,
-    {
-      width: OG_WIDTH,
-      height: OG_HEIGHT,
-      fonts,
-    },
+      </div>
+    </div>,
+    { width: OG_WIDTH, height: OG_HEIGHT, fonts },
   )
 }
