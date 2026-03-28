@@ -10,7 +10,7 @@
 
 const OFF_API_BASE = "https://world.openfoodfacts.org/api/v2/product"
 const OFF_BRAND_BASE = "https://world.openfoodfacts.org/brand"
-const USER_AGENT = "PriceLens/1.0 (https://pricelens.pt; contact@pricelens.pt)"
+const USER_AGENT = "PriceLens/1.0 (https://price-lens.vercel.app; contact@price-lens.vercel.app)"
 const MIN_DELAY_MS = 650 // ~92 req/min, safely under the 100/min limit
 const THROTTLE_STALE_MS = 10_000 // skip throttle if last request was >10s ago
 const MAX_RETRIES = 2

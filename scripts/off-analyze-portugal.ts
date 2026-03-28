@@ -72,7 +72,7 @@ async function main() {
 
   log(`Downloading OFF CSV...`)
   const res = await fetch(OFF_CSV_URL, {
-    headers: { "User-Agent": "PriceLens/1.0 (https://pricelens.pt)" },
+    headers: { "User-Agent": "PriceLens/1.0 (https://price-lens.vercel.app)" },
     redirect: "follow",
   })
   if (!res.ok || !res.body) throw new Error(`Download failed: HTTP ${res.status}`)

@@ -74,7 +74,7 @@ async function ensureLocalCsv(filePath: string, forceDownload: boolean, log: (ms
   fs.mkdirSync(dir, { recursive: true })
 
   const res = await fetch(OFF_CSV_URL, {
-    headers: { "User-Agent": "PriceLens/1.0 (https://pricelens.pt)" },
+    headers: { "User-Agent": "PriceLens/1.0 (https://price-lens.vercel.app)" },
     redirect: "follow",
   })
 

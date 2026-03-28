@@ -1,56 +1,15 @@
 "use client"
 
+import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
-import type { LucideIcon } from "lucide-react"
-import {
-  DatabaseIcon,
-  CrownIcon,
-  SparklesIcon,
-  FlaskConicalIcon,
-  CalendarClockIcon,
-  DollarSignIcon,
-  ShoppingCartIcon,
-  ChevronDown,
-  ChevronUp,
-  HomeIcon,
-  ShoppingBasketIcon,
-  HeartIcon,
-  LogOutIcon,
-  UserIcon,
-  ScanFaceIcon,
-  MoreHorizontalIcon,
-  MapIcon,
-  GaugeIcon,
-  PickaxeIcon,
-  LayersIcon,
-  TimerIcon,
-  ContrastIcon,
-  ScanBarcodeIcon,
-  GitMergeIcon,
-} from "lucide-react"
 
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarRail,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-} from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,9 +18,51 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarRail,
+} from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+
+import {
+  BriefcaseIcon,
+  CalendarClockIcon,
+  ChevronDown,
+  ChevronUp,
+  ContrastIcon,
+  CrownIcon,
+  DollarSignIcon,
+  FlaskConicalIcon,
+  GaugeIcon,
+  GitMergeIcon,
+  HeartIcon,
+  HomeIcon,
+  LayersIcon,
+  LogOutIcon,
+  LucideIcon,
+  MapIcon,
+  MoreHorizontalIcon,
+  PickaxeIcon,
+  ScanBarcodeIcon,
+  ScanFaceIcon,
+  ShoppingBasketIcon,
+  ShoppingCartIcon,
+  SparklesIcon,
+  TimerIcon,
+  UserIcon,
+} from "lucide-react"
 
 interface NavItem {
   title: string
@@ -76,6 +77,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
     items: [
       { title: "Analytics", href: "/admin/analytics", icon: GaugeIcon },
       { title: "Performance", href: "/admin/performance", icon: TimerIcon },
+      { title: "Marketing", href: "/admin/marketing", icon: BriefcaseIcon },
     ],
   },
   {

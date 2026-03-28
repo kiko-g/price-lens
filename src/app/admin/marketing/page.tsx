@@ -1,61 +1,30 @@
 "use client"
 
+import Image, { type StaticImageData } from "next/image"
 import { useState, useRef, useCallback, useEffect } from "react"
 import { toPng } from "html-to-image"
 
 import { Button } from "@/components/ui/button"
-import { ChevronDownIcon, ChevronRightIcon, DownloadIcon, CheckCircleIcon } from "lucide-react"
+import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
+import PingoDocePng from "@/images/brands/pingo-doce.png"
 
-function Section({
-  title,
-  children,
-  defaultOpen = true,
-}: {
-  title: string
-  children: React.ReactNode
-  defaultOpen?: boolean
-}) {
-  const [open, setOpen] = useState(defaultOpen)
-
-  return (
-    <div>
-      <button
-        type="button"
-        className="hover:bg-muted/50 flex w-full items-center gap-2 px-4 py-3 text-left font-semibold transition-colors active:scale-100"
-        onClick={() => setOpen((o) => !o)}
-      >
-        {open ? <ChevronDownIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
-        {title}
-      </button>
-      {open && <div className="border-border space-y-6 border-t px-4 py-6">{children}</div>}
-    </div>
-  )
-}
-
-function Subsection({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">{label}</p>
-      {children}
-    </div>
-  )
-}
-
-const BANNER_W = 1600
-const BANNER_H = 400
-
-const LINKEDIN_KPIS = [
-  { value: "126k+", label: "products tracked" },
-  { value: "€79k+", label: "in savings across catalog" },
-  { value: "17k+", label: "on discount" },
-  { value: "~29k", label: "daily price checks" },
-  // { value: "2k+", label: "daily price changes" },
-  // { value: "192k+", label: "price points" },
-]
-
-const LINKEDIN_TRACKING_TEXT = "Tracking since Mar/2025. Data as of Feb/2026."
+import { DownloadIcon, CheckCircleIcon } from "lucide-react"
 
 function LinkedInBanner() {
+  const BANNER_W = 1600
+  const BANNER_H = 400
+
+  const LINKEDIN_KPIS = [
+    { value: "126k+", label: "products tracked" },
+    { value: "€79k+", label: "in savings across catalog" },
+    { value: "17k+", label: "on discount" },
+    { value: "~29k", label: "daily price checks" },
+    // { value: "2k+", label: "daily price changes" },
+    // { value: "192k+", label: "price points" },
+  ]
+
+  const LINKEDIN_TRACKING_TEXT = "Tracking since Mar/2025. Data as of Feb/2026."
+
   const ref = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
 
@@ -66,7 +35,7 @@ function LinkedInBanner() {
       const dataUrl = await toPng(ref.current, {
         width: BANNER_W,
         height: BANNER_H,
-        pixelRatio: 1,
+        pixelRatio: 2,
         cacheBust: true,
         skipFonts: true,
       })
@@ -86,7 +55,7 @@ function LinkedInBanner() {
     const url = await toPng(ref.current, {
       width: BANNER_W,
       height: BANNER_H,
-      pixelRatio: 1,
+      pixelRatio: 2,
       cacheBust: true,
       skipFonts: true,
     })
@@ -94,17 +63,28 @@ function LinkedInBanner() {
   }, [])
 
   useEffect(() => {
-    const t = setTimeout(capture, 300)
+    const t = setTimeout(capture, 500)
     return () => clearTimeout(t)
   }, [capture])
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {/* Hidden native-res banner for capture */}
       <div className="pointer-events-none fixed -top-[9999px] left-0 opacity-0" aria-hidden>
         <div
           ref={ref}
-          style={{ width: BANNER_W, height: BANNER_H, fontFamily: "'Inter', system-ui, sans-serif" }}
+          style={
+            {
+              width: BANNER_W,
+              height: BANNER_H,
+              fontFamily: "'Inter', system-ui, sans-serif",
+              // Theme vars so SVGs using fill-foreground / fill-background render in the offscreen capture
+              "--foreground": "oklch(0.9914 0.0043 246.02)",
+              "--background": "oklch(0.1493 0.0059 256.58)",
+              "--color-foreground": "oklch(0.9914 0.0043 246.02)",
+              "--color-background": "oklch(0.1493 0.0059 256.58)",
+            } as React.CSSProperties
+          }
           className="relative overflow-hidden bg-[#08080a]"
         >
           {/* Ambient glow */}
@@ -144,9 +124,9 @@ function LinkedInBanner() {
           {/* Content */}
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ paddingLeft: 360, paddingRight: 120 }}
+            style={{ paddingLeft: 320, paddingRight: 120 }}
           >
-            <div className="flex items-center gap-10">
+            <div className="flex items-center gap-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/price-lens.svg"
@@ -164,14 +144,27 @@ function LinkedInBanner() {
                 >
                   Price Lens
                 </h1>
-                <p className="mt-2 text-zinc-400" style={{ fontSize: 20, letterSpacing: "-0.015em", lineHeight: 1.3 }}>
-                  Price tracking for Portuguese supermarkets
+                <p className="mt-2 text-zinc-400" style={{ fontSize: 20, lineHeight: 1.3 }}>
+                  Price tracking for Portuguese supermarkets.
                 </p>
-                <p className="mt-1 text-zinc-500" style={{ fontSize: 15, letterSpacing: "-0.01em" }}>
-                  Continente · Auchan · Pingo Doce
+                <p className="mt-1 text-zinc-400" style={{ fontSize: 20, lineHeight: 1.3 }}>
+                  Helping consumers save money by buying at the right time.
                 </p>
+                <div className="mt-3 flex items-center gap-6">
+                  <SupermarketChainBadge originId={1} variant="logo" className="h-12! w-auto! md:h-12! md:w-auto!" />
+                  <SupermarketChainBadge originId={2} variant="logo" className="h-12! w-auto! md:h-10! md:w-auto!" />
+                  <Image
+                    src={PingoDocePng as StaticImageData}
+                    alt="Pingo Doce"
+                    width={36 * 2.64736298}
+                    height={36}
+                    className="rounded"
+                  />
+                </div>
               </div>
+
               <div className="h-24 w-px shrink-0 bg-white/6" />
+
               <div className="flex flex-col gap-4">
                 <div className="grid shrink-0 grid-cols-2 gap-2">
                   {LINKEDIN_KPIS.map((kpi) => (
@@ -186,7 +179,7 @@ function LinkedInBanner() {
                       >
                         {kpi.value}
                       </span>
-                      <span className="mt-1 text-zinc-500" style={{ fontSize: 11 }}>
+                      <span className="mt-1 font-medium tracking-tight text-zinc-300" style={{ fontSize: 13 }}>
                         {kpi.label}
                       </span>
                     </div>
@@ -267,7 +260,7 @@ function OGPreview({ src, filename, width, height }: { src: string; filename: st
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <div className="bg-muted/30 border-border overflow-hidden rounded-lg border">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={imgSrc} alt={filename} className="block w-full" style={{ aspectRatio: `${width}/${height}` }} />
@@ -290,35 +283,17 @@ function OGPreview({ src, filename, width, height }: { src: string; filename: st
   )
 }
 
-export default function DebugPage() {
+export default function MarketingPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">UI Showcase</h1>
-        <p className="text-muted-foreground text-sm">Preview components and states without breaking the app.</p>
-      </div>
-
-      {/* ----------------------------------------------------------------- */}
-      {/* OG / Social Images */}
-      {/* ----------------------------------------------------------------- */}
-      <Section title="Social Images" defaultOpen={true}>
-        <div className="grid gap-8">
-          <Subsection label="linkedin banner (4:1)">
-            <LinkedInBanner />
-          </Subsection>
-          <Subsection label="og image — with stats (1.9:1)">
-            <OGPreview src="/og?stats=true" filename="price-lens-og-stats.png" width={1200} height={630} />
-          </Subsection>
-          <Subsection label="og image — default (1.9:1)">
-            <OGPreview
-              src="/og?title=Price+Lens&description=Price+tracking+for+Portuguese+supermarkets"
-              filename="price-lens-og.png"
-              width={1200}
-              height={630}
-            />
-          </Subsection>
-        </div>
-      </Section>
+    <div className="flex w-full flex-1 flex-col gap-12 overflow-y-auto px-16 py-12">
+      <LinkedInBanner />
+      <OGPreview src="/og?stats=true" filename="price-lens-og-stats.png" width={1200} height={630} />
+      <OGPreview
+        src="/og?title=Price+Lens&description=Price+tracking+for+Portuguese+supermarkets"
+        filename="price-lens-og.png"
+        width={1200}
+        height={630}
+      />
     </div>
   )
 }
