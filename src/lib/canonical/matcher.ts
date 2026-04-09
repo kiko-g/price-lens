@@ -790,6 +790,21 @@ async function refreshCanonicalCounts(
   }
 
   log(`[RefreshCounts] Done. Updated ${totalUpdated} canonical_products.`)
+
+  // Validate: flag any canonical_products with store_count > 3 (max supermarkets)
+  const MAX_STORES = 3
+  const { data: overlinked } = await supabase
+    .from("canonical_products")
+    .select("id, name, store_count")
+    .gt("store_count", MAX_STORES)
+
+  if (overlinked && overlinked.length > 0) {
+    log(
+      `[RefreshCounts] WARNING: ${overlinked.length} canonical_products have store_count > ${MAX_STORES}. ` +
+        `IDs: ${overlinked.map((c) => c.id).join(", ")}. Run /api/admin/canonical-matches/cleanup to fix.`,
+    )
+  }
+
   return totalUpdated
 }
 

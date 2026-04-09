@@ -55,9 +55,7 @@ export async function signInWithGoogle(formData: FormData) {
     return redirect("/login?error=origin-missing")
   }
 
-  const callbackUrl = next
-    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
-    : `${origin}/auth/callback`
+  const callbackUrl = next ? `${origin}/auth/callback?next=${encodeURIComponent(next)}` : `${origin}/auth/callback`
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

@@ -152,7 +152,10 @@ export async function GET(request: Request) {
                           <img
                             src={`${baseUrl}${STORE_LOGO_PATHS[product.origin_id].src}`}
                             alt={STORE_NAMES[product.origin_id] || ""}
-                            width={Math.round((STORE_LOGO_PATHS[product.origin_id].width / STORE_LOGO_PATHS[product.origin_id].height) * 20)}
+                            width={Math.round(
+                              (STORE_LOGO_PATHS[product.origin_id].width / STORE_LOGO_PATHS[product.origin_id].height) *
+                                20,
+                            )}
                             height={20}
                             tw="h-5"
                             style={{ objectFit: "contain" }}

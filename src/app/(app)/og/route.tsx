@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og"
 import { loadGeistFonts } from "@/lib/og-fonts"
-import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
+import { OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 import { siteConfig } from "@/lib/config"
 import { getHomeStats } from "@/lib/queries/home-stats"
 
@@ -57,34 +57,40 @@ export async function GET(request: Request) {
         />
 
         {/* Grid lines */}
-        <div tw="absolute" style={{ left: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
-        <div tw="absolute" style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
-        <div tw="absolute" style={{ left: 600, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
-        <div tw="absolute" style={{ top: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
-        <div tw="absolute" style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+        <div
+          tw="absolute"
+          style={{ left: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+        />
+        <div
+          tw="absolute"
+          style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+        />
+        <div
+          tw="absolute"
+          style={{ left: 600, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+        />
+        <div
+          tw="absolute"
+          style={{ top: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+        />
+        <div
+          tw="absolute"
+          style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+        />
 
         {/* Content */}
         <div tw="flex flex-col absolute items-center justify-center" style={{ inset: 0, padding: "60px 80px" }}>
           {/* Top: Logo + divider + text */}
           <div tw="flex items-center" style={{ gap: 36 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`${origin}/price-lens.svg`}
-              alt=""
-              width={96}
-              height={96}
-              style={{ objectFit: "contain" }}
-            />
+            <img src={`${origin}/price-lens.svg`} alt="" width={96} height={96} style={{ objectFit: "contain" }} />
 
             {/* Divider */}
             <div tw="flex" style={{ width: 1, height: 110, backgroundColor: "rgba(255,255,255,0.08)" }} />
 
             {/* Text */}
             <div tw="flex flex-col">
-              <div
-                tw="text-white"
-                style={{ fontSize: 56, fontWeight: 600, letterSpacing: "-0.045em", lineHeight: 1 }}
-              >
+              <div tw="text-white" style={{ fontSize: 56, fontWeight: 600, letterSpacing: "-0.045em", lineHeight: 1 }}>
                 Price Lens
               </div>
               <div
@@ -93,10 +99,7 @@ export async function GET(request: Request) {
               >
                 Price tracking for Portuguese supermarkets
               </div>
-              <div
-                tw="text-zinc-500 mt-1"
-                style={{ fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}
-              >
+              <div tw="text-zinc-500 mt-1" style={{ fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}>
                 Continente · Auchan · Pingo Doce
               </div>
             </div>
@@ -157,21 +160,21 @@ export async function GET(request: Request) {
 
       {/* Grid lines */}
       <div tw="absolute" style={{ left: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
-      <div tw="absolute" style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+      <div
+        tw="absolute"
+        style={{ right: 80, top: 0, bottom: 0, width: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+      />
       <div tw="absolute" style={{ top: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
-      <div tw="absolute" style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }} />
+      <div
+        tw="absolute"
+        style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
+      />
 
       {/* Content — centered */}
       <div tw="flex absolute items-center justify-center" style={{ inset: 0, padding: "60px 80px" }}>
         <div tw="flex items-center" style={{ gap: 36 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${origin}/price-lens.svg`}
-            alt=""
-            width={96}
-            height={96}
-            style={{ objectFit: "contain" }}
-          />
+          <img src={`${origin}/price-lens.svg`} alt="" width={96} height={96} style={{ objectFit: "contain" }} />
 
           <div tw="flex" style={{ width: 1, height: 110, backgroundColor: "rgba(255,255,255,0.08)" }} />
 

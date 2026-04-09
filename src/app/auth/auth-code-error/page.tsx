@@ -7,10 +7,7 @@ import { pageMetadata } from "@/lib/config"
 
 import { LogIn, HomeIcon } from "lucide-react"
 
-export const metadata: Metadata = pageMetadata(
-  "Sign-in Failed",
-  "We couldn't complete your sign-in. Please try again.",
-)
+export const metadata: Metadata = pageMetadata("Sign-in Failed", "We couldn't complete your sign-in. Please try again.")
 
 export default function AuthCodeErrorPage() {
   return (

@@ -125,20 +125,46 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Failed to query products" }, { status: 500 })
     }
 
-    // Re-check a small batch of unavailable products weekly to catch any that come back
+    // Smart revival: re-check unavailable products, prioritizing high-value ones
     const RECHECK_BATCH_SIZE = 50
-    const recheckCutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-    const { data: recheckProducts } = await supabase
+    const recheckCutoff = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
+
+    // Priority 1: products that are favorited by users (most valuable to revive)
+    const { data: favoritedUnavailable } = await supabase
       .from("store_products")
       .select(SCHEDULER_COLUMNS)
       .eq("available", false)
       .not("url", "is", null)
-      .in("priority", [...ACTIVE_PRIORITIES])
+      .not("barcode", "is", null)
+      .in(
+        "id",
+        (await supabase.from("user_favorites").select("store_product_id")).data?.map((f) => f.store_product_id) || [],
+      )
       .or(`updated_at.lt.${recheckCutoff},updated_at.is.null`)
-      .limit(RECHECK_BATCH_SIZE)
+      .limit(20)
 
-    if (recheckProducts && recheckProducts.length > 0) {
-      console.log(`[Scheduler] Re-checking ${recheckProducts.length} unavailable products`)
+    // Priority 2: high-priority products with barcodes
+    const remainingSlots = RECHECK_BATCH_SIZE - (favoritedUnavailable?.length || 0)
+    const { data: highPriorityUnavailable } = await supabase
+      .from("store_products")
+      .select(SCHEDULER_COLUMNS)
+      .eq("available", false)
+      .not("url", "is", null)
+      .not("barcode", "is", null)
+      .in("priority", [4, 5])
+      .or(`updated_at.lt.${recheckCutoff},updated_at.is.null`)
+      .order("priority", { ascending: false })
+      .limit(remainingSlots)
+
+    const recheckProducts = [
+      ...(favoritedUnavailable || []),
+      ...(highPriorityUnavailable || []).filter((p) => !favoritedUnavailable?.some((f) => f.id === p.id)),
+    ]
+
+    if (recheckProducts.length > 0) {
+      console.log(
+        `[Scheduler] Smart revival: ${favoritedUnavailable?.length || 0} favorited + ${recheckProducts.length - (favoritedUnavailable?.length || 0)} high-priority = ${recheckProducts.length} total`,
+      )
     }
 
     // Merge main products with re-check products

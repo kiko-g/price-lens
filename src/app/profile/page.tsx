@@ -1,5 +1,8 @@
 "use client"
 
+import React from "react"
+import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useUser } from "@/hooks/useUser"
 
@@ -8,14 +11,14 @@ import { ProfileSidebar } from "@/components/profile/ProfileSidebar"
 import { FavoritesTab } from "@/components/profile/FavoritesTab"
 import { ListsTab } from "@/components/profile/ListsTab"
 import { PlanTab } from "@/components/profile/PlanTab"
+import { SavingsTab } from "@/components/profile/SavingsTab"
 import { SettingsTab } from "@/components/profile/SettingsTab"
 
 import { EmptyStateView } from "@/components/ui/combo/state-views"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { BellIcon, CreditCardIcon, HeartIcon, ListIcon, SettingsIcon } from "lucide-react"
+import { BellIcon, CreditCardIcon, HeartIcon, ListIcon, SettingsIcon, TrophyIcon } from "lucide-react"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -56,6 +59,10 @@ export default function ProfilePage() {
                     <BellIcon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Alerts</span>
                   </TabsTrigger>
+                  <TabsTrigger value="savings" className="gap-1.5">
+                    <TrophyIcon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Savings</span>
+                  </TabsTrigger>
                   <TabsTrigger value="plan" className="gap-1.5">
                     <CreditCardIcon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Plan</span>
@@ -78,6 +85,10 @@ export default function ProfilePage() {
                   <AlertsTab />
                 </TabsContent>
 
+                <TabsContent value="savings" className="mt-4">
+                  <SavingsTab />
+                </TabsContent>
+
                 <TabsContent value="plan" className="mt-4">
                   <PlanTab plan={profile?.plan} />
                 </TabsContent>
@@ -95,17 +106,101 @@ export default function ProfilePage() {
 }
 
 function AlertsTab() {
-  return (
-    <EmptyStateView
-      icon={BellIcon}
-      title="Price alerts"
-      message="Get notified when products you track drop in price. Available with Price Lens Plus."
-      actions={
-        <Button variant="outline" size="sm" disabled>
-          Coming Soon
-        </Button>
+  return <AlertsTabContent />
+}
+
+function AlertsTabContent() {
+  const [alerts, setAlerts] = React.useState<
+    Array<{
+      id: number
+      store_product_id: number
+      threshold_type: string
+      is_active: boolean
+      store_products: {
+        id: number
+        name: string
+        brand: string | null
+        image: string | null
+        price: number
+        origin_id: number
       }
-    />
+    }>
+  >([])
+  const [isLoading, setIsLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    fetch("/api/alerts")
+      .then((res) => res.json())
+      .then((data) => {
+        setAlerts(data.alerts || [])
+        setIsLoading(false)
+      })
+      .catch(() => setIsLoading(false))
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 w-full rounded-lg" />
+        ))}
+      </div>
+    )
+  }
+
+  if (alerts.length === 0) {
+    return (
+      <EmptyStateView
+        icon={BellIcon}
+        title="No price alerts yet"
+        message="Set alerts on products you want to track. We'll email you when prices drop. Visit any product page and tap the bell icon to get started."
+      />
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-muted-foreground text-sm">
+        You have {alerts.length} active alert{alerts.length !== 1 ? "s" : ""}. We&apos;ll email you when these products
+        drop in price.
+      </p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {alerts.map((alert) => {
+          const product = alert.store_products
+          if (!product) return null
+          return (
+            <Link
+              key={alert.id}
+              href={`/products/${product.id}`}
+              className="border-border hover:bg-accent flex items-center gap-3 rounded-lg border p-3 transition-colors"
+            >
+              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white">
+                {product.image ? (
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-contain p-1"
+                    sizes="48px"
+                    unoptimized
+                  />
+                ) : (
+                  <BellIcon className="text-muted-foreground h-5 w-5" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{product.name}</p>
+                <p className="text-muted-foreground text-xs">
+                  {product.price.toFixed(2)}€ ·{" "}
+                  {alert.threshold_type === "any_drop" ? "Any drop" : alert.threshold_type}
+                </p>
+              </div>
+              <BellIcon className="size-4 shrink-0 text-amber-500" />
+            </Link>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

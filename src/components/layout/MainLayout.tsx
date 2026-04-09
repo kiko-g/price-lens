@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { Suspense } from "react"
 import { Header } from "./Header"
+import { BottomNav } from "./BottomNav"
 import { ControlledFooter } from "./ControlledFooter"
 import { ScrollToTop } from "./ScrollToTop"
 import { WelcomeToast } from "./WelcomeToast"
@@ -20,8 +21,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         <WelcomeToast />
       </Suspense>
       <Header />
-      <div className="flex flex-1 flex-col">{children}</div>
+      <div className="flex flex-1 flex-col pb-16 lg:pb-0">{children}</div>
       <ControlledFooter />
+      <BottomNav />
     </div>
   )
 }

@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
-import { AlertCircleIcon } from "lucide-react"
+import { AlertCircleIcon, FlaskConicalIcon } from "lucide-react"
+
+const IS_DEV = process.env.NODE_ENV === "development"
 
 const errorMessages: Record<string, string> = {
   "origin-missing": "Something went wrong starting the sign-in flow. Please try again.",
@@ -79,6 +81,25 @@ export default function LoginPage() {
             Continue with Google
           </Button>
         </form>
+
+        {IS_DEV && (
+          <div className="mt-6 w-full">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-dashed" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background text-muted-foreground px-2">Dev only</span>
+              </div>
+            </div>
+            <Button asChild variant="outline" className="mt-4 w-full border-dashed font-mono text-xs">
+              <a href="/api/auth/dev-login">
+                <FlaskConicalIcon className="mr-2 h-3.5 w-3.5" />
+                Sign in as dev@pricelens.dev
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

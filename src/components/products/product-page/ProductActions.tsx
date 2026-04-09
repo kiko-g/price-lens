@@ -14,6 +14,7 @@ import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
 import { ResponsiveActionsMenu, ResponsiveActionsMenuItem } from "@/components/ui/combo/responsive-actions-menu"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { FavoriteButton } from "@/components/products/product-page/FavoriteButton"
+import { AlertButton } from "@/components/products/product-page/AlertButton"
 
 import { EllipsisVerticalIcon, RefreshCcwIcon, MicroscopeIcon, CircleIcon, InfoIcon } from "lucide-react"
 
@@ -32,6 +33,7 @@ export function ProductActions({ sp }: ProductActionsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <FavoriteButton storeProduct={sp} />
+      <AlertButton storeProductId={sp.id} productName={sp.name} />
       <ShareButton sp={sp} />
       <ResponsiveActionsMenu
         trigger={

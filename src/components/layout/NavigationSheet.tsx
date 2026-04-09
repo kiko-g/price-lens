@@ -33,7 +33,7 @@ import { LogoLink } from "@/components/layout/LogoLink"
 import { SearchContainer } from "@/components/layout/search"
 import { BarcodeScanButton } from "@/components/scan"
 
-const primaryNavKeys = new Set(["/", "/products", "/favorites"])
+const primaryNavKeys = new Set(["/", "/products", "/deals", "/favorites"])
 
 const productQuickFilters = [
   { label: "Price Drops", href: "/products?sort=price-drop", icon: TrendingDownIcon },

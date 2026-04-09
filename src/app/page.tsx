@@ -1,12 +1,14 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
 import { defaultMetadata } from "@/lib/config"
+import { getHomeStats } from "@/lib/queries/home-stats"
 
 import { Layout } from "@/components/layout"
 import { Hero } from "@/components/home/Hero"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { DiagonalSplitCta } from "@/components/home/DiagonalSplitCta"
 import { AboutTeaserCta } from "@/components/home/AboutTeaserCta"
+import { HomeContent } from "@/components/home/HomeContent"
 
 export const revalidate = 3600
 
@@ -18,6 +20,31 @@ function Separator() {
   return (
     <div className="from-border/5 via-border/30 to-border/5 dark:from-border/5 dark:via-border/50 dark:to-border/5 my-2 h-[2px] w-full bg-linear-to-r lg:my-4" />
   )
+}
+
+async function HomeContentWrapper() {
+  const stats = await getHomeStats()
+
+  const marketingContent = (
+    <>
+      <Suspense
+        fallback={
+          <div className="z-20 mx-auto flex min-h-[50vh] w-full items-center justify-center px-4 py-12">
+            <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
+          </div>
+        }
+      >
+        <Hero />
+      </Suspense>
+
+      <Separator />
+      <DiagonalSplitCta />
+      <Separator />
+      <AboutTeaserCta />
+    </>
+  )
+
+  return <HomeContent totalProducts={stats.totalProducts} marketingContent={marketingContent} />
 }
 
 export default async function Home() {
@@ -37,15 +64,8 @@ export default async function Home() {
             </div>
           }
         >
-          <Hero />
+          <HomeContentWrapper />
         </Suspense>
-
-        <Separator />
-
-        <DiagonalSplitCta />
-
-        <Separator />
-        <AboutTeaserCta />
       </main>
     </Layout>
   )

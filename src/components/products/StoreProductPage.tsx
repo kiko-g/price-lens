@@ -1,10 +1,12 @@
 "use client"
 
+import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 
 import type { StoreProduct } from "@/types"
 import { RANGES, DateRange } from "@/types/business"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed"
 
 import { Separator } from "@/components/ui/separator"
 import { ProductChart } from "@/components/products/ProductChart"
@@ -70,9 +72,27 @@ function ChartSection({
 export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const searchParams = useSearchParams()
   const updateParams = useUpdateSearchParams()
+  const { addItem } = useRecentlyViewed()
 
   const rangeFromUrl = parseRangeParam(searchParams.get("range"))
   const storeProductId = sp.id?.toString() || ""
+
+  useEffect(() => {
+    addItem({
+      id: sp.id,
+      name: sp.name,
+      brand: sp.brand,
+      image: sp.image,
+      price: sp.price,
+      origin_id: sp.origin_id,
+    })
+    // Track product view (fire-and-forget)
+    fetch("/api/views", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ store_product_id: sp.id }),
+    }).catch(() => {})
+  }, [sp.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRangeChange = (range: DateRange) => {
     updateParams({ range: range === DEFAULT_RANGE ? null : range })
