@@ -12,7 +12,6 @@ import { BarcodeScanButton } from "@/components/scan"
 const navItems = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/products", label: "Products", icon: ShoppingBasketIcon },
-  { href: "__scan__", label: "Scan", icon: ScanBarcodeIcon },
   { href: "/favorites", label: "Favorites", icon: HeartIcon },
   { href: "/profile", label: "Profile", icon: UserIcon },
 ] as const
@@ -27,27 +26,13 @@ export function BottomNav() {
   return (
     <nav
       className={cn(
-        "bg-background/95 fixed right-0 bottom-0 left-0 z-50 border-t backdrop-blur-lg transition-transform duration-300 lg:hidden",
-        "pb-[env(safe-area-inset-bottom,0px)]",
+        "fixed right-0 bottom-0 left-0 z-50 flex items-center px-4 lg:hidden transition-transform duration-300",
+        "pb-[calc(1rem+env(safe-area-inset-bottom,0px))]",
         isHidden && "translate-y-full",
       )}
     >
-      <div className="flex h-14 items-center justify-around px-2">
+      <div className="bg-background/95 flex h-14 flex-1 items-center justify-around rounded-full border px-2 shadow-lg backdrop-blur-lg">
         {navItems.map((item) => {
-          if (item.href === "__scan__") {
-            return (
-              <BarcodeScanButton key={item.label}>
-                <button
-                  type="button"
-                  className="bg-primary text-primary-foreground -mt-4 flex size-12 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95"
-                  aria-label="Scan barcode"
-                >
-                  <item.icon className="size-5" />
-                </button>
-              </BarcodeScanButton>
-            )
-          }
-
           const isActive =
             item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/")
 
@@ -69,6 +54,16 @@ export function BottomNav() {
           )
         })}
       </div>
+
+      <BarcodeScanButton>
+        <button
+          type="button"
+          className="bg-primary text-primary-foreground ml-3 flex size-14 shrink-0 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95"
+          aria-label="Scan barcode"
+        >
+          <ScanBarcodeIcon className="size-6" />
+        </button>
+      </BarcodeScanButton>
     </nav>
   )
 }
