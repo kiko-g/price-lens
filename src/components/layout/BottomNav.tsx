@@ -31,7 +31,7 @@ export function BottomNav() {
         isHidden && "translate-y-full",
       )}
     >
-      <div className="bg-background/95 flex h-14 flex-1 items-center justify-around rounded-full border px-2 shadow-lg backdrop-blur-lg">
+      <div className="bg-background/80 flex h-14 flex-1 items-center justify-around rounded-full border border-border/50 px-2 shadow-md backdrop-blur-xl">
         {navItems.map((item) => {
           const isActive =
             item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/")
@@ -43,12 +43,12 @@ export function BottomNav() {
               key={item.label}
               href={resolvedHref}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 px-3 py-1 transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground",
+                "flex flex-col items-center justify-center gap-0.5 rounded-full px-4 py-1.5 transition-all duration-200",
+                isActive ? "bg-muted text-foreground" : "text-muted-foreground",
               )}
               aria-label={item.label}
             >
-              <item.icon className={cn("size-5", isActive && "fill-primary/15")} />
+              <item.icon className={cn("size-5", isActive && "fill-foreground/10")} />
               <span className="text-[10px] leading-tight font-medium">{item.label}</span>
             </Link>
           )
@@ -58,7 +58,7 @@ export function BottomNav() {
       <BarcodeScanButton>
         <button
           type="button"
-          className="bg-primary text-primary-foreground ml-3 flex size-14 shrink-0 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95"
+          className="bg-foreground text-background ml-3 flex size-14 shrink-0 items-center justify-center rounded-full shadow-md transition-transform active:scale-95"
           aria-label="Scan barcode"
         >
           <ScanBarcodeIcon className="size-6" />
