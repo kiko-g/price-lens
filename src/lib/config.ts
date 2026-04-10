@@ -72,7 +72,7 @@ export const navigation = [
   },
   {
     icon: ShoppingBasketIcon,
-    label: "Products",
+    label: "Browse",
     href: "/products",
     shownOnDesktop: true,
     shownOnMobile: true,

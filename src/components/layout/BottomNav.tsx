@@ -11,7 +11,7 @@ import { BarcodeScanButton } from "@/components/scan"
 
 const navItems = [
   { href: "/", label: "Home", icon: HomeIcon },
-  { href: "/products", label: "Products", icon: ShoppingBasketIcon },
+  { href: "/products", label: "Browse", icon: ShoppingBasketIcon },
   { href: "/favorites", label: "Favorites", icon: HeartIcon },
   { href: "/profile", label: "Profile", icon: UserIcon },
 ] as const
