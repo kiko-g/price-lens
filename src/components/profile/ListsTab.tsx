@@ -44,16 +44,25 @@ interface ShoppingList {
 export function ListsTab() {
   const [lists, setLists] = useState<ShoppingList[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [newListName, setNewListName] = useState("")
 
   const fetchLists = useCallback(() => {
+    setError(null)
     fetch("/api/lists")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then((data) => {
         setLists(data.lists || [])
         setIsLoading(false)
       })
-      .catch(() => setIsLoading(false))
+      .catch((err) => {
+        console.error("[ListsTab] failed to load lists:", err)
+        setError("Could not load shopping lists")
+        setIsLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -113,6 +122,17 @@ export function ListsTab() {
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-32 w-full rounded-lg" />
         <Skeleton className="h-32 w-full rounded-lg" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-destructive py-8 text-center text-sm">
+        {error}
+        <button onClick={fetchLists} className="mt-2 block w-full text-xs underline">
+          Try again
+        </button>
       </div>
     )
   }

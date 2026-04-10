@@ -1,0 +1,84 @@
+---
+description: Performance guardrails — bundle size, client boundary sizing, dynamic imports
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+## Performance
+
+### Keep `"use client"` boundaries small
+
+The `"use client"` directive marks everything in that file — and all its imports — as client JavaScript. A single large `"use client"` file pulls all its static and presentational parts into the client bundle.
+
+- Client components over ~300 lines are a signal to split: extract static/presentational sections as Server Components, keep the interactive parts as small client leaves.
+- A layout component that only needs a `useState` for one toggle should not be `"use client"` — extract the toggle as its own small client component.
+
+```tsx
+// wrong - entire page is client-side because of one dropdown
+"use client"
+export function ProductPage({ product }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <HeroSection product={product} />   {/* static, could be server */}
+      <PriceTable prices={product.prices} /> {/* static */}
+      <Dropdown open={open} onOpenChange={setOpen} /> {/* needs client */}
+    </div>
+  )
+}
+
+// correct - only the dropdown is client
+export function ProductPage({ product }) {
+  return (
+    <div>
+      <HeroSection product={product} />
+      <PriceTable prices={product.prices} />
+      <DropdownClient />   {/* "use client" isolated here */}
+    </div>
+  )
+}
+```
+
+### Use `next/dynamic` for heavy below-the-fold components
+
+Chart libraries, rich text editors, map components, and other heavy dependencies should be loaded lazily when they are not needed on initial paint.
+
+```tsx
+import dynamic from "next/dynamic"
+
+const ProductChart = dynamic(
+  () => import("@/components/products/ProductChart"),
+  { loading: () => <ChartSkeleton />, ssr: false }
+)
+```
+
+Use `ssr: false` only when the component uses browser-only APIs that would break SSR.
+
+### No barrel `index.ts` re-exports
+
+Barrel files cause bundlers to include the entire module in every chunk that imports any single export, breaking tree-shaking.
+
+```ts
+// wrong - any import from this barrel pulls in everything
+// src/components/icons/index.ts
+export { SearchIcon } from "./SearchIcon"
+export { HeartIcon } from "./HeartIcon"
+// ... 40 more
+
+// correct - import directly from the source
+import { SearchIcon } from "@/components/icons/SearchIcon"
+```
+
+Do not create new `index.ts` barrel files. If you need to add an export, add it directly to the source file and import from there.
+
+### No heavy imports in skeletons or server components
+
+Skeletons and Server Components must not import client-only libraries (chart libs, animation libraries, complex form libraries). This forces those libraries into the server bundle or the skeleton's chunk.
+
+```tsx
+// wrong - skeleton pulls in the entire recharts library
+import { ProductChart } from "@/components/products/ProductChart" // "use client" + recharts
+
+// correct - skeleton is standalone
+import { ChartSkeleton } from "@/components/products/skeletons/ChartSkeleton"
+```

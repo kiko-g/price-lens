@@ -32,7 +32,9 @@ export function PWAInstallFAB({ visible, forceDesktop, onClick, onDismiss }: PWA
           setPulse(false)
           try {
             sessionStorage.setItem(PULSE_SESSION_KEY, "1")
-          } catch {}
+          } catch {
+            // sessionStorage unavailable (private browsing or storage quota)
+          }
         }, 6_000)
         return () => clearTimeout(pulseTimer)
       }

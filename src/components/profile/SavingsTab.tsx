@@ -22,15 +22,23 @@ interface UserStats {
 export function SavingsTab() {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/user/stats")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then((data) => {
         setStats(data)
         setIsLoading(false)
       })
-      .catch(() => setIsLoading(false))
+      .catch((err) => {
+        console.error("[SavingsTab] failed to load stats:", err)
+        setError("Could not load your stats")
+        setIsLoading(false)
+      })
   }, [])
 
   if (isLoading) {
@@ -44,6 +52,10 @@ export function SavingsTab() {
         <Skeleton className="h-48 rounded-lg" />
       </div>
     )
+  }
+
+  if (error) {
+    return <p className="text-destructive py-8 text-center text-sm">{error}</p>
   }
 
   if (!stats) return null

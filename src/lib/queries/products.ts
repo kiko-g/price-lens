@@ -311,7 +311,7 @@ export const storeProductQueries = {
 
     // Step 2: broaden via canonical_product_id if available
     const canonicalId = barcodeMatches?.find((p) => p.canonical_product_id)?.canonical_product_id
-    let allProducts = barcodeMatches ?? []
+    const allProducts = barcodeMatches ?? []
 
     if (canonicalId) {
       const { data: canonicalMatches } = await supabase

@@ -31,7 +31,7 @@ type Props = {
 
 export function AdminPrioritiesGrid({ initialData, initPage, initQuery, initPriorityFilter }: Props) {
   const router = useRouter()
-  const [page, setPage] = useState(initPage)
+  const [page] = useState(initPage)
   const [query, setQuery] = useState(initQuery)
   const [priorityFilter, setPriorityFilter] = useState(initPriorityFilter)
   const [products, setProducts] = useState<StoreProduct[]>(initialData.products)

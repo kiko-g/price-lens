@@ -250,7 +250,8 @@ export function useFavoriteStatus(storeProductId: number | null) {
         await addMutation.mutateAsync(storeProductId)
       }
       return true
-    } catch {
+    } catch (err) {
+      console.error("[useFavorites] toggleFavorite failed:", err)
       return false
     }
   }, [user, storeProductId, query.data, addMutation, removeMutation])
@@ -320,7 +321,8 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
           await addMutation.mutateAsync(storeProductId)
         }
         return true
-      } catch {
+      } catch (err) {
+        console.error("[useFavorites] toggleFavorite failed:", err)
         return false
       }
     },

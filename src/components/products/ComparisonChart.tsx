@@ -61,7 +61,7 @@ function getStoreName(originId: number | null): string {
 function formatTrackingSince(dateStr: string | null): string {
   if (!dateStr) return ""
   const date = new Date(dateStr)
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" })
+  return date.toLocaleDateString("pt-PT", { month: "short", year: "numeric" })
 }
 
 export function ComparisonChart({ productsWithPrices, selectedRange, className }: ComparisonChartProps) {
@@ -197,7 +197,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                 labelFormatter={(_, payload) => {
                   const rawDate = (payload[0] as { payload?: { rawDate?: string } })?.payload?.rawDate
                   if (!rawDate) return ""
-                  return new Date(rawDate).toLocaleDateString(undefined, {
+                  return new Date(rawDate).toLocaleDateString("pt-PT", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",

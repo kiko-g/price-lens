@@ -6,12 +6,24 @@ const eslintConfig = [
   {
     files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
     rules: {
-      // Downgrade to warnings for gradual fixes
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "@typescript-eslint/no-explicit-any": "off", // TODO: FIXME:
-      "prefer-const": "warn",
+      "prefer-const": "error",
       "react/no-unescaped-entities": "warn",
+
+      // Catch empty catch blocks — silent failures are worse than visible ones
+      "no-empty": ["error", { allowEmptyCatch: false }],
+
+      // Catch components defined inside render (performance + hook rules violation risk)
+      "react/no-unstable-nested-components": "warn",
 
       // React hooks - keep rules-of-hooks as error, rest as warnings
       "react-hooks/rules-of-hooks": "error",

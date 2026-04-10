@@ -1,0 +1,101 @@
+---
+description: Error handling patterns — no silent failures, no empty catches, proper error boundaries
+globs: "**/*.ts,**/*.tsx"
+alwaysApply: true
+---
+
+## Error Handling
+
+Silent failures are worse than visible ones. A blank screen that looks like "no data" when it is actually a network error misleads users and hides bugs.
+
+### Never write an empty catch block
+
+```ts
+// wrong - hides the error completely
+try {
+  await doSomething()
+} catch {}
+
+// wrong - swallows error with no context
+.catch(() => setIsLoading(false))
+
+// correct - always log at minimum
+try {
+  await doSomething()
+} catch (err) {
+  console.error("[context] doSomething failed:", err)
+}
+```
+
+Always include the caught error object in `console.error`. Use a `[ComponentName]` or `[hookName]` prefix so errors are easy to find in logs.
+
+### Never silently reset state on failure
+
+When a fetch fails, do not just clear the loading spinner. Show the user something went wrong.
+
+```tsx
+// wrong - failed fetch looks like "no data"
+fetch("/api/lists")
+  .then(r => r.json())
+  .then(data => setLists(data))
+  .catch(() => setIsLoading(false))
+
+// correct - set an error state
+fetch("/api/lists")
+  .then(r => r.json())
+  .then(data => setLists(data))
+  .catch(err => {
+    console.error("[ListsTab] fetch failed:", err)
+    setError("Could not load lists")
+    setIsLoading(false)
+  })
+```
+
+Render the error state in the UI — a simple `<p className="text-destructive">...</p>` or a `<Callout variant="warning">` is sufficient.
+
+### Route-level error boundaries
+
+Every route segment that renders user-specific or async data must have an `error.tsx` alongside its `page.tsx`. This prevents a single segment's error from taking down the entire page.
+
+```
+app/
+  products/
+    error.tsx   ← required if page.tsx fetches data
+    page.tsx
+  profile/
+    error.tsx
+    page.tsx
+```
+
+Minimum `error.tsx`:
+
+```tsx
+"use client"
+
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-4 p-8">
+      <p className="text-destructive">Something went wrong.</p>
+      <button onClick={reset} className="text-sm underline">Try again</button>
+    </div>
+  )
+}
+```
+
+### API routes
+
+- Return correct HTTP status codes — never `200` with `{ error: "..." }` in the body.
+- Use `NextResponse.json({ error: "..." }, { status: 400 })` for client errors and `{ status: 500 }` for server errors.
+
+### Acceptable empty catches
+
+The only case where an empty catch is acceptable is for **non-critical, non-observable browser APIs** (e.g. `sessionStorage.setItem`) where failure truly has no user impact. Even then, add a comment.
+
+```ts
+// acceptable - sessionStorage is best-effort, failure is invisible to user
+try {
+  sessionStorage.setItem("key", value)
+} catch {
+  // sessionStorage blocked (private browsing or storage quota)
+}
+```
