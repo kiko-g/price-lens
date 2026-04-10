@@ -10,6 +10,8 @@ import { generateQueryKey } from "@/hooks/useFavoritesFiltered"
 import type { SearchType } from "@/types/business"
 
 import { FavoritesShowcase } from "@/components/favorites/FavoritesShowcase"
+import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
+import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -63,13 +65,13 @@ function buildServerQueryParams(params: { [key: string]: string | undefined }, l
 
 function LoadingFallback() {
   return (
-    <div className="flex w-full flex-col gap-3 p-4">
+    <div className="flex w-full flex-col gap-3 p-4 lg:h-full lg:overflow-y-auto">
       <Skeleton className="h-12 w-full" />
-      <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <ProductGridWrapper className="w-full">
         {Array.from({ length: LIMIT }).map((_, i) => (
-          <Skeleton key={i} className="aspect-square w-full rounded-lg" />
+          <StoreProductCardSkeleton key={i} />
         ))}
-      </div>
+      </ProductGridWrapper>
     </div>
   )
 }

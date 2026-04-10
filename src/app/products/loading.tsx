@@ -12,7 +12,7 @@ export default function ProductsLoading() {
       <HideFooter />
       <div className="flex w-full flex-col lg:h-full lg:flex-row">
         {/* Desktop Sidebar skeleton */}
-        <aside className="hidden h-full flex-col border-r p-4 lg:flex lg:w-80 lg:min-w-80">
+        <aside className="hidden h-full flex-1 flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:max-w-80 lg:min-w-80">
           <Skeleton className="mb-2 h-7 w-32" />
           <Skeleton className="mb-4 h-4 w-full" />
           <Skeleton className="h-9 w-full rounded-md" />
@@ -46,7 +46,7 @@ export default function ProductsLoading() {
         </aside>
 
         {/* Main content skeleton */}
-        <div className="flex w-full flex-1 flex-col p-4">
+        <div className="relative flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
           <div className="mb-4 flex items-center justify-between">
             <Skeleton className="h-3 w-48 rounded" />
             <Skeleton className="h-3 w-24 rounded" />

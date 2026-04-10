@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useUser } from "@/hooks/useUser"
+import { useUserAlerts } from "@/hooks/useUserAlerts"
 
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { ProfileSidebar } from "@/components/profile/ProfileSidebar"
@@ -106,37 +107,7 @@ export default function ProfilePage() {
 }
 
 function AlertsTab() {
-  return <AlertsTabContent />
-}
-
-function AlertsTabContent() {
-  const [alerts, setAlerts] = React.useState<
-    Array<{
-      id: number
-      store_product_id: number
-      threshold_type: string
-      is_active: boolean
-      store_products: {
-        id: number
-        name: string
-        brand: string | null
-        image: string | null
-        price: number
-        origin_id: number
-      }
-    }>
-  >([])
-  const [isLoading, setIsLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    fetch("/api/alerts")
-      .then((res) => res.json())
-      .then((data) => {
-        setAlerts(data.alerts || [])
-        setIsLoading(false)
-      })
-      .catch(() => setIsLoading(false))
-  }, [])
+  const { data: alerts, isLoading } = useUserAlerts()
 
   if (isLoading) {
     return (
@@ -148,7 +119,7 @@ function AlertsTabContent() {
     )
   }
 
-  if (alerts.length === 0) {
+  if (!alerts || alerts.length === 0) {
     return (
       <EmptyStateView
         icon={BellIcon}

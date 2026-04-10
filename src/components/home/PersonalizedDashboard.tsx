@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useUser } from "@/hooks/useUser"
 import { useRecentlyViewed, type RecentlyViewedItem } from "@/hooks/useRecentlyViewed"
-import { STORE_NAMES } from "@/types/business"
+import { useUserAlerts } from "@/hooks/useUserAlerts"
+import { useUserFavoritesSummary, type FavoriteSummaryItem } from "@/hooks/useUserFavoritesSummary"
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/business/product"
 
@@ -15,59 +16,22 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 
-import {
-  BellIcon,
-  HeartIcon,
-  TrendingDownIcon,
-  ClockIcon,
-  ArrowRightIcon,
-  TagIcon,
-  PackageIcon,
-  SparklesIcon,
-} from "lucide-react"
+import { BellIcon, HeartIcon, ClockIcon, ArrowRightIcon, TagIcon, PackageIcon, SparklesIcon } from "lucide-react"
 
-interface FavoriteItem {
-  id: number
-  name: string
-  brand: string | null
-  image: string | null
-  price: number
-  origin_id: number
-  discount: number | null
-  price_recommended: number | null
-  price_per_major_unit: number | null
-  major_unit: string | null
-  pack: string | null
-}
-
-interface AlertItem {
-  id: number
-  store_product_id: number
-  store_products: FavoriteItem
-}
+type FavoriteItem = FavoriteSummaryItem
 
 export function PersonalizedDashboard({ totalProducts }: { totalProducts: number }) {
   const { user, profile } = useUser()
   const { items: recentlyViewed } = useRecentlyViewed()
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([])
-  const [favoritesTotal, setFavoritesTotal] = useState<number | null>(null)
-  const [alerts, setAlerts] = useState<AlertItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: alertsData, isLoading: alertsLoading } = useUserAlerts()
+  const { data: favoritesData, isLoading: favoritesLoading } = useUserFavoritesSummary(18)
+
+  const favorites = favoritesData?.items ?? []
+  const favoritesTotal = favoritesData?.totalCount ?? null
+  const alerts = (alertsData ?? []).slice(0, 4)
+  const isLoading = alertsLoading || favoritesLoading
 
   const firstName = profile?.full_name?.split(" ")[0] || user?.user_metadata?.full_name?.split(" ")[0] || "there"
-
-  useEffect(() => {
-    if (!user) return
-
-    Promise.all([fetch("/api/favorites?limit=18").then((r) => r.json()), fetch("/api/alerts").then((r) => r.json())])
-      .then(([favData, alertData]) => {
-        setFavorites(favData.data?.map((f: { store_products: FavoriteItem }) => f.store_products).filter(Boolean) || [])
-        setFavoritesTotal(favData.pagination?.totalCount ?? favData.data?.length ?? null)
-        setAlerts(alertData.alerts?.slice(0, 4) || [])
-        setIsLoading(false)
-      })
-      .catch(() => setIsLoading(false))
-  }, [user])
 
   return (
     <div className="z-20 mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-10">
@@ -260,8 +224,8 @@ function DashboardSection({
       <CardContent className="p-4 pt-0">
         {isLoading ? (
           <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            {Array.from({ length: 6 }).map((_, i) => (
+              <MiniProductCardSkeleton key={i} />
             ))}
           </div>
         ) : isEmpty ? (
@@ -351,6 +315,22 @@ function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyV
   )
 }
 
+export function MiniProductCardSkeleton() {
+  return (
+    <div className="bg-card border-border flex flex-col overflow-hidden rounded-xl border">
+      <div className="aspect-7/8 w-full bg-white dark:bg-white/5" />
+      <div className="flex flex-col gap-0.5 p-2">
+        <Skeleton className="h-[22px] w-full rounded-sm" />
+        <div className="mt-0.5 flex flex-col items-start gap-y-0.5">
+          <Skeleton className="h-3 w-12 rounded-sm" />
+          <Skeleton className="h-3.5 w-14 rounded-sm" />
+        </div>
+        <Skeleton className="h-2.5 w-16 rounded-sm" />
+      </div>
+    </div>
+  )
+}
+
 function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedItem }) {
   const discount = "discount" in product ? product.discount : null
   const priceRecommended = "price_recommended" in product ? product.price_recommended : null
@@ -366,13 +346,13 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
       className="bg-card hover:bg-accent border-border flex flex-col overflow-hidden rounded-xl border transition-colors"
     >
       {/* Image */}
-      <div className="relative aspect-square w-full bg-white">
+      <div className="relative aspect-7/8 w-full bg-white">
         {product.image ? (
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="rounded-lg object-contain p-2"
+            className="rounded-lg object-contain p-1.5 pb-0"
             sizes="160px"
             unoptimized
           />
@@ -393,7 +373,9 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
       {/* Info */}
       <div className="flex flex-col gap-0.5 p-2">
         <p className="text-foreground line-clamp-2 text-[11px] leading-tight font-medium">{product.name}</p>
-        <div className="mt-1 flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5">
+        <div className="mt-0.5 flex flex-col items-start gap-y-0.5">
+          <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
+
           <div className="flex flex-wrap items-baseline gap-x-1">
             <span
               className={cn(
@@ -409,7 +391,6 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
               </span>
             )}
           </div>
-          <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
         </div>
         {pricePerUnit && majorUnit && (
           <p className="text-muted-foreground tabular-nums" style={{ fontSize: "10px" }}>

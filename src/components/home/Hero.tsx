@@ -128,46 +128,61 @@ async function HeroContent() {
 function HeroSkeleton() {
   return (
     <div className="z-20 mx-auto w-full max-w-7xl px-4 lg:px-8">
-      {/* Mobile skeleton */}
+      {/* Mobile skeleton — matches HeroContent mobile: pt-6 pb-6, individual spacing */}
       <div className="lg:hidden">
-        <div className="flex flex-col items-center gap-6 pt-10 pb-6">
-          <Skeleton className="h-10 w-3/4 max-w-xs" />
+        <div className="flex flex-col items-center pt-6 pb-6">
+          <Skeleton className="h-[72px] w-3/4 max-w-xs rounded-lg" />
+          <Skeleton className="my-2.5 h-4 w-56" />
+          <Skeleton className="mb-4 h-16 w-full rounded-xl" />
           <Skeleton className="h-12 w-full max-w-md rounded-xl" />
+        </div>
+        <div className="flex flex-col gap-5 pb-6">
+          {/* Entry points — row variant: horizontal pills */}
+          <div className="flex w-full items-center justify-center gap-2.5">
+            <Skeleton className="h-8 w-24 rounded-full" />
+            <Skeleton className="h-8 w-28 rounded-full" />
+            <Skeleton className="h-8 w-32 rounded-full" />
+          </div>
+          {/* Chain quick filters */}
           <div className="flex w-full gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-20 flex-1 rounded-xl" />
             ))}
           </div>
         </div>
-        <div className="flex flex-col gap-5 pb-6">
-          <div className="grid grid-cols-2 gap-2.5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-2xl" />
-            ))}
-          </div>
-        </div>
       </div>
-      {/* Desktop skeleton */}
+
+      {/* Desktop skeleton — matches HeroContent desktop layout */}
       <div className="hidden lg:block">
-        <div className="flex gap-10 pt-20 pb-8">
+        <div className="flex gap-10 pt-20 pb-6">
           <div className="flex flex-1 flex-col gap-5">
             <Skeleton className="h-16 w-3/4 max-w-lg" />
             <Skeleton className="h-5 w-96" />
             <Skeleton className="h-12 w-full max-w-lg rounded-xl" />
+            <Skeleton className="h-10 w-80 rounded-lg" />
           </div>
-          <div className="flex w-[280px] shrink-0 flex-col gap-2.5 xl:w-[320px]">
+          <div className="flex w-[200px] shrink-0 flex-col gap-2.5 xl:w-[260px]">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-24 flex-1 rounded-2xl" />
             ))}
           </div>
         </div>
-        <Skeleton className="mb-5 h-10 w-[500px] rounded-full" />
-        <div className="flex gap-2.5 pb-8">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 flex-1 rounded-2xl" />
-          ))}
+
+        {/* Entry points — row variant: horizontal pills */}
+        <div className="flex items-center gap-2.5 pb-8">
+          <Skeleton className="h-8 w-24 rounded-full" />
+          <Skeleton className="h-8 w-28 rounded-full" />
+          <Skeleton className="h-8 w-32 rounded-full" />
+          <Skeleton className="h-8 w-24 rounded-full" />
         </div>
+
+        {/* Popular products */}
         <Skeleton className="mb-6 h-48 rounded-2xl" />
+
+        {/* Freshness badge */}
+        <div className="flex justify-center pb-12">
+          <Skeleton className="h-4 w-48" />
+        </div>
       </div>
     </div>
   )

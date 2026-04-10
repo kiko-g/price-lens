@@ -9,6 +9,7 @@ import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { DiagonalSplitCta } from "@/components/home/DiagonalSplitCta"
 import { AboutTeaserCta } from "@/components/home/AboutTeaserCta"
 import { HomeContent } from "@/components/home/HomeContent"
+import { PersonalizedDashboardSkeleton } from "@/components/home/PersonalizedDashboardSkeleton"
 
 export const revalidate = 3600
 
@@ -27,15 +28,7 @@ async function HomeContentWrapper() {
 
   const marketingContent = (
     <>
-      <Suspense
-        fallback={
-          <div className="z-20 mx-auto flex min-h-[50vh] w-full items-center justify-center px-4 py-12">
-            <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
-          </div>
-        }
-      >
-        <Hero />
-      </Suspense>
+      <Hero />
 
       <Separator />
       <DiagonalSplitCta />
@@ -57,13 +50,7 @@ export default async function Home() {
       />
 
       <main className="flex w-full flex-col items-center justify-center">
-        <Suspense
-          fallback={
-            <div className="z-20 mx-auto flex min-h-[50vh] w-full items-center justify-center px-4 py-12">
-              <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
-            </div>
-          }
-        >
+        <Suspense fallback={<PersonalizedDashboardSkeleton />}>
           <HomeContentWrapper />
         </Suspense>
       </main>
