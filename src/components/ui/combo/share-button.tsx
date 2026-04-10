@@ -132,7 +132,8 @@ export function ShareButton({
           <TooltipTrigger asChild>
             <Button variant={variant} size={size} onClick={handleShare}>
               <ShareIcon className="h-4 w-4" />
-              Share product
+              <span className="hidden md:block">Share product</span>
+              <span className="block md:hidden">Share</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -144,7 +145,8 @@ export function ShareButton({
           <DropdownMenuTrigger asChild>
             <Button variant={variant} size={size}>
               <ShareIcon className="h-4 w-4" />
-              Share product
+              <span className="hidden md:block">Share product</span>
+              <span className="block md:hidden">Share</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

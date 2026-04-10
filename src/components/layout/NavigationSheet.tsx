@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import type { NavigationItem } from "@/types"
-import { GithubIcon } from "@/components/icons"
+import { GithubIcon, InstagramIcon, LinkedinIcon, XTwitterIcon } from "@/components/icons"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
 import {
   ContrastIcon,
@@ -199,15 +199,54 @@ export function NavigationSheet() {
         <Separator className="mx-5 w-auto" />
 
         {/* footer */}
-        <div className="flex items-center px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
-          <Link
-            href={siteConfig.links.repo}
-            target="_blank"
-            className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 px-1 py-1 text-xs transition-colors"
-          >
-            <GithubIcon className="size-3.5" />
-            <span>Source code</span>
-          </Link>
+        <div className="flex items-center justify-between px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+          <div className="flex flex-col gap-0.5">
+            <Link
+              href={siteConfig.links.github}
+              target="_blank"
+              className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+            >
+              Built by <span className="font-medium">Francisco Gonçalves</span>
+            </Link>
+            <Link
+              href={siteConfig.links.repo}
+              target="_blank"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-xs transition-colors"
+            >
+              <GithubIcon className="size-3" />
+              <span>Open source on GitHub</span>
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-0.5">
+            <Link
+              href={siteConfig.links.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
+              aria-label="Instagram"
+            >
+              <InstagramIcon className="size-3.5 fill-current" />
+            </Link>
+            <Link
+              href={siteConfig.links.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
+              aria-label="X (Twitter)"
+            >
+              <XTwitterIcon className="size-3.5 fill-current" />
+            </Link>
+            <Link
+              href={siteConfig.links.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
+              aria-label="LinkedIn"
+            >
+              <LinkedinIcon className="size-3.5 fill-current stroke-transparent" />
+            </Link>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

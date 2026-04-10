@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useUser } from "@/hooks/useUser"
@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/business/product"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
@@ -245,20 +244,50 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
   const [page, setPage] = useState(0)
   const pages = chunkArray(products, 6)
-  const dragStartX = useRef<number | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const productKey = products.map((p) => p.id).join(",")
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    dragStartX.current = e.clientX
-  }
+  const updatePageFromScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (!el || pages.length <= 1) return
+    const w = el.clientWidth
+    if (w <= 0) return
+    const idx = Math.round(el.scrollLeft / w)
+    setPage(Math.min(Math.max(0, idx), pages.length - 1))
+  }, [pages.length])
 
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (dragStartX.current === null) return
-    const dx = dragStartX.current - e.clientX
-    if (Math.abs(dx) > 40) {
-      if (dx > 0) setPage((p) => Math.min(p + 1, pages.length - 1))
-      else setPage((p) => Math.max(p - 1, 0))
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || pages.length <= 1) return
+    el.addEventListener("scroll", updatePageFromScroll, { passive: true })
+    return () => el.removeEventListener("scroll", updatePageFromScroll)
+  }, [pages.length, updatePageFromScroll])
+
+  useEffect(() => {
+    const onResize = () => {
+      const el = scrollRef.current
+      if (!el || pages.length <= 1) return
+      const w = el.clientWidth
+      if (w <= 0) return
+      el.scrollLeft = page * w
+      updatePageFromScroll()
     }
-    dragStartX.current = null
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [page, pages.length, updatePageFromScroll])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollLeft = 0
+    setPage(0)
+  }, [productKey])
+
+  const goToPage = (i: number) => {
+    const el = scrollRef.current
+    if (!el) return
+    const w = el.clientWidth
+    el.scrollTo({ left: i * w, behavior: "smooth" })
+    setPage(i)
   }
 
   if (pages.length <= 1) {
@@ -272,36 +301,36 @@ function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyV
   }
 
   return (
-    <div className="select-none">
+    <div>
       <div
-        className="overflow-hidden"
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={() => {
-          dragStartX.current = null
-        }}
+        ref={scrollRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Favorite products"
+        className={cn(
+          "flex w-full min-w-0 snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth",
+          "overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "[-webkit-overflow-scrolling:touch]",
+        )}
+        style={{ touchAction: "pan-x pan-y" }}
       >
-        <div
-          className="flex transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${page * 100}%)` }}
-        >
-          {pages.map((pageProducts, i) => (
-            <div key={i} className="grid min-w-full grid-cols-3 gap-2">
-              {pageProducts.map((p) => (
-                <MiniProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          ))}
-        </div>
+        {pages.map((pageProducts, i) => (
+          <div key={i} className="grid w-full shrink-0 grow-0 basis-full snap-start grid-cols-3 gap-2">
+            {pageProducts.map((p) => (
+              <MiniProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        ))}
       </div>
 
-      {/* Pagination dots */}
       <div className="mt-3 flex items-center justify-center gap-1.5">
         {pages.map((_, i) => (
           <button
             key={i}
-            onClick={() => setPage(i)}
-            aria-label={`Page ${i + 1}`}
+            type="button"
+            onClick={() => goToPage(i)}
+            aria-label={`Page ${i + 1} of ${pages.length}`}
+            aria-current={i === page ? "true" : undefined}
             className={cn(
               "rounded-full transition-all duration-200",
               i === page

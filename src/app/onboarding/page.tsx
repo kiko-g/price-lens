@@ -117,7 +117,7 @@ export default function OnboardingPage() {
             <div className="flex flex-col gap-2">
               <Button onClick={() => setStep(1)} className="w-full">
                 Get started
-                <ArrowRightIcon className="ml-1.5 size-4" />
+                <ArrowRightIcon className="size-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
                 Skip for now
@@ -170,7 +170,7 @@ export default function OnboardingPage() {
             <div className="flex flex-col gap-2">
               <Button onClick={() => setStep(2)} className="w-full">
                 Continue
-                <ArrowRightIcon className="ml-1.5 size-4" />
+                <ArrowRightIcon className="size-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
                 Skip
@@ -196,7 +196,7 @@ export default function OnboardingPage() {
             <div className="flex flex-col gap-2">
               <Button onClick={handleComplete} className="w-full">
                 Start exploring
-                <ArrowRightIcon className="ml-1.5 size-4" />
+                <ArrowRightIcon className="size-4" />
               </Button>
               <Button
                 variant="outline"

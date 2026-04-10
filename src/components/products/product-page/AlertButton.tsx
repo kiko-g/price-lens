@@ -64,7 +64,7 @@ export function AlertButton({ storeProductId, productName, className, variant = 
               ) : (
                 <BellIcon className="size-4" />
               )}
-              {variant !== "icon" && <span className="ml-1.5">{hasAlert ? "Alert on" : "Alert me"}</span>}
+              {variant !== "icon" && <span>{hasAlert ? "Alert on" : "Alert me"}</span>}
             </Button>
           </TooltipTrigger>
           <TooltipContent>{hasAlert ? "Remove price alert" : "Get notified when price drops"}</TooltipContent>
