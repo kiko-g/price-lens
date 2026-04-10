@@ -15,7 +15,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 
-import { BellIcon, HeartIcon, ClockIcon, ArrowRightIcon, TagIcon, PackageIcon, SparklesIcon } from "lucide-react"
+import {
+  BellIcon,
+  HeartIcon,
+  ClockIcon,
+  ArrowRightIcon,
+  TagIcon,
+  PackageIcon,
+  PinIcon,
+  SparklesIcon,
+} from "lucide-react"
 import type { HeroProduct } from "@/lib/business/hero"
 
 type FavoriteItem = FavoriteSummaryItem
@@ -159,11 +168,12 @@ export function PersonalizedDashboard({
       {/* Popular products discovery */}
       {heroProducts.length > 0 && (
         <DashboardSection
-          title="Popular Products"
-          icon={SparklesIcon}
+          title="Handpicked"
+          icon={PinIcon}
           href="/products"
           isEmpty={false}
           isLoading={false}
+          className="mt-6"
         >
           <MiniProductCarousel products={heroProducts} desktopLimit={12} />
         </DashboardSection>
@@ -216,6 +226,7 @@ function DashboardSection({
   isEmpty,
   emptyMessage,
   isLoading,
+  className,
   children,
 }: {
   title: string
@@ -224,10 +235,11 @@ function DashboardSection({
   isEmpty: boolean
   emptyMessage?: string
   isLoading: boolean
+  className?: string
   children: React.ReactNode
 }) {
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold">
           <Icon className="text-muted-foreground size-4" />
@@ -268,7 +280,7 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size))
 }
 
-function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
+function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem | HeroProduct)[] }) {
   const [page, setPage] = useState(0)
   const pages = chunkArray(products, 6)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -384,7 +396,7 @@ function MiniProductCarousel({
     <>
       {/* Mobile: swipe carousel, 3 cols × 2 rows per page */}
       <div className="md:hidden">
-        <MobileCarousel products={products.filter(isMiniProduct)} />
+        <MobileCarousel products={products} />
       </div>
 
       {/* Desktop: flowing grid, no paging — 4 cols up to xl, then 6 */}
@@ -395,10 +407,6 @@ function MiniProductCarousel({
       </div>
     </>
   )
-}
-
-function isMiniProduct(p: FavoriteItem | RecentlyViewedItem | HeroProduct): p is FavoriteItem | RecentlyViewedItem {
-  return "origin_id" in p
 }
 
 export function MiniProductCardSkeleton() {
@@ -465,7 +473,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
 
       {/* Info */}
       <div className="flex flex-col gap-0.5 p-2">
-        <p className="text-foreground line-clamp-2 text-[11px] leading-tight font-medium">{product.name}</p>
+        <p className="text-foreground line-clamp-2 text-xs leading-tight font-medium">{product.name}</p>
         <div className="mt-0.5 flex flex-col items-start gap-y-0.5">
           <SupermarketChainBadge originId={originId} variant="logoSmall" />
 
@@ -479,18 +487,25 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
               {product.price != null ? `${product.price.toFixed(2)}€` : "—"}
             </span>
             {hasStrikethrough && (
-              <span className="text-muted-foreground tabular-nums line-through" style={{ fontSize: "10px" }}>
+              <span className="text-muted-foreground text-xs tabular-nums line-through">
                 {priceRecommended!.toFixed(2)}€
               </span>
             )}
           </div>
         </div>
-        {pricePerUnit && majorUnit && (
-          <p className="text-muted-foreground tabular-nums" style={{ fontSize: "10px" }}>
-            {pricePerUnit.toFixed(2)}€/{majorUnit}
-          </p>
-        )}
+        {pricePerUnit && majorUnit && <MiniProductCardPricePerUnit pricePerUnit={pricePerUnit} majorUnit={majorUnit} />}
       </div>
     </Link>
+  )
+}
+
+function MiniProductCardPricePerUnit({ pricePerUnit, majorUnit }: { pricePerUnit: number; majorUnit: string }) {
+  const formattedPricePerUnit = pricePerUnit.toFixed(2)
+  const formattedMajorUnit = majorUnit.startsWith("/") ? majorUnit.slice(1) : majorUnit
+
+  return (
+    <p className="text-2xs text-muted-foreground tabular-nums">
+      {formattedPricePerUnit}€/<span className="lowercase">{formattedMajorUnit}</span>
+    </p>
   )
 }

@@ -49,3 +49,4 @@ See `.cursor/rules/` for context-specific rules:
 - [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron plan (Pro).
 - [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron plan (Pro).
 - [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Pro plan).
+
