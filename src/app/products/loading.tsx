@@ -1,17 +1,21 @@
+import { FilterIcon, SearchIcon } from "lucide-react"
+
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
-
 import { HideFooter } from "@/contexts/FooterContext"
 
 const LIMIT = 20
+
+// Approximate widths of each SmartViewPresets chip label + icon at text-xs
+const PRESET_WIDTHS = ["w-[90px]", "w-[76px]", "w-[104px]", "w-[118px]"]
 
 export default function ProductsLoading() {
   return (
     <main className="lg:h-[calc(100dvh-var(--header-height))] lg:overflow-hidden">
       <HideFooter />
       <div className="flex w-full flex-col lg:h-full lg:flex-row">
-        {/* Desktop Sidebar skeleton */}
+        {/* Desktop sidebar skeleton */}
         <aside className="hidden h-full flex-1 flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:max-w-80 lg:min-w-80">
           <Skeleton className="mb-2 h-7 w-32" />
           <Skeleton className="mb-4 h-4 w-full" />
@@ -45,12 +49,34 @@ export default function ProductsLoading() {
           </div>
         </aside>
 
-        {/* Main content skeleton */}
+        {/* Mobile nav skeleton — mirrors MobileNav to prevent layout shift */}
+        <div className="sticky top-(--header-height) z-50 lg:hidden">
+          <div className="flex w-full items-center gap-2 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
+            <div className="flex flex-1 items-center gap-2.5 rounded-lg border px-3 py-2.5">
+              <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+              <span className="text-muted-foreground flex-1 text-sm">Search products...</span>
+            </div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
+              <FilterIcon className="text-muted-foreground h-4 w-4" />
+            </div>
+          </div>
+        </div>
+
+        {/* Main content area */}
         <div className="relative flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
-          <div className="mb-4 flex items-center justify-between">
+          {/* SmartViewPresets chips skeleton — same h-8 min-h-8 row */}
+          <div className="no-scrollbar mb-3 flex h-8 max-h-8 min-h-8 gap-2 overflow-x-auto">
+            {PRESET_WIDTHS.map((w, i) => (
+              <Skeleton key={i} className={`h-8 shrink-0 rounded-full ${w}`} />
+            ))}
+          </div>
+
+          {/* Desktop status bar skeleton */}
+          <div className="mb-4 hidden items-center justify-between lg:flex">
             <Skeleton className="h-3 w-48 rounded" />
             <Skeleton className="h-3 w-24 rounded" />
           </div>
+
           <ProductGridWrapper className="w-full">
             {Array.from({ length: LIMIT }).map((_, i) => (
               <StoreProductCardSkeleton key={i} />
