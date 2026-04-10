@@ -1,0 +1,119 @@
+---
+description: Data fetching patterns — TanStack Query for client data, useEffect only for side effects
+globs: "**/*.tsx,**/*.ts"
+alwaysApply: false
+---
+
+## Data Fetching
+
+### Server Components: fetch data at the right level
+
+Server Components are the right place for data that is ready on first render — page-level queries, initial product data, user profile. They do not need loading states or error handling boilerplate because Next.js handles that via `loading.tsx` and `error.tsx`.
+
+Server fetching is not *always* correct — if data changes based on user interaction after load, or is user-triggered, a client approach is better. Use judgment.
+
+```tsx
+// good — data is ready on first render, no client JS
+export async function ProductPage({ params }) {
+  const product = await fetchProduct(params.id)
+  return <ProductHero product={product} />
+}
+```
+
+Every `fetch()` in a server context must declare its caching intent:
+
+```ts
+// explicit intent required
+const res = await fetch(url, { cache: "no-store" })
+const res = await fetch(url, { next: { revalidate: 3600 } })
+```
+
+### Client data: use TanStack Query, not `useEffect` + `fetch`
+
+For data fetching in client components, use **TanStack Query** (`@tanstack/react-query` v5). It handles loading states, error states, caching, deduplication, and background refetches automatically — all the things a raw `useEffect` requires you to wire manually.
+
+```ts
+// wrong — manual fetch in useEffect
+useEffect(() => {
+  setIsLoading(true)
+  fetch("/api/lists")
+    .then(r => r.json())
+    .then(data => { setLists(data.lists); setIsLoading(false) })
+    .catch(err => { setError(err); setIsLoading(false) })
+}, [])
+
+// correct — TanStack Query
+function useLists() {
+  return useQuery({
+    queryKey: ["lists"],
+    queryFn: () => fetch("/api/lists").then(r => r.json()),
+    staleTime: 1000 * 60 * 2, // 2 min
+  })
+}
+```
+
+Always define the query/mutation fn in a dedicated hook in `src/hooks/use*.ts`, not inline in the component.
+
+### Mutations: `useMutation` with `onSuccess` invalidation
+
+```ts
+function useCreateList() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (name: string) =>
+      fetch("/api/lists", { method: "POST", body: JSON.stringify({ name }) }).then(r => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lists"] })
+      toast.success("List created")
+    },
+    onError: (err) => {
+      console.error("[useCreateList] failed:", err)
+      toast.error("Could not create list")
+    },
+  })
+}
+```
+
+### `useEffect` is for side effects only
+
+`useEffect` is appropriate for:
+- Subscribing to browser events (`resize`, `scroll`, `beforeinstallprompt`)
+- Reading/writing `localStorage` or `sessionStorage` after mount
+- Integrating third-party imperative APIs (maps, video players)
+- Tracking/analytics fire-and-forget calls
+
+`useEffect` is **not** appropriate for:
+- Fetching data → use TanStack Query
+- Deriving state from props → compute during render or use `useMemo`
+- Responding to user interactions → use event handlers
+
+```tsx
+// wrong — data fetch disguised as a side effect
+useEffect(() => {
+  fetch("/api/user/stats").then(r => r.json()).then(setStats)
+}, [])
+
+// correct — TanStack Query
+const { data: stats, isLoading, error } = useUserStats()
+```
+
+### Query key conventions
+
+```ts
+// product-scoped
+queryKey: ["storeProduct", id]
+queryKey: ["prices", storeProductId]
+
+// user-scoped
+queryKey: ["lists"]           // implicit: tied to session
+queryKey: ["favorites"]
+
+// admin
+queryKey: ["storeProducts", { page, query, priority }]
+```
+
+Keep query keys consistent across the codebase so `invalidateQueries` works correctly.
+
+### Supabase queries
+
+Follow the [Supabase rule](supabase.mdc) for pagination (1000-row limit) and type safety. Never assume a single `.select()` returns all rows.

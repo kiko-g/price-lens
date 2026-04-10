@@ -42,7 +42,9 @@ function wasInstalledBefore(): boolean {
 function markInstalled(): void {
   try {
     localStorage.setItem(INSTALLED_KEY, "1")
-  } catch {}
+  } catch {
+    // localStorage unavailable (private browsing or storage quota)
+  }
 }
 
 function getDismissState(): DismissState | null {
@@ -57,7 +59,9 @@ function getDismissState(): DismissState | null {
 function saveDismissState(state: DismissState): void {
   try {
     localStorage.setItem(DISMISS_KEY, JSON.stringify(state))
-  } catch {}
+  } catch {
+    // localStorage unavailable (private browsing or storage quota)
+  }
 }
 
 function isPermanentlyDismissed(): boolean {

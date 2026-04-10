@@ -13,7 +13,9 @@ export const createClient = () => {
         try {
           const cookieStore = await cookies()
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-        } catch {}
+        } catch {
+          // setAll can throw when called from a Server Component context where cookies are read-only
+        }
       },
     },
   })

@@ -72,7 +72,7 @@ export abstract class BaseProductScraper implements StoreScraper {
    * Detects "soft 404" pages - where HTTP status is 200 but content shows product not found
    * Override in store-specific scrapers to detect their error pages
    */
-  protected isSoftNotFound($: cheerio.CheerioAPI): boolean {
+  protected isSoftNotFound(_$: cheerio.CheerioAPI): boolean {
     return false
   }
 

@@ -42,7 +42,7 @@ export default function ProfileLoading() {
               <Skeleton className="h-8 w-14" />
               <Skeleton className="h-8 w-16" />
               <Skeleton className="h-8 w-14" />
-              <Skeleton className="h-8 w-18" />
+              <Skeleton className="h-8 w-[72px]" />
             </div>
             <div className="mt-4 space-y-4">
               <Skeleton className="h-4 w-48" />

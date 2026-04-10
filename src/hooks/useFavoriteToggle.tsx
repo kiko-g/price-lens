@@ -88,7 +88,8 @@ export function useFavoriteToggle() {
           await addMutation.mutateAsync({ storeProductId, productName })
         }
         return { success: true, newState: !currentState }
-      } catch {
+      } catch (err) {
+        console.error("[useFavoriteToggle] toggle failed:", err)
         return { success: false, newState: currentState }
       }
     },

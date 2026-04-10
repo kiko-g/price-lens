@@ -24,7 +24,10 @@ export function useAlertToggle(storeProductId: number) {
     fetch(`/api/alerts/check?store_product_id=${storeProductId}`)
       .then((res) => res.json())
       .then((data) => setState({ hasAlert: data.has_alert, isLoading: false }))
-      .catch(() => setState({ hasAlert: false, isLoading: false }))
+      .catch((err) => {
+        console.error("[useAlertToggle] failed to check alert status:", err)
+        setState({ hasAlert: false, isLoading: false })
+      })
   }, [user, storeProductId])
 
   const toggleAlert = useCallback(

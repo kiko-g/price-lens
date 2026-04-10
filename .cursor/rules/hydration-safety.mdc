@@ -1,0 +1,60 @@
+---
+description: Prevent React hydration errors in Next.js SSR/client rendering
+globs: "**/*.tsx,**/*.ts"
+alwaysApply: true
+---
+
+## Hydration Safety
+
+React hydration errors occur when server-rendered HTML does not match what React renders on the client. These fail silently in production (React recovers with a full client re-render) but cause layout flashes, accessibility breakage, and SEO penalties.
+
+### Time and randomness
+
+- **Never call `Date.now()`, `new Date()`, or `Math.random()` during render** in a client component — the server and client will produce different values.
+  - Move to `useEffect` (runs only on client after hydration)
+  - Or compute on the server and pass as a serialized prop
+- Use `useId()` (React 18+) when you need a stable unique ID — never `Math.random()` in `useMemo`.
+
+```tsx
+// wrong - server and client generate different IDs
+const id = useMemo(() => Math.random().toString(36), [])
+
+// correct
+const id = useId()
+```
+
+### Date formatting
+
+- **Always pass an explicit locale** to `toLocaleDateString` / `toLocaleString` / `Intl.*` — the server Node.js locale and browser locale can differ, producing a mismatch.
+- Use `"pt-PT"` for this app's primary audience.
+
+```tsx
+// wrong - locale differs between server and browser
+date.toLocaleDateString(undefined, { month: "short" })
+
+// correct
+date.toLocaleDateString("pt-PT", { month: "short" })
+```
+
+### Client-only UI (theme toggles, PWA banners, etc.)
+
+- When a component must render differently on the server vs client (e.g. a theme toggle that reads `localStorage`), use `suppressHydrationWarning` **only on the exact element** that differs — never on a wrapper div or layout element.
+- Prefer wrapping client-only subtrees in `<Suspense fallback={<Skeleton />}>` over a `mounted` boolean guard that hides content until after hydration. The Suspense approach is explicit about what to show before data is ready.
+
+```tsx
+// avoid - hides content after hydration causing layout shift
+const [mounted, setMounted] = useState(false)
+useEffect(() => setMounted(true), [])
+if (!mounted) return null
+
+// prefer - explicit fallback, no layout shift
+<Suspense fallback={<ThemeToggleSkeleton />}>
+  <ThemeToggle />
+</Suspense>
+```
+
+### `suppressHydrationWarning`
+
+- Only place `suppressHydrationWarning` on the **leaf element** whose attribute genuinely differs (e.g. `<html lang>` or `<time datetime>`).
+- Always add a comment explaining why suppression is needed.
+- Never suppress on `<div>`, layout wrappers, or large component trees.

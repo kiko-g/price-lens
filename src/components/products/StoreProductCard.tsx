@@ -230,7 +230,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 <TooltipContent side="left" align="end">
                   <span>Added to favorites</span>
                   <br />
-                  <span className="text-muted-foreground">{new Date(favoritedAt).toLocaleDateString()}</span>
+                  <span className="text-muted-foreground">{new Date(favoritedAt).toLocaleDateString("pt-PT")}</span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

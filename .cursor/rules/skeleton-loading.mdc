@@ -1,0 +1,77 @@
+---
+description: Skeleton loading states must match the real component dimensions and live in their own files
+globs: "**/loading.tsx,**/*Skeleton*,**/*skeleton*"
+alwaysApply: false
+---
+
+## Skeleton Loading
+
+A skeleton that doesn't match the real component causes layout shift — the page "jumps" when the skeleton is replaced. This is jarring, hurts CLS score, and looks unprofessional.
+
+### Skeletons must mirror real component dimensions
+
+When writing or updating a skeleton, open the real component side-by-side and match:
+
+- **Outer layout**: same flex/grid direction, same `gap-*`, same `p-*` and `m-*`
+- **Image/avatar areas**: same `w-*`, `h-*`, `aspect-*`, `rounded-*`
+- **Text line heights**: `h-4` for body, `h-5` for headings — match what the real text renders as
+- **Spacing between regions**: `mb-*` and `mt-*` must match between skeleton and real card
+
+```tsx
+// wrong - skeleton uses mb-3, real card uses mb-2
+<div className="mb-3">
+  <Skeleton className="h-32 w-full" />
+</div>
+
+// correct - aligned with the real card
+<div className="mb-2">
+  <Skeleton className="h-32 w-full" />
+</div>
+```
+
+### Always update the skeleton when you update the layout
+
+If you change spacing, padding, or section order in a component, update its corresponding skeleton in the same PR/change. They are a pair.
+
+### Use only standard Tailwind widths
+
+Non-standard Tailwind widths (e.g. `w-18`, `w-22`) are not part of the default scale and silently compute to `0` or the wrong value depending on Tailwind version.
+
+```tsx
+// wrong - w-18 is not a default Tailwind class
+<Skeleton className="w-18 h-6" />
+
+// correct - use a standard width or arbitrary value
+<Skeleton className="w-20 h-6" />
+<Skeleton className="w-[72px] h-6" />
+```
+
+Always verify a Tailwind class exists in the default v4 scale before using it.
+
+### Skeletons must live in their own files
+
+Never export a skeleton component from a `"use client"` file that also contains the real component. This forces the browser to download the full component implementation just to show the skeleton.
+
+```
+// wrong structure
+src/components/home/PersonalizedDashboard.tsx  ← "use client", exports both real + skeleton
+
+// correct structure
+src/components/home/PersonalizedDashboard.tsx       ← "use client", real component only
+src/components/home/PersonalizedDashboardSkeleton.tsx ← no "use client", skeleton only
+```
+
+The skeleton file should have **no** `"use client"` directive unless the skeleton itself requires client interactivity (it almost never does).
+
+### Loading fallbacks in Suspense
+
+When using React `<Suspense>` with a skeleton fallback, the fallback component must be importable without pulling in any client-side dependencies:
+
+```tsx
+// correct - skeleton is a pure RSC, no client bundle cost
+import { ProductCardSkeleton } from "@/components/products/skeletons/ProductCardSkeleton"
+
+<Suspense fallback={<ProductCardSkeleton />}>
+  <ProductCard id={id} />
+</Suspense>
+```

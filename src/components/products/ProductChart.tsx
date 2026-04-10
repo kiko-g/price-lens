@@ -576,7 +576,7 @@ function Graph({ className }: GraphProps) {
                 labelFormatter={(_, payload) => {
                   const rawDate = (payload[0] as { payload?: { rawDate?: string } })?.payload?.rawDate
                   if (!rawDate) return ""
-                  return new Date(rawDate).toLocaleDateString(undefined, {
+                  return new Date(rawDate).toLocaleDateString("pt-PT", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -786,7 +786,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       {trackingSince && (
         <blockquote className="text-muted-foreground text-xs italic">
           Tracking since{" "}
-          {new Date(trackingSince).toLocaleDateString(undefined, {
+          {new Date(trackingSince).toLocaleDateString("pt-PT", {
             day: "2-digit",
             month: "long",
             year: "numeric",

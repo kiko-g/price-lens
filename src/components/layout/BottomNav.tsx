@@ -26,7 +26,7 @@ export function BottomNav() {
   return (
     <nav
       className={cn(
-        "fixed right-0 bottom-0 left-0 z-50 flex items-center px-4 lg:hidden transition-transform duration-300",
+        "fixed right-0 bottom-0 left-0 z-50 flex items-center px-4 transition-transform duration-300 lg:hidden",
         "pb-[calc(1rem+env(safe-area-inset-bottom,0px))]",
         isHidden && "translate-y-full",
       )}

@@ -535,10 +535,13 @@ const SidebarMenuSkeleton = React.forwardRef<
     showIcon?: boolean
   }
 >(({ className, showIcon = false, ...props }, ref) => {
-  // Random width between 50 to 90%.
+  // Stable width derived from a deterministic ID to avoid hydration mismatches.
+  const id = React.useId()
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+    // Convert id characters to a deterministic number in [50, 90]
+    const seed = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+    return `${(seed % 41) + 50}%`
+  }, [id])
 
   return (
     <div
