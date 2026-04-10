@@ -27,8 +27,8 @@ export function PersonalizedDashboardSkeleton() {
         ))}
       </div>
 
-      {/* Two-column dashboard sections — matches DashboardSection using Card/CardHeader/CardContent */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Stacked dashboard sections — matches DashboardSection using Card/CardHeader/CardContent */}
+      <div className="flex flex-col gap-6">
         {Array.from({ length: 2 }).map((_, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
@@ -39,8 +39,13 @@ export function PersonalizedDashboardSkeleton() {
               <Skeleton className="h-3 w-14" />
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 md:hidden">
                 {Array.from({ length: 6 }).map((_, j) => (
+                  <MiniProductCardSkeleton key={j} />
+                ))}
+              </div>
+              <div className="hidden grid-cols-4 gap-2 md:grid xl:grid-cols-6">
+                {Array.from({ length: 12 }).map((_, j) => (
                   <MiniProductCardSkeleton key={j} />
                 ))}
               </div>

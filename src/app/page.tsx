@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 import { defaultMetadata } from "@/lib/config"
 import { getHomeStats } from "@/lib/queries/home-stats"
+import { getHeroProducts } from "@/lib/business/hero"
 
 import { Layout } from "@/components/layout"
 import { Hero } from "@/components/home/Hero"
@@ -24,7 +25,7 @@ function Separator() {
 }
 
 async function HomeContentWrapper() {
-  const stats = await getHomeStats()
+  const [stats, heroProducts] = await Promise.all([getHomeStats(), getHeroProducts()])
 
   const marketingContent = (
     <>
@@ -37,7 +38,9 @@ async function HomeContentWrapper() {
     </>
   )
 
-  return <HomeContent totalProducts={stats.totalProducts} marketingContent={marketingContent} />
+  return (
+    <HomeContent totalProducts={stats.totalProducts} marketingContent={marketingContent} heroProducts={heroProducts} />
+  )
 }
 
 export default async function Home() {
