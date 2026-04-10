@@ -16,14 +16,22 @@ import { SupermarketChainBadge } from "@/components/products/SupermarketChainBad
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 
 import { BellIcon, HeartIcon, ClockIcon, ArrowRightIcon, TagIcon, PackageIcon, SparklesIcon } from "lucide-react"
+import { PopularProducts } from "@/components/home/PopularProducts"
+import type { HeroProduct } from "@/lib/business/hero"
 
 type FavoriteItem = FavoriteSummaryItem
 
-export function PersonalizedDashboard({ totalProducts }: { totalProducts: number }) {
+export function PersonalizedDashboard({
+  totalProducts,
+  heroProducts,
+}: {
+  totalProducts: number
+  heroProducts: HeroProduct[]
+}) {
   const { user, profile } = useUser()
   const { items: recentlyViewed } = useRecentlyViewed()
   const { data: alertsData, isLoading: alertsLoading } = useUserAlerts()
-  const { data: favoritesData, isLoading: favoritesLoading } = useUserFavoritesSummary(18)
+  const { data: favoritesData, isLoading: favoritesLoading } = useUserFavoritesSummary(24)
 
   const favorites = favoritesData?.items ?? []
   const favoritesTotal = favoritesData?.totalCount ?? null
@@ -72,7 +80,7 @@ export function PersonalizedDashboard({ totalProducts }: { totalProducts: number
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="flex flex-col gap-6">
         {/* Favorites summary */}
         <DashboardSection
           title="Your Favorites"
@@ -93,7 +101,7 @@ export function PersonalizedDashboard({ totalProducts }: { totalProducts: number
           emptyMessage="Products you view will appear here."
           isLoading={false}
         >
-          <MiniProductCarousel products={recentlyViewed.slice(0, 18)} />
+          <MiniProductCarousel products={recentlyViewed.slice(0, 24)} />
         </DashboardSection>
       </div>
 
@@ -147,6 +155,13 @@ export function PersonalizedDashboard({ totalProducts }: { totalProducts: number
             </Link>
           </CardContent>
         </Card>
+      )}
+
+      {/* Popular products discovery */}
+      {heroProducts.length > 0 && (
+        <div className="mt-6 pb-4">
+          <PopularProducts products={heroProducts} />
+        </div>
       )}
     </div>
   )
@@ -222,11 +237,18 @@ function DashboardSection({
       </CardHeader>
       <CardContent className="p-4 pt-0">
         {isLoading ? (
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <MiniProductCardSkeleton key={i} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-3 gap-2 md:hidden">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <MiniProductCardSkeleton key={i} />
+              ))}
+            </div>
+            <div className="hidden grid-cols-4 gap-2 md:grid xl:grid-cols-6">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <MiniProductCardSkeleton key={i} />
+              ))}
+            </div>
+          </>
         ) : isEmpty ? (
           <p className="text-muted-foreground py-6 text-center text-xs">{emptyMessage}</p>
         ) : (
@@ -241,7 +263,7 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size))
 }
 
-function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
+function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
   const [page, setPage] = useState(0)
   const pages = chunkArray(products, 6)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -341,6 +363,24 @@ function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyV
         ))}
       </div>
     </div>
+  )
+}
+
+function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
+  return (
+    <>
+      {/* Mobile: swipe carousel, 3 cols × 2 rows per page */}
+      <div className="md:hidden">
+        <MobileCarousel products={products} />
+      </div>
+
+      {/* Desktop: flowing grid, no paging — 4 cols up to xl, then 6 */}
+      <div className="hidden grid-cols-4 gap-2 md:grid xl:grid-cols-6">
+        {products.map((p) => (
+          <MiniProductCard key={p.id} product={p} />
+        ))}
+      </div>
+    </>
   )
 }
 
