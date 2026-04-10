@@ -20,7 +20,7 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
         <SearchContainer registerKeyboardShortcut={false}>
           <button
             type="button"
-            className="bg-card hover:bg-accent/50 relative flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-4 transition-colors md:py-3.5"
+            className="bg-card hover:bg-accent/50 relative flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 transition-colors md:py-3.5"
             style={{
               boxShadow:
                 "0 0 16px color-mix(in oklch, var(--primary) 12%, transparent), 0 0 4px color-mix(in oklch, var(--secondary) 8%, transparent)",

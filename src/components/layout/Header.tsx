@@ -17,8 +17,7 @@ import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
 import { FavoritesLink } from "@/components/layout/FavoritesLink"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
 
-import { ScanBarcodeIcon, SearchIcon } from "lucide-react"
-import { BarcodeScanButton } from "@/components/scan"
+import { SearchIcon } from "lucide-react"
 
 export function Header() {
   const pathname = usePathname()
@@ -67,16 +66,6 @@ export function Header() {
               </button>
             </SearchContainer>
           )}
-
-          <BarcodeScanButton>
-            <button
-              type="button"
-              className="bg-primary/10 border-primary/25 dark:bg-primary/20 dark:border-primary/30 text-foreground hover:bg-primary/20 dark:hover:bg-primary/40 hidden cursor-pointer items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors active:scale-[0.97] lg:inline-flex"
-            >
-              <ScanBarcodeIcon className="size-3.5" />
-              Scan
-            </button>
-          </BarcodeScanButton>
 
           <div className="hidden md:flex">
             <ThemeToggle size="icon" variant="outline" />

@@ -31,7 +31,7 @@ export function BottomNav() {
         isHidden && "translate-y-full",
       )}
     >
-      <div className="bg-background/80 flex h-14 flex-1 items-center justify-around rounded-full border border-border/50 px-2 shadow-md backdrop-blur-xl">
+      <div className="bg-background/80 border-border/50 flex h-14 flex-1 items-center justify-around rounded-full border px-2 shadow-md backdrop-blur-xl">
         {navItems.map((item) => {
           const isActive =
             item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/")
