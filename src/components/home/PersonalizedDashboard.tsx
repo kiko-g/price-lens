@@ -16,7 +16,6 @@ import { SupermarketChainBadge } from "@/components/products/SupermarketChainBad
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 
 import { BellIcon, HeartIcon, ClockIcon, ArrowRightIcon, TagIcon, PackageIcon, SparklesIcon } from "lucide-react"
-import { PopularProducts } from "@/components/home/PopularProducts"
 import type { HeroProduct } from "@/lib/business/hero"
 
 type FavoriteItem = FavoriteSummaryItem
@@ -90,7 +89,7 @@ export function PersonalizedDashboard({
           emptyMessage="No favorites yet. Browse products and tap the heart icon to start tracking."
           isLoading={isLoading}
         >
-          <MiniProductCarousel products={favorites} />
+          <MiniProductCarousel products={favorites} desktopLimit={12} />
         </DashboardSection>
 
         {/* Recently viewed */}
@@ -101,7 +100,7 @@ export function PersonalizedDashboard({
           emptyMessage="Products you view will appear here."
           isLoading={false}
         >
-          <MiniProductCarousel products={recentlyViewed.slice(0, 24)} />
+          <MiniProductCarousel products={recentlyViewed.slice(0, 24)} desktopLimit={6} />
         </DashboardSection>
       </div>
 
@@ -159,9 +158,15 @@ export function PersonalizedDashboard({
 
       {/* Popular products discovery */}
       {heroProducts.length > 0 && (
-        <div className="mt-6 pb-4">
-          <PopularProducts products={heroProducts} />
-        </div>
+        <DashboardSection
+          title="Popular Products"
+          icon={SparklesIcon}
+          href="/products"
+          isEmpty={false}
+          isLoading={false}
+        >
+          <MiniProductCarousel products={heroProducts} desktopLimit={12} />
+        </DashboardSection>
       )}
     </div>
   )
@@ -366,22 +371,34 @@ function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewed
   )
 }
 
-function MiniProductCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
+function MiniProductCarousel({
+  products,
+  desktopLimit,
+}: {
+  products: (FavoriteItem | RecentlyViewedItem | HeroProduct)[]
+  desktopLimit?: number
+}) {
+  const desktopProducts = desktopLimit ? products.slice(0, desktopLimit) : products
+
   return (
     <>
       {/* Mobile: swipe carousel, 3 cols × 2 rows per page */}
       <div className="md:hidden">
-        <MobileCarousel products={products} />
+        <MobileCarousel products={products.filter(isMiniProduct)} />
       </div>
 
       {/* Desktop: flowing grid, no paging — 4 cols up to xl, then 6 */}
       <div className="hidden grid-cols-4 gap-2 md:grid xl:grid-cols-6">
-        {products.map((p) => (
+        {desktopProducts.map((p) => (
           <MiniProductCard key={p.id} product={p} />
         ))}
       </div>
     </>
   )
+}
+
+function isMiniProduct(p: FavoriteItem | RecentlyViewedItem | HeroProduct): p is FavoriteItem | RecentlyViewedItem {
+  return "origin_id" in p
 }
 
 export function MiniProductCardSkeleton() {
@@ -400,18 +417,25 @@ export function MiniProductCardSkeleton() {
   )
 }
 
-function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedItem }) {
+function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedItem | HeroProduct }) {
   const discount = "discount" in product ? product.discount : null
-  const priceRecommended = "price_recommended" in product ? product.price_recommended : null
+  const priceRecommended =
+    "price_recommended" in product
+      ? product.price_recommended
+      : "priceRecommended" in product
+        ? product.priceRecommended
+        : null
   const pricePerUnit = "price_per_major_unit" in product ? product.price_per_major_unit : null
   const majorUnit = "major_unit" in product ? product.major_unit : null
+  const originId = "origin_id" in product ? product.origin_id : product.originId
+  const href = "href" in product ? product.href : `/products/${product.id}`
 
   const hasDiscount = Boolean(discount && discount > 0)
-  const hasStrikethrough = Boolean(priceRecommended && priceRecommended > product.price)
+  const hasStrikethrough = Boolean(priceRecommended && product.price != null && priceRecommended > product.price)
 
   return (
     <Link
-      href={`/products/${product.id}`}
+      href={href}
       className="bg-card hover:bg-accent border-border flex flex-col overflow-hidden rounded-xl border transition-colors"
     >
       {/* Image */}
@@ -443,7 +467,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
       <div className="flex flex-col gap-0.5 p-2">
         <p className="text-foreground line-clamp-2 text-[11px] leading-tight font-medium">{product.name}</p>
         <div className="mt-0.5 flex flex-col items-start gap-y-0.5">
-          <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
+          <SupermarketChainBadge originId={originId} variant="logoSmall" />
 
           <div className="flex flex-wrap items-baseline gap-x-1">
             <span
@@ -452,7 +476,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
                 hasDiscount ? "text-emerald-600 dark:text-emerald-400" : "text-foreground",
               )}
             >
-              {product.price.toFixed(2)}€
+              {product.price != null ? `${product.price.toFixed(2)}€` : "—"}
             </span>
             {hasStrikethrough && (
               <span className="text-muted-foreground tabular-nums line-through" style={{ fontSize: "10px" }}>
