@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 export interface DealProduct {
   id: number
   origin_id: number
+  url: string
   name: string
   brand: string | null
   pack: string | null
@@ -20,6 +21,7 @@ export interface DealProduct {
 const DEAL_COLUMNS = [
   "id",
   "origin_id",
+  "url",
   "name",
   "brand",
   "pack",

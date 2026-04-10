@@ -7,8 +7,8 @@ import { SupermarketChain, STORE_NAMES } from "@/types/business"
 
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
+import { cn } from "@/lib/utils"
 
 import { TrendingDownIcon, TicketPercentIcon, FilterIcon } from "lucide-react"
 
@@ -59,34 +59,44 @@ export function DealsShowcase({ deals }: { deals: DealsResult }) {
           <button
             key={filter.id}
             type="button"
+            aria-label={filter.label}
+            aria-pressed={storeFilter === filter.id}
             onClick={() => setStoreFilter(filter.id)}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-              storeFilter === filter.id
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background hover:bg-accent border-border"
-            }`}
+            className={cn(
+              "inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border px-3 text-sm font-medium transition-colors",
+              "originId" in filter ? "min-w-[3rem] px-2.5" : "px-3.5",
+              storeFilter === filter.id &&
+                ("originId" in filter
+                  ? "border-primary bg-primary/10 text-foreground ring-primary/20 ring-2"
+                  : "border-primary bg-primary text-primary-foreground"),
+              storeFilter !== filter.id && "border-border bg-background hover:bg-accent",
+            )}
           >
-            {"originId" in filter && <SupermarketChainBadge originId={filter.originId} variant="logoSmall" />}
-            {filter.label}
+            {"originId" in filter ? (
+              <>
+                <span className="sr-only">{filter.label}</span>
+                <span className="flex h-5 items-center [&_img]:object-contain [&_svg]:max-h-5">
+                  <SupermarketChainBadge originId={filter.originId} variant="logoSmall" />
+                </span>
+              </>
+            ) : (
+              filter.label
+            )}
           </button>
         ))}
       </div>
 
       <Tabs defaultValue="price-drops">
-        <TabsList>
-          <TabsTrigger value="price-drops" className="gap-1.5">
-            <TrendingDownIcon className="size-3.5" />
-            Price Drops
-            <Badge variant="secondary" className="ml-1 text-[10px]">
-              {filteredDrops.length}
-            </Badge>
+        <TabsList className="h-auto min-h-10 gap-1 p-1">
+          <TabsTrigger value="price-drops" className="gap-2 px-3 py-2 text-sm data-[state=active]:shadow-sm">
+            <TrendingDownIcon className="size-4 shrink-0" />
+            <span>Price Drops</span>
+            <DealTabCount n={filteredDrops.length} />
           </TabsTrigger>
-          <TabsTrigger value="discounts" className="gap-1.5">
-            <TicketPercentIcon className="size-3.5" />
-            Discounts
-            <Badge variant="secondary" className="ml-1 text-[10px]">
-              {filteredDiscounts.length}
-            </Badge>
+          <TabsTrigger value="discounts" className="gap-2 px-3 py-2 text-sm data-[state=active]:shadow-sm">
+            <TicketPercentIcon className="size-4 shrink-0" />
+            <span>Discounts</span>
+            <DealTabCount n={filteredDiscounts.length} />
           </TabsTrigger>
         </TabsList>
 
@@ -115,6 +125,14 @@ export function DealsShowcase({ deals }: { deals: DealsResult }) {
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+function DealTabCount({ n }: { n: number }) {
+  return (
+    <span className="bg-muted-foreground/15 text-muted-foreground inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums">
+      {n}
+    </span>
   )
 }
 
