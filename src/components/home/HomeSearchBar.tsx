@@ -35,7 +35,7 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
       <BarcodeScanButton>
         <button
           type="button"
-          className="bg-card hover:bg-accent/50 flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-4 transition-colors md:py-3.5"
+          className="bg-card hover:bg-accent/50 flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-3.5 transition-colors md:py-3.5"
           style={{
             boxShadow:
               "0 0 16px color-mix(in oklch, var(--secondary) 12%, transparent), 0 0 4px color-mix(in oklch, var(--primary) 8%, transparent)",
