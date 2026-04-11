@@ -42,7 +42,10 @@ interface MobileNavProps {
   isSearching: boolean
   loadedCount: number
   totalCount: number | null
+  /** When totalCount is unknown (fast pagination), true means more pages may exist */
+  hasMoreProducts: boolean
   activeFilterCount: number
+  filterParts?: string[]
   onFilterPress: () => void
 }
 
@@ -51,7 +54,9 @@ export function MobileNav({
   isSearching,
   loadedCount,
   totalCount,
+  hasMoreProducts,
   activeFilterCount,
+  filterParts,
   onFilterPress,
 }: MobileNavProps) {
   const scrollDirection = useScrollDirection()
@@ -76,14 +81,38 @@ export function MobileNav({
               ) : (
                 <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
               )}
-              <span
-                className={cn("flex-1 truncate text-left text-sm", query ? "text-foreground" : "text-muted-foreground")}
-              >
-                {query || "Search products..."}
-              </span>
-              {loadedCount > 0 && totalCount != null && (
-                <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-                  {loadedCount}/{totalCount}
+              {query ? (
+                <span className="text-foreground flex-1 truncate text-left text-sm">{query}</span>
+              ) : filterParts && filterParts.length > 0 ? (
+                <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+                  {filterParts.map((part) => (
+                    <span
+                      key={part}
+                      className="text-muted-foreground shrink-0 rounded border px-1.5 py-0.5 text-xs leading-none"
+                    >
+                      {part}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                <span className="text-muted-foreground flex-1 truncate text-left text-sm">Search products...</span>
+              )}
+              {loadedCount > 0 && (
+                <span
+                  className="text-muted-foreground shrink-0 text-xs tabular-nums"
+                  title={
+                    totalCount != null
+                      ? `${loadedCount} of ${totalCount} products loaded`
+                      : hasMoreProducts
+                        ? `${loadedCount} products loaded, more available`
+                        : `${loadedCount} products loaded`
+                  }
+                >
+                  {totalCount != null
+                    ? `${loadedCount}/${totalCount}`
+                    : hasMoreProducts
+                      ? `${loadedCount}+`
+                      : String(loadedCount)}
                 </span>
               )}
             </button>

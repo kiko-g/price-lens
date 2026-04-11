@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { PrioritySource } from "@/types"
 import { useStoreProducts, fetchStoreProducts } from "@/hooks/useStoreProducts"
@@ -22,6 +22,7 @@ import {
 } from "./url-state"
 import { CanonicalCategoryCascade } from "./CategoryFilter"
 import { MobileFiltersDrawer, MobileNav } from "./MobileFiltersDrawer"
+import { ProductBatchMilestone } from "./ProductBatchMilestone"
 import { PriceRangeFilter, SmartViewPresets } from "./FilterControls"
 import { PaginationControls, BottomPagination } from "./PaginationControls"
 import { DebounceProgressBar, LoadingGrid, EmptyState } from "./StateViews"
@@ -53,6 +54,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { ErrorStateView } from "@/components/ui/combo/state-views"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
+import { getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { ProductGridWrapper } from "@/components/products/ProductGridWrapper"
 import { ScrapeUrlDialog } from "@/components/admin/ScrapeUrlDialog"
@@ -126,6 +128,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   // Desktop: show our overlay for any URL update (page, sort, filters) so we don't see Next.js "Rendering..." badge
   const [isNavigating, setIsNavigating] = useState(false)
   const urlStateKeyWhenNavigatingRef = useRef<string | null>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   const updateUrlWithOverlay = useCallback(
     (updates: Record<string, string | number | boolean | null | undefined>) => {
@@ -169,6 +172,16 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const [mobilePage, setMobilePage] = useState(1)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [mobileHasMore, setMobileHasMore] = useState(true)
+  const [showLoadingMoreUi, setShowLoadingMoreUi] = useState(false)
+
+  useEffect(() => {
+    if (!isLoadingMore) {
+      setShowLoadingMoreUi(false)
+      return
+    }
+    const t = window.setTimeout(() => setShowLoadingMoreUi(true), 220)
+    return () => window.clearTimeout(t)
+  }, [isLoadingMore])
 
   // Stable filter identity string (excludes page) to detect filter changes
   const filterIdentity = useMemo(
@@ -512,6 +525,23 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     }
   }, [])
 
+  // Auto-load more on mobile when sentinel scrolls into view
+  useEffect(() => {
+    if (isDesktop || !mobileHasMore) return
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isLoadingMore && !isLoading) {
+          handleLoadMore()
+        }
+      },
+      { rootMargin: "300px" },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [isDesktop, mobileHasMore, isLoadingMore, isLoading, handleLoadMore])
+
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (urlState.origin) count++
@@ -523,6 +553,27 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     if (urlState.priceMin || urlState.priceMax) count++
     return count
   }, [urlState])
+
+  // Filter parts for the mobile search bar badge pills when filters are active but no query
+  const filterParts = useMemo((): string[] => {
+    if (!activeFilterCount) return []
+    const parts: string[] = []
+    if (selectedOrigins.length === 1) {
+      const name = getSupermarketChainName(selectedOrigins[0])
+      if (name) parts.push(name)
+    } else if (selectedOrigins.length > 1) {
+      parts.push(`${selectedOrigins.length} stores`)
+    }
+    if (urlState.category) {
+      const name = urlState.category.replace(/^\d+-/, "").replace(/-/g, " ")
+      parts.push(name.charAt(0).toUpperCase() + name.slice(1))
+    }
+    if (urlState.onlyDiscounted) parts.push("On sale")
+    if (urlState.priceMin && urlState.priceMax) parts.push(`${urlState.priceMin}–${urlState.priceMax}€`)
+    else if (urlState.priceMin) parts.push(`From ${urlState.priceMin}€`)
+    else if (urlState.priceMax) parts.push(`Up to ${urlState.priceMax}€`)
+    return parts.slice(0, 3)
+  }, [activeFilterCount, selectedOrigins, urlState])
 
   const bulkPriorityFilterParams = useMemo(() => {
     const params = new URLSearchParams()
@@ -1002,7 +1053,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         isSearching={isSearching}
         loadedCount={displayProducts.length}
         totalCount={totalCount}
+        hasMoreProducts={mobileHasMore}
         activeFilterCount={activeFilterCount}
+        filterParts={filterParts}
         onFilterPress={() => setMobileFiltersOpen(true)}
       />
 
@@ -1123,9 +1176,15 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               <ProductGridWrapper
                 className={cn("w-full transition-opacity duration-200", showOverlay && "pointer-events-none")}
               >
-                {displayProducts.map((product, idx) => (
-                  <StoreProductCard key={product.id} sp={product} imagePriority={isDesktop ? idx < 20 : idx < 10} />
-                ))}
+                {displayProducts.flatMap((product, idx) => {
+                  const nodes: ReactNode[] = [
+                    <StoreProductCard key={product.id} sp={product} imagePriority={isDesktop ? idx < 20 : idx < 10} />,
+                  ]
+                  if (!isDesktop && (idx + 1) % limit === 0 && idx + 1 < displayProducts.length) {
+                    nodes.push(<ProductBatchMilestone key={`batch-${idx + 1}`} loaded={idx + 1} />)
+                  }
+                  return nodes
+                })}
               </ProductGridWrapper>
             </div>
 
@@ -1142,29 +1201,44 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               />
             </div>
 
-            {/* Mobile: Load More button */}
+            {/* Mobile: infinite scroll sentinel + status */}
             <div className="my-6 flex flex-col items-center gap-3 lg:hidden">
               {mobileHasMore ? (
-                <Button variant="outline" className="w-full max-w-xs" onClick={handleLoadMore} disabled={isLoadingMore}>
-                  {isLoadingMore ? (
-                    <>
+                <>
+                  <div ref={sentinelRef} className="h-px w-full" aria-hidden />
+                  {showLoadingMoreUi && (
+                    <div className="text-muted-foreground flex items-center gap-2">
                       <Loader2Icon className="h-4 w-4 animate-spin" />
-                      Loading...
+                      <span className="text-xs">Loading more...</span>
+                    </div>
+                  )}
+                  <p className="text-muted-foreground text-center text-xs">
+                    {totalCount != null ? (
+                      <>
+                        Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> of{" "}
+                        <span className="text-foreground font-semibold">{totalCount}</span> products
+                      </>
+                    ) : (
+                      <>
+                        Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> products
+                        <span className="text-muted-foreground/80"> · scroll for more</span>
+                      </>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <p className="text-muted-foreground text-center text-xs">
+                  {totalCount != null ? (
+                    <>
+                      Showing all <span className="text-foreground font-semibold">{totalCount}</span> products matching
+                      filters
                     </>
                   ) : (
-                    "Load more products"
+                    <>
+                      <span className="text-foreground font-semibold">{displayProducts.length}</span> products match
+                      your filters
+                    </>
                   )}
-                </Button>
-              ) : (
-                <p className="text-muted-foreground text-xs">
-                  Showing all <span className="text-foreground font-semibold">{totalCount}</span> products matching
-                  filters
-                </p>
-              )}
-              {mobileHasMore && totalCount != null && (
-                <p className="text-muted-foreground text-xs">
-                  Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> of{" "}
-                  <span className="text-foreground font-semibold">{totalCount}</span> products
                 </p>
               )}
             </div>

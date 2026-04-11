@@ -64,27 +64,19 @@ export function PersonalizedDashboard({
 
       {/* Quick action cards */}
       <div className="mb-6 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-        <QuickActionCard
-          href="/deals"
-          icon={TagIcon}
-          label="Deals"
-          description="Price drops & discounts"
-          hue="emerald"
-        />
+        <QuickActionCard href="/deals" icon={TagIcon} label="Deals" description="Price drops & discounts" />
         <QuickActionCard
           href="/favorites"
           icon={HeartIcon}
           label="Favorites"
           description={favoritesTotal !== null ? `${favoritesTotal} products` : "View all"}
-          hue="rose"
         />
-        <QuickActionCard href="/products" icon={PackageIcon} label="Products" description="Browse all" hue="blue" />
+        <QuickActionCard href="/products" icon={PackageIcon} label="Products" description="Browse all" />
         <QuickActionCard
           href="/profile?tab=alerts"
           icon={BellIcon}
           label="Alerts"
           description={`${alerts.length} active`}
-          hue="amber"
         />
       </div>
 
@@ -95,7 +87,7 @@ export function PersonalizedDashboard({
           icon={HeartIcon}
           href="/favorites"
           isEmpty={favorites.length === 0}
-          emptyMessage="No favorites yet. Browse products and tap the heart icon to start tracking."
+          emptyMessage="No favorites yet. Browse products and tap the heart icon."
           isLoading={isLoading}
         >
           <MiniProductCarousel products={favorites} desktopLimit={12} />
@@ -182,34 +174,24 @@ export function PersonalizedDashboard({
   )
 }
 
-const hueClasses = {
-  emerald: { bg: "bg-emerald-500/10" },
-  rose: { bg: "bg-rose-500/10" },
-  blue: { bg: "bg-blue-500/10" },
-  amber: { bg: "bg-amber-500/10" },
-} as const
-
 function QuickActionCard({
   href,
   icon: Icon,
   label,
   description,
-  hue,
 }: {
   href: string
   icon: React.ElementType
   label: string
   description: string
-  hue: keyof typeof hueClasses
 }) {
-  const { bg } = hueClasses[hue]
   return (
     <Link
       href={href}
       className="bg-card hover:bg-accent border-border flex items-center gap-3 rounded-xl border p-3 transition-colors lg:p-4"
     >
-      <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-lg", bg)}>
-        <Icon className="text-foreground size-4" />
+      <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-lg">
+        <Icon className="text-muted-foreground size-4" />
       </div>
       <div className="min-w-0">
         <p className="text-sm leading-tight font-semibold">{label}</p>
