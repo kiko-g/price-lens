@@ -14,7 +14,7 @@ import { formatRelativeTime } from "@/lib/business/chart"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
+import { Badge, badgeVariants } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { CodeShowcase } from "@/components/ui/combo/code-showcase"
@@ -305,9 +305,17 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           </TooltipProvider>
 
           <div className="mt-1.5 flex items-center justify-between gap-1.5">
-            <span className="w-full text-sm leading-4 font-semibold text-blue-600 dark:text-blue-500">
-              {sp.brand ? sp.brand : <span className="text-muted-foreground opacity-30">No Brand</span>}
-            </span>
+            {sp.brand ? (
+              <Link
+                href={`/products?brand=${encodeURIComponent(sp.brand)}`}
+                className="text-primary hover:text-primary/90 w-full text-sm leading-4 font-semibold underline-offset-2 hover:underline"
+                aria-label={`Browse products for brand ${sp.brand}`}
+              >
+                {sp.brand}
+              </Link>
+            ) : (
+              <span className="text-muted-foreground w-full text-sm leading-4 font-semibold opacity-30">No Brand</span>
+            )}
           </div>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
@@ -442,9 +450,16 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <div className="text-muted-foreground -mt-1 mb-2 flex w-full items-start justify-between gap-1.5 border-b pb-2 text-xs">
                 <div className="flex flex-wrap items-center gap-1.5">
                   {sp.brand && (
-                    <Badge variant="blue" size="xs">
+                    <Link
+                      href={`/products?brand=${encodeURIComponent(sp.brand)}`}
+                      className={cn(
+                        badgeVariants({ variant: "blue", size: "xs" }),
+                        "inline-flex no-underline hover:opacity-90",
+                      )}
+                      aria-label={`Browse products for brand ${sp.brand}`}
+                    >
                       {sp.brand}
-                    </Badge>
+                    </Link>
                   )}
 
                   <TooltipProvider delayDuration={200}>

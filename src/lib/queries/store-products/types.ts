@@ -1,5 +1,5 @@
 import type { SearchType, SortByType } from "@/types/business"
-import { SupermarketChain } from "@/types/business"
+import { SupermarketChain, DEFAULT_BROWSE_SORT } from "@/types/business"
 import type { StoreProduct, PrioritySource } from "@/types"
 import { createClient } from "@/lib/supabase/server"
 
@@ -135,6 +135,13 @@ export interface CanonicalCategoryFilter {
 }
 
 /**
+ * Brand filter — exact match on `store_products.brand` (OR within the list).
+ */
+export interface BrandFilter {
+  names: string[]
+}
+
+/**
  * Sorting options
  */
 export interface SortOptions {
@@ -206,6 +213,9 @@ export interface StoreProductsQueryParams {
   /** Price range filter */
   priceRange?: PriceRangeFilter
 
+  /** Filter by exact brand name(s) */
+  brand?: BrandFilter
+
   /** Additional filter flags */
   flags?: FilterFlags
 
@@ -267,7 +277,7 @@ export const DEFAULT_PAGINATION: PaginationOptions = {
 }
 
 export const DEFAULT_SORT: SortOptions = {
-  sortBy: "a-z",
+  sortBy: DEFAULT_BROWSE_SORT,
   prioritizeByPriority: false,
 }
 
@@ -329,6 +339,11 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
       .join(";")
   }
 
+  const getBrandKey = (): QueryKeyValue => {
+    if (!params.brand?.names?.length) return null
+    return [...params.brand.names].sort().join("|")
+  }
+
   return [
     "storeProducts",
     // Search
@@ -346,6 +361,8 @@ export function generateQueryKey(params: StoreProductsQueryParams): QueryKeyValu
     params.canonicalCategory?.categoryId ?? null,
     // Origin
     getOriginKey(),
+    // Brand
+    getBrandKey(),
     // Priority
     getPriorityKey(),
     // Source

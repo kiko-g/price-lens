@@ -29,7 +29,7 @@ export const STORE_COLORS_SECONDARY: Record<number, string> = {
 }
 
 export const SORT_LABELS: Record<string, string> = {
-  relevance: "Most Relevant",
+  relevance: "Best match (search)",
   "a-z": "A to Z",
   "z-a": "Z to A",
   "price-low-high": "Cheapest",
@@ -70,10 +70,15 @@ export const sortByTypes = [
   "only-nulls",
 ] as const
 
+export type SortByType = (typeof sortByTypes)[number]
+
+/** Default /products `sort` when the URL omits it (browse without an active search). */
+export const DEFAULT_BROWSE_SORT: SortByType = "updated-newest"
+
 export const sortTypesLabels: {
   [key in SortByType]: string
 } = {
-  relevance: "Most Relevant",
+  relevance: "Best match (search)",
   "a-z": "A to Z",
   "z-a": "Z to A",
   "price-low-high": "High to Low",
@@ -90,10 +95,8 @@ export const sortTypesLabels: {
 
 export const getSortByType = (sortBy: string) => {
   if (sortByTypes.includes(sortBy as SortByType)) return sortBy as SortByType
-  return "a-z" as SortByType
+  return DEFAULT_BROWSE_SORT
 }
-
-export type SortByType = (typeof sortByTypes)[number]
 
 export const RANGES = ["1W", "2W", "1M", "3M", "6M", "1Y", "Max"] as const
 export type DateRange = (typeof RANGES)[number]

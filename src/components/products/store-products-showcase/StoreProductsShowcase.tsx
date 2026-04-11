@@ -7,7 +7,7 @@ import { useStoreProducts, fetchStoreProducts } from "@/hooks/useStoreProducts"
 import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
 import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { searchTypes, type SearchType, type SortByType } from "@/types/business"
+import { searchTypes, type SearchType, type SortByType, DEFAULT_BROWSE_SORT } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import { cn, serializeArray } from "@/lib/utils"
 import { UTILITY_SORT_OPTIONS, ALL_SORT_LABELS } from "@/lib/business/filters"
@@ -83,7 +83,13 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
 
-  const DEFAULT_ACCORDION_VALUES = ["sort", "store-origin", "price-range", "categories"]
+  useEffect(() => {
+    if (!urlState.query.trim() && urlState.sortBy === "relevance") {
+      updateUrl({ sort: DEFAULT_BROWSE_SORT, page: 1 })
+    }
+  }, [urlState.query, urlState.sortBy, updateUrl])
+
+  const DEFAULT_ACCORDION_VALUES = ["sort", "store-origin", "price-range", "categories", "brand"]
 
   // Desktop detection (lg breakpoint = 1024px) - debounce only applies on desktop
   const isDesktop = useMediaQuery("(min-width: 1024px)")
@@ -105,6 +111,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     category: urlState.category,
     priceMin: urlState.priceMin,
     priceMax: urlState.priceMax,
+    brand: urlState.brand,
   })
 
   // Check if there are pending filter changes (local differs from URL)
@@ -121,7 +128,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       localFilters.source !== urlState.source ||
       localFilters.category !== urlState.category ||
       localFilters.priceMin !== urlState.priceMin ||
-      localFilters.priceMax !== urlState.priceMax
+      localFilters.priceMax !== urlState.priceMax ||
+      localFilters.brand !== urlState.brand
     )
   }, [queryInput, localFilters, urlState])
 
@@ -197,6 +205,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         orderByPriority: urlState.orderByPriority,
         onlyAvailable: urlState.onlyAvailable,
         onlyDiscounted: urlState.onlyDiscounted,
+        brand: urlState.brand,
       }),
     [urlState],
   )
@@ -306,8 +315,15 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       category: urlState.category,
       priceMin: urlState.priceMin,
       priceMax: urlState.priceMax,
+      brand: urlState.brand,
     })
   }, [urlState])
+
+  const sortOptionsForSelect = useMemo(() => {
+    const hasSearch = Boolean(queryInput.trim()) || Boolean(urlState.query.trim())
+    if (hasSearch) return UTILITY_SORT_OPTIONS
+    return UTILITY_SORT_OPTIONS.filter((o) => o.value !== "relevance")
+  }, [queryInput, urlState.query])
 
   // ============================================================================
   // Handlers
@@ -324,6 +340,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       priority: localFilters.priority || null,
       source: localFilters.source || null,
       category: localFilters.category || null,
+      brand: localFilters.brand.trim() || null,
       priority_order: localFilters.orderByPriority,
       available: localFilters.onlyAvailable,
       discounted: localFilters.onlyDiscounted,
@@ -362,6 +379,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       priority: localFilters.priority || null,
       source: localFilters.source || null,
       category: localFilters.category || null,
+      brand: localFilters.brand.trim() || null,
       priority_order: localFilters.orderByPriority,
       available: localFilters.onlyAvailable,
       discounted: localFilters.onlyDiscounted,
@@ -447,6 +465,16 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     debouncedUpdateUrl({ category: null, page: 1 })
   }
 
+  const handleBrandInputChange = (value: string) => {
+    setLocalFilters((prev) => ({ ...prev, brand: value }))
+    debouncedUpdateUrl({ brand: value.trim() ? value : null, page: 1 })
+  }
+
+  const handleClearBrand = () => {
+    setLocalFilters((prev) => ({ ...prev, brand: "" }))
+    debouncedUpdateUrl({ brand: null, page: 1 })
+  }
+
   const handleClearFilters = () => {
     debouncedUpdateUrl.cancel()
     setQueryInput("")
@@ -462,6 +490,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       category: FILTER_CONFIG.category.default,
       priceMin: FILTER_CONFIG.priceMin.default,
       priceMax: FILTER_CONFIG.priceMax.default,
+      brand: FILTER_CONFIG.brand.default,
     })
     router.push(window.location.pathname)
   }
@@ -551,6 +580,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     if (urlState.onlyDiscounted) count++
     if (urlState.sortBy !== FILTER_CONFIG.sortBy.default) count++
     if (urlState.priceMin || urlState.priceMax) count++
+    if (urlState.brand.trim()) count++
     return count
   }, [urlState])
 
@@ -569,6 +599,13 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       parts.push(name.charAt(0).toUpperCase() + name.slice(1))
     }
     if (urlState.onlyDiscounted) parts.push("On sale")
+    if (urlState.brand.trim()) {
+      const brands = urlState.brand
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+      parts.push(brands.length === 1 ? brands[0]! : `${brands.length} brands`)
+    }
     if (urlState.priceMin && urlState.priceMax) parts.push(`${urlState.priceMin}–${urlState.priceMax}€`)
     else if (urlState.priceMin) parts.push(`From ${urlState.priceMin}€`)
     else if (urlState.priceMax) parts.push(`Up to ${urlState.priceMax}€`)
@@ -587,6 +624,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     const catId = parseCategoryId(urlState.category)
     if (catId) params.set("canonicalCat", String(catId))
     if (urlState.onlyDiscounted) params.set("onlyDiscounted", "true")
+    if (urlState.brand.trim()) params.set("brand", urlState.brand.trim())
     return params.toString()
   }, [urlState])
 
@@ -605,6 +643,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     if (selectedPriorities.length > 0) parts.push(`Priority: ${selectedPriorities.join(", ")}`)
     if (selectedSources.length > 0) parts.push(`Source: ${selectedSources.join(", ")}`)
     if (urlState.category) parts.push(`Category: ${urlState.category}`)
+    if (urlState.brand.trim()) parts.push(`Brand: ${urlState.brand.trim()}`)
     if (urlState.onlyDiscounted) parts.push("Only discounted")
     return parts.length > 0 ? parts.join(" • ") : "No filters applied (all products)"
   }, [urlState, selectedOrigins, selectedPriorities, selectedSources])
@@ -767,7 +806,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        {UTILITY_SORT_OPTIONS.map((option) => (
+                        {sortOptionsForSelect.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             <div className="flex items-center gap-2">
                               <option.icon className="h-4 w-4" />
@@ -872,6 +911,36 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                     })
                   }}
                 />
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Brand filter */}
+            <AccordionItem value="brand">
+              <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
+                Brand
+                {localFilters.brand.trim() && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleClearBrand()
+                    }}
+                    className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
+                  >
+                    Clear
+                  </span>
+                )}
+              </AccordionTrigger>
+              <AccordionContent className="p-px pb-3">
+                <Input
+                  placeholder="e.g. Kinder, Nestlé (comma-separated)"
+                  className="text-sm"
+                  value={localFilters.brand}
+                  onChange={(e) => handleBrandInputChange(e.target.value)}
+                  aria-label="Filter by brand names"
+                />
+                <p className="text-muted-foreground mt-1.5 text-xs">Exact store brand names; separate multiple with commas.</p>
               </AccordionContent>
             </AccordionItem>
 
@@ -1064,6 +1133,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         open={mobileFiltersOpen}
         onOpenChange={setMobileFiltersOpen}
         activeFilterCount={activeFilterCount}
+        searchQueryForSort={queryInput.trim() || urlState.query.trim()}
         localFilters={localFilters}
         selectedOrigins={selectedOrigins}
         selectedPriorities={selectedPriorities}
@@ -1076,6 +1146,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         onTogglePriorityOrder={handleTogglePriorityOrder}
         onToggleAvailable={handleToggleAvailable}
         onToggleDiscounted={handleToggleDiscounted}
+        onBrandChange={handleBrandInputChange}
         onPriceRangeChange={(min, max) => {
           setLocalFilters((prev) => ({ ...prev, priceMin: min, priceMax: max }))
           debouncedUpdateUrl({ price_min: min || null, price_max: max || null, page: 1 })

@@ -150,6 +150,7 @@ export async function queryStoreProducts(
   query = applyPriorityFilter(query, params, flags)
   query = applyOriginFilter(query, params)
   query = applyCategoryFilter(query, params)
+  query = applyBrandFilter(query, params)
   query = applySearchFilter(query, params)
 
   if (flags.onlyDiscounted) {
@@ -267,6 +268,7 @@ async function queryWithRelevanceRanking(
   query = applyPriorityFilter(query, params, flags)
   query = applyOriginFilter(query, params)
   query = applyCategoryFilter(query, params)
+  query = applyBrandFilter(query, params)
 
   if (flags.onlyDiscounted) {
     query = query.gt("discount", 0)
@@ -359,6 +361,7 @@ async function queryWithIlikeFallback(
   query = applyPriorityFilter(query, params, flags)
   query = applyOriginFilter(query, params)
   query = applyCategoryFilter(query, params)
+  query = applyBrandFilter(query, params)
   query = applyIlikeSearchFallback(query, params)
 
   if (flags.onlyDiscounted) {
@@ -426,6 +429,12 @@ async function queryWithIlikeFallback(
 // ============================================================================
 // Filter Helper Functions
 // ============================================================================
+
+function applyBrandFilter<Q extends { [key: string]: any }>(query: Q, params: StoreProductsQueryParams): Q {
+  const names = params.brand?.names?.map((n) => n.trim()).filter((n) => n.length > 0) ?? []
+  if (names.length === 0) return query
+  return query.in("brand", names)
+}
 
 function applyPriorityFilter<Q extends { [key: string]: any }>(
   query: Q,
@@ -836,6 +845,7 @@ export async function getMatchingProductsCount(
   query = applyPriorityFilter(query, params, flags)
   query = applyOriginFilter(query, params)
   query = applyCategoryFilter(query, params)
+  query = applyBrandFilter(query, params)
   query = applySearchFilter(query, params)
   query = applySourceFilter(query, params)
 
@@ -902,6 +912,7 @@ export async function getMatchingProductsWithDistribution(
     // Apply all filters EXCEPT priority (we want to see all priorities in the distribution)
     query = applyOriginFilter(query, params)
     query = applyCategoryFilter(query, params)
+    query = applyBrandFilter(query, params)
     query = applySearchFilter(query, params)
     query = applySourceFilter(query, params)
 
@@ -987,6 +998,7 @@ export async function bulkUpdatePriority(params: BulkPriorityUpdateParams): Prom
     query = applyPriorityFilter(query, params.filters, flags)
     query = applyOriginFilter(query, params.filters)
     query = applyCategoryFilter(query, params.filters)
+    query = applyBrandFilter(query, params.filters)
     query = applySearchFilter(query, params.filters)
     query = applySourceFilter(query, params.filters)
 

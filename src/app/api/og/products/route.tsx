@@ -2,7 +2,14 @@ import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
 import { buildPageTitle } from "@/lib/business/page-title"
-import { getSearchType, STORE_COLORS, STORE_LOGO_PATHS, STORE_NAMES, type SortByType } from "@/types/business"
+import {
+  getSearchType,
+  STORE_COLORS,
+  STORE_LOGO_PATHS,
+  STORE_NAMES,
+  type SortByType,
+  DEFAULT_BROWSE_SORT,
+} from "@/types/business"
 import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 import type { PrioritySource } from "@/types"
 
@@ -22,13 +29,16 @@ export async function GET(request: Request) {
   const query = searchParams.get("q") || undefined
   const searchIn = getSearchType(searchParams.get("t") ?? "any")
   const sortBy = searchParams.get("sort") || undefined
-  const priorityOrder = searchParams.get("priority_order") !== "false"
+  const priorityOrder = searchParams.get("priority_order") === "true"
   const originParam = searchParams.get("origin")
   const categoryParam = searchParams.get("category") || undefined
   const onlyDiscounted = searchParams.get("discounted") === "true"
   const onlyAvailable = searchParams.get("available") !== "false"
   const priorityParam = searchParams.get("priority")
   const sourceParam = searchParams.get("source")
+  const brandParam = searchParams.get("brand")?.trim()
+  const priceMinParam = searchParams.get("price_min")
+  const priceMaxParam = searchParams.get("price_max")
 
   const origins = originParam
     ?.split(",")
@@ -45,6 +55,23 @@ export async function GET(request: Request) {
     .map((v) => v.trim())
     .filter((v): v is PrioritySource => v === "ai" || v === "manual")
 
+  const brandNames = brandParam
+    ? brandParam
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : []
+
+  const priceMin = priceMinParam ? parseFloat(priceMinParam) : undefined
+  const priceMax = priceMaxParam ? parseFloat(priceMaxParam) : undefined
+  const priceRange =
+    (priceMin != null && !isNaN(priceMin)) || (priceMax != null && !isNaN(priceMax))
+      ? {
+          ...(priceMin != null && !isNaN(priceMin) ? { min: priceMin } : {}),
+          ...(priceMax != null && !isNaN(priceMax) ? { max: priceMax } : {}),
+        }
+      : undefined
+
   const title = buildPageTitle({
     query,
     sortBy,
@@ -59,6 +86,8 @@ export async function GET(request: Request) {
     canonicalCategory: categoryId && categoryId > 0 ? { categoryId } : undefined,
     priority: priorityValues?.length ? { values: priorityValues } : undefined,
     source: sourceValues?.length ? { values: sourceValues } : undefined,
+    brand: brandNames.length > 0 ? { names: brandNames } : undefined,
+    priceRange,
     flags: {
       onlyDiscounted,
       onlyAvailable,
@@ -66,7 +95,7 @@ export async function GET(request: Request) {
       minimalSelectForPreview: true,
     },
     pagination: { page: 1, limit: PRODUCTS_AMOUNT },
-    sort: { sortBy: (sortBy as SortByType) || "a-z", prioritizeByPriority: priorityOrder },
+    sort: { sortBy: (sortBy as SortByType) || DEFAULT_BROWSE_SORT, prioritizeByPriority: priorityOrder },
   })
 
   const products = result.data ?? []
