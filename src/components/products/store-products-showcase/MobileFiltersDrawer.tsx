@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { CanonicalCategory } from "@/types"
 import { type SearchType, type SortByType } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
@@ -217,16 +217,28 @@ function storeOriginSummary(selectedOrigins: number[]): string {
     .join(", ")
 }
 
+function brandSummary(brand: string): string {
+  const parts = brand
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (parts.length === 0) return "Any brand"
+  if (parts.length === 1) return parts[0]!
+  return `${parts.length} brands`
+}
+
 // ============================================================================
 // MobileFiltersDrawer
 // ============================================================================
 
-type DrawerView = "filters" | "categories" | "sort" | "stores" | "price"
+type DrawerView = "filters" | "categories" | "sort" | "stores" | "price" | "brand"
 
 export interface MobileFiltersDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   activeFilterCount: number
+  /** Used to show/hide search relevance sort when there is no active query */
+  searchQueryForSort: string
   localFilters: {
     searchType: SearchType
     sortBy: SortByType
@@ -239,6 +251,7 @@ export interface MobileFiltersDrawerProps {
     category: string
     priceMin: string
     priceMax: string
+    brand: string
   }
   selectedOrigins: number[]
   selectedPriorities: number[]
@@ -251,6 +264,7 @@ export interface MobileFiltersDrawerProps {
   onTogglePriorityOrder: () => void
   onToggleAvailable: () => void
   onToggleDiscounted: () => void
+  onBrandChange: (brand: string) => void
   onPriceRangeChange: (min: string, max: string) => void
 }
 
@@ -258,6 +272,7 @@ export function MobileFiltersDrawer({
   open,
   onOpenChange,
   activeFilterCount,
+  searchQueryForSort,
   localFilters,
   selectedOrigins,
   selectedPriorities,
@@ -270,6 +285,7 @@ export function MobileFiltersDrawer({
   onTogglePriorityOrder,
   onToggleAvailable,
   onToggleDiscounted,
+  onBrandChange,
   onPriceRangeChange,
 }: MobileFiltersDrawerProps) {
   const [view, setView] = useState<DrawerView>("filters")
@@ -282,7 +298,7 @@ export function MobileFiltersDrawer({
     if (!open) setView("filters")
   }, [open])
 
-  const sortLabel = ALL_SORT_LABELS[localFilters.sortBy]?.label ?? "Most Relevant"
+  const sortLabel = ALL_SORT_LABELS[localFilters.sortBy]?.label ?? localFilters.sortBy
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -301,10 +317,17 @@ export function MobileFiltersDrawer({
         ) : view === "sort" ? (
           <MobileSortPickerView
             currentSort={localFilters.sortBy}
+            showSearchRelevance={Boolean(searchQueryForSort)}
             onSelect={(sort) => {
               onSortChange(sort)
               setView("filters")
             }}
+            onBack={() => setView("filters")}
+          />
+        ) : view === "brand" ? (
+          <MobileBrandFilterView
+            brand={localFilters.brand}
+            onChange={onBrandChange}
             onBack={() => setView("filters")}
           />
         ) : view === "stores" ? (
@@ -326,6 +349,7 @@ export function MobileFiltersDrawer({
             sortLabel={sortLabel}
             categorySummary={selectedCat ? selectedCat.breadcrumb : "All categories"}
             storeSummary={storeOriginSummary(selectedOrigins)}
+            brandSummaryText={brandSummary(localFilters.brand)}
             priceSummary={priceRangeSummary(localFilters.priceMin, localFilters.priceMax)}
             activeFilterCount={activeFilterCount}
             localFilters={localFilters}
@@ -351,6 +375,7 @@ function MainFiltersView({
   sortLabel,
   categorySummary,
   storeSummary,
+  brandSummaryText,
   priceSummary,
   activeFilterCount,
   localFilters,
@@ -365,6 +390,7 @@ function MainFiltersView({
   sortLabel: string
   categorySummary: string
   storeSummary: string
+  brandSummaryText: string
   priceSummary: string
   activeFilterCount: number
   localFilters: MobileFiltersDrawerProps["localFilters"]
@@ -392,6 +418,7 @@ function MainFiltersView({
         <FilterSummaryRow label="Category" value={categorySummary} onClick={() => onViewChange("categories")} />
         <FilterSummaryRow label="Sort By" value={sortLabel} onClick={() => onViewChange("sort")} />
         <FilterSummaryRow label="Store" value={storeSummary} onClick={() => onViewChange("stores")} />
+        <FilterSummaryRow label="Brand" value={brandSummaryText} onClick={() => onViewChange("brand")} />
         <FilterSummaryRow
           label="Price Range"
           value={priceSummary}
@@ -503,19 +530,26 @@ function MainFiltersView({
 
 function MobileSortPickerView({
   currentSort,
+  showSearchRelevance,
   onSelect,
   onBack,
 }: {
   currentSort: SortByType
+  showSearchRelevance: boolean
   onSelect: (sort: SortByType) => void
   onBack: () => void
 }) {
+  const sortGroups = useMemo(() => {
+    if (showSearchRelevance) return SORT_OPTIONS_GROUPS
+    return SORT_OPTIONS_GROUPS.filter((g) => g.label !== "Search")
+  }, [showSearchRelevance])
+
   return (
     <div className="flex h-full flex-col">
       <SubViewHeader title="Sort By" onBack={onBack} />
       <div className="flex-1 overflow-y-auto overscroll-contain px-4">
         <RadioGroup value={currentSort} onValueChange={(v) => onSelect(v as SortByType)} className="gap-0">
-          {SORT_OPTIONS_GROUPS.map((group, gi) => (
+          {sortGroups.map((group, gi) => (
             <div key={group.label} className={cn(gi > 0 && "border-border mt-2 border-t pt-2")}>
               <span className="text-muted-foreground mb-1.5 block text-[11px] font-medium tracking-wider uppercase">
                 {group.label}
@@ -536,6 +570,34 @@ function MobileSortPickerView({
             </div>
           ))}
         </RadioGroup>
+      </div>
+    </div>
+  )
+}
+
+function MobileBrandFilterView({
+  brand,
+  onChange,
+  onBack,
+}: {
+  brand: string
+  onChange: (value: string) => void
+  onBack: () => void
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      <SubViewHeader title="Brand" onBack={onBack} />
+      <div className="flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 pb-4">
+        <Label htmlFor="mobile-brand-filter" className="text-muted-foreground text-xs font-medium">
+          Exact names, comma-separated
+        </Label>
+        <Input
+          id="mobile-brand-filter"
+          placeholder="e.g. Kinder, Nestlé"
+          value={brand}
+          onChange={(e) => onChange(e.target.value)}
+          className="text-base"
+        />
       </div>
     </div>
   )

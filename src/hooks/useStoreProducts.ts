@@ -61,6 +61,11 @@ function paramsToSearchParams(params: StoreProductsQueryParams): Record<string, 
     searchParams.canonicalCat = String(params.canonicalCategory.categoryId)
   }
 
+  // Brand (comma-separated exact names)
+  if (params.brand?.names?.length) {
+    searchParams.brand = params.brand.names.join(",")
+  }
+
   // Price range
   if (params.priceRange?.min != null) {
     searchParams.priceMin = String(params.priceRange.min)

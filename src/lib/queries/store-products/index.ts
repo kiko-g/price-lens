@@ -45,6 +45,7 @@ export type {
   CategoryFilter,
   CategoryTuple,
   CanonicalCategoryFilter,
+  BrandFilter,
   OriginFilter,
   PriorityFilter,
   SourceFilter,

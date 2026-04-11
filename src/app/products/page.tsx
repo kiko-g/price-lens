@@ -11,6 +11,7 @@ import { Footer } from "@/components/layout/Footer"
 import { HideFooter } from "@/contexts/FooterContext"
 import { siteConfig } from "@/lib/config"
 import type { SearchType, SortByType } from "@/types/business"
+import { DEFAULT_BROWSE_SORT } from "@/types/business"
 import type { PrioritySource } from "@/types"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
@@ -43,6 +44,9 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     "priority",
     "source",
     "category",
+    "brand",
+    "price_min",
+    "price_max",
   ] as const
   const ogParams = new URLSearchParams()
   for (const key of ogParamKeys) {
@@ -87,8 +91,8 @@ function buildServerQueryParams(
       limit,
     },
     sort: {
-      sortBy: (params.sort ?? "updated-newest") as SortByType,
-      prioritizeByPriority: params.priority_order !== "false",
+      sortBy: (params.sort ?? DEFAULT_BROWSE_SORT) as SortByType,
+      prioritizeByPriority: params.priority_order === "true",
     },
     flags: {
       excludeEmptyNames: true,
@@ -131,6 +135,24 @@ function buildServerQueryParams(
     const match = params.category.match(/^(\d+)/)
     const categoryId = match ? parseInt(match[1], 10) : null
     if (categoryId && categoryId > 0) qp.canonicalCategory = { categoryId }
+  }
+
+  const brandParam = params.brand?.trim()
+  if (brandParam) {
+    const names = brandParam
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (names.length > 0) qp.brand = { names }
+  }
+
+  const priceMin = params.price_min ? parseFloat(params.price_min) : undefined
+  const priceMax = params.price_max ? parseFloat(params.price_max) : undefined
+  if ((priceMin != null && !isNaN(priceMin)) || (priceMax != null && !isNaN(priceMax))) {
+    qp.priceRange = {
+      ...(priceMin != null && !isNaN(priceMin) ? { min: priceMin } : {}),
+      ...(priceMax != null && !isNaN(priceMax) ? { max: priceMax } : {}),
+    }
   }
 
   return qp

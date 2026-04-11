@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 
 export const UTILITY_SORT_OPTIONS = [
-  { label: "Most Relevant", value: "relevance", icon: SquareStarIcon },
+  { label: "Best match (search)", value: "relevance", icon: SquareStarIcon },
   { label: "Name: A to Z", value: "a-z", icon: ArrowDownAZ },
   { label: "Name: Z to A", value: "z-a", icon: ArrowUpAZ },
   { label: "Price: High to Low", value: "price-high-low", icon: ArrowUpWideNarrowIcon },
@@ -27,7 +27,7 @@ export const UTILITY_SORT_OPTIONS = [
 ] as const
 
 export const ALL_SORT_LABELS: Record<string, { label: string; icon: typeof ClockArrowDown }> = {
-  relevance: { label: "Most Relevant", icon: SquareStarIcon },
+  relevance: { label: "Best match (search)", icon: SquareStarIcon },
   "updated-newest": { label: "Recently Updated", icon: ClockArrowDown },
   "updated-oldest": { label: "Least Updated", icon: ClockArrowUp },
   "created-newest": { label: "Recently Added", icon: CalendarArrowDown },
@@ -44,7 +44,7 @@ export const ALL_SORT_LABELS: Record<string, { label: string; icon: typeof Clock
 export const SORT_OPTIONS_GROUPS = [
   {
     label: "Search",
-    options: [{ label: "Most Relevant", value: "relevance", icon: SquareStarIcon }],
+    options: [{ label: "Best match (search)", value: "relevance", icon: SquareStarIcon }],
   },
   {
     label: "Price Intelligence",

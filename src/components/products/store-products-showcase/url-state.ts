@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { PrioritySource } from "@/types"
 import { SupermarketChain, type StoreProductsQueryParams } from "@/hooks/useStoreProducts"
-import { type SearchType, type SortByType } from "@/types/business"
+import { type SearchType, type SortByType, DEFAULT_BROWSE_SORT } from "@/types/business"
 import { buildPageTitle } from "@/lib/business/page-title"
 
 export const FILTER_DEBOUNCE_MS = 500
@@ -16,11 +16,11 @@ export const FILTER_DEBOUNCE_MS = 500
  */
 export const FILTER_CONFIG = {
   page: { key: "page", default: 1 },
-  sortBy: { key: "sort", default: "relevance" },
+  sortBy: { key: "sort", default: DEFAULT_BROWSE_SORT },
   origin: { key: "origin", default: "" },
   searchType: { key: "t", default: "any" },
   query: { key: "q", default: "" },
-  orderByPriority: { key: "priority_order", default: true },
+  orderByPriority: { key: "priority_order", default: false },
   onlyAvailable: { key: "available", default: true },
   onlyDiscounted: { key: "discounted", default: false },
   priority: { key: "priority", default: "" },
@@ -28,6 +28,7 @@ export const FILTER_CONFIG = {
   category: { key: "category", default: "" },
   priceMin: { key: "price_min", default: "" },
   priceMax: { key: "price_max", default: "" },
+  brand: { key: "brand", default: "" },
 } as const
 
 export function toSlug(name: string): string {
@@ -72,7 +73,7 @@ export function useUrlState() {
       origin: searchParams.get(FILTER_CONFIG.origin.key) ?? FILTER_CONFIG.origin.default,
       searchType: (searchParams.get(FILTER_CONFIG.searchType.key) ?? FILTER_CONFIG.searchType.default) as SearchType,
       query: searchParams.get(FILTER_CONFIG.query.key) ?? FILTER_CONFIG.query.default,
-      orderByPriority: searchParams.get(FILTER_CONFIG.orderByPriority.key) !== "false",
+      orderByPriority: searchParams.get(FILTER_CONFIG.orderByPriority.key) === "true",
       onlyAvailable: searchParams.get(FILTER_CONFIG.onlyAvailable.key) !== "false",
       onlyDiscounted: searchParams.get(FILTER_CONFIG.onlyDiscounted.key) === "true",
       priority: searchParams.get(FILTER_CONFIG.priority.key) ?? FILTER_CONFIG.priority.default,
@@ -80,6 +81,7 @@ export function useUrlState() {
       category: searchParams.get(FILTER_CONFIG.category.key) ?? FILTER_CONFIG.category.default,
       priceMin: searchParams.get(FILTER_CONFIG.priceMin.key) ?? FILTER_CONFIG.priceMin.default,
       priceMax: searchParams.get(FILTER_CONFIG.priceMax.key) ?? FILTER_CONFIG.priceMax.default,
+      brand: searchParams.get(FILTER_CONFIG.brand.key) ?? FILTER_CONFIG.brand.default,
     }),
     [searchParams],
   )
@@ -188,6 +190,16 @@ export function buildQueryParams(
     params.priceRange = {
       ...(priceMin != null && !isNaN(priceMin) ? { min: priceMin } : {}),
       ...(priceMax != null && !isNaN(priceMax) ? { max: priceMax } : {}),
+    }
+  }
+
+  if (urlState.brand.trim()) {
+    const names = urlState.brand
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+    if (names.length > 0) {
+      params.brand = { names }
     }
   }
 

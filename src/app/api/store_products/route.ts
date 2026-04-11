@@ -9,6 +9,7 @@ import {
   SupermarketChain,
 } from "@/lib/queries/store-products"
 import type { SearchType, SortByType } from "@/types/business"
+import { DEFAULT_BROWSE_SORT } from "@/types/business"
 import { PrioritySource } from "@/types"
 import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProducts } from "@/lib/kv"
 
@@ -27,8 +28,9 @@ import { isStoreProductsCacheEnabled, getCachedStoreProducts, setCachedStoreProd
  * - category, category_2, category_3: Hierarchical category filter (store-specific)
  * - categories: Semicolon-separated main categories (e.g., "Laticínios;Bebidas")
  * - canonicalCat: Canonical category ID (includes all descendants)
- * - sort: "a-z" | "z-a" | "price-low-high" | "price-high-low" | "only-nulls"
- * - orderByPriority: "true" to order by priority first
+ * - sort: "a-z" | "z-a" | "price-low-high" | "price-high-low" | "relevance" | ...
+ * - orderByPriority: "true" to order by priority first (omit when false)
+ * - brand: comma-separated exact brand names (matches store_products.brand)
  * - page: Page number (1-indexed)
  * - limit: Items per page
  * - onlyDiscounted: "true" to show only discounted products
@@ -263,6 +265,18 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
     }
   }
 
+  // Brand filter (exact names, comma-separated)
+  const brandParam = params.get("brand")?.trim()
+  if (brandParam) {
+    const names = brandParam
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+    if (names.length > 0) {
+      queryParams.brand = { names }
+    }
+  }
+
   // Price range filter
   const priceMinParam = params.get("priceMin")
   const priceMaxParam = params.get("priceMax")
@@ -278,11 +292,9 @@ function parseSearchParams(params: URLSearchParams): StoreProductsQueryParams {
   // Sort options
   const sort = params.get("sort") as SortByType | null
   const orderByPriority = params.get("orderByPriority") === "true"
-  if (sort || orderByPriority) {
-    queryParams.sort = {
-      sortBy: sort ?? "a-z",
-      prioritizeByPriority: orderByPriority,
-    }
+  queryParams.sort = {
+    sortBy: sort ?? DEFAULT_BROWSE_SORT,
+    prioritizeByPriority: orderByPriority,
   }
 
   // Pagination
