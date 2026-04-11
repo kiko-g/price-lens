@@ -424,6 +424,12 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
     debouncedUpdateUrl({ origin: serialized || null, page: 1 })
   }
 
+  const handleSetOrigins = (originIds: number[]) => {
+    const serialized = serializeArray(originIds) ?? ""
+    setLocalFilters((prev) => ({ ...prev, origin: serialized }))
+    debouncedUpdateUrl({ origin: serialized || null, page: 1 })
+  }
+
   const handleClearOrigins = () => {
     setLocalFilters((prev) => ({ ...prev, origin: "" }))
     debouncedUpdateUrl({ origin: null, page: 1 })
@@ -940,7 +946,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   onChange={(e) => handleBrandInputChange(e.target.value)}
                   aria-label="Filter by brand names"
                 />
-                <p className="text-muted-foreground mt-1.5 text-xs">Exact store brand names; separate multiple with commas.</p>
+                <p className="text-muted-foreground mt-1.5 text-xs">
+                  Exact store brand names; separate multiple with commas.
+                </p>
               </AccordionContent>
             </AccordionItem>
 
@@ -1137,8 +1145,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         localFilters={localFilters}
         selectedOrigins={selectedOrigins}
         selectedPriorities={selectedPriorities}
-        onOriginToggle={handleOriginToggle}
-        onClearOrigins={handleClearOrigins}
+        onSetOrigins={handleSetOrigins}
         onPriorityToggle={handlePriorityToggle}
         onClearPriority={handleClearPriority}
         onCategoryChange={handleCategoryChange}

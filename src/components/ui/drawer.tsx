@@ -66,7 +66,7 @@ type DrawerDirection = "bottom" | "top" | "left" | "right"
 
 const DIRECTION_CLASSES: Record<DrawerDirection, string> = {
   bottom:
-    "inset-x-0 bottom-0 mt-24 h-auto max-h-[90svh] touch-pan-y rounded-t-2xl border-t pb-[env(safe-area-inset-bottom,0px)]",
+    "inset-x-0 bottom-0 mt-24 h-auto max-h-[90svh] touch-pan-y rounded-t-2xl border-t pb-[max(1rem,env(safe-area-inset-bottom,0px))]",
   top: "inset-x-0 top-0 mb-24 h-auto max-h-[90svh] touch-pan-y rounded-b-2xl border-b pt-[env(safe-area-inset-top,0px)]",
   left: "inset-y-0 left-0 h-full w-[85%] max-w-sm touch-pan-x rounded-r-2xl border-r",
   right: "inset-y-0 right-0 h-full w-[85%] max-w-sm touch-pan-x rounded-l-2xl border-l",
