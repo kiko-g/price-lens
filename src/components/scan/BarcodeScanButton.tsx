@@ -134,6 +134,13 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
     [manualTextValue, router],
   )
 
+  const handleOpenManualEntry = useCallback(() => {
+    if (isScanningCamera || isStartingCamera) {
+      stopScanning()
+    }
+    setManualTextOpen(true)
+  }, [isScanningCamera, isStartingCamera, stopScanning])
+
   const startScanning = useCallback(async () => {
     cameraAbortRef.current?.abort()
     const ac = new AbortController()
@@ -172,6 +179,13 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       cameraAbortRef.current = null
     }
   }, [])
+
+  const handleResumeCameraFromManual = useCallback(() => {
+    setManualTextOpen(false)
+    setError(null)
+    setIsStartingCamera(true)
+    startScanning()
+  }, [startScanning])
 
   const handleToggleTorch = useCallback(async () => {
     const track = streamRef.current?.getVideoTracks()[0]
@@ -307,7 +321,16 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       </Slot>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md">
+        <DialogContent
+          className={cn(
+            "max-w-[95vw] sm:max-w-md",
+            // Bottom sheet on narrow viewports: avoids huge jump when the mobile keyboard resizes the visual viewport (centered translate-y dialogs jump badly on iOS).
+            "max-md:data-[state=closed]:slide-out-to-bottom max-md:data-[state=closed]:slide-out-to-left-0 max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=open]:slide-in-from-left-0",
+            "max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:max-h-[min(92dvh,92svh)] max-md:w-full max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0",
+            "max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-t-2xl max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0",
+            "max-md:pb-[max(1rem,env(safe-area-inset-bottom,0px))]",
+          )}
+        >
           <DialogHeader>
             <DialogTitle>Scan barcode</DialogTitle>
             <DialogDescription>Scan product barcodes with your camera or upload an image.</DialogDescription>
@@ -374,7 +397,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               </div>
             )}
 
-            {showFallbackControls && (
+            {showFallbackControls && !manualTextOpen && (
               <div className="flex flex-col gap-3">
                 <Button
                   type="button"
@@ -413,6 +436,37 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               </div>
             )}
 
+            {manualTextOpen && !showViewfinder && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="min-w-0 flex-1"
+                  onClick={handleResumeCameraFromManual}
+                  disabled={isStartingCamera || isProcessing}
+                >
+                  {isStartingCamera ? (
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CameraIcon className="h-4 w-4" />
+                  )}
+                  Use camera
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="min-w-0 flex-1"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+                  Upload
+                </Button>
+              </div>
+            )}
+
             <input
               ref={fileInputRef}
               type="file"
@@ -432,6 +486,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
                   value={manualTextValue}
                   onChange={(e) => setManualTextValue(e.target.value)}
                   autoFocus
+                  enterKeyHint="done"
                   className="text-sm"
                 />
                 <Button type="submit" size="sm" disabled={!manualTextValue.trim()}>
@@ -442,7 +497,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               <button
                 type="button"
                 className="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
-                onClick={() => setManualTextOpen(true)}
+                onClick={handleOpenManualEntry}
               >
                 Type barcode manually
               </button>
