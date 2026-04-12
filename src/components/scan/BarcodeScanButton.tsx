@@ -8,8 +8,9 @@ import { Slot } from "@radix-ui/react-slot"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
-import { CameraIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
+import { CameraIcon, FlashlightIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
 
 function navigateToCompare(router: ReturnType<typeof useRouter>, barcode: string) {
   router.push(`/products/barcode/${encodeURIComponent(barcode)}`)
@@ -18,6 +19,42 @@ function navigateToCompare(router: ReturnType<typeof useRouter>, barcode: string
 function isProductBarcode(value: string): boolean {
   const digits = value.replace(/\D/g, "")
   return digits.length >= 8 && digits.length <= 14
+}
+
+type GetUserMediaConstraints = MediaStreamConstraints & { signal?: AbortSignal }
+
+async function requestCameraStream(signal: AbortSignal): Promise<MediaStream> {
+  const attempts: MediaStreamConstraints[] = [
+    {
+      video: {
+        facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
+    },
+    { video: { facingMode: { ideal: "environment" } } },
+    { video: true },
+  ]
+  let lastError: unknown
+  for (const videoOnly of attempts) {
+    try {
+      const c: GetUserMediaConstraints = { ...videoOnly, signal }
+      return await navigator.mediaDevices.getUserMedia(c)
+    } catch (err) {
+      lastError = err
+      if (err instanceof DOMException && err.name === "AbortError") throw err
+    }
+  }
+  throw lastError
+}
+
+function trackSupportsTorch(track: MediaStreamTrack): boolean {
+  try {
+    const c = track.getCapabilities?.() as MediaTrackCapabilities & { torch?: boolean }
+    return !!c && "torch" in c
+  } catch {
+    return false
+  }
 }
 
 type BarcodeScanButtonProps = {
@@ -33,6 +70,8 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
 
   const [isScanningCamera, setIsScanningCamera] = useState(false)
   const [isStartingCamera, setIsStartingCamera] = useState(false)
+  const [torchSupported, setTorchSupported] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
   const [manualTextOpen, setManualTextOpen] = useState(false)
   const [manualTextValue, setManualTextValue] = useState("")
 
@@ -41,8 +80,11 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   const streamRef = useRef<MediaStream | null>(null)
   const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraAbortRef = useRef<AbortController | null>(null)
 
   const stopScanning = useCallback(() => {
+    cameraAbortRef.current?.abort()
+    cameraAbortRef.current = null
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
     if (scanIntervalRef.current) {
@@ -50,6 +92,9 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       scanIntervalRef.current = null
     }
     setIsScanningCamera(false)
+    setIsStartingCamera(false)
+    setTorchSupported(false)
+    setTorchOn(false)
   }, [])
 
   const handleScanSuccess = useCallback(
@@ -90,25 +135,58 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
   )
 
   const startScanning = useCallback(async () => {
+    cameraAbortRef.current?.abort()
+    const ac = new AbortController()
+    cameraAbortRef.current = ac
+    const { signal } = ac
+
     try {
       setError(null)
       setIsStartingCamera(true)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-      })
+      const stream = await requestCameraStream(signal)
+      if (signal.aborted) {
+        stream.getTracks().forEach((t) => t.stop())
+        return
+      }
       streamRef.current = stream
+      const vtrack = stream.getVideoTracks()[0]
+      setTorchSupported(vtrack ? trackSupportsTorch(vtrack) : false)
+      setTorchOn(false)
       setIsScanningCamera(true)
     } catch (err) {
-      console.error("Error accessing camera:", err)
-      setError("Unable to access camera. Please ensure you have granted camera permissions.")
+      if (err instanceof DOMException && err.name === "AbortError") return
+      console.error("[BarcodeScanButton] camera access failed:", err)
+      if (err instanceof DOMException && err.name === "NotAllowedError") {
+        setError(
+          "Camera access was denied. Allow camera for this site in your browser settings (site permissions / lock icon in the address bar), then try again.",
+        )
+      } else if (err instanceof DOMException && err.name === "NotFoundError") {
+        setError("No camera was found on this device.")
+      } else {
+        setError("Unable to access the camera. Check permissions and try again.")
+      }
     } finally {
-      setIsStartingCamera(false)
+      if (!signal.aborted) {
+        setIsStartingCamera(false)
+      }
+      cameraAbortRef.current = null
     }
   }, [])
+
+  const handleToggleTorch = useCallback(async () => {
+    const track = streamRef.current?.getVideoTracks()[0]
+    if (!track || !torchSupported) return
+    const next = !torchOn
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: next } as MediaTrackConstraintSet & { torch: boolean }],
+      })
+      setTorchOn(next)
+    } catch (err) {
+      console.error("[BarcodeScanButton] torch toggle failed:", err)
+      setError("Flashlight is not available on this device or browser.")
+    }
+  }, [torchOn, torchSupported])
 
   useEffect(() => {
     if (!isScanningCamera || !streamRef.current) return
@@ -141,7 +219,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
         }, 300)
       })
       .catch((err) => {
-        console.error("Video play failed:", err)
+        console.error("[BarcodeScanButton] video play failed:", err)
         setError("Unable to play camera stream.")
         stopScanning()
       })
@@ -201,7 +279,6 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
     if (open && !isScanningCamera) {
       startScanning()
     }
-    // only trigger on open change, not isScanning
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
@@ -209,9 +286,23 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
     return () => stopScanning()
   }, [stopScanning])
 
+  const showViewfinder = open && (isStartingCamera || isScanningCamera)
+  const showFallbackControls = open && !isStartingCamera && !isScanningCamera
+
   return (
     <>
-      <Slot onClick={() => setOpen(true)} onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && setOpen(true)}>
+      <Slot
+        onClick={() => {
+          setOpen(true)
+          setIsStartingCamera(true)
+        }}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === "Enter") {
+            setOpen(true)
+            setIsStartingCamera(true)
+          }
+        }}
+      >
         {children}
       </Slot>
 
@@ -229,21 +320,61 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
               </p>
             )}
 
-            {isScanningCamera ? (
+            {showViewfinder && (
               <div className="flex flex-col gap-3">
                 <div className="relative aspect-video overflow-hidden rounded-md bg-black">
-                  <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="border-primary/60 h-1/2 w-3/4 rounded-lg border-2 shadow-lg" />
-                  </div>
+                  {isScanningCamera ? (
+                    <>
+                      <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <div className="border-primary/60 h-1/2 w-3/4 rounded-lg border-2 shadow-lg" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-muted-foreground flex h-full min-h-[140px] flex-col items-center justify-center gap-3 px-4 text-center text-sm">
+                      <Loader2Icon className="text-primary h-10 w-10 animate-spin" aria-hidden />
+                      <span>Starting camera…</span>
+                    </div>
+                  )}
                 </div>
-                <canvas ref={canvasRef} className="hidden" />
+                {isScanningCamera && <canvas ref={canvasRef} className="hidden" />}
+
+                <div className="flex flex-wrap gap-2">
+                  {isScanningCamera && torchSupported && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="min-w-0 flex-1"
+                      onClick={handleToggleTorch}
+                      aria-pressed={torchOn}
+                      aria-label={torchOn ? "Turn off flashlight" : "Turn on flashlight"}
+                    >
+                      <FlashlightIcon className={cn("h-5 w-5", torchOn && "text-amber-400")} aria-hidden />
+                      {torchOn ? "Light off" : "Light"}
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="min-w-0 flex-1"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? <Loader2Icon className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
+                    {isProcessing ? "Processing…" : "Upload image"}
+                  </Button>
+                </div>
+
                 <Button type="button" variant="outline" className="w-full" size="lg" onClick={stopScanning}>
-                  <XIcon className="h-5 w-5" />
-                  Stop scanning
+                  <XIcon className="h-5 w-5" aria-hidden />
+                  {isScanningCamera ? "Stop scanning" : "Cancel"}
                 </Button>
               </div>
-            ) : (
+            )}
+
+            {showFallbackControls && (
               <div className="flex flex-col gap-3">
                 <Button
                   type="button"
@@ -279,16 +410,17 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
                   {isProcessing ? <Loader2Icon className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
                   {isProcessing ? "Processing…" : "Upload image"}
                 </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  aria-hidden
-                  onChange={handleFileChange}
-                />
               </div>
             )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-hidden
+              onChange={handleFileChange}
+            />
 
             {manualTextOpen ? (
               <form onSubmit={handleManualSubmit} className="flex gap-2">
