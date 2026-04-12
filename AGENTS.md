@@ -2,6 +2,12 @@
 
 Price tracking app for Portuguese supermarkets built with Next.js 16, React 19, Supabase, and TailwindCSS.
 
+## Product context
+
+- **Audience**: Shoppers in **Portugal** comparing prices across major chains; **mobile and PWA** are first-class.
+- **Core flows**: Search, product detail & price history, **barcode scan**, favorites, deals/alerts.
+- **Locales**: Prefer **`pt-PT`** for user-visible dates/numbers where the codebase sets an explicit locale (see hydration rules).
+
 ## Essentials
 
 - **Package manager**: pnpm (not npm)
@@ -9,7 +15,13 @@ Price tracking app for Portuguese supermarkets built with Next.js 16, React 19, 
 - **Verify changes**: `pnpm check` (runs tsc, lint, build)
 - **Run tests**: `pnpm test:run`
 
-## Detailed Guidelines
+## AI / Cursor context
+
+- **Always-applied rule**: [Product context](.cursor/rules/product-context.mdc) — what we’re building and who it’s for.
+- **Mobile & PWA** (when editing `src/**/*.tsx`): [mobile-pwa-ux.mdc](.cursor/rules/mobile-pwa-ux.mdc)
+- **Optional skill**: [.cursor/skills/mobile-and-pwa-verification/SKILL.md](.cursor/skills/mobile-and-pwa-verification/SKILL.md) — checklist before shipping keyboard/camera/modal work
+
+## Detailed guidelines
 
 See `.cursor/rules/` for context-specific rules:
 
@@ -19,38 +31,5 @@ See `.cursor/rules/` for context-specific rules:
 - [Skeleton loading](.cursor/rules/skeleton-loading.mdc) - Skeleton dimensions must match real components; skeletons in own files
 - [Data fetching](.cursor/rules/data-fetching.mdc) - TanStack Query for client data, useEffect only for side effects, server fetch cache intent
 - [Performance](.cursor/rules/performance.mdc) - Small client boundaries, no barrel exports, lazy-load heavy components
-- [Database and business logic](.cursor/rules/supabase.mdc) - Supabase and business logic rules. Essential for understanding limitations and the barebone layer of Price Lens.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron context (Pro plan).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan and cron configuration.
-- [Vercel deployment](.cursor/rules/vercel.mdc) - Vercel Pro plan, cron jobs.
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro, crons, deployment
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron plan (Pro)
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Pro plan).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Pro plan).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Vercel Pro).
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro, crons, deployment
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan and cron limits.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan and cron configuration.
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro plan, cron jobs, deployment.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro), cron configuration.
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro plan, crons, deployment context.
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro plan, crons, deployment.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan and cron assumptions.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan and cron constraints.
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro, crons, deployment
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron jobs (Pro plan).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro), cron configuration.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Pro plan).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro) and cron behavior.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro), cron limits, infrastructure assumptions.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro), cron capabilities
-- [Vercel](.cursor/rules/vercel.mdc) - Vercel Pro plan, cron configuration
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment, crons, plan (Pro).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Vercel Pro).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron plan (Pro).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro), cron configuration.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment plan (Pro) and cron expectations.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment, crons, plan.
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron plan (Pro).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron plan (Pro).
-- [Vercel](.cursor/rules/vercel.mdc) - Deployment and cron configuration (Pro plan).
+- [Database and business logic](.cursor/rules/supabase.mdc) - Supabase limits, queries, and business context
+- [Vercel](.cursor/rules/vercel.mdc) - Deployment, Pro plan, cron routes, `CRON_SECRET`, env vars

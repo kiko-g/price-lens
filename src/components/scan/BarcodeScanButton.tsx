@@ -322,6 +322,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
+          overlayVisualViewportSync={open}
           className={cn(
             "max-w-[95vw] sm:max-w-md",
             // Bottom sheet on narrow viewports: avoids huge jump when the mobile keyboard resizes the visual viewport (centered translate-y dialogs jump badly on iOS).

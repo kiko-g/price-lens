@@ -6,6 +6,44 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+function useVisualViewportOverlayStyle(enabled: boolean): React.CSSProperties | undefined {
+  const [style, setStyle] = React.useState<React.CSSProperties | undefined>(undefined)
+
+  React.useLayoutEffect(() => {
+    if (!enabled || typeof window === "undefined") {
+      setStyle(undefined)
+      return
+    }
+    const vv = window.visualViewport
+    if (!vv) {
+      setStyle(undefined)
+      return
+    }
+
+    const sync = (): void => {
+      setStyle({
+        position: "fixed",
+        top: vv.offsetTop,
+        left: vv.offsetLeft,
+        width: vv.width,
+        height: vv.height,
+        right: "auto",
+        bottom: "auto",
+      })
+    }
+
+    sync()
+    vv.addEventListener("resize", sync)
+    vv.addEventListener("scroll", sync)
+    return () => {
+      vv.removeEventListener("resize", sync)
+      vv.removeEventListener("scroll", sync)
+    }
+  }, [enabled])
+
+  return style
+}
+
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
@@ -29,12 +67,25 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+  /**
+   * Pin the dimmed overlay to `visualViewport` (not the layout viewport). Helps on iOS when the
+   * software keyboard opens: avoids a visible strip of undimmed page between the dialog and keyboard.
+   */
+  overlayVisualViewportSync?: boolean
+}
+
+const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, DialogContentProps>(
+  ({ className, children, overlayVisualViewportSync = false, ...props }, ref) => {
+    const overlayStyle = useVisualViewportOverlayStyle(overlayVisualViewportSync)
+    const useVvOverlay = overlayVisualViewportSync && overlayStyle != null
+
+    return (
   <DialogPortal>
-    <DialogOverlay />
+    <DialogOverlay
+      className={useVvOverlay ? cn("inset-auto h-auto min-h-0 w-auto min-w-0") : undefined}
+      style={useVvOverlay ? overlayStyle : undefined}
+    />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
@@ -50,7 +101,9 @@ const DialogContent = React.forwardRef<
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-))
+    )
+  },
+)
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

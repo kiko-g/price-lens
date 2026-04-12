@@ -1,0 +1,27 @@
+---
+description: Mobile and PWA UX — viewports, keyboard, safe areas, real-device testing
+globs: src/**/*.tsx
+alwaysApply: false
+---
+
+# Mobile & PWA UX
+
+## Layout & CSS
+
+- Prefer **`dvh` / `svh` / `min()`** over raw `100vh` for full-height or bottom sheets; iOS keyboard changes the **visual** viewport.
+- Respect **`env(safe-area-inset-*)`** for fixed bottom nav, sheets, and full-bleed UI.
+- **`position: fixed` + keyboard**: the layout viewport and visual viewport differ on mobile. Overlays/modals that must meet the keyboard may need **`window.visualViewport`** (resize/scroll listeners) — see barcode scan dialog pattern in `BarcodeScanButton`.
+
+## PWA / permissions
+
+- **Camera / mic in iOS standalone PWA** may not persist like Safari tabs — WebKit limitation; don’t promise “save permission” in app code.
+- Exercise **camera, install banner, and permissions** on **HTTPS** (e.g. **Vercel preview**), not only `http://localhost`.
+
+## Testing discipline
+
+- **Narrow desktop DevTools ≠ mobile**. Before calling mobile-sensitive UI done, assume **real device** checks (iPhone Safari + Android Chrome minimum) for: keyboard open, scroll, fixed bars, touch targets.
+- For dialogs, inputs, and scanners: verify **no undimmed gap** between sheet and keyboard when possible.
+
+## Touch & a11y
+
+- Interactive controls should be large enough for touch; don’t rely on hover-only affordances.

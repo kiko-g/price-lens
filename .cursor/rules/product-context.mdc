@@ -1,0 +1,14 @@
+---
+description: What Price Lens is — product, audience, and stack (always read)
+alwaysApply: true
+---
+
+# Price Lens — product context
+
+- **What**: Consumer web app to **compare supermarket prices** in **Portugal** (Continente, Pingo Doce, Auchan, etc.), track history, deals, favorites, and **barcode lookup**. TLDR: WE WANT PORTUGAL SUPERMARKET USERS TO SAVE MONEY AND SHOW THEM THEIR SAVINGS!
+- **Who**: Portuguese shoppers; **UI copy and dates** should align with **`pt-PT`** where the codebase already specifies locale (see hydration rules).
+- **Form factors**: **Mobile matters** — many flows (search, scan, lists) are used on phones; **PWA** (install to home screen) is supported. Do not assume desktop-only.
+- **Stack**: Next.js App Router, React, Supabase, Tailwind, deployed on **Vercel** (see `vercel.mdc` for cron/env).
+- **Data reality**: Large product/price tables; Supabase **row limits and egress** apply (`supabase.mdc`). Prefer efficient queries and pagination.
+
+When unsure about domain behavior (stores, barcodes, priorities), check existing modules under `src/lib/` and `src/types/` before inventing rules.
