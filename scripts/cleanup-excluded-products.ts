@@ -56,7 +56,6 @@ const skipUnmapped = process.argv.includes("--skip-unmapped")
 
 const INITIAL_BATCH_SIZE = 100
 const MIN_BATCH_SIZE = 10
-const DELAY_BETWEEN_BATCHES_MS = 1000
 
 const ORIGIN_SKU_PATTERNS: Record<number, RegExp> = {
   1: /-(\d+)\.html$/, // Continente

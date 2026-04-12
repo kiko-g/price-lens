@@ -15,15 +15,17 @@ export function PriceRangeFilter({
   priceMin,
   priceMax,
   onChange,
+  className,
 }: {
   priceMin: string
   priceMax: string
   onChange: (min: string, max: string) => void
+  className?: string
 }) {
   const activeChipIdx = PRICE_RANGE_CHIPS.findIndex((c) => c.min === priceMin && c.max === priceMax)
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn("flex flex-col gap-2", className)}>
       <div className="flex flex-wrap gap-1.5">
         {PRICE_RANGE_CHIPS.map((chip, idx) => (
           <button
