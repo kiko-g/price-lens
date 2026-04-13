@@ -12,7 +12,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js"
-import { parseGtin, extractInnerGtin13 } from "@/lib/gtin"
+import { parseGtin, extractInnerGtin13, gtinFamilyKey } from "@/lib/gtin"
 import { runBulkEnrichment, type EnrichOptions } from "@/lib/canonical/off-bulk-enrichment"
 import {
   normalizeName,
@@ -62,6 +62,10 @@ interface StoreProductRow {
   brand: string | null
   pack: string | null
   major_unit: string | null
+  trade_item_id?: number
+  origin_id?: number | null
+  price_recommended?: number | null
+  price?: number | null
 }
 
 interface TradeItemRow {
@@ -93,6 +97,86 @@ interface RepresentativeAttrs {
 const CONFIDENCE_ASSIGN = 88
 const CONFIDENCE_LOG = 70
 const PAGE_SIZE = 1000
+
+/** When both sides have PVR data, require tight agreement (recommended retail). */
+const PVR_RATIO_MIN = 0.96
+const PVR_MAX_ABS_DIFF = 0.15
+
+function collectPositivePVR(sps: { price_recommended?: number | null }[]): number[] {
+  const out: number[] = []
+  for (const sp of sps) {
+    const p = sp.price_recommended
+    if (p != null && p > 0) out.push(p)
+  }
+  return out
+}
+
+/** PVR gate: skip when either side has no price_recommended; else min/max must be tight. */
+function pvrClustersCompatible(a: number[], b: number[]): boolean {
+  if (a.length === 0 || b.length === 0) return true
+  const gMin = Math.min(...a, ...b)
+  const gMax = Math.max(...a, ...b)
+  if (gMax <= 0) return true
+  return gMin / gMax >= PVR_RATIO_MIN || gMax - gMin <= PVR_MAX_ABS_DIFF
+}
+
+/**
+ * One consumer GTIN family per chain per canonical. Rejects if DB already has
+ * multiple distinct families on the same origin (corrupt) or incoming disagrees.
+ */
+function originFamiliesAllow(
+  byOrigin: Map<number, Set<string>>,
+  incomingSps: { origin_id?: number | null }[],
+  tiGtin: string,
+): boolean {
+  const fk = gtinFamilyKey(tiGtin)
+  const originsSeen = new Set<number>()
+  for (const sp of incomingSps) {
+    const o = sp.origin_id
+    if (o == null) continue
+    if (originsSeen.has(o)) continue
+    originsSeen.add(o)
+    const set = byOrigin.get(o)
+    if (!set || set.size === 0) continue
+    if (set.size > 1) return false
+    const [only] = set
+    if (only !== fk) return false
+  }
+  return true
+}
+
+function commitOriginFamilies(
+  byOrigin: Map<number, Set<string>>,
+  incomingSps: { origin_id?: number | null }[],
+  tiGtin: string,
+): void {
+  const fk = gtinFamilyKey(tiGtin)
+  const originsSeen = new Set<number>()
+  for (const sp of incomingSps) {
+    const o = sp.origin_id
+    if (o == null) continue
+    if (originsSeen.has(o)) continue
+    originsSeen.add(o)
+    let set = byOrigin.get(o)
+    if (!set) {
+      set = new Set()
+      byOrigin.set(o, set)
+    }
+    set.add(fk)
+  }
+}
+
+function collectPVRFromTradeItemIds(
+  tiIds: number[],
+  spByTradeItemId: Map<number, StoreProductRow[]>,
+): number[] {
+  const out: number[] = []
+  for (const id of tiIds) {
+    const sps = spByTradeItemId.get(id)
+    if (sps) out.push(...collectPositivePVR(sps))
+  }
+  return out
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -316,10 +400,11 @@ export async function runPass1(
   const existing = byBarcode.size - created
   log(`[Pass 1] Trade items upserted: ${created}, already existed: ${existing < 0 ? 0 : existing}`)
 
-  // Linking: batch store_products updates
-  const LINK_BATCH = 500
+  // Linking: one update per barcode group (same GTIN → same trade_item). Keep concurrency low so
+  // PostgREST is not overwhelmed (hundreds of parallel updates silently fail under load).
+  const LINK_PARALLEL = 15
   let linked = 0
-  let linkBatchNum = 0
+  let processedGroups = 0
   let lastLinkPct = -1
   const barcodeEntries = [...byBarcode.entries()]
 
@@ -334,36 +419,39 @@ export async function runPass1(
 
   log(`[Pass 1] Linking ${products.length} store_products via ${linkOps.length} barcode groups...`)
 
-  for (let i = 0; i < linkOps.length; i += LINK_BATCH) {
-    const batch = linkOps.slice(i, i + LINK_BATCH)
+  for (let i = 0; i < linkOps.length; i += LINK_PARALLEL) {
+    const chunk = linkOps.slice(i, i + LINK_PARALLEL)
     const results = await Promise.all(
-      batch.map((op) => supabase.from("store_products").update({ trade_item_id: op.tiId }).in("id", op.spIds)),
+      chunk.map((op) => supabase.from("store_products").update({ trade_item_id: op.tiId }).in("id", op.spIds)),
     )
 
     for (let j = 0; j < results.length; j++) {
       if (results[j].error) {
-        log(`[Pass 1] WARN: linking failed for a barcode group`)
+        log(`[Pass 1] WARN: linking failed for a barcode group: ${formatSupabaseError(results[j].error)}`)
       } else {
-        linked += batch[j].spIds.length
+        linked += chunk[j].spIds.length
       }
     }
 
-    linkBatchNum += batch.length
-    const pct = Math.floor((linkBatchNum / linkOps.length) * 100)
+    processedGroups += chunk.length
+    const pct = linkOps.length === 0 ? 100 : Math.floor((processedGroups / linkOps.length) * 100)
     if (pct % 5 === 0 && pct !== lastLinkPct) {
       lastLinkPct = pct
       log(`[Pass 1] Linking progress: ${pct}% (${linked} store_products linked)`)
     }
   }
 
-  const { count: unlinked } = await supabase
+  const { count: noBarcodeCount } = await supabase
     .from("store_products")
     .select("id", { count: "exact", head: true })
     .is("barcode", null)
 
-  log(`[Pass 1] Linked ${linked} store_products. ${unlinked ?? "?"} remain unlinked (no barcode).`)
+  log(
+    `[Pass 1] Linked ${linked} store_products. ` +
+      `${noBarcodeCount ?? "?"} store_products have no barcode (skipped by Pass 1).`,
+  )
 
-  return { created, existing: existing < 0 ? 0 : existing, linked, unlinked: unlinked ?? 0 }
+  return { created, existing: existing < 0 ? 0 : existing, linked, unlinked: noBarcodeCount ?? 0 }
 }
 
 // ---------------------------------------------------------------------------
@@ -466,7 +554,7 @@ export async function runPass2(
   const allStoreProds = await fetchAllPaginated<StoreProductRow & { trade_item_id: number }>((from, to) =>
     supabase
       .from("store_products")
-      .select("id, barcode, name, brand, pack, major_unit, trade_item_id")
+      .select("id, barcode, name, brand, pack, major_unit, trade_item_id, origin_id, price_recommended, price")
       .not("trade_item_id", "is", null)
       .order("id")
       .range(from, to),
@@ -477,6 +565,51 @@ export async function runPass2(
     spByTradeItemId.set(sp.trade_item_id, group)
   }
   log(`[Pass 2] Pre-loaded ${allStoreProds.length} store_products for ${spByTradeItemId.size} trade_items`)
+
+  const canonicalOriginFamilies = new Map<number, Map<number, Set<string>>>()
+  const pvrByCanonical = new Map<number, number[]>()
+
+  interface AssignedTiRow {
+    canonical_product_id: number
+    gtin: string
+    store_products: { origin_id: number | null; price_recommended: number | null }[] | null
+  }
+
+  log("[Pass 2] Loading per-chain GTIN + PVR index for assigned canonicals...")
+  const assignedTisWithSp = await fetchAllPaginated<AssignedTiRow>((from, to) =>
+    supabase
+      .from("trade_items")
+      .select("canonical_product_id, gtin, store_products(origin_id, price_recommended)")
+      .not("canonical_product_id", "is", null)
+      .order("id")
+      .range(from, to),
+  )
+  for (const row of assignedTisWithSp) {
+    const cid = row.canonical_product_id
+    const fk = gtinFamilyKey(row.gtin)
+    for (const sp of row.store_products ?? []) {
+      const oid = sp.origin_id
+      if (oid == null) continue
+      let om = canonicalOriginFamilies.get(cid)
+      if (!om) {
+        om = new Map()
+        canonicalOriginFamilies.set(cid, om)
+      }
+      let set = om.get(oid)
+      if (!set) {
+        set = new Set()
+        om.set(oid, set)
+      }
+      set.add(fk)
+      const p = sp.price_recommended
+      if (p != null && p > 0) {
+        const arr = pvrByCanonical.get(cid) ?? []
+        arr.push(p)
+        pvrByCanonical.set(cid, arr)
+      }
+    }
+  }
+  log(`[Pass 2] Indexed ${canonicalOriginFamilies.size} canonical_products for structural gates`)
 
   let canonicalsMatched = 0
   const lowConfidenceMatches: LowConfidenceMatch[] = []
@@ -514,7 +647,13 @@ export async function runPass2(
   // During the loop, unmatched trade_items create virtual canonicals (negative IDs)
   // that subsequent trade_items can match against.
   let nextVirtualId = -1
-  type VirtualCanonical = { virtualId: number; offName: string | null; rep: RepresentativeAttrs; tiIds: number[] }
+  type VirtualCanonical = {
+    virtualId: number
+    offName: string | null
+    rep: RepresentativeAttrs
+    tiIds: number[]
+    originFamilyByOrigin: Map<number, Set<string>>
+  }
   const virtualById = new Map<number, VirtualCanonical>()
 
   type PendingLink = { tiId: number; canonicalId: number }
@@ -562,17 +701,74 @@ export async function runPass2(
 
     if (bestMatch && bestMatch.confidence >= CONFIDENCE_ASSIGN) {
       const matchedId = bestMatch.canonical.id
-      if (matchedId < 0) {
-        // Matched a virtual canonical — add to its group
-        virtualById.get(matchedId)!.tiIds.push(ti.id)
+      const originMap =
+        matchedId >= 0
+          ? (canonicalOriginFamilies.get(matchedId) ?? new Map<number, Set<string>>())
+          : virtualById.get(matchedId)!.originFamilyByOrigin
+      const originOk = originFamiliesAllow(originMap, storeProds, ti.gtin)
+      const incPvr = collectPositivePVR(storeProds)
+      const existingPvr =
+        matchedId >= 0
+          ? pvrByCanonical.get(matchedId) ?? []
+          : collectPVRFromTradeItemIds(virtualById.get(matchedId)!.tiIds, spByTradeItemId)
+      const pvrOk = pvrClustersCompatible(incPvr, existingPvr)
+
+      if (!originOk || !pvrOk) {
+        if (bestMatch.confidence >= CONFIDENCE_LOG) {
+          lowConfidenceMatches.push({
+            tradeItemGtin: ti.gtin,
+            candidateCanonicalId: matchedId,
+            candidateCanonicalName: bestMatch.canonical.name,
+            confidence: bestMatch.confidence,
+            reasons: [...bestMatch.reasons, !originOk ? "origin_family_mismatch" : "pvr_mismatch"],
+          })
+        }
+        const virtualId = nextVirtualId--
+        const virtualRow: CanonicalRow = {
+          id: virtualId,
+          name: rep.offName || rep.name,
+          brand: rep.brand,
+          volume_value: rep.size?.baseValue ?? null,
+          volume_unit: rep.size?.baseUnit ?? null,
+          off_name: ti.off_product_name,
+        }
+        addToIndex(canonicalsByBrand, virtualRow)
+        const originFamilyByOrigin = new Map<number, Set<string>>()
+        commitOriginFamilies(originFamilyByOrigin, storeProds, ti.gtin)
+        virtualById.set(virtualId, {
+          virtualId,
+          offName: ti.off_product_name,
+          rep,
+          tiIds: [ti.id],
+          originFamilyByOrigin,
+        })
+      } else if (matchedId < 0) {
+        const vc = virtualById.get(matchedId)!
+        vc.tiIds.push(ti.id)
+        commitOriginFamilies(vc.originFamilyByOrigin, storeProds, ti.gtin)
+        if (ti.off_product_name && !canonicalOffNames.has(matchedId)) {
+          canonicalOffNames.set(matchedId, ti.off_product_name)
+          bestMatch.canonical.off_name = ti.off_product_name
+        }
+        canonicalsMatched++
       } else {
         pendingLinks.push({ tiId: ti.id, canonicalId: matchedId })
+        let om = canonicalOriginFamilies.get(matchedId)
+        if (!om) {
+          om = new Map()
+          canonicalOriginFamilies.set(matchedId, om)
+        }
+        commitOriginFamilies(om, storeProds, ti.gtin)
+        if (incPvr.length > 0) {
+          const ex = pvrByCanonical.get(matchedId) ?? []
+          pvrByCanonical.set(matchedId, [...ex, ...incPvr])
+        }
+        if (ti.off_product_name && !canonicalOffNames.has(matchedId)) {
+          canonicalOffNames.set(matchedId, ti.off_product_name)
+          bestMatch.canonical.off_name = ti.off_product_name
+        }
+        canonicalsMatched++
       }
-      if (ti.off_product_name && !canonicalOffNames.has(matchedId)) {
-        canonicalOffNames.set(matchedId, ti.off_product_name)
-        bestMatch.canonical.off_name = ti.off_product_name
-      }
-      canonicalsMatched++
     } else {
       if (bestMatch && bestMatch.confidence >= CONFIDENCE_LOG) {
         lowConfidenceMatches.push({
@@ -584,8 +780,6 @@ export async function runPass2(
         })
       }
 
-      // Create a virtual canonical and add it to the brand index
-      // so subsequent trade_items in this run can match against it
       const virtualId = nextVirtualId--
       const virtualRow: CanonicalRow = {
         id: virtualId,
@@ -596,7 +790,15 @@ export async function runPass2(
         off_name: ti.off_product_name,
       }
       addToIndex(canonicalsByBrand, virtualRow)
-      virtualById.set(virtualId, { virtualId, offName: ti.off_product_name, rep, tiIds: [ti.id] })
+      const originFamilyByOrigin = new Map<number, Set<string>>()
+      commitOriginFamilies(originFamilyByOrigin, storeProds, ti.gtin)
+      virtualById.set(virtualId, {
+        virtualId,
+        offName: ti.off_product_name,
+        rep,
+        tiIds: [ti.id],
+        originFamilyByOrigin,
+      })
     }
   }
 

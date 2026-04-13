@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import axios, { AxiosError } from "axios"
 import type { StoreProduct } from "@/types"
+import { mergeStoreProductScrapeResponse } from "@/lib/store-product-scrape-response"
 import { useUser } from "@/hooks/useUser"
 import { useSetProductPriority } from "@/hooks/useSetProductPriority"
 
@@ -25,7 +26,7 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
   try {
     const response = await axios.post(`/api/store_products/scrape`, { storeProduct })
     if (response.status !== 200) throw new Error("Failed to update store product")
-    return response.data as StoreProduct
+    return mergeStoreProductScrapeResponse(storeProduct, response.data)
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 404) {
       throw new ProductUnavailableError()

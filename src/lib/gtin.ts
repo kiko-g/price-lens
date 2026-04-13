@@ -90,3 +90,14 @@ export function extractInnerGtin13(barcode: string): string | null {
   }
   return null
 }
+
+/** Consumer-unit key for comparing GTINs (GTIN-14 level-0 → inner EAN-13). */
+export function gtinFamilyKey(gtin: string): string {
+  const t = gtin.replace(/\s/g, "").trim()
+  const inner = extractInnerGtin13(t)
+  return inner ?? t
+}
+
+export function gtinKeysMatch(a: string, b: string): boolean {
+  return gtinFamilyKey(a) === gtinFamilyKey(b)
+}

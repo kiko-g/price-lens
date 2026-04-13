@@ -93,6 +93,7 @@ async function getCanonicals(req: NextRequest) {
     brand: string | null
     barcode: string | null
     price: number | null
+    price_recommended: number | null
     image: string | null
     url: string | null
     trade_item_id: number
@@ -100,7 +101,7 @@ async function getCanonicals(req: NextRequest) {
   if (allTiIds.length > 0) {
     const { data } = await supabase
       .from("store_products")
-      .select("id, origin_id, name, brand, barcode, price, image, url, trade_item_id")
+      .select("id, origin_id, name, brand, barcode, price, price_recommended, image, url, trade_item_id")
       .in("trade_item_id", allTiIds)
       .order("origin_id")
     allStoreProducts = (data ?? []) as typeof allStoreProducts
@@ -167,7 +168,7 @@ async function getOrphans(req: NextRequest) {
   const tiIds = orphanTis.map((ti: { trade_item_id: number }) => ti.trade_item_id)
   const { data: storeProducts } = await supabase
     .from("store_products")
-    .select("id, origin_id, name, brand, barcode, price, image, url, trade_item_id")
+    .select("id, origin_id, name, brand, barcode, price, price_recommended, image, url, trade_item_id")
     .in("trade_item_id", tiIds)
     .order("origin_id")
 

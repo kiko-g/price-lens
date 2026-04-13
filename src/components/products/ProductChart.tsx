@@ -784,14 +784,8 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       </ScrollArea>
 
       {trackingSince && (
-        <blockquote className="text-muted-foreground text-xs italic">
-          Tracking since{" "}
-          {new Date(trackingSince).toLocaleDateString("pt-PT", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          })}
-          . Showing data for up to {formatRelativeTime(new Date(trackingSince), "long")}.
+        <blockquote className="text-muted-foreground text-2xs text-right">
+          Showing data for up to {formatRelativeTime(new Date(trackingSince), "long")}
         </blockquote>
       )}
     </div>

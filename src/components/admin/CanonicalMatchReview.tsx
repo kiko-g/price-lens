@@ -36,6 +36,7 @@ interface StoreProductInfo {
   brand: string | null
   barcode: string | null
   price: number | null
+  price_recommended: number | null
   image: string | null
   url: string | null
 }
@@ -189,6 +190,7 @@ export function CanonicalMatchReview() {
                 <SelectItem value="1">1+ Barcodes</SelectItem>
                 <SelectItem value="2">2+ Barcodes</SelectItem>
                 <SelectItem value="3">3+ Barcodes</SelectItem>
+                <SelectItem value="4">4+ Barcodes (review)</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -358,6 +360,11 @@ function CanonicalCard({ canonical, onRefresh }: { canonical: CanonicalProduct; 
               <Badge variant="outline" className="text-xs">
                 {canonical.source}
               </Badge>
+              {canonical.source === "auto" && canonical.barcodeCount > 3 && (
+                <Badge variant="destructive" className="text-xs">
+                  {canonical.barcodeCount} GTINs (review)
+                </Badge>
+              )}
               <span className="text-muted-foreground text-xs">
                 {canonical.barcodeCount} barcode{canonical.barcodeCount !== 1 ? "s" : ""} · {canonical.storeCount} store
                 {canonical.storeCount !== 1 ? "s" : ""}
@@ -558,8 +565,13 @@ function StoreProductRow({ sp }: { sp: StoreProductInfo }) {
       {sp.image && <img src={sp.image} alt="" className="size-20 shrink-0 rounded-lg object-cover p-0.5" />}
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs leading-tight">{sp.name}</p>
-        <div className="mt-0.5 flex items-center gap-2">
+        <div className="mt-0.5 flex flex-wrap items-center gap-2">
           {sp.price != null && <span className="text-xs font-semibold">{sp.price.toFixed(2)}€</span>}
+          {sp.price_recommended != null && sp.price_recommended > 0 && (
+            <span className="text-muted-foreground text-[10px]" title="Preço recomendado (PVR)">
+              PVR {sp.price_recommended.toFixed(2)}€
+            </span>
+          )}
           <span className="text-muted-foreground truncate font-mono text-[10px]">{sp.barcode}</span>
         </div>
       </div>

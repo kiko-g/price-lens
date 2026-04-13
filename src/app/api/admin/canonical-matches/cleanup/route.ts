@@ -107,11 +107,16 @@ export async function POST() {
     }
   }
 
-  // Refresh counts
   if (fixed > 0) {
-    await supabase.rpc("refresh_canonical_counts_batch", {
-      batch_ids: overlinked.map((cp) => cp.id),
-    })
+    for (;;) {
+      const { data, error } = await supabase.rpc("refresh_canonical_counts_batch", { batch_size: 2000 })
+      if (error) {
+        console.error("[canonical-matches/cleanup] refresh_canonical_counts_batch failed:", error)
+        break
+      }
+      const n = typeof data === "number" ? data : 0
+      if (n === 0) break
+    }
   }
 
   return NextResponse.json({

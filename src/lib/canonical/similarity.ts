@@ -131,7 +131,12 @@ export function normalizeName(name: string | null): string {
 export function extractWords(name: string | null): string[] {
   if (!name) return []
   const normalized = normalizeName(name)
-  return normalized.split(" ").filter((word) => word.length > 1 && !STOP_WORDS.has(word))
+  return normalized.split(" ").filter((word) => {
+    if (!word || STOP_WORDS.has(word)) return false
+    // keep stage / variant digits (e.g. Aptamil 1 vs 2) — length-1 alphabetic tokens stay dropped
+    if (/^\d+$/.test(word)) return true
+    return word.length > 1
+  })
 }
 
 // ---------------------------------------------------------------------------

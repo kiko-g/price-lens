@@ -1,5 +1,6 @@
 import axios from "axios"
 import type { StoreProduct, Price } from "@/types"
+import { mergeStoreProductScrapeResponse } from "@/lib/store-product-scrape-response"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useMemo } from "react"
@@ -35,7 +36,7 @@ async function scrapeAndUpdateStoreProduct(storeProduct: StoreProduct) {
 
   const response = await axios.post(`/api/store_products/scrape`, { storeProduct })
   if (response.status !== 200) throw new Error("Failed to update store product")
-  return response.data as StoreProduct
+  return mergeStoreProductScrapeResponse(storeProduct, response.data)
 }
 
 async function getStoreProductCategories() {
@@ -105,8 +106,9 @@ export function useUpdateStoreProduct() {
     mutationFn: scrapeAndUpdateStoreProduct,
     onSuccess: (data) => {
       const id = data.id?.toString()
+      const label = data.name?.trim() || (id ? `#${id}` : "This product")
       toast.success("Product updated", {
-        description: `Product ${id} has been updated successfully.`,
+        description: `"${label}" has been updated successfully.`,
       })
       if (id) queryClient.invalidateQueries({ queryKey: ["storeProduct", id] })
     },
