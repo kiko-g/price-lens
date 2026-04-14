@@ -17,7 +17,10 @@ type Props = {
   className?: string
 }
 
-function useCheaperElsewhereHint(sp: StoreProduct, identicalProducts: StoreProduct[] | undefined): CheaperElsewhereHint | null {
+function useCheaperElsewhereHint(
+  sp: StoreProduct,
+  identicalProducts: StoreProduct[] | undefined,
+): CheaperElsewhereHint | null {
   return useMemo(() => {
     if (!identicalProducts?.length || sp.price == null || sp.id == null) return null
     const all: StoreProduct[] = [sp, ...identicalProducts]

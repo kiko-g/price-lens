@@ -169,10 +169,7 @@ function commitOriginFamilies(
   }
 }
 
-function collectPVRFromTradeItemIds(
-  tiIds: number[],
-  spByTradeItemId: Map<number, StoreProductRow[]>,
-): number[] {
+function collectPVRFromTradeItemIds(tiIds: number[], spByTradeItemId: Map<number, StoreProductRow[]>): number[] {
   const out: number[] = []
   for (const id of tiIds) {
     const sps = spByTradeItemId.get(id)
@@ -240,9 +237,7 @@ async function fetchPass1UnlinkedStoreProducts(supabase: SupabaseClient): Promis
         .limit(PAGE_SIZE)
 
       if (error) {
-        throw new Error(
-          `Pass 1 fetch (ids ${winStart}-${winEnd}, after ${cursor}): ${formatSupabaseError(error)}`,
-        )
+        throw new Error(`Pass 1 fetch (ids ${winStart}-${winEnd}, after ${cursor}): ${formatSupabaseError(error)}`)
       }
       if (!data?.length) break
       all.push(...data)
@@ -757,7 +752,7 @@ export async function runPass2(
       const incPvr = collectPositivePVR(storeProds)
       const existingPvr =
         matchedId >= 0
-          ? pvrByCanonical.get(matchedId) ?? []
+          ? (pvrByCanonical.get(matchedId) ?? [])
           : collectPVRFromTradeItemIds(virtualById.get(matchedId)!.tiIds, spByTradeItemId)
       const pvrOk = pvrClustersCompatible(incPvr, existingPvr)
 

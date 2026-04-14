@@ -102,9 +102,7 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
         className={cn(
           "flex w-full items-center gap-2.5",
           !isMobile && "justify-center lg:justify-start",
-          isMobile &&
-            !isCompactMobile &&
-            "-mx-4 justify-start gap-2 overflow-x-auto px-4 pb-0.5 no-scrollbar",
+          isMobile && !isCompactMobile && "no-scrollbar -mx-4 justify-start gap-2 overflow-x-auto px-4 pb-0.5",
         )}
       >
         {rowEntries.map((entry) => (

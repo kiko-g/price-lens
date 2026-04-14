@@ -6,10 +6,7 @@ export type ScrapeStoreProductApiBody = {
   available?: boolean
 }
 
-export function mergeStoreProductScrapeResponse(
-  storeProduct: StoreProduct,
-  body: unknown,
-): StoreProduct {
+export function mergeStoreProductScrapeResponse(storeProduct: StoreProduct, body: unknown): StoreProduct {
   const parsed = body as ScrapeStoreProductApiBody
   const scraped = parsed.data
   return {

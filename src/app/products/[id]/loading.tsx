@@ -32,8 +32,8 @@ function ChartSkeleton() {
         </div>
 
         {/* PriceTable skeleton */}
-        <div className="order-1 min-w-0 max-w-2xl xl:col-start-1 xl:row-start-2">
-          <div className="max-h-[280px] min-w-0 w-full max-w-full xl:max-h-80">
+        <div className="order-1 max-w-2xl min-w-0 xl:col-start-1 xl:row-start-2">
+          <div className="max-h-[280px] w-full max-w-full min-w-0 xl:max-h-80">
             <Skeleton className="mb-2 h-8 w-full rounded-md" />
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (

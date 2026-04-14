@@ -30,10 +30,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (sourceMode !== "auto" && sourceMode !== "all") {
-    return NextResponse.json(
-      { error: `Invalid source: ${sourceMode}. Use "auto" or "all".` },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: `Invalid source: ${sourceMode}. Use "auto" or "all".` }, { status: 400 })
   }
 
   let listQuery = supabase
@@ -94,7 +91,6 @@ export async function GET(req: NextRequest) {
       max_barcode_count_in_db: maxBarcodeCount,
     },
     ...(note ? { note } : {}),
-    hint:
-      "For duplicate GTIN families per chain on the same canonical (not visible via barcode_count alone), run supabase/snippets/07-canonical_quality_suspects.sql query #2 in Studio or psql.",
+    hint: "For duplicate GTIN families per chain on the same canonical (not visible via barcode_count alone), run supabase/snippets/07-canonical_quality_suspects.sql query #2 in Studio or psql.",
   })
 }

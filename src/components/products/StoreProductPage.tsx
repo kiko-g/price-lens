@@ -51,18 +51,15 @@ function ChartSection({
           <ProductChart.ChartContent>
             <ProductChart.AnalyticsDisclosure>
               <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-x-6 xl:gap-y-3">
-                <div className="order-2 flex min-w-0 max-w-2xl flex-col xl:col-start-1 xl:row-start-1">
+                <div className="order-2 flex max-w-2xl min-w-0 flex-col xl:col-start-1 xl:row-start-1">
                   <ProductChart.PricesVariation showFreshnessInfo={false} />
                 </div>
 
-                <div className="order-1 min-w-0 max-w-2xl xl:col-start-1 xl:row-start-2">
-                  <ProductChart.PriceTable
-                    className="max-h-[280px] min-w-0 w-full max-w-full xl:max-h-80"
-                    scrollable
-                  />
+                <div className="order-1 max-w-2xl min-w-0 xl:col-start-1 xl:row-start-2">
+                  <ProductChart.PriceTable className="max-h-[280px] w-full max-w-full min-w-0 xl:max-h-80" scrollable />
                 </div>
 
-                <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-3 flex h-fit min-w-0 max-w-xl flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
+                <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-3 flex h-fit max-w-xl min-w-0 flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
                   <ProductChart.RangeSelector className="xl:justify-start" />
                   <ProductChart.Graph />
                 </div>

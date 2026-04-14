@@ -386,7 +386,11 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isProcessing}
                   >
-                    {isProcessing ? <Loader2Icon className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
+                    {isProcessing ? (
+                      <Loader2Icon className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <ImageIcon className="h-5 w-5" />
+                    )}
                     {isProcessing ? "Processing…" : "Upload image"}
                   </Button>
                 </div>

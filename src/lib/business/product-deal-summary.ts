@@ -58,9 +58,7 @@ export function getProductDealSummary(
     }
   }
 
-  const currentPoint = pricePoints.find(
-    (p) => p.price === sp.price && p.price_recommended === sp.price_recommended,
-  )
+  const currentPoint = pricePoints.find((p) => p.price === sp.price && p.price_recommended === sp.price_recommended)
   const freqPct = currentPoint != null ? Math.round((currentPoint.frequencyRatio ?? 0) * 100) : null
 
   if (freqPct == null) {
@@ -74,9 +72,7 @@ export function getProductDealSummary(
   const isMostCommon = matchesMostCommonBanner(sp, mostCommon)
   const historyDays = Math.max(0, options?.historyDays ?? 0)
 
-  const nascent =
-    currentPoint != null &&
-    isNascentShortObservation(currentPoint, freqPct, isMostCommon, historyDays)
+  const nascent = currentPoint != null && isNascentShortObservation(currentPoint, freqPct, isMostCommon, historyDays)
 
   let tier: DealSummaryTier
   let tierLabel: string | null

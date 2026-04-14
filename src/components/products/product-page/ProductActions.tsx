@@ -34,19 +34,10 @@ export function ProductActions({ sp }: ProductActionsProps) {
   const elevated = process.env.NODE_ENV === "development" || profile?.role === "admin"
 
   return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-3 md:gap-2",
-        compactActions && "w-full justify-between",
-      )}
-    >
+    <div className={cn("flex flex-wrap items-center gap-3 md:gap-2", compactActions && "w-full justify-between")}>
       <div className="flex items-center gap-3">
         <FavoriteButton storeProduct={sp} compact={compactActions} />
-        <AlertButton
-          storeProductId={sp.id}
-          productName={sp.name}
-          variant={compactActions ? "icon" : "default"}
-        />
+        <AlertButton storeProductId={sp.id} productName={sp.name} variant={compactActions ? "icon" : "default"} />
         <ResponsiveActionsMenu
           trigger={
             <Button variant="outline" size={compactActions ? "icon-lg" : "icon-sm"}>
@@ -54,53 +45,53 @@ export function ProductActions({ sp }: ProductActionsProps) {
             </Button>
           }
         >
-        <ResponsiveActionsMenuItem asChild>
-          <DrawerSheet
-            title="Details"
-            description="Inspect store product data"
-            trigger={
-              <button type="button" className="flex w-full items-center justify-between gap-2">
-                Store product details
-                <InfoIcon />
-              </button>
-            }
+          <ResponsiveActionsMenuItem asChild>
+            <DrawerSheet
+              title="Details"
+              description="Inspect store product data"
+              trigger={
+                <button type="button" className="flex w-full items-center justify-between gap-2">
+                  Store product details
+                  <InfoIcon />
+                </button>
+              }
+            >
+              <div className="w-full">
+                <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
+              </div>
+            </DrawerSheet>
+          </ResponsiveActionsMenuItem>
+
+          <ResponsiveActionsMenuItem
+            onClick={() => updateStoreProduct.mutate(sp)}
+            disabled={updateStoreProduct.isPending}
           >
-            <div className="w-full">
-              <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
-            </div>
-          </DrawerSheet>
-        </ResponsiveActionsMenuItem>
-
-        <ResponsiveActionsMenuItem
-          onClick={() => updateStoreProduct.mutate(sp)}
-          disabled={updateStoreProduct.isPending}
-        >
-          <span className="flex w-full items-center gap-1">
-            <span>Update from {supermarketName}</span>
-            <DevBadge />
-          </span>
-          {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon />}
-        </ResponsiveActionsMenuItem>
-
-        {elevated && (
-          <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
             <span className="flex w-full items-center gap-1">
-              <span>Set priority</span>
+              <span>Update from {supermarketName}</span>
               <DevBadge />
             </span>
-            <MicroscopeIcon />
+            {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon />}
           </ResponsiveActionsMenuItem>
-        )}
 
-        {elevated && (
-          <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
-            <span className="flex w-full items-center gap-1">
-              <span>Clear priority</span>
-              <DevBadge />
-            </span>
-            <CircleIcon />
-          </ResponsiveActionsMenuItem>
-        )}
+          {elevated && (
+            <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
+              <span className="flex w-full items-center gap-1">
+                <span>Set priority</span>
+                <DevBadge />
+              </span>
+              <MicroscopeIcon />
+            </ResponsiveActionsMenuItem>
+          )}
+
+          {elevated && (
+            <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
+              <span className="flex w-full items-center gap-1">
+                <span>Clear priority</span>
+                <DevBadge />
+              </span>
+              <CircleIcon />
+            </ResponsiveActionsMenuItem>
+          )}
         </ResponsiveActionsMenu>
       </div>
       <div className="flex items-center gap-3">

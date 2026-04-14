@@ -11,13 +11,7 @@ import { Button } from "@/components/ui/button"
 import { LoginPrompt } from "@/components/auth/LoginPrompt"
 import { HeartIcon } from "lucide-react"
 
-export function FavoriteButton({
-  storeProduct,
-  compact = false,
-}: {
-  storeProduct: StoreProduct
-  compact?: boolean
-}) {
+export function FavoriteButton({ storeProduct, compact = false }: { storeProduct: StoreProduct; compact?: boolean }) {
   const { user } = useUser()
   const { toggleFavorite, isLoading } = useFavoriteToggle()
   const [isFavorited, setIsFavorited] = useState(storeProduct.is_favorited ?? false)

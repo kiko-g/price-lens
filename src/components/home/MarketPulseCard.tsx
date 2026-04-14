@@ -93,7 +93,7 @@ export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats;
           className="group flex min-w-[5.25rem] flex-col items-center gap-0.5 active:opacity-70 sm:min-w-0 sm:gap-0"
         >
           <span className="text-base font-bold tracking-tight tabular-nums sm:text-lg">{item.value}</span>
-          <span className="text-muted-foreground max-[380px]:text-[10px] text-[11px] leading-tight sm:leading-none">
+          <span className="text-muted-foreground text-[11px] leading-tight max-[380px]:text-[10px] sm:leading-none">
             {item.shortLabel}
           </span>
         </Link>

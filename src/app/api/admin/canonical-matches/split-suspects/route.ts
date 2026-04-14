@@ -32,10 +32,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (sourceMode !== "auto" && sourceMode !== "all") {
-    return NextResponse.json(
-      { error: `Invalid source: ${sourceMode}. Use "auto" or "all".` },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: `Invalid source: ${sourceMode}. Use "auto" or "all".` }, { status: 400 })
   }
 
   const supabase = createAdminClient()
@@ -53,8 +50,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         error: error.message,
-        hint:
-          "If this is undefined_function, apply scripts/migrations/038_canonical_pvr_split_suspects.sql to the target database.",
+        hint: "If this is undefined_function, apply scripts/migrations/038_canonical_pvr_split_suspects.sql to the target database.",
       },
       { status: 500 },
     )
