@@ -69,9 +69,10 @@ export async function GET(req: NextRequest) {
       minNameSimilarity,
       source: sourceMode,
       limit,
-      interpretation: `Same brand (≥3 chars, must contain a letter), same pack volume fields, same PVPR; group size in [${minSize}, ${maxExclusive}). Pairs need name similarity ≥ ${minNameSimilarity} unless minNameSimilarity=0.`,
+      interpretation: `Same brand (≥3 chars, ≥2 letters after stripping non-letters; not numeric-only), same pack volume fields, same PVPR; group size in [${minSize}, ${maxExclusive}). Pairs need name similarity ≥ ${minNameSimilarity} unless minNameSimilarity=0.`,
     },
     groupCount: groups.length,
     groups,
+    note: 'Each pair includes name_similarity. If your JSON lacks it or filters.interpretation does not match this text, redeploy the app. If junk brands (e.g. ".") still appear, re-run the latest scripts/migrations/038_canonical_pvr_split_suspects.sql on Supabase.',
   })
 }

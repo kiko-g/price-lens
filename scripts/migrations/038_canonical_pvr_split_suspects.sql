@@ -10,6 +10,12 @@
 --                             use 0 to disable (noisy). Default 0.45.
 --
 -- Requires: pg_trgm (see 023_precompute_canonical_counts.sql)
+--
+-- Drop legacy 4-arg overload: adding a 5th param creates a new signature; REPLACE only
+-- updates the exact same arg list, so COMMENT / duplicate overloads trigger "not unique".
+
+DROP FUNCTION IF EXISTS list_canonical_pvr_split_suspect_groups(integer, integer, text, integer);
+DROP FUNCTION IF EXISTS list_canonical_pvr_split_suspect_groups(integer, integer, text, integer, real);
 
 CREATE OR REPLACE FUNCTION list_canonical_pvr_split_suspect_groups(
   p_min_size INT DEFAULT 2,
@@ -60,8 +66,9 @@ AS $$
     INNER JOIN canonical_pvr cpp ON cpp.cp_id = cp.id
     WHERE cp.brand IS NOT NULL
       AND length(trim(cp.brand)) >= 3
-      -- Drop junk “brands” (pure numbers, punctuation-only, etc.); require a Latin letter
-      AND cp.brand ~ '[A-Za-z]'
+      -- Real brand: ≥2 letters (Unicode-safe); drop “1699”, “.”, “500”, punctuation-only, etc.
+      AND length(regexp_replace(trim(cp.brand), '[^[:alpha:]]', '', 'g')) >= 2
+      AND trim(cp.brand) !~ '^[0-9]+$'
       AND (
         p_source = 'all'
         OR (p_source = 'auto' AND cp.source = 'auto')
@@ -106,5 +113,5 @@ AS $$
   LIMIT LEAST(COALESCE(NULLIF(p_limit, 0), 100), 500);
 $$;
 
-COMMENT ON FUNCTION list_canonical_pvr_split_suspect_groups IS
+COMMENT ON FUNCTION list_canonical_pvr_split_suspect_groups(integer, integer, text, integer, real) IS
   'Admin triage: same normalized brand + pack volume + identical PVPR; small groups; pairs need pg_trgm name similarity unless p_min_name_similarity=0.';
