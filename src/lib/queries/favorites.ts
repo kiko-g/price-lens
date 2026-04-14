@@ -5,6 +5,10 @@ import type { PaginationParams, PaginatedQueryResult } from "./types"
 import type { StoreProduct } from "@/types"
 import type { SearchType, SortByType } from "@/types/business"
 import { SupermarketChain } from "@/types/business"
+import {
+  DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS,
+  PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE,
+} from "@/lib/business/price-change"
 
 // ============================================================================
 // Favorites Query Types
@@ -394,6 +398,20 @@ export const favoriteQueries = {
 
     query = this._applyFiltersFromProducts(query, params)
 
+    if (sortBy === "price-drop-smart") {
+      const cutoff = new Date(
+        Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000,
+      ).toISOString()
+      query = query
+        .not("price", "is", null)
+        .gt("price", 0)
+        .not("last_price_change_at", "is", null)
+        .gte("last_price_change_at", cutoff)
+        .lt("price_change_pct", 0)
+        .gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
+        .not("price_drop_smart_score", "is", null)
+    }
+
     switch (sortBy) {
       case "a-z":
         query = query.order("name", { ascending: true })
@@ -409,6 +427,11 @@ export const favoriteQueries = {
         break
       case "price-drop":
         query = query.order("price_change_pct", { ascending: true, nullsFirst: false })
+        break
+      case "price-drop-smart":
+        query = query
+          .order("price_drop_smart_score", { ascending: false, nullsFirst: false })
+          .order("price_change_pct", { ascending: true, nullsFirst: false })
         break
       case "price-increase":
         query = query.order("price_change_pct", { ascending: false, nullsFirst: false })

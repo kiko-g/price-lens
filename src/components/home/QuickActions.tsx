@@ -14,7 +14,7 @@ const actions = [
   },
   {
     label: "Price Drops",
-    href: "/products?sort=discount&available=true",
+    href: "/products?sort=price-drop-smart&available=true",
     icon: TrendingDownIcon,
   },
   {

@@ -55,7 +55,7 @@ export async function DiagonalSplitCta() {
             </p>
 
             <Button asChild variant="primary" size="lg" roundedness="xl" className="group gap-2">
-              <Link href="/products?sort=price-drop">
+              <Link href="/products?sort=price-drop-smart">
                 Browse today&apos;s price drops
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>

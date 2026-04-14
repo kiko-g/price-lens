@@ -22,8 +22,8 @@ const entryPoints = [
   },
   {
     label: "Price Drops",
-    description: "Biggest drops",
-    href: "/products?sort=price-drop",
+    description: "History-weighted drops",
+    href: "/products?sort=price-drop-smart",
     icon: TrendingDownIcon,
     iconColor: "text-emerald-600 dark:text-emerald-400",
     iconBg: "bg-emerald-500/10 dark:bg-emerald-500/20",

@@ -19,6 +19,7 @@ export interface DealProduct {
   available: boolean
   price_change_pct: number | null
   last_price_change_at: string | null
+  price_drop_smart_score: number | null
   updated_at: string
 }
 
@@ -37,6 +38,7 @@ const DEAL_COLUMNS = [
   "available",
   "price_change_pct",
   "last_price_change_at",
+  "price_drop_smart_score",
   "updated_at",
 ].join(", ")
 
@@ -66,7 +68,8 @@ export async function getDeals(options?: { originId?: number; limit?: number }):
     .gte("last_price_change_at", dropRecencyCutoff)
     .lt("price_change_pct", 0)
     .gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
-    .order("price_change_pct", { ascending: true })
+    .order("price_drop_smart_score", { ascending: false, nullsFirst: false })
+    .order("price_change_pct", { ascending: true, nullsFirst: false })
     .limit(limit)
 
   let discountsQuery = supabase

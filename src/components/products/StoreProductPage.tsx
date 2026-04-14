@@ -17,6 +17,7 @@ import { CategoryBreadcrumb } from "@/components/products/product-page/CategoryB
 import { ProductHeroDesktop } from "@/components/products/product-page/ProductHeroDesktop"
 import { ProductHeroMobile } from "@/components/products/product-page/ProductHeroMobile"
 import { ProductPageDealSummary } from "@/components/products/product-page/ProductPageDealSummary"
+import { ProductPriceStatsCallout } from "@/components/products/product-page/ProductPriceStatsCallout"
 
 const DEFAULT_RANGE = "1M" as const
 
@@ -94,7 +95,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ store_product_id: sp.id }),
-    }).catch(() => {})
+    }).catch((err) => console.error("[StoreProductPage] views POST failed:", err))
   }, [sp.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRangeChange = (range: DateRange) => {
@@ -108,6 +109,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       {/* Desktop hero (hidden below md) - chart lives inside the right column */}
       <ProductHeroDesktop sp={sp}>
+        <ProductPriceStatsCallout sp={sp} className="mt-1 max-w-2xl" />
         <ChartSection sp={sp} rangeFromUrl={rangeFromUrl} onRangeChange={handleRangeChange} />
       </ProductHeroDesktop>
 
@@ -116,6 +118,10 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       <div className="mt-5 md:hidden">
         <ProductPageDealSummary sp={sp} />
+      </div>
+
+      <div className="mt-4 px-0 md:hidden">
+        <ProductPriceStatsCallout sp={sp} />
       </div>
 
       {/* Mobile: price history accordion (compact when collapsed) before the full compare list */}

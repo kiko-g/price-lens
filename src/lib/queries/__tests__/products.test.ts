@@ -177,7 +177,8 @@ describe("storeProductQueries", () => {
   describe("getById", () => {
     it("should return store product by id", async () => {
       const mockProduct = createMockStoreProduct({ id: 1 })
-      mockChain.single.mockResolvedValue({ data: mockProduct, error: null })
+      mockChain.single.mockResolvedValueOnce({ data: mockProduct, error: null })
+      mockChain.maybeSingle.mockResolvedValueOnce({ data: {}, error: null })
 
       const result = await storeProductQueries.getById("1")
 
@@ -186,12 +187,14 @@ describe("storeProductQueries", () => {
 
     it("should include favorite status when userId provided", async () => {
       const mockProduct = createMockStoreProduct({ id: 1 })
-      mockChain.single.mockResolvedValueOnce({ data: mockProduct, error: null })
-      mockChain.single.mockResolvedValueOnce({ data: { id: 1 }, error: null })
+      mockChain.single
+        .mockResolvedValueOnce({ data: mockProduct, error: null })
+        .mockResolvedValueOnce({ data: { id: 1 }, error: null })
+      mockChain.maybeSingle.mockResolvedValueOnce({ data: {}, error: null })
 
       const result = await storeProductQueries.getById("1", "user-123")
 
-      expect((result.data as Record<string, unknown>)?.is_favorited).toBe(true)
+      expect(result.data?.is_favorited).toBe(true)
     })
   })
 
@@ -492,7 +495,7 @@ describe("storeProductQueries", () => {
       expect(result.data).toEqual(mockProduct)
     })
 
-    it("should set default priority of 1 when none provided", async () => {
+    it("should omit priority from upsert (governance-owned fields)", async () => {
       const mockProduct = createMockStoreProduct({ priority: null })
       // First .single() call is for fetching existing created_at
       mockChain.single.mockResolvedValueOnce({ data: null, error: null })
@@ -501,7 +504,11 @@ describe("storeProductQueries", () => {
 
       await storeProductQueries.createOrUpdateProduct(mockProduct)
 
-      expect(mockChain.upsert).toHaveBeenCalledWith(expect.objectContaining({ priority: 1 }), expect.any(Object))
+      const upsertArg = mockChain.upsert.mock.calls[0]?.[0] as Record<string, unknown>
+      expect(upsertArg).toBeDefined()
+      expect(upsertArg.priority).toBeUndefined()
+      expect(upsertArg.priority_source).toBeUndefined()
+      expect(upsertArg.priority_updated_at).toBeUndefined()
     })
   })
 })

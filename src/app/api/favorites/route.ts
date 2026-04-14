@@ -67,7 +67,7 @@ export async function DELETE(req: NextRequest) {
  * - q: Search query string
  * - searchType: "any" | "name" | "brand" | "url" | "category"
  * - origin: Comma-separated origin IDs (e.g., "1,2,3")
- * - sort: "a-z" | "z-a" | "price-low-high" | "price-high-low" | "recently-added" | "oldest-first"
+ * - sort: includes "recently-added" | "oldest-first" | "a-z" | "z-a" | "price-low-high" | "price-high-low" | "price-drop" | "price-drop-smart" | "price-increase" | "best-discount"
  * - page: Page number (1-indexed)
  * - limit: Items per page
  * - onlyDiscounted: "true" to show only discounted products

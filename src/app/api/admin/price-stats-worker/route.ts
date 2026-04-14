@@ -58,10 +58,7 @@ async function handler(req: NextRequest) {
     })
   } catch (err) {
     console.error("[price-stats-worker] Unhandled error:", err)
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Unknown error" }, { status: 500 })
   }
 }
 

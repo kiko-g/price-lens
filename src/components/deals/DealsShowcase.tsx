@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { cn } from "@/lib/utils"
 
-import { TrendingDownIcon, TicketPercentIcon, FilterIcon } from "lucide-react"
+import { TrendingDownIcon, TicketPercentIcon, FilterIcon, type LucideIcon } from "lucide-react"
 
 const storeFilters = [
   { id: "all", label: "All Stores" },
@@ -102,7 +102,7 @@ export function DealsShowcase({ deals }: { deals: DealsResult }) {
 
         <TabsContent value="price-drops" className="mt-4">
           {filteredDrops.length === 0 ? (
-            <EmptyDeals />
+            <EmptyDeals variant="drops" />
           ) : (
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {filteredDrops.map((product) => (
@@ -114,7 +114,7 @@ export function DealsShowcase({ deals }: { deals: DealsResult }) {
 
         <TabsContent value="discounts" className="mt-4">
           {filteredDiscounts.length === 0 ? (
-            <EmptyDeals />
+            <EmptyDeals variant="discounts" />
           ) : (
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {filteredDiscounts.map((product) => (
@@ -136,11 +136,17 @@ function DealTabCount({ n }: { n: number }) {
   )
 }
 
-function EmptyDeals() {
+function EmptyDeals({ variant }: { variant: "drops" | "discounts" }) {
+  const message =
+    variant === "drops"
+      ? "Não há quedas recentes que cumpram estes critérios (preço válido, alteração nas últimas 2 semanas, magnitude plausível). Tente outra loja ou volte mais tarde — a lista pode encher quando os dados forem atualizados."
+      : "Não há descontos destacados para este filtro. Tente outra loja."
+  const Icon: LucideIcon = variant === "drops" ? TrendingDownIcon : TicketPercentIcon
+
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <TrendingDownIcon className="text-muted-foreground mb-3 size-10" />
-      <p className="text-muted-foreground text-sm">No deals found for this filter. Try a different store.</p>
+      <Icon className="text-muted-foreground mb-3 size-10" />
+      <p className="text-muted-foreground max-w-md text-sm text-pretty">{message}</p>
     </div>
   )
 }

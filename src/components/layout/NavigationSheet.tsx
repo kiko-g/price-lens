@@ -36,7 +36,7 @@ import { BarcodeScanButton } from "@/components/scan"
 const primaryNavKeys = new Set(["/", "/products", "/deals", "/favorites"])
 
 const productQuickFilters = [
-  { label: "Price Drops", href: "/products?sort=price-drop", icon: TrendingDownIcon },
+  { label: "Price Drops", href: "/products?sort=price-drop-smart", icon: TrendingDownIcon },
   { label: "Discounts", href: "/products?discounted=true&sort=best-discount", icon: TicketPercentIcon },
   { label: "Essential", href: "/products?priority=5", icon: AppleIcon },
 ] as const

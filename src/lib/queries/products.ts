@@ -208,33 +208,50 @@ export const storeProductQueries = {
 
   async getById(id: string, userId?: string | null) {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from("store_products_with_canonical")
-      .select(
-        "id, origin_id, url, name, brand, barcode, pack, price, price_recommended, price_per_major_unit, major_unit, discount, image, category, category_2, category_3, priority, priority_source, priority_updated_at, available, created_at, updated_at, canonical_category_id, canonical_category_name, canonical_level, canonical_parent_id, canonical_category_name_2, canonical_parent_id_2, canonical_category_name_3",
-      )
-      .eq("id", id)
-      .single()
+    // View `store_products_with_canonical` uses `sp.*` expanded at CREATE VIEW time — it does not pick up new
+    // store_products columns until the view is recreated. Keep canonical fields on the view select and merge
+    // listing-quality columns from the base table so product pages work before/without a view refresh migration.
+    const canonicalSelect =
+      "id, origin_id, url, name, brand, barcode, pack, price, price_recommended, price_per_major_unit, major_unit, discount, image, category, category_2, category_3, priority, priority_source, priority_updated_at, available, created_at, updated_at, canonical_category_id, canonical_category_name, canonical_level, canonical_parent_id, canonical_category_name_2, canonical_parent_id_2, canonical_category_name_3"
+    const statsSelect =
+      "price_change_pct, last_price_change_at, price_stats_obs_90d, price_stats_cv_ln_90d, price_stats_updated_at, price_drop_smart_score"
+
+    const [canonicalRes, statsRes] = await Promise.all([
+      supabase.from("store_products_with_canonical").select(canonicalSelect).eq("id", id).single(),
+      supabase.from("store_products").select(statsSelect).eq("id", id).maybeSingle(),
+    ])
+
+    const { data, error } = canonicalRes
+    if (error || !data) {
+      return { data: null, error }
+    }
+
+    let merged: StoreProduct = { ...data }
+    if (statsRes.error) {
+      console.error("[storeProductQueries.getById] store_products stats select failed:", statsRes.error)
+    } else if (statsRes.data) {
+      merged = { ...merged, ...statsRes.data }
+    }
 
     // If user is provided and product exists, check if it's favorited
-    if (userId && data && !error) {
+    if (userId) {
       const { data: favorite } = await supabase
         .from("user_favorites")
         .select("id")
         .eq("user_id", userId)
-        .eq("store_product_id", data.id)
+        .eq("store_product_id", merged.id)
         .single()
 
       return {
         data: {
-          ...data,
+          ...merged,
           is_favorited: !!favorite,
         },
-        error,
+        error: null,
       }
     }
 
-    return { data, error }
+    return { data: merged, error: null }
   },
 
   async getByBarcode(barcode: string, userId?: string | null) {

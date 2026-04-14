@@ -17,12 +17,7 @@ import {
 
 const SUPABASE_QUERY_TIMEOUT_MS = parseInt(process.env.SUPABASE_QUERY_TIMEOUT_MS || "15000", 10)
 
-const SORTS_REQUIRING_NON_NULL_PRICE = new Set([
-  "price-drop",
-  "price-drop-smart",
-  "price-increase",
-  "best-discount",
-])
+const SORTS_REQUIRING_NON_NULL_PRICE = new Set(["price-drop", "price-drop-smart", "price-increase", "best-discount"])
 
 function mergeListingFlags(
   sortBy: string,
@@ -45,9 +40,7 @@ function applyListingQualityFilters<Q extends { [key: string]: any }>(
     q = q.not("price", "is", null).gt("price", 0)
   }
   if (sortBy === "price-drop" || sortBy === "price-drop-smart") {
-    const cutoff = new Date(
-      Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000,
-    ).toISOString()
+    const cutoff = new Date(Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000).toISOString()
     q = q.not("last_price_change_at", "is", null).gte("last_price_change_at", cutoff).lt("price_change_pct", 0)
     q = q.gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
     if (sortBy === "price-drop-smart") {
@@ -55,9 +48,7 @@ function applyListingQualityFilters<Q extends { [key: string]: any }>(
     }
   }
   if (sortBy === "price-increase") {
-    const cutoff = new Date(
-      Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000,
-    ).toISOString()
+    const cutoff = new Date(Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000).toISOString()
     q = q.not("last_price_change_at", "is", null).gte("last_price_change_at", cutoff).gt("price_change_pct", 0)
     q = q.lte("price_change_pct", PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
   }

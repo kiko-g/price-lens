@@ -100,7 +100,7 @@ export const SMART_VIEW_PRESETS = [
   {
     label: "Price Drops",
     icon: TrendingDownIcon,
-    params: { sort: "price-drop" },
+    params: { sort: "price-drop-smart" },
   },
   {
     label: "Price Increases",
@@ -129,6 +129,15 @@ export const FAVORITES_SORT_OPTIONS_GROUPS = [
     options: [
       { label: "Price: High to Low", value: "price-high-low", icon: ArrowUpWideNarrowIcon },
       { label: "Price: Low to High", value: "price-low-high", icon: ArrowDownWideNarrowIcon },
+    ],
+  },
+  {
+    label: "Price intelligence",
+    options: [
+      { label: "Biggest Price Drops", value: "price-drop", icon: TrendingDownIcon },
+      { label: "Price Drops (weighted)", value: "price-drop-smart", icon: TrendingDownIcon },
+      { label: "Biggest Price Increases", value: "price-increase", icon: TrendingUpIcon },
+      { label: "Best Discounts", value: "best-discount", icon: TicketPercentIcon },
     ],
   },
 ]

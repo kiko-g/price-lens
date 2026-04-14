@@ -30,7 +30,7 @@ function buildPulseStats(stats: HomeStats): PulseStat[] {
       value: formatNumber(stats.priceDropsToday),
       label: "price drops today",
       shortLabel: "price drops today",
-      href: "/products?sort=price-drop",
+      href: "/products?sort=price-drop-smart",
       iconColor: "text-primary-800 dark:text-primary-300",
       bgTint: "bg-primary/4 dark:bg-primary-400/6 md:bg-primary/8 md:dark:bg-primary-400/10",
     },
