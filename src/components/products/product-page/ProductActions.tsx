@@ -1,6 +1,7 @@
 "use client"
 
 import type { StoreProduct } from "@/types"
+import { cn } from "@/lib/utils"
 import { useUser } from "@/hooks/useUser"
 import { useSetProductPriority } from "@/hooks/useSetProductPriority"
 import { useUpdateStoreProduct } from "@/hooks/useProducts"
@@ -16,6 +17,7 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { FavoriteButton } from "@/components/products/product-page/FavoriteButton"
 import { AlertButton } from "@/components/products/product-page/AlertButton"
 
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { EllipsisVerticalIcon, RefreshCcwIcon, MicroscopeIcon, CircleIcon, InfoIcon } from "lucide-react"
 
 interface ProductActionsProps {
@@ -26,22 +28,32 @@ export function ProductActions({ sp }: ProductActionsProps) {
   const { profile } = useUser()
   const updateStoreProduct = useUpdateStoreProduct()
   const { promptAndSetPriority, clearPriority, isPending: isPriorityPending } = useSetProductPriority(sp.id)
+  const compactActions = useMediaQuery("(max-width: 768px)")
 
   const supermarketName = getSupermarketChainName(sp?.origin_id)
   const elevated = process.env.NODE_ENV === "development" || profile?.role === "admin"
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <FavoriteButton storeProduct={sp} />
-      <AlertButton storeProductId={sp.id} productName={sp.name} />
-      <ShareButton sp={sp} />
-      <ResponsiveActionsMenu
-        trigger={
-          <Button variant="outline" size="icon-sm">
-            <EllipsisVerticalIcon className="h-4 w-4" />
-          </Button>
-        }
-      >
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-3 md:gap-2",
+        compactActions && "w-full justify-between",
+      )}
+    >
+      <div className="flex items-center gap-3">
+        <FavoriteButton storeProduct={sp} compact={compactActions} />
+        <AlertButton
+          storeProductId={sp.id}
+          productName={sp.name}
+          variant={compactActions ? "icon" : "default"}
+        />
+        <ResponsiveActionsMenu
+          trigger={
+            <Button variant="outline" size={compactActions ? "icon-lg" : "icon-sm"}>
+              <EllipsisVerticalIcon className="h-4 w-4" />
+            </Button>
+          }
+        >
         <ResponsiveActionsMenuItem asChild>
           <DrawerSheet
             title="Details"
@@ -89,7 +101,11 @@ export function ProductActions({ sp }: ProductActionsProps) {
             <CircleIcon />
           </ResponsiveActionsMenuItem>
         )}
-      </ResponsiveActionsMenu>
+        </ResponsiveActionsMenu>
+      </div>
+      <div className="flex items-center gap-3">
+        <ShareButton sp={sp} compact={compactActions} />
+      </div>
     </div>
   )
 }

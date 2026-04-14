@@ -50,7 +50,7 @@ export function OffProductActions({ productName }: OffProductActionsProps) {
     <div className="flex flex-wrap items-center gap-2">
       <Button variant="outline" size="sm" onClick={handleShare}>
         {copied ? <CheckIcon className="h-4 w-4" /> : <ShareIcon className="h-4 w-4" />}
-        Share product
+        Share
       </Button>
     </div>
   )

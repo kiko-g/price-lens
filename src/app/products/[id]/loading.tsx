@@ -32,8 +32,8 @@ function ChartSkeleton() {
         </div>
 
         {/* PriceTable skeleton */}
-        <div className="order-1 max-w-2xl xl:col-start-1 xl:row-start-2">
-          <div className="max-h-[280px] min-w-100 xl:max-h-80 xl:max-w-full">
+        <div className="order-1 min-w-0 max-w-2xl xl:col-start-1 xl:row-start-2">
+          <div className="max-h-[280px] min-w-0 w-full max-w-full xl:max-h-80">
             <Skeleton className="mb-2 h-8 w-full rounded-md" />
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -130,13 +130,10 @@ function MobileHeroSkeleton() {
       <Skeleton className="h-4 w-28" />
 
       <div className="flex flex-wrap items-center gap-2">
-        <Skeleton className="h-8 w-36 rounded-md" />
-        <Skeleton className="h-8 w-32 rounded-md" />
-        <Skeleton className="h-8 w-8 rounded-md" />
-      </div>
-
-      <div className="mt-4">
-        <ChartSkeleton />
+        <Skeleton className="h-9 w-9 rounded-md" />
+        <Skeleton className="h-9 w-9 rounded-md" />
+        <Skeleton className="h-9 w-9 rounded-md" />
+        <Skeleton className="h-9 w-9 rounded-md" />
       </div>
     </article>
   )
@@ -210,9 +207,23 @@ export default function ProductLoading() {
         <DesktopHeroSkeleton />
         <MobileHeroSkeleton />
 
+        <div className="mt-5 md:hidden">
+          <Skeleton variant="shimmer" className="h-28 w-full rounded-xl" />
+        </div>
+
+        <div className="mt-5 md:hidden">
+          <ChartSkeleton />
+        </div>
+
+        <div className="mt-6 md:hidden">
+          <IdenticalProductsSkeleton />
+        </div>
+
         <Separator className="mt-8 mb-4" />
-        <IdenticalProductsSkeleton />
-        <Separator className="mt-8 mb-4" />
+        <div className="hidden md:block">
+          <IdenticalProductsSkeleton />
+        </div>
+        <Separator className="mt-8 mb-4 hidden md:block" />
         <RelatedProductsSkeleton />
       </div>
     </div>

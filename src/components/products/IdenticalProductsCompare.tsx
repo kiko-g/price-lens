@@ -56,50 +56,45 @@ function CompactStoreCard({
       href={generateProductPath(product)}
       aria-label={`${chainLabel}, ${priceLabel}. Open product page.`}
       className={cn(
-        "group hover:border-foreground/20 dark:hover:border-foreground/30 flex min-h-[3.75rem] flex-row items-center gap-3 overflow-hidden rounded-lg border p-3 transition-all hover:shadow-md sm:gap-4",
+        "group hover:border-foreground/20 dark:hover:border-foreground/30 flex min-h-15 w-full flex-row items-center gap-3 overflow-hidden rounded-lg border p-3 transition-all hover:shadow-md sm:gap-4",
         showFloorHighlight &&
           "border-success/40 bg-success/5 shadow-success/30 dark:border-success/50 dark:bg-success/10 dark:shadow-success/40 shadow-[0_0_14px_-2px] dark:shadow-[0_0_20px_-2px]",
       )}
     >
-      <div className="flex shrink-0 self-center">
-        <span className="flex h-[2.75rem] min-w-[4.5rem] items-center justify-center rounded-full border bg-white px-2 py-1.5 [--background:var(--color-white)] [--foreground:var(--base-800)]">
-          <SupermarketChainBadge
-            originId={product.origin_id}
-            variant="logo"
-            className="!h-5 w-auto !max-w-[84px] md:!h-6 md:!max-w-[92px]"
-          />
-        </span>
+      <div className="flex shrink-0 flex-col gap-2 self-start">
+        <SupermarketChainBadge
+          originId={product.origin_id}
+          variant="logo"
+          className="h-6! w-auto! max-w-[108px]! rounded-md bg-white px-1 py-0.5 md:h-6! md:max-w-[108px]!"
+        />
+
+        {isCurrent && (
+          <Badge size="xs" variant="blue" className="w-fit">
+            <MapPinIcon className="h-3 w-3" />
+            This page
+          </Badge>
+        )}
+        {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
+          <Badge size="xs" variant="success" className="w-fit">
+            <TrophyIcon className="h-3 w-3" />
+            Cheapest
+          </Badge>
+        )}
+        {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
+          <Badge size="xs" variant="success" className="w-fit">
+            <TrophyIcon className="h-3 w-3" />
+            Best price
+          </Badge>
+        )}
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {isCurrent && (
-            <Badge size="xs" variant="blue" className="shrink-0">
-              <MapPinIcon className="h-3 w-3" />
-              This page
-            </Badge>
-          )}
-          {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
-            <Badge size="xs" variant="success" className="shrink-0">
-              <TrophyIcon className="h-3 w-3" />
-              Cheapest
-            </Badge>
-          )}
-          {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
-            <Badge size="xs" variant="success" className="shrink-0">
-              <TrophyIcon className="h-3 w-3" />
-              Best price
-            </Badge>
-          )}
-        </div>
-        {duplicateChain && product.pack ? (
-          <p className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-snug">{product.pack}</p>
-        ) : null}
-      </div>
-
-      <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+      <div className="flex w-full flex-1 shrink-0 flex-col items-end justify-end gap-2 text-right">
         {product.price !== null && product.price !== undefined ? (
-          <div className="flex flex-wrap items-center justify-end gap-x-1.5 gap-y-0.5">
+          <div className="flex items-center justify-end gap-2">
+            {duplicateChain && product.pack ? (
+              <p className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-snug">{product.pack}</p>
+            ) : null}
+
             <span
               className={cn(
                 "text-base font-bold tabular-nums sm:text-lg",
@@ -109,30 +104,32 @@ function CompactStoreCard({
             >
               {product.price.toFixed(2)}€
             </span>
-            {hasDiscount && (
-              <>
-                <span className="text-muted-foreground text-sm tabular-nums line-through">
-                  {product.price_recommended?.toFixed(2)}€
-                </span>
-                <Badge variant="destructive" size="xs" className="shrink-0">
-                  -{discountValueToPercentage(product.discount!)}
-                </Badge>
-              </>
-            )}
           </div>
         ) : (
           <span className="text-muted-foreground text-base font-bold">--€</span>
         )}
 
         <div className="flex flex-wrap items-center justify-end gap-1.5">
-          {priceDiff !== null && priceDiff > 0 && (
-            <Badge variant="outline" size="xs" className="tabular-nums">
-              +{priceDiff.toFixed(2)}€
-            </Badge>
+          {hasDiscount && (
+            <>
+              <span className="text-muted-foreground text-sm tabular-nums line-through">
+                {product.price_recommended?.toFixed(2)}€
+              </span>
+              <Badge variant="destructive" size="xs" className="shrink-0">
+                -{discountValueToPercentage(product.discount!)}
+              </Badge>
+            </>
           )}
+
           {product.price_per_major_unit && product.major_unit && (
             <Badge variant="price-per-unit" size="xs" className="tabular-nums">
               {product.price_per_major_unit}€/{formatMajorUnitSuffix(product.major_unit)}
+            </Badge>
+          )}
+
+          {priceDiff !== null && priceDiff > 0 && (
+            <Badge variant="boring" size="xs" className="tabular-nums">
+              +{priceDiff.toFixed(2)}€
             </Badge>
           )}
         </div>
@@ -160,9 +157,9 @@ function LoadingSkeleton() {
       </div>
 
       <div className="flex flex-col gap-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex min-h-[3.75rem] flex-row items-center gap-3 rounded-lg border p-3">
-            <Skeleton className="h-[2.75rem] w-[4.5rem] shrink-0 rounded-full" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex min-h-15 flex-row items-center gap-3 rounded-lg border p-3">
+            <Skeleton className="h-11 w-18 shrink-0 rounded-full" />
             <Skeleton className="h-4 flex-1 rounded" />
             <div className="flex shrink-0 flex-col items-end gap-1">
               <Skeleton className="h-6 w-16 rounded" />
@@ -225,17 +222,25 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
   if (!identicalProducts || identicalProducts.length === 0) {
     return (
       <div className="animate-fade-in-fast min-h-[180px] space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="flex items-center gap-2 text-lg font-semibold">
-            <ScaleIcon className="h-5 w-5" />
-            Compare Prices
+            <ScaleIcon className="h-5 w-5 shrink-0" />
+            Compare prices
           </h3>
+          {compareHref ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={compareHref}>
+                Open comparison
+                <ArrowRightIcon className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : null}
         </div>
 
         <EmptyStateView
           icon={ScaleIcon}
-          title="No price comparisons available"
-          message="We couldn't find this product listed at other stores right now. Check back later as availability updates regularly."
+          title="No other stores for this product"
+          message="We only found this listing in the chains we track (or grouping is still incomplete). Check back later, or open the barcode compare page if available."
         />
       </div>
     )
@@ -251,7 +256,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         <h3 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-lg font-semibold">
           <span className="inline-flex items-center gap-2">
             <ScaleIcon className="h-5 w-5 shrink-0" />
-            Compare Prices
+            Compare prices
           </span>
           <span className="inline-flex flex-wrap items-center gap-1.5">
             {chainCount === listingCount ? (
@@ -274,7 +279,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         {compareHref && (
           <Button asChild variant="outline" size="sm">
             <Link href={compareHref}>
-              Compare in detail
+              See more
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </Button>
@@ -286,10 +291,10 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
       currentProduct.price !== null &&
       hasPriceSpread &&
       currentProduct.price > cheapestPrice ? (
-        <p className="text-muted-foreground mb-3">
-          <ZapIcon className="text-success mr-1 inline-flex h-4 w-4" />
+        <p className="text-muted-foreground mb-3 text-sm">
+          <ZapIcon className="text-success mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
           <span className="text-success font-medium">Save {(currentProduct.price - cheapestPrice).toFixed(2)}€</span> by
-          switching to the cheapest option.
+          switching to the cheapest store
         </p>
       ) : cheapestPrice !== null &&
         currentProduct.price !== null &&
@@ -298,7 +303,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         hasUniqueCheapest ? (
         <p className="text-muted-foreground mb-3">
           <SmilePlusIcon className="text-success mr-1 inline-flex h-4 w-4" />
-          <span className="text-success font-medium">You are already viewing</span> the cheapest option.
+          <span className="text-success font-medium">You&apos;re already on</span> the cheapest option.
         </p>
       ) : cheapestPrice !== null &&
         currentProduct.price !== null &&
@@ -312,11 +317,11 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         </p>
       ) : (
         <p className="text-muted-foreground mb-3">
-          All stores have the same price. You&apos;re not missing out on deals.
+          All tracked stores show the same price — you&apos;re not missing a better deal elsewhere.
         </p>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 md:flex-row md:gap-3">
         {sortedProducts.map((product) => {
           const atLowestPriceTier = cheapestPrice !== null && product.price === cheapestPrice
           const isCurrent = product.id === currentProduct.id

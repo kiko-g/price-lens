@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button"
 import { LoginPrompt } from "@/components/auth/LoginPrompt"
 import { HeartIcon } from "lucide-react"
 
-export function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct }) {
+export function FavoriteButton({
+  storeProduct,
+  compact = false,
+}: {
+  storeProduct: StoreProduct
+  compact?: boolean
+}) {
   const { user } = useUser()
   const { toggleFavorite, isLoading } = useFavoriteToggle()
   const [isFavorited, setIsFavorited] = useState(storeProduct.is_favorited ?? false)
@@ -31,9 +37,15 @@ export function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct })
   if (!user) {
     return (
       <>
-        <Button variant="outline" size="sm" onClick={() => setLoginPromptOpen(true)} title="Sign in to add favorites">
+        <Button
+          variant="outline"
+          size={compact ? "icon-lg" : "sm"}
+          onClick={() => setLoginPromptOpen(true)}
+          title="Sign in to save favorites"
+          aria-label="Sign in to add to favorites"
+        >
           <HeartIcon className="h-4 w-4" />
-          Add to favorites
+          {!compact ? "Add to favorites" : null}
         </Button>
         <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
       </>
@@ -43,10 +55,11 @@ export function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct })
   return (
     <Button
       variant="outline"
-      size="sm"
+      size={compact ? "icon-lg" : "sm"}
       onClick={handleToggleFavorite}
       disabled={favoriteLoading}
       title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+      aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
     >
       <HeartIcon
         className={cn(
@@ -55,7 +68,7 @@ export function FavoriteButton({ storeProduct }: { storeProduct: StoreProduct })
           favoriteLoading && "animate-pulse",
         )}
       />
-      {isFavorited ? "Remove from favorites" : "Add to favorites"}
+      {!compact ? (isFavorited ? "Remove from favorites" : "Add to favorites") : null}
     </Button>
   )
 }

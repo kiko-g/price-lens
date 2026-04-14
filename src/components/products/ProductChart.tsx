@@ -35,6 +35,7 @@ import { imagePlaceholder } from "@/lib/business/data"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
@@ -45,7 +46,15 @@ import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
 import { formatDistanceToNow } from "date-fns"
-import { ArrowDownIcon, BarChart2Icon, BinocularsIcon, ImageIcon, InfoIcon, WifiOffIcon } from "lucide-react"
+import {
+  ArrowDownIcon,
+  BarChart2Icon,
+  BinocularsIcon,
+  ChevronDownIcon,
+  ImageIcon,
+  InfoIcon,
+  WifiOffIcon,
+} from "lucide-react"
 
 const FALLBACK_ACTIVE_DOT_RADIUS = 5
 const CHART_TRANSITION_DURATION = 300
@@ -687,26 +696,28 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
     <div className={cn("animate-fade-in-fast flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
       <div
         className={cn(
-          "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm whitespace-nowrap",
+          "flex min-w-0 items-start gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm",
           sp.price === mostCommon?.price
             ? "bg-success/10 dark:bg-success/20 border-success/20 dark:border-success/40"
             : "bg-destructive/10 dark:bg-destructive/20 border-destructive/20 dark:border-destructive/40",
         )}
       >
-        <BinocularsIcon className="h-4 w-4" />
+        <BinocularsIcon className="mt-0.5 h-4 w-4 shrink-0" />
         {sp.price === mostCommon?.price ? (
-          <span>
-            Current price is <span className="text-success font-bold">the most common price</span>
+          <span className="min-w-0 wrap-break-word">
+            Current price is <span className="text-success font-bold">the most common price</span>.
           </span>
         ) : (
-          <span>
-            Current price is <span className="text-destructive font-bold">not</span> the most common price
+          <span className="min-w-0 wrap-break-word">
+            Current price is <span className="text-destructive font-bold">not</span> the most common price.
           </span>
         )}
       </div>
 
-      <ScrollArea className={cn("mt-1 rounded-lg border", scrollable && orderedPoints.length > 6 && "h-[250px]")}>
-        <Table>
+      <ScrollArea
+        className={cn("mt-1 max-w-full rounded-lg border", scrollable && orderedPoints.length > 6 && "h-[250px]")}
+      >
+        <Table className="w-full max-w-full min-w-0">
           <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
             <TableRow className="bg-accent hover:bg-accent">
               <TableHead className="h-7 text-xs">
@@ -719,7 +730,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
               </TableHead>
               <TableHead className="h-7 text-center text-xs">
                 <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
-                Per Unit
+                Per unit
               </TableHead>
               <TableHead className="h-7 text-center text-xs">
                 <span className="bg-chart-4 mr-1 inline-block size-2 rounded-full"></span>
@@ -784,7 +795,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       </ScrollArea>
 
       {trackingSince && (
-        <blockquote className="text-muted-foreground text-2xs text-right">
+        <blockquote className="text-muted-foreground text-2xs text-left wrap-break-word md:text-right">
           Showing data for up to {formatRelativeTime(new Date(trackingSince), "long")}
         </blockquote>
       )}
@@ -864,6 +875,38 @@ function ErrorDisplay({ className }: ErrorDisplayProps) {
       <p className="text-destructive">Failed to load price data</p>
       <p className="text-muted-foreground mt-1 text-sm">Please try refreshing the page</p>
     </div>
+  )
+}
+
+// ============================================================================
+// Mobile analytics disclosure (expandable chart/table — summary lives above compare on mobile)
+// ============================================================================
+
+type AnalyticsDisclosureProps = {
+  children: ReactNode
+}
+
+function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
+  const isDesktop = useMediaQuery("(min-width: 768px)")
+  const [open, setOpen] = useState(false)
+
+  if (isDesktop) {
+    return <div className="w-full min-w-0">{children}</div>
+  }
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="group/collapsible w-full min-w-0 space-y-3">
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className="text-foreground border-border bg-muted/25 hover:bg-muted/40 flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
+        >
+          <span className="min-w-0 break-words">Price history and analysis</span>
+          <ChevronDownIcon className="size-5 shrink-0 opacity-70 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="min-w-0 overflow-hidden">{children}</CollapsibleContent>
+    </Collapsible>
   )
 }
 
@@ -1006,6 +1049,7 @@ export const ProductChart = Object.assign(ProductChartLegacy, {
   Graph,
   PriceTable,
   ChartContent,
+  AnalyticsDisclosure,
   FallbackDetails,
   NotTracked: NotTrackedDisplay,
   NoData: NoDataDisplay,

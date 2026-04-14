@@ -16,6 +16,7 @@ import { IdenticalProductsCompare } from "@/components/products/IdenticalProduct
 import { CategoryBreadcrumb } from "@/components/products/product-page/CategoryBreadcrumb"
 import { ProductHeroDesktop } from "@/components/products/product-page/ProductHeroDesktop"
 import { ProductHeroMobile } from "@/components/products/product-page/ProductHeroMobile"
+import { ProductPageDealSummary } from "@/components/products/product-page/ProductPageDealSummary"
 
 const DEFAULT_RANGE = "1M" as const
 
@@ -48,20 +49,25 @@ function ChartSection({
           <ProductChart.Error />
 
           <ProductChart.ChartContent>
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-x-6 xl:gap-y-3">
-              <div className="order-2 flex max-w-2xl flex-col xl:col-start-1 xl:row-start-1">
-                <ProductChart.PricesVariation showFreshnessInfo={false} />
-              </div>
+            <ProductChart.AnalyticsDisclosure>
+              <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-x-6 xl:gap-y-3">
+                <div className="order-2 flex min-w-0 max-w-2xl flex-col xl:col-start-1 xl:row-start-1">
+                  <ProductChart.PricesVariation showFreshnessInfo={false} />
+                </div>
 
-              <div className="order-1 max-w-2xl xl:col-start-1 xl:row-start-2">
-                <ProductChart.PriceTable className="max-h-[280px] min-w-100 xl:max-h-80 xl:max-w-full" scrollable />
-              </div>
+                <div className="order-1 min-w-0 max-w-2xl xl:col-start-1 xl:row-start-2">
+                  <ProductChart.PriceTable
+                    className="max-h-[280px] min-w-0 w-full max-w-full xl:max-h-80"
+                    scrollable
+                  />
+                </div>
 
-              <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-3 flex h-fit max-w-xl flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
-                <ProductChart.RangeSelector className="xl:justify-start" />
-                <ProductChart.Graph />
+                <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-3 flex h-fit min-w-0 max-w-xl flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
+                  <ProductChart.RangeSelector className="xl:justify-start" />
+                  <ProductChart.Graph />
+                </div>
               </div>
-            </div>
+            </ProductChart.AnalyticsDisclosure>
           </ProductChart.ChartContent>
         </>
       )}
@@ -111,14 +117,24 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       {/* Mobile hero (hidden at md+) */}
       <ProductHeroMobile sp={sp} />
 
-      {/* Mobile chart full width, hidden on desktop (already rendered inside hero) */}
-      <div className="mt-4 md:hidden">
+      <div className="mt-5 md:hidden">
+        <ProductPageDealSummary sp={sp} />
+      </div>
+
+      {/* Mobile: price history accordion (compact when collapsed) before the full compare list */}
+      <div className="mt-5 md:hidden">
         <ChartSection sp={sp} rangeFromUrl={rangeFromUrl} onRangeChange={handleRangeChange} />
       </div>
 
+      <div className="mt-6 md:hidden">
+        <IdenticalProductsCompare currentProduct={sp} />
+      </div>
+
       <Separator className="mt-8 mb-4" />
-      <IdenticalProductsCompare currentProduct={sp} />
-      <Separator className="mt-8 mb-4" />
+      <div className="hidden md:block">
+        <IdenticalProductsCompare currentProduct={sp} />
+      </div>
+      <Separator className="mt-8 mb-4 hidden md:block" />
       <RelatedStoreProducts id={storeProductId} limit={20} />
     </div>
   )

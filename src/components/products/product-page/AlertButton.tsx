@@ -38,7 +38,7 @@ export function AlertButton({ storeProductId, productName, className, variant = 
 
   if (isLoading) {
     return (
-      <Button variant="outline" size={variant === "icon" ? "icon" : "sm"} disabled className={className}>
+      <Button variant="outline" size={variant === "icon" ? "icon-lg" : "sm"} disabled className={className}>
         <LoaderIcon className="size-4 animate-spin" />
       </Button>
     )
@@ -51,7 +51,7 @@ export function AlertButton({ storeProductId, productName, className, variant = 
           <TooltipTrigger asChild>
             <Button
               variant={hasAlert ? "default" : "outline"}
-              size={variant === "icon" ? "icon" : "sm"}
+              size={variant === "icon" ? "icon-lg" : "sm"}
               onClick={handleClick}
               disabled={isToggling}
               className={cn(hasAlert && "border-amber-500 bg-amber-500 text-white hover:bg-amber-600", className)}
@@ -67,7 +67,7 @@ export function AlertButton({ storeProductId, productName, className, variant = 
               {variant !== "icon" && <span>{hasAlert ? "Alert on" : "Alert me"}</span>}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{hasAlert ? "Remove price alert" : "Get notified when price drops"}</TooltipContent>
+          <TooltipContent>{hasAlert ? "Remove price alert" : "Get notified when the price drops"}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
