@@ -36,5 +36,6 @@ FROM list_canonical_pvr_split_suspect_groups(
   p_min_size := 2,
   p_max_exclusive := 3,
   p_source := 'auto',
-  p_limit := 200
+  p_limit := 200,
+  p_min_name_similarity := 0.45
 );

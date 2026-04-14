@@ -835,6 +835,7 @@ export type Database = {
         Args: {
           p_limit?: number
           p_max_exclusive?: number
+          p_min_name_similarity?: number
           p_min_size?: number
           p_source?: string
         }
@@ -843,6 +844,7 @@ export type Database = {
           canonical_ids: number[]
           canonical_names: string[]
           group_size: number
+          name_similarity: number | null
           pvr_value: number
         }[]
       }

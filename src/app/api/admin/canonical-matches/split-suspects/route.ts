@@ -14,6 +14,7 @@ export const maxDuration = 60
  * Query:
  * - minSize (default 2) — minimum number of canonicals in a group
  * - maxExclusive (default 3) — group size must be strictly less than this (so default → only pairs)
+ * - minNameSimilarity (default 0.45) — for pairs only, pg_trgm similarity between the two names; use 0 to disable
  * - source=auto (default) | all
  * - limit (default 100, max 500)
  */
@@ -23,6 +24,12 @@ export async function GET(req: NextRequest) {
   const minSize = Math.min(50, Math.max(2, parseInt(searchParams.get("minSize") ?? "2", 10)))
   const maxExclusive = Math.min(100, Math.max(minSize + 1, parseInt(searchParams.get("maxExclusive") ?? "3", 10)))
   const limit = Math.min(500, Math.max(1, parseInt(searchParams.get("limit") ?? "100", 10)))
+  const minNameSimRaw = searchParams.get("minNameSimilarity")
+  let minNameSimilarity = 0.45
+  if (minNameSimRaw !== null && minNameSimRaw !== "") {
+    const x = parseFloat(minNameSimRaw)
+    minNameSimilarity = Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0.45
+  }
 
   if (sourceMode !== "auto" && sourceMode !== "all") {
     return NextResponse.json(
@@ -38,6 +45,7 @@ export async function GET(req: NextRequest) {
     p_max_exclusive: maxExclusive,
     p_source: sourceMode,
     p_limit: limit,
+    p_min_name_similarity: minNameSimilarity,
   })
 
   if (error) {
@@ -58,9 +66,10 @@ export async function GET(req: NextRequest) {
     filters: {
       minSize,
       maxExclusive,
+      minNameSimilarity,
       source: sourceMode,
       limit,
-      interpretation: `Groups with ${minSize} <= size < ${maxExclusive} (integer sizes). Default maxExclusive=3 → only pairs.`,
+      interpretation: `Same brand (≥3 chars, must contain a letter), same pack volume fields, same PVPR; group size in [${minSize}, ${maxExclusive}). Pairs need name similarity ≥ ${minNameSimilarity} unless minNameSimilarity=0.`,
     },
     groupCount: groups.length,
     groups,
