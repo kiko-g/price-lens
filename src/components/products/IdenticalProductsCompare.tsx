@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
+import { DealSummaryLightRays } from "@/components/products/product-page/DealSummaryLightRays"
 
 import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon } from "lucide-react"
 
@@ -56,82 +57,87 @@ function CompactStoreCard({
       href={generateProductPath(product)}
       aria-label={`${chainLabel}, ${priceLabel}. Open product page.`}
       className={cn(
-        "group hover:border-foreground/20 dark:hover:border-foreground/30 flex min-h-15 w-full flex-row items-center gap-3 overflow-hidden rounded-lg border p-3 transition-all hover:shadow-md sm:gap-4",
+        "group hover:border-foreground/20 dark:hover:border-foreground/30 relative min-h-15 w-full overflow-hidden rounded-lg border p-3 transition-all",
+        showFloorHighlight && "isolate",
         showFloorHighlight &&
-          "border-success/40 bg-success/5 shadow-success/30 dark:border-success/50 dark:bg-success/10 dark:shadow-success/40 shadow-[0_0_14px_-2px] dark:shadow-[0_0_20px_-2px]",
+          "border-secondary/40 bg-secondary/5 shadow-secondary/30 dark:border-secondary/40 dark:bg-secondary/10 dark:shadow-secondary/40",
       )}
     >
-      <div className="flex shrink-0 flex-col gap-2 self-start">
-        <SupermarketChainBadge
-          originId={product.origin_id}
-          variant="logo"
-          className="h-6! w-auto! max-w-[108px]! rounded-md bg-white px-1 py-0.5 md:h-6! md:max-w-[108px]!"
-        />
+      {showFloorHighlight ? <DealSummaryLightRays tier="habitual" /> : null}
 
-        {isCurrent && (
-          <Badge size="xs" variant="blue" className="w-fit">
-            <MapPinIcon className="h-3 w-3" />
-            This page
-          </Badge>
-        )}
-        {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
-          <Badge size="xs" variant="success" className="w-fit">
-            <TrophyIcon className="h-3 w-3" />
-            Cheapest
-          </Badge>
-        )}
-        {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
-          <Badge size="xs" variant="success" className="w-fit">
-            <TrophyIcon className="h-3 w-3" />
-            Best price
-          </Badge>
-        )}
-      </div>
+      <div className="relative z-1 flex w-full flex-row items-center gap-3 sm:gap-4">
+        <div className="flex shrink-0 flex-col gap-2 self-start">
+          <SupermarketChainBadge
+            originId={product.origin_id}
+            variant="logo"
+            className="h-6! w-auto! max-w-[108px]! rounded-md bg-white px-1 py-0.5 md:h-6! md:max-w-[108px]!"
+          />
 
-      <div className="flex w-full flex-1 shrink-0 flex-col items-end justify-end gap-2 text-right">
-        {product.price !== null && product.price !== undefined ? (
-          <div className="flex items-center justify-end gap-2">
-            {duplicateChain && product.pack ? (
-              <p className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-snug">{product.pack}</p>
-            ) : null}
+          {isCurrent && (
+            <Badge size="xs" variant="glass-primary" className="w-fit">
+              <MapPinIcon className="h-3 w-3" />
+              This page
+            </Badge>
+          )}
+          {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
+            <Badge size="xs" variant="retail" className="w-fit">
+              <TrophyIcon className="h-3 w-3" />
+              Cheapest
+            </Badge>
+          )}
+          {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
+            <Badge size="xs" variant="retail" className="w-fit">
+              <TrophyIcon className="h-3 w-3" />
+              Best price
+            </Badge>
+          )}
+        </div>
 
-            <span
-              className={cn(
-                "text-base font-bold tabular-nums sm:text-lg",
-                showFloorHighlight && "text-success",
-                !showFloorHighlight && "text-foreground",
-              )}
-            >
-              {product.price.toFixed(2)}€
-            </span>
-          </div>
-        ) : (
-          <span className="text-muted-foreground text-base font-bold">--€</span>
-        )}
+        <div className="flex w-full flex-1 shrink-0 flex-col items-end justify-end gap-2 text-right">
+          {product.price !== null && product.price !== undefined ? (
+            <div className="flex items-center justify-end gap-2">
+              {duplicateChain && product.pack ? (
+                <p className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-snug">{product.pack}</p>
+              ) : null}
 
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          {hasDiscount && (
-            <>
-              <span className="text-muted-foreground text-sm tabular-nums line-through">
-                {product.price_recommended?.toFixed(2)}€
+              <span
+                className={cn(
+                  "text-base font-bold tabular-nums sm:text-lg",
+                  showFloorHighlight && "text-success",
+                  !showFloorHighlight && "text-foreground",
+                )}
+              >
+                {product.price.toFixed(2)}€
               </span>
-              <Badge variant="destructive" size="xs" className="shrink-0">
-                -{discountValueToPercentage(product.discount!)}
+            </div>
+          ) : (
+            <span className="text-muted-foreground text-base font-bold">--€</span>
+          )}
+
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
+            {hasDiscount && (
+              <>
+                <span className="text-muted-foreground text-sm tabular-nums line-through">
+                  {product.price_recommended?.toFixed(2)}€
+                </span>
+                <Badge variant="destructive" size="xs" className="shrink-0">
+                  -{discountValueToPercentage(product.discount!)}
+                </Badge>
+              </>
+            )}
+
+            {product.price_per_major_unit && product.major_unit && (
+              <Badge variant="price-per-unit" size="xs" className="tabular-nums">
+                {product.price_per_major_unit}€/{formatMajorUnitSuffix(product.major_unit)}
               </Badge>
-            </>
-          )}
+            )}
 
-          {product.price_per_major_unit && product.major_unit && (
-            <Badge variant="price-per-unit" size="xs" className="tabular-nums">
-              {product.price_per_major_unit}€/{formatMajorUnitSuffix(product.major_unit)}
-            </Badge>
-          )}
-
-          {priceDiff !== null && priceDiff > 0 && (
-            <Badge variant="boring" size="xs" className="tabular-nums">
-              +{priceDiff.toFixed(2)}€
-            </Badge>
-          )}
+            {priceDiff !== null && priceDiff > 0 && (
+              <Badge variant="boring" size="xs" className="tabular-nums">
+                +{priceDiff.toFixed(2)}€
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
     </Link>

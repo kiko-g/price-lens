@@ -103,7 +103,7 @@ export function DealSummaryCard({
               : BarChart2Icon
 
   const iconRing = cn(
-    "flex size-9 items-center justify-center rounded-full shadow-sm ring-1 ring-black/5 dark:ring-white/10",
+    "flex size-9 items-center justify-center rounded-full shadow-sm ring-0",
     tier === "habitual" && "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",
     tier === "infrequent" && "bg-amber-500/20 text-amber-600 dark:text-amber-400",
     tier === "middle" && "bg-primary/15 text-primary",
