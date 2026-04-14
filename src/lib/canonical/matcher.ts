@@ -98,6 +98,9 @@ const CONFIDENCE_ASSIGN = 88
 const CONFIDENCE_LOG = 70
 const PAGE_SIZE = 1000
 
+/** Pass 1: slice `store_products` by `id` ranges so each query hits the PK index (PostgREST offset scans time out on prod). */
+const PASS1_ID_WINDOW = 20_000
+
 /** When both sides have PVR data, require tight agreement (recommended retail). */
 const PVR_RATIO_MIN = 0.96
 const PVR_MAX_ABS_DIFF = 0.15
@@ -195,6 +198,59 @@ async function fetchAllPaginated<T>(
     if (data.length < PAGE_SIZE) break
     offset += PAGE_SIZE
   }
+  return all
+}
+
+async function fetchPass1UnlinkedStoreProducts(supabase: SupabaseClient): Promise<StoreProductRow[]> {
+  const { data: minRow, error: minErr } = await supabase
+    .from("store_products")
+    .select("id")
+    .order("id", { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  const { data: maxRow, error: maxErr } = await supabase
+    .from("store_products")
+    .select("id")
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (minErr) throw new Error(`Pass 1 min id: ${formatSupabaseError(minErr)}`)
+  if (maxErr) throw new Error(`Pass 1 max id: ${formatSupabaseError(maxErr)}`)
+  if (!minRow?.id || !maxRow?.id) return []
+
+  const minId = minRow.id
+  const maxId = maxRow.id
+  const all: StoreProductRow[] = []
+
+  for (let winStart = minId; winStart <= maxId; winStart += PASS1_ID_WINDOW) {
+    const winEnd = Math.min(winStart + PASS1_ID_WINDOW - 1, maxId)
+    let cursor = winStart - 1
+    for (;;) {
+      const { data, error } = await supabase
+        .from("store_products")
+        .select("id, barcode, name, brand, pack, major_unit")
+        .gte("id", winStart)
+        .lte("id", winEnd)
+        .not("barcode", "is", null)
+        .is("trade_item_id", null)
+        .gt("id", cursor)
+        .order("id", { ascending: true })
+        .limit(PAGE_SIZE)
+
+      if (error) {
+        throw new Error(
+          `Pass 1 fetch (ids ${winStart}-${winEnd}, after ${cursor}): ${formatSupabaseError(error)}`,
+        )
+      }
+      if (!data?.length) break
+      all.push(...data)
+      cursor = data[data.length - 1].id
+      if (data.length < PAGE_SIZE) break
+    }
+  }
+
   return all
 }
 
@@ -313,17 +369,9 @@ export async function runPass1(
 ): Promise<{ created: number; existing: number; linked: number; unlinked: number }> {
   const dryRun = options.dryRun ?? false
 
-  log("[Pass 1] Fetching unlinked store_products with barcodes...")
+  log("[Pass 1] Fetching unlinked store_products with barcodes (by id windows)...")
 
-  const products = await fetchAllPaginated<StoreProductRow>((from, to) =>
-    supabase
-      .from("store_products")
-      .select("id, barcode, name, brand, pack, major_unit")
-      .not("barcode", "is", null)
-      .is("trade_item_id", null)
-      .order("id")
-      .range(from, to),
-  )
+  const products = await fetchPass1UnlinkedStoreProducts(supabase)
 
   const byBarcode = new Map<string, StoreProductRow[]>()
   for (const p of products) {

@@ -26,3 +26,15 @@ INNER JOIN canonical_products c ON c.id = p.canonical_id
 WHERE p.distinct_gtins > 1
 ORDER BY p.distinct_gtins DESC, c.id
 LIMIT 200;
+
+-- 3) Split suspects: same normalized brand + identical PVPR (one rounded PVR per canonical),
+--    group size in [min, max) — default min=2 max_exclusive=3 → pairs only.
+--    Migration: scripts/migrations/038_canonical_pvr_split_suspects.sql
+--    HTTP: GET /api/admin/canonical-matches/split-suspects
+SELECT *
+FROM list_canonical_pvr_split_suspect_groups(
+  p_min_size := 2,
+  p_max_exclusive := 3,
+  p_source := 'auto',
+  p_limit := 200
+);

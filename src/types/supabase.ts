@@ -831,6 +831,21 @@ export type Database = {
         }
       }
       immutable_unaccent: { Args: { "": string }; Returns: string }
+      list_canonical_pvr_split_suspect_groups: {
+        Args: {
+          p_limit?: number
+          p_max_exclusive?: number
+          p_min_size?: number
+          p_source?: string
+        }
+        Returns: {
+          brand_key: string
+          canonical_ids: number[]
+          canonical_names: string[]
+          group_size: number
+          pvr_value: number
+        }[]
+      }
       list_canonical_products: {
         Args: {
           min_barcodes?: number
