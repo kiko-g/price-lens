@@ -57,7 +57,7 @@ function ChartSection({
                 </div>
 
                 <div className="order-1 max-w-2xl min-w-0 xl:col-start-1 xl:row-start-2">
-                  <ProductChart.PriceTable className="max-h-[280px] w-full max-w-full min-w-0 xl:max-h-80" scrollable />
+                  <ProductChart.PriceTable className="w-full max-w-full min-w-0" scrollable={false} />
                 </div>
 
                 <div className="xl:dark:bg-foreground/2 xl:bg-foreground/2 order-3 flex h-fit max-w-xl min-w-0 flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:rounded-lg xl:px-2 xl:pt-3 xl:pb-0">
@@ -109,7 +109,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       {/* Desktop hero (hidden below md) - chart lives inside the right column */}
       <ProductHeroDesktop sp={sp}>
-        <ProductPriceStatsCallout sp={sp} className="mt-1 max-w-2xl" />
+        <ProductPriceStatsCallout sp={sp} className="mt-1 max-w-2xl" placement="desktop" />
         <ChartSection sp={sp} rangeFromUrl={rangeFromUrl} onRangeChange={handleRangeChange} />
       </ProductHeroDesktop>
 
@@ -120,9 +120,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         <ProductPageDealSummary sp={sp} />
       </div>
 
-      <div className="mt-4 px-0 md:hidden">
-        <ProductPriceStatsCallout sp={sp} />
-      </div>
+      <ProductPriceStatsCallout sp={sp} placement="mobile" className="mt-4 px-0 md:hidden" />
 
       {/* Mobile: price history accordion (compact when collapsed) before the full compare list */}
       <div className="mt-5 md:hidden">
@@ -133,7 +131,8 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
         <IdenticalProductsCompare currentProduct={sp} />
       </div>
 
-      <Separator className="mt-8 mb-4" />
+      <Separator className="mt-3 mb-3 h-0 md:mt-8 md:mb-4 md:h-px" />
+
       <div className="hidden md:block">
         <IdenticalProductsCompare currentProduct={sp} />
       </div>

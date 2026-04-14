@@ -699,6 +699,82 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   const restPoints = sorted.filter((p) => !(p.price === sp.price && p.price_recommended === sp.price_recommended))
   const orderedPoints = currentPricePoint ? [currentPricePoint, ...restPoints] : sorted
 
+  const pricePointsTable = (
+    <Table className="w-full max-w-full min-w-0">
+      <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
+        <TableRow className="bg-accent hover:bg-accent">
+          <TableHead className="h-7 text-xs">
+            <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
+            Price
+          </TableHead>
+          <TableHead className="h-7 text-center text-xs">
+            <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
+            Original
+          </TableHead>
+          <TableHead className="h-7 text-center text-xs">
+            <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
+            Per unit
+          </TableHead>
+          <TableHead className="h-7 text-center text-xs">
+            <span className="bg-chart-4 mr-1 inline-block size-2 rounded-full"></span>
+            Freq (%)
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        {orderedPoints.map((point: PricePoint, index) => {
+          const isMostCommon = point.price === mostCommon?.price
+          const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
+          const hasDiscount = point.discount !== null && point.discount > 0.0
+
+          return (
+            <TableRow
+              key={index}
+              className={cn(
+                "hover:bg-transparent",
+                isCurrentPrice && hasMultiplePrices && "border-l-primary border-l-2",
+                isCurrentPrice && index === 0 && hasMultiplePrices && "border-b-border border-b",
+              )}
+            >
+              <TableCell>
+                <div className="flex items-center gap-1.5">
+                  {isCurrentPrice && hasMultiplePrices && <span className="text-primary text-xs leading-none">▸</span>}
+
+                  <span className="text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
+
+                  {hasDiscount && (
+                    <span className="text-2xs text-success flex items-center gap-0.5">
+                      <ArrowDownIcon className="size-2.5" />
+                      {discountValueToPercentage(point.discount, 0)}
+                    </span>
+                  )}
+                </div>
+              </TableCell>
+
+              <TableCell className="text-center text-xs font-medium tracking-tighter">
+                {point.price_recommended?.toFixed(2)}€
+              </TableCell>
+
+              <TableCell className="text-center text-xs font-medium tracking-tighter">
+                {point.price_per_major_unit?.toFixed(2)}€
+              </TableCell>
+
+              <TableCell
+                className={cn(
+                  "text-center text-xs font-medium tracking-tighter",
+                  isMostCommon ? "text-success font-semibold" : "",
+                )}
+              >
+                {(point.frequencyRatio * 100).toFixed(0)}%
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
+
   return (
     <div className={cn("animate-fade-in-fast flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
       <div
@@ -721,85 +797,13 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         )}
       </div>
 
-      <ScrollArea
-        className={cn("mt-1 max-w-full rounded-lg border", scrollable && orderedPoints.length > 6 && "h-[250px]")}
-      >
-        <Table className="w-full max-w-full min-w-0">
-          <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
-            <TableRow className="bg-accent hover:bg-accent">
-              <TableHead className="h-7 text-xs">
-                <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
-                Price
-              </TableHead>
-              <TableHead className="h-7 text-center text-xs">
-                <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
-                Original
-              </TableHead>
-              <TableHead className="h-7 text-center text-xs">
-                <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
-                Per unit
-              </TableHead>
-              <TableHead className="h-7 text-center text-xs">
-                <span className="bg-chart-4 mr-1 inline-block size-2 rounded-full"></span>
-                Freq (%)
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {orderedPoints.map((point: PricePoint, index) => {
-              const isMostCommon = point.price === mostCommon?.price
-              const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
-              const hasDiscount = point.discount !== null && point.discount > 0.0
-
-              return (
-                <TableRow
-                  key={index}
-                  className={cn(
-                    "hover:bg-transparent",
-                    isCurrentPrice && hasMultiplePrices && "border-l-primary border-l-2",
-                    isCurrentPrice && index === 0 && hasMultiplePrices && "border-b-border border-b",
-                  )}
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-1.5">
-                      {isCurrentPrice && hasMultiplePrices && (
-                        <span className="text-primary text-xs leading-none">▸</span>
-                      )}
-
-                      <span className="text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
-
-                      {hasDiscount && (
-                        <span className="text-2xs text-success flex items-center gap-0.5">
-                          <ArrowDownIcon className="size-2.5" />
-                          {discountValueToPercentage(point.discount, 0)}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="text-center text-xs font-medium tracking-tighter">
-                    {point.price_recommended?.toFixed(2)}€
-                  </TableCell>
-
-                  <TableCell className="text-center text-xs font-medium tracking-tighter">
-                    {point.price_per_major_unit?.toFixed(2)}€
-                  </TableCell>
-
-                  <TableCell
-                    className={cn(
-                      "text-center text-xs font-medium tracking-tighter",
-                      isMostCommon ? "text-success font-semibold" : "",
-                    )}
-                  >
-                    {(point.frequencyRatio * 100).toFixed(0)}%
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+      {scrollable ? (
+        <ScrollArea className={cn("mt-1 max-w-full rounded-lg border", orderedPoints.length > 6 && "h-[250px]")}>
+          {pricePointsTable}
+        </ScrollArea>
+      ) : (
+        <div className="mt-1 max-w-full rounded-lg border">{pricePointsTable}</div>
+      )}
 
       {trackingSince && (
         <blockquote className="text-muted-foreground text-2xs text-left wrap-break-word md:text-right">
@@ -908,7 +912,7 @@ function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
           type="button"
           className="text-foreground border-border bg-muted/25 hover:bg-muted/40 flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
         >
-          <span className="min-w-0 wrap-break-word">Price history and analysis</span>
+          <span className="min-w-0 wrap-break-word">Price history & breakdown</span>
           <ChevronDownIcon className="size-5 shrink-0 opacity-70 transition-transform group-data-[state=open]/collapsible:rotate-180" />
         </button>
       </CollapsibleTrigger>

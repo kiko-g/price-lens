@@ -84,7 +84,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
       </div>
 
       {/* Price row + freshness share one line: tight price cluster left, “Verified …” uses remaining width on the right */}
-      <div className="flex w-full flex-wrap items-center gap-y-1">
+      <div className="flex w-full flex-wrap items-center gap-x-2 gap-y-0">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
           {hasDiscount ? (
             <>
@@ -113,7 +113,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
         </div>
 
         {sp.updated_at ? (
-          <div className="ml-auto w-fit max-w-[min(100%,11.5rem)] shrink-0 self-center pt-0.5">
+          <div className="w-fit shrink-0 self-center">
             <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
           </div>
         ) : null}

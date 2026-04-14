@@ -37,6 +37,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import {
+  BarChart3Icon,
   BriefcaseIcon,
   CalendarClockIcon,
   ChevronDown,
@@ -94,6 +95,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { title: "Discovery", href: "/admin/discovery", icon: MapIcon },
       { title: "Bulk Scrape", href: "/admin/bulk-scrape", icon: PickaxeIcon },
       { title: "Test Scrapers", href: "/admin/test", icon: FlaskConicalIcon },
+      { title: "Product stats UI", href: "/admin/product-stats-preview", icon: BarChart3Icon },
     ],
   },
   {

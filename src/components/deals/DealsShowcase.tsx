@@ -139,8 +139,8 @@ function DealTabCount({ n }: { n: number }) {
 function EmptyDeals({ variant }: { variant: "drops" | "discounts" }) {
   const message =
     variant === "drops"
-      ? "Não há quedas recentes que cumpram estes critérios (preço válido, alteração nas últimas 2 semanas, magnitude plausível). Tente outra loja ou volte mais tarde — a lista pode encher quando os dados forem atualizados."
-      : "Não há descontos destacados para este filtro. Tente outra loja."
+      ? "No recent price drops match these rules (valid price, change within the last two weeks, plausible size). Try another store or check back later — the list fills as data updates."
+      : "No standout discounts for this filter. Try another store."
   const Icon: LucideIcon = variant === "drops" ? TrendingDownIcon : TicketPercentIcon
 
   return (

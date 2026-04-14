@@ -10,15 +10,23 @@ export const HERO_PRODUCT_IDS = [
   5913, // Starbucks Latte (Continente)
   4455, // Chocapic cereal (Continente)
   20406, // Yopro Danone (Continente)
+  18583, // Buondi caps decaf (Continente)
+  279091, // Milka 90g plain (Continente)
+  3329, // Oakberry Açaí 473ml (Continente)
   // AUCHAN
+  87415, // Manteiga Mimosa Sal (Auchan)
   97842, // Coca Cola Zero 1L (Auchan)
   95119, // Ice Tea Lipton Pessego Zero 2L (Auchan)
   95008, // Nectar Compal Classico Tutti Frutti 1L (Auchan)
   79981, // Prozis Peanut Butter (Auchan)
+  95042, // Compal pera 1l (Auchan)
   // PINGO DOCE
   2266777, // OIKOS Grego Pessego (Pingo Doce)
   2267052, // Haagen dazs chocolate belga (Pingo Doce)
   165722, // Ruffles Presunto (Pingo Doce)
+  166493, // Powerade Blue 500ml (Pingo Doce)
+  165297, // Queijo Limiano Flamengo low fat (Pingo Doce)
+  168315, // Cheerios Aveia Integral 300g (Pingo Doce)
 ]
 
 export type HeroProduct = {

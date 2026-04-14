@@ -1,6 +1,6 @@
 import { DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS, PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE } from "./price-change"
 
-/** CV of log prices (90d); heuristic bands — tune against production distributions. */
+/** CV of log prices (90d); heuristic bands (tune against production distributions). */
 const CV_LOW_MAX = 0.04
 const CV_MEDIUM_MAX = 0.12
 
@@ -13,14 +13,24 @@ export function volatilityBandFromCv(cv: number | null | undefined): VolatilityB
   return "high"
 }
 
-export function volatilityLabelPt(band: VolatilityBand): string {
+/** Short plain-English lead for shoppers (not “volatility” jargon). */
+export function volatilityCasualLead(band: VolatilityBand | null, sufficient: boolean): string {
+  if (!sufficient) return "We're still collecting prices here"
+  if (band === "low") return "Mostly steady lately"
+  if (band === "medium") return "Moves up and down a bit"
+  if (band === "high") return "Often jumps between levels"
+  return "Pattern still unclear"
+}
+
+/** User-facing band label (English); prefer `volatilityCasualLead` on consumer UI. */
+export function volatilityBandLabel(band: VolatilityBand): string {
   switch (band) {
     case "low":
-      return "Baixa volatilidade"
+      return "Low volatility"
     case "medium":
-      return "Volatilidade moderada"
+      return "Moderate volatility"
     case "high":
-      return "Alta volatilidade"
+      return "High volatility"
   }
 }
 
@@ -39,15 +49,22 @@ export interface PriceGuidance {
   tone: PriceGuidanceTone
 }
 
+type GuidanceOpts = { compact?: boolean }
+
 /**
- * Short heuristic copy (not predictive). Call only when `hasSufficientPriceStats` is true.
+ * Heuristic copy (not predictive). Call only when `hasSufficientPriceStats` is true.
+ * Use `compact` on small screens: one short sentence, casual tone.
  */
-export function getPriceMovementGuidance(input: {
-  priceChangePct: number | null | undefined
-  lastPriceChangeAt: string | null | undefined
-  obs90d: number | null | undefined
-  band: VolatilityBand | null
-}): PriceGuidance {
+export function getPriceMovementGuidance(
+  input: {
+    priceChangePct: number | null | undefined
+    lastPriceChangeAt: string | null | undefined
+    obs90d: number | null | undefined
+    band: VolatilityBand | null
+  },
+  opts?: GuidanceOpts,
+): PriceGuidance {
+  const compact = opts?.compact ?? false
   const { priceChangePct, lastPriceChangeAt, obs90d, band } = input
   const obs = obs90d ?? 0
   const pct = priceChangePct ?? 0
@@ -56,48 +73,62 @@ export function getPriceMovementGuidance(input: {
   if (obs >= 2 && obs <= 5 && absPct >= 0.12) {
     return {
       tone: "warning",
-      body: "A variação recente é forte, mas o histórico nesta janela ainda é limitado. Vale a pena cruzar com o gráfico e com outros produtos antes de decidir.",
+      body: compact
+        ? "Big move, few price points. Compare shops."
+        : "Recent change is large and we still have few price points in this window. Check the chart and other stores before you decide.",
     }
   }
 
   if (absPct >= PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE * 0.85 && obs < 6) {
     return {
       tone: "info",
-      body: "A alteração indicada é grande face ao histórico disponível; trate como indicador aproximado e confira o gráfico.",
+      body: compact
+        ? "Huge swing. Verify on the chart."
+        : "This change looks big compared to what we've seen. Treat it as rough and confirm on the chart.",
     }
   }
 
   if (band == null) {
     return {
       tone: "info",
-      body: "Use o histórico ao lado para ver se o preço atual é habitual ou excecional.",
+      body: compact
+        ? "Typical price? See the chart."
+        : "Use the chart to see if today's price is normal for this product.",
     }
   }
 
   if (isRecentPriceDrop(lastPriceChangeAt, priceChangePct ?? null) && band === "high") {
     return {
       tone: "warning",
-      body: "Há uma queda recente num preço que costuma variar bastante — pode ser promoção. Compare com o histórico antes de comprar.",
+      body: compact
+        ? "Bumpy history. Chart shows if it's a deal."
+        : "This price often moves. A drop can still be a deal. Glance at the chart before you buy.",
     }
   }
 
   if (band === "low" && !isRecentPriceDrop(lastPriceChangeAt, priceChangePct ?? null)) {
     return {
       tone: "info",
-      body: "O preço tem sido relativamente estável; menos urgência em agir só por esta leitura.",
+      body: compact
+        ? "Fairly calm. No rush from this alone."
+        : "Recently this price has been fairly calm. No need to rush based on this hint alone.",
     }
   }
 
   if (band === "low" && isRecentPriceDrop(lastPriceChangeAt, priceChangePct ?? null)) {
     return {
       tone: "info",
-      body: "Queda recente num preço que costuma ser estável pode ser uma boa oportunidade; confirme no gráfico e noutras lojas.",
+      body: compact
+        ? "Unusual drop for a steady price. Peek at the chart."
+        : "A drop like this is less common when the price is usually steady. Worth comparing the chart and other stores.",
     }
   }
 
   return {
     tone: "info",
-    body: "Use o histórico ao lado para ver se o preço atual é habitual ou excecional.",
+    body: compact
+      ? "Typical price? See the chart."
+      : "Use the chart to see if today's price is normal for this product.",
   }
 }
 
@@ -108,4 +139,16 @@ export function hasSufficientPriceStats(
   if (updatedAt == null) return false
   const obs = obs90d ?? 0
   return obs >= 2
+}
+
+/** Show volatility callout on product page mobile only at or above this (reduces noise when history is thin). */
+export const MOBILE_PRICE_STATS_MIN_OBSERVATIONS = 8
+
+export function shouldShowMobilePriceStatsCallout(
+  updatedAt: string | null | undefined,
+  obs90d: number | null | undefined,
+): boolean {
+  if (!hasSufficientPriceStats(updatedAt, obs90d)) return false
+  const obs = obs90d ?? 0
+  return obs >= MOBILE_PRICE_STATS_MIN_OBSERVATIONS
 }
