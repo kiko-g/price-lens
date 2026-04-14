@@ -377,8 +377,12 @@ export type Database = {
           pack: string | null
           price: number | null
           price_change_pct: number | null
+          price_drop_smart_score: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
+          price_stats_cv_ln_90d: number | null
+          price_stats_obs_90d: number | null
+          price_stats_updated_at: string | null
           priority: number | null
           priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
@@ -408,8 +412,12 @@ export type Database = {
           pack?: string | null
           price?: number | null
           price_change_pct?: number | null
+          price_drop_smart_score?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
+          price_stats_cv_ln_90d?: number | null
+          price_stats_obs_90d?: number | null
+          price_stats_updated_at?: string | null
           priority?: number | null
           priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
@@ -439,8 +447,12 @@ export type Database = {
           pack?: string | null
           price?: number | null
           price_change_pct?: number | null
+          price_drop_smart_score?: number | null
           price_per_major_unit?: number | null
           price_recommended?: number | null
+          price_stats_cv_ln_90d?: number | null
+          price_stats_obs_90d?: number | null
+          price_stats_updated_at?: string | null
           priority?: number | null
           priority_source?: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at?: string | null
@@ -628,8 +640,12 @@ export type Database = {
           pack: string | null
           price: number | null
           price_change_pct: number | null
+          price_drop_smart_score: number | null
           price_per_major_unit: number | null
           price_recommended: number | null
+          price_stats_cv_ln_90d: number | null
+          price_stats_obs_90d: number | null
+          price_stats_updated_at: string | null
           priority: number | null
           priority_source: Database["public"]["Enums"]["priority_source_type"] | null
           priority_updated_at: string | null
@@ -692,6 +708,10 @@ export type Database = {
       }
       compute_analytics_snapshot: {
         Args: { p_triggered_by?: string }
+        Returns: Json
+      }
+      refresh_store_product_price_stats_batch: {
+        Args: { p_batch_size?: number }
         Returns: Json
       }
       count_canonical_products: {

@@ -10,6 +10,10 @@
       "schedule": "0 */12 * * *"
     },
     {
+      "path": "/api/admin/price-stats-worker",
+      "schedule": "30 */12 * * *"
+    },
+    {
       "path": "/api/admin/alerts/scrape-health",
       "schedule": "0 */8 * * *"
     }

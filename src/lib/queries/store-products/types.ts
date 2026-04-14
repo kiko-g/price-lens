@@ -175,6 +175,11 @@ export interface FilterFlags {
   onlyAvailable?: boolean
   /** Use minimal column set for OG/preview (id, origin_id, name, brand, price, discount, image) */
   minimalSelectForPreview?: boolean
+  /**
+   * When true, exclude rows with null price (browse-quality listings).
+   * Default true for sorts that need a display price.
+   */
+  requireNonNullPrice?: boolean
 }
 
 // ============================================================================

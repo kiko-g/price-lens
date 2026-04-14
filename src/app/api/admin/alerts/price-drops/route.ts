@@ -5,6 +5,7 @@ import { priceDropAlertHtml, priceDropAlertSubject } from "@/lib/email/templates
 import { siteConfig } from "@/lib/config"
 import { STORE_NAMES } from "@/types/business"
 import { generateProductSlug } from "@/lib/business/product"
+import { priceBeforeFromChangeRatio, priceChangeRatioToPercentPoints } from "@/lib/business/price-change"
 
 export const maxDuration = 60
 
@@ -58,13 +59,25 @@ export async function POST() {
       available: boolean
     }
 
-    if (!product || !product.available || !product.price_change_pct || product.price_change_pct >= 0) continue
+    if (
+      !product ||
+      !product.available ||
+      product.price_change_pct == null ||
+      product.price_change_pct >= 0 ||
+      product.price == null ||
+      product.price <= 0
+    )
+      continue
 
-    const changePct = Math.abs(product.price_change_pct)
+    const changeRatioAbs = Math.abs(product.price_change_pct)
 
     if (sub.threshold_type === "any_drop") {
       alertsToSend.push({ subscription: sub, product: { ...product, price_change_pct: product.price_change_pct } })
-    } else if (sub.threshold_type === "percentage" && sub.threshold_value && changePct >= sub.threshold_value) {
+    } else if (
+      sub.threshold_type === "percentage" &&
+      sub.threshold_value != null &&
+      changeRatioAbs >= sub.threshold_value
+    ) {
       alertsToSend.push({ subscription: sub, product: { ...product, price_change_pct: product.price_change_pct } })
     } else if (sub.threshold_type === "target_price" && sub.threshold_value && product.price <= sub.threshold_value) {
       alertsToSend.push({ subscription: sub, product: { ...product, price_change_pct: product.price_change_pct } })
@@ -100,7 +113,8 @@ export async function POST() {
 
     const userName = nameMap.get(alert.subscription.user_id) || "there"
     const storeName = STORE_NAMES[alert.product.origin_id] || "Unknown Store"
-    const oldPrice = alert.product.price / (1 + alert.product.price_change_pct / 100)
+    const oldPrice = priceBeforeFromChangeRatio(alert.product.price, alert.product.price_change_pct)
+    if (oldPrice == null) continue
     const slug = generateProductSlug(alert.product)
     const productUrl = `${siteConfig.url}/products/${alert.product.id}-${slug}`
 
@@ -108,7 +122,10 @@ export async function POST() {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: email,
-        subject: priceDropAlertSubject(alert.product.name, alert.product.price_change_pct),
+        subject: priceDropAlertSubject(
+          alert.product.name,
+          priceChangeRatioToPercentPoints(alert.product.price_change_pct),
+        ),
         html: priceDropAlertHtml({
           userName,
           productName: alert.product.name,
@@ -116,7 +133,7 @@ export async function POST() {
           storeName,
           oldPrice,
           newPrice: alert.product.price,
-          changePercent: alert.product.price_change_pct,
+          changePercent: priceChangeRatioToPercentPoints(alert.product.price_change_pct),
           productUrl,
         }),
       })

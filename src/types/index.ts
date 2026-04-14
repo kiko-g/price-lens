@@ -89,6 +89,10 @@ export interface StoreProduct {
   canonical_product_id?: number | null
   price_change_pct?: number | null
   last_price_change_at?: string | null
+  price_stats_obs_90d?: number | null
+  price_stats_cv_ln_90d?: number | null
+  price_stats_updated_at?: string | null
+  price_drop_smart_score?: number | null
 }
 
 export interface StoreProductWithSimilarity extends StoreProduct {

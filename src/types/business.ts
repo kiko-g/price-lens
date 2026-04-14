@@ -39,6 +39,7 @@ export const SORT_LABELS: Record<string, string> = {
   "updated-newest": "Recently Updated",
   "updated-oldest": "Least Updated",
   "price-drop": "Price Drops",
+  "price-drop-smart": "Price Drops (weighted)",
   "price-increase": "Price Increases",
   "best-discount": "Best Discounts",
 }
@@ -65,6 +66,7 @@ export const sortByTypes = [
   "updated-newest",
   "updated-oldest",
   "price-drop",
+  "price-drop-smart",
   "price-increase",
   "best-discount",
   "only-nulls",
@@ -88,6 +90,7 @@ export const sortTypesLabels: {
   "updated-newest": "Recently Updated",
   "updated-oldest": "Least Recently",
   "price-drop": "Biggest Price Drops",
+  "price-drop-smart": "Price drops (history-weighted)",
   "price-increase": "Biggest Price Increases",
   "best-discount": "Best Discounts",
   "only-nulls": "Invalid products",
