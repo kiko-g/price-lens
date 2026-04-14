@@ -30,6 +30,7 @@ import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 import { LogoLink } from "@/components/layout/LogoLink"
+import { useNavigationSheet } from "@/contexts/NavigationSheetContext"
 
 const primaryNavKeys = new Set(["/", "/products", "/deals", "/favorites"])
 
@@ -48,8 +49,10 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
   const { user, isLoading } = useUser()
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, setOpen: setIsOpen } = useNavigationSheet()
   const [mounted, setMounted] = useState(false)
+
+  const showMobileHamburgerTrigger = isLoading || !user
 
   useEffect(() => {
     setMounted(true)
@@ -68,14 +71,17 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
 
   return (
     <Drawer direction="left" open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerTrigger className="inline-flex lg:hidden" asChild>
-        <button
-          type="button"
-          className="hover:bg-accent/60 flex size-10 cursor-pointer items-center justify-center rounded-lg transition-colors active:scale-[0.95]"
-        >
-          <MenuIcon className="size-5" />
-        </button>
-      </DrawerTrigger>
+      {showMobileHamburgerTrigger ? (
+        <DrawerTrigger className="inline-flex lg:hidden" asChild>
+          <button
+            type="button"
+            className="hover:bg-accent/60 flex size-10 cursor-pointer items-center justify-center rounded-lg transition-colors active:scale-[0.95]"
+            aria-label="Open navigation menu"
+          >
+            <MenuIcon className="size-5" />
+          </button>
+        </DrawerTrigger>
+      ) : null}
 
       <DrawerContent direction="left" className="flex flex-col gap-0 px-0 pt-[max(1rem,env(safe-area-inset-top,0px))]">
         <DrawerTitle className="sr-only">Navigation menu</DrawerTitle>

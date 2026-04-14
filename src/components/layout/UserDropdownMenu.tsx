@@ -22,20 +22,29 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { GithubIcon } from "@/components/icons"
-import { ContrastIcon, HeartIcon, LogOut, UserIcon } from "lucide-react"
+import { useNavigationSheet } from "@/contexts/NavigationSheetContext"
+import { ContrastIcon, HeartIcon, LogIn, LogOut, UserIcon } from "lucide-react"
 
 export function UserDropdownMenu() {
   const { user, profile, isLoading } = useUser()
   const { resolvedTheme: theme, setTheme } = useTheme()
+  const { openSheet } = useNavigationSheet()
 
   const router = useRouter()
   const isMobile = useMediaQuery("(max-width: 768px)")
 
-  if (isLoading) return <Skeleton className="size-[34px] rounded-lg border md:ml-0" />
+  if (isLoading)
+    return <Skeleton className="h-10 w-24 shrink-0 rounded-full border md:ml-0 lg:h-9 lg:w-9 lg:rounded-lg" />
 
   if (!user)
     return isMobile ? (
-      <Button variant="outline" size="md" className="relative" onClick={() => router.push("/login")}>
+      <Button
+        variant="secondary"
+        size="sm"
+        className="text-foreground hover:bg-muted/80 border-border/70 bg-muted/45 h-10 gap-2 rounded-full border px-3.5 shadow-none"
+        onClick={() => router.push("/login")}
+      >
+        <LogIn className="size-4 shrink-0" aria-hidden />
         Sign in
       </Button>
     ) : (
@@ -54,26 +63,28 @@ export function UserDropdownMenu() {
   const userBadgeText = getUserBadgeText()
   const userInitial = user.email ? user.email.charAt(0).toUpperCase() : "U"
 
-  // On mobile the nav sheet covers profile/favorites/theme/sign-out,
-  // so the avatar just links to /profile instead of opening a dropdown.
   if (isMobile)
     return (
-      <Link href="/profile" className="relative flex size-[34px] items-center justify-center rounded-full">
-        <Avatar className="size-[34px]">
-          <AvatarImage
-            src={user.user_metadata.avatar_url || "/placeholder.svg"}
-            alt={user.user_metadata.full_name ?? "User"}
-          />
+      <button
+        type="button"
+        onClick={() => openSheet()}
+        className="focus-visible:ring-ring relative flex size-10 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        aria-label="Open menu"
+        aria-haspopup="dialog"
+      >
+        <Avatar className="size-9">
+          <AvatarImage src={user.user_metadata.avatar_url || "/placeholder.svg"} alt="" />
           <AvatarFallback>{userInitial}</AvatarFallback>
         </Avatar>
+        <span className="sr-only">{user.user_metadata.full_name ?? "Account menu"}</span>
         <Badge
           size="3xs"
           variant="default"
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 leading-none capitalize"
+          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 leading-none capitalize"
         >
           {userBadgeText}
         </Badge>
-      </Link>
+      </button>
     )
 
   const handleSignOut = async () => {
