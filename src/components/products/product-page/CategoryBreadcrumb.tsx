@@ -95,7 +95,7 @@ export function CategoryBreadcrumb({ sp, className }: CategoryBreadcrumbProps) {
 
 function BreadcrumbSegment({ segment, isLast }: { segment: CategorySegment; isLast: boolean }) {
   const baseClass = cn(
-    "truncate transition-colors hover:underline",
+    "truncate transition-colors hover:underline border rounded-md px-1.5 py-px",
     isLast ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground",
   )
 
