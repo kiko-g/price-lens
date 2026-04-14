@@ -60,7 +60,7 @@ export function ErrorStateView({
 
 interface EmptyStateViewProps {
   title: string
-  message?: string
+  message?: string | React.ReactNode
   icon?: LucideIcon
   actions?: React.ReactNode
   className?: string
@@ -68,13 +68,13 @@ interface EmptyStateViewProps {
 
 export function EmptyStateView({ title, message, icon: Icon = SearchXIcon, actions, className }: EmptyStateViewProps) {
   return (
-    <Empty className={cn("border-border bg-muted/30 border py-10", className)}>
+    <Empty className={cn("border-border bg-muted/30 border py-8", className)}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon className="size-5" />
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
-        {message && <EmptyDescription>{message}</EmptyDescription>}
+        {message && typeof message === "string" ? <EmptyDescription>{message}</EmptyDescription> : message}
       </EmptyHeader>
       {actions && <EmptyContent>{actions}</EmptyContent>}
     </Empty>

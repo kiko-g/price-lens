@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
+import { EmptyDescription } from "@/components/ui/empty"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { LightRays } from "@/components/ui/magic/light-rays"
 import { floorCompareLightRaysPreset } from "@/components/products/product-page/deal-tier-light-rays"
@@ -247,7 +248,19 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         <EmptyStateView
           icon={ScaleIcon}
           title="No other stores for this product"
-          message="We only found this listing in the chains we track (or grouping is still incomplete). Check back later, or open the barcode compare page if available."
+          message={
+            <div className="flex max-w-md flex-col items-center gap-1.5">
+              <EmptyDescription className="text-center">
+                We only found this listing in the current store (
+                {getSupermarketChainName(currentProduct.origin_id) ?? "Store"}).
+              </EmptyDescription>
+              <SupermarketChainBadge
+                originId={currentProduct.origin_id}
+                variant="logo"
+                className="inline-flex h-7! w-auto! max-w-[140px]! rounded-md bg-white px-2 py-1 md:h-7! md:max-w-[140px]!"
+              />
+            </div>
+          }
         />
       </div>
     )

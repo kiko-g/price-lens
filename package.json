@@ -5,6 +5,9 @@
   "overrides": {
     "react-is": "^19.0.1"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["supabase"]
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:prod": "env-cmd -f .env.production next dev --turbopack",
@@ -133,7 +136,7 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "puppeteer": "^24.37.4",
     "sharp": "^0.34.5",
-    "supabase": "^2.76.10",
+    "supabase": "^2.90.0",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.2.0",
     "to-ico": "^1.1.5",
