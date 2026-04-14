@@ -171,7 +171,7 @@ function CompareCard({
                 <span className="text-muted-foreground text-sm line-through">{product.price_recommended}€</span>
                 {product.discount && (
                   <Badge variant="destructive" size="xs">
-                    <TagIcon className="h-2.5 w-2.5" />-{discountValueToPercentage(product.discount)}
+                    <TagIcon className="h-2.5 w-2.5" />−{discountValueToPercentage(product.discount)}
                   </Badge>
                 )}
               </>

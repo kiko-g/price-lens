@@ -85,11 +85,17 @@ export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats;
   }
 
   return (
-    <div className="flex flex-row items-start justify-center gap-6 self-center lg:justify-start">
+    <div className="flex max-w-full flex-row flex-wrap items-start justify-center gap-x-4 gap-y-2 self-center sm:gap-x-6 sm:gap-y-0 lg:flex-nowrap lg:justify-start">
       {items.map((item) => (
-        <Link key={item.label} href={item.href} className="group flex flex-col items-center gap-0 active:opacity-70">
-          <span className="text-lg font-bold tracking-tight tabular-nums">{item.value}</span>
-          <span className="text-muted-foreground text-[11px] leading-none">{item.shortLabel}</span>
+        <Link
+          key={item.label}
+          href={item.href}
+          className="group flex min-w-[5.25rem] flex-col items-center gap-0.5 active:opacity-70 sm:min-w-0 sm:gap-0"
+        >
+          <span className="text-base font-bold tracking-tight tabular-nums sm:text-lg">{item.value}</span>
+          <span className="text-muted-foreground max-[380px]:text-[10px] text-[11px] leading-tight sm:leading-none">
+            {item.shortLabel}
+          </span>
         </Link>
       ))}
     </div>

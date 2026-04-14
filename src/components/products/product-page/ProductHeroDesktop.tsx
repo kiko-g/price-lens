@@ -138,7 +138,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
 
             {sp.discount ? (
               <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-                -{discountValueToPercentage(sp.discount)}
+                −{discountValueToPercentage(sp.discount)}
               </Badge>
             ) : null}
 

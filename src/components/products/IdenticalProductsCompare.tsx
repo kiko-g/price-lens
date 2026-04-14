@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
-import { DealSummaryLightRays } from "@/components/products/product-page/DealSummaryLightRays"
+import { LightRays } from "@/components/ui/magic/light-rays"
+import { floorCompareLightRaysPreset } from "@/components/products/product-page/deal-tier-light-rays"
 
 import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon } from "lucide-react"
 
@@ -63,7 +64,7 @@ function CompactStoreCard({
           "border-secondary/40 bg-secondary/5 shadow-secondary/30 dark:border-secondary/40 dark:bg-secondary/10 dark:shadow-secondary/40",
       )}
     >
-      {showFloorHighlight ? <DealSummaryLightRays tier="habitual" /> : null}
+      {showFloorHighlight ? <LightRays {...floorCompareLightRaysPreset} /> : null}
 
       <div className="relative z-1 flex w-full flex-row items-center gap-3 sm:gap-4">
         <div className="flex shrink-0 flex-col gap-2 self-start">
@@ -80,7 +81,7 @@ function CompactStoreCard({
             </Badge>
           )}
           {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
-            <Badge size="xs" variant="retail" className="w-fit">
+            <Badge size="xs" variant="secondary" className="w-fit">
               <TrophyIcon className="h-3 w-3" />
               Cheapest
             </Badge>
@@ -103,7 +104,7 @@ function CompactStoreCard({
               <span
                 className={cn(
                   "text-base font-bold tabular-nums sm:text-lg",
-                  showFloorHighlight && "text-success",
+                  showFloorHighlight && "text-primary",
                   !showFloorHighlight && "text-foreground",
                 )}
               >
@@ -121,7 +122,7 @@ function CompactStoreCard({
                   {product.price_recommended?.toFixed(2)}€
                 </span>
                 <Badge variant="destructive" size="xs" className="shrink-0">
-                  -{discountValueToPercentage(product.discount!)}
+                  −{discountValueToPercentage(product.discount!)}
                 </Badge>
               </>
             )}
@@ -298,8 +299,8 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
       hasPriceSpread &&
       currentProduct.price > cheapestPrice ? (
         <p className="text-muted-foreground mb-3 text-sm">
-          <ZapIcon className="text-success mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
-          <span className="text-success font-medium">Save {(currentProduct.price - cheapestPrice).toFixed(2)}€</span> by
+          <ZapIcon className="text-primary mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
+          <span className="text-primary font-medium">Save {(currentProduct.price - cheapestPrice).toFixed(2)}€</span> by
           switching to the cheapest store
         </p>
       ) : cheapestPrice !== null &&
@@ -308,8 +309,8 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         currentProduct.price === cheapestPrice &&
         hasUniqueCheapest ? (
         <p className="text-muted-foreground mb-3">
-          <SmilePlusIcon className="text-success mr-1 inline-flex h-4 w-4" />
-          <span className="text-success font-medium">You&apos;re already on</span> the cheapest option.
+          <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
+          <span className="text-primary font-medium">You&apos;re already on</span> the cheapest option.
         </p>
       ) : cheapestPrice !== null &&
         currentProduct.price !== null &&
@@ -317,7 +318,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         currentProduct.price === cheapestPrice &&
         !hasUniqueCheapest ? (
         <p className="text-muted-foreground mb-3">
-          <SmilePlusIcon className="text-success mr-1 inline-flex h-4 w-4" />
+          <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
           You&apos;re viewing a listing at the lowest price ({cheapestPrice.toFixed(2)}€). Other offers go up to{" "}
           {highestPrice?.toFixed(2)}€.
         </p>

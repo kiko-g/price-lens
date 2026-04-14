@@ -1,6 +1,7 @@
 "use client"
 
 import { SearchIcon, ScanBarcodeIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { SearchContainer } from "@/components/layout/search"
 import { BarcodeScanButton } from "@/components/scan"
 
@@ -20,7 +21,7 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
         <SearchContainer registerKeyboardShortcut={false}>
           <button
             type="button"
-            className="bg-card hover:bg-accent/50 relative flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 transition-colors md:py-3.5"
+            className="bg-card hover:bg-accent/50 relative flex w-full cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-3.5 transition-colors max-[420px]:py-3 md:gap-3 md:px-4 md:py-3.5"
             style={{
               boxShadow:
                 "0 0 16px color-mix(in oklch, var(--primary) 12%, transparent), 0 0 4px color-mix(in oklch, var(--secondary) 8%, transparent)",
@@ -35,15 +36,22 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
       <BarcodeScanButton>
         <button
           type="button"
-          className="bg-card hover:bg-accent/50 flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-3.5 transition-colors md:py-3.5"
+          aria-label="Scan barcode"
+          className={cn(
+            "bg-card hover:bg-accent/50 flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border transition-colors",
+            "max-[420px]:size-11 max-[420px]:justify-center max-[420px]:p-0",
+            "min-[421px]:px-3.5 min-[421px]:py-3.5",
+          )}
           style={{
             boxShadow:
               "0 0 16px color-mix(in oklch, var(--secondary) 12%, transparent), 0 0 4px color-mix(in oklch, var(--primary) 8%, transparent)",
           }}
         >
-          <ScanBarcodeIcon className="sm:text-muted-foreground text-foreground size-5" />
-          <span className="sm:text-muted-foreground text-foreground hidden text-sm sm:inline-flex">Scan barcode</span>
-          <span className="sm:text-muted-foreground text-foreground inline-flex text-sm sm:hidden">Scan</span>
+          <ScanBarcodeIcon className="sm:text-muted-foreground text-foreground size-5 shrink-0" />
+          <span className="text-foreground hidden text-sm sm:inline-flex sm:text-muted-foreground">Scan barcode</span>
+          <span className="text-foreground inline-flex max-[420px]:hidden text-sm sm:hidden sm:text-muted-foreground">
+            Scan
+          </span>
         </button>
       </BarcodeScanButton>
     </div>

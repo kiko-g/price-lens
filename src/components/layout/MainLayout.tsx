@@ -21,7 +21,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         <WelcomeToast />
       </Suspense>
       <Header />
-      <div className="flex flex-1 flex-col pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">{children}</div>
+      <div className="flex flex-1 flex-col pb-[calc(6.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0">{children}</div>
       <ControlledFooter />
       <BottomNav />
     </div>

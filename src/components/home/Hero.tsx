@@ -26,7 +26,7 @@ async function HeroContent() {
               "animate-fade-in",
               "bg-linear-to-br from-30% bg-clip-text text-transparent",
               "from-zinc-950 to-zinc-500 dark:from-zinc-50 dark:to-zinc-400",
-              "w-full max-w-full text-center text-3xl leading-[1.1] font-bold tracking-tight opacity-0 [--animation-delay:100ms] sm:w-full sm:max-w-full sm:text-4xl",
+              "w-full max-w-full text-center text-3xl leading-[1.1] font-semibold tracking-tight opacity-0 [--animation-delay:100ms] sm:w-full sm:max-w-full sm:text-4xl",
             )}
           >
             Price tracking for

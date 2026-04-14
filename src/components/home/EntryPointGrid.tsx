@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsCompactMobile, useIsMobile } from "@/hooks/use-mobile"
 
 import { ShoppingBasketIcon, TrendingDownIcon, TicketPercentIcon, AppleIcon } from "lucide-react"
 
@@ -58,28 +58,67 @@ const entryPoints = [
     mobileTint: "bg-linear-to-br from-rose-400/5 to-rose-500/10 dark:from-rose-400/15 dark:to-rose-500/15",
     shownOnDesktop: true,
     shownOnMobile: false,
+    shownOnNarrowMobile: true,
   },
 ] as const
 
+function visibleRowEntries(isMobile: boolean, isCompactMobile: boolean) {
+  return entryPoints.filter((entry) => {
+    if (!isMobile) return entry.shownOnDesktop
+    if (isCompactMobile) return entry.shownOnMobile || entry.shownOnNarrowMobile === true
+    return entry.shownOnMobile
+  })
+}
+
 export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" }) {
   const isMobile = useIsMobile()
+  const isCompactMobile = useIsCompactMobile()
   const shown = isMobile ? "shownOnMobile" : "shownOnDesktop"
   const entryPointsFiltered = entryPoints.filter((entry) => entry[shown as keyof typeof entry])
+  const rowEntries = visibleRowEntries(isMobile, isCompactMobile)
 
   if (variant === "row") {
+    if (isMobile && isCompactMobile) {
+      return (
+        <div className="grid w-full grid-cols-2 gap-1.5">
+          {rowEntries.map((entry) => (
+            <Link
+              key={entry.label}
+              href={entry.href}
+              className={cn(
+                "bg-muted/35 border-border/60 text-muted-foreground hover:bg-muted/55 hover:text-foreground flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1 py-1.5 text-center transition-colors active:opacity-90",
+              )}
+            >
+              <entry.icon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+              <span className="text-foreground text-[10px] leading-tight font-medium">{entry.label}</span>
+            </Link>
+          ))}
+        </div>
+      )
+    }
+
     return (
-      <div className="flex w-full items-center justify-center gap-2.5 lg:justify-start lg:gap-2.5">
-        {entryPointsFiltered.map((entry) => (
+      <div
+        className={cn(
+          "flex w-full items-center gap-2.5",
+          !isMobile && "justify-center lg:justify-start",
+          isMobile &&
+            !isCompactMobile &&
+            "-mx-4 justify-start gap-2 overflow-x-auto px-4 pb-0.5 no-scrollbar",
+        )}
+      >
+        {rowEntries.map((entry) => (
           <Link
             key={entry.label}
             href={entry.href}
             className={cn(
-              "text-foreground hover:bg-accent bg-accent/50 flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
+              "text-foreground hover:bg-accent bg-accent/50 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
+              isMobile && !isCompactMobile && "min-h-10 px-3 py-2",
               isMobile ? entry.mobileBg : "",
             )}
           >
-            <entry.icon className="text-foreground size-3.5" />
-            <span>{entry.label}</span>
+            <entry.icon className="text-foreground size-3.5 shrink-0" />
+            <span className="whitespace-nowrap">{entry.label}</span>
           </Link>
         ))}
       </div>

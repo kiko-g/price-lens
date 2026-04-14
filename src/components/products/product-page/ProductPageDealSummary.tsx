@@ -49,6 +49,10 @@ export function ProductPageDealSummary({ sp, className }: Props) {
 
   const pricePoints = useMemo(() => data?.analytics?.pricePoints ?? null, [data?.analytics?.pricePoints])
   const mostCommon = useMemo(() => data?.analytics?.mostCommon ?? null, [data?.analytics?.mostCommon])
+  const historyDays = useMemo(
+    () => data?.analytics?.dateRange?.daysBetween ?? 0,
+    [data?.analytics?.dateRange?.daysBetween],
+  )
 
   const cheaperHint = useCheaperElsewhereHint(sp, identicalProducts)
   const resolvedCheaper = !crossLoading ? cheaperHint : null
@@ -62,6 +66,7 @@ export function ProductPageDealSummary({ sp, className }: Props) {
       sp={sp}
       pricePoints={pricePoints}
       mostCommon={mostCommon}
+      historyDays={historyDays}
       isLoading={isLoading}
       cheaperHint={resolvedCheaper}
       className={className}

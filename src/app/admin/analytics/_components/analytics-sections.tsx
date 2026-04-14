@@ -867,7 +867,7 @@ export function SchedulerCapacitySection({ data, isLoading }: { data?: Analytics
                     Daily Deficit
                   </div>
                   <p className="mt-1 text-xl font-bold text-red-600 dark:text-red-400">
-                    -{cap.deficit.toLocaleString()}
+                    −{cap.deficit.toLocaleString()}
                   </p>
                   <p className="text-xs text-red-600/80 dark:text-red-400/80">scrapes short</p>
                 </div>

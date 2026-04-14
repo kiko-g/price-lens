@@ -450,6 +450,45 @@ function RangeSelector({ className }: RangeSelectorProps) {
   )
 }
 
+function formatPriceTickLabel(value: number): string {
+  return `€${value.toFixed(2)}`
+}
+
+function estimatePriceAxisWidth(ticks: number[]): number {
+  if (ticks.length === 0) return 40
+  const longestLabel = ticks.reduce((longest, tick) => {
+    const label = formatPriceTickLabel(tick)
+    return label.length > longest.length ? label : longest
+  }, "")
+  return Math.max(40, longestLabel.length * 7 + 8)
+}
+
+function CustomTick({
+  x,
+  y,
+  payload,
+  yAxisId,
+}: {
+  x: string | number
+  y: string | number
+  payload: { value: number }
+  yAxisId: string
+}) {
+  return (
+    <text x={Number(x)} y={Number(y)} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
+      {yAxisId === "price" ? formatPriceTickLabel(payload.value) : `${payload.value}%`}
+    </text>
+  )
+}
+
+function PriceYAxisTick(props: Omit<React.ComponentProps<typeof CustomTick>, "yAxisId">) {
+  return <CustomTick {...props} yAxisId="price" />
+}
+
+function DiscountYAxisTick(props: Omit<React.ComponentProps<typeof CustomTick>, "yAxisId">) {
+  return <CustomTick {...props} yAxisId="discount" />
+}
+
 // ============================================================================
 // Graph Component
 // ============================================================================
@@ -564,7 +603,7 @@ function Graph({ className }: GraphProps) {
             domain={[chartBounds.floor, chartBounds.ceiling]}
             ticks={chartBounds.ticks}
             allowDataOverflow={false}
-            tick={(props) => <CustomTick {...props} yAxisId="price" />}
+            tick={PriceYAxisTick}
           />
           <YAxis
             dataKey="discount"
@@ -576,7 +615,7 @@ function Graph({ className }: GraphProps) {
             domain={[0, 100]}
             ticks={[0, 25, 50, 75, 100]}
             tickFormatter={(value) => `${value}%`}
-            tick={(props) => <CustomTick {...props} yAxisId="discount" />}
+            tick={DiscountYAxisTick}
           />
           <ChartTooltip
             cursor={false}
@@ -620,38 +659,6 @@ function Graph({ className }: GraphProps) {
         </LineChart>
       </ChartContainer>
     </div>
-  )
-}
-
-function formatPriceTickLabel(value: number): string {
-  return `€${value.toFixed(2)}`
-}
-
-function estimatePriceAxisWidth(ticks: number[]): number {
-  if (ticks.length === 0) return 40
-  const longestLabel = ticks.reduce((longest, tick) => {
-    const label = formatPriceTickLabel(tick)
-    return label.length > longest.length ? label : longest
-  }, "")
-  // ~7px per character at font size 12, plus 8px padding
-  return Math.max(40, longestLabel.length * 7 + 8)
-}
-
-function CustomTick({
-  x,
-  y,
-  payload,
-  yAxisId,
-}: {
-  x: string | number
-  y: string | number
-  payload: { value: number }
-  yAxisId: string
-}) {
-  return (
-    <text x={Number(x)} y={Number(y)} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
-      {yAxisId === "price" ? formatPriceTickLabel(payload.value) : `${payload.value}%`}
-    </text>
   )
 }
 
@@ -901,7 +908,7 @@ function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
           type="button"
           className="text-foreground border-border bg-muted/25 hover:bg-muted/40 flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
         >
-          <span className="min-w-0 break-words">Price history and analysis</span>
+          <span className="min-w-0 wrap-break-word">Price history and analysis</span>
           <ChevronDownIcon className="size-5 shrink-0 opacity-70 transition-transform group-data-[state=open]/collapsible:rotate-180" />
         </button>
       </CollapsibleTrigger>
@@ -969,7 +976,7 @@ function FallbackDetails({ className }: FallbackDetailsProps) {
         ) : null}
         {sp.discount ? (
           <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-            -{discountValueToPercentage(sp.discount)}
+            −{discountValueToPercentage(sp.discount)}
           </Badge>
         ) : null}
         <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />

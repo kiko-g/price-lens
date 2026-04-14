@@ -432,7 +432,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
         {/* Discount badge — overlaid on image */}
         {hasDiscount && (
           <div className="bg-primary text-primary-foreground absolute top-1.5 left-1.5 rounded px-1 py-0.5 text-[10px] leading-none font-bold">
-            -{discountValueToPercentage(discount!, 0)}
+            −{discountValueToPercentage(discount!, 0)}
           </div>
         )}
       </div>

@@ -109,7 +109,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             {originalPrice && discountPercent && (
               <div tw="flex items-center ml-4">
                 <span tw="text-3xl text-[#666] line-through">{originalPrice}€</span>
-                <span tw="ml-3 px-3 py-1 bg-rose-500/20 text-rose-400 text-2xl rounded-lg">-{discountPercent}%</span>
+                <span tw="ml-3 px-3 py-1 bg-rose-500/20 text-rose-400 text-2xl rounded-lg">−{discountPercent}%</span>
               </div>
             )}
           </div>

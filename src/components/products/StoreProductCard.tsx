@@ -327,21 +327,16 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
         {/* Prices and Actions */}
         <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
-          <div className="items-ce flex flex-wrap justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             {hasDiscount && sp.discount ? (
               <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                  <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
-                  <Badge
-                    variant="destructive"
-                    size="2xs"
-                    roundedness="sm"
-                    className="w-fit opacity-100 transition-opacity duration-300 group-hover:opacity-0"
-                  >
-                    -{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
-                  </Badge>
-                </div>
                 <div className="flex items-center gap-1.5">
+                  <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+                  <span className="text-destructive w-fit text-xs font-bold opacity-100 transition-opacity duration-300 group-hover:opacity-0">
+                    −{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
+                  </span>
+                </div>
+                <div className="flex flex-col items-start gap-1 md:flex-row md:items-center md:gap-1.5">
                   <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
                   <PriceChangeBadge pct={sp.price_change_pct} />
                 </div>
@@ -349,7 +344,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             ) : null}
 
             {isNormalPrice ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-col items-start gap-1 md:flex-row md:items-center md:gap-1.5">
                 <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
                 <PriceChangeBadge pct={sp.price_change_pct} />
               </div>

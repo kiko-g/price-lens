@@ -253,7 +253,6 @@
   --animate-spin: spin 1s linear infinite;
   --animate-bounce-x: bounce-x 750ms infinite;
   --animate-blob: blob 7s infinite;
-  --animate-deal-summary-rays: deal-summary-rays 18s linear infinite;
 
   --breakpoint-2xl: 96rem; /* 1536px */
   --breakpoint-3xl: 120rem; /* 1920px */
@@ -320,15 +319,6 @@
   }
 
   @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes deal-summary-rays {
     from {
       transform: rotate(0deg);
     }

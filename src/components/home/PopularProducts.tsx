@@ -39,7 +39,7 @@ function ProductCard({ product, compact = false }: { product: HeroProduct; compa
       className={cn(
         "group relative flex shrink-0 items-start",
         compact
-          ? "w-40 gap-2"
+          ? "w-42 gap-2 sm:w-40"
           : "hover:border-border w-56 gap-2.5 rounded-xl border border-transparent bg-white/60 p-2.5 transition-all duration-200 hover:bg-white hover:shadow-lg dark:bg-white/5 dark:hover:bg-white/10",
       )}
     >
@@ -65,14 +65,7 @@ function ProductCard({ product, compact = false }: { product: HeroProduct; compa
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span
-          className={cn(
-            "text-foreground/80 line-clamp-2 leading-snug font-medium",
-            compact ? "text-[11px]" : "text-xs",
-          )}
-        >
-          {product.name}
-        </span>
+        <span className="text-foreground/80 line-clamp-2 text-xs leading-snug font-medium">{product.name}</span>
 
         <div className="flex flex-wrap items-baseline gap-1">
           {product.price != null && (
@@ -95,8 +88,8 @@ function ProductCard({ product, compact = false }: { product: HeroProduct; compa
 
         <div className="flex items-center gap-1.5">
           {hasDiscount && (
-            <span className="rounded bg-emerald-600 px-1 py-px text-[9px] leading-none font-bold text-white">
-              -{discountValueToPercentage(product.discount!, 0)}
+            <span className="rounded bg-emerald-600 px-1 py-px text-[10px] leading-none font-bold text-white">
+              −{discountValueToPercentage(product.discount!, 0)}
             </span>
           )}
           <SupermarketChainBadge
