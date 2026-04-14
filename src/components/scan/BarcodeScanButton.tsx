@@ -60,11 +60,14 @@ function trackSupportsTorch(track: MediaStreamTrack): boolean {
 type BarcodeScanButtonProps = {
   /** A single React element that will receive the trigger props (onClick, onKeyDown). Must be a button or interactive element. */
   children: React.ReactElement
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
+export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange }: BarcodeScanButtonProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
   const [error, setError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -97,27 +100,30 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
     setTorchOn(false)
   }, [])
 
-  const handleScanSuccess = useCallback(
-    (code: string) => {
-      if (!isProductBarcode(code)) return
-      stopScanning()
-      setOpen(false)
-      navigateToCompare(router, code)
-    },
-    [router, stopScanning],
-  )
-
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      if (!isOpen) {
+  const updateOpen = useCallback(
+    (next: boolean) => {
+      if (!next) {
         stopScanning()
         setError(null)
         setManualTextOpen(false)
         setManualTextValue("")
       }
-      setOpen(isOpen)
+      if (controlledOpen !== undefined) {
+        onOpenChange?.(next)
+      } else {
+        setInternalOpen(next)
+      }
     },
-    [stopScanning],
+    [controlledOpen, onOpenChange, stopScanning],
+  )
+
+  const handleScanSuccess = useCallback(
+    (code: string) => {
+      if (!isProductBarcode(code)) return
+      updateOpen(false)
+      navigateToCompare(router, code)
+    },
+    [router, updateOpen],
   )
 
   const handleManualSubmit = useCallback(
@@ -128,10 +134,10 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
         setError("Enter a valid barcode (8 to 14 digits).")
         return
       }
-      setOpen(false)
+      updateOpen(false)
       navigateToCompare(router, digits)
     },
-    [manualTextValue, router],
+    [manualTextValue, router, updateOpen],
   )
 
   const handleOpenManualEntry = useCallback(() => {
@@ -267,7 +273,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
           const result = await codeReader.decodeFromImageUrl(imageUrl)
           const code = result?.getText()
           if (code && isProductBarcode(code)) {
-            setOpen(false)
+            updateOpen(false)
             navigateToCompare(router, code)
           } else {
             setError("No barcode found in image. Try another image.")
@@ -286,7 +292,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
       }
       img.src = imageUrl
     },
-    [open, router, stopScanning],
+    [open, router, stopScanning, updateOpen],
   )
 
   useEffect(() => {
@@ -307,12 +313,12 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
     <>
       <Slot
         onClick={() => {
-          setOpen(true)
+          updateOpen(true)
           setIsStartingCamera(true)
         }}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === "Enter") {
-            setOpen(true)
+            updateOpen(true)
             setIsStartingCamera(true)
           }
         }}
@@ -320,7 +326,7 @@ export function BarcodeScanButton({ children }: BarcodeScanButtonProps) {
         {children}
       </Slot>
 
-      <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Dialog open={open} onOpenChange={updateOpen}>
         <DialogContent
           overlayVisualViewportSync={open}
           className={cn(

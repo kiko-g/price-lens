@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { navigation } from "@/lib/config"
@@ -14,6 +15,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { NavigationSheet } from "@/components/layout/NavigationSheet"
 import { SearchContainer } from "@/components/layout/search"
 import { UserDropdownMenu } from "@/components/layout/UserDropdownMenu"
+import { BarcodeScanButton } from "@/components/scan"
 import { FavoritesLink } from "@/components/layout/FavoritesLink"
 import { EarlyAccessBadge } from "@/components/layout/EarlyAccessBadge"
 
@@ -23,12 +25,32 @@ export function Header() {
   const pathname = usePathname()
   const isMobile = useMediaQuery("(max-width: 768px)")
   const isEarlyAccess = false
+  const [navSheetSearchOpen, setNavSheetSearchOpen] = useState(false)
+  const [navSheetScanOpen, setNavSheetScanOpen] = useState(false)
 
   return (
     <header className="bg-opacity-80 dark:bg-opacity-80 bg-background/90 sticky top-0 z-50 mx-auto h-(--header-height) w-full border-b pt-[env(safe-area-inset-top,0px)] backdrop-blur backdrop-filter xl:px-4">
       <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
         <div className="flex items-center gap-3">
-          <NavigationSheet />
+          <NavigationSheet
+            onRequestSearch={() => setNavSheetSearchOpen(true)}
+            onRequestBarcodeScan={() => setNavSheetScanOpen(true)}
+          />
+
+          <SearchContainer
+            open={navSheetSearchOpen}
+            onOpenChange={setNavSheetSearchOpen}
+            registerKeyboardShortcut={false}
+          >
+            <button type="button" tabIndex={-1} className="sr-only" aria-hidden>
+              Open search from menu
+            </button>
+          </SearchContainer>
+          <BarcodeScanButton open={navSheetScanOpen} onOpenChange={setNavSheetScanOpen}>
+            <button type="button" tabIndex={-1} className="sr-only" aria-hidden>
+              Open barcode scan from menu
+            </button>
+          </BarcodeScanButton>
 
           <LogoLink />
           {isEarlyAccess && <EarlyAccessBadge />}

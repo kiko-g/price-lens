@@ -30,8 +30,6 @@ import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 import { LogoLink } from "@/components/layout/LogoLink"
-import { SearchContainer } from "@/components/layout/search"
-import { BarcodeScanButton } from "@/components/scan"
 
 const primaryNavKeys = new Set(["/", "/products", "/deals", "/favorites"])
 
@@ -41,7 +39,12 @@ const productQuickFilters = [
   { label: "Essential", href: "/products?priority=5", icon: AppleIcon },
 ] as const
 
-export function NavigationSheet() {
+type NavigationSheetProps = {
+  onRequestSearch?: () => void
+  onRequestBarcodeScan?: () => void
+}
+
+export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: NavigationSheetProps = {}) {
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
   const { user, isLoading } = useUser()
@@ -118,25 +121,29 @@ export function NavigationSheet() {
 
         {/* quick actions */}
         <div className="mt-3 flex w-full items-center gap-2 px-5">
-          <SearchContainer registerKeyboardShortcut={false}>
-            <button
-              type="button"
-              className="text-muted-foreground hover:border-input hover:text-foreground border-border flex h-10 w-full flex-1 items-center gap-2 rounded-lg border px-3 text-left text-sm transition-colors"
-            >
-              <SearchIcon className="size-4 shrink-0" />
-              <span>Search products...</span>
-            </button>
-          </SearchContainer>
+          <button
+            type="button"
+            onClick={() => {
+              handleClose()
+              onRequestSearch?.()
+            }}
+            className="text-muted-foreground hover:border-input hover:text-foreground border-border flex h-10 w-full flex-1 items-center gap-2 rounded-lg border px-3 text-left text-sm transition-colors"
+          >
+            <SearchIcon className="size-4 shrink-0" />
+            <span>Search products...</span>
+          </button>
 
-          <BarcodeScanButton>
-            <button
-              type="button"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors"
-            >
-              <ScanBarcodeIcon className="size-4 shrink-0" />
-              <span>Scan barcode</span>
-            </button>
-          </BarcodeScanButton>
+          <button
+            type="button"
+            onClick={() => {
+              handleClose()
+              onRequestBarcodeScan?.()
+            }}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors"
+          >
+            <ScanBarcodeIcon className="size-4 shrink-0" />
+            <span>Scan barcode</span>
+          </button>
         </div>
 
         <Separator className="mx-5 mt-4 w-auto" />
