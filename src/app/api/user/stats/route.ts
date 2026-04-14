@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { priceBeforeFromChangeRatio } from "@/lib/business/price-change"
 
 /**
  * User stats & savings estimate.
@@ -44,10 +45,17 @@ export async function GET() {
 
   for (const fav of favorites) {
     const product = fav.store_products as unknown as { price: number; price_change_pct: number | null }
-    if (product?.price_change_pct && product.price_change_pct < 0) {
-      const priceBefore = product.price / (1 + product.price_change_pct / 100)
-      estimatedSavings += priceBefore - product.price
-      productsWithDrops++
+    if (
+      product?.price != null &&
+      product.price > 0 &&
+      product.price_change_pct != null &&
+      product.price_change_pct < 0
+    ) {
+      const priceBefore = priceBeforeFromChangeRatio(product.price, product.price_change_pct)
+      if (priceBefore != null) {
+        estimatedSavings += priceBefore - product.price
+        productsWithDrops++
+      }
     }
   }
 

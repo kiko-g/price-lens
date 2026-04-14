@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
     // Fetch wider column set so the batch worker doesn't need to re-read each product.
     // The extra fields are passed through QStash to eliminate per-product SELECTs.
     const SCHEDULER_COLUMNS =
-      "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at"
+      "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at, price_stats_cv_ln_90d"
 
     const {
       data: products,
@@ -211,7 +211,11 @@ export async function GET(req: NextRequest) {
         const thresholdHours = PRIORITY_REFRESH_HOURS[product.priority ?? 0] ?? 24
         const updatedAt = product.updated_at ? new Date(product.updated_at) : new Date(0) // Never scraped = very old
         const hoursAgo = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60)
-        const urgencyScore = hoursAgo / thresholdHours
+        const baseUrgency = hoursAgo / thresholdHours
+        const cv = product.price_stats_cv_ln_90d
+        const volatilityBoost =
+          typeof cv === "number" && Number.isFinite(cv) && cv > 1e-9 ? Math.min(0.35, cv / 0.12) : 0
+        const urgencyScore = baseUrgency * (1 + volatilityBoost)
 
         return {
           ...product,

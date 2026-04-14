@@ -1,4 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
+import {
+  DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS,
+  PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE,
+} from "@/lib/business/price-change"
 
 export interface DealProduct {
   id: number
@@ -47,12 +51,21 @@ export async function getDeals(options?: { originId?: number; limit?: number }):
   const supabase = createClient()
   const limit = options?.limit ?? 24
 
+  const dropRecencyCutoff = new Date(
+    Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString()
+
   let priceDropsQuery = supabase
     .from("store_products")
     .select(DEAL_COLUMNS)
     .eq("available", true)
     .not("name", "is", null)
+    .not("price", "is", null)
+    .gt("price", 0)
+    .not("last_price_change_at", "is", null)
+    .gte("last_price_change_at", dropRecencyCutoff)
     .lt("price_change_pct", 0)
+    .gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
     .order("price_change_pct", { ascending: true })
     .limit(limit)
 
@@ -61,7 +74,10 @@ export async function getDeals(options?: { originId?: number; limit?: number }):
     .select(DEAL_COLUMNS)
     .eq("available", true)
     .not("name", "is", null)
+    .not("price", "is", null)
+    .gt("price", 0)
     .gt("discount", 0)
+    .lte("discount", PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
     .order("discount", { ascending: false })
     .limit(limit)
 

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/business/data"
 import { formatRelativeTime } from "@/lib/business/chart"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
+import { PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE } from "@/lib/business/price-change"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge, badgeVariants } from "@/components/ui/badge"
@@ -100,10 +101,13 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
       <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
     </span>
   )
-  const isPriceNotSet = !sp.price_recommended && !sp.price
+  const hasUnitPrice = sp.price_per_major_unit != null && sp.major_unit
+  const isPriceNotSet = !sp.price_recommended && !sp.price && !hasUnitPrice
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isNormalPrice =
     (!sp.price_recommended && sp.price) || (sp.price_recommended && sp.price && sp.price_recommended === sp.price)
+  const isPriceMissingWithReference =
+    !sp.price && (sp.price_recommended != null || (sp.discount != null && sp.discount > 0))
 
   const categoryText = sp.category
     ? `${sp.category}${sp.category_2 ? ` > ${sp.category_2}` : ""}${sp.category_3 ? ` > ${sp.category_3}` : ""}`
@@ -350,6 +354,18 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               </div>
             ) : null}
 
+            {isPriceMissingWithReference ? (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-muted-foreground text-sm font-medium">Preço indisponível</span>
+                {hasUnitPrice ? (
+                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+                    {sp.price_per_major_unit!.toFixed(2)}€/
+                    {sp.major_unit!.startsWith("/") ? sp.major_unit!.slice(1) : sp.major_unit}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
             {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
           </div>
 
@@ -554,6 +570,7 @@ const PRICE_CHANGE_THRESHOLD = 0.01
 
 function PriceChangeBadge({ pct }: { pct: number | null | undefined }) {
   if (pct == null || Math.abs(pct) < PRICE_CHANGE_THRESHOLD) return null
+  if (Math.abs(pct) > PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE) return null
 
   const isSignificant = Math.abs(pct) >= 0.05
   const isNegative = pct < 0

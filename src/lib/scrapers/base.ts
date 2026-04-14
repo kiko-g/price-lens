@@ -7,6 +7,9 @@ import { fetchHtml, parseHtml, transformRawProduct, extractPriorityInfo, cleanUr
  * Abstract base class for all store scrapers
  * Handles common logic: fetching, error handling, transformation
  * Subclasses only need to implement the extraction logic
+ *
+ * Ingest quality: rely on last_http_status + explicit error/not_found returns;
+ * soft 404s need per-origin isSoftNotFound; partial parses should not upsert a valid-looking price.
  */
 export abstract class BaseProductScraper implements StoreScraper {
   abstract readonly originId: StoreOrigin

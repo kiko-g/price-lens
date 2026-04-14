@@ -2,10 +2,70 @@ import { createClient } from "@/lib/supabase/server"
 import { fetchAll } from "@/lib/supabase/fetch-all"
 import { withTimeout } from "@/lib/resilience"
 import type { SupabaseClient } from "./types"
-import type { StoreProductsQueryParams, StoreProductsQueryResult, StoreProductWithMeta, PaginationMeta } from "./types"
+import type {
+  StoreProductsQueryParams,
+  StoreProductsQueryResult,
+  StoreProductWithMeta,
+  PaginationMeta,
+  FilterFlags,
+} from "./types"
 import { DEFAULT_PAGINATION, DEFAULT_SORT, DEFAULT_FLAGS } from "./types"
+import {
+  DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS,
+  PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE,
+} from "@/lib/business/price-change"
 
 const SUPABASE_QUERY_TIMEOUT_MS = parseInt(process.env.SUPABASE_QUERY_TIMEOUT_MS || "15000", 10)
+
+const SORTS_REQUIRING_NON_NULL_PRICE = new Set([
+  "price-drop",
+  "price-drop-smart",
+  "price-increase",
+  "best-discount",
+])
+
+function mergeListingFlags(
+  sortBy: string,
+  userFlags: typeof DEFAULT_FLAGS & FilterFlags,
+): typeof DEFAULT_FLAGS & FilterFlags {
+  const base = { ...DEFAULT_FLAGS, ...userFlags }
+  if (SORTS_REQUIRING_NON_NULL_PRICE.has(sortBy)) {
+    return { ...base, requireNonNullPrice: userFlags.requireNonNullPrice !== false }
+  }
+  return base
+}
+
+function applyListingQualityFilters<Q extends { [key: string]: any }>(
+  query: Q,
+  sortBy: string,
+  flags: typeof DEFAULT_FLAGS & FilterFlags,
+): Q {
+  let q = query
+  if (flags.requireNonNullPrice) {
+    q = q.not("price", "is", null).gt("price", 0)
+  }
+  if (sortBy === "price-drop" || sortBy === "price-drop-smart") {
+    const cutoff = new Date(
+      Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString()
+    q = q.not("last_price_change_at", "is", null).gte("last_price_change_at", cutoff).lt("price_change_pct", 0)
+    q = q.gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
+    if (sortBy === "price-drop-smart") {
+      q = q.not("price_drop_smart_score", "is", null)
+    }
+  }
+  if (sortBy === "price-increase") {
+    const cutoff = new Date(
+      Date.now() - DEFAULT_LISTING_PRICE_CHANGE_RECENCY_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString()
+    q = q.not("last_price_change_at", "is", null).gte("last_price_change_at", cutoff).gt("price_change_pct", 0)
+    q = q.lte("price_change_pct", PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
+  }
+  if (sortBy === "best-discount") {
+    q = q.gt("discount", 0).lte("discount", PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
+  }
+  return q
+}
 
 // Explicit column lists to avoid SELECT * egress overhead
 const LISTING_COLUMNS = [
@@ -32,6 +92,10 @@ const LISTING_COLUMNS = [
   "updated_at",
   "price_change_pct",
   "last_price_change_at",
+  "price_stats_obs_90d",
+  "price_stats_cv_ln_90d",
+  "price_drop_smart_score",
+  "price_stats_updated_at",
 ].join(", ")
 
 const LISTING_COLUMNS_CANONICAL = [
@@ -105,7 +169,7 @@ export async function queryStoreProducts(
 
   const pagination = { ...DEFAULT_PAGINATION, ...params.pagination }
   const sort = { ...DEFAULT_SORT, ...params.sort }
-  const flags = { ...DEFAULT_FLAGS, ...params.flags }
+  const flags = mergeListingFlags(sort.sortBy, { ...DEFAULT_FLAGS, ...params.flags })
 
   // Route to relevance-ranked RPC when searching with relevance sort
   const hasSearchQuery = !!params.search?.query && sanitizeSearchQuery(params.search.query).length > 0
@@ -161,6 +225,7 @@ export async function queryStoreProducts(
   }
 
   query = applySourceFilter(query, params)
+  query = applyListingQualityFilters(query, sort.sortBy, flags)
 
   if (params.priceRange?.min != null) {
     query = query.gte("price", params.priceRange.min)
@@ -254,7 +319,7 @@ async function queryWithRelevanceRanking(
   supabase: SupabaseClient,
   pagination: { page: number; limit: number },
   sort: { sortBy: string; prioritizeByPriority?: boolean },
-  flags: typeof DEFAULT_FLAGS,
+  flags: typeof DEFAULT_FLAGS & FilterFlags,
 ): Promise<StoreProductsQueryResult> {
   const queryText = sanitizeSearchQuery(params.search!.query)
   const offset = (pagination.page - 1) * pagination.limit
@@ -278,6 +343,7 @@ async function queryWithRelevanceRanking(
   }
 
   query = applySourceFilter(query, params)
+  query = applyListingQualityFilters(query, sort.sortBy, flags)
 
   if (params.priceRange?.min != null) {
     query = query.gte("price", params.priceRange.min)
@@ -348,9 +414,10 @@ async function queryWithIlikeFallback(
   supabase: SupabaseClient,
   pagination: { page: number; limit: number },
   sort: { sortBy: string; prioritizeByPriority?: boolean },
-  flags: typeof DEFAULT_FLAGS,
+  flags: typeof DEFAULT_FLAGS & FilterFlags,
 ): Promise<StoreProductsQueryResult> {
   const offset = (pagination.page - 1) * pagination.limit
+  const effectiveSort = sort.sortBy === "relevance" ? "a-z" : sort.sortBy
 
   let query = supabase.from("store_products").select(LISTING_COLUMNS)
 
@@ -372,6 +439,7 @@ async function queryWithIlikeFallback(
   }
 
   query = applySourceFilter(query, params)
+  query = applyListingQualityFilters(query, effectiveSort, flags)
 
   if (params.priceRange?.min != null) {
     query = query.gte("price", params.priceRange.min)
@@ -383,7 +451,7 @@ async function queryWithIlikeFallback(
   if (sort.prioritizeByPriority) {
     query = query.order("priority", { ascending: false, nullsFirst: false })
   }
-  query = applySorting(query, sort.sortBy === "relevance" ? "a-z" : sort.sortBy)
+  query = applySorting(query, effectiveSort)
 
   query = query.range(offset, offset + pagination.limit)
 
@@ -737,6 +805,10 @@ function applySorting<Q extends { [key: string]: any }>(query: Q, sortBy: string
       return query.order("updated_at", { ascending: true, nullsFirst: true })
     case "price-drop":
       return query.order("price_change_pct", { ascending: true, nullsFirst: false })
+    case "price-drop-smart":
+      return query
+        .order("price_drop_smart_score", { ascending: false, nullsFirst: false })
+        .order("price_change_pct", { ascending: true, nullsFirst: false })
     case "price-increase":
       return query.order("price_change_pct", { ascending: false, nullsFirst: false })
     case "best-discount":
@@ -817,7 +889,8 @@ export async function getMatchingProductsCount(
   params: StoreProductsQueryParams,
 ): Promise<{ count: number; error: { message: string } | null }> {
   const supabase = createClient()
-  const flags = { ...DEFAULT_FLAGS, ...params.flags }
+  const sortBy = params.sort?.sortBy ?? DEFAULT_SORT.sortBy
+  const flags = mergeListingFlags(sortBy, { ...DEFAULT_FLAGS, ...params.flags })
 
   // Determine which table/view to use based on canonical category filter
   const useCanonicalView = !!params.canonicalCategory?.categoryId
@@ -848,6 +921,7 @@ export async function getMatchingProductsCount(
   query = applyBrandFilter(query, params)
   query = applySearchFilter(query, params)
   query = applySourceFilter(query, params)
+  query = applyListingQualityFilters(query, sortBy, flags)
 
   if (flags.onlyDiscounted) {
     query = query.gt("discount", 0)
@@ -884,7 +958,8 @@ export async function getMatchingProductsWithDistribution(
   params: StoreProductsQueryParams,
 ): Promise<PriorityDistributionResult> {
   const supabase = createClient()
-  const flags = { ...DEFAULT_FLAGS, ...params.flags }
+  const sortBy = params.sort?.sortBy ?? DEFAULT_SORT.sortBy
+  const flags = mergeListingFlags(sortBy, { ...DEFAULT_FLAGS, ...params.flags })
 
   // Determine which table/view to use based on canonical category filter
   const useCanonicalView = !!params.canonicalCategory?.categoryId
@@ -915,6 +990,7 @@ export async function getMatchingProductsWithDistribution(
     query = applyBrandFilter(query, params)
     query = applySearchFilter(query, params)
     query = applySourceFilter(query, params)
+    query = applyListingQualityFilters(query, sortBy, flags)
 
     if (flags.onlyDiscounted) {
       query = query.gt("discount", 0)

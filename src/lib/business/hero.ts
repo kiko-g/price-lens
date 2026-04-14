@@ -38,9 +38,12 @@ export async function getHeroProducts(): Promise<HeroProduct[]> {
 
     const { data, error } = await supabase
       .from("store_products")
-      .select("id, name, image, origin_id, brand, price, price_recommended, discount")
+      .select("id, name, image, origin_id, brand, price, price_recommended, discount, available")
       .in("id", HERO_PRODUCT_IDS)
       .not("image", "is", null)
+      .eq("available", true)
+      .not("price", "is", null)
+      .gt("price", 0)
 
     if (error || !data) return []
 

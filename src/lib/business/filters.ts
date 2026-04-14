@@ -37,6 +37,7 @@ export const ALL_SORT_LABELS: Record<string, { label: string; icon: typeof Clock
   "price-high-low": { label: "Price: High to Low", icon: ArrowUpWideNarrowIcon },
   "price-low-high": { label: "Price: Low to High", icon: ArrowDownWideNarrowIcon },
   "price-drop": { label: "Biggest Price Drops", icon: TrendingDownIcon },
+  "price-drop-smart": { label: "Price Drops (weighted)", icon: TrendingDownIcon },
   "price-increase": { label: "Biggest Price Increases", icon: TrendingUpIcon },
   "best-discount": { label: "Best Discounts", icon: TicketPercentIcon },
 }
@@ -50,6 +51,7 @@ export const SORT_OPTIONS_GROUPS = [
     label: "Price Intelligence",
     options: [
       { label: "Biggest Price Drops", value: "price-drop", icon: TrendingDownIcon },
+      { label: "Price Drops (weighted)", value: "price-drop-smart", icon: TrendingDownIcon },
       { label: "Biggest Price Increases", value: "price-increase", icon: TrendingUpIcon },
       { label: "Best Discounts", value: "best-discount", icon: TicketPercentIcon },
     ],

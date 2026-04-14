@@ -40,10 +40,15 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { store_product_id, threshold_type = "any_drop", threshold_value } = body
+  const { store_product_id, threshold_type = "any_drop", threshold_value: rawThreshold } = body
 
   if (!store_product_id) {
     return NextResponse.json({ error: "store_product_id is required" }, { status: 400 })
+  }
+
+  let threshold_value: number | null = rawThreshold ?? null
+  if (threshold_type === "percentage" && threshold_value != null && threshold_value > 1) {
+    threshold_value = threshold_value / 100
   }
 
   const { data, error } = await supabase
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         store_product_id,
         threshold_type,
-        threshold_value: threshold_value ?? null,
+        threshold_value,
         is_active: true,
         updated_at: new Date().toISOString(),
       },
