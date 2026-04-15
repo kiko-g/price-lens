@@ -337,7 +337,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         </p>
       ) : (
         <p className="text-muted-foreground mb-3">
-          All tracked stores show the same price — you&apos;re not missing a better deal elsewhere.
+          All tracked stores show the same price: you&apos;re not missing a better deal elsewhere.
         </p>
       )}
 

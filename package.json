@@ -6,7 +6,9 @@
     "react-is": "^19.0.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["supabase"]
+    "onlyBuiltDependencies": [
+      "supabase"
+    ]
   },
   "scripts": {
     "dev": "next dev --turbopack",

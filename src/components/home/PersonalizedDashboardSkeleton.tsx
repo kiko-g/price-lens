@@ -14,7 +14,7 @@ export function PersonalizedDashboardSkeleton() {
         <Skeleton className="h-[50px] w-full rounded-xl md:h-[50px] lg:max-w-md" variant="shimmer" />
       </div>
 
-      {/* Quick action cards — matches QuickActionCard structure: bg-card border p-3 lg:p-4, icon size-8 + two text lines */}
+      {/* Quick action cards: matches QuickActionCard structure: bg-card border p-3 lg:p-4, icon size-8 + two text lines */}
       <div className="mb-6 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
@@ -30,7 +30,7 @@ export function PersonalizedDashboardSkeleton() {
         ))}
       </div>
 
-      {/* Stacked dashboard sections — matches DashboardSection using Card/CardHeader/CardContent */}
+      {/* Stacked dashboard sections: matches DashboardSection using Card/CardHeader/CardContent */}
       <div className="flex flex-col gap-6">
         {Array.from({ length: 3 }).map((_, i) => (
           <Card key={i}>
@@ -47,7 +47,7 @@ export function PersonalizedDashboardSkeleton() {
                   <MiniProductCardSkeleton key={j} />
                 ))}
               </div>
-              {/* dot row placeholder — Favorites usually has 2+ pages so dots render */}
+              {/* dot row placeholder: Favorites usually has 2+ pages so dots render */}
               {i === 0 && (
                 <div className="mt-3 flex items-center justify-center gap-1.5 md:hidden">
                   <Skeleton variant="shimmer" className="h-1.5 w-4 rounded-full" />

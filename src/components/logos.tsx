@@ -71,7 +71,7 @@ export function AuchanSvg(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-/** Pingo Doce wordmark: use fixed fills, not theme tokens — `fill-foreground` / `fill-background` break on `bg-white` chips in dark mode. */
+/** Pingo Doce wordmark: use fixed fills, not theme tokens: `fill-foreground` / `fill-background` break on `bg-white` chips in dark mode. */
 export function PingoDoceSvg(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1088 246" fill="none" {...props}>

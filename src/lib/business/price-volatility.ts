@@ -141,6 +141,59 @@ export function hasSufficientPriceStats(
   return obs >= 2
 }
 
+/** Distinct price-level count from `/api/prices?analytics` (store product page only). */
+export type PriceHistoryHint = {
+  loading: boolean
+  /** From analytics `pricePoints.length`; `null` when product is not tracked / fetch not used. */
+  levels: number | null
+}
+
+/**
+ * Single-level history: the chart, frequency table, and "most common price" row already say it all.
+ * Omit the desktop "How stable is this price?" card to avoid stacking redundant boxes.
+ */
+export function shouldHideDesktopPriceStabilityCallout(priceHistoryHint?: PriceHistoryHint): boolean {
+  if (priceHistoryHint == null) return false
+  if (priceHistoryHint.loading) return false
+  return priceHistoryHint.levels === 1
+}
+
+/** Short copy when `hasSufficientPriceStats` is false (consumer UI). */
+export function getInsufficientPriceStatsMessage(
+  updatedAt: string | null | undefined,
+  obs90d: number | null | undefined,
+  priceHistoryHint?: PriceHistoryHint | null,
+): string | null {
+  if (priceHistoryHint?.loading) {
+    return null
+  }
+
+  if (priceHistoryHint != null && priceHistoryHint.levels === 1) {
+    return "Every recorded price is at the same level, so volatility is zero."
+  }
+
+  if (priceHistoryHint != null && priceHistoryHint.levels != null && priceHistoryHint.levels >= 2) {
+    return "The short stability blurb is still syncing. The chart and frequency table below already show how this price moved."
+  }
+
+  if (priceHistoryHint != null && priceHistoryHint.levels === 0) {
+    return "No price history in our records for this product yet."
+  }
+
+  if (updatedAt != null) {
+    const obs = obs90d ?? 0
+    if (obs === 1) {
+      return "Only one price check in this window, so volatility is zero. See the chart below for context."
+    }
+    if (obs === 0) {
+      return "No checks in this 90-day window yet. The chart shows what we have."
+    }
+    return "We need more recorded prices in the last 90 days before stability notes are meaningful. The chart below is still the best place to look."
+  }
+
+  return "Stability stats are not available yet. The chart below is still the best place to look."
+}
+
 /** Show volatility callout on product page mobile only at or above this (reduces noise when history is thin). */
 export const MOBILE_PRICE_STATS_MIN_OBSERVATIONS = 8
 

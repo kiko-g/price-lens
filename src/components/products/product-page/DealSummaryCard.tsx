@@ -30,7 +30,7 @@ type DealSummaryCardProps = {
   sp: StoreProduct
   pricePoints: PricePoint[] | null
   mostCommon: PricePoint | null
-  /** From analytics.dateRange.daysBetween — improves “rare” vs “new price” labeling */
+  /** From analytics.dateRange.daysBetween: improves “rare” vs “new price” labeling */
   historyDays?: number
   isLoading: boolean
   cheaperHint?: CheaperElsewhereHint | null

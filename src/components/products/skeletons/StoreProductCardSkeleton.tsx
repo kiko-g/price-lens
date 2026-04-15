@@ -5,12 +5,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function StoreProductCardSkeleton() {
   return (
     <div className="bg-background flex w-full flex-col rounded-lg">
-      {/* Image — mb-2 matches real card */}
+      {/* Image: mb-2 matches real card */}
       <div className="relative mb-2 overflow-hidden rounded-md border border-transparent">
         <Skeleton className="aspect-8/7 w-full" />
       </div>
 
-      {/* Category badge + brand + name — mirrors real card text block */}
+      {/* Category badge + brand + name: mirrors real card text block */}
       <div className="flex flex-1 flex-col items-start">
         <div className="flex w-full flex-col items-start">
           <Skeleton className="h-4 w-16 rounded-sm" />

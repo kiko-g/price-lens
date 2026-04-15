@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import type { StoreProduct } from "@/types"
 import { RANGES, DateRange } from "@/types/business"
+import type { PriceHistoryHint } from "@/lib/business/price-volatility"
 import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams"
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed"
 
@@ -30,16 +31,19 @@ function ChartSection({
   sp,
   rangeFromUrl,
   onRangeChange,
+  onPriceHistoryHint,
 }: {
   sp: StoreProduct
   rangeFromUrl: DateRange
   onRangeChange: (range: DateRange) => void
+  onPriceHistoryHint?: (hint: PriceHistoryHint) => void
 }) {
   return (
     <ProductChart.Root
       sp={sp}
       defaultRange={rangeFromUrl}
       onRangeChange={onRangeChange}
+      onPriceHistoryHint={onPriceHistoryHint}
       samplingMode="efficient"
       className="flex-1"
     >
@@ -78,8 +82,25 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
   const updateParams = useUpdateSearchParams()
   const { addItem } = useRecentlyViewed()
 
+  const isTracked = sp.priority != null && sp.priority > 0
+  const [priceHistoryHint, setPriceHistoryHint] = useState<PriceHistoryHint>(() => ({
+    loading: isTracked,
+    levels: null,
+  }))
+
+  const handlePriceHistoryHint = useCallback((hint: PriceHistoryHint) => {
+    setPriceHistoryHint(hint)
+  }, [])
+
   const rangeFromUrl = parseRangeParam(searchParams.get("range"))
   const storeProductId = sp.id?.toString() || ""
+
+  useEffect(() => {
+    setPriceHistoryHint({
+      loading: sp.priority != null && sp.priority > 0,
+      levels: null,
+    })
+  }, [sp.id, sp.priority])
 
   useEffect(() => {
     addItem({
@@ -109,8 +130,18 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       {/* Desktop hero (hidden below md) - chart lives inside the right column */}
       <ProductHeroDesktop sp={sp}>
-        <ProductPriceStatsCallout sp={sp} className="mt-1 max-w-2xl" placement="desktop" />
-        <ChartSection sp={sp} rangeFromUrl={rangeFromUrl} onRangeChange={handleRangeChange} />
+        <ProductPriceStatsCallout
+          sp={sp}
+          className="mt-1 max-w-2xl"
+          placement="desktop"
+          priceHistoryHint={priceHistoryHint}
+        />
+        <ChartSection
+          sp={sp}
+          rangeFromUrl={rangeFromUrl}
+          onRangeChange={handleRangeChange}
+          onPriceHistoryHint={handlePriceHistoryHint}
+        />
       </ProductHeroDesktop>
 
       {/* Mobile hero (hidden at md+) */}
@@ -124,7 +155,12 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
       {/* Mobile: price history accordion (compact when collapsed) before the full compare list */}
       <div className="mt-5 md:hidden">
-        <ChartSection sp={sp} rangeFromUrl={rangeFromUrl} onRangeChange={handleRangeChange} />
+        <ChartSection
+          sp={sp}
+          rangeFromUrl={rangeFromUrl}
+          onRangeChange={handleRangeChange}
+          onPriceHistoryHint={handlePriceHistoryHint}
+        />
       </div>
 
       <div className="mt-6 md:hidden">

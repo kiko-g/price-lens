@@ -128,7 +128,7 @@ async function HeroContent() {
 function HeroSkeleton() {
   return (
     <div className="z-20 mx-auto w-full max-w-7xl px-4 lg:px-8">
-      {/* Mobile skeleton — matches HeroContent mobile: pt-6 pb-6, individual spacing */}
+      {/* Mobile skeleton: matches HeroContent mobile: pt-6 pb-6, individual spacing */}
       <div className="lg:hidden">
         <div className="flex flex-col items-center pt-6 pb-6">
           <Skeleton className="h-[72px] w-3/4 max-w-xs rounded-lg" />
@@ -137,7 +137,7 @@ function HeroSkeleton() {
           <Skeleton className="h-12 w-full max-w-md rounded-xl" />
         </div>
         <div className="flex flex-col gap-5 pb-6">
-          {/* Entry points — row variant: horizontal pills */}
+          {/* Entry points: row variant: horizontal pills */}
           <div className="flex w-full items-center justify-center gap-2.5">
             <Skeleton className="h-8 w-24 rounded-full" />
             <Skeleton className="h-8 w-28 rounded-full" />
@@ -152,7 +152,7 @@ function HeroSkeleton() {
         </div>
       </div>
 
-      {/* Desktop skeleton — matches HeroContent desktop layout */}
+      {/* Desktop skeleton: matches HeroContent desktop layout */}
       <div className="hidden lg:block">
         <div className="flex gap-10 pt-20 pb-6">
           <div className="flex flex-1 flex-col gap-5">
@@ -168,7 +168,7 @@ function HeroSkeleton() {
           </div>
         </div>
 
-        {/* Entry points — row variant: horizontal pills */}
+        {/* Entry points: row variant: horizontal pills */}
         <div className="flex items-center gap-2.5 pb-8">
           <Skeleton className="h-8 w-24 rounded-full" />
           <Skeleton className="h-8 w-28 rounded-full" />

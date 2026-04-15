@@ -44,7 +44,7 @@ export function BottomNav() {
               key={item.label}
               href={resolvedHref}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-2 py-1.5 transition-all duration-200 sm:px-3",
+                "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-2 py-1 transition-all duration-200 sm:px-2.5",
                 isActive ? "bg-muted text-foreground" : "text-muted-foreground",
               )}
               aria-label={item.label}

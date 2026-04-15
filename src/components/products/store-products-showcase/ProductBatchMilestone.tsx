@@ -7,7 +7,7 @@ type ProductBatchMilestoneProps = {
 
 /**
  * Full-width row inside the product grid (use with col-span-full) between batches
- * of `limit` items on mobile — in document flow, not a fixed overlay.
+ * of `limit` items on mobile: in document flow, not a fixed overlay.
  */
 export function ProductBatchMilestone({ loaded }: ProductBatchMilestoneProps) {
   return (

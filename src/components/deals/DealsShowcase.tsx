@@ -64,7 +64,7 @@ export function DealsShowcase({ deals }: { deals: DealsResult }) {
             onClick={() => setStoreFilter(filter.id)}
             className={cn(
               "inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border px-3 text-sm font-medium transition-colors",
-              "originId" in filter ? "min-w-[3rem] px-2.5" : "px-3.5",
+              "originId" in filter ? "min-w-12 px-2.5" : "px-3.5",
               storeFilter === filter.id &&
                 ("originId" in filter
                   ? "border-primary bg-primary/10 text-foreground ring-primary/20 ring-2"
@@ -130,7 +130,7 @@ export function DealsShowcase({ deals }: { deals: DealsResult }) {
 
 function DealTabCount({ n }: { n: number }) {
   return (
-    <span className="bg-muted-foreground/15 text-muted-foreground inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums">
+    <span className="bg-muted-foreground/15 text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums">
       {n}
     </span>
   )
@@ -139,7 +139,7 @@ function DealTabCount({ n }: { n: number }) {
 function EmptyDeals({ variant }: { variant: "drops" | "discounts" }) {
   const message =
     variant === "drops"
-      ? "No recent price drops match these rules (valid price, change within the last two weeks, plausible size). Try another store or check back later — the list fills as data updates."
+      ? "No recent price drops match these rules (valid price, change within the last two weeks, plausible size). Try another store or check back later: the list fills as data updates."
       : "No standout discounts for this filter. Try another store."
   const Icon: LucideIcon = variant === "drops" ? TrendingDownIcon : TicketPercentIcon
 

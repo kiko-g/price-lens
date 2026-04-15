@@ -476,7 +476,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
           <LoadingGrid limit={limit} />
         ) : favorites.length > 0 ? (
           <>
-            {/* Smart View Presets (desktop only — mobile presets are in MobileNav) */}
+            {/* Smart View Presets (desktop only: mobile presets are in MobileNav) */}
             <div className="hidden lg:block">
               <FavoritesSmartViewPresets urlState={urlState} isLoading={isFetching} onApply={handlePresetApply} />
             </div>

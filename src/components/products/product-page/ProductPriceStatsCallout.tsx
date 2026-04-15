@@ -2,8 +2,11 @@
 
 import type { StoreProduct } from "@/types"
 import {
+  type PriceHistoryHint,
+  getInsufficientPriceStatsMessage,
   getPriceMovementGuidance,
   hasSufficientPriceStats,
+  shouldHideDesktopPriceStabilityCallout,
   shouldShowMobilePriceStatsCallout,
   volatilityBandFromCv,
   volatilityCasualLead,
@@ -18,9 +21,11 @@ type Props = {
   className?: string
   /** `mobile`: below-the-fold strip on phones. `desktop`: card in hero (md+). */
   placement?: "mobile" | "desktop"
+  /** When set (store page), aligns insufficient-stats copy with chart frequency data. */
+  priceHistoryHint?: PriceHistoryHint
 }
 
-export function ProductPriceStatsCallout({ sp, className, placement = "desktop" }: Props) {
+export function ProductPriceStatsCallout({ sp, className, placement = "desktop", priceHistoryHint }: Props) {
   const isAdmin = useIsAdmin()
   const showDevScore = process.env.NODE_ENV === "development" || isAdmin
 
@@ -77,11 +82,23 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop" 
     )
   }
 
+  if (placement === "desktop" && shouldHideDesktopPriceStabilityCallout(priceHistoryHint)) {
+    return null
+  }
+
+  if (placement === "desktop" && !sufficient && priceHistoryHint?.loading) {
+    return null
+  }
+
+  const insufficientMessage = !sufficient
+    ? getInsufficientPriceStatsMessage(sp.price_stats_updated_at, sp.price_stats_obs_90d, priceHistoryHint)
+    : null
+
   return (
     <section
       className={cn(
         "flex flex-col gap-2 md:gap-3",
-        "md:border-border/70 md:bg-muted/20 md:rounded-xl md:border md:p-5",
+        "md:border-border/70 md:bg-muted/20 md:rounded-xl md:border md:p-4",
         className,
       )}
       aria-label="How stable is this price?"
@@ -97,14 +114,14 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop" 
         {metaDesktop}
       </div>
 
-      {!sufficient ? (
-        <Callout variant="info" icon={InfoIcon} className="md:mt-0">
-          <p className="text-muted-foreground text-sm leading-snug">
-            We need more recorded prices in the last 90 days before we can say how jumpy this product usually is. The
-            chart below is still the best place to look.
-          </p>
-        </Callout>
-      ) : guidance && guidanceCompact ? (
+      {!sufficient && insufficientMessage ? (
+        <div className="text-muted-foreground flex gap-2.5 md:mt-0">
+          <InfoIcon className="text-info mt-0.5 size-4 shrink-0" aria-hidden />
+          <p className="text-sm leading-snug">{insufficientMessage}</p>
+        </div>
+      ) : null}
+
+      {sufficient && guidance && guidanceCompact ? (
         <Callout variant={guidance.tone === "warning" ? "warning" : "info"} icon={InfoIcon}>
           <div className="hidden md:block">
             <p className="text-foreground text-sm font-semibold">{volatilityCasualLead(band, true)}</p>

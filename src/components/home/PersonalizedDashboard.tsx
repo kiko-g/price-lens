@@ -381,7 +381,7 @@ function MiniProductCarousel({
         <MobileCarousel products={products} />
       </div>
 
-      {/* Desktop: flowing grid, no paging — 4 cols up to xl, then 6 */}
+      {/* Desktop: flowing grid, no paging: 4 cols up to xl, then 6 */}
       <div className="hidden grid-cols-4 gap-2 md:grid xl:grid-cols-6">
         {desktopProducts.map((p) => (
           <MiniProductCard key={p.id} product={p} />
@@ -429,7 +429,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
           </div>
         )}
 
-        {/* Discount badge — overlaid on image */}
+        {/* Discount badge: overlaid on image */}
         {hasDiscount && (
           <div className="bg-primary text-primary-foreground absolute top-1.5 left-1.5 rounded px-1 py-0.5 text-[10px] leading-none font-bold">
             −{discountValueToPercentage(discount!, 0)}

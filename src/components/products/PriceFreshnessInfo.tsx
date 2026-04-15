@@ -86,7 +86,7 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
             </p>
             <div className="border-border/60 border-t pt-5 md:hidden">
               <p className="text-muted-foreground text-sm leading-relaxed">
-                <span className="text-foreground font-medium">Favorites</span> — add this product to bump how often we
+                <span className="text-foreground font-medium">Favorites</span>: add this product to bump how often we
                 check it.
               </p>
             </div>

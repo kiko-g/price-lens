@@ -130,11 +130,21 @@ type RootProps = {
   sp: StoreProduct
   defaultRange?: DateRange
   onRangeChange?: (range: DateRange) => void
+  /** When set, reports analytics `pricePoints.length` so copy elsewhere can match the frequency table. */
+  onPriceHistoryHint?: (hint: { loading: boolean; levels: number | null }) => void
   samplingMode?: ChartSamplingMode
   className?: string
 }
 
-function Root({ children, sp, defaultRange = "1M", onRangeChange, samplingMode = "hybrid", className }: RootProps) {
+function Root({
+  children,
+  sp,
+  defaultRange = "1M",
+  onRangeChange,
+  onPriceHistoryHint,
+  samplingMode = "hybrid",
+  className,
+}: RootProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const showDots = samplingMode === "efficient"
   const baseDotRadius = isMobile ? 2 : 0
@@ -271,9 +281,23 @@ function Root({ children, sp, defaultRange = "1M", onRangeChange, samplingMode =
     isTooltipActive,
   }
 
+  useEffect(() => {
+    if (!onPriceHistoryHint) return
+    if (!isTracked) {
+      onPriceHistoryHint({ loading: false, levels: null })
+      return
+    }
+    if (isLoading) {
+      onPriceHistoryHint({ loading: true, levels: null })
+      return
+    }
+    const levels = pricePoints?.length ?? 0
+    onPriceHistoryHint({ loading: false, levels })
+  }, [isTracked, isLoading, onPriceHistoryHint, pricePoints])
+
   return (
     <ProductChartContext.Provider value={contextValue}>
-      <div className={cn("flex w-full flex-col", className)}>{children}</div>
+      <div className={cn("flex w-full min-w-0 flex-col", className)}>{children}</div>
     </ProductChartContext.Provider>
   )
 }
@@ -676,7 +700,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
 
   if (isLoading) {
     return (
-      <div className={cn("flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
+      <div className={cn("flex w-full max-w-full min-w-0 flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
         <Skeleton variant="shimmer" className="h-10 w-full rounded-lg" />
         <div className="mt-1 flex flex-col rounded-lg border">
           <Skeleton variant="shimmer" className="h-7 w-full rounded-none rounded-t-lg" />
@@ -776,7 +800,12 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
   )
 
   return (
-    <div className={cn("animate-fade-in-fast flex flex-1 shrink-0 flex-col gap-2 overflow-hidden", className)}>
+    <div
+      className={cn(
+        "animate-fade-in-fast flex w-full max-w-full min-w-0 flex-1 shrink-0 flex-col gap-2 overflow-hidden",
+        className,
+      )}
+    >
       <div
         className={cn(
           "flex min-w-0 items-start gap-2 rounded-lg border px-2.5 py-1.5 pr-3 text-sm",
@@ -785,7 +814,6 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
             : "bg-destructive/10 dark:bg-destructive/20 border-destructive/20 dark:border-destructive/40",
         )}
       >
-        <BinocularsIcon className="mt-0.5 h-4 w-4 shrink-0" />
         {sp.price === mostCommon?.price ? (
           <span className="min-w-0 wrap-break-word">
             Current price is <span className="text-success font-bold">the most common price</span>.
@@ -798,11 +826,13 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       </div>
 
       {scrollable ? (
-        <ScrollArea className={cn("mt-1 max-w-full rounded-lg border", orderedPoints.length > 6 && "h-[250px]")}>
+        <ScrollArea
+          className={cn("mt-1 max-w-full min-w-0 rounded-lg border", orderedPoints.length > 6 && "h-[250px]")}
+        >
           {pricePointsTable}
         </ScrollArea>
       ) : (
-        <div className="mt-1 max-w-full rounded-lg border">{pricePointsTable}</div>
+        <div className="mt-1 max-w-full min-w-0 overflow-x-auto rounded-lg border">{pricePointsTable}</div>
       )}
 
       {trackingSince && (
@@ -890,7 +920,7 @@ function ErrorDisplay({ className }: ErrorDisplayProps) {
 }
 
 // ============================================================================
-// Mobile analytics disclosure (expandable chart/table — summary lives above compare on mobile)
+// Mobile analytics disclosure (expandable chart/table; summary lives above compare on mobile)
 // ============================================================================
 
 type AnalyticsDisclosureProps = {
@@ -910,9 +940,13 @@ function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="text-foreground border-border bg-muted/25 hover:bg-muted/40 flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
+          className="text-foreground border-border bg-muted/25 hover:bg-muted/40 group-data-[state=open]/collapsible:bg-muted flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
         >
-          <span className="min-w-0 wrap-break-word">Price history & breakdown</span>
+          <span className="flex items-center gap-1.5">
+            <BinocularsIcon className="mt-0.5 h-4 w-4 shrink-0" />
+            <span className="min-w-0 wrap-break-word">Price history & breakdown</span>
+          </span>
+
           <ChevronDownIcon className="size-5 shrink-0 opacity-70 transition-transform group-data-[state=open]/collapsible:rotate-180" />
         </button>
       </CollapsibleTrigger>

@@ -105,7 +105,7 @@ export async function GET(request: Request) {
             </div>
           </div>
 
-          {/* KPI grid — 4 across */}
+          {/* KPI grid: 4 across */}
           <div tw="flex mt-12" style={{ gap: 12 }}>
             {kpis.map((kpi) => (
               <div
@@ -170,7 +170,7 @@ export async function GET(request: Request) {
         style={{ bottom: 60, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.04)" }}
       />
 
-      {/* Content — centered */}
+      {/* Content: centered */}
       <div tw="flex absolute items-center justify-center" style={{ inset: 0, padding: "60px 80px" }}>
         <div tw="flex items-center" style={{ gap: 36 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

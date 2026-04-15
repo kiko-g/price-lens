@@ -49,7 +49,7 @@ export default function ProductsLoading() {
           </div>
         </aside>
 
-        {/* Mobile nav skeleton — mirrors MobileNav to prevent layout shift */}
+        {/* Mobile nav skeleton: mirrors MobileNav to prevent layout shift */}
         <div className="sticky top-(--header-height) z-50 lg:hidden">
           <div className="flex w-full items-center gap-2 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
             <div className="flex flex-1 items-center gap-2.5 rounded-lg border px-3 py-2.5">
@@ -64,7 +64,7 @@ export default function ProductsLoading() {
 
         {/* Main content area */}
         <div className="relative flex w-full flex-1 flex-col p-4 lg:h-full lg:overflow-y-auto">
-          {/* SmartViewPresets chips skeleton — same h-8 min-h-8 row */}
+          {/* SmartViewPresets chips skeleton: same h-8 min-h-8 row */}
           <div className="no-scrollbar mb-3 flex h-8 max-h-8 min-h-8 gap-2 overflow-x-auto">
             {PRESET_WIDTHS.map((w, i) => (
               <Skeleton key={i} className={`h-8 shrink-0 rounded-full ${w}`} />

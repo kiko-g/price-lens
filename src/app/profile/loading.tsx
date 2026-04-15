@@ -34,7 +34,7 @@ export default function ProfileLoading() {
             </div>
           </div>
 
-          {/* Tabs skeleton — 6 pills matching real TabsList */}
+          {/* Tabs skeleton: 6 pills matching real TabsList */}
           <div className="min-w-0 flex-1">
             <div className="bg-muted inline-flex h-10 items-center gap-1 rounded-md p-1">
               <Skeleton className="h-8 w-20" />
