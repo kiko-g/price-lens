@@ -404,15 +404,13 @@ export function InflationTrends() {
                   <LineChart data={inflationData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
                     <XAxis
-                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
                       dataKey="year"
                       interval="preserveStartEnd"
                       tickMargin={8}
-                      className="text-xs sm:text-sm"
+                      minTickGap={16}
                       domain={[1999, 2024]}
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
                       tickMargin={8}
                       width={35}
                       domain={[0, 8]}
@@ -423,7 +421,6 @@ export function InflationTrends() {
                         position: "insideLeft",
                         style: { textAnchor: "middle", fontSize: "12px" },
                       }}
-                      className="text-xs sm:text-sm"
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend
@@ -482,15 +479,13 @@ export function InflationTrends() {
                   <LineChart data={cumulativeInflation}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
                     <XAxis
-                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
                       dataKey="year"
                       interval="preserveStartEnd"
                       tickMargin={8}
-                      className="text-xs sm:text-sm"
+                      minTickGap={16}
                       domain={[1999, 2024]}
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
                       tickMargin={8}
                       width={35}
                       domain={[100, 200]}
@@ -500,7 +495,6 @@ export function InflationTrends() {
                         position: "insideLeft",
                         style: { textAnchor: "middle", fontSize: "12px" },
                       }}
-                      className="text-xs sm:text-sm"
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line

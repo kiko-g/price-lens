@@ -201,10 +201,13 @@ function Root({
   const daysBetweenDates = analytics?.dateRange.daysBetween || 0
 
   const xAxisTickInterval = useMemo(() => {
-    const dataLength = chartData.length
-    if (dataLength <= 8) return 0
-    return Math.floor(dataLength / 8)
-  }, [chartData.length])
+    const n = chartData.length
+    if (n <= 1) return 0
+    const isShortRange = selectedRange === "1W" || selectedRange === "2W" || selectedRange === "1M"
+    const maxTicks = isMobile ? (isShortRange ? 6 : 5) : isShortRange ? 12 : 8
+    if (n <= maxTicks) return 0
+    return Math.floor(n / maxTicks)
+  }, [chartData.length, isMobile, selectedRange])
 
   const updateChartData = useCallback(
     (range: DateRange) => {
@@ -484,33 +487,36 @@ function estimatePriceAxisWidth(ticks: number[]): number {
     const label = formatPriceTickLabel(tick)
     return label.length > longest.length ? label : longest
   }, "")
-  return Math.max(40, longestLabel.length * 7 + 8)
+  return Math.max(40, longestLabel.length * 8 + 10)
 }
 
-function CustomTick({
-  x,
-  y,
-  payload,
-  yAxisId,
-}: {
-  x: string | number
-  y: string | number
-  payload: { value: number }
-  yAxisId: string
-}) {
+function PriceYAxisTick({ x, y, payload }: { x: string | number; y: string | number; payload: { value: number } }) {
   return (
-    <text x={Number(x)} y={Number(y)} textAnchor="end" fill="#666" key={`${yAxisId}-tick-${payload.value}`}>
-      {yAxisId === "price" ? formatPriceTickLabel(payload.value) : `${payload.value}%`}
+    <text
+      x={Number(x)}
+      y={Number(y)}
+      textAnchor="end"
+      className="fill-foreground/70"
+      key={`price-tick-${payload.value}`}
+    >
+      {formatPriceTickLabel(payload.value)}
     </text>
   )
 }
 
-function PriceYAxisTick(props: Omit<React.ComponentProps<typeof CustomTick>, "yAxisId">) {
-  return <CustomTick {...props} yAxisId="price" />
-}
-
-function DiscountYAxisTick(props: Omit<React.ComponentProps<typeof CustomTick>, "yAxisId">) {
-  return <CustomTick {...props} yAxisId="discount" />
+function DiscountYAxisTick({ x, y, payload }: { x: string | number; y: string | number; payload: { value: number } }) {
+  return (
+    <text
+      x={Number(x)}
+      y={Number(y)}
+      dx={4}
+      textAnchor="start"
+      className="fill-foreground/70"
+      key={`discount-tick-${payload.value}`}
+    >
+      {`${payload.value}%`}
+    </text>
+  )
 }
 
 // ============================================================================
@@ -607,15 +613,15 @@ function Graph({ className }: GraphProps) {
           transition: `opacity ${CHART_TRANSITION_DURATION}ms ease-in-out`,
         }}
       >
-        <LineChart accessibilityLayer data={chartData} margin={{ left: 4, right: -20, top: 12, bottom: 30 }}>
-          <CartesianGrid strokeDasharray="4 4" />
+        <LineChart accessibilityLayer data={chartData} margin={{ left: 4, right: 14, top: 12, bottom: 36 }}>
+          <CartesianGrid strokeDasharray="4 4" syncWithTicks yAxisId="price" />
           <XAxis
             dataKey="date"
             tickLine={false}
             axisLine={false}
             tickMargin={8}
             interval={xAxisTickInterval}
-            tick={{ fontSize: 10 }}
+            minTickGap={isMobile ? 28 : 16}
           />
           <YAxis
             yAxisId="price"
@@ -635,7 +641,7 @@ function Graph({ className }: GraphProps) {
             orientation="right"
             tickLine={false}
             axisLine={false}
-            width={40}
+            width={isMobile ? 44 : 52}
             domain={[0, 100]}
             ticks={[0, 25, 50, 75, 100]}
             tickFormatter={(value) => `${value}%`}
@@ -940,7 +946,7 @@ function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="text-foreground border-border bg-muted/25 hover:bg-muted/40 group-data-[state=open]/collapsible:bg-muted flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
+          className="text-foreground border-border bg-muted/25 hover:bg-muted/40 group-data-[state=open]/collapsible:bg-muted/50 flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3.5 text-left text-sm font-semibold"
         >
           <span className="flex items-center gap-1.5">
             <BinocularsIcon className="mt-0.5 h-4 w-4 shrink-0" />

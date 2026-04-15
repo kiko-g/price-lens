@@ -105,7 +105,7 @@ export function buildChartData(
     })
   }
 
-  // Find price at a given date
+  // Find price at a given date (interval match, then last row with validFrom <= date for small gaps)
   const findPriceAtDate = (date: Date): ProcessedPrice | null => {
     for (let i = processedPrices.length - 1; i >= 0; i--) {
       const p = processedPrices[i]
@@ -113,7 +113,13 @@ export function buildChartData(
         return p
       }
     }
-    return null
+    let lastStarted: ProcessedPrice | null = null
+    for (const p of processedPrices) {
+      if (p.validFrom <= date) {
+        lastStarted = p
+      }
+    }
+    return lastStarted
   }
 
   // Add price change boundary points (used by both 'efficient' and 'hybrid' modes)
@@ -193,7 +199,7 @@ function formatDateForChart(dateString: string, totalDays: number = 30): string 
 
   // For very long ranges (> 1 year), show month + year
   if (totalDays > 365) {
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString("pt-PT", {
       month: "short",
       year: "2-digit",
     })
@@ -201,14 +207,14 @@ function formatDateForChart(dateString: string, totalDays: number = 30): string 
 
   // For medium ranges (> 2 months), show day + month
   if (totalDays > 60) {
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString("pt-PT", {
       day: "2-digit",
       month: "short",
     })
   }
 
   // For short ranges, show day + month
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString("pt-PT", {
     day: "numeric",
     month: "short",
   })

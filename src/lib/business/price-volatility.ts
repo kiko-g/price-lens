@@ -158,11 +158,22 @@ export function shouldHideDesktopPriceStabilityCallout(priceHistoryHint?: PriceH
   return priceHistoryHint.levels === 1
 }
 
+/** After this many days since listing/tracking anchor, do not imply denormalized stats are "still syncing". */
+export const PRICE_STATS_UI_SYNC_GRACE_DAYS = 28
+
+function ageInDaysSince(iso: string | null | undefined): number | null {
+  if (iso == null || iso === "") return null
+  const t = Date.parse(iso)
+  if (!Number.isFinite(t)) return null
+  return (Date.now() - t) / 86_400_000
+}
+
 /** Short copy when `hasSufficientPriceStats` is false (consumer UI). */
 export function getInsufficientPriceStatsMessage(
   updatedAt: string | null | undefined,
   obs90d: number | null | undefined,
   priceHistoryHint?: PriceHistoryHint | null,
+  statsSyncGraceAnchorAt?: string | null,
 ): string | null {
   if (priceHistoryHint?.loading) {
     return null
@@ -173,7 +184,12 @@ export function getInsufficientPriceStatsMessage(
   }
 
   if (priceHistoryHint != null && priceHistoryHint.levels != null && priceHistoryHint.levels >= 2) {
-    return "The short stability blurb is still syncing. The chart and frequency table below already show how this price moved."
+    const age = ageInDaysSince(statsSyncGraceAnchorAt)
+    const withinSyncGrace = age != null && age <= PRICE_STATS_UI_SYNC_GRACE_DAYS
+    if (withinSyncGrace) {
+      return "The short stability blurb is still syncing. The chart and frequency table below already show how this price moved."
+    }
+    return "We don't have a stability summary for this product yet. The chart and frequency table below show how the price moved."
   }
 
   if (priceHistoryHint != null && priceHistoryHint.levels === 0) {

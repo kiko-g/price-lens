@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Legend } from "recharts"
 
 import type { StoreProduct, Price } from "@/types"
@@ -65,6 +66,7 @@ function formatTrackingSince(dateStr: string | null): string {
 }
 
 export function ComparisonChart({ productsWithPrices, selectedRange, className }: ComparisonChartProps) {
+  const isMobile = useMediaQuery("(max-width: 768px)")
   // Build chart data for each product and merge by date
   const { mergedData, chartBounds, storeKeys } = useMemo(() => {
     if (productsWithPrices.length === 0) {
@@ -143,12 +145,13 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
     return { mergedData, chartBounds, storeKeys }
   }, [productsWithPrices, selectedRange])
 
-  // Calculate x-axis tick interval
   const xAxisTickInterval = useMemo(() => {
-    const dataLength = mergedData.length
-    if (dataLength <= 8) return 0
-    return Math.floor(dataLength / 8)
-  }, [mergedData.length])
+    const n = mergedData.length
+    if (n <= 1) return 0
+    const maxTicks = isMobile ? 5 : 8
+    if (n <= maxTicks) return 0
+    return Math.floor(n / maxTicks)
+  }, [mergedData.length, isMobile])
 
   // Build chart config for ChartContainer
   const chartConfig = useMemo(() => {
@@ -170,15 +173,15 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
   return (
     <div className={cn("bg-card rounded-lg border p-4", className)}>
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
-        <LineChart data={mergedData} margin={{ left: 4, right: 12, top: 12, bottom: 30 }}>
-          <CartesianGrid strokeDasharray="4 4" />
+        <LineChart data={mergedData} margin={{ left: 4, right: 12, top: 12, bottom: 36 }}>
+          <CartesianGrid strokeDasharray="4 4" syncWithTicks />
           <XAxis
             dataKey="date"
             tickLine={false}
             axisLine={false}
             tickMargin={8}
             interval={xAxisTickInterval}
-            tick={{ fontSize: 10 }}
+            minTickGap={isMobile ? 28 : 16}
           />
           <YAxis
             orientation="left"

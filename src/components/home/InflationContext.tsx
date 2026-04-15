@@ -89,19 +89,13 @@ export function InflationContext() {
               <LineChart data={cumulativeInflation}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
                 <XAxis
-                  tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
                   dataKey="year"
                   interval="preserveStartEnd"
                   tickMargin={8}
+                  minTickGap={16}
                   domain={[1999, 2024]}
                 />
-                <YAxis
-                  tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 400 }}
-                  tickMargin={8}
-                  width={35}
-                  domain={[100, 200]}
-                  tickFormatter={(value) => `${value}`}
-                />
+                <YAxis tickMargin={8} width={35} domain={[100, 200]} tickFormatter={(value) => `${value}`} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
                   type="monotone"

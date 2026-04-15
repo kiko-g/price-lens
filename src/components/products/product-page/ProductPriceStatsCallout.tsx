@@ -90,8 +90,15 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
     return null
   }
 
+  const statsSyncGraceAnchorAt = sp.priority_updated_at ?? sp.created_at
+
   const insufficientMessage = !sufficient
-    ? getInsufficientPriceStatsMessage(sp.price_stats_updated_at, sp.price_stats_obs_90d, priceHistoryHint)
+    ? getInsufficientPriceStatsMessage(
+        sp.price_stats_updated_at,
+        sp.price_stats_obs_90d,
+        priceHistoryHint,
+        statsSyncGraceAnchorAt,
+      )
     : null
 
   return (
@@ -115,10 +122,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
       </div>
 
       {!sufficient && insufficientMessage ? (
-        <div className="text-muted-foreground flex gap-2.5 md:mt-0">
-          <InfoIcon className="text-info mt-0.5 size-4 shrink-0" aria-hidden />
-          <p className="text-sm leading-snug">{insufficientMessage}</p>
-        </div>
+        <p className="text-muted-foreground text-sm leading-snug md:mt-0">{insufficientMessage}</p>
       ) : null}
 
       {sufficient && guidance && guidanceCompact ? (
