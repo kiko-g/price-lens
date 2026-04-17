@@ -329,7 +329,8 @@ function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewed
         aria-roledescription="carousel"
         aria-label="Favorite products"
         className={cn(
-          "flex w-full min-w-0 snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth",
+          // items-start: avoid stretching short pages to the tallest page’s height (e.g. last page with 1 item).
+          "flex w-full min-w-0 snap-x snap-mandatory items-start overflow-x-auto overflow-y-hidden scroll-smooth",
           "overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           "[-webkit-overflow-scrolling:touch]",
         )}
@@ -413,7 +414,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
       className="bg-card hover:bg-accent border-border flex flex-col overflow-hidden rounded-xl border transition-colors"
     >
       {/* Image */}
-      <div className="relative aspect-7/8 w-full bg-white">
+      <div className="relative aspect-8/7 w-full bg-white">
         {product.image ? (
           <Image
             src={product.image}

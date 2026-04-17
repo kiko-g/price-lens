@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function MiniProductCardSkeleton() {
   return (
     <div className="bg-card border-border flex flex-col overflow-hidden rounded-xl border">
-      <div className="aspect-7/8 w-full bg-white dark:bg-white/5" />
+      <div className="aspect-square w-full bg-white dark:bg-white/5" />
       <div className="flex flex-col gap-0.5 p-2">
         {/* 2 lines of text-xs leading-tight = 15px × 2 = 30px */}
         <Skeleton variant="shimmer" className="h-[30px] w-full rounded-sm" />
