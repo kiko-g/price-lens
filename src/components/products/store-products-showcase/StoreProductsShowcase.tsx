@@ -1161,7 +1161,10 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
       />
 
       {/* Main Content Area */}
-      <div data-main-scroll className="relative flex w-full flex-1 flex-col px-3 py-2 sm:px-4 sm:py-3 lg:h-full lg:overflow-y-auto">
+      <div
+        data-main-scroll
+        className="relative flex w-full flex-1 flex-col px-3 py-2 sm:px-4 sm:py-3 lg:h-full lg:overflow-y-auto"
+      >
         {/* Pull-to-refresh indicator (mobile) */}
         {(pullDistance > 0 || isPullRefreshing) && (
           <div

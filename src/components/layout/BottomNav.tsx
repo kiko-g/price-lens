@@ -28,7 +28,8 @@ export function BottomNav() {
     <nav
       className={cn(
         "bg-background border-border/40 fixed right-0 bottom-0 left-0 z-50 border-t shadow-[0_-8px_30px_-12px_rgba(0,0,0,0.08)] transition-transform duration-300 ease-out lg:hidden dark:shadow-[0_-8px_30px_-12px_rgba(0,0,0,0.35)]",
-        "px-3 pt-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]",
+        /* PWA standalone: skip stacking full safe-area — browser tab keeps env() for home indicator */
+        "px-3 pt-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] [@media(display-mode:standalone)]:pb-3",
         isHidden && "translate-y-full",
       )}
       aria-label="Primary navigation"

@@ -21,7 +21,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         <WelcomeToast />
       </Suspense>
       <Header />
-      <div className="flex flex-1 flex-col pb-[calc(7.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0">{children}</div>
+      <div className="flex flex-1 flex-col pb-[calc(7.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0 [@media(display-mode:standalone)]:pb-[6.25rem]">
+        {children}
+      </div>
       <ControlledFooter />
       <BottomNav />
     </div>

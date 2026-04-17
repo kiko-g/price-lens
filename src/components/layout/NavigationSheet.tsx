@@ -212,7 +212,7 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
         <Separator className="mx-5 w-auto" />
 
         {/* footer */}
-        <div className="flex items-center justify-between px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+        <div className="flex items-center justify-between px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] [@media(display-mode:standalone)]:pb-4">
           <div className="flex flex-col gap-0.5">
             <Link
               href={siteConfig.links.github}
