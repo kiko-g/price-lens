@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { useIsCompactMobile, useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 import { ShoppingBasketIcon, TrendingDownIcon, TicketPercentIcon, AppleIcon } from "lucide-react"
 
@@ -62,23 +62,19 @@ const entryPoints = [
   },
 ] as const
 
-function visibleRowEntries(isMobile: boolean, isCompactMobile: boolean) {
-  return entryPoints.filter((entry) => {
-    if (!isMobile) return entry.shownOnDesktop
-    if (isCompactMobile) return entry.shownOnMobile || entry.shownOnNarrowMobile === true
-    return entry.shownOnMobile
-  })
+function rowVariantEntries(isMobile: boolean) {
+  if (!isMobile) return entryPoints.filter((entry) => entry.shownOnDesktop)
+  return entryPoints.filter((entry) => entry.shownOnMobile || entry.shownOnNarrowMobile === true)
 }
 
 export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" }) {
   const isMobile = useIsMobile()
-  const isCompactMobile = useIsCompactMobile()
   const shown = isMobile ? "shownOnMobile" : "shownOnDesktop"
   const entryPointsFiltered = entryPoints.filter((entry) => entry[shown as keyof typeof entry])
-  const rowEntries = visibleRowEntries(isMobile, isCompactMobile)
+  const rowEntries = rowVariantEntries(isMobile)
 
   if (variant === "row") {
-    if (isMobile && isCompactMobile) {
+    if (isMobile) {
       return (
         <div className="grid w-full grid-cols-2 gap-1.5">
           {rowEntries.map((entry) => (
@@ -98,21 +94,13 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
     }
 
     return (
-      <div
-        className={cn(
-          "flex w-full items-center gap-2.5",
-          !isMobile && "justify-center lg:justify-start",
-          isMobile && !isCompactMobile && "no-scrollbar -mx-4 justify-start gap-2 overflow-x-auto px-4 pb-0.5",
-        )}
-      >
+      <div className={cn("flex w-full items-center gap-2.5", "justify-center lg:justify-start")}>
         {rowEntries.map((entry) => (
           <Link
             key={entry.label}
             href={entry.href}
             className={cn(
               "text-foreground hover:bg-accent bg-accent/50 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
-              isMobile && !isCompactMobile && "min-h-10 px-3 py-2",
-              isMobile ? entry.mobileBg : "",
             )}
           >
             <entry.icon className="text-foreground size-3.5 shrink-0" />

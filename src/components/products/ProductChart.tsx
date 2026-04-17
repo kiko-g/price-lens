@@ -27,6 +27,7 @@ import {
   buildChartData,
   chartConfig,
   calculateChartBounds,
+  formatChartAxisTick,
   formatRelativeTime,
   type ChartSamplingMode,
 } from "@/lib/business/chart"
@@ -88,7 +89,6 @@ type ProductChartContextValue = {
   // Derived values
   trackingSince: string | null
   daysBetweenDates: number
-  xAxisTickInterval: number
   variations: {
     price: number
     priceRecommended: number
@@ -200,15 +200,6 @@ function Root({
 
   const daysBetweenDates = analytics?.dateRange.daysBetween || 0
 
-  const xAxisTickInterval = useMemo(() => {
-    const n = chartData.length
-    if (n <= 1) return 0
-    const isShortRange = selectedRange === "1W" || selectedRange === "2W" || selectedRange === "1M"
-    const maxTicks = isMobile ? (isShortRange ? 6 : 5) : isShortRange ? 12 : 8
-    if (n <= maxTicks) return 0
-    return Math.floor(n / maxTicks)
-  }, [chartData.length, isMobile, selectedRange])
-
   const updateChartData = useCallback(
     (range: DateRange) => {
       if (!prices || prices.length === 0) return
@@ -272,7 +263,6 @@ function Root({
     error: error || null,
     trackingSince: analytics?.dateRange.minDate || null,
     daysBetweenDates,
-    xAxisTickInterval,
     variations,
     samplingMode,
     showDots,
@@ -534,13 +524,33 @@ function Graph({ className }: GraphProps) {
     activeAxis,
     isLoading,
     isTransitioning,
-    xAxisTickInterval,
     showDots,
     baseDotRadius,
     isMobile,
     chartRef,
     isTooltipActive,
+    daysBetweenDates,
   } = useProductChartContext()
+
+  const chartSpanDays = useMemo(() => {
+    if (chartData.length < 2) return Math.max(1, daysBetweenDates || 30)
+    const ts = chartData.map((d) => d.timeMs)
+    return Math.max(1, Math.ceil((Math.max(...ts) - Math.min(...ts)) / 86400000))
+  }, [chartData, daysBetweenDates])
+
+  const xTimeDomain = useMemo((): [number, number] | null => {
+    if (chartData.length === 0) return null
+    const ts = chartData.map((d) => d.timeMs)
+    let min = Math.min(...ts)
+    let max = Math.max(...ts)
+    if (min === max) {
+      min -= 86400000
+      max += 86400000
+    }
+    const span = max - min
+    const pad = Math.max(span * 0.02, 86400000 * 0.5)
+    return [min - pad, max + pad]
+  }, [chartData])
 
   if (isLoading) {
     return (
@@ -616,12 +626,15 @@ function Graph({ className }: GraphProps) {
         <LineChart accessibilityLayer data={chartData} margin={{ left: 4, right: 14, top: 12, bottom: 36 }}>
           <CartesianGrid strokeDasharray="4 4" syncWithTicks yAxisId="price" />
           <XAxis
-            dataKey="date"
+            type="number"
+            dataKey="timeMs"
+            domain={xTimeDomain ?? [0, 1]}
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            interval={xAxisTickInterval}
+            interval="preserveEnd"
             minTickGap={isMobile ? 28 : 16}
+            tickFormatter={(v) => formatChartAxisTick(Number(v), chartSpanDays)}
           />
           <YAxis
             yAxisId="price"

@@ -19,7 +19,7 @@ export const STORE_COLORS: Record<number, string> = {
 export const STORE_LOGO_PATHS: Record<number, { src: string; width: number; height: number }> = {
   [SupermarketChain.Continente]: { src: "/logos/continente.png", width: 442, height: 80 },
   [SupermarketChain.Auchan]: { src: "/logos/auchan.png", width: 234, height: 80 },
-  [SupermarketChain.PingoDoce]: { src: "/logos/pingo-doce.png", width: 354, height: 80 },
+  [SupermarketChain.PingoDoce]: { src: "/logos/pingo-doce.png", width: 2560, height: 967 },
 }
 
 export const STORE_COLORS_SECONDARY: Record<number, string> = {

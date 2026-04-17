@@ -23,6 +23,8 @@ export const BasketCategoryLabels: Record<BasketProductCategory, { en: string; p
 export interface ProductChartEntry {
   date: string
   rawDate: string
+  /** UTC midnight ms for calendar day of rawDate — used for time-proportional X-axis */
+  timeMs: number
   price: number
   "price-recommended": number
   "price-per-major-unit": number

@@ -4,12 +4,11 @@ import { cn } from "@/lib/utils"
 import Image, { type StaticImageData } from "next/image"
 import ContinenteLogo from "@/images/brands/continente.svg"
 import AuchanLogo from "@/images/brands/auchan.svg"
-import { PingoDoceSvg } from "@/components/logos"
+import PingoDoceLogo from "@/images/brands/pingo-doce.png"
 
 type SupermarketInfo = {
   name: string
-  logo?: StaticImageData
-  SvgLogo?: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  logo: StaticImageData
 }
 
 function getSupermarketInfo(originId: number | null): SupermarketInfo | null {
@@ -19,7 +18,7 @@ function getSupermarketInfo(originId: number | null): SupermarketInfo | null {
     case SupermarketChain.Auchan:
       return { name: "Auchan", logo: AuchanLogo }
     case SupermarketChain.PingoDoce:
-      return { name: "Pingo Doce", SvgLogo: PingoDoceSvg }
+      return { name: "Pingo Doce", logo: PingoDoceLogo }
     default:
       return null
   }
@@ -58,12 +57,9 @@ export function SupermarketChainBadge({ originId, variant = "logo", className }:
         </Badge>
       )
     case "logo":
-      if (info.SvgLogo) {
-        return <info.SvgLogo aria-label={info.name} className={cn("h-5! w-auto! md:h-5! md:w-min", className)} />
-      }
       return (
         <Image
-          src={info.logo!}
+          src={info.logo}
           alt={info.name}
           width={600}
           height={200}
@@ -71,18 +67,9 @@ export function SupermarketChainBadge({ originId, variant = "logo", className }:
         />
       )
     case "logoSmall":
-      if (info.SvgLogo) {
-        return (
-          <info.SvgLogo
-            aria-label={info.name}
-            className={cn("h-[15px]! w-auto! max-w-[54px]! overflow-hidden", className)}
-          />
-        )
-      }
-
       return (
         <Image
-          src={info.logo!}
+          src={info.logo}
           alt={info.name}
           width={600}
           height={200}

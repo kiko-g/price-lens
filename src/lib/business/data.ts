@@ -1,4 +1,5 @@
 import { productsImages } from "@/images/products"
+import { chartTimeMsFromRawDate } from "@/lib/business/chart"
 import { BasketProduct, ProductChartEntry } from "@/types"
 
 export const imagePlaceholder = {
@@ -10,6 +11,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "January",
     rawDate: "2025-01-15",
+    timeMs: chartTimeMsFromRawDate("2025-01-15"),
     price: 4.99,
     "price-recommended": 5.99,
     discount: 17,
@@ -18,6 +20,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "February",
     rawDate: "2025-02-15",
+    timeMs: chartTimeMsFromRawDate("2025-02-15"),
     price: 5.49,
     "price-recommended": 5.99,
     discount: 8,
@@ -26,6 +29,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "March",
     rawDate: "2025-03-15",
+    timeMs: chartTimeMsFromRawDate("2025-03-15"),
     price: 5.99,
     "price-recommended": 6.49,
     discount: 8,
@@ -34,6 +38,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "April",
     rawDate: "2025-04-15",
+    timeMs: chartTimeMsFromRawDate("2025-04-15"),
     price: 5.49,
     "price-recommended": 6.49,
     discount: 15,
@@ -42,6 +47,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "May",
     rawDate: "2025-05-15",
+    timeMs: chartTimeMsFromRawDate("2025-05-15"),
     price: 4.99,
     "price-recommended": 6.49,
     discount: 23,
@@ -50,6 +56,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "June",
     rawDate: "2025-06-15",
+    timeMs: chartTimeMsFromRawDate("2025-06-15"),
     price: 5.99,
     "price-recommended": 6.99,
     discount: 14,
@@ -58,6 +65,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "July",
     rawDate: "2025-07-15",
+    timeMs: chartTimeMsFromRawDate("2025-07-15"),
     price: 6.49,
     "price-recommended": 6.99,
     discount: 7,
@@ -66,6 +74,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "August",
     rawDate: "2025-08-15",
+    timeMs: chartTimeMsFromRawDate("2025-08-15"),
     price: 5.99,
     "price-recommended": 6.99,
     discount: 14,
@@ -74,6 +83,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "September",
     rawDate: "2025-09-15",
+    timeMs: chartTimeMsFromRawDate("2025-09-15"),
     price: 5.49,
     "price-recommended": 6.49,
     discount: 15,
@@ -82,6 +92,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "October",
     rawDate: "2025-10-15",
+    timeMs: chartTimeMsFromRawDate("2025-10-15"),
     price: 4.99,
     "price-recommended": 6.49,
     discount: 23,
@@ -90,6 +101,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "November",
     rawDate: "2025-11-15",
+    timeMs: chartTimeMsFromRawDate("2025-11-15"),
     price: 5.99,
     "price-recommended": 6.99,
     discount: 14,
@@ -98,6 +110,7 @@ export const mockChartData: ProductChartEntry[] = [
   {
     date: "December",
     rawDate: "2025-12-15",
+    timeMs: chartTimeMsFromRawDate("2025-12-15"),
     price: 6.49,
     "price-recommended": 6.99,
     discount: 7,

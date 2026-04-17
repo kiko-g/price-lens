@@ -7,6 +7,25 @@ const MAX_CHART_POINTS = 200
 
 export type ChartSamplingMode = "raw" | "hybrid" | "efficient"
 
+/** UTC midnight for the calendar day in `YYYY-MM-DD` or ISO string (date portion only). */
+export function chartTimeMsFromRawDate(rawDate: string): number {
+  const day = rawDate.split("T")[0]
+  const [y, m, d] = day.split("-").map(Number)
+  if (!y || !m || !d) return Date.parse(rawDate)
+  return Date.UTC(y, m - 1, d)
+}
+
+export function formatChartAxisTick(timeMs: number, spanDays: number): string {
+  const date = new Date(timeMs)
+  if (spanDays > 365) {
+    return date.toLocaleString("pt-PT", { month: "short", year: "2-digit" })
+  }
+  if (spanDays > 60) {
+    return date.toLocaleString("pt-PT", { day: "2-digit", month: "short" })
+  }
+  return date.toLocaleString("pt-PT", { day: "numeric", month: "short" })
+}
+
 type BuildChartDataOptions = {
   range?: DateRange
   samplingMode?: ChartSamplingMode
@@ -98,6 +117,7 @@ export function buildChartData(
     entries.push({
       date: date.toISOString(),
       rawDate: date.toISOString(),
+      timeMs: Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
       price: price.price ?? 0,
       "price-per-major-unit": price.price_per_major_unit ?? 0,
       "price-recommended": price.price_recommended ?? 0,
@@ -195,29 +215,7 @@ export function buildChartData(
 }
 
 function formatDateForChart(dateString: string, totalDays: number = 30): string {
-  const date = new Date(dateString)
-
-  // For very long ranges (> 1 year), show month + year
-  if (totalDays > 365) {
-    return date.toLocaleString("pt-PT", {
-      month: "short",
-      year: "2-digit",
-    })
-  }
-
-  // For medium ranges (> 2 months), show day + month
-  if (totalDays > 60) {
-    return date.toLocaleString("pt-PT", {
-      day: "2-digit",
-      month: "short",
-    })
-  }
-
-  // For short ranges, show day + month
-  return date.toLocaleString("pt-PT", {
-    day: "numeric",
-    month: "short",
-  })
+  return formatChartAxisTick(new Date(dateString).getTime(), totalDays)
 }
 
 export const chartConfig = {

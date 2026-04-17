@@ -7,7 +7,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis, Legend } from "recharts"
 import type { StoreProduct, Price } from "@/types"
 import { STORE_NAMES, STORE_COLORS, STORE_COLORS_SECONDARY, DateRange } from "@/types/business"
 import { cn } from "@/lib/utils"
-import { buildChartData, calculateChartBounds } from "@/lib/business/chart"
+import { buildChartData, calculateChartBounds, chartTimeMsFromRawDate, formatChartAxisTick } from "@/lib/business/chart"
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
@@ -42,6 +42,7 @@ interface ComparisonChartProps {
 type MergedDataPoint = {
   date: string
   rawDate: string
+  timeMs: number
   [key: string]: number | string | null // Dynamic keys for each store's price
 }
 
@@ -122,6 +123,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
           dateMap.set(rawDate, {
             date: point.date,
             rawDate,
+            timeMs: point.timeMs ?? chartTimeMsFromRawDate(rawDate),
           })
         }
         const existing = dateMap.get(rawDate)!
@@ -145,13 +147,25 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
     return { mergedData, chartBounds, storeKeys }
   }, [productsWithPrices, selectedRange])
 
-  const xAxisTickInterval = useMemo(() => {
-    const n = mergedData.length
-    if (n <= 1) return 0
-    const maxTicks = isMobile ? 5 : 8
-    if (n <= maxTicks) return 0
-    return Math.floor(n / maxTicks)
-  }, [mergedData.length, isMobile])
+  const comparisonChartSpanDays = useMemo(() => {
+    if (mergedData.length < 2) return 30
+    const ts = mergedData.map((d) => d.timeMs)
+    return Math.max(1, Math.ceil((Math.max(...ts) - Math.min(...ts)) / 86400000))
+  }, [mergedData])
+
+  const comparisonXDomain = useMemo((): [number, number] | null => {
+    if (mergedData.length === 0) return null
+    const ts = mergedData.map((d) => d.timeMs)
+    let min = Math.min(...ts)
+    let max = Math.max(...ts)
+    if (min === max) {
+      min -= 86400000
+      max += 86400000
+    }
+    const span = max - min
+    const pad = Math.max(span * 0.02, 86400000 * 0.5)
+    return [min - pad, max + pad]
+  }, [mergedData])
 
   // Build chart config for ChartContainer
   const chartConfig = useMemo(() => {
@@ -174,14 +188,17 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
     <div className={cn("bg-card rounded-lg border p-4", className)}>
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <LineChart data={mergedData} margin={{ left: 4, right: 12, top: 12, bottom: 36 }}>
-          <CartesianGrid strokeDasharray="4 4" syncWithTicks />
+          <CartesianGrid strokeDasharray="4 4" syncWithTicks yAxisId={0} />
           <XAxis
-            dataKey="date"
+            type="number"
+            dataKey="timeMs"
+            domain={comparisonXDomain ?? [0, 1]}
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            interval={xAxisTickInterval}
+            interval="preserveEnd"
             minTickGap={isMobile ? 28 : 16}
+            tickFormatter={(v) => formatChartAxisTick(Number(v), comparisonChartSpanDays)}
           />
           <YAxis
             orientation="left"
