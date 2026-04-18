@@ -127,6 +127,14 @@
     }
   },
   "errors": {
+    "boundary": {
+      "deals": "Não foi possível carregar as promoções.",
+      "favorites": "Não foi possível carregar os favoritos.",
+      "identical": "Não foi possível carregar produtos idênticos.",
+      "products": "Ocorreu um erro ao carregar os produtos.",
+      "profile": "Não foi possível carregar o perfil.",
+      "product": "Não foi possível carregar este produto."
+    },
     "notFound": {
       "line1": "Não há nada para ver aqui.",
       "line2": "Parece que te aventuraste num reino digital desconhecido.",

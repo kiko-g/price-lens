@@ -127,6 +127,14 @@
     }
   },
   "errors": {
+    "boundary": {
+      "deals": "Could not load deals.",
+      "favorites": "Could not load your favorites.",
+      "identical": "Could not load identical products.",
+      "products": "Something went wrong loading products.",
+      "profile": "Could not load your profile.",
+      "product": "Could not load this product."
+    },
     "notFound": {
       "line1": "Nothing to see here.",
       "line2": "Looks like you've ventured into the unknown digital realm.",
