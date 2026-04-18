@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import {
   DownloadIcon,
   ShareIcon,
@@ -37,6 +38,10 @@ export function AppInstallContent() {
   const [installed, setInstalled] = useState(false)
   const [installing, setInstalling] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
+  const t = useTranslations("pwa.appPage")
+  const tIos = useTranslations("pwa.appPage.ios")
+  const tAndroid = useTranslations("pwa.appPage.android")
+  const tDesktop = useTranslations("pwa.appPage.desktop")
 
   useEffect(() => {
     setPlatform(getPlatform())
@@ -75,19 +80,17 @@ export function AppInstallContent() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/price-lens.svg" alt="" width={36} height={36} className="size-9" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">Get the App</h1>
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">{t("title")}</h1>
           </div>
 
           <p className="text-muted-foreground max-w-lg text-sm md:text-base/relaxed">
-            Price Lens works better as an app outside the browser. Install it on your device for a{" "}
-            <strong>faster</strong>, <strong>offline-ready</strong>, <strong>full-screen</strong> experience without
-            going through an App Store.
+            {t.rich("subtitle", { strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
 
           {installed && (
             <div className="bg-primary/10 text-primary mt-2 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
               <CheckCircle2Icon className="size-4" />
-              Already installed. You&apos;re all set!
+              {t("alreadyInstalled")}
             </div>
           )}
         </div>
@@ -99,31 +102,28 @@ export function AppInstallContent() {
           {/* ios */}
           <InstructionCard
             id="ios"
-            title="iPhone & iPad"
+            title={tIos("title")}
             icon={SmartphoneIcon}
             expanded={platform === "ios"}
             className={platform === "ios" ? "order-first" : ""}
             steps={[
-              <>
-                Open this page in <strong>Safari</strong> (required for iOS)
-              </>,
-              <>
-                Tap the <ShareIcon className="mb-0.5 inline size-3.5" /> <strong>Share</strong> button in the toolbar
-              </>,
-              <>
-                Scroll down and tap <strong>&quot;Add to Home Screen&quot;</strong>
-              </>,
-              <>
-                Make sure <strong>&quot;Open as Web App&quot;</strong> is enabled, then tap{" "}
-                <PlusSquareIcon className="mb-0.5 inline size-3.5" /> <strong>Add</strong>
-              </>,
+              tIos.rich("step1", { strong: (c) => <strong>{c}</strong> }),
+              tIos.rich("step2", {
+                strong: (c) => <strong>{c}</strong>,
+                icon: () => <ShareIcon className="mb-0.5 inline size-3.5" />,
+              }),
+              tIos.rich("step3", { strong: (c) => <strong>{c}</strong> }),
+              tIos.rich("step4", {
+                strong: (c) => <strong>{c}</strong>,
+                icon: () => <PlusSquareIcon className="mb-0.5 inline size-3.5" />,
+              }),
             ]}
           />
 
           {/* android / chromium */}
           <InstructionCard
             id="android"
-            title="Android & Chrome"
+            title={tAndroid("title")}
             icon={ChromeIcon}
             expanded={platform === "android"}
             className={platform === "android" ? "order-first" : ""}
@@ -132,27 +132,21 @@ export function AppInstallContent() {
               platform === "android" && (
                 <Button onClick={handleInstall} disabled={installing || !deferredPrompt.current} className="w-full">
                   <DownloadIcon className="size-4" />
-                  {installing ? "Installing…" : "Install now"}
+                  {installing ? t("installing") : t("installNow")}
                 </Button>
               )
             }
             steps={[
-              <>
-                Tap the <strong>Install</strong> button above, or tap the browser menu (<strong>⋮</strong>)
-              </>,
-              <>
-                Select <strong>&quot;Install app&quot;</strong> or <strong>&quot;Add to Home screen&quot;</strong>
-              </>,
-              <>
-                Tap <strong>Install</strong> to confirm
-              </>,
+              tAndroid.rich("step1", { strong: (c) => <strong>{c}</strong> }),
+              tAndroid.rich("step2", { strong: (c) => <strong>{c}</strong> }),
+              tAndroid.rich("step3", { strong: (c) => <strong>{c}</strong> }),
             ]}
           />
 
           {/* desktop */}
           <InstructionCard
             id="desktop"
-            title="Desktop (Chrome, Edge)"
+            title={tDesktop("title")}
             icon={MonitorIcon}
             expanded={platform === "desktop"}
             className={platform === "desktop" ? "order-first" : ""}
@@ -161,17 +155,13 @@ export function AppInstallContent() {
               platform === "desktop" && (
                 <Button onClick={handleInstall} disabled={installing || !deferredPrompt.current} className="w-full">
                   <DownloadIcon className="size-4" />
-                  {installing ? "Installing…" : "Install now"}
+                  {installing ? t("installing") : t("installNow")}
                 </Button>
               )
             }
             steps={[
-              <>
-                Click the <strong>Install</strong> button above, or look for the install icon in the address bar
-              </>,
-              <>
-                Click <strong>Install</strong> in the browser prompt
-              </>,
+              tDesktop.rich("step1", { strong: (c) => <strong>{c}</strong> }),
+              tDesktop.rich("step2", { strong: (c) => <strong>{c}</strong> }),
             ]}
           />
         </div>

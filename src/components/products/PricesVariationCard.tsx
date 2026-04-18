@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 import { type StoreProduct } from "@/types"
@@ -42,6 +43,7 @@ const defaultOptions: Props["options"] = {
 export function PricesVariationCard({ className, data, actions, state, options = defaultOptions }: Props) {
   const { storeProduct, discountVariation, priceVariation, priceRecommendedVariation, pricePerMajorUnitVariation } =
     data
+  const t = useTranslations("products.pricesVariation")
 
   const {
     url: onlineUrl,
@@ -70,7 +72,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
           isActive={isPriceActive}
           onClick={actions.onPriceChange}
           chartColor="chart-1"
-          label="Price"
+          label={t("price")}
           value={price}
           variation={priceVariation}
         />
@@ -79,7 +81,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
           isActive={isPriceRecommendedActive}
           onClick={actions.onPriceRecommendedChange}
           chartColor="chart-2"
-          label="Price without discount"
+          label={t("priceWithoutDiscount")}
           value={priceRecommended ?? "0"}
           variation={priceRecommendedVariation}
         />
@@ -88,7 +90,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
           isActive={isPricePerMajorUnitActive}
           onClick={actions.onPricePerMajorUnitChange}
           chartColor="chart-3"
-          label={`Price per unit (${majorUnit})`}
+          label={t("pricePerUnit", { unit: majorUnit ?? "" })}
           value={pricePerMajorUnit ?? "0"}
           variation={pricePerMajorUnitVariation}
         />
@@ -97,7 +99,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
           isActive={isDiscountActive}
           onClick={actions.onDiscountChange}
           chartColor="chart-4"
-          label="Discount"
+          label={t("discount")}
           value={discount ? discountValueToPercentage(discount, 0) : "0%"}
           variation={discountVariation}
           invertColors
@@ -127,7 +129,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
             className="group text-xs transition-transform duration-300 [&_svg]:size-3"
           >
             <Link href={generateProductPath(storeProduct)}>
-              See product
+              {t("seeProduct")}
               <ArrowRightIcon className="group-hover:animate-bounce-x" />
             </Link>
           </Button>

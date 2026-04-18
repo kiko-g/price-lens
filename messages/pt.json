@@ -919,6 +919,13 @@
         "noImage": "Sem imagem"
       }
     },
+    "pricesVariation": {
+      "price": "Preço",
+      "priceWithoutDiscount": "Preço sem desconto",
+      "pricePerUnit": "Preço por unidade ({unit})",
+      "discount": "Desconto",
+      "seeProduct": "Ver produto"
+    },
     "priorityChip": {
       "label": "Prioridade {value}",
       "noPriority": "Sem prioridade"
@@ -1014,6 +1021,31 @@
     }
   },
   "pwa": {
+    "appPage": {
+      "title": "Obter a App",
+      "subtitle": "O Price Lens funciona melhor como app fora do browser. Instala-o no teu dispositivo para uma experiência <strong>mais rápida</strong>, <strong>preparada para offline</strong> e em <strong>ecrã inteiro</strong>, sem passares pela App Store.",
+      "alreadyInstalled": "Já está instalado. Tudo pronto!",
+      "installing": "A instalar…",
+      "installNow": "Instalar agora",
+      "ios": {
+        "title": "iPhone & iPad",
+        "step1": "Abre esta página no <strong>Safari</strong> (necessário no iOS)",
+        "step2": "Toca no botão <icon></icon> <strong>Partilhar</strong> na barra de ferramentas",
+        "step3": "Desce e toca em <strong>\"Adicionar ao ecrã principal\"</strong>",
+        "step4": "Confirma que <strong>\"Abrir como Web App\"</strong> está ativo e toca em <icon></icon> <strong>Adicionar</strong>"
+      },
+      "android": {
+        "title": "Android & Chrome",
+        "step1": "Toca no botão <strong>Instalar</strong> acima, ou abre o menu do browser (<strong>⋮</strong>)",
+        "step2": "Seleciona <strong>\"Instalar app\"</strong> ou <strong>\"Adicionar ao ecrã principal\"</strong>",
+        "step3": "Toca em <strong>Instalar</strong> para confirmar"
+      },
+      "desktop": {
+        "title": "Desktop (Chrome, Edge)",
+        "step1": "Clica no botão <strong>Instalar</strong> acima, ou procura o ícone de instalação na barra de endereços",
+        "step2": "Clica em <strong>Instalar</strong> na janela do browser"
+      }
+    },
     "banner": {
       "aria": "Instalar a app Price Lens",
       "title": "Obtém a app",

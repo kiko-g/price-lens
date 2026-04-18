@@ -919,6 +919,13 @@
         "noImage": "No image"
       }
     },
+    "pricesVariation": {
+      "price": "Price",
+      "priceWithoutDiscount": "Price without discount",
+      "pricePerUnit": "Price per unit ({unit})",
+      "discount": "Discount",
+      "seeProduct": "See product"
+    },
     "priorityChip": {
       "label": "Priority {value}",
       "noPriority": "No priority"
@@ -1014,6 +1021,31 @@
     }
   },
   "pwa": {
+    "appPage": {
+      "title": "Get the App",
+      "subtitle": "Price Lens works better as an app outside the browser. Install it on your device for a <strong>faster</strong>, <strong>offline-ready</strong>, <strong>full-screen</strong> experience without going through an App Store.",
+      "alreadyInstalled": "Already installed. You're all set!",
+      "installing": "Installing…",
+      "installNow": "Install now",
+      "ios": {
+        "title": "iPhone & iPad",
+        "step1": "Open this page in <strong>Safari</strong> (required for iOS)",
+        "step2": "Tap the <icon></icon> <strong>Share</strong> button in the toolbar",
+        "step3": "Scroll down and tap <strong>\"Add to Home Screen\"</strong>",
+        "step4": "Make sure <strong>\"Open as Web App\"</strong> is enabled, then tap <icon></icon> <strong>Add</strong>"
+      },
+      "android": {
+        "title": "Android & Chrome",
+        "step1": "Tap the <strong>Install</strong> button above, or tap the browser menu (<strong>⋮</strong>)",
+        "step2": "Select <strong>\"Install app\"</strong> or <strong>\"Add to Home screen\"</strong>",
+        "step3": "Tap <strong>Install</strong> to confirm"
+      },
+      "desktop": {
+        "title": "Desktop (Chrome, Edge)",
+        "step1": "Click the <strong>Install</strong> button above, or look for the install icon in the address bar",
+        "step2": "Click <strong>Install</strong> in the browser prompt"
+      }
+    },
     "banner": {
       "aria": "Install Price Lens app",
       "title": "Get the app",
