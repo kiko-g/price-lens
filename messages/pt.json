@@ -167,6 +167,57 @@
       "body": "Não foram encontrados produtos para este produto canónico."
     }
   },
+  "auth": {
+    "login": {
+      "loginTo": "Inicia sessão no",
+      "noSpam": "Nunca usaremos o teu email para spam",
+      "smile": "sorriso",
+      "continueWithGoogle": "Continuar com Google",
+      "devOnly": "Apenas dev",
+      "signInAsDev": "Entrar como dev@pricelens.dev",
+      "errors": {
+        "origin-missing": "Ocorreu um erro ao iniciar o processo. Tenta novamente.",
+        "default": "Falha no início de sessão. Tenta novamente."
+      }
+    }
+  },
+  "profile": {
+    "settings": {
+      "appearance": {
+        "themeHint": "Alterna entre modo claro e escuro",
+        "languageHint": "Define o idioma da app"
+      },
+      "contact": {
+        "title": "Contacto e feedback",
+        "links": {
+          "questions": {
+            "title": "Dúvidas?",
+            "description": "Envia email ao programador do Price Lens para kikojpgoncalves@gmail.com"
+          },
+          "bug": {
+            "title": "Encontraste um bug?",
+            "description": "Problemas de UI ou formatação? Reporta aqui!"
+          },
+          "feature": {
+            "title": "Pedido de funcionalidade?",
+            "description": "Estamos sempre à procura de novas ideias! Diz-nos o que gostarias de ver."
+          }
+        }
+      },
+      "account": {
+        "signOutTitle": "Terminar sessão",
+        "signOutHint": "Termina a sessão da tua conta Price Lens neste dispositivo"
+      },
+      "danger": {
+        "title": "Zona de perigo",
+        "body": "Elimina permanentemente a tua conta e todos os dados associados. Esta ação não pode ser revertida.",
+        "confirm": "Tens a certeza que queres eliminar a conta? Esta ação não pode ser revertida.",
+        "error": "Não foi possível eliminar a conta. Tenta novamente.",
+        "deleting": "A eliminar…",
+        "deleteAction": "Eliminar conta"
+      }
+    }
+  },
   "home": {
     "hero": {
       "titleMobile": "Acompanha os preços dos<br></br>supermercados portugueses",

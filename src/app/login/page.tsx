@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { redirect, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { signInWithGoogle } from "./actions"
 import { useUser } from "@/hooks/useUser"
 
@@ -13,16 +14,12 @@ import { AlertCircleIcon, FlaskConicalIcon } from "lucide-react"
 
 const IS_DEV = process.env.NODE_ENV === "development"
 
-const errorMessages: Record<string, string> = {
-  "origin-missing": "Something went wrong starting the sign-in flow. Please try again.",
-  default: "Sign-in failed. Please try again.",
-}
-
 export default function LoginPage() {
   const { user, isLoading } = useUser()
   const searchParams = useSearchParams()
   const errorParam = searchParams.get("error")
   const nextParam = searchParams.get("next")
+  const t = useTranslations("auth.login")
 
   if (isLoading) {
     return (
@@ -40,7 +37,12 @@ export default function LoginPage() {
     redirect(nextParam || "/profile")
   }
 
-  const errorMessage = errorParam ? (errorMessages[errorParam] ?? errorMessages.default) : null
+  const resolveErrorMessage = (): string | null => {
+    if (!errorParam) return null
+    if (errorParam === "origin-missing") return t("errors.origin-missing")
+    return t("errors.default")
+  }
+  const errorMessage = resolveErrorMessage()
 
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
@@ -52,7 +54,7 @@ export default function LoginPage() {
 
       <div className="flex w-full max-w-lg flex-col items-center justify-center px-8 lg:px-4">
         <h1 className="text-foreground mb-2 flex items-center text-2xl font-semibold">
-          <span>Login to</span>
+          <span>{t("loginTo")}</span>
           <div className="ml-2 flex items-center">
             <Image src="/price-lens.svg" alt="Price Lens" width={24} height={24} className="mr-1" />
             <span className="tracking-tighter">Price Lens</span>
@@ -60,8 +62,8 @@ export default function LoginPage() {
         </h1>
         <div className="text-muted-foreground mb-4 flex flex-col items-center gap-x-0 gap-y-0.5 text-center text-sm md:flex-row md:gap-x-1">
           <span>
-            We'll never use your email for spam{" "}
-            <span role="img" aria-label="smile">
+            {t("noSpam")}{" "}
+            <span role="img" aria-label={t("smile")}>
               😊
             </span>
           </span>
@@ -78,7 +80,7 @@ export default function LoginPage() {
           {nextParam && <input type="hidden" name="next" value={nextParam} />}
           <Button type="submit" variant="marketing-default" className="w-full" size="lg">
             <GoogleIcon />
-            Continue with Google
+            {t("continueWithGoogle")}
           </Button>
         </form>
 
@@ -89,13 +91,13 @@ export default function LoginPage() {
                 <span className="w-full border-t border-dashed" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background text-muted-foreground px-2">Dev only</span>
+                <span className="bg-background text-muted-foreground px-2">{t("devOnly")}</span>
               </div>
             </div>
             <Button asChild variant="outline" className="mt-4 w-full border-dashed font-mono text-xs">
               <a href="/api/auth/dev-login">
                 <FlaskConicalIcon className="mr-2 h-3.5 w-3.5" />
-                Sign in as dev@pricelens.dev
+                {t("signInAsDev")}
               </a>
             </Button>
           </div>

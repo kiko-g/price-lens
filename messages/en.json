@@ -167,6 +167,57 @@
       "body": "No store products found for this canonical product."
     }
   },
+  "auth": {
+    "login": {
+      "loginTo": "Login to",
+      "noSpam": "We'll never use your email for spam",
+      "smile": "smile",
+      "continueWithGoogle": "Continue with Google",
+      "devOnly": "Dev only",
+      "signInAsDev": "Sign in as dev@pricelens.dev",
+      "errors": {
+        "origin-missing": "Something went wrong starting the sign-in flow. Please try again.",
+        "default": "Sign-in failed. Please try again."
+      }
+    }
+  },
+  "profile": {
+    "settings": {
+      "appearance": {
+        "themeHint": "Switch between light and dark mode",
+        "languageHint": "Set the app language"
+      },
+      "contact": {
+        "title": "Contact & Feedback",
+        "links": {
+          "questions": {
+            "title": "Questions?",
+            "description": "Email Price Lens developer directly at kikojpgoncalves@gmail.com"
+          },
+          "bug": {
+            "title": "Found a bug?",
+            "description": "UI glitches or formatting issues? Report them here!"
+          },
+          "feature": {
+            "title": "Feature request?",
+            "description": "We're always looking for new ideas! Let us know what you'd like to see."
+          }
+        }
+      },
+      "account": {
+        "signOutTitle": "Sign out",
+        "signOutHint": "Sign out of your Price Lens account on this device"
+      },
+      "danger": {
+        "title": "Danger Zone",
+        "body": "Permanently delete your account and all associated data. This action cannot be undone.",
+        "confirm": "Are you sure you want to delete your account? This action cannot be undone.",
+        "error": "Failed to delete account. Please try again.",
+        "deleting": "Deleting…",
+        "deleteAction": "Delete account"
+      }
+    }
+  },
   "home": {
     "hero": {
       "titleMobile": "Price tracking for<br></br>Portuguese supermarkets",
