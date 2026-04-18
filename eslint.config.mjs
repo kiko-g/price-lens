@@ -1,10 +1,12 @@
 import nextConfig from "eslint-config-next"
+import formatjs from "eslint-plugin-formatjs"
 
 const eslintConfig = [
   ...nextConfig,
   { ignores: ["public/**"] },
   {
     files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+    plugins: { "@formatjs": formatjs },
     rules: {
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
@@ -29,6 +31,12 @@ const eslintConfig = [
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
 
+      // Flag raw JSX string literals in user-facing code.
+      // Kept at "warn" during migration so pre-existing English strings in
+      // un-migrated components don't block CI. Promote to "error" once those
+      // are cleaned up.
+      "@formatjs/no-literal-string-in-jsx": "warn",
+
       // Disable React Compiler rules (not using React Compiler)
       "react-hooks/config": "off",
       "react-hooks/error-boundaries": "off",
@@ -45,6 +53,22 @@ const eslintConfig = [
       "react-hooks/unsupported-syntax": "off",
       "react-hooks/use-memo": "off",
       "react-hooks/incompatible-library": "off",
+    },
+  },
+  {
+    // Admin area, scrapers, and API routes are explicitly out of scope for
+    // i18n migration; keep the JSX-literal rule off there so it doesn't
+    // create noise.
+    files: [
+      "src/app/admin/**/*.{ts,tsx}",
+      "src/components/admin/**/*.{ts,tsx}",
+      "src/lib/scrapers/**/*.{ts,tsx}",
+      "src/app/api/**/*.{ts,tsx}",
+      "src/lib/pipeline/**/*.{ts,tsx}",
+      "scripts/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "@formatjs/no-literal-string-in-jsx": "off",
     },
   },
 ]
