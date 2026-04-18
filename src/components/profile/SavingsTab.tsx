@@ -1,8 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { ACHIEVEMENTS, type AchievementDef } from "@/lib/gamification/achievements"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatPrice } from "@/lib/i18n/format"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -23,6 +26,9 @@ export function SavingsTab() {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const t = useTranslations("profile.savingsTab")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   useEffect(() => {
     fetch("/api/user/stats")
@@ -36,10 +42,10 @@ export function SavingsTab() {
       })
       .catch((err) => {
         console.error("[SavingsTab] failed to load stats:", err)
-        setError("Could not load your stats")
+        setError(t("loadError"))
         setIsLoading(false)
       })
-  }, [])
+  }, [t])
 
   if (isLoading) {
     return (
@@ -66,31 +72,31 @@ export function SavingsTab() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           icon={TrendingDownIcon}
-          label="Est. Savings"
-          value={`${stats.estimated_savings.toFixed(2)}€`}
+          label={t("stats.savingsLabel")}
+          value={formatPrice(stats.estimated_savings, locale)}
           color="text-green-600"
-          description={`from ${stats.products_with_drops} price drops`}
+          description={t("stats.savingsDescription", { count: stats.products_with_drops })}
         />
         <StatCard
           icon={HeartIcon}
-          label="Favorites"
+          label={t("stats.favoritesLabel")}
           value={String(stats.favorites_count)}
           color="text-red-500"
-          description="products tracked"
+          description={t("stats.favoritesDescription")}
         />
         <StatCard
           icon={BellIcon}
-          label="Alerts"
+          label={t("stats.alertsLabel")}
           value={String(stats.alerts_count)}
           color="text-amber-500"
-          description="active alerts"
+          description={t("stats.alertsDescription")}
         />
         <StatCard
           icon={FlameIcon}
-          label="Streak"
-          value={`${stats.streak} day${stats.streak !== 1 ? "s" : ""}`}
+          label={t("stats.streakLabel")}
+          value={t("stats.streakValue", { count: stats.streak })}
           color="text-orange-500"
-          description="checking prices"
+          description={t("stats.streakDescription")}
         />
       </div>
 
@@ -99,7 +105,7 @@ export function SavingsTab() {
         <CardHeader className="p-4 pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold">
             <TrophyIcon className="size-4 text-amber-500" />
-            Achievements
+            {t("achievementsTitle")}
             <Badge variant="secondary" className="text-[10px]">
               {stats.achievements.length}/{ACHIEVEMENTS.length}
             </Badge>

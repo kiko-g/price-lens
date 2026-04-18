@@ -218,7 +218,130 @@
       }
     }
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Price Lens",
+      "subtitle": "Track prices across Portuguese supermarkets and never overpay for groceries again. Let's get you set up in 30 seconds.",
+      "cta": "Get started",
+      "skip": "Skip for now"
+    },
+    "features": {
+      "favorites": {
+        "title": "Favorite products",
+        "description": "Track the products you buy regularly and see their price trends over time."
+      },
+      "alerts": {
+        "title": "Price alerts",
+        "description": "Get notified by email when your tracked products drop in price."
+      },
+      "deals": {
+        "title": "Browse deals",
+        "description": "See the biggest price drops and discounts across all stores in one place."
+      }
+    },
+    "stores": {
+      "title": "Where do you shop?",
+      "subtitle": "Select the stores you visit so we can personalize your experience.",
+      "continue": "Continue",
+      "skip": "Skip"
+    },
+    "ready": {
+      "title": "You're all set!",
+      "subtitle": "Start browsing products, favorite the ones you care about, and set price alerts to get notified when they drop.",
+      "start": "Start exploring",
+      "browseDeals": "Browse deals first"
+    }
+  },
   "profile": {
+    "page": {
+      "loginRedirect": "Redirecting to login…"
+    },
+    "tabs": {
+      "favorites": "Favorites",
+      "lists": "Lists",
+      "alerts": "Alerts",
+      "savings": "Savings",
+      "plan": "Plan",
+      "settings": "Settings"
+    },
+    "sidebar": {
+      "fallbackName": "User",
+      "favoritesLabel": "Favorites",
+      "listsLabel": "Lists",
+      "alertsLabel": "Alerts",
+      "memberSince": "Member since <strong>{date}</strong>",
+      "favoritesShort": "{count, plural, one {# favorite} other {# favorites}}",
+      "favoritesAndMember": "<strong>{count}</strong> · Member since <strong>{date}</strong>",
+      "browseProducts": "Browse Products",
+      "myFavorites": "My Favorites"
+    },
+    "favoritesTab": {
+      "errorTitle": "Could not load favorites",
+      "errorMessage": "Something went wrong. Try refreshing the page.",
+      "emptyTitle": "No favorites yet",
+      "emptyMessage": "Start adding products to your favorites to see them here.",
+      "findProducts": "Find products",
+      "recent": "Your most recent favorites (<strong>{count}</strong> total)",
+      "viewAll": "View all",
+      "seeAll": "See all {count} favorites"
+    },
+    "listsTab": {
+      "loadError": "Could not load shopping lists",
+      "tryAgain": "Try again",
+      "newListPlaceholder": "New list name…",
+      "newListDefaultName": "My List",
+      "createButton": "Create",
+      "createdToast": "Created \"{name}\"",
+      "deletedToast": "List deleted",
+      "emptyTitle": "No shopping lists yet",
+      "emptyMessage": "Create a list above and add products from any product page using the \"Add to list\" action.",
+      "checkedRatio": "{checked}/{total} checked",
+      "noItems": "No items yet. Add products from product pages.",
+      "costByStore": "Cost by store"
+    },
+    "alertsTab": {
+      "emptyTitle": "No price alerts yet",
+      "emptyMessage": "Set alerts on products you want to track. We'll email you when prices drop. Visit any product page and tap the bell icon to get started.",
+      "summary": "{count, plural, one {You have # active alert.} other {You have # active alerts.}} We'll email you when these products drop in price.",
+      "anyDrop": "Any drop"
+    },
+    "savingsTab": {
+      "loadError": "Could not load your stats",
+      "stats": {
+        "savingsLabel": "Est. Savings",
+        "savingsDescription": "from {count, plural, one {# price drop} other {# price drops}}",
+        "favoritesLabel": "Favorites",
+        "favoritesDescription": "products tracked",
+        "alertsLabel": "Alerts",
+        "alertsDescription": "active alerts",
+        "streakLabel": "Streak",
+        "streakValue": "{count, plural, one {# day} other {# days}}",
+        "streakDescription": "checking prices"
+      },
+      "achievementsTitle": "Achievements"
+    },
+    "planTab": {
+      "title": "Price Lens is free",
+      "intro": "Price Lens is completely free during early access. We're actively building new features to help you save money on groceries. Here's what's on our roadmap:",
+      "status": {
+        "available": "Available",
+        "building": "In development"
+      },
+      "features": {
+        "history": {
+          "title": "Full price history",
+          "description": "Unlimited custom product tracking with deep historical data and trend analysis."
+        },
+        "alerts": {
+          "title": "Price alerts",
+          "description": "Get notified when products you track drop in price. Set custom thresholds per product."
+        },
+        "shoppingList": {
+          "title": "Shopping list optimizer",
+          "description": "Optimize your shopping list across different supermarket sources. Get the best deals and save time."
+        }
+      }
+    },
     "settings": {
       "appearance": {
         "themeHint": "Switch between light and dark mode",

@@ -2,8 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react"
 import Image from "next/image"
+import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { STORE_NAMES } from "@/types/business"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatPrice } from "@/lib/i18n/format"
 
 import { EmptyStateView } from "@/components/ui/combo/state-views"
 import { Button } from "@/components/ui/button"
@@ -46,6 +49,7 @@ export function ListsTab() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [newListName, setNewListName] = useState("")
+  const t = useTranslations("profile.listsTab")
 
   const fetchLists = useCallback(() => {
     setError(null)
@@ -60,17 +64,17 @@ export function ListsTab() {
       })
       .catch((err) => {
         console.error("[ListsTab] failed to load lists:", err)
-        setError("Could not load shopping lists")
+        setError(t("loadError"))
         setIsLoading(false)
       })
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchLists()
   }, [fetchLists])
 
   const handleCreateList = async () => {
-    const name = newListName.trim() || "My List"
+    const name = newListName.trim() || t("newListDefaultName")
     const res = await fetch("/api/lists", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -79,7 +83,7 @@ export function ListsTab() {
     if (res.ok) {
       setNewListName("")
       fetchLists()
-      toast.success(`Created "${name}"`)
+      toast.success(t("createdToast", { name }))
     }
   }
 
@@ -90,7 +94,7 @@ export function ListsTab() {
       body: JSON.stringify({ list_id: listId }),
     })
     fetchLists()
-    toast.success("List deleted")
+    toast.success(t("deletedToast"))
   }
 
   const handleToggleItem = async (itemId: number, checked: boolean) => {
@@ -131,7 +135,7 @@ export function ListsTab() {
       <div className="text-destructive py-8 text-center text-sm">
         {error}
         <button onClick={fetchLists} className="mt-2 block w-full text-xs underline">
-          Try again
+          {t("tryAgain")}
         </button>
       </div>
     )
@@ -142,7 +146,7 @@ export function ListsTab() {
       {/* Create list */}
       <div className="flex gap-2">
         <Input
-          placeholder="New list name..."
+          placeholder={t("newListPlaceholder")}
           value={newListName}
           onChange={(e) => setNewListName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreateList()}
@@ -150,16 +154,12 @@ export function ListsTab() {
         />
         <Button onClick={handleCreateList} size="sm">
           <PlusIcon className="mr-1 size-4" />
-          Create
+          {t("createButton")}
         </Button>
       </div>
 
       {lists.length === 0 ? (
-        <EmptyStateView
-          icon={ListIcon}
-          title="No shopping lists yet"
-          message='Create a list above and add products from any product page using the "Add to list" action.'
-        />
+        <EmptyStateView icon={ListIcon} title={t("emptyTitle")} message={t("emptyMessage")} />
       ) : (
         lists.map((list) => (
           <ShoppingListCard
@@ -193,6 +193,10 @@ function ShoppingListCard({
     return sum + item.store_products.price * item.quantity
   }, 0)
 
+  const t = useTranslations("profile.listsTab")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
+
   // Per-store totals for price optimization
   const byStore = new Map<number, number>()
   for (const item of items) {
@@ -208,11 +212,11 @@ function ShoppingListCard({
           <ShoppingCartIcon className="text-muted-foreground size-4" />
           {list.name}
           <span className="text-muted-foreground text-xs font-normal">
-            {checkedCount}/{items.length} checked
+            {t("checkedRatio", { checked: checkedCount, total: items.length })}
           </span>
         </CardTitle>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold tabular-nums">{total.toFixed(2)}€</span>
+          <span className="text-sm font-semibold tabular-nums">{formatPrice(total, locale)}</span>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -226,9 +230,7 @@ function ShoppingListCard({
 
       <CardContent className="space-y-1 p-4 pt-0">
         {items.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-center text-xs">
-            No items yet. Add products from product pages.
-          </p>
+          <p className="text-muted-foreground py-4 text-center text-xs">{t("noItems")}</p>
         ) : (
           <>
             {items.map((item) => {
@@ -262,8 +264,8 @@ function ShoppingListCard({
                     <div className="flex items-center gap-1">
                       <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
                       <span className="text-muted-foreground text-[10px]">
-                        {item.quantity > 1 && `${item.quantity}x `}
-                        {product.price.toFixed(2)}€
+                        {item.quantity > 1 && `${item.quantity}× `}
+                        {formatPrice(product.price, locale)}
                       </span>
                     </div>
                   </div>
@@ -282,14 +284,14 @@ function ShoppingListCard({
             {/* Per-store cost breakdown */}
             {byStore.size > 1 && (
               <div className="border-border mt-2 space-y-1 border-t pt-2">
-                <p className="text-muted-foreground text-[10px] font-medium uppercase">Cost by store</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase">{t("costByStore")}</p>
                 {Array.from(byStore.entries()).map(([originId, storeTotal]) => (
                   <div key={originId} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <SupermarketChainBadge originId={originId} variant="logoSmall" />
                       <span className="text-xs">{STORE_NAMES[originId]}</span>
                     </div>
-                    <span className="text-xs font-semibold tabular-nums">{storeTotal.toFixed(2)}€</span>
+                    <span className="text-xs font-semibold tabular-nums">{formatPrice(storeTotal, locale)}</span>
                   </div>
                 ))}
               </div>

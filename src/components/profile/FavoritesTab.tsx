@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useFavoritesFiltered } from "@/hooks/useFavoritesFiltered"
 
 import { cn } from "@/lib/utils"
@@ -18,6 +19,7 @@ const GRID_CLASS = "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-
 
 export function FavoritesTab() {
   const router = useRouter()
+  const t = useTranslations("profile.favoritesTab")
 
   const {
     data: favorites,
@@ -37,25 +39,19 @@ export function FavoritesTab() {
   if (isLoading) return <FavoritesTabSkeleton />
 
   if (isError) {
-    return (
-      <EmptyStateView
-        icon={HeartIcon}
-        title="Could not load favorites"
-        message="Something went wrong. Try refreshing the page."
-      />
-    )
+    return <EmptyStateView icon={HeartIcon} title={t("errorTitle")} message={t("errorMessage")} />
   }
 
   if (favorites.length === 0) {
     return (
       <EmptyStateView
         icon={HeartIcon}
-        title="No favorites yet"
-        message="Start adding products to your favorites to see them here."
+        title={t("emptyTitle")}
+        message={t("emptyMessage")}
         actions={
           <Button variant="outline" size="sm" onClick={() => router.push("/products")}>
             <SearchIcon className="size-4" />
-            Find products
+            {t("findProducts")}
           </Button>
         }
       />
@@ -66,11 +62,14 @@ export function FavoritesTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          Your most recent favorites (<span className="text-foreground font-medium">{totalCount}</span> total)
+          {t.rich("recent", {
+            count: totalCount,
+            strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+          })}
         </p>
         <Button variant="link" size="sm" asChild className="gap-1 px-0">
           <Link href="/favorites">
-            View all
+            {t("viewAll")}
             <ArrowRightIcon className="h-3.5 w-3.5" />
           </Link>
         </Button>
@@ -86,7 +85,7 @@ export function FavoritesTab() {
         <div className="flex justify-center pt-2">
           <Button variant="outline" asChild>
             <Link href="/favorites">
-              See all {totalCount} favorites
+              {t("seeAll", { count: totalCount })}
               <ArrowRightIcon className="ml-1 h-4 w-4" />
             </Link>
           </Button>

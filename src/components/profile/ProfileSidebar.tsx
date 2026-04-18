@@ -2,7 +2,10 @@
 
 import Link from "next/link"
 import type { User } from "@supabase/supabase-js"
+import { useLocale, useTranslations } from "next-intl"
 import { useFavoritesCount } from "@/hooks/useFavorites"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatDate } from "@/lib/i18n/format"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -24,23 +27,26 @@ function getProviderIcon(provider: string | undefined) {
   }
 }
 
-const quickLinks = [
-  { label: "Browse Products", href: "/products", icon: PackageSearchIcon },
-  { label: "My Favorites", href: "/favorites", icon: HeartIcon },
-]
-
 export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
   const { count: favoritesCount } = useFavoritesCount(user.id)
+  const t = useTranslations("profile.sidebar")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   const avatarUrl = user.user_metadata?.avatar_url?.replace(/=s96-c/, "=s400-c")
-  const username = user.user_metadata?.full_name || "User"
+  const username = user.user_metadata?.full_name || t("fallbackName")
   const userInitial = user.email ? user.email[0].toUpperCase() : "U"
   const provider = user?.app_metadata?.provider
-  const memberSince = new Date(user.created_at).toLocaleDateString("en-US", {
+  const memberSinceFormatted = formatDate(new Date(user.created_at), locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
   })
+
+  const quickLinks = [
+    { key: "browseProducts" as const, href: "/products", icon: PackageSearchIcon },
+    { key: "myFavorites" as const, href: "/favorites", icon: HeartIcon },
+  ]
 
   return (
     <>
@@ -75,22 +81,25 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
         <div className="text-muted-foreground mt-4 flex w-full items-center justify-center gap-3 border-t pt-3 text-center text-xs">
           <div className="flex flex-col items-center">
             <span className="text-foreground text-base font-bold">{favoritesCount}</span>
-            <span>Favorites</span>
+            <span>{t("favoritesLabel")}</span>
           </div>
           <div className="bg-border h-8 w-px" />
           <div className="flex flex-col items-center">
             <span className="text-foreground text-base font-bold">0</span>
-            <span>Lists</span>
+            <span>{t("listsLabel")}</span>
           </div>
           <div className="bg-border h-8 w-px" />
           <div className="flex flex-col items-center">
             <span className="text-foreground text-base font-bold">0</span>
-            <span>Alerts</span>
+            <span>{t("alertsLabel")}</span>
           </div>
         </div>
 
         <p className="text-muted-foreground mt-2 text-xs">
-          Member since <strong>{memberSince}</strong>
+          {t.rich("memberSince", {
+            date: memberSinceFormatted,
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </p>
 
         {/* Quick links */}
@@ -102,7 +111,7 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
               className="text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
             >
               <link.icon className="h-4 w-4" />
-              {link.label}
+              {t(link.key)}
             </Link>
           ))}
         </nav>
@@ -134,7 +143,11 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
             </div>
 
             <span className="text-muted-foreground text-xs">
-              <strong>{favoritesCount} favorites</strong> · Member since <strong>{memberSince}</strong>
+              {t.rich("favoritesAndMember", {
+                count: t("favoritesShort", { count: favoritesCount }),
+                date: memberSinceFormatted,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </span>
           </div>
         </div>

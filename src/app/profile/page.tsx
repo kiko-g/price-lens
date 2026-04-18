@@ -4,8 +4,11 @@ import React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
 import { useUser } from "@/hooks/useUser"
 import { useUserAlerts } from "@/hooks/useUserAlerts"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatPrice } from "@/lib/i18n/format"
 
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { ProfileSidebar } from "@/components/profile/ProfileSidebar"
@@ -24,6 +27,7 @@ import { BellIcon, CreditCardIcon, HeartIcon, ListIcon, SettingsIcon, TrophyIcon
 export default function ProfilePage() {
   const router = useRouter()
   const { user, profile, isLoading } = useUser()
+  const tTabs = useTranslations("profile.tabs")
 
   if (!isLoading && !user) {
     router.push("/login")
@@ -50,27 +54,27 @@ export default function ProfilePage() {
                 <TabsList className="w-full justify-start overflow-x-auto">
                   <TabsTrigger value="favorites" className="gap-1.5">
                     <HeartIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Favorites</span>
+                    <span className="hidden sm:inline">{tTabs("favorites")}</span>
                   </TabsTrigger>
                   <TabsTrigger value="lists" className="gap-1.5">
                     <ListIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Lists</span>
+                    <span className="hidden sm:inline">{tTabs("lists")}</span>
                   </TabsTrigger>
                   <TabsTrigger value="alerts" className="gap-1.5">
                     <BellIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Alerts</span>
+                    <span className="hidden sm:inline">{tTabs("alerts")}</span>
                   </TabsTrigger>
                   <TabsTrigger value="savings" className="gap-1.5">
                     <TrophyIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Savings</span>
+                    <span className="hidden sm:inline">{tTabs("savings")}</span>
                   </TabsTrigger>
                   <TabsTrigger value="plan" className="gap-1.5">
                     <CreditCardIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Plan</span>
+                    <span className="hidden sm:inline">{tTabs("plan")}</span>
                   </TabsTrigger>
                   <TabsTrigger value="settings" className="gap-1.5">
                     <SettingsIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Settings</span>
+                    <span className="hidden sm:inline">{tTabs("settings")}</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -108,6 +112,9 @@ export default function ProfilePage() {
 
 function AlertsTab() {
   const { data: alerts, isLoading } = useUserAlerts()
+  const t = useTranslations("profile.alertsTab")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   if (isLoading) {
     return (
@@ -120,21 +127,12 @@ function AlertsTab() {
   }
 
   if (!alerts || alerts.length === 0) {
-    return (
-      <EmptyStateView
-        icon={BellIcon}
-        title="No price alerts yet"
-        message="Set alerts on products you want to track. We'll email you when prices drop. Visit any product page and tap the bell icon to get started."
-      />
-    )
+    return <EmptyStateView icon={BellIcon} title={t("emptyTitle")} message={t("emptyMessage")} />
   }
 
   return (
     <div className="space-y-3">
-      <p className="text-muted-foreground text-sm">
-        You have {alerts.length} active alert{alerts.length !== 1 ? "s" : ""}. We&apos;ll email you when these products
-        drop in price.
-      </p>
+      <p className="text-muted-foreground text-sm">{t("summary", { count: alerts.length })}</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {alerts.map((alert) => {
           const product = alert.store_products
@@ -162,8 +160,8 @@ function AlertsTab() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{product.name}</p>
                 <p className="text-muted-foreground text-xs">
-                  {product.price.toFixed(2)}€ ·{" "}
-                  {alert.threshold_type === "any_drop" ? "Any drop" : alert.threshold_type}
+                  {formatPrice(product.price, locale)} ·{" "}
+                  {alert.threshold_type === "any_drop" ? t("anyDrop") : alert.threshold_type}
                 </p>
               </div>
               <BellIcon className="size-4 shrink-0 text-amber-500" />

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { SupermarketChain, STORE_NAMES, STORE_LOGO_PATHS } from "@/types/business"
 import { markOnboardingComplete } from "@/components/layout/WelcomeToast"
@@ -30,28 +31,18 @@ const stores = [
   },
 ]
 
-const features = [
-  {
-    icon: HeartIcon,
-    title: "Favorite products",
-    description: "Track the products you buy regularly and see their price trends over time.",
-  },
-  {
-    icon: BellIcon,
-    title: "Price alerts",
-    description: "Get notified by email when your tracked products drop in price.",
-  },
-  {
-    icon: TagIcon,
-    title: "Browse deals",
-    description: "See the biggest price drops and discounts across all stores in one place.",
-  },
-]
+const featureKeys = ["favorites", "alerts", "deals"] as const
+const featureIcons = {
+  favorites: HeartIcon,
+  alerts: BellIcon,
+  deals: TagIcon,
+} as const
 
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [selectedStores, setSelectedStores] = useState<Set<number>>(new Set())
+  const t = useTranslations("onboarding")
 
   const toggleStore = (id: number) => {
     setSelectedStores((prev) => {
@@ -93,34 +84,34 @@ export default function OnboardingPage() {
           <div className="animate-fade-in space-y-6 text-center">
             <SparklesIcon className="text-primary mx-auto size-12" />
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Welcome to Price Lens</h1>
-              <p className="text-muted-foreground mt-2 text-sm text-balance">
-                Track prices across Portuguese supermarkets and never overpay for groceries again. Let&apos;s get you
-                set up in 30 seconds.
-              </p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("welcome.title")}</h1>
+              <p className="text-muted-foreground mt-2 text-sm text-balance">{t("welcome.subtitle")}</p>
             </div>
 
             <div className="space-y-3 text-left">
-              {features.map((feature) => (
-                <div key={feature.title} className="flex items-start gap-3">
-                  <div className="bg-primary/10 rounded-lg p-2">
-                    <feature.icon className="text-primary size-4" />
+              {featureKeys.map((key) => {
+                const Icon = featureIcons[key]
+                return (
+                  <div key={key} className="flex items-start gap-3">
+                    <div className="bg-primary/10 rounded-lg p-2">
+                      <Icon className="text-primary size-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{t(`features.${key}.title` as const)}</p>
+                      <p className="text-muted-foreground text-xs">{t(`features.${key}.description` as const)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{feature.title}</p>
-                    <p className="text-muted-foreground text-xs">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             <div className="flex flex-col gap-2">
               <Button onClick={() => setStep(1)} className="w-full">
-                Get started
+                {t("welcome.cta")}
                 <ArrowRightIcon className="size-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
-                Skip for now
+                {t("welcome.skip")}
               </Button>
             </div>
           </div>
@@ -130,10 +121,8 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="animate-fade-in space-y-6 text-center">
             <div>
-              <h2 className="text-xl font-bold">Where do you shop?</h2>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Select the stores you visit so we can personalize your experience.
-              </p>
+              <h2 className="text-xl font-bold">{t("stores.title")}</h2>
+              <p className="text-muted-foreground mt-1 text-sm">{t("stores.subtitle")}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
@@ -169,11 +158,11 @@ export default function OnboardingPage() {
 
             <div className="flex flex-col gap-2">
               <Button onClick={() => setStep(2)} className="w-full">
-                Continue
+                {t("stores.continue")}
                 <ArrowRightIcon className="size-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
-                Skip
+                {t("stores.skip")}
               </Button>
             </div>
           </div>
@@ -186,16 +175,13 @@ export default function OnboardingPage() {
               <CheckIcon className="text-primary size-8" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">You&apos;re all set!</h2>
-              <p className="text-muted-foreground mt-1 text-sm text-balance">
-                Start browsing products, favorite the ones you care about, and set price alerts to get notified when
-                they drop.
-              </p>
+              <h2 className="text-xl font-bold">{t("ready.title")}</h2>
+              <p className="text-muted-foreground mt-1 text-sm text-balance">{t("ready.subtitle")}</p>
             </div>
 
             <div className="flex flex-col gap-2">
               <Button onClick={handleComplete} className="w-full">
-                Start exploring
+                {t("ready.start")}
                 <ArrowRightIcon className="size-4" />
               </Button>
               <Button
@@ -207,7 +193,7 @@ export default function OnboardingPage() {
                 className="w-full"
               >
                 <TagIcon className="mr-1.5 size-4" />
-                Browse deals first
+                {t("ready.browseDeals")}
               </Button>
             </div>
           </div>

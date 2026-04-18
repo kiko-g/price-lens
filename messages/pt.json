@@ -218,7 +218,130 @@
       }
     }
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Bem-vindo ao Price Lens",
+      "subtitle": "Acompanha preços nos supermercados portugueses e nunca mais pagues a mais. Vamos pôr-te a usar em 30 segundos.",
+      "cta": "Começar",
+      "skip": "Saltar por agora"
+    },
+    "features": {
+      "favorites": {
+        "title": "Produtos favoritos",
+        "description": "Acompanha os produtos que compras regularmente e vê a evolução dos preços ao longo do tempo."
+      },
+      "alerts": {
+        "title": "Alertas de preço",
+        "description": "Recebe um email quando os produtos que acompanhas baixam de preço."
+      },
+      "deals": {
+        "title": "Explorar promoções",
+        "description": "Vê as maiores descidas e os melhores descontos de todas as lojas num só sítio."
+      }
+    },
+    "stores": {
+      "title": "Onde costumas comprar?",
+      "subtitle": "Escolhe as lojas que frequentas para personalizarmos a tua experiência.",
+      "continue": "Continuar",
+      "skip": "Saltar"
+    },
+    "ready": {
+      "title": "Está tudo pronto!",
+      "subtitle": "Começa a explorar produtos, marca os teus favoritos e cria alertas de preço para seres avisado quando descerem.",
+      "start": "Começar a explorar",
+      "browseDeals": "Ver promoções primeiro"
+    }
+  },
   "profile": {
+    "page": {
+      "loginRedirect": "A redirecionar para o login…"
+    },
+    "tabs": {
+      "favorites": "Favoritos",
+      "lists": "Listas",
+      "alerts": "Alertas",
+      "savings": "Poupança",
+      "plan": "Plano",
+      "settings": "Definições"
+    },
+    "sidebar": {
+      "fallbackName": "Utilizador",
+      "favoritesLabel": "Favoritos",
+      "listsLabel": "Listas",
+      "alertsLabel": "Alertas",
+      "memberSince": "Membro desde <strong>{date}</strong>",
+      "favoritesShort": "{count, plural, one {# favorito} other {# favoritos}}",
+      "favoritesAndMember": "<strong>{count}</strong> · Membro desde <strong>{date}</strong>",
+      "browseProducts": "Explorar produtos",
+      "myFavorites": "Os meus favoritos"
+    },
+    "favoritesTab": {
+      "errorTitle": "Não foi possível carregar os favoritos",
+      "errorMessage": "Ocorreu um erro. Tenta atualizar a página.",
+      "emptyTitle": "Ainda sem favoritos",
+      "emptyMessage": "Começa a adicionar produtos aos teus favoritos para os veres aqui.",
+      "findProducts": "Encontrar produtos",
+      "recent": "Os teus favoritos mais recentes (<strong>{count}</strong> no total)",
+      "viewAll": "Ver todos",
+      "seeAll": "Ver todos os {count} favoritos"
+    },
+    "listsTab": {
+      "loadError": "Não foi possível carregar as listas",
+      "tryAgain": "Tentar novamente",
+      "newListPlaceholder": "Nome da nova lista…",
+      "newListDefaultName": "A minha lista",
+      "createButton": "Criar",
+      "createdToast": "Lista \"{name}\" criada",
+      "deletedToast": "Lista eliminada",
+      "emptyTitle": "Ainda sem listas de compras",
+      "emptyMessage": "Cria uma lista acima e adiciona produtos a partir de qualquer página de produto pela ação \"Adicionar à lista\".",
+      "checkedRatio": "{checked}/{total} marcados",
+      "noItems": "Sem itens. Adiciona produtos a partir das páginas de produto.",
+      "costByStore": "Custo por loja"
+    },
+    "alertsTab": {
+      "emptyTitle": "Ainda sem alertas de preço",
+      "emptyMessage": "Cria alertas nos produtos que queres acompanhar. Avisamos por email quando os preços descem. Visita uma página de produto e toca no ícone do sino para começar.",
+      "summary": "{count, plural, one {Tens # alerta ativo.} other {Tens # alertas ativos.}} Avisamos por email quando estes produtos descerem de preço.",
+      "anyDrop": "Qualquer descida"
+    },
+    "savingsTab": {
+      "loadError": "Não foi possível carregar as estatísticas",
+      "stats": {
+        "savingsLabel": "Poupança est.",
+        "savingsDescription": "de {count, plural, one {# descida de preço} other {# descidas de preço}}",
+        "favoritesLabel": "Favoritos",
+        "favoritesDescription": "produtos acompanhados",
+        "alertsLabel": "Alertas",
+        "alertsDescription": "alertas ativos",
+        "streakLabel": "Sequência",
+        "streakValue": "{count, plural, one {# dia} other {# dias}}",
+        "streakDescription": "a verificar preços"
+      },
+      "achievementsTitle": "Conquistas"
+    },
+    "planTab": {
+      "title": "O Price Lens é gratuito",
+      "intro": "O Price Lens é totalmente gratuito durante o early access. Estamos a construir novas funcionalidades para te ajudar a poupar nas compras. Eis o que está no nosso roadmap:",
+      "status": {
+        "available": "Disponível",
+        "building": "Em desenvolvimento"
+      },
+      "features": {
+        "history": {
+          "title": "Histórico completo",
+          "description": "Acompanhamento ilimitado de produtos com histórico profundo e análise de tendências."
+        },
+        "alerts": {
+          "title": "Alertas de preço",
+          "description": "Sê avisado quando produtos que acompanhas baixarem de preço. Define limites personalizados por produto."
+        },
+        "shoppingList": {
+          "title": "Otimizador de lista de compras",
+          "description": "Otimiza a tua lista de compras entre diferentes supermercados. Apanha os melhores preços e poupa tempo."
+        }
+      }
+    },
     "settings": {
       "appearance": {
         "themeHint": "Alterna entre modo claro e escuro",
