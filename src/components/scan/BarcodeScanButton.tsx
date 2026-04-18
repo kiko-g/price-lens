@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { BrowserMultiFormatReader } from "@zxing/browser"
 import { Slot } from "@radix-ui/react-slot"
 
@@ -70,6 +71,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
   const open = controlledOpen ?? internalOpen
   const [error, setError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const t = useTranslations("scan")
 
   const [isScanningCamera, setIsScanningCamera] = useState(false)
   const [isStartingCamera, setIsStartingCamera] = useState(false)
@@ -131,13 +133,13 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       e.preventDefault()
       const digits = manualTextValue.replace(/\D/g, "")
       if (!isProductBarcode(digits)) {
-        setError("Enter a valid barcode (8 to 14 digits).")
+        setError(t("errorInvalidBarcode"))
         return
       }
       updateOpen(false)
       navigateToCompare(router, digits)
     },
-    [manualTextValue, router, updateOpen],
+    [manualTextValue, router, updateOpen, t],
   )
 
   const handleOpenManualEntry = useCallback(() => {
@@ -170,13 +172,11 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       if (err instanceof DOMException && err.name === "AbortError") return
       console.error("[BarcodeScanButton] camera access failed:", err)
       if (err instanceof DOMException && err.name === "NotAllowedError") {
-        setError(
-          "Camera access was denied. Allow camera for this site in your browser settings (site permissions / lock icon in the address bar), then try again.",
-        )
+        setError(t("errorCameraDenied"))
       } else if (err instanceof DOMException && err.name === "NotFoundError") {
-        setError("No camera was found on this device.")
+        setError(t("errorNoCamera"))
       } else {
-        setError("Unable to access the camera. Check permissions and try again.")
+        setError(t("errorCameraGeneric"))
       }
     } finally {
       if (!signal.aborted) {
@@ -184,7 +184,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       }
       cameraAbortRef.current = null
     }
-  }, [])
+  }, [t])
 
   const handleResumeCameraFromManual = useCallback(() => {
     setManualTextOpen(false)
@@ -204,9 +204,9 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       setTorchOn(next)
     } catch (err) {
       console.error("[BarcodeScanButton] torch toggle failed:", err)
-      setError("Flashlight is not available on this device or browser.")
+      setError(t("errorFlashlight"))
     }
-  }, [torchOn, torchSupported])
+  }, [torchOn, torchSupported, t])
 
   useEffect(() => {
     if (!isScanningCamera || !streamRef.current) return
@@ -240,7 +240,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       })
       .catch((err) => {
         console.error("[BarcodeScanButton] video play failed:", err)
-        setError("Unable to play camera stream.")
+        setError(t("errorVideoPlay"))
         stopScanning()
       })
 
@@ -252,7 +252,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       streamRef.current?.getTracks().forEach((track) => track.stop())
       streamRef.current = null
     }
-  }, [isScanningCamera, handleScanSuccess, stopScanning])
+  }, [isScanningCamera, handleScanSuccess, stopScanning, t])
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,10 +276,10 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
             updateOpen(false)
             navigateToCompare(router, code)
           } else {
-            setError("No barcode found in image. Try another image.")
+            setError(t("errorNoBarcodeInImage"))
           }
         } catch {
-          setError("No barcode found in image. Try another image.")
+          setError(t("errorNoBarcodeInImage"))
         } finally {
           URL.revokeObjectURL(imageUrl)
           setIsProcessing(false)
@@ -287,12 +287,12 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       }
       img.onerror = () => {
         URL.revokeObjectURL(imageUrl)
-        setError("Failed to load image.")
+        setError(t("errorImageLoad"))
         setIsProcessing(false)
       }
       img.src = imageUrl
     },
-    [open, router, stopScanning, updateOpen],
+    [open, router, stopScanning, updateOpen, t],
   )
 
   useEffect(() => {
@@ -339,8 +339,8 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
           )}
         >
           <DialogHeader>
-            <DialogTitle>Scan barcode</DialogTitle>
-            <DialogDescription>Scan product barcodes with your camera or upload an image.</DialogDescription>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("description")}</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
@@ -363,7 +363,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   ) : (
                     <div className="text-muted-foreground flex h-full min-h-[140px] flex-col items-center justify-center gap-3 px-4 text-center text-sm">
                       <Loader2Icon className="text-primary h-10 w-10 animate-spin" aria-hidden />
-                      <span>Starting camera…</span>
+                      <span>{t("startingCamera")}</span>
                     </div>
                   )}
                 </div>
@@ -378,10 +378,10 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                       className="min-w-0 flex-1"
                       onClick={handleToggleTorch}
                       aria-pressed={torchOn}
-                      aria-label={torchOn ? "Turn off flashlight" : "Turn on flashlight"}
+                      aria-label={torchOn ? t("turnOffFlashlight") : t("turnOnFlashlight")}
                     >
                       <FlashlightIcon className={cn("h-5 w-5", torchOn && "text-amber-400")} aria-hidden />
-                      {torchOn ? "Light off" : "Light"}
+                      {torchOn ? t("lightOff") : t("light")}
                     </Button>
                   )}
                   <Button
@@ -397,13 +397,13 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                     ) : (
                       <ImageIcon className="h-5 w-5" />
                     )}
-                    {isProcessing ? "Processing…" : "Upload image"}
+                    {isProcessing ? t("processing") : t("uploadImage")}
                   </Button>
                 </div>
 
                 <Button type="button" variant="outline" className="w-full" size="lg" onClick={stopScanning}>
                   <XIcon className="h-5 w-5" aria-hidden />
-                  {isScanningCamera ? "Stop scanning" : "Cancel"}
+                  {isScanningCamera ? t("stopScanning") : t("cancel")}
                 </Button>
               </div>
             )}
@@ -423,14 +423,14 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   ) : (
                     <CameraIcon className="h-5 w-5" />
                   )}
-                  {isStartingCamera ? "Starting camera…" : "Start camera"}
+                  {isStartingCamera ? t("startingCamera") : t("startCamera")}
                 </Button>
                 <div className="relative">
                   <span className="border-border absolute inset-0 flex items-center">
                     <span className="w-full border-t" />
                   </span>
                   <span className="text-muted-foreground relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2">or</span>
+                    <span className="bg-background px-2">{t("or")}</span>
                   </span>
                 </div>
                 <Button
@@ -442,7 +442,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   disabled={isProcessing}
                 >
                   {isProcessing ? <Loader2Icon className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
-                  {isProcessing ? "Processing…" : "Upload image"}
+                  {isProcessing ? t("processing") : t("uploadImage")}
                 </Button>
               </div>
             )}
@@ -462,7 +462,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   ) : (
                     <CameraIcon className="h-4 w-4" />
                   )}
-                  Use camera
+                  {t("useCamera")}
                 </Button>
                 <Button
                   type="button"
@@ -473,7 +473,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   disabled={isProcessing}
                 >
                   {isProcessing ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-                  Upload
+                  {t("upload")}
                 </Button>
               </div>
             )}
@@ -493,7 +493,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="e.g. 5601234567890"
+                  placeholder={t("manualPlaceholder")}
                   value={manualTextValue}
                   onChange={(e) => setManualTextValue(e.target.value)}
                   autoFocus
@@ -501,7 +501,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   className="text-sm"
                 />
                 <Button type="submit" size="sm" disabled={!manualTextValue.trim()}>
-                  Go
+                  {t("go")}
                 </Button>
               </form>
             ) : (
@@ -510,7 +510,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                 className="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
                 onClick={handleOpenManualEntry}
               >
-                Type barcode manually
+                {t("typeBarcodeManually")}
               </button>
             )}
           </div>

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,7 @@ interface LoginPromptProps {
 
 function LoginPromptBody({ pathname }: { pathname: string }) {
   const loginHref = `/login?next=${encodeURIComponent(pathname)}`
+  const t = useTranslations("auth.loginPrompt")
 
   return (
     <div className="flex flex-col items-center gap-4 px-2 py-2 text-center">
@@ -26,20 +28,18 @@ function LoginPromptBody({ pathname }: { pathname: string }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <h3 className="text-base font-semibold tracking-tight">Save your favorites</h3>
-        <p className="text-muted-foreground text-sm text-balance">
-          Sign in to monitor prices on the products you care about. We can tell you when it is the best time to buy.
-        </p>
+        <h3 className="text-base font-semibold tracking-tight">{t("title")}</h3>
+        <p className="text-muted-foreground text-sm text-balance">{t("body")}</p>
       </div>
 
       <Button asChild variant="marketing-default" size="lg" className="w-full max-w-xs">
         <Link href={loginHref}>
           <GoogleIcon />
-          Continue with Google
+          {t("continueWithGoogle")}
         </Link>
       </Button>
 
-      <p className="text-muted-foreground/60 text-xs">No spam, ever.</p>
+      <p className="text-muted-foreground/60 text-xs">{t("noSpam")}</p>
     </div>
   )
 }
@@ -47,14 +47,15 @@ function LoginPromptBody({ pathname }: { pathname: string }) {
 export function LoginPrompt({ open, onOpenChange }: LoginPromptProps) {
   const isMobile = useIsMobile()
   const pathname = usePathname()
+  const t = useTranslations("auth.loginPrompt")
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent>
           <DrawerHeader className="sr-only">
-            <DrawerTitle>Sign in</DrawerTitle>
-            <DrawerDescription>Sign in to save favorites</DrawerDescription>
+            <DrawerTitle>{t("ariaTitle")}</DrawerTitle>
+            <DrawerDescription>{t("ariaDescription")}</DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-8">
             <LoginPromptBody pathname={pathname} />
@@ -68,8 +69,8 @@ export function LoginPrompt({ open, onOpenChange }: LoginPromptProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader className="sr-only">
-          <DialogTitle>Sign in</DialogTitle>
-          <DialogDescription>Sign in to save favorites</DialogDescription>
+          <DialogTitle>{t("ariaTitle")}</DialogTitle>
+          <DialogDescription>{t("ariaDescription")}</DialogDescription>
         </DialogHeader>
         <LoginPromptBody pathname={pathname} />
       </DialogContent>

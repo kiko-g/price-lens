@@ -1,4 +1,52 @@
 {
+  "scan": {
+    "title": "Scan barcode",
+    "description": "Scan product barcodes with your camera or upload an image.",
+    "startCamera": "Start camera",
+    "startingCamera": "Starting camera…",
+    "stopScanning": "Stop scanning",
+    "cancel": "Cancel",
+    "uploadImage": "Upload image",
+    "upload": "Upload",
+    "useCamera": "Use camera",
+    "processing": "Processing…",
+    "or": "or",
+    "light": "Light",
+    "lightOff": "Light off",
+    "turnOnFlashlight": "Turn on flashlight",
+    "turnOffFlashlight": "Turn off flashlight",
+    "manualPlaceholder": "e.g. 5601234567890",
+    "go": "Go",
+    "typeBarcodeManually": "Type barcode manually",
+    "errorInvalidBarcode": "Enter a valid barcode (8 to 14 digits).",
+    "errorCameraDenied": "Camera access was denied. Allow camera for this site in your browser settings (site permissions / lock icon in the address bar), then try again.",
+    "errorNoCamera": "No camera was found on this device.",
+    "errorCameraGeneric": "Unable to access the camera. Check permissions and try again.",
+    "errorFlashlight": "Flashlight is not available on this device or browser.",
+    "errorVideoPlay": "Unable to play camera stream.",
+    "errorNoBarcodeInImage": "No barcode found in image. Try another image.",
+    "errorImageLoad": "Failed to load image."
+  },
+  "ui": {
+    "share": {
+      "share": "Share",
+      "tooltip": "Share this product",
+      "ariaShare": "Share product",
+      "checkOut": "Check out {name} on Price Lens",
+      "shared": "Shared successfully",
+      "copyLink": "Copy link",
+      "copiedLink": "Link copied to clipboard:",
+      "copyFailed": "Failed to copy link",
+      "copyFailedDescription": "Please try again or copy manually",
+      "email": "Email",
+      "emailOpened": "Email client opened",
+      "emailOpenedDescription": "Compose your email to share",
+      "twitter": "Twitter",
+      "sharingTwitter": "Sharing on Twitter",
+      "whatsapp": "WhatsApp",
+      "sharingWhatsApp": "Sharing on WhatsApp"
+    }
+  },
   "common": {
     "actions": {
       "save": "Save",
@@ -205,6 +253,14 @@
     }
   },
   "auth": {
+    "loginPrompt": {
+      "title": "Save your favorites",
+      "body": "Sign in to monitor prices on the products you care about. We can tell you when it is the best time to buy.",
+      "continueWithGoogle": "Continue with Google",
+      "noSpam": "No spam, ever.",
+      "ariaTitle": "Sign in",
+      "ariaDescription": "Sign in to save favorites"
+    },
     "login": {
       "loginTo": "Login to",
       "noSpam": "We'll never use your email for spam",

@@ -1,4 +1,52 @@
 {
+  "scan": {
+    "title": "Ler código de barras",
+    "description": "Lê códigos de barras de produtos com a câmara ou carrega uma imagem.",
+    "startCamera": "Iniciar câmara",
+    "startingCamera": "A iniciar câmara…",
+    "stopScanning": "Parar leitura",
+    "cancel": "Cancelar",
+    "uploadImage": "Carregar imagem",
+    "upload": "Carregar",
+    "useCamera": "Usar câmara",
+    "processing": "A processar…",
+    "or": "ou",
+    "light": "Luz",
+    "lightOff": "Luz off",
+    "turnOnFlashlight": "Ligar lanterna",
+    "turnOffFlashlight": "Desligar lanterna",
+    "manualPlaceholder": "ex. 5601234567890",
+    "go": "Ir",
+    "typeBarcodeManually": "Escrever código manualmente",
+    "errorInvalidBarcode": "Insere um código válido (8 a 14 dígitos).",
+    "errorCameraDenied": "Acesso à câmara negado. Permite a câmara para este site nas definições do browser (permissões do site / ícone de cadeado na barra de endereços) e tenta novamente.",
+    "errorNoCamera": "Não foi encontrada câmara neste dispositivo.",
+    "errorCameraGeneric": "Não foi possível aceder à câmara. Verifica as permissões e tenta novamente.",
+    "errorFlashlight": "A lanterna não está disponível neste dispositivo ou browser.",
+    "errorVideoPlay": "Não foi possível reproduzir a câmara.",
+    "errorNoBarcodeInImage": "Nenhum código encontrado na imagem. Tenta outra imagem.",
+    "errorImageLoad": "Falha ao carregar a imagem."
+  },
+  "ui": {
+    "share": {
+      "share": "Partilhar",
+      "tooltip": "Partilhar este produto",
+      "ariaShare": "Partilhar produto",
+      "checkOut": "Vê {name} no Price Lens",
+      "shared": "Partilhado com sucesso",
+      "copyLink": "Copiar link",
+      "copiedLink": "Link copiado:",
+      "copyFailed": "Falha ao copiar link",
+      "copyFailedDescription": "Tenta novamente ou copia manualmente",
+      "email": "Email",
+      "emailOpened": "Cliente de email aberto",
+      "emailOpenedDescription": "Compõe o teu email para partilhar",
+      "twitter": "Twitter",
+      "sharingTwitter": "A partilhar no Twitter",
+      "whatsapp": "WhatsApp",
+      "sharingWhatsApp": "A partilhar no WhatsApp"
+    }
+  },
   "common": {
     "actions": {
       "save": "Guardar",
@@ -205,6 +253,14 @@
     }
   },
   "auth": {
+    "loginPrompt": {
+      "title": "Guarda os teus favoritos",
+      "body": "Inicia sessão para acompanhar preços dos produtos que te interessam. Podemos avisar-te quando for a melhor altura para comprar.",
+      "continueWithGoogle": "Continuar com Google",
+      "noSpam": "Sem spam, prometido.",
+      "ariaTitle": "Iniciar sessão",
+      "ariaDescription": "Inicia sessão para guardar favoritos"
+    },
     "login": {
       "loginTo": "Inicia sessão no",
       "noSpam": "Nunca usaremos o teu email para spam",
