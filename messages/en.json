@@ -167,6 +167,95 @@
       "body": "No store products found for this canonical product."
     }
   },
+  "home": {
+    "hero": {
+      "titleMobile": "Price tracking for<br></br>Portuguese supermarkets",
+      "subtitleMobile": "Turn price swings into savings. <strong>Money in your pocket</strong>.",
+      "titleDesktop": "Price tracking for Portuguese supermarkets",
+      "subtitleDesktop": "Daily price monitoring across Continente, Auchan and Pingo Doce.<br></br>Turn supermarket swings into savings. More <strong>money in your pocket</strong>."
+    },
+    "searchBar": {
+      "placeholder": "Search products…",
+      "placeholderWithCount": "Search {count} products…",
+      "scanBarcode": "Scan barcode"
+    },
+    "valueProposition": {
+      "title": "How Price Lens helps",
+      "subtitle": "We do the tracking so you can make smarter choices at the supermarket.",
+      "pillars": {
+        "track": {
+          "title": "Track",
+          "description": "Monitor daily price changes across Continente, Auchan, and Pingo Doce — automatically."
+        },
+        "understand": {
+          "title": "Understand",
+          "description": "See full price history and trends for any product — not just today's shelf tag."
+        },
+        "save": {
+          "title": "Save",
+          "description": "Make informed decisions and catch price hikes before they compound into real cost increases."
+        }
+      }
+    },
+    "popularProducts": {
+      "title": "Popular products"
+    },
+    "marketPulse": {
+      "drops": { "label": "price drops today", "short": "price drops today" },
+      "discount": { "label": "on discount now", "short": "on discount" },
+      "savings": { "label": "in savings on sale", "short": "savings" }
+    },
+    "chainFilters": {
+      "products": "products",
+      "onSale": "{count} on sale"
+    },
+    "storeOverview": {
+      "title": "Stores we track",
+      "browse": "Browse"
+    },
+    "freshness": {
+      "justNow": "Updated just now",
+      "hoursAgo": "Updated {hours}h ago",
+      "today": "Updated today",
+      "recent": "Updated recently",
+      "trackingSince": "Tracking since Mar 2025"
+    },
+    "entryPoints": {
+      "browseAll": { "label": "Browse all", "description": "Full catalog" },
+      "priceDrops": { "label": "Price drops", "description": "History-weighted drops" },
+      "bestDiscounts": { "label": "Best discounts", "description": "On sale now" },
+      "essential": { "label": "Essential", "description": "Top tracked" }
+    },
+    "diagonalCta": {
+      "headingEuros": "{euros} in savings across {count} products on sale",
+      "headingDrops": "{count} price drops detected today",
+      "bodyWithStores": "Prices shift every week across {count} major chains. What costs €6.99 today was €4.49 last month. Price Lens tracks it all so you buy at the right time.",
+      "body": "Prices shift every week across supermarkets. What costs €6.99 today was €4.49 last month. Price Lens tracks it all so you buy at the right time.",
+      "cta": "Browse today's price drops"
+    },
+    "aboutTeaser": {
+      "title": "Why track prices?",
+      "subtitle": "Portuguese grocery inflation hit 20%+ over the last 5 years. Small savings compound.",
+      "points": {
+        "creep": {
+          "title": "Invisible price creep",
+          "text": "Small hikes on everyday products add up to hundreds of euros you never noticed losing."
+        },
+        "history": {
+          "title": "Full price history",
+          "text": "See exactly how a product's price has moved over weeks and months across stores."
+        },
+        "timing": {
+          "title": "Buy at the right time",
+          "text": "Most products cycle through discounts. Price Lens shows you when prices drop."
+        }
+      },
+      "cta": {
+        "title": "Understand the bigger picture",
+        "body": "See the data behind Portuguese grocery inflation and how Price Lens helps."
+      }
+    }
+  },
   "products": {
     "browse": {
       "metadata": {

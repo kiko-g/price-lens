@@ -167,6 +167,95 @@
       "body": "Não foram encontrados produtos para este produto canónico."
     }
   },
+  "home": {
+    "hero": {
+      "titleMobile": "Acompanha os preços dos<br></br>supermercados portugueses",
+      "subtitleMobile": "Transforma variações de preço em poupança. <strong>Dinheiro no teu bolso</strong>.",
+      "titleDesktop": "Acompanha os preços dos supermercados portugueses",
+      "subtitleDesktop": "Monitorização diária de preços no Continente, Auchan e Pingo Doce.<br></br>Transforma variações em poupança. Mais <strong>dinheiro no teu bolso</strong>."
+    },
+    "searchBar": {
+      "placeholder": "Pesquisar produtos…",
+      "placeholderWithCount": "Pesquisar {count} produtos…",
+      "scanBarcode": "Ler código de barras"
+    },
+    "valueProposition": {
+      "title": "Como o Price Lens ajuda",
+      "subtitle": "Nós fazemos o acompanhamento para tomares decisões mais inteligentes no supermercado.",
+      "pillars": {
+        "track": {
+          "title": "Acompanhar",
+          "description": "Monitoriza variações diárias de preços no Continente, Auchan e Pingo Doce — automaticamente."
+        },
+        "understand": {
+          "title": "Compreender",
+          "description": "Vê o histórico completo e as tendências de preço de qualquer produto — não apenas o preço de hoje."
+        },
+        "save": {
+          "title": "Poupar",
+          "description": "Toma decisões informadas e apanha as subidas de preço antes que se transformem em custos reais."
+        }
+      }
+    },
+    "popularProducts": {
+      "title": "Produtos populares"
+    },
+    "marketPulse": {
+      "drops": { "label": "descidas de preço hoje", "short": "descidas hoje" },
+      "discount": { "label": "em promoção agora", "short": "em promoção" },
+      "savings": { "label": "em poupança em promoção", "short": "poupança" }
+    },
+    "chainFilters": {
+      "products": "produtos",
+      "onSale": "{count} em promoção"
+    },
+    "storeOverview": {
+      "title": "Lojas que acompanhamos",
+      "browse": "Explorar"
+    },
+    "freshness": {
+      "justNow": "Atualizado agora",
+      "hoursAgo": "Atualizado há {hours}h",
+      "today": "Atualizado hoje",
+      "recent": "Atualizado recentemente",
+      "trackingSince": "A acompanhar desde março de 2025"
+    },
+    "entryPoints": {
+      "browseAll": { "label": "Explorar tudo", "description": "Catálogo completo" },
+      "priceDrops": { "label": "Descidas de preço", "description": "Ponderadas pelo histórico" },
+      "bestDiscounts": { "label": "Melhores descontos", "description": "Em promoção agora" },
+      "essential": { "label": "Essenciais", "description": "Mais acompanhados" }
+    },
+    "diagonalCta": {
+      "headingEuros": "{euros} em poupança em {count} produtos em promoção",
+      "headingDrops": "{count} descidas de preço detetadas hoje",
+      "bodyWithStores": "Os preços variam todas as semanas em {count} grandes cadeias. O que custa 6,99€ hoje custava 4,49€ no mês passado. O Price Lens acompanha tudo para comprares no momento certo.",
+      "body": "Os preços variam todas as semanas nos supermercados. O que custa 6,99€ hoje custava 4,49€ no mês passado. O Price Lens acompanha tudo para comprares no momento certo.",
+      "cta": "Ver as descidas de preço de hoje"
+    },
+    "aboutTeaser": {
+      "title": "Porquê acompanhar preços?",
+      "subtitle": "A inflação alimentar em Portugal passou os 20% nos últimos 5 anos. Pequenas poupanças somam.",
+      "points": {
+        "creep": {
+          "title": "Aumentos invisíveis",
+          "text": "Pequenas subidas em produtos do dia a dia somam centenas de euros sem dares por isso."
+        },
+        "history": {
+          "title": "Histórico completo",
+          "text": "Vê exatamente como o preço de um produto se moveu ao longo de semanas e meses, loja a loja."
+        },
+        "timing": {
+          "title": "Compra na altura certa",
+          "text": "A maioria dos produtos passa por ciclos de desconto. O Price Lens mostra-te quando os preços descem."
+        }
+      },
+      "cta": {
+        "title": "Vê o panorama completo",
+        "body": "Descobre os dados por trás da inflação alimentar portuguesa e como o Price Lens ajuda."
+      }
+    }
+  },
   "products": {
     "browse": {
       "metadata": {

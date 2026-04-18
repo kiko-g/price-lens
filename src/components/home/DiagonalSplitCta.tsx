@@ -1,17 +1,11 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { getLocale, getTranslations } from "next-intl/server"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { getHomeStats } from "@/lib/queries/home-stats"
 import { DiagonalSplitCtaRight } from "@/components/home/DiagonalSplitCtaRight"
-
-function formatNumber(n: number): string {
-  return n.toLocaleString("pt-PT")
-}
-
-function formatEuros(n: number): string {
-  return `€${n.toLocaleString("pt-PT", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-}
+import { isLocale, toLocaleTag } from "@/i18n/config"
 
 /**
  * Two panels whose inner edges are clipped by a shallow diagonal, leaving the
@@ -19,7 +13,15 @@ function formatEuros(n: number): string {
  * regular rounded cards; on md+ the clip-paths kick in.
  */
 export async function DiagonalSplitCta() {
-  const stats = await getHomeStats()
+  const [stats, localeRaw, t] = await Promise.all([
+    getHomeStats(),
+    getLocale(),
+    getTranslations("home.diagonalCta"),
+  ])
+  const locale = isLocale(localeRaw) ? localeRaw : "pt"
+  const tag = toLocaleTag(locale)
+  const formatNumber = (n: number) => n.toLocaleString(tag)
+  const formatEuros = (n: number) => `€${n.toLocaleString(tag, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 
   const hasEuroStat = stats.totalDiscountSavingsEuros > 0 || stats.totalSavingsEuros24h > 0
   const euroValue = stats.totalDiscountSavingsEuros > 0 ? stats.totalDiscountSavingsEuros : stats.totalSavingsEuros24h
@@ -45,18 +47,17 @@ export async function DiagonalSplitCta() {
               )}
             >
               {hasEuroStat
-                ? `${formatEuros(euroValue)} in savings across ${formatNumber(stats.productsOnDiscount)} products on sale`
-                : `${formatNumber(stats.priceDropsToday)} price drops detected today`}
+                ? t("headingEuros", { euros: formatEuros(euroValue), count: formatNumber(stats.productsOnDiscount) })
+                : t("headingDrops", { count: formatNumber(stats.priceDropsToday) })}
             </h2>
 
             <p className="text-muted-foreground max-w-[400px] text-sm leading-relaxed text-pretty">
-              Prices shift every week across {storeCount > 0 ? `${storeCount} major chains` : "supermarkets"}. What
-              costs €6.99 today was €4.49 last month. Price Lens tracks it all so you buy at the right time.
+              {storeCount > 0 ? t("bodyWithStores", { count: storeCount }) : t("body")}
             </p>
 
             <Button asChild variant="primary" size="lg" roundedness="xl" className="group gap-2">
               <Link href="/products?sort=price-drop-smart">
-                Browse today&apos;s price drops
+                {t("cta")}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { SearchIcon, ScanBarcodeIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SearchContainer } from "@/components/layout/search"
@@ -13,7 +14,9 @@ function formatProductCount(n: number): string {
 
 export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number }) {
   const countLabel = formatProductCount(totalProducts)
-  const placeholder = countLabel ? `Search ${countLabel} products...` : "Search products..."
+  const t = useTranslations("home.searchBar")
+  const tBottom = useTranslations("layout.bottomNav")
+  const placeholder = countLabel ? t("placeholderWithCount", { count: countLabel }) : t("placeholder")
 
   return (
     <div className="flex w-full items-center gap-2.5">
@@ -36,7 +39,7 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
       <BarcodeScanButton>
         <button
           type="button"
-          aria-label="Scan barcode"
+          aria-label={t("scanBarcode")}
           className={cn(
             "bg-card hover:bg-accent/50 flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border transition-colors",
             "max-[420px]:size-11 max-[420px]:justify-center max-[420px]:p-0",
@@ -48,9 +51,9 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
           }}
         >
           <ScanBarcodeIcon className="sm:text-muted-foreground text-foreground size-5 shrink-0" />
-          <span className="text-foreground sm:text-muted-foreground hidden text-sm sm:inline-flex">Scan barcode</span>
+          <span className="text-foreground sm:text-muted-foreground hidden text-sm sm:inline-flex">{t("scanBarcode")}</span>
           <span className="text-foreground sm:text-muted-foreground inline-flex text-sm max-[420px]:hidden sm:hidden">
-            Scan
+            {tBottom("scan")}
           </span>
         </button>
       </BarcodeScanButton>
