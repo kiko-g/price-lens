@@ -267,6 +267,32 @@
       "metadata": {
         "viewDetails": "Vê os detalhes do produto no Price Lens"
       }
+    },
+    "card": {
+      "favorite": {
+        "add": "Adicionar aos favoritos",
+        "remove": "Remover dos favoritos",
+        "signInToAdd": "Inicia sessão para adicionar favoritos",
+        "addedOn": "Adicionado aos favoritos"
+      },
+      "browseBrand": "Ver produtos da marca {brand}",
+      "noBrand": "Sem marca",
+      "untitled": "Sem título",
+      "priceUnavailable": "Preço indisponível",
+      "hierarchy": {
+        "title": "Hierarquia",
+        "originalIn": "Hierarquia original em",
+        "none": "Sem categoria disponível"
+      },
+      "menu": {
+        "openPage": "Abrir página do produto",
+        "openIn": "Abrir em {store}",
+        "compareInOtherStores": "Comparar noutras lojas",
+        "updateFrom": "Atualizar do {store}",
+        "setPriority": "Definir prioridade",
+        "clearPriority": "Limpar prioridade"
+      },
+      "inspectData": "Inspecionar dados do produto"
     }
   },
   "layout": {

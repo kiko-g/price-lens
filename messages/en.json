@@ -267,6 +267,32 @@
       "metadata": {
         "viewDetails": "View product details on Price Lens"
       }
+    },
+    "card": {
+      "favorite": {
+        "add": "Add to favorites",
+        "remove": "Remove from favorites",
+        "signInToAdd": "Sign in to add favorites",
+        "addedOn": "Added to favorites"
+      },
+      "browseBrand": "Browse products for brand {brand}",
+      "noBrand": "No brand",
+      "untitled": "Untitled",
+      "priceUnavailable": "Price unavailable",
+      "hierarchy": {
+        "title": "Hierarchy",
+        "originalIn": "Original hierarchy in",
+        "none": "No category available"
+      },
+      "menu": {
+        "openPage": "Open product page",
+        "openIn": "Open in {store}",
+        "compareInOtherStores": "Compare in other stores",
+        "updateFrom": "Update from {store}",
+        "setPriority": "Set priority",
+        "clearPriority": "Clear priority"
+      },
+      "inspectData": "Inspect store product data"
     }
   },
   "layout": {
