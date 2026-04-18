@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { HomeIcon, WorkflowIcon, HeartIcon, ShoppingBasketIcon, InfoIcon, SmartphoneIcon, TagIcon } from "lucide-react"
 
 export const siteConfig = {
@@ -62,54 +63,39 @@ export function pageMetadata(title: string, description: string): Metadata {
   }
 }
 
-export const navigation = [
-  {
-    icon: HomeIcon,
-    label: "Home",
-    href: "/",
-    shownOnDesktop: true,
-    shownOnMobile: true,
-  },
-  {
-    icon: ShoppingBasketIcon,
-    label: "Browse",
-    href: "/products",
-    shownOnDesktop: true,
-    shownOnMobile: true,
-  },
-  {
-    icon: TagIcon,
-    label: "Deals",
-    href: "/deals",
-    shownOnDesktop: true,
-    shownOnMobile: true,
-  },
-  {
-    icon: HeartIcon,
-    label: "Favorites",
-    href: "/favorites",
-    shownOnDesktop: true,
-    shownOnMobile: true,
-  },
-  {
-    icon: SmartphoneIcon,
-    label: "Get the App",
-    href: "/app",
-    shownOnDesktop: false,
-    shownOnMobile: true,
-  },
-  {
-    icon: InfoIcon,
-    label: "About",
-    href: "/about",
-    shownOnDesktop: true,
-    shownOnMobile: true,
-  },
-  {
-    icon: WorkflowIcon,
-    label: "Admin",
-    href: "/admin",
-    shownOnDesktop: true,
-    shownOnMobile: true,
-  },
+/**
+ * Builds `Metadata` from translation keys under `metadata.pages.<page>.{title,description}`.
+ * Used by pages with `export async function generateMetadata` so each route's SEO
+ * respects the active locale.
+ */
+export async function pageMetadataFromKey(
+  key: string,
+  options?: { titleOverride?: string; descriptionOverride?: string },
+): Promise<Metadata> {
+  const t = await getTranslations("metadata.pages")
+  const title = options?.titleOverride ?? t(`${key}.title` as never)
+  const description = options?.descriptionOverride ?? t(`${key}.description` as never)
+  return pageMetadata(title, description)
+}
+
+import type { ComponentType, SVGProps } from "react"
+
+export type NavigationKey = "home" | "browse" | "deals" | "favorites" | "getTheApp" | "about" | "admin"
+
+export type NavigationItem = {
+  key: NavigationKey
+  icon: ComponentType<SVGProps<SVGSVGElement>>
+  href: string
+  shownOnDesktop: boolean
+  shownOnMobile: boolean
+}
+
+export const navigation: NavigationItem[] = [
+  { key: "home", icon: HomeIcon, href: "/", shownOnDesktop: true, shownOnMobile: true },
+  { key: "browse", icon: ShoppingBasketIcon, href: "/products", shownOnDesktop: true, shownOnMobile: true },
+  { key: "deals", icon: TagIcon, href: "/deals", shownOnDesktop: true, shownOnMobile: true },
+  { key: "favorites", icon: HeartIcon, href: "/favorites", shownOnDesktop: true, shownOnMobile: true },
+  { key: "getTheApp", icon: SmartphoneIcon, href: "/app", shownOnDesktop: false, shownOnMobile: true },
+  { key: "about", icon: InfoIcon, href: "/about", shownOnDesktop: true, shownOnMobile: true },
+  { key: "admin", icon: WorkflowIcon, href: "/admin", shownOnDesktop: true, shownOnMobile: true },
 ]

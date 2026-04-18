@@ -1,8 +1,9 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import { STORE_NAMES } from "@/types/business"
-import { siteConfig } from "@/lib/config"
+import { siteConfig, pageMetadataFromKey } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { extractProductIdFromSlug, generateProductSlug } from "@/lib/business/product"
@@ -31,11 +32,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const storeProduct = await getProduct(idParam)
 
   if (!storeProduct) {
-    return {
-      title: "Product Not Found",
-      description: "The requested product could not be found.",
-    }
+    return pageMetadataFromKey("productNotFound")
   }
+
+  const t = await getTranslations("products.pdp.metadata")
 
   // Generate canonical URL with full slug for SEO
   const canonicalSlug = generateProductSlug(storeProduct)
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   if (storeProduct.pack) descParts.push(storeProduct.pack)
   if (storeProduct.category) descParts.push(storeProduct.category)
-  const description = descParts.length > 0 ? descParts.join(" · ") : `View product details on ${siteConfig.name}`
+  const description = descParts.length > 0 ? descParts.join(" · ") : t("viewDetails")
 
   // Use product-specific OG image route with product image, prices, etc.
   const ogImageUrl = `${siteConfig.url}/products/${storeProduct.id}/og`

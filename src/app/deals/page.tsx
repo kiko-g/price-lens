@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
-import { pageMetadata } from "@/lib/config"
+import { pageMetadataFromKey } from "@/lib/config"
 import { getDeals } from "@/lib/queries/deals"
 
 import { Layout } from "@/components/layout"
@@ -9,10 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export const revalidate = 1800
 
-export const metadata: Metadata = pageMetadata(
-  "Deals & Price Drops",
-  "Browse the biggest price drops and best discounts across Portuguese supermarkets. Updated daily.",
-)
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadataFromKey("deals")
+}
 
 async function DealsContent() {
   const deals = await getDeals({ limit: 36 })

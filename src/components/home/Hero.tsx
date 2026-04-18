@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { getTranslations } from "next-intl/server"
 import { cn } from "@/lib/utils"
 
 import { getHomeStats } from "@/lib/queries/home-stats"
@@ -14,7 +15,7 @@ import { FreshnessBadge } from "@/components/home/FreshnessBadge"
 import { PopularProducts } from "@/components/home/PopularProducts"
 
 async function HeroContent() {
-  const [stats, heroProducts] = await Promise.all([getHomeStats(), getHeroProducts()])
+  const [stats, heroProducts, t] = await Promise.all([getHomeStats(), getHeroProducts(), getTranslations("home.hero")])
 
   return (
     <div className="z-20 mx-auto w-full max-w-7xl px-4 lg:px-8">
@@ -29,14 +30,13 @@ async function HeroContent() {
               "w-full max-w-full text-center text-3xl leading-[1.1] font-semibold tracking-tight opacity-0 [--animation-delay:100ms] sm:w-full sm:max-w-full sm:text-4xl",
             )}
           >
-            Price tracking for
-            <br />
-            Portuguese supermarkets
+            {t.rich("titleMobile", { br: () => <br /> })}
           </h1>
 
           <p className="text-muted-foreground animate-fade-in my-2.5 text-center text-sm opacity-0 [--animation-delay:150ms]">
-            Turn price swings into savings.{" "}
-            <strong className="text-foreground dark:text-foreground font-semibold">Money in your pocket</strong>.
+            {t.rich("subtitleMobile", {
+              strong: (c) => <strong className="text-foreground dark:text-foreground font-semibold">{c}</strong>,
+            })}
           </p>
 
           <div className="animate-fade-in mb-4 w-full opacity-0 [--animation-delay:250ms]">
@@ -82,14 +82,14 @@ async function HeroContent() {
                 "max-w-3xl text-5xl leading-[1.1] font-bold tracking-tight xl:text-6xl",
               )}
             >
-              Price tracking for Portuguese supermarkets
+              {t("titleDesktop")}
             </h1>
 
             <p className="text-muted-foreground max-w-lg text-base text-balance">
-              Daily price monitoring across Continente, Auchan and Pingo Doce.
-              <br />
-              Turn supermarket swings into strong. More{" "}
-              <strong className="text-foreground dark:text-foreground font-bold">money in your pocket</strong>.
+              {t.rich("subtitleDesktop", {
+                br: () => <br />,
+                strong: (c) => <strong className="text-foreground dark:text-foreground font-bold">{c}</strong>,
+              })}
             </p>
 
             <div className="w-full max-w-lg">

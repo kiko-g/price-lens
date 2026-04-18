@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
 
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { InstagramIcon, LinkedinIcon, XTwitterIcon } from "@/components/icons"
 
 export function Footer({ className }: { className?: string }) {
+  const t = useTranslations("layout.footerFull")
   return (
     <footer
       className={cn(
@@ -18,35 +20,40 @@ export function Footer({ className }: { className?: string }) {
     >
       <div className="flex flex-col items-start justify-start gap-0">
         <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
-          Built by{" "}
-          <Link
-            target="_blank"
-            href={siteConfig.links.github}
-            className="inline-flex items-center gap-2 font-medium text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
-          >
-            Francisco Gonçalves
-            <Image src="/profile.svg" alt="author" width={24} height={24} className="rounded-full" />
-          </Link>
+          {t.rich("builtBy", {
+            link: (chunks) => (
+              <Link
+                target="_blank"
+                href={siteConfig.links.github}
+                className="inline-flex items-center gap-2 font-medium text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
+              >
+                {chunks}
+                <Image src="/profile.svg" alt="" width={24} height={24} className="rounded-full" />
+              </Link>
+            ),
+          })}
         </p>
 
         <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
-          Code is open source and available on{" "}
-          <Link
-            target="_blank"
-            href={siteConfig.links.repo}
-            className="inline-flex items-center gap-2 font-semibold text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
-          >
-            GitHub
-          </Link>
+          {t.rich("openSource", {
+            link: (chunks) => (
+              <Link
+                target="_blank"
+                href={siteConfig.links.repo}
+                className="inline-flex items-center gap-2 font-semibold text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
 
-        {/* TODO: add decent text to terms and privacy */}
         <div className="text-muted-foreground mt-4 hidden w-full gap-x-4">
           <Link href="/terms" className="text-2xs hover:underline md:text-sm">
-            Terms of Service
+            {t("terms")}
           </Link>
           <Link href="/privacy" className="text-2xs hover:underline md:text-sm">
-            Privacy
+            {t("privacy")}
           </Link>
         </div>
       </div>

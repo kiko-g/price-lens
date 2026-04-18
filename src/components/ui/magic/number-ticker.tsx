@@ -1,9 +1,11 @@
 "use client"
 
 import { useInView, useMotionValue, useSpring } from "motion/react"
+import { useLocale } from "next-intl"
 import { ComponentPropsWithoutRef, useEffect, useRef } from "react"
 
 import { cn } from "@/lib/utils"
+import { isLocale, toLocaleTag } from "@/i18n/config"
 
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   value: number
@@ -21,6 +23,8 @@ export function NumberTicker({
   ...props
 }: NumberTickerProps) {
   const ref = useRef<HTMLSpanElement>(null)
+  const locale = useLocale()
+  const tag = isLocale(locale) ? toLocaleTag(locale) : "pt-PT"
   const motionValue = useMotionValue(direction === "down" ? value : 0)
   const springValue = useSpring(motionValue, {
     damping: 60,
@@ -39,13 +43,13 @@ export function NumberTicker({
     () =>
       springValue.on("change", (latest) => {
         if (ref.current) {
-          ref.current.textContent = Intl.NumberFormat("en-US", {
+          ref.current.textContent = Intl.NumberFormat(tag, {
             minimumFractionDigits: decimalPlaces,
             maximumFractionDigits: decimalPlaces,
           }).format(Number(latest.toFixed(decimalPlaces)))
         }
       }),
-    [springValue, decimalPlaces],
+    [springValue, decimalPlaces, tag],
   )
 
   return (

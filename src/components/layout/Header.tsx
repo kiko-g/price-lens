@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { navigation } from "@/lib/config"
@@ -28,6 +29,8 @@ export function Header() {
   const isEarlyAccess = false
   const [navSheetSearchOpen, setNavSheetSearchOpen] = useState(false)
   const [navSheetScanOpen, setNavSheetScanOpen] = useState(false)
+  const tNav = useTranslations("nav")
+  const tHeader = useTranslations("layout.header")
 
   return (
     <NavigationSheetProvider>
@@ -45,12 +48,12 @@ export function Header() {
               registerKeyboardShortcut={false}
             >
               <button type="button" tabIndex={-1} className="sr-only" aria-hidden>
-                Open search from menu
+                {tHeader("openSearchFromMenu")}
               </button>
             </SearchContainer>
             <BarcodeScanButton open={navSheetScanOpen} onOpenChange={setNavSheetScanOpen}>
               <button type="button" tabIndex={-1} className="sr-only" aria-hidden>
-                Open barcode scan from menu
+                {tHeader("openBarcodeFromMenu")}
               </button>
             </BarcodeScanButton>
 
@@ -70,7 +73,7 @@ export function Header() {
                       className={cn("", pathname === hrefSanitized && "bg-zinc-200 dark:bg-zinc-100/20")}
                       key={item.href}
                     >
-                      <Link href={item.href}>{item.label}</Link>
+                      <Link href={item.href}>{tNav(item.key)}</Link>
                     </Button>
                   )
                 })}
@@ -85,7 +88,7 @@ export function Header() {
                   className="text-muted-foreground hover:border-input hover:text-foreground border-border bg-accent hidden h-[34px] max-w-[320px] min-w-[240px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors md:flex"
                 >
                   <SearchIcon className="h-4 w-4 shrink-0" />
-                  <span className="flex-1 truncate text-left text-sm">Search products</span>
+                  <span className="flex-1 truncate text-left text-sm">{tHeader("searchProducts")}</span>
                   <Kbd className="bg-muted dark:bg-foreground/10 h-5 min-w-5 px-1.5 text-[10px]">⌘K</Kbd>
                 </button>
               </SearchContainer>

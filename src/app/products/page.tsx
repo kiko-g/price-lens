@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import { StoreProductsShowcase } from "@/components/products/store-products-showcase"
 import { queryStoreProducts, generateQueryKey } from "@/lib/queries/store-products"
@@ -55,8 +56,10 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 
   const ogImageUrl = `${siteConfig.url}/api/og/products${ogParams.toString() ? `?${ogParams}` : ""}`
-  const ogTitle = `Price Lens | ${title}`
-  const description = `Browse and compare prices${params.q ? ` for "${params.q}"` : ""} across supermarkets`
+  const tMeta = await getTranslations("metadata")
+  const tBrowse = await getTranslations("products.browse.metadata")
+  const ogTitle = `${tMeta("site.name")} | ${title}`
+  const description = params.q ? tBrowse("descriptionWithQuery", { query: params.q }) : tBrowse("description")
 
   return {
     title,

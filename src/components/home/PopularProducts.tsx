@@ -3,9 +3,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/business/data"
-import { discountValueToPercentage } from "@/lib/business/product"
+import { discountValueToPercentage, formatPrice as formatPriceLocaleAware } from "@/lib/business/product"
+import { isLocale } from "@/i18n/config"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { Marquee } from "@/components/ui/marquee"
 import type { HeroProduct } from "@/lib/business/hero"
@@ -24,12 +26,10 @@ function resolveImageUrl(src: string, size = 200): string {
   }
 }
 
-function formatPrice(n: number): string {
-  return n.toLocaleString("pt-PT", { style: "currency", currency: "EUR" })
-}
-
 function ProductCard({ product, compact = false }: { product: HeroProduct; compact?: boolean }) {
   const [loaded, setLoaded] = useState(false)
+  const locale = useLocale()
+  const formatPrice = (n: number) => formatPriceLocaleAware(n, isLocale(locale) ? locale : "pt")
   const hasDiscount = product.discount != null && product.discount > 0
   const imgSize = compact ? 56 : 80
 
@@ -104,6 +104,7 @@ function ProductCard({ product, compact = false }: { product: HeroProduct; compa
 }
 
 export function PopularProducts({ products, className }: { products: HeroProduct[]; className?: string }) {
+  const t = useTranslations("home.popularProducts")
   if (products.length === 0) return null
 
   const mid = Math.ceil(products.length / 2)
@@ -113,7 +114,7 @@ export function PopularProducts({ products, className }: { products: HeroProduct
   return (
     <div className={cn("flex h-full flex-col gap-2 md:gap-1", className)}>
       <p className="text-muted-foreground mb-3 text-center text-[11px] font-semibold tracking-widest uppercase md:text-left">
-        Popular products
+        {t("title")}
       </p>
 
       <div className="relative">

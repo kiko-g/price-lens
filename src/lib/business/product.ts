@@ -1,18 +1,29 @@
 import type { StoreProduct } from "@/types"
+import type { Locale } from "@/i18n/config"
+import { formatPrice as formatPriceI18n } from "@/lib/i18n/format"
 
-export const popularProducts = [
-  { label: "Cápsulas de Café", value: "capsulas de cafe" },
-  { label: "Leite", value: "leite" },
-  { label: "Atum", value: "atum" },
-  { label: "Iogurte Grego", value: "iogurte grego" },
-  { label: "Cereais", value: "cereais" },
-  { label: "Fiambre", value: "fiambre" },
-  { label: "Häagen-Dazs", value: "haagen dazs" },
-  { label: "Salmão", value: "salmao" },
-  { label: "Chocolate", value: "chocolate" },
-  { label: "Biscoitos", value: "biscoitos" },
-  { label: "Bolachas", value: "bolachas" },
+/**
+ * Product labels shown in the "popular searches" area.
+ * The `value` is the search term sent to the backend (always PT — that's
+ * how the catalog is indexed); `labels` holds the display text per locale.
+ */
+export const popularProducts: Array<{ value: string; labels: Record<Locale, string> }> = [
+  { value: "capsulas de cafe", labels: { pt: "Cápsulas de Café", en: "Coffee Capsules" } },
+  { value: "leite", labels: { pt: "Leite", en: "Milk" } },
+  { value: "atum", labels: { pt: "Atum", en: "Tuna" } },
+  { value: "iogurte grego", labels: { pt: "Iogurte Grego", en: "Greek Yogurt" } },
+  { value: "cereais", labels: { pt: "Cereais", en: "Cereal" } },
+  { value: "fiambre", labels: { pt: "Fiambre", en: "Ham" } },
+  { value: "haagen dazs", labels: { pt: "Häagen-Dazs", en: "Häagen-Dazs" } },
+  { value: "salmao", labels: { pt: "Salmão", en: "Salmon" } },
+  { value: "chocolate", labels: { pt: "Chocolate", en: "Chocolate" } },
+  { value: "biscoitos", labels: { pt: "Biscoitos", en: "Biscuits" } },
+  { value: "bolachas", labels: { pt: "Bolachas", en: "Cookies" } },
 ]
+
+export function getPopularProducts(locale: Locale): Array<{ label: string; value: string }> {
+  return popularProducts.map(({ value, labels }) => ({ value, label: labels[locale] ?? labels.pt }))
+}
 
 /**
  * Generates a URL-safe slug from a store product
@@ -86,8 +97,8 @@ export function priceToNumber(price: string) {
   return Number(price.replace(",", ".").replace(/[^0-9.-]+/g, "")) // assuming PT locale
 }
 
-export function formatPrice(price: number) {
-  return new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(price)
+export function formatPrice(price: number, locale?: Locale | string) {
+  return formatPriceI18n(price, locale)
 }
 
 export function formatProductName(name: string | undefined) {

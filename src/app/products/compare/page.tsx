@@ -1,9 +1,10 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
 import type { StoreProduct, Price } from "@/types"
-import { siteConfig, pageMetadata } from "@/lib/config"
+import { pageMetadata, pageMetadataFromKey } from "@/lib/config"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { priceQueries } from "@/lib/queries/prices"
@@ -49,22 +50,21 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const canonicalId = canonical ? parseInt(canonical) : null
 
   if (!canonicalId) {
-    return pageMetadata("Compare Prices", `Compare product prices across supermarkets on ${siteConfig.name}.`)
+    return pageMetadataFromKey("compare")
   }
 
+  const t = await getTranslations("metadata.compare")
   const products = await getProductsByCanonical(canonicalId)
 
   if (products.length === 0) {
-    return pageMetadata(
-      `Product Lookup - Canonical #${canonicalId}`,
-      `Looking up Canonical #${canonicalId} on ${siteConfig.name}.`,
-    )
+    return pageMetadata(t("lookupTitle", { id: canonicalId }), t("lookupDescription", { id: canonicalId }))
   }
 
   const firstProduct = products[0]
   const storeCount = new Set(products.map((p) => p.origin_id)).size
-  const title = `Compare Prices - ${firstProduct.name || "Product"}`
-  const description = `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`
+  const name = firstProduct.name || t("genericProduct")
+  const title = t("title", { name })
+  const description = t("description", { name, count: storeCount })
 
   return pageMetadata(title, description)
 }
@@ -96,6 +96,8 @@ export default async function CanonicalComparePage({ searchParams }: PageProps) 
     )
   }
 
+  const t = await getTranslations("compare.empty")
+  const tNav = await getTranslations("nav")
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -104,16 +106,14 @@ export default async function CanonicalComparePage({ searchParams }: PageProps) 
         className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
       />
       <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
-        <p className="text-muted-foreground max-w-sm text-center">
-          No store products found for this canonical product.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
+        <p className="text-muted-foreground max-w-sm text-center">{t("body")}</p>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <BackButton />
           <Button asChild variant="outline">
             <Link href="/products" prefetch={false}>
               <SearchIcon className="h-4 w-4" />
-              Browse products
+              {tNav("browse")}
             </Link>
           </Button>
         </div>

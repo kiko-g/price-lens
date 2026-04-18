@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { DownloadIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -17,6 +18,7 @@ export function PWAInstallFAB({ visible, forceDesktop, onClick, onDismiss }: PWA
   const [mounted, setMounted] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
   const [pulse, setPulse] = useState(false)
+  const t = useTranslations("pwa.fab")
 
   useEffect(() => {
     if (visible) {
@@ -58,7 +60,7 @@ export function PWAInstallFAB({ visible, forceDesktop, onClick, onDismiss }: PWA
     >
       <button
         onClick={onClick}
-        aria-label="Install Price Lens app"
+        aria-label={t("install")}
         className={cn(
           "bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-full shadow-lg",
           "transition-transform hover:scale-105 active:scale-95",
@@ -69,7 +71,7 @@ export function PWAInstallFAB({ visible, forceDesktop, onClick, onDismiss }: PWA
       </button>
       <button
         onClick={onDismiss}
-        aria-label="Dismiss install prompt"
+        aria-label={t("dismiss")}
         className="bg-muted/80 text-muted-foreground hover:bg-muted flex size-6 items-center justify-center rounded-full shadow-sm backdrop-blur-sm transition-colors"
       >
         <XIcon className="size-3" />

@@ -4,9 +4,12 @@ import { useState } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import Image from "next/image"
+import { useLocale, useTranslations } from "next-intl"
 import { type StoreProduct } from "@/types"
 import { useUser } from "@/hooks/useUser"
 import { useStoreProductCard } from "@/hooks/useStoreProductCard"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatDate } from "@/lib/i18n/format"
 
 import { cn } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/business/data"
@@ -86,6 +89,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
   const { user, profile } = useUser()
   const [loginPromptOpen, setLoginPromptOpen] = useState(false)
+  const t = useTranslations("products.card")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   if (!sp || !sp.url) {
     return null
@@ -138,7 +144,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <div className="relative aspect-8/7 w-full">
               <Image
                 src={resolveImageUrlForCard(sp.image, 300)}
-                alt={sp.name || "Product Image"}
+                alt={sp.name || ""}
                 width={400}
                 height={400}
                 unoptimized
@@ -205,7 +211,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             )}
             onClick={user ? toggleFavorite : () => setLoginPromptOpen(true)}
             disabled={isFavoritePending}
-            title={user ? (isFavorited ? "Remove from favorites" : "Add to favorites") : "Sign in to add favorites"}
+            title={user ? (isFavorited ? t("favorite.remove") : t("favorite.add")) : t("favorite.signInToAdd")}
           >
             <HeartIcon
               className={cn(
@@ -228,13 +234,13 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     className="gap-1 opacity-100 transition-opacity duration-300 group-hover:opacity-50"
                   >
                     <CalendarPlusIcon className="h-3 w-3" />
-                    {formatRelativeTime(new Date(favoritedAt), "short")}
+                    {formatRelativeTime(new Date(favoritedAt), "short", locale)}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent side="left" align="end">
-                  <span>Added to favorites</span>
+                  <span>{t("favorite.addedOn")}</span>
                   <br />
-                  <span className="text-muted-foreground">{new Date(favoritedAt).toLocaleDateString("pt-PT")}</span>
+                  <span className="text-muted-foreground">{formatDate(new Date(favoritedAt), locale)}</span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -285,12 +291,12 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6}>
                 {canonicalCategoryPath ? (
                   <div className="flex flex-col gap-0">
-                    <span className="block font-medium">Hierarchy</span>
+                    <span className="block font-medium">{t("hierarchy.title")}</span>
                     <span className="font-semibold">{canonicalCategoryPath}</span>
                     {categoryText && (
                       <>
                         <span className="mt-4 mb-1 flex items-center gap-1 font-medium">
-                          Original hierarchy in {supermarketBadge}
+                          {t("hierarchy.originalIn")} {supermarketBadge}
                         </span>
                         <span className="font-bold">{categoryText}</span>
                       </>
@@ -299,9 +305,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 ) : (
                   <div className="flex flex-col gap-0">
                     <span className="mb-0 flex items-center gap-1 font-medium">
-                      Original hierarchy in {supermarketBadge}
+                      {t("hierarchy.originalIn")} {supermarketBadge}
                     </span>
-                    <span className="font-bold">{categoryText || "No category available"}</span>
+                    <span className="font-bold">{categoryText || t("hierarchy.none")}</span>
                   </div>
                 )}
               </TooltipContent>
@@ -313,18 +319,20 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <Link
                 href={`/products?brand=${encodeURIComponent(sp.brand)}`}
                 className="text-primary hover:text-primary/90 w-full text-sm leading-4 font-semibold underline-offset-2 hover:underline"
-                aria-label={`Browse products for brand ${sp.brand}`}
+                aria-label={t("browseBrand", { brand: sp.brand })}
               >
                 {sp.brand}
               </Link>
             ) : (
-              <span className="text-muted-foreground w-full text-sm leading-4 font-semibold opacity-30">No Brand</span>
+              <span className="text-muted-foreground w-full text-sm leading-4 font-semibold opacity-30">
+                {t("noBrand")}
+              </span>
             )}
           </div>
 
           <h2 className="line-clamp-2 min-h-[44px] w-full text-sm font-medium tracking-tight">
             <Link href={generateProductPath(sp)} target="_blank" className="hover:underline active:scale-[0.97]">
-              {sp.name || "Untitled"}
+              {sp.name || t("untitled")}
             </Link>
           </h2>
         </div>
@@ -356,7 +364,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
             {isPriceMissingWithReference ? (
               <div className="flex flex-col gap-0.5">
-                <span className="text-muted-foreground text-sm font-medium">Preço indisponível</span>
+                <span className="text-muted-foreground text-sm font-medium">{t("priceUnavailable")}</span>
                 {hasUnitPrice ? (
                   <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
                     {sp.price_per_major_unit!.toFixed(2)}€/
@@ -383,7 +391,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   target="_blank"
                   className="flex w-full items-center justify-between gap-1 active:scale-[0.97]"
                 >
-                  Open product page
+                  {t("menu.openPage")}
                   <ArrowUpRightIcon />
                 </Link>
               </ResponsiveActionsMenuItem>
@@ -394,7 +402,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                   target="_blank"
                   className="flex w-full items-center justify-between gap-1 active:scale-[0.97]"
                 >
-                  Open in {supermarketName}
+                  {t("menu.openIn", { store: supermarketName ?? "" })}
                   <ExternalLinkIcon />
                 </Link>
               </ResponsiveActionsMenuItem>
@@ -406,7 +414,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 onClick={user ? toggleFavorite : () => setLoginPromptOpen(true)}
                 disabled={user ? isFavoritePending : false}
               >
-                {user && isFavorited ? "Remove from favorites" : "Add to favorites"}
+                {user && isFavorited ? t("favorite.remove") : t("favorite.add")}
                 <HeartIcon />
               </ResponsiveActionsMenuItem>
 
@@ -420,7 +428,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                         : `/products/barcode/${sp.barcode}`
                     }
                   >
-                    Compare in other stores
+                    {t("menu.compareInOtherStores")}
                     <ScaleIcon />
                   </Link>
                 </ResponsiveActionsMenuItem>
@@ -429,7 +437,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               {elevated && (
                 <ResponsiveActionsMenuItem onClick={updateFromSource} disabled={isUpdating}>
                   <span className="flex w-full items-center gap-1">
-                    <span>Update from {supermarketName}</span>
+                    <span>{t("menu.updateFrom", { store: supermarketName ?? "" })}</span>
                     <DevBadge />
                   </span>
                   <RefreshCcwIcon />
@@ -439,7 +447,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               {elevated && (
                 <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
                   <span className="flex w-full items-center gap-1">
-                    <span>Set priority</span>
+                    <span>{t("menu.setPriority")}</span>
                     <DevBadge />
                   </span>
                   <MicroscopeIcon />
@@ -449,7 +457,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               {elevated && (
                 <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
                   <span className="flex w-full items-center gap-1">
-                    <span>Clear priority</span>
+                    <span>{t("menu.clearPriority")}</span>
                     <DevBadge />
                   </span>
                   <CircleIcon />
@@ -467,7 +475,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                         badgeVariants({ variant: "blue", size: "xs" }),
                         "inline-flex no-underline hover:opacity-90",
                       )}
-                      aria-label={`Browse products for brand ${sp.brand}`}
+                      aria-label={t("browseBrand", { brand: sp.brand })}
                     >
                       {sp.brand}
                     </Link>
@@ -535,7 +543,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 defaultValue="view-json-data"
               >
                 <AccordionItem value="view-json-data" className="w-full border-0">
-                  <AccordionTrigger className="py-3">Inspect store product data</AccordionTrigger>
+                  <AccordionTrigger className="py-3">{t("inspectData")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
                       <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />

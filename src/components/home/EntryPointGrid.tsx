@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -8,8 +9,7 @@ import { ShoppingBasketIcon, TrendingDownIcon, TicketPercentIcon, AppleIcon } fr
 
 const entryPoints = [
   {
-    label: "Browse All",
-    description: "Full catalog",
+    key: "browseAll",
     href: "/products",
     icon: ShoppingBasketIcon,
     iconColor: "text-blue-600 dark:text-blue-400",
@@ -21,8 +21,7 @@ const entryPoints = [
     shownOnMobile: true,
   },
   {
-    label: "Price Drops",
-    description: "History-weighted drops",
+    key: "priceDrops",
     href: "/products?sort=price-drop-smart",
     icon: TrendingDownIcon,
     iconColor: "text-emerald-600 dark:text-emerald-400",
@@ -34,8 +33,7 @@ const entryPoints = [
     shownOnMobile: true,
   },
   {
-    label: "Best Discounts",
-    description: "On sale now",
+    key: "bestDiscounts",
     href: "/products?discounted=true&sort=best-discount",
     icon: TicketPercentIcon,
     iconColor: "text-violet-600 dark:text-violet-400",
@@ -47,8 +45,7 @@ const entryPoints = [
     shownOnMobile: true,
   },
   {
-    label: "Essential",
-    description: "Top tracked",
+    key: "essential",
     href: "/products?priority=4,5",
     icon: AppleIcon,
     iconColor: "text-rose-600 dark:text-rose-400",
@@ -69,6 +66,7 @@ function rowVariantEntries(isMobile: boolean) {
 
 export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" }) {
   const isMobile = useIsMobile()
+  const t = useTranslations("home.entryPoints")
   const shown = isMobile ? "shownOnMobile" : "shownOnDesktop"
   const entryPointsFiltered = entryPoints.filter((entry) => entry[shown as keyof typeof entry])
   const rowEntries = rowVariantEntries(isMobile)
@@ -79,14 +77,16 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
         <div className="grid w-full grid-cols-2 gap-1.5">
           {rowEntries.map((entry) => (
             <Link
-              key={entry.label}
+              key={entry.key}
               href={entry.href}
               className={cn(
                 "bg-muted/35 border-border/60 text-muted-foreground hover:bg-muted/55 hover:text-foreground flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1 py-1.5 text-center transition-colors active:opacity-90",
               )}
             >
               <entry.icon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
-              <span className="text-foreground text-[10px] leading-tight font-medium">{entry.label}</span>
+              <span className="text-foreground text-[10px] leading-tight font-medium">
+                {t(`${entry.key}.label` as const)}
+              </span>
             </Link>
           ))}
         </div>
@@ -97,14 +97,14 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
       <div className={cn("flex w-full items-center gap-2.5", "justify-center lg:justify-start")}>
         {rowEntries.map((entry) => (
           <Link
-            key={entry.label}
+            key={entry.key}
             href={entry.href}
             className={cn(
               "text-foreground hover:bg-accent bg-accent/50 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
             )}
           >
             <entry.icon className="text-foreground size-3.5 shrink-0" />
-            <span className="whitespace-nowrap">{entry.label}</span>
+            <span className="whitespace-nowrap">{t(`${entry.key}.label` as const)}</span>
           </Link>
         ))}
       </div>
@@ -115,14 +115,14 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
     <div className="grid w-full grid-cols-2 gap-2">
       {entryPointsFiltered.map((entry) => (
         <Link
-          key={entry.label}
+          key={entry.key}
           href={entry.href}
           className="active:bg-accent bg-accent/50 flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors"
         >
           <entry.icon className="text-foreground size-4 shrink-0" />
           <div className="ml-0.5 flex min-w-0 flex-col items-start">
-            <span className="text-sm font-semibold tracking-tight">{entry.label}</span>
-            <span className="text-muted-foreground text-[11px]">{entry.description}</span>
+            <span className="text-sm font-semibold tracking-tight">{t(`${entry.key}.label` as const)}</span>
+            <span className="text-muted-foreground text-[11px]">{t(`${entry.key}.description` as const)}</span>
           </div>
         </Link>
       ))}

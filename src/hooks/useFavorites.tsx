@@ -2,6 +2,7 @@
 
 import { useCallback } from "react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import { useUser } from "@/hooks/useUser"
 import type { UserFavorite, StoreProduct } from "@/types"
 import type { User } from "@supabase/supabase-js"
@@ -89,6 +90,7 @@ export function useFavoritesCount(userId: string) {
 export function useFavorites(page: number = 1, limit: number = 20) {
   const { user } = useUser()
   const queryClient = useQueryClient()
+  const t = useTranslations("toasts.favorites")
 
   const query = useQuery({
     queryKey: ["favorites", page, limit],
@@ -100,14 +102,14 @@ export function useFavorites(page: number = 1, limit: number = 20) {
   const addMutation = useMutation({
     mutationFn: addFavorite,
     onSuccess: () => {
-      toast.success("Added to favorites")
+      toast.success(t("added"))
       queryClient.invalidateQueries({ queryKey: ["favorites"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
     onError: (error) => {
-      toast.error("Failed to add to favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(t("addFailed"), {
+        description: error instanceof Error ? error.message : t("unknownError"),
       })
     },
   })
@@ -115,14 +117,14 @@ export function useFavorites(page: number = 1, limit: number = 20) {
   const removeMutation = useMutation({
     mutationFn: removeFavorite,
     onSuccess: () => {
-      toast.success("Removed from favorites")
+      toast.success(t("removed"))
       queryClient.invalidateQueries({ queryKey: ["favorites"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
     onError: (error) => {
-      toast.error("Failed to remove from favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(t("removeFailed"), {
+        description: error instanceof Error ? error.message : t("unknownError"),
       })
     },
   })
@@ -198,6 +200,7 @@ export function useFavorites(page: number = 1, limit: number = 20) {
 export function useFavoriteStatus(storeProductId: number | null) {
   const { user } = useUser()
   const queryClient = useQueryClient()
+  const t = useTranslations("toasts.favorites")
 
   const query = useQuery({
     queryKey: ["favoriteStatus", storeProductId],
@@ -209,14 +212,14 @@ export function useFavoriteStatus(storeProductId: number | null) {
   const addMutation = useMutation({
     mutationFn: addFavorite,
     onSuccess: () => {
-      toast.success("Added to favorites")
+      toast.success(t("added"))
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus", storeProductId] })
       queryClient.invalidateQueries({ queryKey: ["favorites"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
     },
     onError: (error) => {
-      toast.error("Failed to add to favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(t("addFailed"), {
+        description: error instanceof Error ? error.message : t("unknownError"),
       })
     },
   })
@@ -224,21 +227,21 @@ export function useFavoriteStatus(storeProductId: number | null) {
   const removeMutation = useMutation({
     mutationFn: removeFavorite,
     onSuccess: () => {
-      toast.success("Removed from favorites")
+      toast.success(t("removed"))
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus", storeProductId] })
       queryClient.invalidateQueries({ queryKey: ["favorites"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
     },
     onError: (error) => {
-      toast.error("Failed to remove from favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(t("removeFailed"), {
+        description: error instanceof Error ? error.message : t("unknownError"),
       })
     },
   })
 
   const toggleFavorite = useCallback(async () => {
     if (!user || !storeProductId) {
-      toast.error("Please log in to manage favorites")
+      toast.error(t("loginToManage"))
       return false
     }
 
@@ -254,7 +257,7 @@ export function useFavoriteStatus(storeProductId: number | null) {
       console.error("[useFavorites] toggleFavorite failed:", err)
       return false
     }
-  }, [user, storeProductId, query.data, addMutation, removeMutation])
+  }, [user, storeProductId, query.data, addMutation, removeMutation, t])
 
   return {
     isFavorited: query.data?.is_favorited ?? false,
@@ -267,6 +270,7 @@ export function useFavoriteStatus(storeProductId: number | null) {
 export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20) {
   const queryClient = useQueryClient()
   const hasValidUser = Boolean(user?.id)
+  const t = useTranslations("toasts.favorites")
 
   const infiniteQuery = useInfiniteQuery({
     queryKey: ["favoritesInfinite", limit],
@@ -283,14 +287,14 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
   const addMutation = useMutation({
     mutationFn: addFavorite,
     onSuccess: () => {
-      toast.success("Added to favorites")
+      toast.success(t("added"))
       queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
     onError: (error) => {
-      toast.error("Failed to add to favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(t("addFailed"), {
+        description: error instanceof Error ? error.message : t("unknownError"),
       })
     },
   })
@@ -298,14 +302,14 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
   const removeMutation = useMutation({
     mutationFn: removeFavorite,
     onSuccess: () => {
-      toast.success("Removed from favorites")
+      toast.success(t("removed"))
       queryClient.invalidateQueries({ queryKey: ["favoritesInfinite"] })
       queryClient.invalidateQueries({ queryKey: ["favoritesCount"] })
       queryClient.invalidateQueries({ queryKey: ["favoriteStatus"] })
     },
     onError: (error) => {
-      toast.error("Failed to remove from favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(t("removeFailed"), {
+        description: error instanceof Error ? error.message : t("unknownError"),
       })
     },
   })

@@ -1,12 +1,14 @@
 "use client"
 
 import { useTheme } from "next-themes"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
+import { LanguageToggle } from "@/components/layout/LanguageToggle"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +34,7 @@ export function UserDropdownMenu() {
 
   const router = useRouter()
   const isMobile = useMediaQuery("(max-width: 768px)")
+  const t = useTranslations("layout.userMenu")
 
   if (isLoading)
     return <Skeleton className="h-10 w-24 shrink-0 rounded-full border md:ml-0 lg:h-9 lg:w-9 lg:rounded-lg" />
@@ -45,11 +48,11 @@ export function UserDropdownMenu() {
         onClick={() => router.push("/login")}
       >
         <LogIn className="size-4 shrink-0" aria-hidden />
-        Sign in
+        {t("signIn")}
       </Button>
     ) : (
       <Button variant="primary" className="relative" onClick={() => router.push("/login")}>
-        <span className="hidden md:inline-flex">Sign in</span>
+        <span className="hidden md:inline-flex">{t("signIn")}</span>
       </Button>
     )
 
@@ -69,14 +72,14 @@ export function UserDropdownMenu() {
         type="button"
         onClick={() => openSheet()}
         className="focus-visible:ring-ring relative flex size-10 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        aria-label="Open menu"
+        aria-label={t("openUserMenu")}
         aria-haspopup="dialog"
       >
         <Avatar className="size-9">
           <AvatarImage src={user.user_metadata.avatar_url || "/placeholder.svg"} alt="" />
           <AvatarFallback>{userInitial}</AvatarFallback>
         </Avatar>
-        <span className="sr-only">{user.user_metadata.full_name ?? "Account menu"}</span>
+        <span className="sr-only">{user.user_metadata.full_name ?? t("openUserMenu")}</span>
         <Badge
           size="3xs"
           variant="default"
@@ -100,11 +103,11 @@ export function UserDropdownMenu() {
           <Avatar className="size-[34px]">
             <AvatarImage
               src={user.user_metadata.avatar_url || "/placeholder.svg"}
-              alt={user.user_metadata.full_name ?? "User"}
+              alt={user.user_metadata.full_name ?? ""}
             />
             <AvatarFallback>{userInitial}</AvatarFallback>
           </Avatar>
-          <span className="sr-only">User</span>
+          <span className="sr-only">{t("openUserMenu")}</span>
           <Badge
             size="3xs"
             variant="default"
@@ -141,25 +144,20 @@ export function UserDropdownMenu() {
         <DropdownMenuItem asChild>
           <Link href="/profile">
             <UserIcon className="h-4 w-4" />
-            <span>Profile</span>
+            <span>{t("profile")}</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href="/favorites">
             <HeartIcon className="h-4 w-4" />
-            <span>Favorites</span>
+            <span>{t("favorites")}</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel>
-          <div className="flex items-center justify-between gap-1">
-            <p className="text-sm leading-none font-medium"></p>
-          </div>
-          Preferences
-        </DropdownMenuLabel>
+        <DropdownMenuLabel>{t("preferences")}</DropdownMenuLabel>
 
         <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
           <Button
@@ -168,8 +166,12 @@ export function UserDropdownMenu() {
             className="w-full"
           >
             <ContrastIcon className="size-4 dark:rotate-180" />
-            <span className="w-full text-left">{theme === "dark" ? "Light" : "Dark"} Theme</span>
+            <span className="w-full text-left">{theme === "dark" ? t("themeLight") : t("themeDark")}</span>
           </Button>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+          <LanguageToggle variant="dropdown-item" />
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
@@ -177,7 +179,7 @@ export function UserDropdownMenu() {
         <DropdownMenuItem variant="destructive" asChild>
           <Button variant="dropdown-item" onClick={handleSignOut} className="w-full">
             <LogOut className="h-4 w-4" />
-            <span className="w-full text-left">Sign Out</span>
+            <span className="w-full text-left">{t("signOut")}</span>
           </Button>
         </DropdownMenuItem>
       </DropdownMenuContent>

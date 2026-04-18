@@ -5,7 +5,8 @@ import Link from "next/link"
 
 import type { StoreProduct, Price } from "@/types"
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
-import { siteConfig, pageMetadata } from "@/lib/config"
+import { pageMetadata, pageMetadataFromKey } from "@/lib/config"
+import { getTranslations } from "next-intl/server"
 import { createClient } from "@/lib/supabase/server"
 import { storeProductQueries } from "@/lib/queries/products"
 import { priceQueries } from "@/lib/queries/prices"
@@ -59,22 +60,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const products = await getProductsByBarcode(barcode)
 
   if (products.length === 0) {
-    return pageMetadata(`Product Lookup - ${barcode}`, `Looking up ${barcode} on ${siteConfig.name}.`)
+    const t = await getTranslations("metadata.pages.productLookup")
+    return pageMetadata(t("title", { barcode }), t("description", { barcode }))
   }
 
   if (products.length === 1) {
-    return {
-      title: "Redirecting...",
-      description: "Redirecting to product page.",
-    }
+    return pageMetadataFromKey("productsRedirect")
   }
 
+  const t = await getTranslations("metadata.compare")
   const firstProduct = products[0]
   const storeCount = new Set(products.map((p) => p.origin_id)).size
-  const title = `Compare Prices - ${firstProduct.name || barcode}`
-  const description = `Compare prices for ${firstProduct.name || "this product"} across ${storeCount} stores on ${siteConfig.name}.`
-
-  return pageMetadata(title, description)
+  const name = firstProduct.name || barcode
+  return pageMetadata(t("title", { name }), t("description", { name, count: storeCount }))
 }
 
 export default async function ProductByBarcodePage({ params }: PageProps) {
@@ -129,6 +127,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
 
   if (offResult.status === "error") {
     console.warn(`[barcode] OFF lookup failed for ${barcode}: ${offResult.reason}`)
+    const t = await getTranslations("barcode.unavailable")
 
     return (
       <div className="flex w-full grow flex-col items-center justify-center">
@@ -143,17 +142,16 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
             <WifiOffIcon className="text-muted-foreground h-6 w-6" />
           </div>
           <div className="flex flex-col items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Lookup unavailable</h1>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
             <p className="text-muted-foreground max-w-sm text-center text-sm">
-              Barcode <span className="font-mono font-medium">{barcode}</span> is not in our tracked stores, and the
-              external database is temporarily unreachable.
+              {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button asChild>
               <a href={`/products/barcode/${encodeURIComponent(barcode)}`}>
                 <RefreshCwIcon className="h-4 w-4" />
-                Try again
+                {t("retry")}
               </a>
             </Button>
             <Button asChild variant="outline">
@@ -169,6 +167,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
     )
   }
 
+  const t = await getTranslations("barcode.notFound")
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -180,25 +179,26 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
       <div className="flex w-full flex-col items-center justify-center gap-5 px-4">
         <Barcode value={barcode} height={50} width={2} />
         <div className="flex flex-col items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Product not found</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
           <p className="text-muted-foreground max-w-sm text-center text-sm">
-            Barcode <span className="font-mono font-medium">{barcode}</span> does not match any product in our tracked
-            stores.
+            {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
           </p>
 
           <p className="text-muted-foreground mt-1 max-w-sm text-center text-sm">
-            We also searched on{" "}
-            <span className="inline-flex items-center gap-1 font-bold">
-              <OpenFoodFactsIcon className="inline h-4 w-4" /> Open Food Facts
-            </span>
-            . It may be a non-food item, a regional product, or a newly released barcode.
+            {t.rich("searchedOff", {
+              off: (chunks) => (
+                <span className="inline-flex items-center gap-1 font-bold">
+                  <OpenFoodFactsIcon className="inline h-4 w-4" /> {chunks}
+                </span>
+              ),
+            })}
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Button asChild>
             <Link href="/products" prefetch={false}>
               <SearchIcon className="h-4 w-4" />
-              Search our products
+              {t("searchOurs")}
             </Link>
           </Button>
           <Button asChild variant="outline">
@@ -208,7 +208,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
               rel="noopener noreferrer"
             >
               <ExternalLinkIcon className="h-4 w-4" />
-              Search on Google
+              {t("searchGoogle")}
             </a>
           </Button>
         </div>
@@ -229,12 +229,13 @@ async function RelatedProductsSection({ product }: { product: OffProduct }) {
   })
 
   if (!trackedRelated || trackedRelated.length === 0) return null
+  const t = await getTranslations("barcode")
 
   return (
     <section>
       <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
         <StoreIcon className="h-5 w-5" />
-        Similar products in our stores
+        {t("similarProducts")}
       </h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {trackedRelated.map((sp) => (

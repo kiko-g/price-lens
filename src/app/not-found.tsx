@@ -1,18 +1,20 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
+import { pageMetadataFromKey } from "@/lib/config"
 import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/ui/combo/back-button"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 
 import { HomeIcon } from "lucide-react"
 
-export const metadata: Metadata = {
-  title: "Page Not Found",
-  description: "The page you're looking for doesn't exist.",
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadataFromKey("notFound")
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations("errors.notFound")
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -24,16 +26,16 @@ export default function NotFound() {
       <div className="flex w-full flex-col items-center justify-center gap-3 px-4">
         <h1 className="animate-bounce text-4xl font-bold tracking-tighter sm:text-5xl">404</h1>
         <p className="text-muted-foreground max-w-lg text-center">
-          Nothing to see here.
+          {t("line1")}
           <br />
-          Looks like you&apos;ve ventured into the unknown digital realm.
+          {t("line2")}
         </p>
         <div className="flex items-center gap-2">
           <BackButton />
           <Button asChild>
             <Link href="/" prefetch={false}>
               <HomeIcon className="h-4 w-4" />
-              Return to website
+              {t("returnHome")}
             </Link>
           </Button>
         </div>

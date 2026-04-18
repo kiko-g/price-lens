@@ -2,6 +2,7 @@ import type { DateRange } from "@/types/business"
 import type { Price, ProductChartEntry } from "@/types"
 import { ChartConfig } from "@/components/ui/chart"
 import { getDaysBetweenDates } from "@/lib/utils"
+import { isLocale, toLocaleTag, type Locale } from "@/i18n/config"
 
 const MAX_CHART_POINTS = 200
 
@@ -15,20 +16,22 @@ export function chartTimeMsFromRawDate(rawDate: string): number {
   return Date.UTC(y, m - 1, d)
 }
 
-export function formatChartAxisTick(timeMs: number, spanDays: number): string {
+export function formatChartAxisTick(timeMs: number, spanDays: number, locale?: Locale | string): string {
+  const tag = locale && isLocale(locale) ? toLocaleTag(locale) : typeof locale === "string" ? locale : toLocaleTag("pt")
   const date = new Date(timeMs)
   if (spanDays > 365) {
-    return date.toLocaleString("pt-PT", { month: "short", year: "2-digit" })
+    return date.toLocaleString(tag, { month: "short", year: "2-digit" })
   }
   if (spanDays > 60) {
-    return date.toLocaleString("pt-PT", { day: "2-digit", month: "short" })
+    return date.toLocaleString(tag, { day: "2-digit", month: "short" })
   }
-  return date.toLocaleString("pt-PT", { day: "numeric", month: "short" })
+  return date.toLocaleString(tag, { day: "numeric", month: "short" })
 }
 
 type BuildChartDataOptions = {
   range?: DateRange
   samplingMode?: ChartSamplingMode
+  locale?: Locale | string
 }
 
 export function buildChartData(
@@ -36,10 +39,14 @@ export function buildChartData(
   options: BuildChartDataOptions | DateRange = "Max",
 ): ProductChartEntry[] {
   // Support both old signature (just range) and new signature (options object)
-  const { range, samplingMode } =
+  const { range, samplingMode, locale } =
     typeof options === "string"
-      ? { range: options, samplingMode: "hybrid" as const }
-      : { range: options.range ?? "1M", samplingMode: options.samplingMode ?? "hybrid" }
+      ? { range: options, samplingMode: "hybrid" as const, locale: undefined as Locale | string | undefined }
+      : {
+          range: options.range ?? "1M",
+          samplingMode: options.samplingMode ?? "hybrid",
+          locale: options.locale,
+        }
 
   const parseUTCDate = (dateStr: string): Date => {
     const date = new Date(dateStr)
@@ -210,12 +217,12 @@ export function buildChartData(
   // Format dates for display (keep rawDate for tooltip)
   return entries.map((entry) => ({
     ...entry,
-    date: formatDateForChart(entry.date, totalDays),
+    date: formatDateForChart(entry.date, totalDays, locale),
   }))
 }
 
-function formatDateForChart(dateString: string, totalDays: number = 30): string {
-  return formatChartAxisTick(new Date(dateString).getTime(), totalDays)
+function formatDateForChart(dateString: string, totalDays: number = 30, locale?: Locale | string): string {
+  return formatChartAxisTick(new Date(dateString).getTime(), totalDays, locale)
 }
 
 export const chartConfig = {
@@ -329,43 +336,85 @@ export function calculateChartBounds(min: number, max: number, targetTicks: numb
 
 export type RelativeTimeMode = "short" | "long" | "relative"
 
+const RELATIVE_LABELS: Record<
+  "en" | "pt",
+  {
+    today: string
+    d: string
+    w: string
+    mo: string
+    y: string
+    ago: string
+    day: [string, string]
+    week: [string, string]
+    month: [string, string]
+    year: [string, string]
+  }
+> = {
+  en: {
+    today: "today",
+    d: "d",
+    w: "w",
+    mo: "mo",
+    y: "y",
+    ago: " ago",
+    day: ["day", "days"],
+    week: ["week", "weeks"],
+    month: ["month", "months"],
+    year: ["year", "years"],
+  },
+  pt: {
+    today: "hoje",
+    d: "d",
+    w: "sem",
+    mo: "m",
+    y: "a",
+    ago: " atrás",
+    day: ["dia", "dias"],
+    week: ["semana", "semanas"],
+    month: ["mês", "meses"],
+    year: ["ano", "anos"],
+  },
+}
+
+function pluralLabel(value: number, singular: string, plural: string): string {
+  return value === 1 ? `${value} ${singular}` : `${value} ${plural}`
+}
+
 /**
  * Unified relative time formatter with 3 display modes:
  * - "short": compact (today, 3d, 2w, 6mo, 1y)
  * - "long": noun form (today, 3 days, 2 weeks, 6 months, 1 year)
  * - "relative": sentence-like (today, 3 days ago, 2 weeks ago, 6 months ago)
  */
-export function formatRelativeTime(date: Date, mode: RelativeTimeMode = "short"): string {
+export function formatRelativeTime(date: Date, mode: RelativeTimeMode = "short", locale: Locale = "pt"): string {
+  const labels = RELATIVE_LABELS[locale] ?? RELATIVE_LABELS.pt
   const diffMs = Date.now() - date.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (diffDays < 1) return "today"
+  if (diffDays < 1) return labels.today
 
   const diffWeeks = Math.floor(diffDays / 7)
   const diffMonths = Math.floor(diffDays / 30)
   const diffYears = Math.floor(diffDays / 365)
 
-  const suffix = mode === "relative" ? " ago" : ""
+  const suffix = mode === "relative" ? labels.ago : ""
 
   if (diffDays < 14) {
-    if (mode === "short") return `${diffDays}d`
-    const label = diffDays === 1 ? "1 day" : `${diffDays} days`
-    return `${label}${suffix}`
+    if (mode === "short") return `${diffDays}${labels.d}`
+    return `${pluralLabel(diffDays, labels.day[0], labels.day[1])}${suffix}`
   }
 
   if (diffDays < 30) {
-    if (mode === "short") return `${diffWeeks}w`
-    const label = diffWeeks === 1 ? "1 week" : `${diffWeeks} weeks`
-    return `${label}${suffix}`
+    if (mode === "short") return `${diffWeeks}${labels.w}`
+    return `${pluralLabel(diffWeeks, labels.week[0], labels.week[1])}${suffix}`
   }
 
   if (diffDays < 365) {
-    if (mode === "short") return `${diffMonths}mo`
-    const label = diffMonths === 1 ? "1 month" : `${diffMonths} months`
-    return `${label}${suffix}`
+    if (mode === "short") return `${diffMonths}${labels.mo}`
+    return `${pluralLabel(diffMonths, labels.month[0], labels.month[1])}${suffix}`
   }
 
-  if (mode === "short") return `${diffYears}y`
-  const label = diffYears === 1 ? "1 year" : `${diffYears} years`
-  return `${label}${suffix}`
+  if (mode === "short") return `${diffYears}${labels.y}`
+  return `${pluralLabel(diffYears, labels.year[0], labels.year[1])}${suffix}`
 }

@@ -90,17 +90,19 @@ export async function POST() {
 
   // Batch fetch user emails
   const userIds = [...new Set(alertsToSend.map((a) => a.subscription.user_id))]
-  const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", userIds)
+  const { data: profiles } = await supabase.from("profiles").select("id, full_name, locale").in("id", userIds)
 
   const { data: users } = await supabase.auth.admin.listUsers()
   const emailMap = new Map<string, string>()
   const nameMap = new Map<string, string>()
+  const localeMap = new Map<string, string>()
 
   users?.users?.forEach((u) => {
     if (u.email) emailMap.set(u.id, u.email)
   })
   profiles?.forEach((p) => {
     if (p.full_name) nameMap.set(p.id, p.full_name)
+    if (p.locale) localeMap.set(p.id, p.locale)
   })
 
   let sent = 0
@@ -113,6 +115,7 @@ export async function POST() {
 
     const userName = nameMap.get(alert.subscription.user_id) || "there"
     const storeName = STORE_NAMES[alert.product.origin_id] || "Unknown Store"
+    const userLocale = localeMap.get(alert.subscription.user_id)
     const oldPrice = priceBeforeFromChangeRatio(alert.product.price, alert.product.price_change_pct)
     if (oldPrice == null) continue
     const slug = generateProductSlug(alert.product)
@@ -122,11 +125,12 @@ export async function POST() {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: email,
-        subject: priceDropAlertSubject(
+        subject: await priceDropAlertSubject(
           alert.product.name,
           priceChangeRatioToPercentPoints(alert.product.price_change_pct),
+          userLocale,
         ),
-        html: priceDropAlertHtml({
+        html: await priceDropAlertHtml({
           userName,
           productName: alert.product.name,
           productBrand: alert.product.brand,
@@ -135,6 +139,7 @@ export async function POST() {
           newPrice: alert.product.price,
           changePercent: priceChangeRatioToPercentPoints(alert.product.price_change_pct),
           productUrl,
+          locale: userLocale,
         }),
       })
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useScrollDirection } from "@/hooks/useScrollDirection"
 import { useUser } from "@/hooks/useUser"
@@ -11,16 +12,19 @@ import { BarcodeScanButton } from "@/components/scan"
 import { SearchContainer } from "@/components/layout/search"
 
 const navItems = [
-  { href: "/", label: "Home", icon: HomeIcon },
-  { href: "/products", label: "Browse", icon: ShoppingBasketIcon },
-  { href: "/favorites", label: "Favorites", icon: HeartIcon },
-  { href: "/profile", label: "Profile", icon: UserIcon },
+  { href: "/", key: "home", icon: HomeIcon },
+  { href: "/products", key: "browse", icon: ShoppingBasketIcon },
+  { href: "/favorites", key: "favorites", icon: HeartIcon },
+  { href: "/profile", key: "profile", icon: UserIcon },
 ] as const
 
 export function BottomNav() {
   const pathname = usePathname()
   const scrollDirection = useScrollDirection({ threshold: 20, minScrollY: 100 })
   const { user } = useUser()
+  const tNav = useTranslations("nav")
+  const tBottom = useTranslations("layout.bottomNav")
+  const tHeader = useTranslations("layout.header")
 
   const isHidden = scrollDirection === "down"
 
@@ -32,7 +36,7 @@ export function BottomNav() {
         "px-3 pt-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] [@media(display-mode:standalone)]:pb-3",
         isHidden && "translate-y-full",
       )}
-      aria-label="Primary navigation"
+      aria-label={tBottom("primary")}
     >
       <div className="flex items-center gap-2">
         <div className="bg-card text-card-foreground border-border flex min-w-0 flex-1 items-center justify-around rounded-full border px-1 py-1 shadow-sm sm:px-2">
@@ -42,18 +46,19 @@ export function BottomNav() {
 
             const resolvedHref = item.href === "/profile" && !user ? "/login" : item.href
 
+            const label = tNav(item.key)
             return (
               <Link
-                key={item.label}
+                key={item.key}
                 href={resolvedHref}
                 className={cn(
                   "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-2 py-1 transition-all duration-200 sm:px-2.5",
                   isActive ? "bg-accent text-foreground" : "text-accent-foreground",
                 )}
-                aria-label={item.label}
+                aria-label={label}
               >
                 <item.icon className={cn("size-5 shrink-0", isActive && "fill-foreground/10")} />
-                <span className="text-[10px] leading-tight font-medium max-[380px]:hidden">{item.label}</span>
+                <span className="text-[10px] leading-tight font-medium max-[380px]:hidden">{label}</span>
               </Link>
             )
           })}
@@ -64,7 +69,7 @@ export function BottomNav() {
             <button
               type="button"
               className="border-border bg-card text-card-foreground hover:bg-accent flex size-12 items-center justify-center rounded-full border shadow-sm transition-transform active:scale-95"
-              aria-label="Search products"
+              aria-label={tHeader("searchProducts")}
             >
               <SearchIcon className="size-5" />
             </button>
@@ -73,7 +78,7 @@ export function BottomNav() {
             <button
               type="button"
               className="bg-foreground text-background flex size-12 items-center justify-center rounded-full shadow-sm transition-transform active:scale-95"
-              aria-label="Scan barcode"
+              aria-label={tBottom("scan")}
             >
               <ScanBarcodeIcon className="size-5" />
             </button>
