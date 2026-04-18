@@ -975,6 +975,29 @@
         "noImage": "No image"
       }
     },
+    "barcodeCompare": {
+      "best": "Best",
+      "unavailable": "Unavailable",
+      "naShort": "N/A",
+      "lowestEver": "Lowest ever",
+      "stableDays": "Stable {count, plural, one {# day} other {# days}}",
+      "loadingInfo": "Loading product information…",
+      "productInformation": "Product Information",
+      "priceComparison": "Price Comparison",
+      "table": {
+        "store": "Store",
+        "price": "Price",
+        "recommended": "Recommended",
+        "perUnit": "Per unit",
+        "lowest": "Lowest"
+      },
+      "lowShort": "Low: {value}€",
+      "storesAndListings": "{stores, plural, one {# store} other {# stores}} · {listings, plural, one {# listing} other {# listings}}",
+      "barcodesCount": "{count, plural, one {# barcode} other {# barcodes}}",
+      "comparePricesTitle": "Compare Prices",
+      "saveUpTo": "<highlight>Save up to {amount}€</highlight> by choosing the cheapest option",
+      "priceHistory": "Price History"
+    },
     "identical": {
       "comparePrices": "Compare prices",
       "openComparison": "Open comparison",

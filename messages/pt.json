@@ -975,6 +975,29 @@
         "noImage": "Sem imagem"
       }
     },
+    "barcodeCompare": {
+      "best": "Melhor",
+      "unavailable": "Indisponível",
+      "naShort": "N/D",
+      "lowestEver": "Mínimo histórico",
+      "stableDays": "Estável há {count, plural, one {# dia} other {# dias}}",
+      "loadingInfo": "A carregar informação do produto…",
+      "productInformation": "Informação do produto",
+      "priceComparison": "Comparação de preços",
+      "table": {
+        "store": "Loja",
+        "price": "Preço",
+        "recommended": "Recomendado",
+        "perUnit": "Por unidade",
+        "lowest": "Mínimo"
+      },
+      "lowShort": "Mín: {value}€",
+      "storesAndListings": "{stores, plural, one {# loja} other {# lojas}} · {listings, plural, one {# listagem} other {# listagens}}",
+      "barcodesCount": "{count, plural, one {# código} other {# códigos}}",
+      "comparePricesTitle": "Comparar preços",
+      "saveUpTo": "<highlight>Poupa até {amount}€</highlight> ao escolheres a opção mais barata",
+      "priceHistory": "Histórico de preços"
+    },
     "identical": {
       "comparePrices": "Comparar preços",
       "openComparison": "Abrir comparação",

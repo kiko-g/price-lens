@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 import type { StoreProduct, Price } from "@/types"
 import { RANGES, DateRange } from "@/types/business"
@@ -117,6 +118,7 @@ function CompareCard({
   priceDiff: number | null
   insights: DealInsights
 }) {
+  const t = useTranslations("products.barcodeCompare")
   const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
 
   return (
@@ -131,12 +133,12 @@ function CompareCard({
       {isCheapest && (
         <Badge variant="success" size="xs" className="absolute top-0 right-0 z-10 rounded-none rounded-bl-md">
           <TrophyIcon className="h-3 w-3" />
-          Best
+          {t("best")}
         </Badge>
       )}
       {product.available === false && (
         <Badge variant="destructive" size="xs" className="absolute top-0 right-0 z-10 rounded-none rounded-bl-md">
-          Unavailable
+          {t("unavailable")}
         </Badge>
       )}
 
@@ -145,14 +147,14 @@ function CompareCard({
           {product.image ? (
             <Image
               src={resolveImageUrl(product.image, 500)}
-              alt={product.name || "Product"}
+              alt={product.name || ""}
               fill
               className="object-contain p-1"
               sizes="80px"
             />
           ) : (
             <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center text-[10px]">
-              N/A
+              {t("naShort")}
             </div>
           )}
         </div>
@@ -203,13 +205,13 @@ function CompareCard({
             {insights.isHistoricalLow && (
               <Badge variant="success" size="xs" className="gap-0.5">
                 <TrendingDownIcon className="h-2.5 w-2.5" />
-                Lowest ever
+                {t("lowestEver")}
               </Badge>
             )}
             {insights.stableDays !== null && (
               <Badge variant="secondary" size="xs" className="gap-0.5">
                 <ShieldCheckIcon className="h-2.5 w-2.5" />
-                Stable {insights.stableDays} days
+                {t("stableDays", { count: insights.stableDays })}
               </Badge>
             )}
           </div>
@@ -229,6 +231,7 @@ interface OffData {
 function ProductInfoSection({ barcode }: { barcode: string }) {
   const [offData, setOffData] = useState<OffData | null>(null)
   const [loading, setLoading] = useState(true)
+  const t = useTranslations("products.barcodeCompare")
 
   useEffect(() => {
     let cancelled = false
@@ -264,7 +267,7 @@ function ProductInfoSection({ barcode }: { barcode: string }) {
     return (
       <div className="bg-card flex items-center gap-2 rounded-lg border px-3 py-3">
         <Loader2Icon className="text-muted-foreground h-4 w-4 animate-spin" />
-        <span className="text-muted-foreground text-xs">Loading product information&hellip;</span>
+        <span className="text-muted-foreground text-xs">{t("loadingInfo")}</span>
       </div>
     )
   }
@@ -285,14 +288,14 @@ function ProductInfoSection({ barcode }: { barcode: string }) {
       <div className="border-b px-3 py-2.5">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
           <OpenFoodFactsIcon className="h-3.5 w-3.5" />
-          Product Information
+          {t("productInformation")}
         </h3>
       </div>
       <div className="flex flex-wrap items-center gap-4 px-3 py-3">
         {offData.imageUrl && (
           <Image
             src={offData.imageUrl}
-            alt="Product"
+            alt=""
             width={80}
             height={80}
             className="size-20 shrink-0 rounded-lg border object-contain p-1"
@@ -334,6 +337,7 @@ function StoreComparisonTable({
   productsWithPrices: ProductWithPrices[]
   cheapestPrice: number | null
 }) {
+  const t = useTranslations("products.barcodeCompare")
   const rows = useMemo(() => {
     return products.map((product) => {
       const pwp = productsWithPrices.find((p) => p.product.id === product.id)
@@ -351,7 +355,7 @@ function StoreComparisonTable({
   return (
     <div className="bg-card overflow-hidden rounded-lg border">
       <div className="border-b px-3 py-2.5">
-        <h3 className="text-sm font-semibold">Price Comparison</h3>
+        <h3 className="text-sm font-semibold">{t("priceComparison")}</h3>
       </div>
 
       {/* Desktop table */}
@@ -359,11 +363,11 @@ function StoreComparisonTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted/50 border-b">
-              <th className="px-3 py-2 text-left text-xs font-medium">Store</th>
-              <th className="px-3 py-2 text-right text-xs font-medium">Price</th>
-              <th className="px-3 py-2 text-right text-xs font-medium">Recommended</th>
-              <th className="px-3 py-2 text-right text-xs font-medium">Per unit</th>
-              <th className="px-3 py-2 text-right text-xs font-medium">Lowest</th>
+              <th className="px-3 py-2 text-left text-xs font-medium">{t("table.store")}</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">{t("table.price")}</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">{t("table.recommended")}</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">{t("table.perUnit")}</th>
+              <th className="px-3 py-2 text-right text-xs font-medium">{t("table.lowest")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -421,7 +425,9 @@ function StoreComparisonTable({
                 )}
               </div>
               {historicalLow !== null && (
-                <span className="text-muted-foreground text-xs tabular-nums">Low: {historicalLow.toFixed(2)}€</span>
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {t("lowShort", { value: historicalLow.toFixed(2) })}
+                </span>
               )}
             </div>
           </div>
@@ -435,6 +441,7 @@ function StoreComparisonTable({
 
 export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes: barcodesProp }: BarcodeCompareProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange>("1M")
+  const t = useTranslations("products.barcodeCompare")
 
   const productsWithPrice = products.filter((p) => p.price !== null && p.price !== undefined)
   const cheapestPrice = productsWithPrice.length > 0 ? Math.min(...productsWithPrice.map((p) => p.price!)) : null
@@ -473,17 +480,16 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
                 </Badge>
               )}
               <Badge variant="boring" size="xs">
-                {storeCount} store{storeCount !== 1 ? "s" : ""} · {products.length} listing
-                {products.length !== 1 ? "s" : ""}
+                {t("storesAndListings", { stores: storeCount, listings: products.length })}
               </Badge>
               {isMultiBarcode && (
                 <Badge variant="secondary" size="xs" className="gap-1">
                   <LinkIcon className="h-3 w-3" />
-                  {uniqueBarcodes.length} barcodes
+                  {t("barcodesCount", { count: uniqueBarcodes.length })}
                 </Badge>
               )}
             </div>
-            <h1 className="text-xl font-bold md:text-2xl">{firstProduct?.name || "Compare Prices"}</h1>
+            <h1 className="text-xl font-bold md:text-2xl">{firstProduct?.name || t("comparePricesTitle")}</h1>
           </div>
 
           {barcode && <Barcode value={barcode} height={40} width={1.5} className="hidden sm:flex" />}
@@ -492,8 +498,10 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
         {savings > 0 && (
           <div className="border-success/30 bg-success/5 dark:border-success/40 dark:bg-success/5 rounded-lg border px-3 py-2">
             <p className="text-sm">
-              <span className="text-success font-semibold">Save up to {savings.toFixed(2)}€</span> by choosing the
-              cheapest option
+              {t.rich("saveUpTo", {
+                amount: savings.toFixed(2),
+                highlight: (chunks) => <span className="text-success font-semibold">{chunks}</span>,
+              })}
             </p>
           </div>
         )}
@@ -533,7 +541,7 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
 
       {/* Price History section */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">Price History</h2>
+        <h2 className="text-base font-semibold">{t("priceHistory")}</h2>
         <SharedRangeSelector selectedRange={selectedRange} onRangeChange={setSelectedRange} />
       </div>
 
