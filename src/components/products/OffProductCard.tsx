@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
 import { Badge } from "@/components/ui/badge"
 import { Barcode } from "@/components/ui/combo/barcode"
@@ -12,6 +13,7 @@ interface OffProductCardProps {
 }
 
 export function OffProductCard({ product, barcode }: OffProductCardProps) {
+  const t = useTranslations("products.offCard")
   const categories = product.categories
     ?.split(",")
     .map((c) => c.trim())
@@ -24,7 +26,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
-            alt={product.displayName || "Product image"}
+            alt={product.displayName || ""}
             width={80}
             height={80}
             className="h-24 w-auto shrink-0 rounded-lg border object-cover p-1"
@@ -58,7 +60,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
         <div className="mb-4">
           <div className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase">
             <LayersIcon className="h-3 w-3" />
-            Categories
+            {t("categories")}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {categories.map((cat) => (
@@ -76,9 +78,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
 
       <div className="mt-4 flex flex-col items-center gap-2">
         <OpenFoodFactsLogo className="h-7 w-auto" />
-        <p className="text-muted-foreground text-center text-sm">
-          This product was found externally but is not currently tracked in our stores.
-        </p>
+        <p className="text-muted-foreground text-center text-sm">{t("externalNote")}</p>
       </div>
     </div>
   )

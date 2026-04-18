@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 import type { OffNutriments } from "@/lib/canonical/open-food-facts"
 
@@ -60,16 +61,18 @@ export function OffProductDetails({
     hasNutrientLevels ||
     hasLabels
 
+  const t = useTranslations("products.offDetails")
+
   if (!hasAny) return null
 
   return (
     <DrawerSheet
-      title="Product Details"
-      description="From Open Food Facts"
+      title={t("title")}
+      description={t("subtitle")}
       trigger={
         <Button variant="outline" size="sm">
           <OpenFoodFactsIcon className="size-4 shrink-0" />
-          Product Details
+          {t("title")}
         </Button>
       }
     >
@@ -82,18 +85,18 @@ export function OffProductDetails({
 
         {hasNutrientLevels && (
           <section>
-            <h3 className="mb-2 text-sm font-semibold">Nutrient Levels</h3>
+            <h3 className="mb-2 text-sm font-semibold">{t("nutrientLevels")}</h3>
             <NutrientLevelIndicators levels={nutrientLevels!} />
           </section>
         )}
 
         {hasNutritionImage && (
           <section>
-            <h3 className="mb-2 text-sm font-semibold">Nutrition Label</h3>
+            <h3 className="mb-2 text-sm font-semibold">{t("nutritionLabel")}</h3>
             <div className="relative aspect-4/3 w-full max-w-sm overflow-hidden rounded-lg border bg-white">
               <Image
                 src={imageNutritionUrl!}
-                alt="Nutrition label"
+                alt={t("nutritionLabel")}
                 fill
                 className="object-contain p-2"
                 sizes="(max-width: 640px) 100vw, 400px"
@@ -109,7 +112,7 @@ export function OffProductDetails({
             <section className="flex flex-col gap-3">
               {hasEcoScore && (
                 <div>
-                  <h3 className="mb-1.5 text-sm font-semibold">Environmental Impact</h3>
+                  <h3 className="mb-1.5 text-sm font-semibold">{t("environmentalImpact")}</h3>
                   <Badge variant="secondary" className="gap-1 text-xs font-medium">
                     Eco-Score {ecoscoreGrade!.toUpperCase()}
                   </Badge>
@@ -117,7 +120,7 @@ export function OffProductDetails({
               )}
               {hasLabels && (
                 <div>
-                  <h3 className="mb-1.5 text-sm font-semibold">Labels</h3>
+                  <h3 className="mb-1.5 text-sm font-semibold">{t("labels")}</h3>
                   <div className="flex flex-wrap gap-1.5">
                     {labels!.map((label) => (
                       <Badge key={label} variant="outline" className="text-xs font-normal">
@@ -135,12 +138,12 @@ export function OffProductDetails({
           <>
             <Separator />
             <section>
-              <h3 className="mb-2 text-sm font-semibold">Ingredients</h3>
+              <h3 className="mb-2 text-sm font-semibold">{t("ingredients")}</h3>
               {hasIngredients && <p className="text-muted-foreground text-sm leading-relaxed">{ingredientsText}</p>}
               {hasAllergens && (
                 <Callout variant="warning" className="mt-2">
                   <p className="text-sm">
-                    <span className="font-semibold">Allergens: </span>
+                    <span className="font-semibold">{t("allergens")}: </span>
                     {allergens}
                   </p>
                 </Callout>
@@ -151,11 +154,11 @@ export function OffProductDetails({
 
         {hasIngredientsImage && (
           <section>
-            <h3 className="mb-2 text-sm font-semibold">Ingredients Label</h3>
+            <h3 className="mb-2 text-sm font-semibold">{t("ingredientsLabel")}</h3>
             <div className="relative aspect-4/3 w-full max-w-sm overflow-hidden rounded-lg border bg-white">
               <Image
                 src={imageIngredientsUrl!}
-                alt="Ingredients label"
+                alt={t("ingredientsLabel")}
                 fill
                 className="object-contain p-2"
                 sizes="(max-width: 640px) 100vw, 400px"
@@ -169,7 +172,7 @@ export function OffProductDetails({
           <>
             <Separator />
             <section>
-              <h3 className="mb-2 text-sm font-semibold">Packaging</h3>
+              <h3 className="mb-2 text-sm font-semibold">{t("packaging")}</h3>
               <p className="text-muted-foreground text-sm">{packagingText}</p>
             </section>
           </>
@@ -179,7 +182,7 @@ export function OffProductDetails({
           <>
             <Separator />
             <section>
-              <h3 className="mb-2 text-sm font-semibold">Data Quality</h3>
+              <h3 className="mb-2 text-sm font-semibold">{t("dataQuality")}</h3>
               <div className="flex items-center gap-2">
                 <div className="bg-muted h-2 w-32 overflow-hidden rounded-full">
                   <div
@@ -188,10 +191,10 @@ export function OffProductDetails({
                   />
                 </div>
                 <Badge variant="secondary" size="xs">
-                  {Math.round(completeness * 100)}% complete
+                  {t("percentComplete", { percent: Math.round(completeness * 100) })}
                 </Badge>
               </div>
-              <p className="text-muted-foreground mt-1 text-xs">Based on Open Food Facts data completeness score</p>
+              <p className="text-muted-foreground mt-1 text-xs">{t("dataQualityNote")}</p>
             </section>
           </>
         )}
@@ -202,15 +205,22 @@ export function OffProductDetails({
 
 // ─── Nutrition table ──────────────────────────────────────────────────
 
-const NUTRITION_ROWS: { label: string; key: keyof OffNutriments; unit: string; indent?: boolean }[] = [
-  { label: "Energy", key: "energyKcal100g", unit: "kcal" },
-  { label: "Fat", key: "fat100g", unit: "g" },
-  { label: "Saturated fat", key: "saturatedFat100g", unit: "g", indent: true },
-  { label: "Carbohydrates", key: "carbohydrates100g", unit: "g" },
-  { label: "Sugars", key: "sugars100g", unit: "g", indent: true },
-  { label: "Fiber", key: "fiber100g", unit: "g" },
-  { label: "Proteins", key: "proteins100g", unit: "g" },
-  { label: "Salt", key: "salt100g", unit: "g" },
+type NutritionRow = {
+  labelKey: "energy" | "fat" | "saturatedFat" | "carbohydrates" | "sugars" | "fiber" | "proteins" | "salt"
+  key: keyof OffNutriments
+  unit: string
+  indent?: boolean
+}
+
+const NUTRITION_ROWS: NutritionRow[] = [
+  { labelKey: "energy", key: "energyKcal100g", unit: "kcal" },
+  { labelKey: "fat", key: "fat100g", unit: "g" },
+  { labelKey: "saturatedFat", key: "saturatedFat100g", unit: "g", indent: true },
+  { labelKey: "carbohydrates", key: "carbohydrates100g", unit: "g" },
+  { labelKey: "sugars", key: "sugars100g", unit: "g", indent: true },
+  { labelKey: "fiber", key: "fiber100g", unit: "g" },
+  { labelKey: "proteins", key: "proteins100g", unit: "g" },
+  { labelKey: "salt", key: "salt100g", unit: "g" },
 ]
 
 function formatNutrientValue(value: number | null, unit: string): string {
@@ -221,6 +231,7 @@ function formatNutrientValue(value: number | null, unit: string): string {
 
 function NutritionTable({ nutriments, servingSize }: { nutriments: OffNutriments; servingSize: string | null }) {
   const hasEnergyKj = nutriments.energyKj100g !== null
+  const t = useTranslations("products.offDetails.nutrition")
 
   return (
     <div>
@@ -228,32 +239,36 @@ function NutritionTable({ nutriments, servingSize }: { nutriments: OffNutriments
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted/50 border-b">
-              <th className="px-4 py-2.5 text-left font-medium">Per 100g</th>
-              <th className="px-4 py-2.5 text-right font-medium">Amount</th>
+              <th className="px-4 py-2.5 text-left font-medium">{t("per100g")}</th>
+              <th className="px-4 py-2.5 text-right font-medium">{t("amount")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
-            {NUTRITION_ROWS.map(({ label, key, unit, indent }) => {
+            {NUTRITION_ROWS.map(({ labelKey, key, unit, indent }) => {
               const value = nutriments[key]
               if (value === null) return null
 
               return (
                 <tr key={key} className="hover:bg-muted/30 transition-colors">
-                  <td className={`px-4 py-2 ${indent ? "text-muted-foreground pl-8" : "font-medium"}`}>{label}</td>
+                  <td className={`px-4 py-2 ${indent ? "text-muted-foreground pl-8" : "font-medium"}`}>
+                    {t(labelKey)}
+                  </td>
                   <td className="px-4 py-2 text-right tabular-nums">{formatNutrientValue(value, unit)}</td>
                 </tr>
               )
             })}
             {hasEnergyKj && (
               <tr className="hover:bg-muted/30 transition-colors">
-                <td className="text-muted-foreground px-4 py-2 pl-8">Energy (kJ)</td>
+                <td className="text-muted-foreground px-4 py-2 pl-8">{t("energyKj")}</td>
                 <td className="px-4 py-2 text-right tabular-nums">{Math.round(nutriments.energyKj100g!)} kJ</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {servingSize && <p className="text-muted-foreground mt-2 text-xs">Serving size: {servingSize}</p>}
+      {servingSize && (
+        <p className="text-muted-foreground mt-2 text-xs">{t("servingSize", { size: servingSize })}</p>
+      )}
     </div>
   )
 }
@@ -266,16 +281,23 @@ const LEVEL_COLORS: Record<string, string> = {
   high: "bg-red-500",
 }
 
-const LEVEL_LABEL_MAP: Record<string, string> = {
-  fat: "Fat",
-  "saturated-fat": "Saturated fat",
-  sugars: "Sugars",
-  salt: "Salt",
+const LEVEL_LABEL_KEYS: Record<string, "fat" | "saturatedFat" | "sugars" | "salt"> = {
+  fat: "fat",
+  "saturated-fat": "saturatedFat",
+  sugars: "sugars",
+  salt: "salt",
 }
 
 function NutrientLevelIndicators({ levels }: { levels: Record<string, string> }) {
-  const entries = Object.entries(levels).filter(([key]) => key in LEVEL_LABEL_MAP)
+  const t = useTranslations("products.offDetails.nutrition")
+  const tLevel = useTranslations("products.offDetails.levels")
+  const entries = Object.entries(levels).filter(([key]) => key in LEVEL_LABEL_KEYS)
   if (entries.length === 0) return null
+
+  const localizeLevel = (level: string): string => {
+    if (level === "low" || level === "moderate" || level === "high") return tLevel(level)
+    return level
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -283,7 +305,7 @@ function NutrientLevelIndicators({ levels }: { levels: Record<string, string> })
         <span key={key} className="flex items-center gap-1.5 text-xs">
           <span className={`inline-block h-2.5 w-2.5 rounded-full ${LEVEL_COLORS[level] ?? "bg-gray-400"}`} />
           <span className="text-muted-foreground">
-            {LEVEL_LABEL_MAP[key]}: <span className="font-medium capitalize">{level}</span>
+            {t(LEVEL_LABEL_KEYS[key])}: <span className="font-medium">{localizeLevel(level)}</span>
           </span>
         </span>
       ))}

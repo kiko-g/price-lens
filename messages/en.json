@@ -774,6 +774,16 @@
       "prevAria": "Previous slide",
       "nextAria": "Next slide"
     },
+    "browseEmpty": {
+      "title": "No results found",
+      "message": "Try adjusting your filters to find what you're looking for.",
+      "messageWithQuery": "We couldn't find any products matching \"{query}\". Try a different search term or clear your filters.",
+      "clearFilters": "Clear filters",
+      "returnHome": "Return home",
+      "essentialsHint": "Or see top-priority essentials, sorted from cheapest to most expensive:",
+      "essentialsAria": "Cheap essentials at {store} (sorted by price)",
+      "essentialsAriaFallback": "See cheap essentials"
+    },
     "showcase": {
       "states": {
         "loadErrorTitle": "Could not load products",
@@ -813,6 +823,68 @@
         "next": "Next"
       },
       "milestone": "{count} products and counting"
+    },
+    "offDetails": {
+      "title": "Product Details",
+      "subtitle": "From Open Food Facts",
+      "nutrientLevels": "Nutrient Levels",
+      "nutritionLabel": "Nutrition Label",
+      "environmentalImpact": "Environmental Impact",
+      "labels": "Labels",
+      "ingredients": "Ingredients",
+      "allergens": "Allergens",
+      "ingredientsLabel": "Ingredients Label",
+      "packaging": "Packaging",
+      "dataQuality": "Data Quality",
+      "percentComplete": "{percent}% complete",
+      "dataQualityNote": "Based on Open Food Facts data completeness score",
+      "nutrition": {
+        "per100g": "Per 100g",
+        "amount": "Amount",
+        "energy": "Energy",
+        "fat": "Fat",
+        "saturatedFat": "Saturated fat",
+        "carbohydrates": "Carbohydrates",
+        "sugars": "Sugars",
+        "fiber": "Fiber",
+        "proteins": "Proteins",
+        "salt": "Salt",
+        "energyKj": "Energy (kJ)",
+        "servingSize": "Serving size: {size}"
+      },
+      "levels": {
+        "low": "low",
+        "moderate": "moderate",
+        "high": "high"
+      }
+    },
+    "offCard": {
+      "categories": "Categories",
+      "externalNote": "This product was found externally but is not currently tracked in our stores."
+    },
+    "offActions": {
+      "shareText": "Check out {name} on Price Lens",
+      "share": "Share",
+      "copied": "Link copied to clipboard",
+      "copyFailed": "Failed to copy link"
+    },
+    "offSearch": {
+      "intro": "Looking for something similar? Try searching our tracked stores with similar keywords.",
+      "searchButton": "Search \"{query}\""
+    },
+    "offPage": {
+      "notTracked": "This product was not found in our tracked stores, but we found it on <link>Open Food Facts</link>",
+      "breadcrumbAria": "Breadcrumb",
+      "breadcrumbProducts": "Products",
+      "breadcrumbScan": "Barcode scan",
+      "perServing": "{size} per serving",
+      "novaLabels": {
+        "unprocessed": "Unprocessed",
+        "processedIngredients": "Processed ingredients",
+        "processed": "Processed",
+        "ultraProcessed": "Ultra-processed"
+      },
+      "sparseData": "Open Food Facts has limited data for this product. <link>Help improve it</link>"
     },
     "off": {
       "lookupTitle": "Open Food Facts product",

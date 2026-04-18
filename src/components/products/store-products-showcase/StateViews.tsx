@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyStateView } from "@/components/ui/combo/state-views"
@@ -53,38 +54,33 @@ const ESSENTIAL_CHEAP_CHAINS = [
 
 export function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: () => void }) {
   const router = useRouter()
+  const t = useTranslations("products.browseEmpty")
 
   return (
     <div className="flex flex-1 items-start justify-center px-2 py-2 sm:px-3">
       <EmptyStateView
-        title="No results found"
-        message={
-          query
-            ? `We couldn't find any products matching "${query}". Try a different search term or clear your filters.`
-            : "Try adjusting your filters to find what you're looking for."
-        }
+        title={t("title")}
+        message={query ? t("messageWithQuery", { query }) : t("message")}
         actions={
           <div className="flex w-full max-w-md flex-col gap-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
               <Button variant="outline" size="sm" onClick={onClearFilters}>
                 <RefreshCcwIcon className="size-4" />
-                Clear filters
+                {t("clearFilters")}
               </Button>
               <Button variant="outline" size="sm" onClick={() => router.push("/")}>
                 <HomeIcon className="size-4" />
-                Return home
+                {t("returnHome")}
               </Button>
             </div>
             <div className="border-border flex flex-col gap-2 border-t pt-3">
-              <p className="text-muted-foreground text-center text-xs sm:text-sm">
-                Ou veja produtos essenciais (prioridade máxima), do mais barato ao mais caro:
-              </p>
+              <p className="text-muted-foreground text-center text-xs sm:text-sm">{t("essentialsHint")}</p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {ESSENTIAL_CHEAP_CHAINS.map((originId) => {
                   const storeName = getSupermarketChainName(originId)
                   const label = storeName
-                    ? `Essenciais baratos no ${storeName} (ordenar por preço)`
-                    : "Ver essenciais baratos"
+                    ? t("essentialsAria", { store: storeName })
+                    : t("essentialsAriaFallback")
                   return (
                     <Button key={originId} variant="outline" className="justify-center gap-2" asChild>
                       <Link href={browseEssentialCheapestProductsHref(originId)} aria-label={label}>

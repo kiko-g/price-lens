@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
 
@@ -18,12 +19,12 @@ import { ChevronRightIcon, InfoIcon } from "lucide-react"
 
 type NutriScoreGrade = "A" | "B" | "C" | "D" | "E"
 const VALID_GRADES = new Set<string>(["A", "B", "C", "D", "E"])
-
-const NOVA_LABELS: Record<number, string> = {
-  1: "Unprocessed",
-  2: "Processed ingredients",
-  3: "Processed",
-  4: "Ultra-processed",
+type NovaKey = "unprocessed" | "processedIngredients" | "processed" | "ultraProcessed"
+const NOVA_KEYS: Record<number, NovaKey> = {
+  1: "unprocessed",
+  2: "processedIngredients",
+  3: "processed",
+  4: "ultraProcessed",
 }
 
 function humanizeTag(tag: string): string {
@@ -40,6 +41,8 @@ interface OffProductPageProps {
 }
 
 export function OffProductPage({ product, barcode, children }: OffProductPageProps) {
+  const t = useTranslations("products.offPage")
+  const tHero = useTranslations("products.hero")
   const rawLabels = product.labels?.split(",").map((l) => l.trim()) ?? []
   const nutriGradeFromField = product.nutriscoreGrade?.toUpperCase() ?? ""
   const nutriGradeFromLabel =
@@ -73,30 +76,33 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
       {/* Not tracked disclaimer */}
       <Callout variant="warning" icon={InfoIcon} className="mb-4 w-full max-w-full">
         <p className="text-sm">
-          This product was not found in our tracked stores, but we found it on{" "}
-          <a
-            href={`https://world.openfoodfacts.org/product/${barcode}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-medium underline underline-offset-2"
-          >
-            Open Food Facts
-            <OpenFoodFactsIcon className="h-4 w-4" />
-          </a>
+          {t.rich("notTracked", {
+            link: (chunks) => (
+              <a
+                href={`https://world.openfoodfacts.org/product/${barcode}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-medium underline underline-offset-2"
+              >
+                {chunks}
+                <OpenFoodFactsIcon className="h-4 w-4" />
+              </a>
+            ),
+          })}
         </p>
       </Callout>
 
       {/* Breadcrumb + back button */}
       <div className="mb-2 flex items-center justify-between md:mb-3">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-0.5 overflow-hidden text-xs md:text-sm">
+        <nav aria-label={t("breadcrumbAria")} className="flex items-center gap-0.5 overflow-hidden text-xs md:text-sm">
           <Link
             href="/products"
             className="text-muted-foreground hover:text-foreground truncate transition-colors hover:underline"
           >
-            Products
+            {t("breadcrumbProducts")}
           </Link>
           <ChevronRightIcon className="text-muted-foreground h-3 w-3 shrink-0" />
-          <span className="text-muted-foreground truncate">Barcode scan</span>
+          <span className="text-muted-foreground truncate">{t("breadcrumbScan")}</span>
           <ChevronRightIcon className="text-muted-foreground h-3 w-3 shrink-0" />
           <span className="text-foreground truncate font-semibold">{barcode}</span>
         </nav>
@@ -110,7 +116,7 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
             {product.imageUrl ? (
               <Image
                 src={product.imageUrl}
-                alt={product.displayName || "Product image"}
+                alt={product.displayName || ""}
                 fill
                 className="max-h-full max-w-full rounded-sm object-contain object-center p-6"
                 sizes="30vw"
@@ -119,7 +125,7 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
               />
             ) : (
               <div className="bg-muted flex h-full w-full items-center justify-center">
-                <p className="text-muted-foreground">No image available</p>
+                <p className="text-muted-foreground">{tHero("noImage")}</p>
               </div>
             )}
           </div>
@@ -148,7 +154,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
             )}
             {product.quantity && <p className="text-muted-foreground line-clamp-3 text-sm">{product.quantity}</p>}
             {product.servingSize && (
-              <p className="text-muted-foreground line-clamp-2 text-xs">{product.servingSize} per serving</p>
+              <p className="text-muted-foreground line-clamp-2 text-xs">
+                {t("perServing", { size: product.servingSize })}
+              </p>
             )}
           </div>
 
@@ -182,7 +190,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
             {hasNova && (
               <Badge variant="secondary" className="gap-1 text-xs font-medium">
                 NOVA {product.novaGroup}
-                <span className="text-muted-foreground font-normal">&middot; {NOVA_LABELS[product.novaGroup!]}</span>
+                <span className="text-muted-foreground font-normal">
+                  &middot; {t(`novaLabels.${NOVA_KEYS[product.novaGroup!]}` as const)}
+                </span>
               </Badge>
             )}
           </div>
@@ -207,7 +217,7 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
           {product.imageUrl ? (
             <Image
               src={product.imageUrl}
-              alt={product.displayName || "Product image"}
+              alt={product.displayName || ""}
               fill
               className="max-h-full max-w-full object-contain object-center"
               sizes="100vw"
@@ -216,7 +226,7 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
             />
           ) : (
             <div className="bg-muted flex h-full w-full items-center justify-center">
-              <p className="text-muted-foreground">No image available</p>
+              <p className="text-muted-foreground">{tHero("noImage")}</p>
             </div>
           )}
         </div>
@@ -238,7 +248,7 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
           )}
           {(product.quantity || product.servingSize) && (
             <p className="text-muted-foreground line-clamp-2 text-sm">
-              {[product.quantity, product.servingSize && `${product.servingSize} per serving`]
+              {[product.quantity, product.servingSize && t("perServing", { size: product.servingSize })]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
@@ -275,7 +285,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
           {hasNova && (
             <Badge variant="secondary" size="sm" className="gap-1 text-xs font-medium">
               NOVA {product.novaGroup}
-              <span className="text-muted-foreground font-normal">&middot; {NOVA_LABELS[product.novaGroup!]}</span>
+              <span className="text-muted-foreground font-normal">
+                &middot; {t(`novaLabels.${NOVA_KEYS[product.novaGroup!]}` as const)}
+              </span>
             </Badge>
           )}
         </div>
@@ -310,17 +322,21 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
 // ─── Sparse data note ───────────────────────────────────────────────
 
 function SparseDataNote({ barcode }: { barcode: string }) {
+  const t = useTranslations("products.offPage")
   return (
     <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-      Open Food Facts has limited data for this product.{" "}
-      <a
-        href={`https://world.openfoodfacts.org/cgi/product.pl?type=edit&code=${barcode}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
-      >
-        Help improve it
-      </a>
+      {t.rich("sparseData", {
+        link: (chunks) => (
+          <a
+            href={`https://world.openfoodfacts.org/cgi/product.pl?type=edit&code=${barcode}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            {chunks}
+          </a>
+        ),
+      })}
     </p>
   )
 }

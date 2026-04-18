@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
 
@@ -285,19 +286,18 @@ function buildSearchQueries(product: OffProduct): string[] {
 
 export function OffSearchCta({ product }: OffSearchCtaProps) {
   const queries = buildSearchQueries(product)
+  const t = useTranslations("products.offSearch")
   if (queries.length === 0) return null
 
   return (
     <section className="flex flex-col items-start gap-3">
-      <p className="text-muted-foreground text-sm">
-        Looking for something similar? Try searching our tracked stores with similar keywords.
-      </p>
+      <p className="text-muted-foreground text-sm">{t("intro")}</p>
       <div className="flex flex-wrap items-center gap-2">
         {queries.map((query, i) => (
           <Button key={query} asChild variant={i === 0 ? "default" : "outline"} size="sm">
             <Link href={`/products?q=${encodeURIComponent(query)}`}>
               <SearchIcon className="h-4 w-4" />
-              Search &ldquo;{query}&rdquo;
+              {t("searchButton", { query })}
             </Link>
           </Button>
         ))}

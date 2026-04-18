@@ -774,6 +774,16 @@
       "prevAria": "Slide anterior",
       "nextAria": "Próximo slide"
     },
+    "browseEmpty": {
+      "title": "Sem resultados",
+      "message": "Tenta ajustar os filtros para encontrares o que procuras.",
+      "messageWithQuery": "Não foi possível encontrar produtos para \"{query}\". Tenta outro termo de pesquisa ou limpa os filtros.",
+      "clearFilters": "Limpar filtros",
+      "returnHome": "Voltar ao início",
+      "essentialsHint": "Ou vê produtos essenciais (prioridade máxima), do mais barato ao mais caro:",
+      "essentialsAria": "Essenciais baratos no {store} (ordenado por preço)",
+      "essentialsAriaFallback": "Ver essenciais baratos"
+    },
     "showcase": {
       "states": {
         "loadErrorTitle": "Não foi possível carregar produtos",
@@ -813,6 +823,68 @@
         "next": "Seguinte"
       },
       "milestone": "{count} produtos e a crescer"
+    },
+    "offDetails": {
+      "title": "Detalhes do produto",
+      "subtitle": "Do Open Food Facts",
+      "nutrientLevels": "Níveis de nutrientes",
+      "nutritionLabel": "Rótulo nutricional",
+      "environmentalImpact": "Impacto ambiental",
+      "labels": "Rótulos",
+      "ingredients": "Ingredientes",
+      "allergens": "Alergénios",
+      "ingredientsLabel": "Rótulo de ingredientes",
+      "packaging": "Embalagem",
+      "dataQuality": "Qualidade dos dados",
+      "percentComplete": "{percent}% completo",
+      "dataQualityNote": "Com base na pontuação de completude do Open Food Facts",
+      "nutrition": {
+        "per100g": "Por 100g",
+        "amount": "Quantidade",
+        "energy": "Energia",
+        "fat": "Gordura",
+        "saturatedFat": "Gordura saturada",
+        "carbohydrates": "Hidratos de carbono",
+        "sugars": "Açúcares",
+        "fiber": "Fibra",
+        "proteins": "Proteínas",
+        "salt": "Sal",
+        "energyKj": "Energia (kJ)",
+        "servingSize": "Dose: {size}"
+      },
+      "levels": {
+        "low": "baixo",
+        "moderate": "moderado",
+        "high": "alto"
+      }
+    },
+    "offCard": {
+      "categories": "Categorias",
+      "externalNote": "Este produto foi encontrado externamente mas não é acompanhado nas nossas lojas."
+    },
+    "offActions": {
+      "shareText": "Vê {name} no Price Lens",
+      "share": "Partilhar",
+      "copied": "Link copiado",
+      "copyFailed": "Falha ao copiar link"
+    },
+    "offSearch": {
+      "intro": "À procura de algo semelhante? Tenta pesquisar nas nossas lojas com palavras-chave parecidas.",
+      "searchButton": "Pesquisar \"{query}\""
+    },
+    "offPage": {
+      "notTracked": "Este produto não foi encontrado nas lojas que acompanhamos, mas encontrámo-lo no <link>Open Food Facts</link>",
+      "breadcrumbAria": "Navegação",
+      "breadcrumbProducts": "Produtos",
+      "breadcrumbScan": "Leitura de código",
+      "perServing": "{size} por dose",
+      "novaLabels": {
+        "unprocessed": "Não processado",
+        "processedIngredients": "Ingredientes processados",
+        "processed": "Processado",
+        "ultraProcessed": "Ultra processado"
+      },
+      "sparseData": "O Open Food Facts tem dados limitados para este produto. <link>Ajuda a melhorar</link>"
     },
     "off": {
       "lookupTitle": "Produto Open Food Facts",
