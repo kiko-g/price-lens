@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -53,24 +54,25 @@ const cumulativeInflation = inflationData.reduce(
 
 const latestPT = cumulativeInflation[cumulativeInflation.length - 1].pt
 
-const chartConfig = {
-  usa: { label: "United States", color: "var(--chart-1)" },
-  pt: { label: "Portugal", color: "var(--chart-2)" },
-  eu: { label: "Eurozone", color: "var(--chart-4)" },
-}
-
 export function InflationContext() {
+  const t = useTranslations("home.inflationContext")
+
+  const chartConfig = {
+    usa: { label: t("regions.usa"), color: "var(--chart-1)" },
+    pt: { label: t("regions.pt"), color: "var(--chart-2)" },
+    eu: { label: t("regions.eu"), color: "var(--chart-4)" },
+  }
+
   return (
     <section className="w-full px-4 py-12 md:py-16 lg:py-24">
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 px-5 md:px-16">
         <div className="flex flex-col items-center gap-3 text-center">
-          <h2 className="max-w-4xl text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            It&apos;s not just groceries
-          </h2>
+          <h2 className="max-w-4xl text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">{t("title")}</h2>
           <p className="text-muted-foreground max-w-3xl text-sm md:text-lg/relaxed">
-            Inflation compounds silently. Since 1999, €100 worth of goods in Portugal now costs{" "}
-            <strong className="text-destructive">€{latestPT.toFixed(0)}</strong>. The same pattern repeats at the
-            product level - which is exactly what Price Lens tracks.
+            {t.rich("body", {
+              value: latestPT.toFixed(0),
+              strong: (chunks) => <strong className="text-destructive">{chunks}</strong>,
+            })}
           </p>
         </div>
 
@@ -78,11 +80,9 @@ export function InflationContext() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <TrendingUpIcon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-              Cumulative Inflation (1999 to 2024)
+              {t("chart.title")}
             </CardTitle>
-            <CardDescription className="text-sm">
-              What €100 from 1999 looks like today for Portugal, the USA, and the Eurozone.
-            </CardDescription>
+            <CardDescription className="text-sm">{t("chart.description")}</CardDescription>
           </CardHeader>
           <CardContent className="p-2 sm:p-6">
             <ChartContainer config={chartConfig} className="h-[250px] w-full sm:h-[300px]">
@@ -102,7 +102,7 @@ export function InflationContext() {
                   dataKey="usa"
                   stroke="var(--chart-1)"
                   strokeWidth={2}
-                  name="United States"
+                  name={t("regions.usa")}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 2 }}
                 />
@@ -111,7 +111,7 @@ export function InflationContext() {
                   dataKey="pt"
                   stroke="var(--chart-2)"
                   strokeWidth={2}
-                  name="Portugal"
+                  name={t("regions.pt")}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 2 }}
                 />
@@ -120,7 +120,7 @@ export function InflationContext() {
                   dataKey="eu"
                   stroke="var(--chart-4)"
                   strokeWidth={2}
-                  name="Eurozone"
+                  name={t("regions.eu")}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 2 }}
                 />
@@ -130,10 +130,13 @@ export function InflationContext() {
         </Card>
 
         <p className="text-muted-foreground text-center text-xs md:text-sm">
-          Historical CPI-U data from US Bureau of Labor Statistics, Eurostat, and INE Portugal.{" "}
-          <Link href="/about" className="text-primary hover:underline">
-            See the full inflation analysis →
-          </Link>
+          {t.rich("footer", {
+            link: (chunks) => (
+              <Link href="/about" className="text-primary hover:underline">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </div>
     </section>

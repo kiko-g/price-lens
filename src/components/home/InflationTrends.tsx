@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 import { Badge } from "@/components/ui/badge"
@@ -33,18 +34,20 @@ interface InflationData {
 
 export function InflationTrends() {
   const [showMore, setShowMore] = useState(false)
+  const t = useTranslations("home.inflationTrends")
+  const tCtx = useTranslations("home.inflationContext.regions")
 
   const chartConfig = {
     rateUSA: {
-      label: "United States",
+      label: tCtx("usa"),
       color: "var(--chart-1)",
     },
     ratePT: {
-      label: "Portugal",
+      label: tCtx("pt"),
       color: "var(--chart-2)",
     },
     rateEU: {
-      label: "Eurozone",
+      label: tCtx("eu"),
       color: "var(--chart-4)",
     },
   }
@@ -240,11 +243,10 @@ export function InflationTrends() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 md:px-16">
           <div className="flex flex-col items-center justify-center gap-3">
             <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Inflation trends since 1999
+              {t("title")}
             </h2>
             <p className="text-muted-foreground mx-auto max-w-4xl text-center text-sm md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
-              Historical Consumer Price Index (CPI-U) inflation rates from the US Bureau of Labor Statistics, Portugal
-              and Eurozone. Data represents year-over-year percentage change spanning 25+ years of economic cycles.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -252,7 +254,7 @@ export function InflationTrends() {
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
             <Card>
               <CardContent className="p-3 md:p-4">
-                <div className="text-muted-foreground text-sm font-medium">25-Year Average</div>
+                <div className="text-muted-foreground text-sm font-medium">{t("stats.average25")}</div>
                 <div className={cn("flex flex-col text-2xl font-bold", getInflationBadge(stats.usa.average).className)}>
                   <span className="hidden md:block">🇺🇸 {stats.usa.average.toFixed(1)}%</span>
                   <span>🇵🇹 {stats.pt.average.toFixed(1)}%</span>
@@ -263,7 +265,7 @@ export function InflationTrends() {
 
             <Card>
               <CardContent className="p-3 md:p-4">
-                <div className="text-muted-foreground text-sm font-medium">5-Year Average</div>
+                <div className="text-muted-foreground text-sm font-medium">{t("stats.average5")}</div>
                 <div
                   className={cn("flex flex-col text-2xl font-bold", getInflationBadge(stats.usa.average5).className)}
                 >
@@ -276,23 +278,27 @@ export function InflationTrends() {
 
             <Card>
               <CardContent className="p-3 md:p-4">
-                <div className="text-muted-foreground text-sm font-medium">Highest rate</div>
+                <div className="text-muted-foreground text-sm font-medium">{t("stats.highest")}</div>
                 <div className="flex flex-col text-2xl font-bold">
                   <span className="hidden md:block">🇺🇸 {stats.usa.highest.toFixed(1)}%</span>
                   <span>🇵🇹 {stats.pt.highest.toFixed(1)}%</span>
                   <span className="hidden md:block">🇪🇺 {stats.eu.highest.toFixed(1)}%</span>
                 </div>
-                <div className="text-muted-foreground text-xs">Achieved in {stats.usa.highestYear}</div>
+                <div className="text-muted-foreground text-xs">
+                  {t("stats.highestYear", { year: stats.usa.highestYear ?? "—" })}
+                </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-3 md:p-4">
-                <div className="text-muted-foreground text-sm font-medium">Fed Target</div>
+                <div className="text-muted-foreground text-sm font-medium">{t("stats.fedTarget")}</div>
                 <div className="text-primary text-2xl font-bold">2.0%</div>
                 <div className="text-muted-foreground text-xs">
-                  Long-term goal only {inflationData.filter((item) => item.rateUSA <= 2.0).length} out of{" "}
-                  {inflationData.length} years
+                  {t("stats.fedTargetNote", {
+                    met: inflationData.filter((item) => item.rateUSA <= 2.0).length,
+                    total: inflationData.length,
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -301,20 +307,22 @@ export function InflationTrends() {
           {/* Data Table */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Historical Inflation Data</CardTitle>
+              <CardTitle className="text-lg">{t("table.title")}</CardTitle>
               <CardDescription>
                 <p>
-                  Data represents a cumulative inflation rate of{" "}
-                  <strong className="text-destructive">{stats.usa.cumulative.toFixed(2)}%</strong>,{" "}
-                  <strong className="text-destructive">{stats.pt.cumulative.toFixed(2)}%</strong> and{" "}
-                  <strong className="text-destructive">{stats.eu.cumulative.toFixed(2)}%</strong> for the USA, Portugal
-                  and Eurozone since 1999, respectively.
+                  {t.rich("table.summary", {
+                    usa: stats.usa.cumulative.toFixed(2),
+                    pt: stats.pt.cumulative.toFixed(2),
+                    eu: stats.eu.cumulative.toFixed(2),
+                    strong: (chunks) => <strong className="text-destructive">{chunks}</strong>,
+                  })}
                 </p>
 
                 <p className="mt-0 hidden md:block">
-                  In other words, having <strong className="text-foreground">100.00$</strong> in 1999, is having{" "}
-                  <strong className="text-foreground">{(100 * (1 + stats.usa.cumulative / 100)).toFixed(2)}$</strong>{" "}
-                  today.
+                  {t.rich("table.summary2", {
+                    value: (100 * (1 + stats.usa.cumulative / 100)).toFixed(2),
+                    strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                  })}
                 </p>
               </CardDescription>
             </CardHeader>
@@ -322,11 +330,11 @@ export function InflationTrends() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Year</TableHead>
+                    <TableHead>{t("table.year")}</TableHead>
                     <TableHead>🇵🇹 PT</TableHead>
                     <TableHead>🇺🇸 USA</TableHead>
                     <TableHead>🇪🇺 EURO</TableHead>
-                    <TableHead>Economic Context</TableHead>
+                    <TableHead>{t("table.context")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -380,7 +388,7 @@ export function InflationTrends() {
 
               <div className="flex justify-center border-t pt-6">
                 <Button variant="outline" className="w-full lg:w-1/4" onClick={() => setShowMore(!showMore)} size="sm">
-                  {showMore ? "Show Less" : "Show More"}
+                  {showMore ? t("table.showLess") : t("table.showMore")}
                   {showMore ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
                 </Button>
               </div>
@@ -393,11 +401,9 @@ export function InflationTrends() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <TrendingUpIcon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                  Inflation Convergence
+                  {t("convergence.title")}
                 </CardTitle>
-                <CardDescription className="text-sm">
-                  Take a look at the yearly fluctuations of inflation for the USA, Portugal and Eurozone.
-                </CardDescription>
+                <CardDescription className="text-sm">{t("convergence.description")}</CardDescription>
               </CardHeader>
               <CardContent className="p-2 sm:p-6">
                 <ChartContainer config={chartConfig} className="h-[250px] w-full sm:h-[300px] lg:h-[250px]">
@@ -416,7 +422,7 @@ export function InflationTrends() {
                       domain={[0, 8]}
                       tickFormatter={(value) => `${value.toFixed(1)}%`}
                       label={{
-                        value: "Rate (%)",
+                        value: t("convergence.yLabel"),
                         angle: -90,
                         position: "insideLeft",
                         style: { textAnchor: "middle", fontSize: "12px" },
@@ -435,7 +441,7 @@ export function InflationTrends() {
                       dataKey="rateUSA"
                       stroke="var(--chart-1)"
                       strokeWidth={2}
-                      name="United States"
+                      name={tCtx("usa")}
                       dot={{ r: 2, strokeWidth: 1 }}
                       activeDot={{ r: 4, strokeWidth: 2 }}
                     />
@@ -444,7 +450,7 @@ export function InflationTrends() {
                       dataKey="ratePT"
                       stroke="var(--chart-2)"
                       strokeWidth={2}
-                      name="Portugal"
+                      name={tCtx("pt")}
                       dot={{ r: 2, strokeWidth: 1 }}
                       activeDot={{ r: 4, strokeWidth: 2 }}
                     />
@@ -453,7 +459,7 @@ export function InflationTrends() {
                       dataKey="rateEU"
                       stroke="var(--chart-4)"
                       strokeWidth={2}
-                      name="Eurozone"
+                      name={tCtx("eu")}
                       dot={{ r: 2, strokeWidth: 1 }}
                       activeDot={{ r: 4, strokeWidth: 2 }}
                     />
@@ -502,7 +508,7 @@ export function InflationTrends() {
                       dataKey="usa"
                       stroke="var(--chart-1)"
                       strokeWidth={2}
-                      name="United States"
+                      name={tCtx("usa")}
                       dot={{ r: 2, strokeWidth: 1 }}
                       activeDot={{ r: 4, strokeWidth: 2 }}
                     />
@@ -511,7 +517,7 @@ export function InflationTrends() {
                       dataKey="pt"
                       stroke="var(--chart-2)"
                       strokeWidth={2}
-                      name="Portugal"
+                      name={tCtx("pt")}
                       dot={{ r: 2, strokeWidth: 1 }}
                       activeDot={{ r: 4, strokeWidth: 2 }}
                     />
@@ -520,7 +526,7 @@ export function InflationTrends() {
                       dataKey="eu"
                       stroke="var(--chart-4)"
                       strokeWidth={2}
-                      name="Eurozone"
+                      name={tCtx("eu")}
                       dot={{ r: 2, strokeWidth: 1 }}
                       activeDot={{ r: 4, strokeWidth: 2 }}
                     />

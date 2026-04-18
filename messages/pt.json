@@ -502,6 +502,184 @@
       "body": "Os preços variam todas as semanas nos supermercados. O que custa 6,99€ hoje custava 4,49€ no mês passado. O Price Lens acompanha tudo para comprares no momento certo.",
       "cta": "Ver as descidas de preço de hoje"
     },
+    "personalizedDashboard": {
+      "welcomeBack": "Bem-vindo de volta,",
+      "fallbackName": "amigo",
+      "subtitle": "Acompanha preços, apanha promoções e poupa no supermercado.",
+      "quickActions": {
+        "deals": "Promoções",
+        "dealsDescription": "Descidas e descontos",
+        "favorites": "Favoritos",
+        "favoritesDescription": "{count, plural, one {# produto} other {# produtos}}",
+        "favoritesViewAll": "Ver todos",
+        "products": "Produtos",
+        "productsDescription": "Explorar tudo",
+        "alerts": "Alertas",
+        "alertsActive": "{count} ativos"
+      },
+      "sections": {
+        "favorites": "Os teus favoritos",
+        "favoritesEmpty": "Ainda sem favoritos. Explora produtos e toca no coração.",
+        "recentlyViewed": "Vistos recentemente",
+        "recentlyViewedEmpty": "Os produtos que vires aparecem aqui.",
+        "activeAlerts": "Alertas ativos",
+        "handpicked": "Escolhidos a dedo",
+        "viewAll": "Ver todos"
+      },
+      "ctaCard": {
+        "title": "Tira mais partido do Price Lens",
+        "body": "Marca produtos como favoritos, define alertas de preço e explora promoções para começares a poupar.",
+        "browseDeals": "Ver promoções"
+      },
+      "carousel": {
+        "ariaProducts": "Produtos favoritos",
+        "ariaPage": "Página {page} de {total}"
+      }
+    },
+    "quickActions": {
+      "allProducts": "Todos os produtos",
+      "tracked": "Acompanhados",
+      "priceDrops": "Descidas",
+      "favorites": "Favoritos"
+    },
+    "diagonalRight": {
+      "title": "Acompanha os produtos que te interessam",
+      "body": "Guarda os teus favoritos e avisamos-te quando o preço descer. Grátis e sem spam.",
+      "goFavorites": "Ir para os favoritos",
+      "continueGoogle": "Continuar com Google"
+    },
+    "pricing": {
+      "title": "Preços simples e transparentes",
+      "subtitle": "Acompanha preços de supermercado e fica atento à inflação com o Price Lens. Escolhe o plano que funciona para ti.",
+      "perMonth": "/mês",
+      "popular": "Popular",
+      "comingSoon": "Em breve",
+      "free": {
+        "name": "Free",
+        "description": "Acompanhamento de preços relevante para todos",
+        "cta": "Começar",
+        "items": {
+          "history14": "Histórico de preços de 14 dias",
+          "basket": "Acompanha produtos do cabaz de inflação selecionado",
+          "compare": "Acede e compara entre vários supermercados",
+          "weeklyAlerts": "Alertas de preço semanais básicos"
+        }
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Acompanhamento avançado para compradores atentos e cépticos da inflação",
+        "cta": "Subscrever Plus",
+        "items": {
+          "everythingFree": "Tudo o que está no Free",
+          "fullHistory": "Histórico de preços completo (não apenas 14 dias)",
+          "unlimitedTracking": "Acompanhamento ilimitado de produtos personalizados",
+          "dailyReports": "Relatórios diários de preços (vs. semanais no Free)",
+          "insights": "Painel de tendências de inflação",
+          "shoppingList": "Otimizador de lista de compras entre lojas",
+          "ppCalculator": "Calculadora de impacto no poder de compra",
+          "exportApi": "Exportação CSV e acesso à API"
+        }
+      },
+      "footer": "Todos os planos incluem a funcionalidade base para transparência de preços e consciência da inflação. Tens dúvidas? <link>Contacta-nos</link>"
+    },
+    "priceCreep": {
+      "title": "A subida invisível dos preços",
+      "subtitle": "Os preços não saltam — sobem aos poucos. Um pequeno aumento mensal parece nada. Mas com o tempo composto, o cenário muda completamente.",
+      "timeframes": {
+        "monthly": { "label": "Mensal", "note": "Mal se nota" },
+        "year": { "label": "Após 1 ano", "note": "Começa a somar" },
+        "fiveYears": { "label": "Após 5 anos", "note": "É dinheiro a sério" }
+      },
+      "callout": "Cada mês a subida é demasiado pequena para incomodar. Mas, somada ao longo do tempo, a tua conta do supermercado fica significativamente mais alta — e ninguém te pediu autorização."
+    },
+    "inflationBasket": {
+      "badge": "A inflação depende de um cabaz de produtos selecionados",
+      "title": "Atenção às tendências de preço dos produtos chave",
+      "body": "O cabaz da inflação representa produtos essenciais escolhidos pelas autoridades económicas para acompanhar os preços ao consumidor. A seleção pode mudar com o tempo, mas o Price Lens está atento às tendências de preço dos produtos que sempre importam. Quem é que não se importa com o preço de <em>essenciais</em> como atum, ovos, leite, etc.?",
+      "ctaRelevant": "Produtos relevantes",
+      "ctaSupermarkets": "Listagens dos supermercados"
+    },
+    "inflationContext": {
+      "title": "Não são só os mantimentos",
+      "body": "A inflação acumula em silêncio. Desde 1999, €100 em produtos em Portugal custam agora <strong>€{value}</strong>. O mesmo padrão repete-se a nível de produto — exatamente o que o Price Lens acompanha.",
+      "chart": {
+        "title": "Inflação acumulada (1999 a 2024)",
+        "description": "O que €100 de 1999 representam hoje em Portugal, EUA e Zona Euro."
+      },
+      "footer": "Dados históricos de CPI-U do US Bureau of Labor Statistics, Eurostat e INE Portugal. <link>Vê a análise completa de inflação →</link>",
+      "regions": {
+        "usa": "Estados Unidos",
+        "pt": "Portugal",
+        "eu": "Zona Euro"
+      }
+    },
+    "inflationTrends": {
+      "title": "Tendências de inflação desde 1999",
+      "subtitle": "Taxas históricas de inflação Consumer Price Index (CPI-U) dos EUA, Portugal e Zona Euro. Os dados representam a variação anual percentual ao longo de mais de 25 anos de ciclos económicos.",
+      "stats": {
+        "average25": "Média 25 anos",
+        "average5": "Média 5 anos",
+        "highest": "Taxa mais alta",
+        "highestYear": "Atingida em {year}",
+        "fedTarget": "Meta da Fed",
+        "fedTargetNote": "Objetivo de longo prazo cumprido em {met} de {total} anos"
+      },
+      "table": {
+        "title": "Dados históricos de inflação",
+        "summary": "Os dados representam uma inflação acumulada de <strong>{usa}%</strong>, <strong>{pt}%</strong> e <strong>{eu}%</strong> para EUA, Portugal e Zona Euro desde 1999, respetivamente.",
+        "summary2": "Por outras palavras, ter <strong>100,00$</strong> em 1999 equivale a ter <strong>{value}$</strong> hoje.",
+        "year": "Ano",
+        "context": "Contexto económico",
+        "showMore": "Ver mais",
+        "showLess": "Ver menos"
+      },
+      "convergence": {
+        "title": "Convergência da inflação",
+        "description": "Vê as flutuações anuais da inflação dos EUA, Portugal e Zona Euro.",
+        "yLabel": "Taxa (%)"
+      },
+      "impactTitle": "Porque a inflação dos EUA atinge fortemente Portugal",
+      "impactSubtitle": "A pequena economia aberta de Portugal está estruturalmente exposta à política monetária dos EUA e aos fluxos de matérias-primas globais. Vê como os choques se propagam."
+    },
+    "savePotential": {
+      "badge": "Calculadora de compras inteligentes",
+      "headlinePart1": "Pára de pagar a mais.",
+      "headlinePart2": "Começa a poupar.",
+      "subtitle": "A maioria dos produtos vai a desconto em algum momento. Comprar na altura certa faz a poupança somar rapidamente. Move o cursor e vê o teu potencial.",
+      "label": "Produtos que compras por mês",
+      "minLabel": "{count} produtos",
+      "maxLabel": "{count} produtos",
+      "savedMonth": "Poupança por mês",
+      "savedYear": "Poupança por ano",
+      "highlight": "Só por comprares com mais cabeça",
+      "cta": "Começa a poupar com o Price Lens",
+      "trust": {
+        "noPayment": "Sem pagamento",
+        "averageSavings": "Média de 20% de poupança",
+        "instantAlerts": "Alertas de preço instantâneos"
+      },
+      "fineprint": "Assume um preço médio de €{price} por produto, ~{chance}% dos produtos em promoção por mês e um desconto médio de {rate}%.",
+      "disclaimer": "A poupança real depende dos teus hábitos de compra."
+    },
+    "savingsSpotlight": {
+      "headlinePart1": "\"Time in the market beats timing the market\"",
+      "headlinePart2": "exceto no",
+      "headlinePart3": "supermercado",
+      "spotlightTitle": "O comprador médio pode poupar até <highlight>€{savings}/ano</highlight> só por comprar na altura certa",
+      "spotlightBody": "Os supermercados rodam promoções constantemente entre marcas e lojas. O Price Lens acompanha esses descontos, para fazeres stock quando os preços estão mais baixos e parares de pagar a mais nas compras.",
+      "spotlightCta": "Começa a poupar nas compras",
+      "comingSoon": "Em breve",
+      "features": {
+        "atStore": {
+          "title": "Estou na loja",
+          "description": "Escolhe a tua loja. Vê o que vale a pena comprar hoje a partir dos teus favoritos e listas."
+        },
+        "trackSavings": {
+          "title": "Acompanha a tua poupança",
+          "description": "Vê quanto poupaste ao longo do tempo a comprar com mais cabeça com o Price Lens."
+        }
+      }
+    },
     "aboutTeaser": {
       "title": "Porquê acompanhar preços?",
       "subtitle": "A inflação alimentar em Portugal passou os 20% nos últimos 5 anos. Pequenas poupanças somam.",

@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useLocale, useTranslations } from "next-intl"
 import { useUser } from "@/hooks/useUser"
 import { useRecentlyViewed, type RecentlyViewedItem } from "@/hooks/useRecentlyViewed"
 import { useUserAlerts } from "@/hooks/useUserAlerts"
 import { useUserFavoritesSummary, type FavoriteSummaryItem } from "@/hooks/useUserFavoritesSummary"
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/business/product"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatPrice } from "@/lib/i18n/format"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
@@ -40,22 +43,26 @@ export function PersonalizedDashboard({
   const { items: recentlyViewed } = useRecentlyViewed()
   const { data: alertsData, isLoading: alertsLoading } = useUserAlerts()
   const { data: favoritesData, isLoading: favoritesLoading } = useUserFavoritesSummary(24)
+  const t = useTranslations("home.personalizedDashboard")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   const favorites = favoritesData?.items ?? []
   const favoritesTotal = favoritesData?.totalCount ?? null
   const alerts = (alertsData ?? []).slice(0, 4)
   const isLoading = alertsLoading || favoritesLoading
 
-  const firstName = profile?.full_name?.split(" ")[0] || user?.user_metadata?.full_name?.split(" ")[0] || "there"
+  const firstName =
+    profile?.full_name?.split(" ")[0] || user?.user_metadata?.full_name?.split(" ")[0] || t("fallbackName")
 
   return (
     <div className="z-20 mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-10">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
-            <span className="text-muted-foreground font-normal">Welcome back,</span> {firstName}
+            <span className="text-muted-foreground font-normal">{t("welcomeBack")}</span> {firstName}
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Track prices, catch deals, and save money on groceries.</p>
+          <p className="text-muted-foreground mt-1 text-sm">{t("subtitle")}</p>
         </div>
         <div className="w-full lg:max-w-md">
           <HomeSearchBar totalProducts={totalProducts} />
@@ -64,30 +71,44 @@ export function PersonalizedDashboard({
 
       {/* Quick action cards */}
       <div className="mb-6 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-        <QuickActionCard href="/deals" icon={TagIcon} label="Deals" description="Price drops & discounts" />
+        <QuickActionCard
+          href="/deals"
+          icon={TagIcon}
+          label={t("quickActions.deals")}
+          description={t("quickActions.dealsDescription")}
+        />
         <QuickActionCard
           href="/favorites"
           icon={HeartIcon}
-          label="Favorites"
-          description={favoritesTotal !== null ? `${favoritesTotal} products` : "View all"}
+          label={t("quickActions.favorites")}
+          description={
+            favoritesTotal !== null
+              ? t("quickActions.favoritesDescription", { count: favoritesTotal })
+              : t("quickActions.favoritesViewAll")
+          }
         />
-        <QuickActionCard href="/products" icon={PackageIcon} label="Products" description="Browse all" />
+        <QuickActionCard
+          href="/products"
+          icon={PackageIcon}
+          label={t("quickActions.products")}
+          description={t("quickActions.productsDescription")}
+        />
         <QuickActionCard
           href="/profile?tab=alerts"
           icon={BellIcon}
-          label="Alerts"
-          description={`${alerts.length} active`}
+          label={t("quickActions.alerts")}
+          description={t("quickActions.alertsActive", { count: alerts.length })}
         />
       </div>
 
       <div className="flex flex-col gap-6">
         {/* Favorites summary */}
         <DashboardSection
-          title="Your Favorites"
+          title={t("sections.favorites")}
           icon={HeartIcon}
           href="/favorites"
           isEmpty={favorites.length === 0}
-          emptyMessage="No favorites yet. Browse products and tap the heart icon."
+          emptyMessage={t("sections.favoritesEmpty")}
           isLoading={isLoading}
         >
           <MiniProductCarousel products={favorites} desktopLimit={12} />
@@ -95,10 +116,10 @@ export function PersonalizedDashboard({
 
         {/* Recently viewed */}
         <DashboardSection
-          title="Recently Viewed"
+          title={t("sections.recentlyViewed")}
           icon={ClockIcon}
           isEmpty={recentlyViewed.length === 0}
-          emptyMessage="Products you view will appear here."
+          emptyMessage={t("sections.recentlyViewedEmpty")}
           isLoading={false}
         >
           <MiniProductCarousel products={recentlyViewed.slice(0, 24)} desktopLimit={6} />
@@ -109,7 +130,7 @@ export function PersonalizedDashboard({
       {alerts.length > 0 && (
         <div className="mt-6">
           <DashboardSection
-            title="Active Alerts"
+            title={t("sections.activeAlerts")}
             icon={BellIcon}
             href="/profile?tab=alerts"
             isEmpty={false}
@@ -127,7 +148,7 @@ export function PersonalizedDashboard({
                   >
                     <BellIcon className="size-3.5 shrink-0 text-amber-500" />
                     <span className="min-w-0 flex-1 truncate text-xs font-medium">{product.name}</span>
-                    <span className="text-xs font-semibold tabular-nums">{product.price.toFixed(2)}€</span>
+                    <span className="text-xs font-semibold tabular-nums">{formatPrice(product.price, locale)}</span>
                   </Link>
                 )
               })}
@@ -142,16 +163,14 @@ export function PersonalizedDashboard({
           <CardContent className="flex items-center gap-4 p-4">
             <SparklesIcon className="text-primary size-8 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">Get more from Price Lens</p>
-              <p className="text-muted-foreground text-xs">
-                Favorite products, set price alerts, and browse deals to start saving on groceries.
-              </p>
+              <p className="text-sm font-medium">{t("ctaCard.title")}</p>
+              <p className="text-muted-foreground text-xs">{t("ctaCard.body")}</p>
             </div>
             <Link
               href="/deals"
               className="bg-primary text-primary-foreground shrink-0 rounded-md px-3 py-1.5 text-xs font-medium"
             >
-              Browse deals
+              {t("ctaCard.browseDeals")}
             </Link>
           </CardContent>
         </Card>
@@ -160,7 +179,7 @@ export function PersonalizedDashboard({
       {/* Popular products discovery */}
       {heroProducts.length > 0 && (
         <DashboardSection
-          title="Handpicked"
+          title={t("sections.handpicked")}
           icon={PinIcon}
           href="/products"
           isEmpty={false}
@@ -220,6 +239,7 @@ function DashboardSection({
   className?: string
   children: React.ReactNode
 }) {
+  const t = useTranslations("home.personalizedDashboard.sections")
   return (
     <Card className={cn(className)}>
       <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
@@ -229,7 +249,7 @@ function DashboardSection({
         </CardTitle>
         {href && (
           <Link href={href} className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs">
-            View all
+            {t("viewAll")}
             <ArrowRightIcon className="size-3" />
           </Link>
         )}
@@ -267,6 +287,7 @@ function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewed
   const pages = chunkArray(products, 6)
   const scrollRef = useRef<HTMLDivElement>(null)
   const productKey = products.map((p) => p.id).join(",")
+  const t = useTranslations("home.personalizedDashboard.carousel")
 
   const updatePageFromScroll = useCallback(() => {
     const el = scrollRef.current
@@ -327,7 +348,7 @@ function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewed
         ref={scrollRef}
         role="region"
         aria-roledescription="carousel"
-        aria-label="Favorite products"
+        aria-label={t("ariaProducts")}
         className={cn(
           // items-start: avoid stretching short pages to the tallest page’s height (e.g. last page with 1 item).
           "flex w-full min-w-0 snap-x snap-mandatory items-start overflow-x-auto overflow-y-hidden scroll-smooth",
@@ -351,7 +372,7 @@ function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewed
             key={i}
             type="button"
             onClick={() => goToPage(i)}
-            aria-label={`Page ${i + 1} of ${pages.length}`}
+            aria-label={t("ariaPage", { page: i + 1, total: pages.length })}
             aria-current={i === page ? "true" : undefined}
             className={cn(
               "rounded-full transition-all duration-200",
@@ -404,6 +425,8 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
   const majorUnit = "major_unit" in product ? product.major_unit : null
   const originId = "origin_id" in product ? product.origin_id : product.originId
   const href = "href" in product ? product.href : `/products/${product.id}`
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   const hasDiscount = Boolean(discount && discount > 0)
   const hasStrikethrough = Boolean(priceRecommended && product.price != null && priceRecommended > product.price)
@@ -451,11 +474,11 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
                 hasDiscount ? "text-emerald-600 dark:text-emerald-400" : "text-foreground",
               )}
             >
-              {product.price != null ? `${product.price.toFixed(2)}€` : "—"}
+              {product.price != null ? formatPrice(product.price, locale) : "—"}
             </span>
             {hasStrikethrough && (
               <span className="text-muted-foreground text-xs tabular-nums line-through">
-                {priceRecommended!.toFixed(2)}€
+                {formatPrice(priceRecommended!, locale)}
               </span>
             )}
           </div>

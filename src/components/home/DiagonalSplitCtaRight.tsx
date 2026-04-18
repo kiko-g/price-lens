@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { Heart, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,7 @@ import { useUser } from "@/hooks/useUser"
 
 export function DiagonalSplitCtaRight() {
   const { user, isLoading } = useUser()
+  const t = useTranslations("home.diagonalRight")
 
   return (
     <div
@@ -23,20 +25,16 @@ export function DiagonalSplitCtaRight() {
           <Heart className="text-destructive-foreground fill-destructive-foreground size-5" />
         </div>
 
-        <h2 className="text-xl font-extrabold tracking-tight text-balance sm:text-2xl">
-          Track the products you care about
-        </h2>
+        <h2 className="text-xl font-extrabold tracking-tight text-balance sm:text-2xl">{t("title")}</h2>
 
-        <p className="text-muted-foreground max-w-[260px] text-sm leading-relaxed text-pretty">
-          Save your favorites and we&apos;ll tell you when prices drop. Free, no spam.
-        </p>
+        <p className="text-muted-foreground max-w-[260px] text-sm leading-relaxed text-pretty">{t("body")}</p>
 
         {isLoading ? (
           <div className="h-11" />
         ) : user ? (
           <Button asChild size="lg" roundedness="xl" className="group gap-2">
             <Link href="/favorites">
-              Go to your favorites
+              {t("goFavorites")}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </Button>
@@ -44,7 +42,7 @@ export function DiagonalSplitCtaRight() {
           <Button asChild variant="marketing-default" size="lg" roundedness="xl" className="max-w-xs">
             <Link href="/login">
               <GoogleIcon />
-              Continue with Google
+              {t("continueGoogle")}
             </Link>
           </Button>
         )}

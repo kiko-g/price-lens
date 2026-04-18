@@ -502,6 +502,184 @@
       "body": "Prices shift every week across supermarkets. What costs €6.99 today was €4.49 last month. Price Lens tracks it all so you buy at the right time.",
       "cta": "Browse today's price drops"
     },
+    "personalizedDashboard": {
+      "welcomeBack": "Welcome back,",
+      "fallbackName": "there",
+      "subtitle": "Track prices, catch deals, and save money on groceries.",
+      "quickActions": {
+        "deals": "Deals",
+        "dealsDescription": "Price drops & discounts",
+        "favorites": "Favorites",
+        "favoritesDescription": "{count, plural, one {# product} other {# products}}",
+        "favoritesViewAll": "View all",
+        "products": "Products",
+        "productsDescription": "Browse all",
+        "alerts": "Alerts",
+        "alertsActive": "{count} active"
+      },
+      "sections": {
+        "favorites": "Your Favorites",
+        "favoritesEmpty": "No favorites yet. Browse products and tap the heart icon.",
+        "recentlyViewed": "Recently Viewed",
+        "recentlyViewedEmpty": "Products you view will appear here.",
+        "activeAlerts": "Active Alerts",
+        "handpicked": "Handpicked",
+        "viewAll": "View all"
+      },
+      "ctaCard": {
+        "title": "Get more from Price Lens",
+        "body": "Favorite products, set price alerts, and browse deals to start saving on groceries.",
+        "browseDeals": "Browse deals"
+      },
+      "carousel": {
+        "ariaProducts": "Favorite products",
+        "ariaPage": "Page {page} of {total}"
+      }
+    },
+    "quickActions": {
+      "allProducts": "All Products",
+      "tracked": "Tracked",
+      "priceDrops": "Price Drops",
+      "favorites": "Favorites"
+    },
+    "diagonalRight": {
+      "title": "Track the products you care about",
+      "body": "Save your favorites and we'll tell you when prices drop. Free, no spam.",
+      "goFavorites": "Go to your favorites",
+      "continueGoogle": "Continue with Google"
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "subtitle": "Track supermarket prices and stay aware of inflation with Price Lens. Choose the plan that works for you.",
+      "perMonth": "/month",
+      "popular": "Popular",
+      "comingSoon": "Coming soon",
+      "free": {
+        "name": "Free",
+        "description": "Relevant price tracking for everyone",
+        "cta": "Get Started",
+        "items": {
+          "history14": "14-day price history",
+          "basket": "Track handpicked inflation basket products",
+          "compare": "Access and compare multiple supermarkets origins",
+          "weeklyAlerts": "Basic weekly price alerts"
+        }
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Advanced tracking for savvy shoppers and inflation doomers",
+        "cta": "Get Plus",
+        "items": {
+          "everythingFree": "Everything in Free",
+          "fullHistory": "Full price history (not just 14 days)",
+          "unlimitedTracking": "Unlimited custom product tracking",
+          "dailyReports": "Daily price reports (vs. weekly in Free)",
+          "insights": "Inflation insights dashboard with trends",
+          "shoppingList": "Shopping list optimizer across stores",
+          "ppCalculator": "Purchasing power impact calculator",
+          "exportApi": "Export CSV data and API access"
+        }
+      },
+      "footer": "All plans include the core functionality for price transparency and inflation awareness. Any questions? <link>Contact us</link>"
+    },
+    "priceCreep": {
+      "title": "The invisible price creep",
+      "subtitle": "Prices don't jump - they creep. A tiny increase each month seems like nothing. But compound it over time and the picture changes completely.",
+      "timeframes": {
+        "monthly": { "label": "Monthly", "note": "Barely noticeable" },
+        "year": { "label": "After 1 Year", "note": "Starting to add up" },
+        "fiveYears": { "label": "After 5 Years", "note": "That's real money" }
+      },
+      "callout": "Each month the increase is too small to care about. But compounded over time, your grocery bill is significantly higher - and no one asked for your permission."
+    },
+    "inflationBasket": {
+      "badge": "Inflation depends on a selected basket of products",
+      "title": "Beware of price trends within key products",
+      "body": "The inflation basket represents essential products selected by economic authorities to track consumer prices. The selection can change over time, but Price Lens keeps an eye on price trends on products that matter forever. Who doesn't care about the price of <em>essentials</em> like tuna, eggs, milk, etc.?",
+      "ctaRelevant": "Relevant products",
+      "ctaSupermarkets": "Supermarket listings"
+    },
+    "inflationContext": {
+      "title": "It's not just groceries",
+      "body": "Inflation compounds silently. Since 1999, €100 worth of goods in Portugal now costs <strong>€{value}</strong>. The same pattern repeats at the product level - which is exactly what Price Lens tracks.",
+      "chart": {
+        "title": "Cumulative Inflation (1999 to 2024)",
+        "description": "What €100 from 1999 looks like today for Portugal, the USA, and the Eurozone."
+      },
+      "footer": "Historical CPI-U data from US Bureau of Labor Statistics, Eurostat, and INE Portugal. <link>See the full inflation analysis →</link>",
+      "regions": {
+        "usa": "United States",
+        "pt": "Portugal",
+        "eu": "Eurozone"
+      }
+    },
+    "inflationTrends": {
+      "title": "Inflation trends since 1999",
+      "subtitle": "Historical Consumer Price Index (CPI-U) inflation rates from the US Bureau of Labor Statistics, Portugal and Eurozone. Data represents year-over-year percentage change spanning 25+ years of economic cycles.",
+      "stats": {
+        "average25": "25-Year Average",
+        "average5": "5-Year Average",
+        "highest": "Highest rate",
+        "highestYear": "Achieved in {year}",
+        "fedTarget": "Fed Target",
+        "fedTargetNote": "Long-term goal only {met} out of {total} years"
+      },
+      "table": {
+        "title": "Historical Inflation Data",
+        "summary": "Data represents a cumulative inflation rate of <strong>{usa}%</strong>, <strong>{pt}%</strong> and <strong>{eu}%</strong> for the USA, Portugal and Eurozone since 1999, respectively.",
+        "summary2": "In other words, having <strong>100.00$</strong> in 1999, is having <strong>{value}$</strong> today.",
+        "year": "Year",
+        "context": "Economic Context",
+        "showMore": "Show More",
+        "showLess": "Show Less"
+      },
+      "convergence": {
+        "title": "Inflation Convergence",
+        "description": "Take a look at the yearly fluctuations of inflation for the USA, Portugal and Eurozone.",
+        "yLabel": "Rate (%)"
+      },
+      "impactTitle": "Why USA inflation hits Portugal hard",
+      "impactSubtitle": "Portugal's small open economy is structurally exposed to USA monetary policy and global commodity flows. Here's how shocks propagate."
+    },
+    "savePotential": {
+      "badge": "Smart Shopping Calculator",
+      "headlinePart1": "Stop overpaying.",
+      "headlinePart2": "Start saving.",
+      "subtitle": "Most products go on discount at some point. Buy at the right time and the savings compound fast. Drag the slider to see your potential.",
+      "label": "Products you buy per month",
+      "minLabel": "{count} products",
+      "maxLabel": "{count} products",
+      "savedMonth": "Saved per month",
+      "savedYear": "Saved per year",
+      "highlight": "Just from shopping smarter",
+      "cta": "Start saving with Price Lens",
+      "trust": {
+        "noPayment": "No payment required",
+        "averageSavings": "Average 20% savings",
+        "instantAlerts": "Instant price alerts"
+      },
+      "fineprint": "Assumes average product price of €{price}, ~{chance}% of products go on sale each month, and an average discount of {rate}%.",
+      "disclaimer": "Actual savings depend on regular shopping habits."
+    },
+    "savingsSpotlight": {
+      "headlinePart1": "\"Time in the market, beats timing the market\"",
+      "headlinePart2": "except in the",
+      "headlinePart3": "supermarket",
+      "spotlightTitle": "The average shopper could save up to <highlight>€{savings}/year</highlight> just by buying at the right time",
+      "spotlightBody": "Supermarkets constantly rotate promotions across brands and stores. Price Lens tracks those discounts, so you stock up when prices are lowest and stop overpaying for everyday groceries.",
+      "spotlightCta": "Start saving on groceries",
+      "comingSoon": "Coming soon",
+      "features": {
+        "atStore": {
+          "title": "I'm at the store",
+          "description": "Pick your store. See what's worth buying today from your favorites and lists."
+        },
+        "trackSavings": {
+          "title": "Track your savings",
+          "description": "See how much you've saved over time by shopping smarter with Price Lens."
+        }
+      }
+    },
     "aboutTeaser": {
       "title": "Why track prices?",
       "subtitle": "Portuguese grocery inflation hit 20%+ over the last 5 years. Small savings compound.",

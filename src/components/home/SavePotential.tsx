@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState, useRef, useEffect, useCallback } from "react"
+import { useTranslations } from "next-intl"
 
 import { ArrowRight, TrendingUp, Zap, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -118,7 +119,7 @@ function CustomSlider({
   )
 }
 
-function StatCard({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function StatCard({ label, value, highlight, highlightLabel }: { label: string; value: number; highlight?: boolean; highlightLabel?: string }) {
   return (
     <div
       className={cn(
@@ -141,9 +142,9 @@ function StatCard({ label, value, highlight }: { label: string; value: number; h
         </span>
       </div>
 
-      {highlight && (
+      {highlight && highlightLabel && (
         <span className="bg-primary/10 border-primary/30 dark:border-primary/30 dark:bg-primary/20 text-foreground mt-1 inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium">
-          Just from shopping smarter
+          {highlightLabel}
         </span>
       )}
     </div>
@@ -153,6 +154,13 @@ function StatCard({ label, value, highlight }: { label: string; value: number; h
 export function SavePotential() {
   const [products, setProducts] = useState(200)
   const { monthly, yearly } = calculateSavings(products)
+  const t = useTranslations("home.savePotential")
+
+  const trustItems = [
+    { icon: ShieldCheck, text: t("trust.noPayment") },
+    { icon: TrendingUp, text: t("trust.averageSavings") },
+    { icon: Zap, text: t("trust.instantAlerts") },
+  ]
 
   return (
     <div className="relative w-full overflow-hidden">
@@ -161,19 +169,18 @@ export function SavePotential() {
           {/* Badge */}
           <span className="border-primary/30 dark:border-primary/30 bg-primary/10 dark:bg-primary/15 z-2 inline-flex items-center gap-2 rounded-full border px-4 py-1.5">
             <Zap className="text-primary size-4" />
-            <span className="text-foreground text-sm font-medium tracking-wide">Smart Shopping Calculator</span>
+            <span className="text-foreground text-sm font-medium tracking-wide">{t("badge")}</span>
           </span>
 
           {/* Heading */}
           <div className="flex flex-col items-center gap-5 text-center">
             <h2 className="text-foreground max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl">
-              Stop overpaying.
+              {t("headlinePart1")}
               <br />
-              <span className="text-primary dark:text-primary">Start saving.</span>
+              <span className="text-primary dark:text-primary">{t("headlinePart2")}</span>
             </h2>
             <p className="text-muted-foreground max-w-3xl text-base leading-relaxed text-pretty md:text-lg">
-              Most products go on discount at some point. Buy at the right time and the savings compound fast. Drag the
-              slider to see your potential.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -182,7 +189,7 @@ export function SavePotential() {
             {/* Slider section */}
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between">
-                <label className="text-foreground text-sm font-medium">Products you buy per month</label>
+                <label className="text-foreground text-sm font-medium">{t("label")}</label>
                 <span className="bg-primary rounded-lg px-3 py-1 text-sm font-bold text-white tabular-nums">
                   {products}
                 </span>
@@ -191,8 +198,8 @@ export function SavePotential() {
               <CustomSlider min={50} max={500} step={10} value={products} onChange={setProducts} />
 
               <div className="text-muted-foreground flex justify-between text-xs">
-                <span>50 products</span>
-                <span>500 products</span>
+                <span>{t("minLabel", { count: 50 })}</span>
+                <span>{t("maxLabel", { count: 500 })}</span>
               </div>
             </div>
 
@@ -201,8 +208,8 @@ export function SavePotential() {
 
             {/* Stats grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <StatCard label="Saved per month" value={monthly} />
-              <StatCard label="Saved per year" value={yearly} highlight />
+              <StatCard label={t("savedMonth")} value={monthly} />
+              <StatCard label={t("savedYear")} value={yearly} highlight highlightLabel={t("highlight")} />
             </div>
 
             {/* CTA */}
@@ -210,18 +217,14 @@ export function SavePotential() {
               href="/products"
               className="group bg-primary text-primary-foreground focus-visible:ring-ring focus-visible:ring-offset-background mt-8 flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-semibold transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
-              Start saving with Price Lens
+              {t("cta")}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
 
           {/* Trust indicators */}
           <div className="flex flex-row flex-wrap items-center justify-center gap-4 sm:gap-8">
-            {[
-              { icon: ShieldCheck, text: "No payment required" },
-              { icon: TrendingUp, text: "Average 20% savings" },
-              { icon: Zap, text: "Instant price alerts" },
-            ].map((item) => (
+            {trustItems.map((item) => (
               <div key={item.text} className="text-muted-foreground flex items-center gap-2 text-sm">
                 <item.icon className="text-primary h-4 w-4" />
                 <span>{item.text}</span>
@@ -232,12 +235,15 @@ export function SavePotential() {
           {/* Fine print */}
           <div className="space-y-3">
             <p className="max-w-lg text-center text-base leading-relaxed font-medium">
-              Assumes average product price of {`€${AVG_PRICE.toFixed(2)}`}, {`~${(DISCOUNT_CHANCE * 100).toFixed(0)}%`}{" "}
-              of products go on sale each month, and an average discount of {`${(DISCOUNT_RATE * 100).toFixed(0)}%`}.
+              {t("fineprint", {
+                price: AVG_PRICE.toFixed(2),
+                chance: (DISCOUNT_CHANCE * 100).toFixed(0),
+                rate: (DISCOUNT_RATE * 100).toFixed(0),
+              })}
             </p>
 
             <p className="text-muted-foreground max-w-lg text-center text-sm leading-relaxed font-medium">
-              Actual savings depend on regular shopping habits.
+              {t("disclaimer")}
             </p>
           </div>
         </div>
