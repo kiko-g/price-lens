@@ -13,11 +13,7 @@ import { isLocale, toLocaleTag } from "@/i18n/config"
  * regular rounded cards; on md+ the clip-paths kick in.
  */
 export async function DiagonalSplitCta() {
-  const [stats, localeRaw, t] = await Promise.all([
-    getHomeStats(),
-    getLocale(),
-    getTranslations("home.diagonalCta"),
-  ])
+  const [stats, localeRaw, t] = await Promise.all([getHomeStats(), getLocale(), getTranslations("home.diagonalCta")])
   const locale = isLocale(localeRaw) ? localeRaw : "pt"
   const tag = toLocaleTag(locale)
   const formatNumber = (n: number) => n.toLocaleString(tag)

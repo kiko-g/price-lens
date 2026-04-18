@@ -233,15 +233,15 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                     variant="tertiary"
                     className="gap-1 opacity-100 transition-opacity duration-300 group-hover:opacity-50"
                   >
-                  <CalendarPlusIcon className="h-3 w-3" />
-                  {formatRelativeTime(new Date(favoritedAt), "short", locale)}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="left" align="end">
-                <span>{t("favorite.addedOn")}</span>
-                <br />
-                <span className="text-muted-foreground">{formatDate(new Date(favoritedAt), locale)}</span>
-              </TooltipContent>
+                    <CalendarPlusIcon className="h-3 w-3" />
+                    {formatRelativeTime(new Date(favoritedAt), "short", locale)}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="left" align="end">
+                  <span>{t("favorite.addedOn")}</span>
+                  <br />
+                  <span className="text-muted-foreground">{formatDate(new Date(favoritedAt), locale)}</span>
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -324,7 +324,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 {sp.brand}
               </Link>
             ) : (
-              <span className="text-muted-foreground w-full text-sm leading-4 font-semibold opacity-30">{t("noBrand")}</span>
+              <span className="text-muted-foreground w-full text-sm leading-4 font-semibold opacity-30">
+                {t("noBrand")}
+              </span>
             )}
           </div>
 

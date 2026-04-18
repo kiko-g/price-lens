@@ -166,7 +166,12 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
             <NavSection label={tSheet("sections.navigation")}>
               {primaryNav.map((item) => (
                 <div key={item.href}>
-                  <NavEntry item={item} isActive={pathname === item.href} onClose={handleClose} label={tNav(item.key)} />
+                  <NavEntry
+                    item={item}
+                    isActive={pathname === item.href}
+                    onClose={handleClose}
+                    label={tNav(item.key)}
+                  />
                   {item.href === "/products" && (
                     <div className="ml-2 flex flex-wrap gap-1.5 pt-0.5 pb-2">
                       {productQuickFilters.map((chip) => (

@@ -336,7 +336,21 @@ export function calculateChartBounds(min: number, max: number, targetTicks: numb
 
 export type RelativeTimeMode = "short" | "long" | "relative"
 
-const RELATIVE_LABELS: Record<"en" | "pt", { today: string; d: string; w: string; mo: string; y: string; ago: string; day: [string, string]; week: [string, string]; month: [string, string]; year: [string, string] }> = {
+const RELATIVE_LABELS: Record<
+  "en" | "pt",
+  {
+    today: string
+    d: string
+    w: string
+    mo: string
+    y: string
+    ago: string
+    day: [string, string]
+    week: [string, string]
+    month: [string, string]
+    year: [string, string]
+  }
+> = {
   en: {
     today: "today",
     d: "d",

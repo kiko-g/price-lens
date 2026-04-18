@@ -23,8 +23,7 @@ export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats;
   const locale = isLocale(localeRaw) ? localeRaw : "pt"
   const tag = toLocaleTag(locale)
   const formatNumber = (n: number) => n.toLocaleString(tag)
-  const formatEuros = (n: number) =>
-    `€${n.toLocaleString(tag, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+  const formatEuros = (n: number) => `€${n.toLocaleString(tag, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
   const t = useTranslations("home.marketPulse")
 
   const items: PulseStat[] = [

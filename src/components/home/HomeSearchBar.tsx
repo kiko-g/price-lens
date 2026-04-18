@@ -51,7 +51,9 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
           }}
         >
           <ScanBarcodeIcon className="sm:text-muted-foreground text-foreground size-5 shrink-0" />
-          <span className="text-foreground sm:text-muted-foreground hidden text-sm sm:inline-flex">{t("scanBarcode")}</span>
+          <span className="text-foreground sm:text-muted-foreground hidden text-sm sm:inline-flex">
+            {t("scanBarcode")}
+          </span>
           <span className="text-foreground sm:text-muted-foreground inline-flex text-sm max-[420px]:hidden sm:hidden">
             {tBottom("scan")}
           </span>
