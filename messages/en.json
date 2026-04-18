@@ -175,6 +175,19 @@
       "body": "No store products found for this canonical product."
     }
   },
+  "email": {
+    "priceDrop": {
+      "title": "Price drop alert",
+      "greeting": "Hi {name}, a product you're tracking just dropped in price.",
+      "was": "Was",
+      "now": "Now",
+      "youSave": "You save {amount} ({percent}% off)",
+      "viewProduct": "View product",
+      "footerReason": "You received this because you set a price alert on {site}.<br>Manage your alerts in your {profile}.",
+      "profileLink": "profile settings",
+      "subject": "{name} dropped {percent}% in price"
+    }
+  },
   "toasts": {
     "favorites": {
       "added": "Added to favorites",

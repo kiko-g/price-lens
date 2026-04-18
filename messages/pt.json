@@ -175,6 +175,19 @@
       "body": "Não foram encontrados produtos para este produto canónico."
     }
   },
+  "email": {
+    "priceDrop": {
+      "title": "Alerta de descida de preço",
+      "greeting": "Olá {name}, um produto que estás a acompanhar acabou de descer de preço.",
+      "was": "Antes",
+      "now": "Agora",
+      "youSave": "Poupas {amount} ({percent}% de desconto)",
+      "viewProduct": "Ver produto",
+      "footerReason": "Recebeste este email porque criaste um alerta de preço no {site}.<br>Gere os teus alertas nas {profile}.",
+      "profileLink": "definições do perfil",
+      "subject": "{name} desceu {percent}% no preço"
+    }
+  },
   "toasts": {
     "favorites": {
       "added": "Adicionado aos favoritos",
