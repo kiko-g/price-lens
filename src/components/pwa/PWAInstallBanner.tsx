@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { DownloadIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,6 +23,7 @@ export function PWAInstallBanner({
 }: PWAInstallBannerProps) {
   const [mounted, setMounted] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
+  const t = useTranslations("pwa.banner")
 
   useEffect(() => {
     if (visible) {
@@ -41,7 +43,7 @@ export function PWAInstallBanner({
   return (
     <div
       role="dialog"
-      aria-label="Install Price Lens app"
+      aria-label={t("aria")}
       className={cn(
         "fixed inset-x-0 bottom-0 z-50",
         !forceDesktop && "md:hidden",
@@ -57,8 +59,8 @@ export function PWAInstallBanner({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] leading-tight font-semibold">Get the app</p>
-            <p className="text-muted-foreground text-[11px] leading-tight">Faster, offline, full-screen</p>
+            <p className="text-[13px] leading-tight font-semibold">{t("title")}</p>
+            <p className="text-muted-foreground text-[11px] leading-tight">{t("subtitle")}</p>
           </div>
 
           {hasNativePrompt ? (
@@ -67,7 +69,7 @@ export function PWAInstallBanner({
               className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity active:opacity-80"
             >
               <DownloadIcon className="size-3.5" />
-              Install
+              {t("install")}
             </button>
           ) : (
             <Link
@@ -75,14 +77,14 @@ export function PWAInstallBanner({
               onClick={onDismiss}
               className="bg-primary text-primary-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity active:opacity-80"
             >
-              Install
+              {t("install")}
             </Link>
           )}
 
           <button
             onClick={onDismiss}
             className="text-muted-foreground/60 hover:text-muted-foreground -mr-1 shrink-0 rounded-full p-1 transition-colors"
-            aria-label="Dismiss"
+            aria-label={t("dismiss")}
           >
             <XIcon className="size-3.5" />
           </button>

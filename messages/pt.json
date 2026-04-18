@@ -180,6 +180,82 @@
       }
     }
   },
+  "layout": {
+    "header": {
+      "openSearchFromMenu": "Abrir pesquisa a partir do menu",
+      "openBarcodeFromMenu": "Abrir leitura de código a partir do menu",
+      "searchProducts": "Pesquisar produtos"
+    },
+    "navSheet": {
+      "title": "Menu de navegação",
+      "openMenu": "Abrir menu de navegação",
+      "signInWithGoogle": "Entrar com Google",
+      "searchProducts": "Pesquisar produtos…",
+      "scanBarcode": "Ler código de barras",
+      "darkMode": "Modo escuro",
+      "builtBy": "Feito por <name>Francisco Gonçalves</name>",
+      "openSource": "Código aberto no GitHub",
+      "sections": {
+        "navigation": "Navegação",
+        "more": "Mais",
+        "preferences": "Preferências"
+      },
+      "quickFilters": {
+        "priceDrops": "Descidas",
+        "discounts": "Descontos",
+        "essential": "Essenciais"
+      }
+    },
+    "bottomNav": {
+      "primary": "Navegação principal",
+      "search": "Pesquisa",
+      "scan": "Ler"
+    },
+    "footer": {
+      "builtBy": "Feito por <name>Francisco Gonçalves</name>",
+      "rights": "© {year} Price Lens.",
+      "repo": "Código aberto no GitHub"
+    },
+    "footerFull": {
+      "builtBy": "Feito por <link>Francisco Gonçalves</link>",
+      "openSource": "Código aberto disponível no <link>GitHub</link>",
+      "terms": "Termos de Serviço",
+      "privacy": "Privacidade"
+    },
+    "userMenu": {
+      "profile": "Perfil",
+      "favorites": "Favoritos",
+      "preferences": "Preferências",
+      "themeLight": "Tema claro",
+      "themeDark": "Tema escuro",
+      "signOut": "Terminar sessão",
+      "signIn": "Iniciar sessão",
+      "openUserMenu": "Abrir menu do utilizador"
+    },
+    "welcomeToast": {
+      "title": "Bem-vindo de volta!",
+      "description": "Sessão iniciada. Boas poupanças!"
+    },
+    "pwa": {
+      "installTitle": "Instalar o Price Lens",
+      "installBody": "Adiciona a app ao ecrã principal para uma experiência mais rápida.",
+      "install": "Instalar",
+      "dismiss": "Agora não"
+    }
+  },
+  "pwa": {
+    "banner": {
+      "aria": "Instalar a app Price Lens",
+      "title": "Obtém a app",
+      "subtitle": "Mais rápida, offline, ecrã inteiro",
+      "install": "Instalar",
+      "dismiss": "Dispensar"
+    },
+    "fab": {
+      "install": "Instalar a app Price Lens",
+      "dismiss": "Dispensar sugestão de instalação"
+    }
+  },
   "nav": {
     "home": "Início",
     "browse": "Explorar",

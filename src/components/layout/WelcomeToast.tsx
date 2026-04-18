@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { HeartIcon } from "lucide-react"
 
@@ -10,6 +11,7 @@ const ONBOARDED_KEY = "pl_onboarded"
 export function WelcomeToast() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const t = useTranslations("layout.welcomeToast")
 
   useEffect(() => {
     if (searchParams.get("welcome") !== "1") return
@@ -30,13 +32,13 @@ export function WelcomeToast() {
 
     // Returning user: show welcome back toast
     setTimeout(() => {
-      toast("Welcome back!", {
-        description: "Check your favorites and alerts for the latest price drops.",
+      toast(t("title"), {
+        description: t("description"),
         icon: <HeartIcon className="text-destructive size-4" />,
         duration: 5000,
       })
     }, 500)
-  }, [searchParams, router])
+  }, [searchParams, router, t])
 
   return null
 }

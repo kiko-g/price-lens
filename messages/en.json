@@ -180,6 +180,82 @@
       }
     }
   },
+  "layout": {
+    "header": {
+      "openSearchFromMenu": "Open search from menu",
+      "openBarcodeFromMenu": "Open barcode scan from menu",
+      "searchProducts": "Search products"
+    },
+    "navSheet": {
+      "title": "Navigation menu",
+      "openMenu": "Open navigation menu",
+      "signInWithGoogle": "Sign in with Google",
+      "searchProducts": "Search products…",
+      "scanBarcode": "Scan barcode",
+      "darkMode": "Dark mode",
+      "builtBy": "Built by <name>Francisco Gonçalves</name>",
+      "openSource": "Open source on GitHub",
+      "sections": {
+        "navigation": "Navigation",
+        "more": "More",
+        "preferences": "Preferences"
+      },
+      "quickFilters": {
+        "priceDrops": "Price drops",
+        "discounts": "Discounts",
+        "essential": "Essential"
+      }
+    },
+    "bottomNav": {
+      "primary": "Primary navigation",
+      "search": "Search",
+      "scan": "Scan"
+    },
+    "footer": {
+      "builtBy": "Built by <name>Francisco Gonçalves</name>",
+      "rights": "© {year} Price Lens.",
+      "repo": "Open source on GitHub"
+    },
+    "footerFull": {
+      "builtBy": "Built by <link>Francisco Gonçalves</link>",
+      "openSource": "Code is open source and available on <link>GitHub</link>",
+      "terms": "Terms of Service",
+      "privacy": "Privacy"
+    },
+    "userMenu": {
+      "profile": "Profile",
+      "favorites": "Favorites",
+      "preferences": "Preferences",
+      "themeLight": "Light Theme",
+      "themeDark": "Dark Theme",
+      "signOut": "Sign out",
+      "signIn": "Sign in",
+      "openUserMenu": "Open user menu"
+    },
+    "welcomeToast": {
+      "title": "Welcome back!",
+      "description": "You're signed in. Happy saving!"
+    },
+    "pwa": {
+      "installTitle": "Install Price Lens",
+      "installBody": "Add the app to your home screen for a faster experience.",
+      "install": "Install",
+      "dismiss": "Not now"
+    }
+  },
+  "pwa": {
+    "banner": {
+      "aria": "Install Price Lens app",
+      "title": "Get the app",
+      "subtitle": "Faster, offline, full-screen",
+      "install": "Install",
+      "dismiss": "Dismiss"
+    },
+    "fab": {
+      "install": "Install Price Lens app",
+      "dismiss": "Dismiss install prompt"
+    }
+  },
   "nav": {
     "home": "Home",
     "browse": "Browse",
