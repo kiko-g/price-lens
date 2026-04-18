@@ -119,7 +119,17 @@ function CustomSlider({
   )
 }
 
-function StatCard({ label, value, highlight, highlightLabel }: { label: string; value: number; highlight?: boolean; highlightLabel?: string }) {
+function StatCard({
+  label,
+  value,
+  highlight,
+  highlightLabel,
+}: {
+  label: string
+  value: number
+  highlight?: boolean
+  highlightLabel?: string
+}) {
   return (
     <div
       className={cn(

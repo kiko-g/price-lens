@@ -266,9 +266,7 @@ function NutritionTable({ nutriments, servingSize }: { nutriments: OffNutriments
           </tbody>
         </table>
       </div>
-      {servingSize && (
-        <p className="text-muted-foreground mt-2 text-xs">{t("servingSize", { size: servingSize })}</p>
-      )}
+      {servingSize && <p className="text-muted-foreground mt-2 text-xs">{t("servingSize", { size: servingSize })}</p>}
     </div>
   )
 }

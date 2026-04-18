@@ -13,9 +13,7 @@ import { cn } from "@/lib/utils"
 
 import { TrendingDownIcon, TicketPercentIcon, FilterIcon, type LucideIcon } from "lucide-react"
 
-type StoreFilter =
-  | { id: "all" }
-  | { id: string; originId: SupermarketChain; label: string }
+type StoreFilter = { id: "all" } | { id: string; originId: SupermarketChain; label: string }
 
 const storeFilters: ReadonlyArray<StoreFilter> = [
   { id: "all" },

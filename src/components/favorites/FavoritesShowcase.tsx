@@ -788,7 +788,12 @@ function FavMobileMainView({
       </div>
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
         <FavFilterSummaryRow label={t("filters.sortBy")} value={sortLabel} onClick={() => onViewChange("sort")} />
-        <FavFilterSummaryRow label={t("filters.store")} value={storeSummary} onClick={() => onViewChange("store")} isLast />
+        <FavFilterSummaryRow
+          label={t("filters.store")}
+          value={storeSummary}
+          onClick={() => onViewChange("store")}
+          isLast
+        />
 
         {summary && (summary.onSale > 0 || summary.priceDrops > 0) && (
           <div className="pt-4">

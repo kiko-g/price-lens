@@ -78,9 +78,7 @@ export function EmptyState({ query, onClearFilters }: { query: string; onClearFi
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {ESSENTIAL_CHEAP_CHAINS.map((originId) => {
                   const storeName = getSupermarketChainName(originId)
-                  const label = storeName
-                    ? t("essentialsAria", { store: storeName })
-                    : t("essentialsAriaFallback")
+                  const label = storeName ? t("essentialsAria", { store: storeName }) : t("essentialsAriaFallback")
                   return (
                     <Button key={originId} variant="outline" className="justify-center gap-2" asChild>
                       <Link href={browseEssentialCheapestProductsHref(originId)} aria-label={label}>
