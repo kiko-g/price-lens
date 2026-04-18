@@ -218,6 +218,64 @@
       }
     }
   },
+  "deals": {
+    "page": {
+      "title": "Promoções & Descidas de preço",
+      "subtitle": "As maiores descidas de preço e os melhores descontos no momento, em supermercados portugueses."
+    },
+    "filters": {
+      "allStores": "Todas as lojas"
+    },
+    "tabs": {
+      "priceDrops": "Descidas",
+      "discounts": "Descontos"
+    },
+    "empty": {
+      "drops": "Não há descidas recentes que cumpram estas regras (preço válido, variação nas últimas duas semanas, tamanho plausível). Tenta outra loja ou volta mais tarde: a lista preenche à medida que os dados são atualizados.",
+      "discounts": "Sem descontos relevantes para este filtro. Tenta outra loja."
+    }
+  },
+  "favoritesPage": {
+    "header": {
+      "title": "Os meus favoritos",
+      "subtitle": "Produtos que guardaste para acesso rápido e acompanhamento de preço"
+    },
+    "search": {
+      "placeholder": "Pesquisar favoritos…",
+      "by": "Pesquisar por"
+    },
+    "filters": {
+      "storeOrigin": "Loja de origem",
+      "sortBy": "Ordenar por",
+      "filtersAndSort": "Filtros e ordenação",
+      "store": "Loja",
+      "allStores": "Todas as lojas",
+      "clear": "Limpar",
+      "active": "{count} ativos"
+    },
+    "summary": {
+      "favorites": "<strong>{count}</strong> favoritos",
+      "matching": " a corresponder a \"{query}\"",
+      "onSale": "{count} em promoção",
+      "priceDrops": "{count} descidas de preço"
+    },
+    "pagination": {
+      "prev": "Anterior",
+      "next": "Seguinte",
+      "showingDesktop": "A mostrar <strong>{from}-{to}</strong> de <strong>{total}</strong> favoritos",
+      "showingBottom": "A mostrar <strong>{from}</strong> a <strong>{to}</strong> de <strong>{total}</strong> favoritos"
+    },
+    "states": {
+      "loading": "A carregar…",
+      "emptyTitle": "Ainda sem favoritos",
+      "emptyMessage": "Começa a adicionar produtos aos teus favoritos para os veres aqui.",
+      "noMatchTitle": "Nenhum favorito corresponde à pesquisa",
+      "noMatchMessage": "Não foi possível encontrar favoritos para \"{query}\".",
+      "clearFilters": "Limpar filtros",
+      "findProducts": "Encontrar produtos"
+    },
+    "ariaBack": "Voltar"
+  },
   "onboarding": {
     "welcome": {
       "title": "Bem-vindo ao Price Lens",

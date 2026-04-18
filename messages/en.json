@@ -218,6 +218,64 @@
       }
     }
   },
+  "deals": {
+    "page": {
+      "title": "Deals & Price Drops",
+      "subtitle": "The biggest price drops and best discounts right now across Portuguese supermarkets."
+    },
+    "filters": {
+      "allStores": "All Stores"
+    },
+    "tabs": {
+      "priceDrops": "Price Drops",
+      "discounts": "Discounts"
+    },
+    "empty": {
+      "drops": "No recent price drops match these rules (valid price, change within the last two weeks, plausible size). Try another store or check back later: the list fills as data updates.",
+      "discounts": "No standout discounts for this filter. Try another store."
+    }
+  },
+  "favoritesPage": {
+    "header": {
+      "title": "My Favorites",
+      "subtitle": "Products you've saved for easy access and price tracking"
+    },
+    "search": {
+      "placeholder": "Search favorites…",
+      "by": "Search by"
+    },
+    "filters": {
+      "storeOrigin": "Store Origin",
+      "sortBy": "Sort By",
+      "filtersAndSort": "Filters & Sort",
+      "store": "Store",
+      "allStores": "All stores",
+      "clear": "Clear",
+      "active": "{count} active"
+    },
+    "summary": {
+      "favorites": "<strong>{count}</strong> favorites",
+      "matching": " matching \"{query}\"",
+      "onSale": "{count} on sale",
+      "priceDrops": "{count} price drops"
+    },
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next",
+      "showingDesktop": "Showing <strong>{from}-{to}</strong> of <strong>{total}</strong> favorites",
+      "showingBottom": "Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> favorites"
+    },
+    "states": {
+      "loading": "Loading…",
+      "emptyTitle": "No favorites yet",
+      "emptyMessage": "Start adding products to your favorites to see them here.",
+      "noMatchTitle": "No favorites match your search",
+      "noMatchMessage": "We couldn't find any favorites matching \"{query}\".",
+      "clearFilters": "Clear filters",
+      "findProducts": "Find products"
+    },
+    "ariaBack": "Go back"
+  },
   "onboarding": {
     "welcome": {
       "title": "Welcome to Price Lens",

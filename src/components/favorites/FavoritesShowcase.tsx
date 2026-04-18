@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import {
   useFavoritesFiltered,
@@ -166,6 +167,7 @@ const serializeArray = (arr: number[]): string | null => {
 export function FavoritesShowcase({ limit = 24, children }: { limit?: number; children?: React.ReactNode }) {
   const router = useRouter()
   const { urlState, updateUrl } = useUrlState()
+  const t = useTranslations("favoritesPage")
 
   const [queryInput, setQueryInput] = useState(urlState.query)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -280,12 +282,10 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
       <aside className="hidden h-full flex-col overflow-y-auto border-r p-4 lg:flex lg:w-80 lg:min-w-80">
         <div className="mb-2 flex items-center gap-2">
           <HeartIcon className="fill-destructive stroke-destructive size-5" />
-          <h2 className="text-lg font-bold">My Favorites</h2>
+          <h2 className="text-lg font-bold">{t("header.title")}</h2>
         </div>
 
-        <p className="text-muted-foreground mb-4 text-sm">
-          Products you&apos;ve saved for easy access and price tracking
-        </p>
+        <p className="text-muted-foreground mb-4 text-sm">{t("header.subtitle")}</p>
 
         {/* Search Input (debounced) */}
         <div className="relative w-full">
@@ -296,7 +296,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
           )}
           <Input
             type="text"
-            placeholder="Search favorites..."
+            placeholder={t("search.placeholder")}
             className="pr-16 pl-8 text-base md:text-sm"
             value={queryInput}
             onChange={(e) => setQueryInput(e.target.value)}
@@ -304,11 +304,11 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
           />
           <Select value={urlState.searchType} onValueChange={(v) => handleSearchTypeChange(v as SearchType)}>
             <SelectTrigger className="text-muted-foreground bg-background hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
-              <SelectValue placeholder="Search by" />
+              <SelectValue placeholder={t("search.by")} />
             </SelectTrigger>
             <SelectContent align="start" className="w-[180px]">
               <SelectGroup>
-                <SelectLabel>Search by</SelectLabel>
+                <SelectLabel>{t("search.by")}</SelectLabel>
                 <SelectSeparator />
                 {searchTypes.map((type) => (
                   <SelectItem key={type} value={type} className="capitalize">
@@ -327,8 +327,11 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
           ) : (
             <>
               <p className="text-muted-foreground text-xs">
-                <strong className="text-foreground">{totalCount}</strong> favorites
-                {urlState.query && ` matching "${urlState.query}"`}
+                {t.rich("summary.favorites", {
+                  count: totalCount,
+                  strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                })}
+                {urlState.query && t("summary.matching", { query: urlState.query })}
                 {showOverlay && (
                   <span className="text-muted-foreground ml-2 inline-flex items-center gap-1">
                     <Loader2Icon className="h-3 w-3 animate-spin" />
@@ -346,7 +349,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                <span>Store Origin</span>
+                <span>{t("filters.storeOrigin")}</span>
                 {selectedOrigins.length > 0 && (
                   <>
                     <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
@@ -359,7 +362,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
                       }}
                       className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
                     >
-                      Clear
+                      {t("filters.clear")}
                     </span>
                   </>
                 )}
@@ -413,7 +416,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
             <AccordionItem value="sort">
               <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
                 <span className="flex flex-1 items-center gap-1">
-                  <span>Sort By</span>
+                  <span>{t("filters.sortBy")}</span>
                 </span>
               </AccordionTrigger>
               <AccordionContent className="p-px pb-3">
@@ -484,11 +487,12 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
             {/* Status Bar - Desktop with inline pagination */}
             <div className="text-muted-foreground mb-4 hidden items-center justify-between text-xs lg:flex">
               <span>
-                Showing{" "}
-                <span className="text-foreground font-semibold">
-                  {showingFrom}-{showingTo}
-                </span>{" "}
-                of <span className="text-foreground font-semibold">{totalCount}</span> favorites
+                {t.rich("pagination.showingDesktop", {
+                  from: showingFrom,
+                  to: showingTo,
+                  total: totalCount,
+                  strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                })}
               </span>
               {totalPages > 1 && (
                 <div className="max-w-48">
@@ -507,7 +511,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
                 <div className="bg-background/60 absolute inset-0 z-10 flex items-start justify-center pt-24 backdrop-blur-[2px]">
                   <div className="bg-background flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg">
                     <Loader2Icon className="h-4 w-4 animate-spin" />
-                    <span className="text-sm font-medium">Loading...</span>
+                    <span className="text-sm font-medium">{t("states.loading")}</span>
                   </div>
                 </div>
               )}
@@ -566,6 +570,7 @@ function MobileNav({
 }) {
   const scrollDirection = useScrollDirection()
   const hidden = scrollDirection === "down"
+  const t = useTranslations("favoritesPage")
 
   return (
     <div
@@ -589,7 +594,7 @@ function MobileNav({
               <span
                 className={cn("flex-1 truncate text-left text-sm", query ? "text-foreground" : "text-muted-foreground")}
               >
-                {query || "Search favorites..."}
+                {query || t("search.placeholder")}
               </span>
               {totalCount > 0 && (
                 <span className="text-muted-foreground shrink-0 text-xs tabular-nums">{totalCount}</span>
@@ -624,8 +629,8 @@ const STORE_OPTIONS = [
   { id: 3, Logo: PingoDoceSvg },
 ] as const
 
-function storeOriginSummary(selectedOrigins: number[]): string {
-  if (selectedOrigins.length === 0) return "All stores"
+function storeOriginSummary(selectedOrigins: number[], allStoresLabel: string): string {
+  if (selectedOrigins.length === 0) return allStoresLabel
   return selectedOrigins
     .map((id) => getSupermarketChainName(id))
     .filter(Boolean)
@@ -658,6 +663,7 @@ function MobileFiltersDrawer({
   summary,
 }: MobileFiltersDrawerProps) {
   const [view, setView] = useState<FavDrawerView>("main")
+  const t = useTranslations("favoritesPage")
 
   useEffect(() => {
     if (!open) setView("main")
@@ -689,7 +695,7 @@ function MobileFiltersDrawer({
         ) : (
           <FavMobileMainView
             sortLabel={sortLabel}
-            storeSummary={storeOriginSummary(selectedOrigins)}
+            storeSummary={storeOriginSummary(selectedOrigins, t("filters.allStores"))}
             activeFilterCount={
               (urlState.sortBy !== "recently-added" ? 1 : 0) +
               (selectedOrigins.length > 0 ? 1 : 0) +
@@ -708,13 +714,14 @@ function MobileFiltersDrawer({
 }
 
 function FavSubViewHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  const t = useTranslations("favoritesPage")
   return (
     <div className="flex items-center gap-3 px-4 pb-3">
       <button
         type="button"
         onClick={onBack}
         className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
-        aria-label="Go back"
+        aria-label={t("ariaBack")}
       >
         <ChevronLeftIcon className="h-5 w-5" />
       </button>
@@ -768,19 +775,20 @@ function FavMobileMainView({
   onViewChange: (view: FavDrawerView) => void
   onPresetApply: (params: Record<string, string | number | boolean | null>) => void
 }) {
+  const t = useTranslations("favoritesPage")
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-4 pb-2">
-        <h2 className="text-lg font-semibold">Filters & Sort</h2>
+        <h2 className="text-lg font-semibold">{t("filters.filtersAndSort")}</h2>
         {activeFilterCount > 0 && (
           <span className="text-foreground bg-accent dark:bg-primary/20 rounded-full px-1.5 py-0.5 text-xs font-medium">
-            {activeFilterCount} active
+            {t("filters.active", { count: activeFilterCount })}
           </span>
         )}
       </div>
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
-        <FavFilterSummaryRow label="Sort By" value={sortLabel} onClick={() => onViewChange("sort")} />
-        <FavFilterSummaryRow label="Store" value={storeSummary} onClick={() => onViewChange("store")} isLast />
+        <FavFilterSummaryRow label={t("filters.sortBy")} value={sortLabel} onClick={() => onViewChange("sort")} />
+        <FavFilterSummaryRow label={t("filters.store")} value={storeSummary} onClick={() => onViewChange("store")} isLast />
 
         {summary && (summary.onSale > 0 || summary.priceDrops > 0) && (
           <div className="pt-4">
@@ -805,9 +813,10 @@ function FavMobileSortView({
   onSelect: (sort: FavoritesSortType) => void
   onBack: () => void
 }) {
+  const t = useTranslations("favoritesPage")
   return (
     <div className="flex h-full flex-col">
-      <FavSubViewHeader title="Sort By" onBack={onBack} />
+      <FavSubViewHeader title={t("filters.sortBy")} onBack={onBack} />
       <div className="flex-1 overflow-y-auto overscroll-contain px-4">
         <RadioGroup value={currentSort} onValueChange={(v) => onSelect(v as FavoritesSortType)} className="gap-0">
           {FAVORITES_SORT_OPTIONS_GROUPS.map((group, gi) => (
@@ -847,6 +856,7 @@ function FavMobileStoreView({
   onClearOrigins: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("favoritesPage")
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 px-4 pb-3">
@@ -854,14 +864,14 @@ function FavMobileStoreView({
           type="button"
           onClick={onBack}
           className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
-          aria-label="Go back"
+          aria-label={t("ariaBack")}
         >
           <ChevronLeftIcon className="h-5 w-5" />
         </button>
-        <h2 className="flex-1 text-lg font-semibold">Store</h2>
+        <h2 className="flex-1 text-lg font-semibold">{t("filters.store")}</h2>
         {selectedOrigins.length > 0 && (
           <button onClick={onClearOrigins} className="text-muted-foreground text-xs font-medium hover:underline">
-            Clear
+            {t("filters.clear")}
           </button>
         )}
       </div>
@@ -904,6 +914,7 @@ function SummaryStatButtons({
   urlState: { onlyDiscounted: boolean; priceChange: string | null }
   onApply: (params: Record<string, string | number | boolean | null>) => void
 }) {
+  const t = useTranslations("favoritesPage")
   const onSaleActive = urlState.onlyDiscounted
   const priceDropsActive = urlState.priceChange === "drop"
 
@@ -931,7 +942,7 @@ function SummaryStatButtons({
           )}
         >
           <TicketPercentIcon className="h-3 w-3" />
-          {summary.onSale} on sale
+          {t("summary.onSale", { count: summary.onSale })}
         </button>
       )}
       {summary.priceDrops > 0 && (
@@ -946,7 +957,7 @@ function SummaryStatButtons({
           )}
         >
           <TrendingDownIcon className="h-3 w-3" />
-          {summary.priceDrops} price drops
+          {t("summary.priceDrops", { count: summary.priceDrops })}
         </button>
       )}
     </div>
@@ -1023,6 +1034,7 @@ interface PaginationControlsProps {
 }
 
 function PaginationControls({ currentPage, totalPages, onPageChange }: PaginationControlsProps) {
+  const t = useTranslations("favoritesPage.pagination")
   return (
     <div className="isolate flex flex-1 -space-x-px">
       <Button
@@ -1031,7 +1043,7 @@ function PaginationControls({ currentPage, totalPages, onPageChange }: Paginatio
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        Prev
+        {t("prev")}
       </Button>
       <Select value={currentPage.toString()} onValueChange={(v) => onPageChange(parseInt(v, 10))}>
         <SelectTrigger className="w-auto justify-center rounded-none font-medium lg:w-full">
@@ -1051,7 +1063,7 @@ function PaginationControls({ currentPage, totalPages, onPageChange }: Paginatio
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
       >
-        Next
+        {t("next")}
       </Button>
     </div>
   )
@@ -1075,27 +1087,24 @@ function LoadingGrid({ limit }: { limit: number }) {
 
 function EmptyState({ query, onClearFilters }: { query: string; onClearFilters: () => void }) {
   const router = useRouter()
+  const t = useTranslations("favoritesPage.states")
 
   return (
     <div className="flex flex-1 items-start justify-center p-4">
       <EmptyStateView
         icon={HeartIcon}
-        title={query ? "No favorites match your search" : "No favorites yet"}
-        message={
-          query
-            ? `We couldn't find any favorites matching "${query}".`
-            : "Start adding products to your favorites to see them here."
-        }
+        title={query ? t("noMatchTitle") : t("emptyTitle")}
+        message={query ? t("noMatchMessage", { query }) : t("emptyMessage")}
         actions={
           query ? (
             <Button variant="outline" size="sm" onClick={onClearFilters}>
               <RefreshCcwIcon className="size-4" />
-              Clear filters
+              {t("clearFilters")}
             </Button>
           ) : (
             <Button variant="outline" size="sm" onClick={() => router.push("/products")}>
               <SearchIcon className="size-4" />
-              Find products
+              {t("findProducts")}
             </Button>
           )
         }
@@ -1119,13 +1128,17 @@ function BottomPagination({
   totalCount: number
   onPageChange: (page: number) => void
 }) {
+  const t = useTranslations("favoritesPage.pagination")
   return (
     <div className="mt-8 flex items-center justify-between border-t py-4">
       <div className="text-muted-foreground flex w-full flex-col text-sm">
         <span>
-          Showing <span className="text-foreground font-semibold">{showingFrom}</span> to{" "}
-          <span className="text-foreground font-semibold">{showingTo}</span> of{" "}
-          <span className="text-foreground font-semibold">{totalCount}</span> favorites
+          {t.rich("showingBottom", {
+            from: showingFrom,
+            to: showingTo,
+            total: totalCount,
+            strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+          })}
         </span>
       </div>
       <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
