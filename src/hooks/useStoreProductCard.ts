@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import axios, { AxiosError } from "axios"
 import type { StoreProduct } from "@/types"
 import { mergeStoreProductScrapeResponse } from "@/lib/store-product-scrape-response"
@@ -54,6 +55,8 @@ async function removeFavorite(storeProductId: number) {
 export function useStoreProductCard(sp: StoreProduct) {
   const queryClient = useQueryClient()
   const { user } = useUser()
+  const tFav = useTranslations("toasts.favorites")
+  const tUpd = useTranslations("toasts.productUpdate")
 
   const lastSuccessfulFavorite = useRef<boolean | null>(null)
   const {
@@ -67,17 +70,17 @@ export function useStoreProductCard(sp: StoreProduct) {
   const updateMutation = useMutation({
     mutationFn: () => scrapeAndUpdateStoreProduct(sp),
     onSuccess: () => {
-      toast.success("Product updated from source")
+      toast.success(tUpd("success"))
       invalidateProductQueries(queryClient, sp.id)
     },
     onError: (error) => {
       if (error instanceof ProductUnavailableError) {
-        toast.error("Product unavailable", {
-          description: "This product is no longer available at the store",
+        toast.error(tUpd("unavailableTitle"), {
+          description: tUpd("unavailableBody"),
         })
       } else {
-        toast.error("Failed to update product", {
-          description: error instanceof Error ? error.message : "Unknown error",
+        toast.error(tUpd("failed"), {
+          description: error instanceof Error ? error.message : tFav("unknownError"),
         })
       }
       invalidateProductQueries(queryClient, sp.id)
@@ -89,15 +92,15 @@ export function useStoreProductCard(sp: StoreProduct) {
     mutationFn: () => addFavorite(sp.id!),
     onSuccess: () => {
       lastSuccessfulFavorite.current = true
-      toast.success("Added to favorites", {
+      toast.success(tFav("added"), {
         description: sp.name ? truncateName(sp.name, 50) : undefined,
       })
       invalidateFavoriteQueries(queryClient)
       invalidateProductQueries(queryClient, sp.id)
     },
     onError: (error) => {
-      toast.error("Failed to add to favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(tFav("addFailed"), {
+        description: error instanceof Error ? error.message : tFav("unknownError"),
       })
     },
   })
@@ -107,15 +110,15 @@ export function useStoreProductCard(sp: StoreProduct) {
     mutationFn: () => removeFavorite(sp.id!),
     onSuccess: () => {
       lastSuccessfulFavorite.current = false
-      toast.success("Removed from favorites", {
+      toast.success(tFav("removed"), {
         description: sp.name ? truncateName(sp.name, 50) : undefined,
       })
       invalidateFavoriteQueries(queryClient)
       invalidateProductQueries(queryClient, sp.id)
     },
     onError: (error) => {
-      toast.error("Failed to remove from favorites", {
-        description: error instanceof Error ? error.message : "Unknown error",
+      toast.error(tFav("removeFailed"), {
+        description: error instanceof Error ? error.message : tFav("unknownError"),
       })
     },
   })
@@ -135,7 +138,7 @@ export function useStoreProductCard(sp: StoreProduct) {
 
   const toggleFavorite = useCallback(async () => {
     if (!user) {
-      toast.error("Please log in to manage favorites")
+      toast.error(tFav("loginToManage"))
       return
     }
     if (!sp.id) return
@@ -145,7 +148,7 @@ export function useStoreProductCard(sp: StoreProduct) {
     } else {
       addFavoriteMutation.mutate()
     }
-  }, [user, sp.id, isFavorited, addFavoriteMutation, removeFavoriteMutation])
+  }, [user, sp.id, isFavorited, addFavoriteMutation, removeFavoriteMutation, tFav])
 
   const updateFromSource = useCallback(() => {
     updateMutation.mutate()

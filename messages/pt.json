@@ -175,6 +175,22 @@
       "body": "Não foram encontrados produtos para este produto canónico."
     }
   },
+  "toasts": {
+    "favorites": {
+      "added": "Adicionado aos favoritos",
+      "removed": "Removido dos favoritos",
+      "addFailed": "Falha ao adicionar aos favoritos",
+      "removeFailed": "Falha ao remover dos favoritos",
+      "loginToManage": "Inicia sessão para gerir favoritos",
+      "unknownError": "Erro desconhecido"
+    },
+    "productUpdate": {
+      "success": "Produto atualizado a partir da fonte",
+      "unavailableTitle": "Produto indisponível",
+      "unavailableBody": "Este produto já não está disponível na loja",
+      "failed": "Falha ao atualizar produto"
+    }
+  },
   "auth": {
     "login": {
       "loginTo": "Inicia sessão no",
