@@ -975,6 +975,54 @@
         "noImage": "Sem imagem"
       }
     },
+    "identical": {
+      "comparePrices": "Comparar preços",
+      "openComparison": "Abrir comparação",
+      "seeMore": "Ver mais",
+      "noOtherStores": "Sem outras lojas para este produto",
+      "onlyHere": "Encontrámos esta listagem apenas na loja atual ({store}).",
+      "storeFallback": "Loja",
+      "thisPage": "Esta página",
+      "cheapest": "Mais barato",
+      "bestPrice": "Melhor preço",
+      "errorTitle": "Falha ao carregar comparação de preços",
+      "ariaLabel": "{chain}, {price}. Abrir página do produto.",
+      "priceLabel": "{value} euros",
+      "priceUnknown": "preço desconhecido",
+      "storesCount": "{count, plural, one {# loja} other {# lojas}}",
+      "chainsCount": "{count, plural, one {# cadeia} other {# cadeias}}",
+      "listingsCount": "{count, plural, one {# listagem} other {# listagens}}",
+      "savingsBySwitching": "<highlight>Poupa {amount}€</highlight> a mudar para a loja mais barata",
+      "alreadyCheapest": "<highlight>Já estás na</highlight> opção mais barata.",
+      "tiedCheapest": "Estás a ver uma listagem ao preço mais baixo ({cheapest}€). As outras ofertas vão até {highest}€.",
+      "allSamePrice": "Todas as lojas acompanhadas têm o mesmo preço: não estás a perder um melhor negócio."
+    },
+    "chart": {
+      "notAvailableInStore": "Este produto não está disponível nesta loja.",
+      "noAxisSelected": "Nenhum eixo selecionado",
+      "priceHistoryBreakdown": "Histórico de preços e detalhes",
+      "table": {
+        "price": "Preço",
+        "original": "Original",
+        "perUnit": "Por unidade",
+        "freq": "Freq (%)",
+        "isMostCommon": "O preço atual é <strong>o preço mais comum</strong>.",
+        "notMostCommon": "O preço atual <strong>não é</strong> o preço mais comum.",
+        "showingFor": "A mostrar dados até {duration}"
+      },
+      "notTracked": {
+        "badge": "Sem histórico de preços disponível",
+        "body": "Este produto não está a ser acompanhado ativamente. Foi verificado pela última vez há <strong>{ago}.</strong> Adiciona-o aos favoritos para ativar acompanhamento regular do preço."
+      },
+      "noData": {
+        "badge": "Ainda sem histórico de preços",
+        "body": "Os dados aparecem à medida que acompanhamos este produto."
+      },
+      "errorState": {
+        "title": "Falha ao carregar dados de preço",
+        "body": "Tenta atualizar a página"
+      }
+    },
     "pricesVariation": {
       "price": "Preço",
       "priceWithoutDiscount": "Preço sem desconto",

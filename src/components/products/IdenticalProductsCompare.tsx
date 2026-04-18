@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import type { StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
@@ -47,17 +48,20 @@ function CompactStoreCard({
   priceDiff: number | null
   duplicateChain: boolean
 }) {
+  const t = useTranslations("products.identical")
   const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
   const showFloorHighlight = atLowestPriceTier && hasPriceSpread
 
-  const chainLabel = getSupermarketChainName(product.origin_id) ?? "Store"
+  const chainLabel = getSupermarketChainName(product.origin_id) ?? t("storeFallback")
   const priceLabel =
-    product.price !== null && product.price !== undefined ? `${product.price.toFixed(2)} euros` : "price unknown"
+    product.price !== null && product.price !== undefined
+      ? t("priceLabel", { value: product.price.toFixed(2) })
+      : t("priceUnknown")
 
   return (
     <Link
       href={generateProductPath(product)}
-      aria-label={`${chainLabel}, ${priceLabel}. Open product page.`}
+      aria-label={t("ariaLabel", { chain: chainLabel, price: priceLabel })}
       className={cn(
         "group hover:border-foreground/20 dark:hover:border-foreground/30 relative min-h-15 w-full overflow-hidden rounded-lg border p-3 transition-all",
         showFloorHighlight && "isolate",
@@ -78,19 +82,19 @@ function CompactStoreCard({
           {isCurrent && (
             <Badge size="xs" variant="glass-primary" className="w-fit">
               <MapPinIcon className="h-3 w-3" />
-              This page
+              {t("thisPage")}
             </Badge>
           )}
           {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
             <Badge size="xs" variant="secondary" className="w-fit">
               <TrophyIcon className="h-3 w-3" />
-              Cheapest
+              {t("cheapest")}
             </Badge>
           )}
           {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
             <Badge size="xs" variant="retail" className="w-fit">
               <TrophyIcon className="h-3 w-3" />
-              Best price
+              {t("bestPrice")}
             </Badge>
           )}
         </div>
@@ -181,6 +185,7 @@ function LoadingSkeleton() {
 }
 
 export function IdenticalProductsCompare({ currentProduct }: Props) {
+  const t = useTranslations("products.identical")
   const {
     data: identicalProducts,
     isLoading,
@@ -219,7 +224,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
       : null
 
   if (error) {
-    return <ErrorStateView error={error} title="Failed to load price comparison" />
+    return <ErrorStateView error={error} title={t("errorTitle")} />
   }
 
   if (isLoading) {
@@ -233,12 +238,12 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="flex items-center gap-2 text-lg font-semibold">
             <ScaleIcon className="h-5 w-5 shrink-0" />
-            Compare prices
+            {t("comparePrices")}
           </h3>
           {compareHref ? (
             <Button asChild variant="outline" size="sm">
               <Link href={compareHref}>
-                Open comparison
+                {t("openComparison")}
                 <ArrowRightIcon className="h-4 w-4" />
               </Link>
             </Button>
@@ -247,12 +252,13 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
 
         <EmptyStateView
           icon={ScaleIcon}
-          title="No other stores for this product"
+          title={t("noOtherStores")}
           message={
             <div className="flex max-w-md flex-col items-center gap-1.5">
               <EmptyDescription className="text-center">
-                We only found this listing in the current store (
-                {getSupermarketChainName(currentProduct.origin_id) ?? "Store"}).
+                {t("onlyHere", {
+                  store: getSupermarketChainName(currentProduct.origin_id) ?? t("storeFallback"),
+                })}
               </EmptyDescription>
               <SupermarketChainBadge
                 originId={currentProduct.origin_id}
@@ -276,20 +282,20 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         <h3 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-lg font-semibold">
           <span className="inline-flex items-center gap-2">
             <ScaleIcon className="h-5 w-5 shrink-0" />
-            Compare prices
+            {t("comparePrices")}
           </span>
           <span className="inline-flex flex-wrap items-center gap-1.5">
             {chainCount === listingCount ? (
               <Badge variant="boring" size="xs">
-                {chainCount} store{chainCount !== 1 ? "s" : ""}
+                {t("storesCount", { count: chainCount })}
               </Badge>
             ) : (
               <>
                 <Badge variant="boring" size="xs">
-                  {chainCount} chain{chainCount !== 1 ? "s" : ""}
+                  {t("chainsCount", { count: chainCount })}
                 </Badge>
                 <Badge variant="boring" size="xs">
-                  {listingCount} listing{listingCount !== 1 ? "s" : ""}
+                  {t("listingsCount", { count: listingCount })}
                 </Badge>
               </>
             )}
@@ -299,7 +305,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         {compareHref && (
           <Button asChild variant="outline" size="sm">
             <Link href={compareHref}>
-              See more
+              {t("seeMore")}
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </Button>
@@ -313,8 +319,10 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
       currentProduct.price > cheapestPrice ? (
         <p className="text-muted-foreground mb-3 text-sm">
           <ZapIcon className="text-primary mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
-          <span className="text-primary font-medium">Save {(currentProduct.price - cheapestPrice).toFixed(2)}€</span> by
-          switching to the cheapest store
+          {t.rich("savingsBySwitching", {
+            amount: (currentProduct.price - cheapestPrice).toFixed(2),
+            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+          })}
         </p>
       ) : cheapestPrice !== null &&
         currentProduct.price !== null &&
@@ -323,7 +331,9 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         hasUniqueCheapest ? (
         <p className="text-muted-foreground mb-3">
           <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
-          <span className="text-primary font-medium">You&apos;re already on</span> the cheapest option.
+          {t.rich("alreadyCheapest", {
+            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+          })}
         </p>
       ) : cheapestPrice !== null &&
         currentProduct.price !== null &&
@@ -332,13 +342,13 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         !hasUniqueCheapest ? (
         <p className="text-muted-foreground mb-3">
           <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
-          You&apos;re viewing a listing at the lowest price ({cheapestPrice.toFixed(2)}€). Other offers go up to{" "}
-          {highestPrice?.toFixed(2)}€.
+          {t("tiedCheapest", {
+            cheapest: cheapestPrice.toFixed(2),
+            highest: highestPrice?.toFixed(2) ?? "",
+          })}
         </p>
       ) : (
-        <p className="text-muted-foreground mb-3">
-          All tracked stores show the same price: you&apos;re not missing a better deal elsewhere.
-        </p>
+        <p className="text-muted-foreground mb-3">{t("allSamePrice")}</p>
       )}
 
       <div className="flex flex-col gap-2 md:flex-row md:gap-3">

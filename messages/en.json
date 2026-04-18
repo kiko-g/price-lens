@@ -975,6 +975,54 @@
         "noImage": "No image"
       }
     },
+    "identical": {
+      "comparePrices": "Compare prices",
+      "openComparison": "Open comparison",
+      "seeMore": "See more",
+      "noOtherStores": "No other stores for this product",
+      "onlyHere": "We only found this listing in the current store ({store}).",
+      "storeFallback": "Store",
+      "thisPage": "This page",
+      "cheapest": "Cheapest",
+      "bestPrice": "Best price",
+      "errorTitle": "Failed to load price comparison",
+      "ariaLabel": "{chain}, {price}. Open product page.",
+      "priceLabel": "{value} euros",
+      "priceUnknown": "price unknown",
+      "storesCount": "{count, plural, one {# store} other {# stores}}",
+      "chainsCount": "{count, plural, one {# chain} other {# chains}}",
+      "listingsCount": "{count, plural, one {# listing} other {# listings}}",
+      "savingsBySwitching": "<highlight>Save {amount}€</highlight> by switching to the cheapest store",
+      "alreadyCheapest": "<highlight>You're already on</highlight> the cheapest option.",
+      "tiedCheapest": "You're viewing a listing at the lowest price ({cheapest}€). Other offers go up to {highest}€.",
+      "allSamePrice": "All tracked stores show the same price: you're not missing a better deal elsewhere."
+    },
+    "chart": {
+      "notAvailableInStore": "This product is not available in this store.",
+      "noAxisSelected": "No axis selected",
+      "priceHistoryBreakdown": "Price history & breakdown",
+      "table": {
+        "price": "Price",
+        "original": "Original",
+        "perUnit": "Per unit",
+        "freq": "Freq (%)",
+        "isMostCommon": "Current price is <strong>the most common price</strong>.",
+        "notMostCommon": "Current price is <strong>not</strong> the most common price.",
+        "showingFor": "Showing data for up to {duration}"
+      },
+      "notTracked": {
+        "badge": "No price history available",
+        "body": "This product is not being tracked actively. It was last checked <strong>{ago} ago.</strong> Add this product to your favorites to enable regular price tracking."
+      },
+      "noData": {
+        "badge": "No price history yet",
+        "body": "Data will appear as we track this product."
+      },
+      "errorState": {
+        "title": "Failed to load price data",
+        "body": "Please try refreshing the page"
+      }
+    },
     "pricesVariation": {
       "price": "Price",
       "priceWithoutDiscount": "Price without discount",

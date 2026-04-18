@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
 import {
   createContext,
   useContext,
@@ -18,6 +19,8 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useActiveAxis } from "@/hooks/useActiveAxis"
 import { useChartTouch } from "@/hooks/useChartTouch"
 import { usePricesWithAnalytics } from "@/hooks/usePrices"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatDate } from "@/lib/i18n/format"
 
 import type { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/business"
@@ -372,6 +375,20 @@ function PricesVariation({
   )
 }
 
+function NotAvailableTooltipText() {
+  const t = useTranslations("products.chart")
+  return <>{t("notAvailableInStore")}</>
+}
+
+function NoAxisSelected() {
+  const t = useTranslations("products.chart")
+  return (
+    <div className="flex h-60 w-full items-center justify-center">
+      <p className="text-muted-foreground mb-4 text-sm">{t("noAxisSelected")}</p>
+    </div>
+  )
+}
+
 function ProductImage() {
   const { sp } = useProductChartContext()
 
@@ -419,7 +436,9 @@ function ProductImage() {
                 <TooltipTrigger>
                   <WifiOffIcon className="h-4 w-4" />
                 </TooltipTrigger>
-                <TooltipContent>This product is not available in this store.</TooltipContent>
+                <TooltipContent>
+                  <NotAvailableTooltipText />
+                </TooltipContent>
               </TooltipUI>
             </TooltipProvider>
           </Badge>
@@ -606,11 +625,7 @@ function Graph({ className }: GraphProps) {
   }
 
   if (activeAxis.length === 0) {
-    return (
-      <div className="flex h-60 w-full items-center justify-center">
-        <p className="text-muted-foreground mb-4 text-sm">No axis selected</p>
-      </div>
-    )
+    return <NoAxisSelected />
   }
 
   return (
@@ -716,6 +731,9 @@ type PriceTableProps = {
 
 function PriceTable({ className, scrollable = true }: PriceTableProps) {
   const { sp, pricePoints, mostCommon, trackingSince, isLoading } = useProductChartContext()
+  const t = useTranslations("products.chart.table")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   if (isLoading) {
     return (
@@ -748,19 +766,19 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         <TableRow className="bg-accent hover:bg-accent">
           <TableHead className="h-7 text-xs">
             <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
-            Price
+            {t("price")}
           </TableHead>
           <TableHead className="h-7 text-center text-xs">
             <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
-            Original
+            {t("original")}
           </TableHead>
           <TableHead className="h-7 text-center text-xs">
             <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
-            Per unit
+            {t("perUnit")}
           </TableHead>
           <TableHead className="h-7 text-center text-xs">
             <span className="bg-chart-4 mr-1 inline-block size-2 rounded-full"></span>
-            Freq (%)
+            {t("freq")}
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -835,11 +853,15 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       >
         {sp.price === mostCommon?.price ? (
           <span className="min-w-0 wrap-break-word">
-            Current price is <span className="text-success font-bold">the most common price</span>.
+            {t.rich("isMostCommon", {
+              strong: (chunks) => <span className="text-success font-bold">{chunks}</span>,
+            })}
           </span>
         ) : (
           <span className="min-w-0 wrap-break-word">
-            Current price is <span className="text-destructive font-bold">not</span> the most common price.
+            {t.rich("notMostCommon", {
+              strong: (chunks) => <span className="text-destructive font-bold">{chunks}</span>,
+            })}
           </span>
         )}
       </div>
@@ -856,7 +878,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
 
       {trackingSince && (
         <blockquote className="text-muted-foreground text-2xs text-left wrap-break-word md:text-right">
-          Showing data for up to {formatRelativeTime(new Date(trackingSince), "long")}
+          {t("showingFor", { duration: formatRelativeTime(new Date(trackingSince), "long", locale) })}
         </blockquote>
       )}
     </div>
@@ -875,6 +897,7 @@ const emptyStateContainerClasses = "bg-muted/50 flex w-full max-w-xl flex-col ga
 
 function NotTrackedDisplay({ className }: NotTrackedDisplayProps) {
   const { sp } = useProductChartContext()
+  const t = useTranslations("products.chart.notTracked")
 
   if (sp.priority !== null && sp.priority > 0) return null
 
@@ -882,12 +905,13 @@ function NotTrackedDisplay({ className }: NotTrackedDisplayProps) {
     <div className={cn(emptyStateContainerClasses, className)}>
       <Badge className="w-fit" variant="secondary">
         <InfoIcon className="h-4 w-4" />
-        No price history available
+        {t("badge")}
       </Badge>
       <p className="text-sm">
-        This product is not being tracked actively. It was last checked{" "}
-        <strong>{formatDistanceToNow(sp.updated_at)} ago.</strong> Add this product to your favorites to enable regular
-        price tracking.
+        {t.rich("body", {
+          ago: formatDistanceToNow(sp.updated_at),
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })}
       </p>
     </div>
   )
@@ -903,6 +927,7 @@ type NoDataDisplayProps = {
 
 function NoDataDisplay({ className }: NoDataDisplayProps) {
   const { isLoading, error, chartData } = useProductChartContext()
+  const t = useTranslations("products.chart.noData")
 
   if (isLoading || error || chartData.length > 0) return null
 
@@ -910,9 +935,9 @@ function NoDataDisplay({ className }: NoDataDisplayProps) {
     <div className={cn(emptyStateContainerClasses, className)}>
       <Badge className="w-fit" variant="secondary">
         <BarChart2Icon className="h-4 w-4" />
-        No price history yet
+        {t("badge")}
       </Badge>
-      <p className="text-sm">Data will appear as we track this product.</p>
+      <p className="text-sm">{t("body")}</p>
     </div>
   )
 }
@@ -927,13 +952,14 @@ type ErrorDisplayProps = {
 
 function ErrorDisplay({ className }: ErrorDisplayProps) {
   const { error } = useProductChartContext()
+  const t = useTranslations("products.chart.errorState")
 
   if (!error) return null
 
   return (
     <div className={cn("flex w-full flex-col items-center justify-center py-8", className)}>
-      <p className="text-destructive">Failed to load price data</p>
-      <p className="text-muted-foreground mt-1 text-sm">Please try refreshing the page</p>
+      <p className="text-destructive">{t("title")}</p>
+      <p className="text-muted-foreground mt-1 text-sm">{t("body")}</p>
     </div>
   )
 }
@@ -949,6 +975,7 @@ type AnalyticsDisclosureProps = {
 function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const [open, setOpen] = useState(false)
+  const t = useTranslations("products.chart")
 
   if (isDesktop) {
     return <div className="w-full min-w-0">{children}</div>
@@ -963,7 +990,7 @@ function AnalyticsDisclosure({ children }: AnalyticsDisclosureProps) {
         >
           <span className="flex items-center gap-1.5">
             <BinocularsIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            <span className="min-w-0 wrap-break-word">Price history & breakdown</span>
+            <span className="min-w-0 wrap-break-word">{t("priceHistoryBreakdown")}</span>
           </span>
 
           <ChevronDownIcon className="size-5 shrink-0 opacity-70 transition-transform group-data-[state=open]/collapsible:rotate-180" />
