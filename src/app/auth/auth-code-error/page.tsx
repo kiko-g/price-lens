@@ -1,15 +1,20 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
 import { Button } from "@/components/ui/button"
 import { HeroGridPattern } from "@/components/home/HeroGridPattern"
-import { pageMetadata } from "@/lib/config"
+import { pageMetadataFromKey } from "@/lib/config"
 
 import { LogIn, HomeIcon } from "lucide-react"
 
-export const metadata: Metadata = pageMetadata("Sign-in Failed", "We couldn't complete your sign-in. Please try again.")
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadataFromKey("authError")
+}
 
-export default function AuthCodeErrorPage() {
+export default async function AuthCodeErrorPage() {
+  const t = await getTranslations("errors.authCode")
+  const tCommon = await getTranslations("common.actions")
   return (
     <div className="flex w-full grow flex-col items-center justify-center">
       <HeroGridPattern
@@ -19,21 +24,19 @@ export default function AuthCodeErrorPage() {
       />
 
       <div className="flex w-full flex-col items-center justify-center gap-3 px-4">
-        <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">Sign-in failed</h1>
-        <p className="text-muted-foreground max-w-md text-center">
-          We couldn&apos;t complete your sign-in. This can happen if the session expired or you cancelled the flow.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">{t("title")}</h1>
+        <p className="text-muted-foreground max-w-md text-center">{t("body")}</p>
         <div className="flex items-center gap-2">
           <Button asChild>
             <Link href="/login">
               <LogIn className="h-4 w-4" />
-              Try again
+              {tCommon("retry")}
             </Link>
           </Button>
           <Button variant="outline" asChild>
             <Link href="/" prefetch={false}>
               <HomeIcon className="h-4 w-4" />
-              Go home
+              {t("goHome")}
             </Link>
           </Button>
         </div>

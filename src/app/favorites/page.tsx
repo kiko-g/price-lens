@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
-import { pageMetadata } from "@/lib/config"
+import { pageMetadataFromKey } from "@/lib/config"
 import { userQueries } from "@/lib/queries/user"
 import { favoriteQueries, type FavoritesQueryParams, type FavoritesSortType } from "@/lib/queries/favorites"
 import { generateQueryKey } from "@/hooks/useFavoritesFiltered"
@@ -20,10 +20,9 @@ import { HideFooter } from "@/contexts/FooterContext"
 
 import { LogInIcon } from "lucide-react"
 
-export const metadata: Metadata = pageMetadata(
-  "My Favorites",
-  "View and manage your favorite products with price tracking across Portuguese supermarkets.",
-)
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadataFromKey("favorites")
+}
 
 const LIMIT = 20
 

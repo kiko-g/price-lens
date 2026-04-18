@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
-import { pageMetadata } from "@/lib/config"
+import { pageMetadataFromKey } from "@/lib/config"
 
-export const metadata: Metadata = pageMetadata(
-  "Login",
-  "Sign in to Price Lens to track prices, save favorites, and get alerts on Portuguese supermarket products.",
-)
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadataFromKey("login")
+}
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return children

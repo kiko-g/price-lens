@@ -55,6 +55,129 @@
     "site": {
       "name": "Price Lens",
       "description": "Daily price monitoring for Portuguese supermarkets (Continente, Auchan and Pingo Doce). Turn price swings into savings. More money in your pocket. All in Price Lens."
+    },
+    "pages": {
+      "about": {
+        "title": "About",
+        "description": "Learn about Price Lens and explore 25+ years of historical inflation data for Portugal, the USA, and the Eurozone."
+      },
+      "terms": {
+        "title": "Terms of Service",
+        "description": "Read the Price Lens terms of service and usage conditions."
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "description": "Read the Price Lens privacy policy to learn how we handle your data."
+      },
+      "profile": {
+        "title": "Profile",
+        "description": "Manage your Price Lens account, preferences, and subscription."
+      },
+      "login": {
+        "title": "Sign in",
+        "description": "Sign in to Price Lens to track prices, save favorites, and get alerts on Portuguese supermarket products."
+      },
+      "app": {
+        "title": "Get the App",
+        "description": "Install Price Lens as a free app on your phone for a faster, offline-ready, full-screen experience."
+      },
+      "deals": {
+        "title": "Deals & Price Drops",
+        "description": "Browse the biggest price drops and best discounts across Portuguese supermarkets. Updated daily."
+      },
+      "favorites": {
+        "title": "My Favorites",
+        "description": "View and manage your favorite products with price tracking across Portuguese supermarkets."
+      },
+      "notFound": {
+        "title": "Page Not Found",
+        "description": "The page you're looking for doesn't exist."
+      },
+      "offline": {
+        "title": "Offline",
+        "description": "Price Lens needs an internet connection to show the latest prices."
+      },
+      "authError": {
+        "title": "Sign-in Failed",
+        "description": "We couldn't complete your sign-in. Please try again."
+      },
+      "productsRedirect": {
+        "title": "Redirecting…",
+        "description": "Redirecting to product page."
+      },
+      "productNotFound": {
+        "title": "Product Not Found",
+        "description": "The requested product could not be found."
+      },
+      "productLookup": {
+        "title": "Product Lookup - {barcode}",
+        "description": "Looking up {barcode} on Price Lens."
+      },
+      "compare": {
+        "title": "Compare Prices",
+        "description": "Compare product prices across supermarkets on Price Lens."
+      }
+    },
+    "compare": {
+      "title": "Compare Prices - {name}",
+      "description": "Compare prices for {name} across {count} stores on Price Lens.",
+      "genericProduct": "product",
+      "lookupTitle": "Product Lookup - Canonical #{id}",
+      "lookupDescription": "Looking up Canonical #{id} on Price Lens."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "line1": "Nothing to see here.",
+      "line2": "Looks like you've ventured into the unknown digital realm.",
+      "returnHome": "Return to website"
+    },
+    "offline": {
+      "title": "You're offline",
+      "body": "Price Lens needs an internet connection to show the latest prices. Please check your connection and try again."
+    },
+    "authCode": {
+      "title": "Sign-in failed",
+      "body": "We couldn't complete your sign-in. This can happen if the session expired or you cancelled the flow.",
+      "goHome": "Go home"
+    },
+    "generic": {
+      "title": "Something went wrong.",
+      "tryAgain": "Try again"
+    }
+  },
+  "barcode": {
+    "unavailable": {
+      "title": "Lookup unavailable",
+      "body": "Barcode <code>{barcode}</code> is not in our tracked stores, and the external database is temporarily unreachable.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Product not found",
+      "body": "Barcode <code>{barcode}</code> does not match any product in our tracked stores.",
+      "searchedOff": "We also searched on <off>Open Food Facts</off>. It may be a non-food item, a regional product, or a newly released barcode.",
+      "searchOurs": "Search our products",
+      "searchGoogle": "Search on Google"
+    },
+    "similarProducts": "Similar products in our stores"
+  },
+  "compare": {
+    "empty": {
+      "title": "Product not found",
+      "body": "No store products found for this canonical product."
+    }
+  },
+  "products": {
+    "browse": {
+      "metadata": {
+        "description": "Browse and compare prices across supermarkets",
+        "descriptionWithQuery": "Browse and compare prices for \"{query}\" across supermarkets"
+      }
+    },
+    "pdp": {
+      "metadata": {
+        "viewDetails": "View product details on Price Lens"
+      }
     }
   },
   "nav": {
@@ -66,6 +189,66 @@
     "getTheApp": "Get the App",
     "admin": "Admin",
     "profile": "Profile"
+  },
+  "legal": {
+    "terms": {
+      "heading": "Terms of Service",
+      "intro": "By accessing the website at Price Lens, you are agreeing to be bound by these terms of service, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.",
+      "sections": {
+        "license": {
+          "title": "1. Use License",
+          "body": "Permission is granted to temporarily download one copy of the materials (information or software) on Price Lens' website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:",
+          "items": {
+            "modify": "modify or copy the materials;",
+            "commercial": "use the materials for any commercial purpose, or for any public display (commercial or non-commercial);",
+            "reverse": "attempt to decompile or reverse engineer any software contained on Price Lens' website;",
+            "copyright": "remove any copyright or other proprietary notations from the materials; or",
+            "transfer": "transfer the materials to another person or \"mirror\" the materials on any other server."
+          },
+          "termination": "This license shall automatically terminate if you violate any of these restrictions and may be terminated by Price Lens at any time."
+        },
+        "disclaimer": {
+          "title": "2. Disclaimer",
+          "body": "The materials on Price Lens' website are provided on an 'as is' basis. Price Lens makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights."
+        },
+        "limitations": {
+          "title": "3. Limitations",
+          "body": "In no event shall Price Lens or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Price Lens' website, even if Price Lens or a Price Lens authorized representative has been notified orally or in writing of the possibility of such damage."
+        },
+        "governingLaw": {
+          "title": "4. Governing Law",
+          "body": "These terms and conditions are governed by and construed in accordance with the laws of Portugal and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location."
+        }
+      }
+    },
+    "privacy": {
+      "heading": "Privacy Policy",
+      "intro": "Your privacy is important to us. It is Price Lens' policy to respect your privacy regarding any information we may collect from you across our website.",
+      "sections": {
+        "collect": {
+          "title": "1. Information We Collect",
+          "body1": "We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we're collecting it and how it will be used.",
+          "body2": "The only personal information we collect is via your authentication provider (e.g., Google) when you sign up. This includes your email address, name, and profile picture. We do not collect any other personal data."
+        },
+        "use": {
+          "title": "2. How We Use Your Information",
+          "body": "We use the collected information to create and manage your account, and to provide you with access to our services. We do not sell or share your personal information with third parties, except as required by law."
+        },
+        "storage": {
+          "title": "3. Data Storage and Security",
+          "body1": "We only retain collected information for as long as necessary to provide you with your requested service. What data we store, we'll protect within commercially acceptable means to prevent loss and theft, as well as unauthorized access, disclosure, copying, use or modification.",
+          "body2": "Our website may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies."
+        },
+        "rights": {
+          "title": "4. Your Rights",
+          "body": "You are free to refuse our request for your personal information, with the understanding that we may be unable to provide you with some of your desired services."
+        },
+        "contact": {
+          "title": "5. Contact Us",
+          "body": "If you have any questions about how we handle user data and personal information, feel free to contact us."
+        }
+      }
+    }
   },
   "search": {
     "placeholder": "What product are you looking for?",

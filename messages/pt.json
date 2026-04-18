@@ -55,6 +55,129 @@
     "site": {
       "name": "Price Lens",
       "description": "Monitorização diária de preços dos supermercados portugueses (Continente, Auchan e Pingo Doce). Transforma variações de preço em poupança. Mais dinheiro no teu bolso. Tudo no Price Lens."
+    },
+    "pages": {
+      "about": {
+        "title": "Sobre",
+        "description": "Sabe mais sobre o Price Lens e explora mais de 25 anos de dados históricos de inflação para Portugal, EUA e Zona Euro."
+      },
+      "terms": {
+        "title": "Termos de Serviço",
+        "description": "Consulta os termos de serviço e condições de utilização do Price Lens."
+      },
+      "privacy": {
+        "title": "Política de Privacidade",
+        "description": "Consulta a política de privacidade do Price Lens para saberes como tratamos os teus dados."
+      },
+      "profile": {
+        "title": "Perfil",
+        "description": "Gere a tua conta Price Lens, preferências e subscrição."
+      },
+      "login": {
+        "title": "Iniciar sessão",
+        "description": "Inicia sessão no Price Lens para acompanhar preços, guardar favoritos e receber alertas sobre produtos de supermercados portugueses."
+      },
+      "app": {
+        "title": "Obter a App",
+        "description": "Instala o Price Lens como app gratuita no teu telemóvel para uma experiência mais rápida, com suporte offline e ecrã inteiro."
+      },
+      "deals": {
+        "title": "Promoções & Descidas de Preço",
+        "description": "Explora as maiores descidas de preço e os melhores descontos nos supermercados portugueses. Atualizado diariamente."
+      },
+      "favorites": {
+        "title": "Os meus favoritos",
+        "description": "Vê e gere os teus produtos favoritos com acompanhamento de preço nos supermercados portugueses."
+      },
+      "notFound": {
+        "title": "Página não encontrada",
+        "description": "A página que procuras não existe."
+      },
+      "offline": {
+        "title": "Offline",
+        "description": "O Price Lens precisa de ligação à internet para mostrar os preços mais recentes."
+      },
+      "authError": {
+        "title": "Falha no início de sessão",
+        "description": "Não foi possível concluir o início de sessão. Tenta novamente."
+      },
+      "productsRedirect": {
+        "title": "A redirecionar…",
+        "description": "A redirecionar para a página do produto."
+      },
+      "productNotFound": {
+        "title": "Produto não encontrado",
+        "description": "Não foi possível encontrar o produto pedido."
+      },
+      "productLookup": {
+        "title": "Pesquisa de produto - {barcode}",
+        "description": "A pesquisar {barcode} no Price Lens."
+      },
+      "compare": {
+        "title": "Comparar preços",
+        "description": "Compara preços de produtos entre supermercados no Price Lens."
+      }
+    },
+    "compare": {
+      "title": "Comparar preços - {name}",
+      "description": "Compara preços de {name} em {count} lojas no Price Lens.",
+      "genericProduct": "produto",
+      "lookupTitle": "Pesquisa de produto - Canónico #{id}",
+      "lookupDescription": "A pesquisar Canónico #{id} no Price Lens."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "line1": "Não há nada para ver aqui.",
+      "line2": "Parece que te aventuraste num reino digital desconhecido.",
+      "returnHome": "Voltar ao site"
+    },
+    "offline": {
+      "title": "Estás offline",
+      "body": "O Price Lens precisa de ligação à internet para mostrar os preços mais recentes. Verifica a tua ligação e tenta novamente."
+    },
+    "authCode": {
+      "title": "Falha no início de sessão",
+      "body": "Não foi possível concluir o início de sessão. Isto pode acontecer se a sessão expirou ou se cancelaste o processo.",
+      "goHome": "Ir para o início"
+    },
+    "generic": {
+      "title": "Ocorreu um erro.",
+      "tryAgain": "Tentar novamente"
+    }
+  },
+  "barcode": {
+    "unavailable": {
+      "title": "Pesquisa indisponível",
+      "body": "O código de barras <code>{barcode}</code> não está nas lojas que acompanhamos e a base de dados externa está temporariamente inacessível.",
+      "retry": "Tentar novamente"
+    },
+    "notFound": {
+      "title": "Produto não encontrado",
+      "body": "O código de barras <code>{barcode}</code> não corresponde a nenhum produto nas lojas que acompanhamos.",
+      "searchedOff": "Também pesquisámos no <off>Open Food Facts</off>. Pode ser um produto não alimentar, regional ou um código recentemente lançado.",
+      "searchOurs": "Pesquisar nos nossos produtos",
+      "searchGoogle": "Pesquisar no Google"
+    },
+    "similarProducts": "Produtos semelhantes nas nossas lojas"
+  },
+  "compare": {
+    "empty": {
+      "title": "Produto não encontrado",
+      "body": "Não foram encontrados produtos para este produto canónico."
+    }
+  },
+  "products": {
+    "browse": {
+      "metadata": {
+        "description": "Explora e compara preços entre supermercados",
+        "descriptionWithQuery": "Explora e compara preços de \"{query}\" entre supermercados"
+      }
+    },
+    "pdp": {
+      "metadata": {
+        "viewDetails": "Vê os detalhes do produto no Price Lens"
+      }
     }
   },
   "nav": {
@@ -66,6 +189,66 @@
     "getTheApp": "Obter a App",
     "admin": "Admin",
     "profile": "Perfil"
+  },
+  "legal": {
+    "terms": {
+      "heading": "Termos de Serviço",
+      "intro": "Ao aceder ao website do Price Lens, concordas em ficar vinculado a estes termos de serviço, às leis e regulamentos aplicáveis, e ficas responsável pelo cumprimento de eventuais leis locais aplicáveis.",
+      "sections": {
+        "license": {
+          "title": "1. Licença de utilização",
+          "body": "É concedida permissão para descarregar temporariamente uma cópia dos materiais (informação ou software) presentes no website do Price Lens apenas para utilização pessoal, não comercial e transitória. Esta é uma licença, não uma transferência de propriedade, e ao abrigo desta licença não podes:",
+          "items": {
+            "modify": "modificar ou copiar os materiais;",
+            "commercial": "utilizar os materiais para qualquer fim comercial ou para qualquer exibição pública (comercial ou não);",
+            "reverse": "tentar descompilar ou fazer engenharia reversa de qualquer software presente no website do Price Lens;",
+            "copyright": "remover direitos de autor ou outras notações proprietárias dos materiais; ou",
+            "transfer": "transferir os materiais para outra pessoa ou fazer \"mirror\" dos materiais noutro servidor."
+          },
+          "termination": "Esta licença termina automaticamente caso violes qualquer destas restrições e pode ser terminada pelo Price Lens a qualquer momento."
+        },
+        "disclaimer": {
+          "title": "2. Limitação de responsabilidade",
+          "body": "Os materiais no website do Price Lens são fornecidos \"no estado em que se encontram\". O Price Lens não oferece garantias, expressas ou implícitas, e rejeita todas as outras garantias, incluindo, sem limitação, garantias ou condições implícitas de comercialização, adequação a um determinado fim ou não violação de propriedade intelectual ou outros direitos."
+        },
+        "limitations": {
+          "title": "3. Limitações",
+          "body": "Em nenhuma circunstância o Price Lens ou os seus fornecedores serão responsáveis por danos (incluindo, sem limitação, danos por perda de dados ou lucros, ou devido a interrupção de negócio) decorrentes do uso ou incapacidade de uso dos materiais no website do Price Lens, mesmo que o Price Lens ou um representante autorizado tenha sido notificado verbalmente ou por escrito da possibilidade de tais danos."
+        },
+        "governingLaw": {
+          "title": "4. Lei aplicável",
+          "body": "Estes termos e condições são regidos e interpretados de acordo com as leis de Portugal e submetes-te irrevogavelmente à jurisdição exclusiva dos tribunais desse Estado."
+        }
+      }
+    },
+    "privacy": {
+      "heading": "Política de Privacidade",
+      "intro": "A tua privacidade é importante para nós. É política do Price Lens respeitar a tua privacidade relativamente a qualquer informação que possamos recolher através do nosso website.",
+      "sections": {
+        "collect": {
+          "title": "1. Informação que recolhemos",
+          "body1": "Só pedimos informação pessoal quando realmente precisamos dela para te prestar um serviço. Recolhemo-la por meios justos e legais, com o teu conhecimento e consentimento. Também te indicamos porque estamos a recolhê-la e como vai ser utilizada.",
+          "body2": "A única informação pessoal que recolhemos é através do teu fornecedor de autenticação (por exemplo, Google) quando te registas. Isto inclui o teu email, nome e foto de perfil. Não recolhemos qualquer outra informação pessoal."
+        },
+        "use": {
+          "title": "2. Como usamos a tua informação",
+          "body": "Utilizamos a informação recolhida para criar e gerir a tua conta e para te dar acesso aos nossos serviços. Não vendemos nem partilhamos a tua informação pessoal com terceiros, exceto quando exigido por lei."
+        },
+        "storage": {
+          "title": "3. Armazenamento e segurança de dados",
+          "body1": "Só retemos a informação recolhida durante o tempo necessário para te prestar o serviço solicitado. Os dados que armazenamos são protegidos através de meios comercialmente aceitáveis para prevenir perda, roubo, acesso, divulgação, cópia, uso ou modificação não autorizados.",
+          "body2": "O nosso website pode conter ligações para sites externos que não são operados por nós. Não temos controlo sobre o conteúdo e práticas desses sites e não podemos aceitar responsabilidade pelas suas políticas de privacidade."
+        },
+        "rights": {
+          "title": "4. Os teus direitos",
+          "body": "És livre de recusar o pedido para nos dares a tua informação pessoal, tendo em conta que poderemos não conseguir disponibilizar-te alguns dos serviços pretendidos."
+        },
+        "contact": {
+          "title": "5. Contacta-nos",
+          "body": "Se tiveres alguma questão sobre como tratamos os dados dos utilizadores e informação pessoal, não hesites em contactar-nos."
+        }
+      }
+    }
   },
   "search": {
     "placeholder": "Que produto procuras?",
