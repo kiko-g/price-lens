@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Legend } from "recharts"
 
@@ -179,7 +180,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
   if (mergedData.length === 0) {
     return (
       <div className={cn("bg-muted/20 flex h-[300px] items-center justify-center rounded-lg border", className)}>
-        <p className="text-muted-foreground text-sm">No price history available</p>
+        <ComparisonChartEmpty />
       </div>
     )
   }
@@ -290,4 +291,9 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
       </ChartContainer>
     </div>
   )
+}
+
+function ComparisonChartEmpty() {
+  const t = useTranslations("products.comparisonChart")
+  return <p className="text-muted-foreground text-sm">{t("noPriceHistory")}</p>
 }

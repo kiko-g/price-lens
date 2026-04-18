@@ -1,5 +1,6 @@
 import type { StoreProduct } from "@/types"
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
@@ -20,6 +21,8 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", skipSnaps: false })
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
+  const t = useTranslations("products.identicalCross")
+  const tRelated = useTranslations("products.related")
 
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev()
   const scrollNext = () => emblaApi && emblaApi.scrollNext()
@@ -43,7 +46,7 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
   }, [emblaApi])
 
   if (error) {
-    return <ErrorStateView error={error} title="Failed to load cross-store products" />
+    return <ErrorStateView error={error} title={t("errorTitle")} />
   }
 
   return (
@@ -51,7 +54,7 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-xl font-medium">
           <BrainCogIcon className="h-4 w-4" />
-          Identical Products in other stores
+          {t("title")}
         </h3>
         {!isLoading && products && products.length > 0 && (
           <div className="flex gap-2">
@@ -63,7 +66,7 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
               disabled={!canScrollPrev}
             >
               <ArrowLeftIcon className="h-4 w-4" />
-              <span className="sr-only">Previous slide</span>
+              <span className="sr-only">{tRelated("prevAria")}</span>
             </Button>
             <Button
               variant="outline"
@@ -73,7 +76,7 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
               disabled={!canScrollNext}
             >
               <ArrowRightIcon className="h-4 w-4" />
-              <span className="sr-only">Next slide</span>
+              <span className="sr-only">{tRelated("nextAria")}</span>
             </Button>
           </div>
         )}
@@ -84,11 +87,7 @@ export function IdenticalStoreProducts({ id, limit = 10 }: Props) {
           <Loader2Icon className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : products && products.length === 0 ? (
-        <EmptyStateView
-          icon={BrainCogIcon}
-          title="No identical products found"
-          message="We couldn't find this product in other stores right now."
-        />
+        <EmptyStateView icon={BrainCogIcon} title={t("emptyTitle")} message={t("emptyMessage")} />
       ) : (
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import type { OffProduct } from "@/lib/canonical/open-food-facts"
 
@@ -20,6 +21,7 @@ export function OffBrandSection({ brand, excludeBarcode }: OffBrandSectionProps)
   const [products, setProducts] = useState<OffProduct[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
+  const t = useTranslations("products.offBrand")
 
   const handleLoad = async () => {
     setLoading(true)
@@ -46,7 +48,7 @@ export function OffBrandSection({ brand, excludeBarcode }: OffBrandSectionProps)
       <section>
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
           <OpenFoodFactsIcon className="h-5 w-5" />
-          More from {brand} on Open Food Facts
+          {t("moreFrom", { brand })}
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {products.map((rp) => (
@@ -61,9 +63,9 @@ export function OffBrandSection({ brand, excludeBarcode }: OffBrandSectionProps)
     <section className="flex items-center gap-3">
       <Button variant="outline" onClick={handleLoad} disabled={loading} className="gap-2">
         {loading ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <OpenFoodFactsIcon className="h-4 w-4" />}
-        {loading ? "Loading..." : `See more from ${brand} on Open Food Facts`}
+        {loading ? t("loading") : t("seeMoreFrom", { brand })}
       </Button>
-      {error && <span className="text-muted-foreground text-sm">Could not load products. Try again later.</span>}
+      {error && <span className="text-muted-foreground text-sm">{t("loadError")}</span>}
     </section>
   )
 }
@@ -80,7 +82,7 @@ function OffRelatedCard({ product }: { product: OffProduct }) {
         {product.imageSmallUrl ? (
           <Image
             src={product.imageSmallUrl}
-            alt={product.displayName || "Product"}
+            alt={product.displayName || ""}
             fill
             className="object-contain p-2 transition-transform group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"

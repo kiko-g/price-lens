@@ -975,6 +975,30 @@
         "noImage": "Sem imagem"
       }
     },
+    "comparisonChart": {
+      "noPriceHistory": "Sem histórico de preços disponível"
+    },
+    "offBrand": {
+      "moreFrom": "Mais de {brand} no Open Food Facts",
+      "seeMoreFrom": "Ver mais de {brand} no Open Food Facts",
+      "loading": "A carregar…",
+      "loadError": "Não foi possível carregar produtos. Tenta mais tarde."
+    },
+    "offLookup": {
+      "notFoundCallout": "Este produto não foi encontrado nas lojas que acompanhamos, mas podemos tentar encontrá-lo noutro sítio",
+      "lookingUp": "A pesquisar <code>{barcode}</code> no <icon></icon><span>Open Food Facts…</span>",
+      "takingLong": "O Open Food Facts está a demorar um pouco mais que o normal. Aguarda!",
+      "stillWaiting": "Ainda à espera… também podes tentar pesquisar manualmente:",
+      "searchOurs": "Pesquisar nos nossos produtos"
+    },
+    "priceStats": {
+      "ariaLabel": "Quão estável é este preço?",
+      "heading": "Quão estável é este preço?",
+      "checksIn90d": "{count, plural, one {# verificação de preço nos últimos 90 dias} other {# verificações de preço nos últimos 90 dias}}",
+      "updatedSuffix": " · atualizado {date}",
+      "infoOnlyShort": "Apenas informativo. Não é aconselhamento.",
+      "infoOnlyLong": "Apenas informativo. Não é aconselhamento financeiro."
+    },
     "barcodeCompare": {
       "best": "Melhor",
       "unavailable": "Indisponível",
@@ -997,6 +1021,12 @@
       "comparePricesTitle": "Comparar preços",
       "saveUpTo": "<highlight>Poupa até {amount}€</highlight> ao escolheres a opção mais barata",
       "priceHistory": "Histórico de preços"
+    },
+    "identicalCross": {
+      "title": "Produtos idênticos noutras lojas",
+      "errorTitle": "Falha ao carregar produtos noutras lojas",
+      "emptyTitle": "Sem produtos idênticos",
+      "emptyMessage": "Não foi possível encontrar este produto noutras lojas neste momento."
     },
     "identical": {
       "comparePrices": "Comparar preços",

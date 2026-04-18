@@ -1,5 +1,7 @@
 "use client"
 
+import { useLocale, useTranslations } from "next-intl"
+
 import type { StoreProduct } from "@/types"
 import {
   type PriceHistoryHint,
@@ -15,6 +17,8 @@ import { Callout } from "@/components/ui/callout"
 import { useIsAdmin } from "@/contexts/UserContext"
 import { AlertTriangleIcon, BarChart3Icon, InfoIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatDate } from "@/lib/i18n/format"
 
 type Props = {
   sp: StoreProduct
@@ -28,6 +32,9 @@ type Props = {
 export function ProductPriceStatsCallout({ sp, className, placement = "desktop", priceHistoryHint }: Props) {
   const isAdmin = useIsAdmin()
   const showDevScore = process.env.NODE_ENV === "development" || isAdmin
+  const t = useTranslations("products.priceStats")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
 
   const sufficient = hasSufficientPriceStats(sp.price_stats_updated_at, sp.price_stats_obs_90d)
   const showMobile = shouldShowMobilePriceStatsCallout(sp.price_stats_updated_at, sp.price_stats_obs_90d)
@@ -45,7 +52,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
 
   const updatedLabel =
     sp.price_stats_updated_at != null
-      ? new Date(sp.price_stats_updated_at).toLocaleDateString("en-GB", {
+      ? formatDate(new Date(sp.price_stats_updated_at), locale, {
           day: "numeric",
           month: "short",
           year: "numeric",
@@ -55,8 +62,8 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
   const metaDesktop =
     sufficient && sp.price_stats_obs_90d != null ? (
       <p className="text-muted-foreground max-w-[16rem] text-right text-xs leading-snug tabular-nums">
-        {sp.price_stats_obs_90d} price checks in the last 90 days
-        {updatedLabel ? ` · updated ${updatedLabel}` : ""}
+        {t("checksIn90d", { count: sp.price_stats_obs_90d })}
+        {updatedLabel ? t("updatedSuffix", { date: updatedLabel }) : ""}
       </p>
     ) : null
 
@@ -67,14 +74,14 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
     const StatusIcon = isWarning ? AlertTriangleIcon : BarChart3Icon
 
     return (
-      <section className={cn(className)} aria-label="How stable is this price?">
+      <section className={cn(className)} aria-label={t("ariaLabel")}>
         <Callout variant={isWarning ? "warning" : "info"}>
           <div className="flex gap-2.5">
             <StatusIcon className="text-foreground mt-0.5 size-4 shrink-0 opacity-90" aria-hidden />
             <div className="min-w-0 space-y-1.5">
               <p className="text-foreground text-sm leading-snug font-semibold">{volatilityCasualLead(band, true)}</p>
               <p className="text-muted-foreground text-sm leading-snug">{guidanceCompact.body}</p>
-              <p className="text-muted-foreground text-[11px] leading-snug">Informative only. Not advice.</p>
+              <p className="text-muted-foreground text-[11px] leading-snug">{t("infoOnlyShort")}</p>
             </div>
           </div>
         </Callout>
@@ -108,7 +115,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
         "md:border-border/70 md:bg-muted/20 md:rounded-xl md:border md:p-4",
         className,
       )}
-      aria-label="How stable is this price?"
+      aria-label={t("ariaLabel")}
     >
       <div className="hidden md:flex md:items-start md:justify-between md:gap-4">
         <h2
@@ -116,7 +123,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
           className="text-foreground flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight"
         >
           <BarChart3Icon className="size-4 shrink-0 opacity-80" aria-hidden />
-          How stable is this price?
+          {t("heading")}
         </h2>
         {metaDesktop}
       </div>
@@ -130,9 +137,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
           <div className="hidden md:block">
             <p className="text-foreground text-sm font-semibold">{volatilityCasualLead(band, true)}</p>
             <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{guidance.body}</p>
-            <p className="text-muted-foreground mt-3 text-[11px] leading-snug">
-              Informative only. Not financial advice.
-            </p>
+            <p className="text-muted-foreground mt-3 text-[11px] leading-snug">{t("infoOnlyLong")}</p>
           </div>
 
           {showDevScore && sp.price_drop_smart_score != null ? (

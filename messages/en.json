@@ -975,6 +975,30 @@
         "noImage": "No image"
       }
     },
+    "comparisonChart": {
+      "noPriceHistory": "No price history available"
+    },
+    "offBrand": {
+      "moreFrom": "More from {brand} on Open Food Facts",
+      "seeMoreFrom": "See more from {brand} on Open Food Facts",
+      "loading": "Loading…",
+      "loadError": "Could not load products. Try again later."
+    },
+    "offLookup": {
+      "notFoundCallout": "This product was not found in our tracked stores, but we can try to find it elsewhere",
+      "lookingUp": "Looking up <code>{barcode}</code> on <icon></icon><span>Open Food Facts…</span>",
+      "takingLong": "Open Food Facts is taking a bit longer than usual. Hang tight!",
+      "stillWaiting": "Still waiting… you can also try searching manually:",
+      "searchOurs": "Search our products"
+    },
+    "priceStats": {
+      "ariaLabel": "How stable is this price?",
+      "heading": "How stable is this price?",
+      "checksIn90d": "{count, plural, one {# price check in the last 90 days} other {# price checks in the last 90 days}}",
+      "updatedSuffix": " · updated {date}",
+      "infoOnlyShort": "Informative only. Not advice.",
+      "infoOnlyLong": "Informative only. Not financial advice."
+    },
     "barcodeCompare": {
       "best": "Best",
       "unavailable": "Unavailable",
@@ -997,6 +1021,12 @@
       "comparePricesTitle": "Compare Prices",
       "saveUpTo": "<highlight>Save up to {amount}€</highlight> by choosing the cheapest option",
       "priceHistory": "Price History"
+    },
+    "identicalCross": {
+      "title": "Identical Products in other stores",
+      "errorTitle": "Failed to load cross-store products",
+      "emptyTitle": "No identical products found",
+      "emptyMessage": "We couldn't find this product in other stores right now."
     },
     "identical": {
       "comparePrices": "Compare prices",

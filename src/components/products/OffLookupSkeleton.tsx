@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import { Callout } from "@/components/ui/callout"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,6 +16,7 @@ interface OffLookupSkeletonProps {
 
 export function OffLookupSkeleton({ barcode }: OffLookupSkeletonProps) {
   const [elapsed, setElapsed] = useState(0)
+  const t = useTranslations("products.offLookup")
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,35 +29,33 @@ export function OffLookupSkeleton({ barcode }: OffLookupSkeletonProps) {
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col px-4 pt-4 lg:py-4">
       <div className="mb-4 flex w-full max-w-full flex-col gap-2">
         <Callout variant="info" icon={BrainIcon} className="mb-3 w-full">
-          <p className="text-sm">
-            This product was not found in our tracked stores, but we can try to find it elsewhere
-          </p>
+          <p className="text-sm">{t("notFoundCallout")}</p>
         </Callout>
 
         <div className="flex items-center gap-3 rounded-lg border px-3 py-2.5">
           <Loader2Icon className="text-primary h-4 w-4 animate-spin" />
           <p className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm">
-            Looking up <span className="font-mono font-medium">{barcode}</span> on
-            <OpenFoodFactsIcon className="inline h-4 w-4" />
-            <span>Open Food Facts&hellip;</span>
+            {t.rich("lookingUp", {
+              barcode,
+              code: (chunks) => <span className="font-mono font-medium">{chunks}</span>,
+              icon: () => <OpenFoodFactsIcon className="inline h-4 w-4" />,
+            })}
           </p>
         </div>
 
         {elapsed >= 5 && elapsed < 12 && (
-          <p className="text-muted-foreground animate-in fade-in slide-in-from-top-1 text-xs">
-            Open Food Facts is taking a bit longer than usual. Hang tight!
-          </p>
+          <p className="text-muted-foreground animate-in fade-in slide-in-from-top-1 text-xs">{t("takingLong")}</p>
         )}
 
         {elapsed >= 12 && (
           <div className="animate-in fade-in slide-in-from-top-1 flex flex-col gap-1.5">
-            <p className="text-muted-foreground text-xs">Still waiting&hellip; you can also try searching manually:</p>
+            <p className="text-muted-foreground text-xs">{t("stillWaiting")}</p>
             <Link
               href={`/products?q=${encodeURIComponent(barcode)}`}
               className="text-primary inline-flex items-center gap-1 text-xs font-medium hover:underline"
             >
               <SearchIcon className="h-3 w-3" />
-              Search our products
+              {t("searchOurs")}
             </Link>
           </div>
         )}
