@@ -841,6 +841,16 @@
       "essentialsAriaFallback": "Ver essenciais baratos"
     },
     "showcase": {
+      "title": "Produtos",
+      "tooling": "Ferramentas",
+      "bulkSetPriority": "Definir prioridade em massa",
+      "priorityHelp": "Os produtos têm níveis de prioridade de 0 a 5. Quando marcados como favoritos, recebem prioridade 5",
+      "count": {
+        "totalFound": "<strong>{count}</strong> produtos encontrados",
+        "noneFound": "Sem produtos encontrados",
+        "showing": "A mostrar <strong>{from}-{to}</strong> produtos",
+        "matchingSuffix": " a corresponder a \"{query}\""
+      },
       "states": {
         "loadErrorTitle": "Não foi possível carregar produtos",
         "loadErrorMessage": "Ocorreu um erro. Tenta novamente.",
@@ -859,6 +869,7 @@
         "sort": "Ordenar",
         "sortBy": "Ordenar por",
         "store": "Loja",
+        "storeOrigin": "Loja de origem",
         "allStores": "Todas as lojas",
         "category": "Categoria",
         "allCategories": "Todas as categorias",

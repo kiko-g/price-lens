@@ -841,6 +841,16 @@
       "essentialsAriaFallback": "See cheap essentials"
     },
     "showcase": {
+      "title": "Products",
+      "tooling": "Tooling",
+      "bulkSetPriority": "Bulk Set Priority",
+      "priorityHelp": "Products have priority levels from 0 to 5. When favorited, products are assigned 5",
+      "count": {
+        "totalFound": "<strong>{count}</strong> products found",
+        "noneFound": "No products found",
+        "showing": "Showing <strong>{from}-{to}</strong> products",
+        "matchingSuffix": " matching \"{query}\""
+      },
       "states": {
         "loadErrorTitle": "Could not load products",
         "loadErrorMessage": "Something went wrong. Please try again.",
@@ -857,8 +867,9 @@
         "searchPlaceholder": "Search products…",
         "searchBy": "Search by",
         "sort": "Sort",
-        "sortBy": "Sort by",
+        "sortBy": "Sort By",
         "store": "Store",
+        "storeOrigin": "Store Origin",
         "allStores": "All stores",
         "category": "Category",
         "allCategories": "All categories",

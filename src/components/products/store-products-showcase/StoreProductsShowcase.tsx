@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { PrioritySource } from "@/types"
 import { useStoreProducts, fetchStoreProducts } from "@/hooks/useStoreProducts"
 import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
@@ -82,6 +83,7 @@ interface StoreProductsShowcaseProps {
 export function StoreProductsShowcase({ limit = 20, children }: StoreProductsShowcaseProps) {
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
+  const tShowcase = useTranslations("products.showcase")
 
   useEffect(() => {
     if (!urlState.query.trim() && urlState.sortBy === "relevance") {
@@ -669,7 +671,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <PackageIcon className="size-5" />
-            <h2 className="text-lg font-bold">Products</h2>
+            <h2 className="text-lg font-bold">{tShowcase("title")}</h2>
             {isSearching ? (
               <Loader2Icon className="text-muted-foreground size-4 animate-spin" />
             ) : hasPendingChanges ? (
@@ -685,7 +687,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-48" align="start">
-              <DropdownMenuLabel>Tooling</DropdownMenuLabel>
+              <DropdownMenuLabel>{tShowcase("tooling")}</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <ScrapeUrlDialog />
               </DropdownMenuItem>
@@ -694,7 +696,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                 <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
                   <BulkPriorityDialog filterParams={bulkPriorityFilterParams} filterSummary={filterSummary}>
                     <button className="flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1.5 text-sm">
-                      Bulk Set Priority
+                      {tShowcase("bulkSetPriority")}
                       <DevBadge />
                     </button>
                   </BulkPriorityDialog>
@@ -707,8 +709,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
         {process.env.NODE_ENV === "development" && (
           <TrackingInformationDialog>
             <button className="text-muted-foreground mb-4 text-left text-sm hover:opacity-80">
-              <InfoIcon className="mb-px inline-block size-3.5" /> Products have priority levels from 0 to 5. When
-              favorited, products are assigned 5
+              <InfoIcon className="mb-px inline-block size-3.5" /> {tShowcase("priorityHelp")}
             </button>
           </TrackingInformationDialog>
         )}
@@ -718,7 +719,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
           <Input
             type="search"
             enterKeyHint="search"
-            placeholder="Search products..."
+            placeholder={tShowcase("filters.searchPlaceholder")}
             className="pr-16 text-base md:text-sm"
             value={queryInput}
             onChange={(e) => {
@@ -740,11 +741,11 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
           />
           <Select value={localFilters.searchType} onValueChange={(v) => handleSearchTypeChange(v as SearchType)}>
             <SelectTrigger className="text-muted-foreground hover:bg-primary hover:text-primary-foreground data-[state=open]:bg-primary data-[state=open]:text-primary-foreground bg-primary/10 dark:bg-primary/20 absolute top-1/2 right-2 flex h-4 w-auto -translate-y-1/2 items-center justify-center border-0 py-2 pr-0 pl-1 text-xs shadow-none transition">
-              <SelectValue placeholder="Search by" />
+              <SelectValue placeholder={tShowcase("filters.searchBy")} />
             </SelectTrigger>
             <SelectContent align="start" className="w-[180px]">
               <SelectGroup>
-                <SelectLabel>Search by</SelectLabel>
+                <SelectLabel>{tShowcase("filters.searchBy")}</SelectLabel>
                 <SelectSeparator />
                 {searchTypes.map((type) => (
                   <SelectItem key={type} value={type} className="capitalize">
@@ -764,21 +765,20 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             <div className="flex flex-col gap-1">
               <p className="text-muted-foreground text-xs">
                 {totalCount != null ? (
-                  <>
-                    <strong className="text-foreground">{totalCount}</strong> products found
-                  </>
+                  tShowcase.rich("count.totalFound", {
+                    count: totalCount,
+                    strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                  })
                 ) : showingFrom === 0 && showingTo === 0 ? (
-                  <>No products found {urlState.query && `matching "${urlState.query}"`}</>
+                  <>{tShowcase("count.noneFound")}</>
                 ) : (
-                  <>
-                    Showing{" "}
-                    <strong className="text-foreground">
-                      {showingFrom}-{showingTo}
-                    </strong>{" "}
-                    products
-                  </>
+                  tShowcase.rich("count.showing", {
+                    from: showingFrom,
+                    to: showingTo,
+                    strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                  })
                 )}
-                {urlState.query && ` matching "${urlState.query}"`}
+                {urlState.query && tShowcase("count.matchingSuffix", { query: urlState.query })}
               </p>
             </div>
           )}
@@ -789,7 +789,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             <AccordionItem value="sort">
               <AccordionTrigger className="cursor-pointer justify-start gap-2 py-2 text-sm font-medium hover:no-underline">
                 <span className="flex flex-1 items-center gap-1">
-                  <span>Sort By</span>
+                  <span>{tShowcase("filters.sortBy")}</span>
                 </span>
               </AccordionTrigger>
               <AccordionContent className="p-px pb-3">
@@ -830,7 +830,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             {/* Store Origin Filter */}
             <AccordionItem value="store-origin">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                <span>Store Origin</span>
+                <span>{tShowcase("filters.storeOrigin")}</span>
                 {selectedOrigins.length > 0 && (
                   <>
                     <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
@@ -843,7 +843,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                       }}
                       className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
                     >
-                      Clear
+                      {tShowcase("filters.clear")}
                     </span>
                   </>
                 )}
