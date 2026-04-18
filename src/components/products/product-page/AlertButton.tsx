@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useUser } from "@/hooks/useUser"
 import { useAlertToggle } from "@/hooks/useAlertToggle"
 import { LoginPrompt } from "@/components/auth/LoginPrompt"
@@ -21,6 +22,7 @@ export function AlertButton({ storeProductId, productName, className, variant = 
   const { user } = useUser()
   const { hasAlert, isLoading, isToggling, toggleAlert } = useAlertToggle(storeProductId)
   const [loginPromptOpen, setLoginPromptOpen] = useState(false)
+  const t = useTranslations("products.alertButton")
 
   const handleClick = async () => {
     if (!user) {
@@ -30,9 +32,9 @@ export function AlertButton({ storeProductId, productName, className, variant = 
 
     await toggleAlert()
     if (hasAlert) {
-      toast.success("Alert removed")
+      toast.success(t("removed"))
     } else {
-      toast.success(`Alert set for ${productName}`, { description: "We'll notify you when the price drops." })
+      toast.success(t("set", { name: productName }), { description: t("setDescription") })
     }
   }
 
@@ -55,7 +57,7 @@ export function AlertButton({ storeProductId, productName, className, variant = 
               onClick={handleClick}
               disabled={isToggling}
               className={cn(hasAlert && "border-amber-500 bg-amber-500 text-white hover:bg-amber-600", className)}
-              aria-label={hasAlert ? "Remove price alert" : "Set price alert"}
+              aria-label={hasAlert ? t("ariaRemove") : t("ariaSet")}
             >
               {isToggling ? (
                 <LoaderIcon className="size-4 animate-spin" />
@@ -64,10 +66,10 @@ export function AlertButton({ storeProductId, productName, className, variant = 
               ) : (
                 <BellIcon className="size-4" />
               )}
-              {variant !== "icon" && <span>{hasAlert ? "Alert on" : "Alert me"}</span>}
+              {variant !== "icon" && <span>{hasAlert ? t("labelOn") : t("labelOff")}</span>}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{hasAlert ? "Remove price alert" : "Get notified when the price drops"}</TooltipContent>
+          <TooltipContent>{hasAlert ? t("tooltipRemove") : t("tooltipSet")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />

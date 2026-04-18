@@ -1,10 +1,13 @@
 "use client"
 
 import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
 
 import type { PricePoint, StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
 import { getProductDealSummary, type DealSummaryTier } from "@/lib/business/product-deal-summary"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatPrice } from "@/lib/i18n/format"
 
 import { Badge, BadgeKind } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -38,17 +41,21 @@ type DealSummaryCardProps = {
 }
 
 function CheaperElsewhereInline({ hint }: { hint: CheaperElsewhereHint }) {
+  const t = useTranslations("products.dealSummary")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
+  const formattedSave = formatPrice(hint.saveAmount, locale)
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      <span className="text-muted-foreground text-sm font-medium">Cheaper at another store</span>
+      <span className="text-muted-foreground text-sm font-medium">{t("cheaperElsewhere")}</span>
       <Link
         href={hint.href}
         className="focus-visible:ring-ring focus-visible:ring-offset-background inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white px-2 py-1 shadow-sm transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:border-white/25"
-        aria-label={`View cheaper price at partner store (save ${hint.saveAmount.toFixed(2)}€)`}
+        aria-label={t("viewCheaperAria", { amount: formattedSave })}
       >
         <SupermarketChainBadge originId={hint.originId} variant="logoSmall" />
       </Link>
-      <span className="text-primary text-xs font-semibold tabular-nums">−{hint.saveAmount.toFixed(2)}€</span>
+      <span className="text-primary text-xs font-semibold tabular-nums">−{formattedSave}</span>
     </div>
   )
 }
@@ -62,6 +69,7 @@ export function DealSummaryCard({
   cheaperHint,
   className,
 }: DealSummaryCardProps) {
+  const t = useTranslations("products.dealSummary")
   if (isLoading) {
     return <Skeleton variant="shimmer" className={cn("h-24 w-full rounded-xl", className)} />
   }
@@ -146,7 +154,7 @@ export function DealSummaryCard({
             <p className="text-foreground text-sm leading-snug font-medium wrap-break-word">{deal.summaryLine}</p>
           </>
         ) : (
-          <p className="text-muted-foreground text-sm font-medium">Compare stores below for the best current price.</p>
+          <p className="text-muted-foreground text-sm font-medium">{t("compareBelow")}</p>
         )}
         {cheaperHint ? <CheaperElsewhereInline hint={cheaperHint} /> : null}
       </div>
@@ -160,6 +168,7 @@ type TrackedHintProps = {
 }
 
 export function DealSummaryCardTrackedHint({ className, cheaperHint }: TrackedHintProps) {
+  const t = useTranslations("products.dealSummary")
   return (
     <div
       className={cn(
@@ -169,7 +178,7 @@ export function DealSummaryCardTrackedHint({ className, cheaperHint }: TrackedHi
     >
       <div className="flex gap-2">
         <BinocularsIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-        <p>Add to favorites to build price history. You&apos;ll see how typical this price is.</p>
+        <p>{t("addToFavoritesHint")}</p>
       </div>
       {cheaperHint ? <CheaperElsewhereInline hint={cheaperHint} /> : null}
     </div>

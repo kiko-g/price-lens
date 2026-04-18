@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/business/product"
@@ -24,6 +25,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
   const isPriceRecommendedNotSet = !sp.price_recommended && sp.price
   const isPriceEqualToRecommended = sp.price_recommended && sp.price && sp.price_recommended === sp.price
   const isNormalPrice = isPriceRecommendedNotSet || isPriceEqualToRecommended
+  const tHero = useTranslations("products.hero")
 
   return (
     <article className="flex w-full flex-col gap-2 md:hidden">
@@ -43,7 +45,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
           />
         ) : (
           <div className="bg-muted flex h-full w-full items-center justify-center">
-            <p className="text-muted-foreground">No image available</p>
+            <p className="text-muted-foreground">{tHero("noImage")}</p>
           </div>
         )}
 
@@ -51,7 +53,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
           <div className="absolute bottom-3 left-3 z-10">
             <Badge variant="dark" size="md" className="w-fit">
               <WifiOffIcon className="h-4 w-4" />
-              Not available
+              {tHero("notAvailable")}
             </Badge>
           </div>
         )}

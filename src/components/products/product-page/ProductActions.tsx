@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import type { StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/hooks/useUser"
@@ -29,8 +31,9 @@ export function ProductActions({ sp }: ProductActionsProps) {
   const updateStoreProduct = useUpdateStoreProduct()
   const { promptAndSetPriority, clearPriority, isPending: isPriorityPending } = useSetProductPriority(sp.id)
   const compactActions = useMediaQuery("(max-width: 768px)")
+  const t = useTranslations("products.actions")
 
-  const supermarketName = getSupermarketChainName(sp?.origin_id)
+  const supermarketName = getSupermarketChainName(sp?.origin_id) ?? ""
   const elevated = process.env.NODE_ENV === "development" || profile?.role === "admin"
 
   return (
@@ -47,11 +50,11 @@ export function ProductActions({ sp }: ProductActionsProps) {
         >
           <ResponsiveActionsMenuItem asChild>
             <DrawerSheet
-              title="Details"
-              description="Inspect store product data"
+              title={t("details")}
+              description={t("inspectData")}
               trigger={
                 <button type="button" className="flex w-full items-center justify-between gap-2">
-                  Store product details
+                  {t("storeProductDetails")}
                   <InfoIcon />
                 </button>
               }
@@ -67,7 +70,7 @@ export function ProductActions({ sp }: ProductActionsProps) {
             disabled={updateStoreProduct.isPending}
           >
             <span className="flex w-full items-center gap-1">
-              <span>Update from {supermarketName}</span>
+              <span>{t("updateFrom", { store: supermarketName })}</span>
               <DevBadge />
             </span>
             {updateStoreProduct.isPending ? <LoadingIcon /> : <RefreshCcwIcon />}
@@ -76,7 +79,7 @@ export function ProductActions({ sp }: ProductActionsProps) {
           {elevated && (
             <ResponsiveActionsMenuItem onClick={promptAndSetPriority} disabled={isPriorityPending}>
               <span className="flex w-full items-center gap-1">
-                <span>Set priority</span>
+                <span>{t("setPriority")}</span>
                 <DevBadge />
               </span>
               <MicroscopeIcon />
@@ -86,7 +89,7 @@ export function ProductActions({ sp }: ProductActionsProps) {
           {elevated && (
             <ResponsiveActionsMenuItem onClick={clearPriority} disabled={isPriorityPending}>
               <span className="flex w-full items-center gap-1">
-                <span>Clear priority</span>
+                <span>{t("clearPriority")}</span>
                 <DevBadge />
               </span>
               <CircleIcon />

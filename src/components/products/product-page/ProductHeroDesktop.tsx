@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { discountValueToPercentage } from "@/lib/business/product"
@@ -44,6 +45,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
   const isNormalPrice = isPriceRecommendedNotSet || isPriceEqualToRecommended
   const isAdmin = useIsAdmin()
   const elevated = process.env.NODE_ENV === "development" || isAdmin
+  const tHero = useTranslations("products.hero")
 
   return (
     <article className="hidden w-full grid-cols-20 gap-8 md:grid">
@@ -64,7 +66,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
             />
           ) : (
             <div className="bg-muted flex h-full w-full items-center justify-center">
-              <p className="text-muted-foreground">No image available</p>
+              <p className="text-muted-foreground">{tHero("noImage")}</p>
             </div>
           )}
 
@@ -72,7 +74,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
             <div className="absolute top-3 left-3 z-10">
               <Badge variant="destructive" size="sm" roundedness="sm" className="w-fit">
                 <AlertTriangleIcon className="h-4 w-4" />
-                Not available
+                {tHero("notAvailable")}
               </Badge>
             </div>
           )}

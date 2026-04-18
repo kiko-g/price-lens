@@ -715,6 +715,142 @@
         "viewDetails": "Vê os detalhes do produto no Price Lens"
       }
     },
+    "hero": {
+      "noImage": "Sem imagem disponível",
+      "notAvailable": "Indisponível"
+    },
+    "freshness": {
+      "trigger": "Verificado {time}",
+      "ariaLabel": "Detalhes da verificação de preço. Última verificação {time}.",
+      "title": "Última verificação do preço",
+      "scrapeNote": "Quando o nosso scrape confirma a listagem, registamos este timestamp.",
+      "priorityDesktop": "Este produto tem prioridade <strong>{priority}</strong>, ou seja, é verificado a cada <strong>{refresh}</strong>.",
+      "priorityMobile": "Atualizamos cerca de cada <strong>{refresh}</strong>. A prioridade <strong>{priority}</strong> define a frequência.",
+      "addToTrackDesktop": "<strong>Adiciona aos favoritos</strong> para ativar acompanhamento regular do preço.",
+      "addToTrackMobileTitle": "Favoritos",
+      "addToTrackMobile": "<strong>Favoritos</strong>: adiciona este produto para o acompanharmos com mais frequência."
+    },
+    "alertButton": {
+      "removed": "Alerta removido",
+      "set": "Alerta definido para {name}",
+      "setDescription": "Avisamos-te quando o preço descer.",
+      "ariaRemove": "Remover alerta de preço",
+      "ariaSet": "Criar alerta de preço",
+      "labelOn": "Alerta ativo",
+      "labelOff": "Alertar-me",
+      "tooltipRemove": "Remover alerta de preço",
+      "tooltipSet": "Receber aviso quando o preço descer"
+    },
+    "favoriteButton": {
+      "signInTitle": "Inicia sessão para guardar favoritos",
+      "signInAria": "Inicia sessão para adicionar aos favoritos",
+      "addLabel": "Adicionar aos favoritos",
+      "removeLabel": "Remover dos favoritos"
+    },
+    "actions": {
+      "details": "Detalhes",
+      "inspectData": "Inspecionar dados do produto",
+      "storeProductDetails": "Detalhes do produto na loja",
+      "updateFrom": "Atualizar do {store}",
+      "setPriority": "Definir prioridade",
+      "clearPriority": "Limpar prioridade"
+    },
+    "dealSummary": {
+      "cheaperElsewhere": "Mais barato noutra loja",
+      "viewCheaperAria": "Ver preço mais barato na loja parceira (poupa {amount})",
+      "compareBelow": "Compara as lojas abaixo para encontrares o melhor preço atual.",
+      "addToFavoritesHint": "Adiciona aos favoritos para construir o histórico de preços. Vais ver quão típico é este preço."
+    },
+    "categoryBreadcrumb": {
+      "ariaNav": "Categoria do produto",
+      "originalIn": "Hierarquia original em"
+    },
+    "related": {
+      "title": "Produtos relacionados",
+      "errorTitle": "Falha a carregar produtos relacionados",
+      "emptyTitle": "Sem produtos relacionados",
+      "emptyMessage": "Não encontrámos produtos relacionados neste momento. Volta mais tarde, o nosso catálogo é atualizado regularmente.",
+      "count": "{count, plural, one {# produto} other {# produtos}}",
+      "prevAria": "Slide anterior",
+      "nextAria": "Próximo slide"
+    },
+    "showcase": {
+      "states": {
+        "loadErrorTitle": "Não foi possível carregar produtos",
+        "loadErrorMessage": "Ocorreu um erro. Tenta novamente.",
+        "noResultsTitle": "Nenhum produto corresponde aos teus filtros",
+        "noResultsMessage": "Tenta ajustar os filtros ou limpar a pesquisa.",
+        "emptyTitle": "Ainda sem produtos",
+        "emptyMessage": "Explora o catálogo para veres produtos aqui.",
+        "loading": "A carregar…",
+        "clearFilters": "Limpar filtros"
+      },
+      "filters": {
+        "title": "Filtros",
+        "search": "Pesquisar",
+        "searchPlaceholder": "Pesquisar produtos…",
+        "searchBy": "Pesquisar por",
+        "sort": "Ordenar",
+        "sortBy": "Ordenar por",
+        "store": "Loja",
+        "allStores": "Todas as lojas",
+        "category": "Categoria",
+        "allCategories": "Todas as categorias",
+        "brand": "Marca",
+        "priceRange": "Intervalo de preços",
+        "discounted": "Apenas com desconto",
+        "available": "Apenas disponíveis",
+        "priority": "Prioridade",
+        "source": "Origem",
+        "clear": "Limpar",
+        "apply": "Aplicar",
+        "active": "{count} ativos"
+      },
+      "pagination": {
+        "showing": "A mostrar <strong>{from}-{to}</strong> de <strong>{total}</strong>",
+        "showingBottom": "A mostrar <strong>{from}</strong> a <strong>{to}</strong> de <strong>{total}</strong>",
+        "prev": "Anterior",
+        "next": "Seguinte"
+      },
+      "milestone": "{count} produtos e a crescer"
+    },
+    "off": {
+      "lookupTitle": "Produto Open Food Facts",
+      "noStoresTitle": "Fora das lojas que acompanhamos",
+      "noStoresBody": "Ainda não acompanhamos este produto, mas eis o que o Open Food Facts sabe sobre ele.",
+      "viewOnOff": "Ver no Open Food Facts",
+      "addToTracking": "Sugerir acompanhamento",
+      "details": {
+        "title": "Detalhes do produto",
+        "brand": "Marca",
+        "categories": "Categorias",
+        "labels": "Rótulos",
+        "stores": "Vendido em",
+        "countries": "Países",
+        "packaging": "Embalagem",
+        "ingredients": "Ingredientes",
+        "nutrients": "Nutrição (por 100g)",
+        "allergens": "Alergénios",
+        "additives": "Aditivos",
+        "noInfo": "Sem informação disponível"
+      },
+      "actions": {
+        "openOff": "Abrir no Open Food Facts",
+        "openGoogle": "Pesquisar no Google"
+      },
+      "search": {
+        "title": "À procura de produtos semelhantes?",
+        "body": "Pesquisa nas nossas lojas acompanhadas por produtos correspondentes.",
+        "cta": "Pesquisar nos nossos produtos"
+      },
+      "card": {
+        "noImage": "Sem imagem"
+      }
+    },
+    "priorityChip": {
+      "label": "Prioridade {value}",
+      "noPriority": "Sem prioridade"
+    },
     "card": {
       "favorite": {
         "add": "Adicionar aos favoritos",

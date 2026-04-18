@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 
 import type { StoreProduct } from "@/types"
@@ -54,6 +55,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", skipSnaps: false })
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
+  const t = useTranslations("products.related")
 
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev()
   const scrollNext = () => emblaApi && emblaApi.scrollNext()
@@ -77,7 +79,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
   }, [emblaApi])
 
   if (error) {
-    return <ErrorStateView error={error} title="Failed to load related products" />
+    return <ErrorStateView error={error} title={t("errorTitle")} />
   }
 
   if (isLoading) {
@@ -90,14 +92,11 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-lg font-semibold">
             <ChartScatterIcon className="h-5 w-5" />
-            Related Products
+            {t("title")}
           </h3>
         </div>
 
-        <EmptyStateView
-          title="No related products found"
-          message="We couldn't find related products for this item right now. Check back later as our catalog updates regularly."
-        />
+        <EmptyStateView title={t("emptyTitle")} message={t("emptyMessage")} />
       </div>
     )
   }
@@ -107,9 +106,9 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <ChartScatterIcon className="h-5 w-5" />
-          Related Products
+          {t("title")}
           <Badge variant="boring" size="xs">
-            {products.length} product{products.length !== 1 ? "s" : ""}
+            {t("count", { count: products.length })}
           </Badge>
         </h3>
         <div className="flex gap-2">
@@ -121,7 +120,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
             disabled={!canScrollPrev}
           >
             <ArrowLeftIcon className="h-4 w-4" />
-            <span className="sr-only">Previous slide</span>
+            <span className="sr-only">{t("prevAria")}</span>
           </Button>
           <Button
             variant="outline"
@@ -131,7 +130,7 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
             disabled={!canScrollNext}
           >
             <ArrowRightIcon className="h-4 w-4" />
-            <span className="sr-only">Next slide</span>
+            <span className="sr-only">{t("nextAria")}</span>
           </Button>
         </div>
       </div>

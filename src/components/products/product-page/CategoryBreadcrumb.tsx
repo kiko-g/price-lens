@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import type { StoreProduct } from "@/types"
@@ -53,13 +54,14 @@ interface CategoryBreadcrumbProps {
 
 export function CategoryBreadcrumb({ sp, className }: CategoryBreadcrumbProps) {
   const segments = buildSegments(sp)
+  const t = useTranslations("products.categoryBreadcrumb")
   if (segments.length === 0) return null
 
   const originalCategoryText = buildOriginalCategoryText(sp)
   const hasCanonical = !!sp.canonical_category_name
 
   return (
-    <nav aria-label="Product category" className={cn("flex items-center gap-1 overflow-hidden", className)}>
+    <nav aria-label={t("ariaNav")} className={cn("flex items-center gap-1 overflow-hidden", className)}>
       <ol className="flex items-center gap-0.5 overflow-hidden text-xs md:text-sm">
         {segments.map((segment, i) => (
           <li key={i} className="flex items-center gap-0.5">
@@ -73,7 +75,7 @@ export function CategoryBreadcrumb({ sp, className }: CategoryBreadcrumbProps) {
                   <TooltipContent side="bottom" align="start" sideOffset={6}>
                     <div className="flex flex-col gap-0">
                       <span className="mb-1 flex items-center gap-1 text-xs font-medium">
-                        Original hierarchy in{" "}
+                        {t("originalIn")}{" "}
                         <span className="inline-flex items-center justify-center rounded-full bg-white px-1.5 py-0.5 [--background:var(--color-white)] [--foreground:var(--base-800)]">
                           <SupermarketChainBadge originId={sp.origin_id} variant="logoSmall" />
                         </span>

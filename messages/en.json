@@ -715,6 +715,142 @@
         "viewDetails": "View product details on Price Lens"
       }
     },
+    "hero": {
+      "noImage": "No image available",
+      "notAvailable": "Not available"
+    },
+    "freshness": {
+      "trigger": "Verified {time}",
+      "ariaLabel": "Price verification details. Last verified {time}.",
+      "title": "Price last verified",
+      "scrapeNote": "When our scrape confirms the listing, we record this timestamp.",
+      "priorityDesktop": "This product has priority <strong>{priority}</strong> meaning it is checked every <strong>{refresh}</strong>.",
+      "priorityMobile": "We aim to refresh about every <strong>{refresh}</strong>. Priority <strong>{priority}</strong> sets how often it is queued.",
+      "addToTrackDesktop": "<strong>Add to favorites</strong> to enable regular price tracking.",
+      "addToTrackMobileTitle": "Favorites",
+      "addToTrackMobile": "<strong>Favorites</strong>: add this product to bump how often we check it."
+    },
+    "alertButton": {
+      "removed": "Alert removed",
+      "set": "Alert set for {name}",
+      "setDescription": "We'll notify you when the price drops.",
+      "ariaRemove": "Remove price alert",
+      "ariaSet": "Set price alert",
+      "labelOn": "Alert on",
+      "labelOff": "Alert me",
+      "tooltipRemove": "Remove price alert",
+      "tooltipSet": "Get notified when the price drops"
+    },
+    "favoriteButton": {
+      "signInTitle": "Sign in to save favorites",
+      "signInAria": "Sign in to add to favorites",
+      "addLabel": "Add to favorites",
+      "removeLabel": "Remove from favorites"
+    },
+    "actions": {
+      "details": "Details",
+      "inspectData": "Inspect store product data",
+      "storeProductDetails": "Store product details",
+      "updateFrom": "Update from {store}",
+      "setPriority": "Set priority",
+      "clearPriority": "Clear priority"
+    },
+    "dealSummary": {
+      "cheaperElsewhere": "Cheaper at another store",
+      "viewCheaperAria": "View cheaper price at partner store (save {amount})",
+      "compareBelow": "Compare stores below for the best current price.",
+      "addToFavoritesHint": "Add to favorites to build price history. You'll see how typical this price is."
+    },
+    "categoryBreadcrumb": {
+      "ariaNav": "Product category",
+      "originalIn": "Original hierarchy in"
+    },
+    "related": {
+      "title": "Related Products",
+      "errorTitle": "Failed to load related products",
+      "emptyTitle": "No related products found",
+      "emptyMessage": "We couldn't find related products for this item right now. Check back later as our catalog updates regularly.",
+      "count": "{count, plural, one {# product} other {# products}}",
+      "prevAria": "Previous slide",
+      "nextAria": "Next slide"
+    },
+    "showcase": {
+      "states": {
+        "loadErrorTitle": "Could not load products",
+        "loadErrorMessage": "Something went wrong. Please try again.",
+        "noResultsTitle": "No products match your filters",
+        "noResultsMessage": "Try adjusting filters or clearing the search.",
+        "emptyTitle": "No products yet",
+        "emptyMessage": "Browse the catalog to see products here.",
+        "loading": "Loading…",
+        "clearFilters": "Clear filters"
+      },
+      "filters": {
+        "title": "Filters",
+        "search": "Search",
+        "searchPlaceholder": "Search products…",
+        "searchBy": "Search by",
+        "sort": "Sort",
+        "sortBy": "Sort by",
+        "store": "Store",
+        "allStores": "All stores",
+        "category": "Category",
+        "allCategories": "All categories",
+        "brand": "Brand",
+        "priceRange": "Price range",
+        "discounted": "Only discounted",
+        "available": "Only available",
+        "priority": "Priority",
+        "source": "Source",
+        "clear": "Clear",
+        "apply": "Apply",
+        "active": "{count} active"
+      },
+      "pagination": {
+        "showing": "Showing <strong>{from}-{to}</strong> of <strong>{total}</strong>",
+        "showingBottom": "Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong>",
+        "prev": "Prev",
+        "next": "Next"
+      },
+      "milestone": "{count} products and counting"
+    },
+    "off": {
+      "lookupTitle": "Open Food Facts product",
+      "noStoresTitle": "Not in our tracked stores",
+      "noStoresBody": "We don't track this product yet, but here's what Open Food Facts knows about it.",
+      "viewOnOff": "View on Open Food Facts",
+      "addToTracking": "Suggest tracking",
+      "details": {
+        "title": "Product details",
+        "brand": "Brand",
+        "categories": "Categories",
+        "labels": "Labels",
+        "stores": "Sold at",
+        "countries": "Countries",
+        "packaging": "Packaging",
+        "ingredients": "Ingredients",
+        "nutrients": "Nutrition (per 100g)",
+        "allergens": "Allergens",
+        "additives": "Additives",
+        "noInfo": "No information available"
+      },
+      "actions": {
+        "openOff": "Open on Open Food Facts",
+        "openGoogle": "Search on Google"
+      },
+      "search": {
+        "title": "Looking for similar products?",
+        "body": "Search our tracked supermarkets for matching products.",
+        "cta": "Search our products"
+      },
+      "card": {
+        "noImage": "No image"
+      }
+    },
+    "priorityChip": {
+      "label": "Priority {value}",
+      "noPriority": "No priority"
+    },
     "card": {
       "favorite": {
         "add": "Add to favorites",

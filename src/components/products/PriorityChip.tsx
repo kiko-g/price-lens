@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function PriorityChip({ priority, size = "2xs", variant = "compact", className }: Props) {
+  const t = useTranslations("products.priorityChip")
   const key = priority === null ? "null" : String(priority)
   const config = PRIORITY_CONFIG[key]
   const label = priority === null ? (config?.label ?? "?") : `${priority}/5`
@@ -28,14 +30,7 @@ export function PriorityChip({ priority, size = "2xs", variant = "compact", clas
       )}
       title={tooltip}
     >
-      {variant === "compact" ? (
-        <span>{label}</span>
-      ) : (
-        <>
-          Priority
-          <span>{label}</span>
-        </>
-      )}
+      {variant === "compact" ? <span>{label}</span> : <span>{t("label", { value: label })}</span>}
     </Badge>
   )
 }

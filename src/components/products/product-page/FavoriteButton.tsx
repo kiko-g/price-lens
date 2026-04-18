@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import type { StoreProduct } from "@/types"
@@ -16,6 +17,7 @@ export function FavoriteButton({ storeProduct, compact = false }: { storeProduct
   const { toggleFavorite, isLoading } = useFavoriteToggle()
   const [isFavorited, setIsFavorited] = useState(storeProduct.is_favorited ?? false)
   const [loginPromptOpen, setLoginPromptOpen] = useState(false)
+  const t = useTranslations("products.favoriteButton")
 
   const favoriteLoading = isLoading(storeProduct.id ?? 0)
 
@@ -35,11 +37,11 @@ export function FavoriteButton({ storeProduct, compact = false }: { storeProduct
           variant="outline"
           size={compact ? "icon-lg" : "sm"}
           onClick={() => setLoginPromptOpen(true)}
-          title="Sign in to save favorites"
-          aria-label="Sign in to add to favorites"
+          title={t("signInTitle")}
+          aria-label={t("signInAria")}
         >
           <HeartIcon className="h-4 w-4" />
-          {!compact ? "Add to favorites" : null}
+          {!compact ? t("addLabel") : null}
         </Button>
         <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
       </>
@@ -52,8 +54,8 @@ export function FavoriteButton({ storeProduct, compact = false }: { storeProduct
       size={compact ? "icon-lg" : "sm"}
       onClick={handleToggleFavorite}
       disabled={favoriteLoading}
-      title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-      aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+      title={isFavorited ? t("removeLabel") : t("addLabel")}
+      aria-label={isFavorited ? t("removeLabel") : t("addLabel")}
     >
       <HeartIcon
         className={cn(
@@ -62,7 +64,7 @@ export function FavoriteButton({ storeProduct, compact = false }: { storeProduct
           favoriteLoading && "animate-pulse",
         )}
       />
-      {!compact ? (isFavorited ? "Remove from favorites" : "Add to favorites") : null}
+      {!compact ? (isFavorited ? t("removeLabel") : t("addLabel")) : null}
     </Button>
   )
 }
