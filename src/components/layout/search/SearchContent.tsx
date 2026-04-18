@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { STORE_NAMES } from "@/types/business"
-import { generateProductPath, popularProducts } from "@/lib/business/product"
+import { generateProductPath, getPopularProducts } from "@/lib/business/product"
+import { isLocale } from "@/i18n/config"
 import { useRecentSearches } from "@/hooks/useRecentSearches"
 import { useLiveSearch } from "@/hooks/useLiveSearch"
 import type { StoreProductWithMeta } from "@/hooks/useStoreProducts"
@@ -30,6 +32,9 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState(initialQuery ?? "")
+  const t = useTranslations("search")
+  const locale = useLocale()
+  const popularProducts = useMemo(() => getPopularProducts(isLocale(locale) ? locale : "pt"), [locale])
 
   const { searches: recentSearches, addSearch, removeSearch, hasSearches } = useRecentSearches()
   const { results, isLoading, isDebouncing, isEmpty } = useLiveSearch(query, { enabled: true, limit: MAX_LIVE_RESULTS })
@@ -88,7 +93,7 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
           ref={inputRef}
           type="search"
           enterKeyHint="search"
-          placeholder="What product are you looking for?"
+          placeholder={t("placeholder")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -99,7 +104,7 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
             type="button"
             onClick={handleClearQuery}
             className="text-muted-foreground hover:text-foreground ml-2 p-1"
-            aria-label="Clear search"
+            aria-label={t("clear")}
           >
             <XIcon className="h-4 w-4" />
           </button>
@@ -113,14 +118,14 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
           {query.trim() && (
             <SearchItem
               icon={<SearchIcon className="h-4 w-4" />}
-              label={`Search for "${query}"`}
+              label={t("searchFor", { query })}
               onClick={() => handleSearch(query)}
             />
           )}
 
           {/* recent searches */}
           {showRecent && (
-            <SearchSection title="Recent Searches">
+            <SearchSection title={t("recent")}>
               {recentSearches.map((search) => (
                 <SearchItem
                   key={search}
@@ -128,6 +133,7 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
                   label={search}
                   onClick={() => handleSearch(search)}
                   onRemove={() => removeSearch(search)}
+                  removeAriaLabel={t("removeRecent", { query: search })}
                 />
               ))}
             </SearchSection>
@@ -135,7 +141,7 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
 
           {/* live results */}
           {showLiveResults && (
-            <SearchSection title="Product Results">
+            <SearchSection title={t("productResults")}>
               {isLoading ? (
                 Array.from({ length: MAX_LIVE_RESULTS }).map((_, index) => <ProductSkeleton key={index} />)
               ) : results.length > 0 ? (
@@ -143,14 +149,14 @@ export function SearchContent({ onClose, autoFocus = true, initialQuery }: Searc
                   <ProductItem key={product.id} product={product} onClick={() => handleProductClick(product)} />
                 ))
               ) : isEmpty ? (
-                <p className="text-muted-foreground py-4 text-center text-sm">No products found</p>
+                <p className="text-muted-foreground py-4 text-center text-sm">{t("noProducts")}</p>
               ) : null}
             </SearchSection>
           )}
 
           {/* popular products */}
           {showPopular && filteredPopular.length > 0 && (
-            <SearchSection title="Popular Products">
+            <SearchSection title={t("popular")}>
               {filteredPopular.map((product) => (
                 <SearchItem
                   key={product.value}
@@ -191,9 +197,10 @@ interface SearchItemProps {
   label: string
   onClick: () => void
   onRemove?: () => void
+  removeAriaLabel?: string
 }
 
-function SearchItem({ icon, label, onClick, onRemove }: SearchItemProps) {
+function SearchItem({ icon, label, onClick, onRemove, removeAriaLabel }: SearchItemProps) {
   return (
     <div
       role="button"
@@ -215,7 +222,7 @@ function SearchItem({ icon, label, onClick, onRemove }: SearchItemProps) {
             onRemove()
           }}
           className="text-muted-foreground hover:text-foreground p-1"
-          aria-label={`Remove ${label} from recent searches`}
+          aria-label={removeAriaLabel ?? label}
         >
           <XIcon className="h-3.5 w-3.5" />
         </button>
@@ -250,7 +257,7 @@ function ProductItem({ product, onClick }: ProductItemProps) {
         {product.image ? (
           <Image
             src={product.image}
-            alt={product.name || "Product"}
+            alt={product.name || ""}
             fill
             className="object-contain p-1"
             sizes="48px"

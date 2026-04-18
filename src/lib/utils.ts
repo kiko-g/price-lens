@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { formatDateTime } from "@/lib/i18n/format"
+import type { Locale } from "@/i18n/config"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -24,16 +26,9 @@ export function now() {
   return new Date().toISOString().replace("Z", "+00:00")
 }
 
-export function formatTimestamptz(timestamptz: string | null) {
+export function formatTimestamptz(timestamptz: string | null, locale?: Locale | string) {
   if (!timestamptz) return ""
-
-  return new Date(timestamptz).toLocaleString("pt-PT", {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })
+  return formatDateTime(new Date(timestamptz), locale)
 }
 
 export function getDaysBetweenDates(startDate: Date, endDate: Date) {

@@ -66,5 +66,15 @@
     "getTheApp": "Get the App",
     "admin": "Admin",
     "profile": "Profile"
+  },
+  "search": {
+    "placeholder": "What product are you looking for?",
+    "clear": "Clear search",
+    "searchFor": "Search for \"{query}\"",
+    "recent": "Recent searches",
+    "productResults": "Product results",
+    "popular": "Popular products",
+    "noProducts": "No products found",
+    "removeRecent": "Remove {query} from recent searches"
   }
 }
