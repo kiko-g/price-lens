@@ -295,6 +295,7 @@ export type Database = {
           avatar_url: string | null
           full_name: string | null
           id: string
+          locale: string | null
           plan: Database["public"]["Enums"]["plan_tier"]
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
@@ -303,6 +304,7 @@ export type Database = {
           avatar_url?: string | null
           full_name?: string | null
           id: string
+          locale?: string | null
           plan?: Database["public"]["Enums"]["plan_tier"]
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
@@ -311,6 +313,7 @@ export type Database = {
           avatar_url?: string | null
           full_name?: string | null
           id?: string
+          locale?: string | null
           plan?: Database["public"]["Enums"]["plan_tier"]
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null

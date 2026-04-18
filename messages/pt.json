@@ -1,0 +1,70 @@
+{
+  "common": {
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "close": "Fechar",
+      "confirm": "Confirmar",
+      "continue": "Continuar",
+      "back": "Voltar",
+      "next": "Seguinte",
+      "retry": "Tentar novamente",
+      "loadMore": "Carregar mais",
+      "search": "Pesquisar",
+      "clear": "Limpar",
+      "apply": "Aplicar",
+      "submit": "Submeter",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "copy": "Copiar",
+      "share": "Partilhar",
+      "signIn": "Iniciar sessão",
+      "signOut": "Terminar sessão",
+      "getStarted": "Começar",
+      "learnMore": "Saber mais"
+    },
+    "states": {
+      "loading": "A carregar…",
+      "empty": "Nada para mostrar",
+      "error": "Ocorreu um erro",
+      "notFound": "Não encontrado"
+    },
+    "labels": {
+      "price": "Preço",
+      "brand": "Marca",
+      "category": "Categoria",
+      "store": "Loja",
+      "savings": "Poupança",
+      "discount": "Desconto",
+      "filters": "Filtros",
+      "sortBy": "Ordenar por",
+      "language": "Idioma",
+      "theme": "Tema",
+      "preferences": "Preferências",
+      "appearance": "Aparência",
+      "account": "Conta",
+      "profile": "Perfil",
+      "settings": "Definições"
+    },
+    "languages": {
+      "en": "English",
+      "pt": "Português"
+    }
+  },
+  "metadata": {
+    "site": {
+      "name": "Price Lens",
+      "description": "Monitorização diária de preços dos supermercados portugueses (Continente, Auchan e Pingo Doce). Transforma variações de preço em poupança. Mais dinheiro no teu bolso. Tudo no Price Lens."
+    }
+  },
+  "nav": {
+    "home": "Início",
+    "browse": "Explorar",
+    "deals": "Promoções",
+    "favorites": "Favoritos",
+    "about": "Sobre",
+    "getTheApp": "Obter a App",
+    "admin": "Admin",
+    "profile": "Perfil"
+  }
+}

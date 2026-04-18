@@ -1,0 +1,70 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "back": "Back",
+      "next": "Next",
+      "retry": "Try again",
+      "loadMore": "Load more",
+      "search": "Search",
+      "clear": "Clear",
+      "apply": "Apply",
+      "submit": "Submit",
+      "delete": "Delete",
+      "edit": "Edit",
+      "copy": "Copy",
+      "share": "Share",
+      "signIn": "Sign in",
+      "signOut": "Sign out",
+      "getStarted": "Get started",
+      "learnMore": "Learn more"
+    },
+    "states": {
+      "loading": "Loading…",
+      "empty": "Nothing to show",
+      "error": "Something went wrong",
+      "notFound": "Not found"
+    },
+    "labels": {
+      "price": "Price",
+      "brand": "Brand",
+      "category": "Category",
+      "store": "Store",
+      "savings": "Savings",
+      "discount": "Discount",
+      "filters": "Filters",
+      "sortBy": "Sort by",
+      "language": "Language",
+      "theme": "Theme",
+      "preferences": "Preferences",
+      "appearance": "Appearance",
+      "account": "Account",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "languages": {
+      "en": "English",
+      "pt": "Português"
+    }
+  },
+  "metadata": {
+    "site": {
+      "name": "Price Lens",
+      "description": "Daily price monitoring for Portuguese supermarkets (Continente, Auchan and Pingo Doce). Turn price swings into savings. More money in your pocket. All in Price Lens."
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "browse": "Browse",
+    "deals": "Deals",
+    "favorites": "Favorites",
+    "about": "About",
+    "getTheApp": "Get the App",
+    "admin": "Admin",
+    "profile": "Profile"
+  }
+}

@@ -5,8 +5,11 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import React from "react"
 import { GeistSans } from "geist/font/sans"
+import { NextIntlClientProvider } from "next-intl"
+import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
+import { isLocale, toLocaleTag, toOpenGraphLocale } from "@/i18n/config"
 
 import { Providers } from "./providers"
 import { Analytics } from "@/components/layout/Analytics"
@@ -45,87 +48,97 @@ export const viewport: Viewport = {
   ],
 }
 
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
-  metadataBase: new URL(siteConfig.url),
-  description: siteConfig.description,
-  keywords: [
-    "Price Tracking",
-    "Supermarket Prices",
-    "Portugal",
-    "Continente",
-    "Pingo Doce",
-    "Auchan",
-    "Price Comparison",
-    "Grocery",
-    "Inflation",
-  ],
-  authors: [
-    {
-      name: siteConfig.author,
-      url: siteConfig.links.website,
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as "en" | "pt"
+  const t = await getTranslations({ locale, namespace: "metadata.site" })
+  const description = t("description")
+  const name = t("name")
+
+  return {
+    title: {
+      default: name,
+      template: `%s | ${name}`,
     },
-  ],
-  creator: siteConfig.author,
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: siteConfig.name,
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    locale: "pt_PT",
-    url: siteConfig.url,
-    title: siteConfig.name,
-    description: siteConfig.description,
-    siteName: siteConfig.name,
-    images: [
+    metadataBase: new URL(siteConfig.url),
+    description,
+    keywords: [
+      "Price Tracking",
+      "Supermarket Prices",
+      "Portugal",
+      "Continente",
+      "Pingo Doce",
+      "Auchan",
+      "Price Comparison",
+      "Grocery",
+      "Inflation",
+    ],
+    authors: [
       {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 628,
-        alt: siteConfig.name,
+        name: siteConfig.author,
+        url: siteConfig.links.website,
       },
     ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
-    images: [siteConfig.ogImage],
-    creator: siteConfig.socialhandle,
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-    other: [
-      { url: "/icons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
-    ],
-  },
-  manifest: `${siteConfig.url}/site.webmanifest`,
+    creator: siteConfig.author,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: name,
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    openGraph: {
+      type: "website",
+      locale: toOpenGraphLocale(isLocale(locale) ? locale : "pt"),
+      url: siteConfig.url,
+      title: name,
+      description,
+      siteName: name,
+      images: [
+        {
+          url: siteConfig.ogImage,
+          width: 1200,
+          height: 628,
+          alt: name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: name,
+      description,
+      images: [siteConfig.ogImage],
+      creator: siteConfig.socialhandle,
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      ],
+      apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+      other: [
+        { url: "/icons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+      ],
+    },
+    manifest: `${siteConfig.url}/site.webmanifest`,
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   const useReactScan = false
+  const locale = await getLocale()
+  const messages = await getMessages()
+  const htmlLang = toLocaleTag(isLocale(locale) ? locale : "pt")
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={htmlLang} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: SPLASH_STYLES }} />
         <link rel="preload" href="/price-lens.svg" as="image" type="image/svg+xml" />
@@ -159,13 +172,15 @@ export default function RootLayout({
             __html: `setTimeout(function(){var s=document.getElementById('__splash');if(s)s.setAttribute('data-hidden','')},8000)`,
           }}
         />
-        <Providers>
-          <Analytics />
-          <ServiceWorkerRegistration />
-          <PWAInstallPrompt />
-          <MainLayout>{children}</MainLayout>
-          <Toaster />
-        </Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>
+            <Analytics />
+            <ServiceWorkerRegistration />
+            <PWAInstallPrompt />
+            <MainLayout>{children}</MainLayout>
+            <Toaster />
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
