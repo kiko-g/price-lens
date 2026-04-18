@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import { cn, getCenteredArray } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -21,6 +22,7 @@ export function PaginationControls({
   className,
 }: PaginationControlsProps) {
   const isNextDisabled = isLoading || !hasNextPage
+  const t = useTranslations("products.pagination")
 
   return (
     <div className={cn("text-foreground isolate flex items-center gap-1 md:gap-2", className)}>
@@ -32,7 +34,7 @@ export function PaginationControls({
         disabled={currentPage === 1}
       >
         <ChevronLeftIcon className="h-4 w-4" />
-        Previous
+        {t("previous")}
       </Button>
 
       {totalPages != null ? (
@@ -61,7 +63,7 @@ export function PaginationControls({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={isNextDisabled}
       >
-        Next
+        {t("next")}
         <ChevronRightIcon className="h-4 w-4" />
       </Button>
     </div>
@@ -85,19 +87,23 @@ export function BottomPagination({
   hasNextPage: boolean
   onPageChange: (page: number) => void
 }) {
+  const t = useTranslations("products.pagination")
   return (
     <div className="mt-8 flex items-center justify-between border-t py-4">
       <div className="text-muted-foreground flex w-full flex-col text-sm">
         <span>
-          Showing <span className="text-foreground font-semibold">{showingFrom}</span> to{" "}
-          <span className="text-foreground font-semibold">{showingTo}</span>
-          {totalCount != null && (
-            <>
-              {" "}
-              of <span className="text-foreground font-semibold">{totalCount}</span>
-            </>
-          )}{" "}
-          results
+          {totalCount != null
+            ? t.rich("showingOfTotal", {
+                from: showingFrom,
+                to: showingTo,
+                total: totalCount,
+                strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+              })
+            : t.rich("showingNoTotal", {
+                from: showingFrom,
+                to: showingTo,
+                strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+              })}
         </span>
       </div>
 

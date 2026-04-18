@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
+import { useTranslations } from "next-intl"
 import { Button, ButtonProps } from "@/components/ui/button"
 
 import { cn } from "@/lib/utils"
@@ -17,6 +18,7 @@ export function ThemeToggle({ className, size = "icon", variant = "outline" }: P
   const { resolvedTheme, setTheme } = useTheme()
   const otherTheme = resolvedTheme === "dark" ? "light" : "dark"
   const [mounted, setMounted] = useState(false)
+  const t = useTranslations("layout.themeToggle")
 
   useEffect(() => {
     setMounted(true)
@@ -26,7 +28,7 @@ export function ThemeToggle({ className, size = "icon", variant = "outline" }: P
     <Button
       size={size}
       variant={variant}
-      aria-label={mounted ? `Switch to ${otherTheme} theme` : "Toggle theme"}
+      aria-label={mounted ? t(`switchTo.${otherTheme}` as const) : t("toggle")}
       onClick={() => setTheme(otherTheme)}
       className={cn("shadow-none", className)}
     >

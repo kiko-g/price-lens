@@ -174,7 +174,16 @@
       "lookupDescription": "Looking up Canonical #{id} on Price Lens."
     }
   },
+  "about": {
+    "title": "About Price Lens",
+    "body": "Price Lens tracks daily price changes across Portuguese supermarkets to make invisible price creep visible. Below you can explore over 25 years of inflation data and understand the bigger picture behind the numbers on the shelf."
+  },
   "errors": {
+    "page": {
+      "title": "Something went wrong",
+      "body": "An unexpected error occurred. Please try again or return to the homepage.",
+      "goHome": "Go home"
+    },
     "boundary": {
       "deals": "Could not load deals.",
       "favorites": "Could not load your favorites.",
@@ -330,7 +339,13 @@
       "clearFilters": "Clear filters",
       "findProducts": "Find products"
     },
-    "ariaBack": "Go back"
+    "ariaBack": "Go back",
+    "unauth": {
+      "title": "Sign in to view your favorites",
+      "description": "Create an account or sign in to save your favorite products and track their prices over time.",
+      "signIn": "Sign In",
+      "browseProducts": "Browse Products"
+    }
   },
   "onboarding": {
     "welcome": {
@@ -953,6 +968,16 @@
       },
       "sparseData": "Open Food Facts has limited data for this product. <link>Help improve it</link>"
     },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showingOfTotal": "Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> results",
+      "showingNoTotal": "Showing <strong>{from}</strong> to <strong>{to}</strong> results"
+    },
+    "batch": {
+      "productsCount": "{count, plural, one {# product} other {# products}}",
+      "loadedSoFar": "{count, plural, one {# product loaded so far} other {# products loaded so far}}"
+    },
     "off": {
       "lookupTitle": "Open Food Facts product",
       "noStoresTitle": "Not in our tracked stores",
@@ -1126,6 +1151,13 @@
     }
   },
   "layout": {
+    "themeToggle": {
+      "toggle": "Toggle theme",
+      "switchTo": {
+        "dark": "Switch to dark theme",
+        "light": "Switch to light theme"
+      }
+    },
     "header": {
       "openSearchFromMenu": "Open search from menu",
       "openBarcodeFromMenu": "Open barcode scan from menu",

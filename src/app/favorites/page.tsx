@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { Metadata } from "next"
 import Link from "next/link"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+import { getTranslations } from "next-intl/server"
 
 import { pageMetadataFromKey } from "@/lib/config"
 import { userQueries } from "@/lib/queries/user"
@@ -81,6 +82,7 @@ interface PageProps {
 
 export default async function FavoritesPage({ searchParams }: PageProps) {
   const { data: user } = await userQueries.getCurrentUser()
+  const t = await getTranslations("favoritesPage.unauth")
 
   if (!user) {
     return (
@@ -92,17 +94,15 @@ export default async function FavoritesPage({ searchParams }: PageProps) {
               <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
                 <LogInIcon className="h-8 w-8" />
               </div>
-              <CardTitle>Sign in to view your favorites</CardTitle>
-              <CardDescription>
-                Create an account or sign in to save your favorite products and track their prices over time.
-              </CardDescription>
+              <CardTitle>{t("title")}</CardTitle>
+              <CardDescription>{t("description")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button asChild>
-                <Link href="/login">Sign In</Link>
+                <Link href="/login">{t("signIn")}</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/products">Browse Products</Link>
+                <Link href="/products">{t("browseProducts")}</Link>
               </Button>
             </CardContent>
           </Card>

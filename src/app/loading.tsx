@@ -1,3 +1,7 @@
+/* eslint-disable @formatjs/no-literal-string-in-jsx */
+// Static brand splash shown before the next-intl provider hydrates,
+// so it cannot consume translations.
+
 export default function RootLoading() {
   return (
     <div

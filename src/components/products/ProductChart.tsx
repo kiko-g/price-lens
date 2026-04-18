@@ -20,7 +20,6 @@ import { useActiveAxis } from "@/hooks/useActiveAxis"
 import { useChartTouch } from "@/hooks/useChartTouch"
 import { usePricesWithAnalytics } from "@/hooks/usePrices"
 import { isLocale, type Locale } from "@/i18n/config"
-import { formatDate } from "@/lib/i18n/format"
 
 import type { StoreProduct, ProductChartEntry, PricePoint } from "@/types"
 import { RANGES, DateRange, daysAmountInRange } from "@/types/business"

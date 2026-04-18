@@ -174,7 +174,16 @@
       "lookupDescription": "A pesquisar Canónico #{id} no Price Lens."
     }
   },
+  "about": {
+    "title": "Sobre o Price Lens",
+    "body": "O Price Lens acompanha as variações diárias de preços nos supermercados portugueses para tornar visível a subida silenciosa dos preços. Em baixo podes explorar mais de 25 anos de dados de inflação e perceber o panorama por trás dos números nas prateleiras."
+  },
   "errors": {
+    "page": {
+      "title": "Algo correu mal",
+      "body": "Ocorreu um erro inesperado. Tenta novamente ou volta ao início.",
+      "goHome": "Ir para o início"
+    },
     "boundary": {
       "deals": "Não foi possível carregar as promoções.",
       "favorites": "Não foi possível carregar os favoritos.",
@@ -330,7 +339,13 @@
       "clearFilters": "Limpar filtros",
       "findProducts": "Encontrar produtos"
     },
-    "ariaBack": "Voltar"
+    "ariaBack": "Voltar",
+    "unauth": {
+      "title": "Inicia sessão para ver os teus favoritos",
+      "description": "Cria uma conta ou inicia sessão para guardar os teus produtos favoritos e acompanhar os preços ao longo do tempo.",
+      "signIn": "Iniciar sessão",
+      "browseProducts": "Explorar produtos"
+    }
   },
   "onboarding": {
     "welcome": {
@@ -953,6 +968,16 @@
       },
       "sparseData": "O Open Food Facts tem dados limitados para este produto. <link>Ajuda a melhorar</link>"
     },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Seguinte",
+      "showingOfTotal": "A mostrar <strong>{from}</strong> a <strong>{to}</strong> de <strong>{total}</strong> resultados",
+      "showingNoTotal": "A mostrar <strong>{from}</strong> a <strong>{to}</strong> resultados"
+    },
+    "batch": {
+      "productsCount": "{count, plural, one {# produto} other {# produtos}}",
+      "loadedSoFar": "{count, plural, one {# produto carregado até agora} other {# produtos carregados até agora}}"
+    },
     "off": {
       "lookupTitle": "Produto Open Food Facts",
       "noStoresTitle": "Fora das lojas que acompanhamos",
@@ -1126,6 +1151,13 @@
     }
   },
   "layout": {
+    "themeToggle": {
+      "toggle": "Alternar tema",
+      "switchTo": {
+        "dark": "Mudar para tema escuro",
+        "light": "Mudar para tema claro"
+      }
+    },
     "header": {
       "openSearchFromMenu": "Abrir pesquisa a partir do menu",
       "openBarcodeFromMenu": "Abrir leitura de código a partir do menu",

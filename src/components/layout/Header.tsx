@@ -89,6 +89,7 @@ export function Header() {
                 >
                   <SearchIcon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 truncate text-left text-sm">{tHeader("searchProducts")}</span>
+                  {/* eslint-disable-next-line @formatjs/no-literal-string-in-jsx -- keyboard shortcut symbol */}
                   <Kbd className="bg-muted dark:bg-foreground/10 h-5 min-w-5 px-1.5 text-[10px]">⌘K</Kbd>
                 </button>
               </SearchContainer>
