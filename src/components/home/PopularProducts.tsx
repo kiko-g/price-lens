@@ -120,12 +120,12 @@ export function PopularProducts({ products, className }: { products: HeroProduct
       <div className="relative">
         {/* Mobile: compact marquee */}
         <div className="flex flex-col gap-2 lg:hidden">
-          <Marquee className="p-0 [--duration:70s] [--gap:0.75rem]">
+          <Marquee className="p-0 [--duration:80s] [--gap:0.75rem]">
             {row1.map((product) => (
               <ProductCard key={product.id} product={product} compact />
             ))}
           </Marquee>
-          <Marquee reverse className="p-0 [--duration:70s] [--gap:0.75rem]">
+          <Marquee reverse className="p-0 [--duration:80s] [--gap:0.75rem]">
             {row2.map((product) => (
               <ProductCard key={product.id} product={product} compact />
             ))}
@@ -134,12 +134,12 @@ export function PopularProducts({ products, className }: { products: HeroProduct
 
         {/* Desktop: full marquee */}
         <div className="hidden flex-col gap-2.5 lg:flex">
-          <Marquee pauseOnHover className="p-0 [--duration:50s] [--gap:0.75rem]">
+          <Marquee pauseOnHover className="p-0 [--duration:80s] [--gap:0.75rem]">
             {row1.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </Marquee>
-          <Marquee reverse pauseOnHover className="p-0 [--duration:50s] [--gap:0.75rem]">
+          <Marquee reverse pauseOnHover className="p-0 [--duration:80s] [--gap:0.75rem]">
             {row2.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

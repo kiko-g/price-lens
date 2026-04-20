@@ -8,7 +8,7 @@ export default function CompareLoading() {
         <div className="mb-6 flex flex-col gap-4">
           <Skeleton className="hidden h-9 w-24 md:block" />
 
-          <div className="grid gap-6 md:grid-cols-[1fr,auto]">
+          <div className="grid gap-6 md:grid-cols-[1fr_auto]">
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <Skeleton className="h-6 w-32" />

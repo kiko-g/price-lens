@@ -80,7 +80,7 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
               key={entry.key}
               href={entry.href}
               className={cn(
-                "bg-muted/35 border-border/60 text-muted-foreground hover:bg-muted/55 hover:text-foreground flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-xl border px-1 py-1.5 text-center transition-colors active:opacity-90",
+                "bg-muted/35 border-border/60 text-muted-foreground hover:bg-muted/55 hover:text-foreground flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl border px-1 py-1.5 text-center transition-colors active:opacity-90",
               )}
             >
               <entry.icon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />

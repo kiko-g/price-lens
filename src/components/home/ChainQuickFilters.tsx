@@ -20,7 +20,7 @@ export function ChainQuickFilters({ perStore, className }: { perStore: PerStoreS
         <Link
           key={store.originId}
           href={`/products?origin=${store.originId}`}
-          className="bg-card/80 hover:bg-accent flex min-h-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-1.5 py-2 text-center backdrop-blur-sm transition-colors sm:min-h-0 sm:px-2 sm:py-2.5"
+          className="bg-card/80 hover:bg-accent flex min-h-18 flex-col items-center justify-center gap-0.5 rounded-2xl px-1.5 py-2 text-center backdrop-blur-sm transition-colors sm:min-h-0 sm:px-2 sm:py-2.5"
         >
           <SupermarketChainBadge originId={store.originId} variant="logo" className="h-4 w-auto" />
           <div className="flex flex-col items-center">

@@ -46,7 +46,8 @@
     "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts",
     "backfill:pingo-doce-barcodes:prod": "env-cmd -f .env.production tsx scripts/backfill-pingo-doce-barcodes.ts",
     "scraper:local": "tsx scripts/run-scraper-local.ts",
-    "icons:generate": "node scripts/generate-app-icons.mjs"
+    "icons:generate": "node scripts/generate-app-icons.mjs",
+    "tailwind:upgrade": "npx @tailwindcss/upgrade --force"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.91",
@@ -121,7 +122,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/postcss": "^4.2.0",
+    "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^25.3.0",
@@ -141,7 +142,7 @@
     "sharp": "^0.34.5",
     "supabase": "^2.90.0",
     "tailwind-scrollbar": "^4.0.2",
-    "tailwindcss": "^4.2.0",
+    "tailwindcss": "^4.2.2",
     "to-ico": "^1.1.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

@@ -670,7 +670,7 @@ function MobileStorePickerView({
                 <SupermarketChainBadge
                   originId={id}
                   variant="logo"
-                  className="!h-6 max-h-6 w-auto max-w-[min(12rem,60vw)] object-contain object-left"
+                  className="h-6! max-h-6 w-auto max-w-[min(12rem,60vw)] object-contain object-left"
                 />
               </span>
               <RadioGroupItem value={String(id)} className="shrink-0" />
