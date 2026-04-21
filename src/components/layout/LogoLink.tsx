@@ -7,7 +7,7 @@ export function LogoLink() {
   return (
     <Link
       href="/"
-      className="flex min-w-0 max-w-full items-center justify-start gap-1.5 transition hover:opacity-80 md:justify-center"
+      className="flex max-w-full min-w-0 items-center justify-start gap-1.5 transition hover:opacity-80 md:justify-center"
     >
       <span className="flex shrink-0 items-center justify-center rounded-full">
         {/* eslint-disable-next-line @next/next/no-img-element */}

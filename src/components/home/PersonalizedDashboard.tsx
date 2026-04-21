@@ -146,7 +146,22 @@ export function PersonalizedDashboard({
                     href={`/products/${product.id}`}
                     className="border-border hover:bg-accent flex items-center gap-2 rounded-lg border p-2.5 transition-colors"
                   >
-                    <BellIcon className="size-3.5 shrink-0 text-amber-500" />
+                    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md border bg-white">
+                      {product.image ? (
+                        <Image
+                          src={product.image}
+                          alt=""
+                          fill
+                          className="object-contain p-0.5"
+                          sizes="32px"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="bg-muted/40 flex h-full w-full items-center justify-center">
+                          <BellIcon className="text-muted-foreground size-3.5" />
+                        </div>
+                      )}
+                    </div>
                     <span className="min-w-0 flex-1 truncate text-xs font-medium">{product.name}</span>
                     <span className="text-xs font-semibold tabular-nums">{formatPrice(product.price, locale)}</span>
                   </Link>
