@@ -233,7 +233,7 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
         <Separator className="mx-5 w-auto" />
 
         {/* footer */}
-        <div className="flex items-center justify-between px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] [@media(display-mode:standalone)]:pb-4">
+        <div className="flex w-full flex-col items-start justify-start gap-2 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] [@media(display-mode:standalone)]:pb-4">
           <div className="flex flex-col gap-0.5">
             <Link
               href={siteConfig.links.github}
@@ -252,13 +252,22 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
             </Link>
           </div>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5 self-end">
+            <Link
+              href={siteConfig.links.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
+              aria-label={tSheet("socialAria.github")}
+            >
+              <GithubIcon className="size-3.5 fill-current" />
+            </Link>
             <Link
               href={siteConfig.links.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
-              aria-label="Instagram"
+              className="text-muted-foreground hover:text-foreground flex size-7 items-center justify-center rounded-md transition-colors"
+              aria-label={tSheet("socialAria.instagram")}
             >
               <InstagramIcon className="size-3.5 fill-current" />
             </Link>
@@ -267,7 +276,7 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
-              aria-label="X (Twitter)"
+              aria-label={tSheet("socialAria.twitter")}
             >
               <XTwitterIcon className="size-3.5 fill-current" />
             </Link>
@@ -276,7 +285,7 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
-              aria-label="LinkedIn"
+              aria-label={tSheet("socialAria.linkedin")}
             >
               <LinkedinIcon className="size-3.5 fill-current stroke-transparent" />
             </Link>

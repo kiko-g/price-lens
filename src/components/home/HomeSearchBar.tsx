@@ -25,10 +25,6 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
           <button
             type="button"
             className="bg-card hover:bg-accent/50 relative flex w-full cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-3.5 transition-colors max-[420px]:py-3 md:gap-3 md:px-4 md:py-3.5"
-            style={{
-              boxShadow:
-                "0 0 16px color-mix(in oklch, var(--primary) 12%, transparent), 0 0 4px color-mix(in oklch, var(--secondary) 8%, transparent)",
-            }}
           >
             <SearchIcon className="text-muted-foreground size-5 shrink-0" />
             <span className="text-muted-foreground flex-1 text-left text-sm">{placeholder}</span>
@@ -45,10 +41,6 @@ export function HomeSearchBar({ totalProducts = 0 }: { totalProducts?: number })
             "max-[420px]:size-11 max-[420px]:justify-center max-[420px]:p-0",
             "min-[421px]:px-3.5 min-[421px]:py-3.5",
           )}
-          style={{
-            boxShadow:
-              "0 0 16px color-mix(in oklch, var(--secondary) 12%, transparent), 0 0 4px color-mix(in oklch, var(--primary) 8%, transparent)",
-          }}
         >
           <ScanBarcodeIcon className="sm:text-muted-foreground text-foreground size-5 shrink-0" />
           <span className="text-foreground sm:text-muted-foreground hidden text-sm sm:inline-flex">

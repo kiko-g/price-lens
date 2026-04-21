@@ -53,6 +53,7 @@ export default async function Home() {
       />
 
       <main className="flex w-full flex-col items-center justify-center">
+        <PersonalizedDashboardSkeleton />
         <Suspense fallback={<PersonalizedDashboardSkeleton />}>
           <HomeContentWrapper />
         </Suspense>

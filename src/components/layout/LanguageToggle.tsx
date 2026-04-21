@@ -47,7 +47,7 @@ export function LanguageToggle({ variant = "segmented", className }: LanguageTog
 
   if (variant === "compact") {
     return (
-      <div className={cn("flex items-center gap-1", className)}>
+      <div className={cn("flex items-center rounded", className)}>
         {locales.map((locale) => (
           <button
             key={locale}
@@ -56,10 +56,10 @@ export function LanguageToggle({ variant = "segmented", className }: LanguageTog
             disabled={isPending || locale === current}
             aria-pressed={locale === current}
             className={cn(
-              "rounded px-2 py-1 text-xs font-medium transition-colors",
+              "px-2 py-1 text-xs font-medium transition-colors first:rounded-l last:rounded-r",
               locale === current
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-primary/20 bg-primary/10",
             )}
           >
             {locale.toUpperCase()}

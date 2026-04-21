@@ -1,6 +1,6 @@
 {
   "scan": {
-    "title": "Ler código de barras",
+    "title": "Código de barras",
     "description": "Lê códigos de barras de produtos com a câmara ou carrega uma imagem.",
     "startCamera": "Iniciar câmara",
     "startingCamera": "A iniciar câmara…",
@@ -66,7 +66,7 @@
       "edit": "Editar",
       "copy": "Copiar",
       "share": "Partilhar",
-      "signIn": "Iniciar sessão",
+      "signIn": "Entrar",
       "signOut": "Terminar sessão",
       "getStarted": "Começar",
       "learnMore": "Saber mais"
@@ -122,7 +122,7 @@
         "description": "Gere a tua conta Price Lens, preferências e subscrição."
       },
       "login": {
-        "title": "Iniciar sessão",
+        "title": "Entrar",
         "description": "Inicia sessão no Price Lens para acompanhar preços, guardar favoritos e receber alertas sobre produtos de supermercados portugueses."
       },
       "app": {
@@ -267,16 +267,50 @@
       "body": "Inicia sessão para acompanhar preços dos produtos que te interessam. Podemos avisar-te quando for a melhor altura para comprar.",
       "continueWithGoogle": "Continuar com Google",
       "noSpam": "Sem spam, prometido.",
-      "ariaTitle": "Iniciar sessão",
+      "ariaTitle": "Entrar",
       "ariaDescription": "Inicia sessão para guardar favoritos"
     },
     "login": {
       "loginTo": "Inicia sessão no",
+      "brandName": "Price Lens",
+      "subtitle": "Guarda favoritos, recebe alertas de descida de preço e mantém a tua lista sincronizada.",
       "noSpam": "Nunca usaremos o teu email para spam",
+      "noSpamMicrocopy": "Sem spam, prometido. 😊",
       "smile": "sorriso",
       "continueWithGoogle": "Continuar com Google",
       "devOnly": "Apenas dev",
       "signInAsDev": "Entrar como dev@pricelens.dev",
+      "benefits": {
+        "favorites": {
+          "title": "Guarda favoritos",
+          "desc": "Acompanha os produtos que te interessam."
+        },
+        "alerts": {
+          "title": "Alertas de descida",
+          "desc": "Descobre quando comprar, quando esperar e como oscilam os preços."
+        },
+        "sync": {
+          "title": "Sincroniza em todos os dispositivos",
+          "desc": "A tua lista, em todo o lado."
+        }
+      },
+      "valueVisual": {
+        "label": "O que ganhas",
+        "subtitle": "Gráficos, volatilidade e timing. Não só o preço da prateleira.",
+        "mockProductName": "Cereais integrais",
+        "mockPriceCurrent": "€3,49",
+        "mockPriceWas": "€4,99",
+        "mockDiscountBadge": "−32%",
+        "insightTitle": "É boa altura para comprar?",
+        "insightLead": "Ligamos o histórico ao preço de hoje para veres descidas, níveis típicos e oscilações num relance.",
+        "timingExample": "Descida recente. Vale a pena comparar",
+        "volatilityExample": "Costuma saltar entre patamares",
+        "guidanceTitle": "Fica ligado aos teus produtos",
+        "guidanceBody": "Inicia sessão para guardar favoritos, receber alertas e ver as mesmas ajudas em todos os dispositivos. Menos suposições, mais dinheiro no bolso.",
+        "demoNote": "Exemplo ilustrativo. Após iniciar sessão, os teus produtos usam histórico e estatísticas reais.",
+        "savingsLine": "{amount} em poupança em promoções acompanhadas no catálogo neste momento.",
+        "chartHint": "90 dias (exemplo)"
+      },
       "errors": {
         "origin-missing": "Ocorreu um erro ao iniciar o processo. Tenta novamente.",
         "default": "Falha no início de sessão. Tenta novamente."
@@ -343,7 +377,7 @@
     "unauth": {
       "title": "Inicia sessão para ver os teus favoritos",
       "description": "Cria uma conta ou inicia sessão para guardar os teus produtos favoritos e acompanhar os preços ao longo do tempo.",
-      "signIn": "Iniciar sessão",
+      "signIn": "Entrar",
       "browseProducts": "Explorar produtos"
     }
   },
@@ -509,15 +543,15 @@
   },
   "home": {
     "hero": {
-      "titleMobile": "Acompanha os preços dos<br></br>supermercados portugueses",
-      "subtitleMobile": "Transforma variações de preço em poupança. <strong>Dinheiro no teu bolso</strong>.",
+      "titleMobile": "Acompanha os preços dos<br></br>supermercados",
+      "subtitleMobile": "Transforma oscilações de preço <strong>dinheiro no teu bolso</strong>.",
       "titleDesktop": "Acompanha os preços dos supermercados portugueses",
       "subtitleDesktop": "Monitorização diária de preços no Continente, Auchan e Pingo Doce.<br></br>Transforma variações em poupança. Mais <strong>dinheiro no teu bolso</strong>."
     },
     "searchBar": {
       "placeholder": "Pesquisar produtos…",
       "placeholderWithCount": "Pesquisar {count} produtos…",
-      "scanBarcode": "Ler código de barras"
+      "scanBarcode": "Código de barras"
     },
     "valueProposition": {
       "title": "Como o Price Lens ajuda",
@@ -525,11 +559,11 @@
       "pillars": {
         "track": {
           "title": "Acompanhar",
-          "description": "Monitoriza variações diárias de preços no Continente, Auchan e Pingo Doce — automaticamente."
+          "description": "Monitoriza variações diárias de preços no Continente, Auchan e Pingo Doce automaticamente."
         },
         "understand": {
           "title": "Compreender",
-          "description": "Vê o histórico completo e as tendências de preço de qualquer produto — não apenas o preço de hoje."
+          "description": "Vê o histórico completo e as tendências de preço de qualquer produto, não apenas o preço de hoje."
         },
         "save": {
           "title": "Poupar",
@@ -655,13 +689,13 @@
     },
     "priceCreep": {
       "title": "A subida invisível dos preços",
-      "subtitle": "Os preços não saltam — sobem aos poucos. Um pequeno aumento mensal parece nada. Mas com o tempo composto, o cenário muda completamente.",
+      "subtitle": "Os preços não saltam. Sobem aos poucos. Um pequeno aumento mensal parece nada. Mas com o tempo composto, o cenário muda completamente.",
       "timeframes": {
         "monthly": { "label": "Mensal", "note": "Mal se nota" },
         "year": { "label": "Após 1 ano", "note": "Começa a somar" },
         "fiveYears": { "label": "Após 5 anos", "note": "É dinheiro a sério" }
       },
-      "callout": "Cada mês a subida é demasiado pequena para incomodar. Mas, somada ao longo do tempo, a tua conta do supermercado fica significativamente mais alta — e ninguém te pediu autorização."
+      "callout": "Cada mês a subida é demasiado pequena para incomodar. Mas, somada ao longo do tempo, a tua conta do supermercado fica significativamente mais alta. E ninguém te pediu autorização."
     },
     "inflationBasket": {
       "badge": "A inflação depende de um cabaz de produtos selecionados",
@@ -672,7 +706,7 @@
     },
     "inflationContext": {
       "title": "Não são só os mantimentos",
-      "body": "A inflação acumula em silêncio. Desde 1999, €100 em produtos em Portugal custam agora <strong>€{value}</strong>. O mesmo padrão repete-se a nível de produto — exatamente o que o Price Lens acompanha.",
+      "body": "A inflação acumula em silêncio. Desde 1999, €100 em produtos em Portugal custam agora <strong>€{value}</strong>. O mesmo padrão repete-se a nível de produto, exatamente o que o Price Lens acompanha.",
       "chart": {
         "title": "Inflação acumulada (1999 a 2024)",
         "description": "O que €100 de 1999 representam hoje em Portugal, EUA e Zona Euro."
@@ -1168,10 +1202,16 @@
       "openMenu": "Abrir menu de navegação",
       "signInWithGoogle": "Entrar com Google",
       "searchProducts": "Pesquisar produtos…",
-      "scanBarcode": "Ler código de barras",
+      "scanBarcode": "Código",
       "darkMode": "Modo escuro",
-      "builtBy": "Feito por <name>Francisco Gonçalves</name>",
+      "builtBy": "Desenvolvido por <name>Francisco Gonçalves</name>",
       "openSource": "Código aberto no GitHub",
+      "socialAria": {
+        "github": "GitHub",
+        "instagram": "Instagram",
+        "twitter": "X (Twitter)",
+        "linkedin": "LinkedIn"
+      },
       "sections": {
         "navigation": "Navegação",
         "more": "Mais",
@@ -1206,7 +1246,7 @@
       "themeLight": "Tema claro",
       "themeDark": "Tema escuro",
       "signOut": "Terminar sessão",
-      "signIn": "Iniciar sessão",
+      "signIn": "Entrar",
       "openUserMenu": "Abrir menu do utilizador"
     },
     "welcomeToast": {

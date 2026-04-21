@@ -50,22 +50,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     isLoading: true,
   })
 
-  // Single auth subscription - onAuthStateChange fires immediately with current session
+  // Single auth subscription - onAuthStateChange fires immediately with current session.
+  // Do not invalidate profile on TOKEN_REFRESHED (fires often when returning to the tab); that caused
+  // the whole app to treat profile as "loading" again and remount home/dashboard unnecessarily.
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setAuthState({
         user: session?.user ?? null,
         session: session ?? null,
         isLoading: false,
       })
 
-      // Invalidate profile query when auth changes
       if (session?.user) {
-        queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY })
+        if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+          queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY })
+        }
       } else {
-        // Clear profile cache on logout
         queryClient.setQueryData(PROFILE_QUERY_KEY, null)
       }
     })
@@ -77,7 +79,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const profileQueryEnabled = !!authState.user && !authState.isLoading
   const {
     data: profile,
-    isFetching: isProfileFetching,
     isPending: isProfilePending,
     error: profileError,
     refetch: refetchProfile,
@@ -89,8 +90,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
   })
 
-  // Profile is loading if: query is fetching, OR query should be enabled but hasn't resolved yet
-  const isProfileLoading = isProfileFetching || (profileQueryEnabled && isProfilePending)
+  // Only block UI on the initial profile resolution, not background refetches (e.g. after invalidate).
+  const isProfileLoading = profileQueryEnabled && isProfilePending
 
   const handleRefetchProfile = useCallback(() => {
     refetchProfile()

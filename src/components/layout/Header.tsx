@@ -35,8 +35,8 @@ export function Header() {
   return (
     <NavigationSheetProvider>
       <header className="bg-background/90 sticky top-0 z-50 mx-auto h-(--header-height) w-full border-b pt-[env(safe-area-inset-top,0px)] backdrop-blur backdrop-filter xl:px-4">
-        <div className="flex h-full items-center justify-between px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
-          <div className="flex items-center gap-3">
+        <div className="flex h-full min-w-0 items-center justify-between gap-2 px-3 py-3 sm:px-3 lg:px-4 xl:px-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <NavigationSheet
               onRequestSearch={() => setNavSheetSearchOpen(true)}
               onRequestBarcodeScan={() => setNavSheetScanOpen(true)}
@@ -80,7 +80,7 @@ export function Header() {
             </nav>
           </div>
 
-          <div className="flex items-center justify-center gap-2.5 md:gap-3">
+          <div className="flex shrink-0 items-center justify-center gap-2.5 md:gap-3">
             {!isMobile && (
               <SearchContainer>
                 <button
@@ -102,6 +102,7 @@ export function Header() {
             <div className="hidden lg:flex">
               <FavoritesLink />
             </div>
+
             <UserDropdownMenu />
           </div>
         </div>

@@ -246,6 +246,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-skeleton-shimmer: skeleton-shimmer 1500ms ease-in-out infinite;
   --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
   --animate-fade-in: fade-in 1s ease-in-out forwards;
   --animate-accordion-down: accordion-down 0.2s ease-out;

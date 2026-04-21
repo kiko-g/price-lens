@@ -272,11 +272,45 @@
     },
     "login": {
       "loginTo": "Login to",
+      "brandName": "Price Lens",
+      "subtitle": "Save favorites, get price-drop alerts, and keep your list in sync.",
       "noSpam": "We'll never use your email for spam",
+      "noSpamMicrocopy": "No spam, ever. 😊",
       "smile": "smile",
       "continueWithGoogle": "Continue with Google",
       "devOnly": "Dev only",
       "signInAsDev": "Sign in as dev@pricelens.dev",
+      "benefits": {
+        "favorites": {
+          "title": "Save favorites",
+          "desc": "Track products you care about."
+        },
+        "alerts": {
+          "title": "Price-drop alerts",
+          "desc": "We'll tell you when it's the best time to buy."
+        },
+        "sync": {
+          "title": "Sync across devices",
+          "desc": "Your list, everywhere."
+        }
+      },
+      "valueVisual": {
+        "label": "What you get",
+        "subtitle": "Charts, volatility, and timing — not just today's shelf price.",
+        "mockProductName": "Whole grain cereal",
+        "mockPriceCurrent": "€3.49",
+        "mockPriceWas": "€4.99",
+        "mockDiscountBadge": "−32%",
+        "insightTitle": "Is it a good time to buy?",
+        "insightLead": "We connect history with today's price so you can spot dips, typical levels, and jumpy swings in seconds.",
+        "timingExample": "Recent dip — worth comparing",
+        "volatilityExample": "Often jumps between levels",
+        "guidanceTitle": "Stay in touch with your products",
+        "guidanceBody": "Sign in to save favorites, get alerts, and see the same insight on every device — less guessing, more money kept in your pocket.",
+        "demoNote": "Illustrative example. After sign-in, your products use real price history and stats.",
+        "savingsLine": "{amount} in tracked promo savings across the catalog right now.",
+        "chartHint": "90 days (example)"
+      },
       "errors": {
         "origin-missing": "Something went wrong starting the sign-in flow. Please try again.",
         "default": "Sign-in failed. Please try again."
@@ -1172,6 +1206,12 @@
       "darkMode": "Dark mode",
       "builtBy": "Built by <name>Francisco Gonçalves</name>",
       "openSource": "Open source on GitHub",
+      "socialAria": {
+        "github": "GitHub",
+        "instagram": "Instagram",
+        "twitter": "X (Twitter)",
+        "linkedin": "LinkedIn"
+      },
       "sections": {
         "navigation": "Navigation",
         "more": "More",

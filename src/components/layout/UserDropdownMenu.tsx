@@ -37,18 +37,18 @@ export function UserDropdownMenu() {
   const t = useTranslations("layout.userMenu")
 
   if (isLoading)
-    return <Skeleton className="h-10 w-24 shrink-0 rounded-full border md:ml-0 lg:h-9 lg:w-9 lg:rounded-lg" />
+    return <Skeleton className="h-7 w-24 shrink-0 rounded-full border md:ml-0 lg:h-7 lg:w-7 lg:rounded-lg" />
 
   if (!user)
     return isMobile ? (
       <Button
         variant="secondary"
         size="sm"
-        className="text-foreground hover:bg-muted/80 border-border/70 bg-muted/45 h-10 gap-2 rounded-full border px-3.5 shadow-none"
+        className="text-foreground hover:bg-muted/80 bg-muted/45 shrink-0 gap-2 rounded-full border border-transparent px-3.5 shadow-none"
         onClick={() => router.push("/login")}
       >
         <LogIn className="size-4 shrink-0" aria-hidden />
-        {t("signIn")}
+        <span className="whitespace-nowrap">{t("signIn")}</span>
       </Button>
     ) : (
       <Button variant="primary" className="relative" onClick={() => router.push("/login")}>

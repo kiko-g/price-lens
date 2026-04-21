@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { STORE_NAMES } from "@/types/business"
+import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { generateProductPath, getPopularProducts } from "@/lib/business/product"
 import { isLocale } from "@/i18n/config"
 import { useRecentSearches } from "@/hooks/useRecentSearches"
@@ -241,6 +242,22 @@ function ProductItem({ product, onClick }: ProductItemProps) {
   const price = product.price
   const pvpr = product.price_recommended ? product.price_recommended : null
   const hasDiscount = product.discount && product.discount > 0
+  const originId = product.origin_id
+  const storeSegment =
+    originId == null
+      ? null
+      : getSupermarketChainName(originId)
+        ? (
+            <span className="inline-flex shrink-0 items-center">
+              <SupermarketChainBadge originId={originId} variant="logoSmall" />
+            </span>
+          )
+        : STORE_NAMES[originId]
+          ? (
+              <span className="truncate">{STORE_NAMES[originId]}</span>
+            )
+          : null
+  const metaRest = [product.brand, product.pack].filter(Boolean).join(" • ")
 
   return (
     <div
@@ -269,11 +286,11 @@ function ProductItem({ product, onClick }: ProductItemProps) {
       </div>
       <div className="w-0 flex-1 self-start">
         <p className="truncate text-sm font-medium">{product.name}</p>
-        <p className="text-muted-foreground truncate text-xs">
-          {[product.origin_id ? STORE_NAMES[product.origin_id] : null, product.brand, product.pack]
-            .filter(Boolean)
-            .join(" • ")}
-        </p>
+        <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
+          {storeSegment}
+          {storeSegment && metaRest ? <span className="shrink-0 opacity-80" aria-hidden>•</span> : null}
+          {metaRest ? <span className="min-w-0 flex-1 truncate">{metaRest}</span> : null}
+        </div>
       </div>
 
       <div className="flex shrink-0 flex-col">
