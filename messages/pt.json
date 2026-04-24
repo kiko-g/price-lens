@@ -1126,11 +1126,16 @@
       "priceHistoryBreakdown": "Histórico de preços e detalhes",
       "table": {
         "price": "Preço",
-        "original": "Original",
+        "original": "PVPR",
+        "pvprColumnHint": "Preço de venda ao público recomendado (referência no rótulo)",
         "perUnit": "Por unidade",
         "freq": "Freq (%)",
         "isMostCommon": "O preço atual é <strong>o preço mais comum</strong>.",
         "notMostCommon": "O preço atual <strong>não é</strong> o preço mais comum.",
+        "groupPvpr": "PVPR: {value}€",
+        "unknownPvpr": "Sem PVPR",
+        "emptyCell": "—",
+        "cellEuro": "{value}€",
         "showingFor": "A mostrar dados até {duration}"
       },
       "notTracked": {

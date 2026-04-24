@@ -63,7 +63,7 @@ export function SupermarketChainBadge({ originId, variant = "logo", className }:
           alt={info.name}
           width={600}
           height={200}
-          className={cn("h-5 w-auto md:h-5 md:w-min", className)}
+          className={cn("h-5 w-auto object-contain object-left md:h-5 md:w-auto", className)}
         />
       )
     case "logoSmall":

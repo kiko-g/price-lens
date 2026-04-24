@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
   useCallback,
+  Fragment,
   type ReactNode,
   type RefObject,
 } from "react"
@@ -596,21 +597,21 @@ function Graph({ className }: GraphProps) {
           strokeDasharray: isSinglePoint ? "0 0" : "8 8",
           dot: dotConfig,
           activeDot: activeDotConfig,
-          strokeWidth: isMobile ? 2 : 3,
+          strokeWidth: isMobile ? 1.5 : 2,
         }
       case "price-per-major-unit":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "4 4",
           dot: dotConfig,
           activeDot: activeDotConfig,
-          strokeWidth: isMobile ? 2 : 3,
+          strokeWidth: isMobile ? 1.5 : 2,
         }
       case "discount":
         return {
           strokeDasharray: isSinglePoint ? "0 0" : "5 5",
           dot: dotConfig,
           activeDot: activeDotConfig,
-          strokeWidth: isMobile ? 2 : 2,
+          strokeWidth: 1.5,
         }
       case "price":
       default:
@@ -618,7 +619,7 @@ function Graph({ className }: GraphProps) {
           strokeDasharray: isSinglePoint ? "0 0" : "0 0",
           dot: dotConfig,
           activeDot: activeDotConfig,
-          strokeWidth: isMobile ? 2 : 4,
+          strokeWidth: isMobile ? 1.5 : 2.25,
         }
     }
   }
@@ -723,6 +724,48 @@ function Graph({ className }: GraphProps) {
 // PriceTable Component
 // ============================================================================
 
+type PvprGroup = {
+  pvpr: number | null
+  points: PricePoint[]
+}
+
+function isUnknownPvpr(p: PricePoint) {
+  return p.price_recommended == null || Number.isNaN(p.price_recommended)
+}
+
+function orderPointsInGroup(points: PricePoint[], sp: StoreProduct): PricePoint[] {
+  const sorted = [...points].sort(
+    (a, b) => a.price - b.price || (a.price_recommended ?? 0) - (b.price_recommended ?? 0),
+  )
+  const current = sorted.find((p) => p.price === sp.price && p.price_recommended === sp.price_recommended)
+  const rest = sorted.filter((p) => !(p.price === sp.price && p.price_recommended === sp.price_recommended))
+  return current ? [current, ...rest] : sorted
+}
+
+function groupPricePointsByPvprDesc(pricePoints: PricePoint[], sp: StoreProduct): PvprGroup[] {
+  const keyToPoints = new Map<string, PricePoint[]>()
+  for (const p of pricePoints) {
+    const key = isUnknownPvpr(p) ? "__unknown__" : String(p.price_recommended)
+    if (!keyToPoints.has(key)) keyToPoints.set(key, [])
+    keyToPoints.get(key)!.push(p)
+  }
+
+  const groups: PvprGroup[] = []
+  for (const [key, points] of keyToPoints) {
+    const pvpr = key === "__unknown__" ? null : Number(key)
+    groups.push({ pvpr, points: orderPointsInGroup(points, sp) })
+  }
+
+  groups.sort((a, b) => {
+    if (a.pvpr == null && b.pvpr == null) return 0
+    if (a.pvpr == null) return 1
+    if (b.pvpr == null) return -1
+    return b.pvpr - a.pvpr
+  })
+
+  return groups
+}
+
 type PriceTableProps = {
   className?: string
   scrollable?: boolean
@@ -751,84 +794,122 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
 
   if (!pricePoints || pricePoints.length === 0) return null
 
-  const hasMultiplePrices = pricePoints?.length > 1
-  const sorted = [...pricePoints].sort((a, b) => a.price - b.price || a.price_recommended - b.price_recommended)
+  const hasMultiplePrices = pricePoints.length > 1
+  const groups = groupPricePointsByPvprDesc(pricePoints, sp)
+  const showPvprSubheaders = groups.length > 1
 
-  // Pin active price at the top, rest sorted by price ascending
-  const currentPricePoint = sorted.find((p) => p.price === sp.price && p.price_recommended === sp.price_recommended)
-  const restPoints = sorted.filter((p) => !(p.price === sp.price && p.price_recommended === sp.price_recommended))
-  const orderedPoints = currentPricePoint ? [currentPricePoint, ...restPoints] : sorted
+  const pricePointRowKey = (point: PricePoint) =>
+    `${point.price}-${point.price_recommended ?? "x"}-${point.price_per_major_unit ?? "x"}`
 
   const pricePointsTable = (
     <Table className="w-full max-w-full min-w-0">
       <TableHeader className={cn(scrollable && "sticky top-0 z-10")}>
         <TableRow className="bg-accent hover:bg-accent">
-          <TableHead className="h-7 text-xs">
-            <span className="bg-chart-1 mr-1 inline-block size-2 rounded-full"></span>
+          <TableHead
+            className={cn("text-foreground h-7 px-2.5 py-1.5 text-xs font-semibold tracking-tight first:pl-2.5")}
+          >
             {t("price")}
           </TableHead>
-          <TableHead className="h-7 text-center text-xs">
-            <span className="bg-chart-2 mr-1 inline-block size-2 rounded-full"></span>
+          <TableHead
+            className={cn(
+              "text-foreground border-border h-7 border-l px-2.5 py-1.5 text-center text-xs font-semibold tracking-tight",
+            )}
+            title={t("pvprColumnHint")}
+          >
             {t("original")}
           </TableHead>
-          <TableHead className="h-7 text-center text-xs">
-            <span className="bg-chart-3 mr-1 inline-block size-2 rounded-full"></span>
+          <TableHead
+            className={cn(
+              "text-foreground border-border h-7 border-l px-2.5 py-1.5 text-center text-xs font-semibold tracking-tight",
+            )}
+          >
             {t("perUnit")}
           </TableHead>
-          <TableHead className="h-7 text-center text-xs">
-            <span className="bg-chart-4 mr-1 inline-block size-2 rounded-full"></span>
+          <TableHead
+            className={cn(
+              "text-foreground border-border h-7 border-l px-2.5 py-1.5 text-center text-xs font-semibold tracking-tight",
+            )}
+          >
             {t("freq")}
           </TableHead>
         </TableRow>
       </TableHeader>
 
       <TableBody>
-        {orderedPoints.map((point: PricePoint, index) => {
-          const isMostCommon = point.price === mostCommon?.price
-          const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
-          const hasDiscount = point.discount !== null && point.discount > 0.0
-
+        {groups.map((group, gIdx) => {
+          const ordered = group.points
           return (
-            <TableRow
-              key={index}
-              className={cn(
-                "hover:bg-transparent",
-                isCurrentPrice && hasMultiplePrices && "border-l-primary border-l-2",
-                isCurrentPrice && index === 0 && hasMultiplePrices && "border-b-border border-b",
+            <Fragment key={group.pvpr == null ? "unknown" : `pvpr-${group.pvpr}`}>
+              {showPvprSubheaders && (
+                <TableRow className="hover:bg-muted/30 bg-muted/20 border-b-border border-b">
+                  <TableCell colSpan={4} className="text-foreground/80 text-2xs py-1.5 font-medium tracking-tight">
+                    {group.pvpr == null ? t("unknownPvpr") : t("groupPvpr", { value: group.pvpr.toFixed(2) })}
+                  </TableCell>
+                </TableRow>
               )}
-            >
-              <TableCell>
-                <div className="flex items-center gap-1.5">
-                  {isCurrentPrice && hasMultiplePrices && <span className="text-primary text-xs leading-none">▸</span>}
 
-                  <span className="text-xs font-semibold tracking-tighter">{point.price.toFixed(2)}€</span>
+              {ordered.map((point: PricePoint, pointIdx) => {
+                const isMostCommon = point.price === mostCommon?.price
+                const isCurrentPrice = sp.price === point.price && sp.price_recommended === point.price_recommended
+                const hasDiscount = point.discount !== null && point.discount > 0.0
+                const hasRowBelow = pointIdx < ordered.length - 1 || gIdx < groups.length - 1
+                const showCurrentDivider =
+                  isCurrentPrice && pointIdx === 0 && hasRowBelow && (hasMultiplePrices || showPvprSubheaders)
 
-                  {hasDiscount && (
-                    <span className="text-2xs text-success flex items-center gap-0.5">
-                      <ArrowDownIcon className="size-2.5" />
-                      {discountValueToPercentage(point.discount, 0)}
-                    </span>
-                  )}
-                </div>
-              </TableCell>
+                return (
+                  <TableRow
+                    key={pricePointRowKey(point)}
+                    className={cn(
+                      "hover:bg-transparent",
+                      isCurrentPrice &&
+                        hasMultiplePrices &&
+                        "border-l-primary bg-primary/10 dark:bg-primary/15 border-l-2",
+                      showCurrentDivider && "border-b-border border-b",
+                    )}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        {isCurrentPrice && hasMultiplePrices && (
+                          <span className="text-primary text-xs leading-none">▸</span>
+                        )}
 
-              <TableCell className="text-center text-xs font-medium tracking-tighter">
-                {point.price_recommended?.toFixed(2)}€
-              </TableCell>
+                        <span className="text-xs font-semibold tracking-tighter">
+                          {t("cellEuro", { value: point.price.toFixed(2) })}
+                        </span>
 
-              <TableCell className="text-center text-xs font-medium tracking-tighter">
-                {point.price_per_major_unit?.toFixed(2)}€
-              </TableCell>
+                        {hasDiscount && (
+                          <span className="text-2xs text-success flex items-center gap-0.5">
+                            <ArrowDownIcon className="size-2.5" />
+                            {discountValueToPercentage(point.discount, 0)}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
 
-              <TableCell
-                className={cn(
-                  "text-center text-xs font-medium tracking-tighter",
-                  isMostCommon ? "text-success font-semibold" : "",
-                )}
-              >
-                {(point.frequencyRatio * 100).toFixed(0)}%
-              </TableCell>
-            </TableRow>
+                    <TableCell className="text-center text-xs font-medium tracking-tighter">
+                      {point.price_recommended != null && !Number.isNaN(point.price_recommended)
+                        ? t("cellEuro", { value: point.price_recommended.toFixed(2) })
+                        : t("emptyCell")}
+                    </TableCell>
+
+                    <TableCell className="text-center text-xs font-medium tracking-tighter">
+                      {point.price_per_major_unit != null && !Number.isNaN(point.price_per_major_unit)
+                        ? t("cellEuro", { value: point.price_per_major_unit.toFixed(2) })
+                        : t("emptyCell")}
+                    </TableCell>
+
+                    <TableCell
+                      className={cn(
+                        "text-center text-xs font-medium tracking-tighter",
+                        isMostCommon ? "text-success font-semibold" : "",
+                      )}
+                    >
+                      {(point.frequencyRatio * 100).toFixed(0)}%
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </Fragment>
           )
         })}
       </TableBody>
@@ -866,9 +947,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       </div>
 
       {scrollable ? (
-        <ScrollArea
-          className={cn("mt-1 max-w-full min-w-0 rounded-lg border", orderedPoints.length > 6 && "h-[250px]")}
-        >
+        <ScrollArea className={cn("mt-1 max-w-full min-w-0 rounded-lg border", pricePoints.length > 6 && "h-[250px]")}>
           {pricePointsTable}
         </ScrollArea>
       ) : (

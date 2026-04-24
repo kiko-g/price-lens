@@ -1126,11 +1126,16 @@
       "priceHistoryBreakdown": "Price history & breakdown",
       "table": {
         "price": "Price",
-        "original": "Original",
+        "original": "RRP",
+        "pvprColumnHint": "Recommended retail price (reference on the label)",
         "perUnit": "Per unit",
         "freq": "Freq (%)",
         "isMostCommon": "Current price is <strong>the most common price</strong>.",
         "notMostCommon": "Current price is <strong>not</strong> the most common price.",
+        "groupPvpr": "RRP: {value}€",
+        "unknownPvpr": "No RRP",
+        "emptyCell": "—",
+        "cellEuro": "{value}€",
         "showingFor": "Showing data for up to {duration}"
       },
       "notTracked": {

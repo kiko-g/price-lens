@@ -72,11 +72,11 @@ function CompactStoreCard({
       {showFloorHighlight ? <LightRays {...floorCompareLightRaysPreset} /> : null}
 
       <div className="relative z-1 flex w-full flex-row items-center gap-3 sm:gap-4">
-        <div className="flex shrink-0 flex-col gap-2 self-start">
+        <div className="flex shrink-0 flex-col items-start gap-2 self-start">
           <SupermarketChainBadge
             originId={product.origin_id}
             variant="logo"
-            className="h-6! w-auto! max-w-[108px]! rounded-md bg-white px-1 py-0.5 md:h-6! md:max-w-[108px]!"
+            className="h-6! w-auto! max-w-[108px]! rounded-md bg-white px-1 py-0.5 object-contain object-left md:h-6! md:max-w-[108px]!"
           />
 
           {isCurrent && (
