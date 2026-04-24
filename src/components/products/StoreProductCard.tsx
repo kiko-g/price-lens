@@ -344,11 +344,11 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
-                  <span className="text-destructive w-fit text-xs font-bold opacity-100 transition-opacity duration-300 group-hover:opacity-0">
+                  <span className="text-2xs w-fit rounded-xs bg-yellow-400 px-1 py-px font-semibold text-black opacity-100 transition-opacity duration-300 group-hover:opacity-0">
                     −{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
                   </span>
                 </div>
-                <div className="flex flex-col items-start gap-1 md:flex-row md:items-center md:gap-1.5">
+                <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
                   <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
                   <PriceChangeBadge pct={sp.price_change_pct} />
                 </div>
@@ -356,7 +356,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             ) : null}
 
             {isNormalPrice ? (
-              <div className="flex flex-col items-start gap-1 md:flex-row md:items-center md:gap-1.5">
+              <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
                 <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
                 <PriceChangeBadge pct={sp.price_change_pct} />
               </div>

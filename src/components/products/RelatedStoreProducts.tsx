@@ -107,8 +107,9 @@ export function RelatedStoreProducts({ id, limit = 10 }: Props) {
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <ChartScatterIcon className="h-5 w-5" />
           {t("title")}
-          <Badge variant="boring" size="xs">
-            {t("count", { count: products.length })}
+          <Badge variant="default" size="xs">
+            <span className="hidden md:inline-flex">{t("count", { count: products.length })}</span>
+            <span className="inline-flex md:hidden">{products.length}</span>
           </Badge>
         </h3>
         <div className="flex gap-2">
