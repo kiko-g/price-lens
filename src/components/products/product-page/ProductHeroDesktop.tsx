@@ -34,10 +34,12 @@ export function resolveImageUrlForPage(image: string, size = 800) {
 
 interface ProductHeroDesktopProps {
   sp: StoreProduct
+  /** Shown under the barcode (e.g. price-frequency table in the left rail on xl+). */
+  asideBelowBarcode?: ReactNode
   children?: ReactNode
 }
 
-export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
+export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductHeroDesktopProps) {
   const isPriceNotSet = !sp.price_recommended && !sp.price
   const hasDiscount = sp.price_recommended && sp.price && sp.price_recommended !== sp.price
   const isPriceRecommendedNotSet = !sp.price_recommended && sp.price
@@ -48,9 +50,9 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
   const tHero = useTranslations("products.hero")
 
   return (
-    <article className="hidden w-full grid-cols-20 gap-8 md:grid">
-      {/* Left column: Image + Barcode */}
-      <aside className="col-span-6 flex flex-col items-center">
+    <article className="hidden w-full grid-cols-21 gap-8 md:grid md:items-start">
+      {/* Left column: Image + Barcode (+ optional left-rail content) */}
+      <aside className="col-span-7 flex w-full min-w-0 flex-col items-center">
         <div className="relative aspect-8/7 w-full overflow-hidden rounded-lg border bg-white">
           {sp.image ? (
             <Image
@@ -83,6 +85,8 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
         <div className="mt-4 inline-flex w-full flex-wrap items-start justify-center gap-4">
           <Barcode value={sp.barcode} height={35} width={2} showMissingValue />
         </div>
+
+        {asideBelowBarcode != null ? <div className="mt-4 w-full min-w-0 self-stretch">{asideBelowBarcode}</div> : null}
       </aside>
 
       {/* Right column: Details */}
@@ -114,7 +118,7 @@ export function ProductHeroDesktop({ sp, children }: ProductHeroDesktopProps) {
         </div>
 
         {/* Pricing */}
-        <div className="flex flex-col items-start justify-start gap-2">
+        <div className="flex flex-col items-start justify-start gap-1">
           <div className="flex flex-wrap items-center gap-2">
             {hasDiscount ? (
               <>

@@ -109,9 +109,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
       </div>
 
       {/* Desktop hero (hidden below md) */}
-      <div className="hidden w-full grid-cols-20 gap-8 md:grid">
+      <div className="hidden w-full grid-cols-21 gap-8 md:grid">
         {/* Left column: Image + Barcode */}
-        <aside className="col-span-6 flex flex-col items-center">
+        <aside className="col-span-7 flex flex-col items-center">
           <div className="relative aspect-8/7 w-full overflow-hidden rounded-lg border bg-white">
             {product.imageUrl ? (
               <Image

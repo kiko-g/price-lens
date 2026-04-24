@@ -76,7 +76,7 @@ function CompactStoreCard({
           <SupermarketChainBadge
             originId={product.origin_id}
             variant="logo"
-            className="h-6! w-auto! max-w-[108px]! rounded-md bg-white px-1 py-0.5 object-contain object-left md:h-6! md:max-w-[108px]!"
+            className="h-6! w-auto! max-w-[108px]! rounded-md bg-white object-contain object-left px-1 py-0.5 md:h-6! md:max-w-[108px]!"
           />
 
           {isCurrent && (
@@ -106,6 +106,10 @@ function CompactStoreCard({
                 <p className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-snug">{product.pack}</p>
               ) : null}
 
+              <span className="text-muted-foreground text-sm tabular-nums line-through">
+                {product.price_recommended?.toFixed(2)}€
+              </span>
+
               <span
                 className={cn(
                   "text-base font-bold tabular-nums sm:text-lg",
@@ -122,14 +126,9 @@ function CompactStoreCard({
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             {hasDiscount && (
-              <>
-                <span className="text-muted-foreground text-sm tabular-nums line-through">
-                  {product.price_recommended?.toFixed(2)}€
-                </span>
-                <Badge variant="destructive" size="xs" className="shrink-0">
-                  −{discountValueToPercentage(product.discount!)}
-                </Badge>
-              </>
+              <Badge variant="destructive" size="xs" className="shrink-0">
+                −{discountValueToPercentage(product.discount!)}
+              </Badge>
             )}
 
             {product.price_per_major_unit && product.major_unit && (

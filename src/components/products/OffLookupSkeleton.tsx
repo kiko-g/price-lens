@@ -71,8 +71,8 @@ export function OffLookupSkeleton({ barcode }: OffLookupSkeletonProps) {
       </div>
 
       {/* Desktop skeleton */}
-      <div className="hidden w-full grid-cols-20 gap-8 md:grid">
-        <div className="col-span-6 flex flex-col items-center">
+      <div className="hidden w-full grid-cols-21 gap-8 md:grid">
+        <div className="col-span-7 flex flex-col items-center">
           <Skeleton className="aspect-8/7 w-full rounded-lg" />
           <Skeleton className="mt-4 h-10 w-48" />
         </div>

@@ -853,6 +853,7 @@
       "removeLabel": "Remove from favorites"
     },
     "actions": {
+      "menuTitle": "Actions",
       "details": "Details",
       "inspectData": "Inspect store product data",
       "storeProductDetails": "Store product details",

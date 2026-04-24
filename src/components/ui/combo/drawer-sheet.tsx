@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -20,26 +20,53 @@ const DefaultTrigger = (
   </Button>
 )
 
+function useSheetOpen(
+  controlledOpen: boolean | undefined,
+  onControlledOpenChange: ((open: boolean) => void) | undefined,
+) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  const onOpenChange = useCallback(
+    (next: boolean) => {
+      if (!isControlled) setUncontrolledOpen(next)
+      onControlledOpenChange?.(next)
+    },
+    [isControlled, onControlledOpenChange],
+  )
+  return { open, onOpenChange }
+}
+
 export function DrawerSheet({
   children,
   title,
   description,
   trigger = DefaultTrigger,
+  open: controlledOpen,
+  onOpenChange: onControlledOpenChange,
 }: {
   children: React.ReactNode
   title?: string
   description?: string
-  trigger?: React.ReactNode
+  /** Pass `null` to omit a trigger and control opening via `open` / `onOpenChange` (e.g. from a menu item). */
+  trigger?: React.ReactNode | null
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const { open, onOpenChange } = useSheetOpen(controlledOpen, onControlledOpenChange)
   const isDesktop = useMediaQuery("(min-width: 768px)")
+
+  const effectiveTrigger = trigger === undefined ? DefaultTrigger : trigger
+  const hasTrigger = trigger !== null
 
   if (isDesktop) {
     return (
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild className="top-4">
-          {trigger}
-        </SheetTrigger>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        {hasTrigger ? (
+          <SheetTrigger asChild className="top-4">
+            {effectiveTrigger}
+          </SheetTrigger>
+        ) : null}
         <SheetContent className="overflow-x-hidden overflow-y-scroll">
           <SheetHeader>
             <SheetTitle className="text-left">{title}</SheetTitle>
@@ -53,10 +80,12 @@ export function DrawerSheet({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild className="top-4">
-        {trigger}
-      </DrawerTrigger>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      {hasTrigger ? (
+        <DrawerTrigger asChild className="top-4">
+          {effectiveTrigger}
+        </DrawerTrigger>
+      ) : null}
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="text-left">{title}</DrawerTitle>

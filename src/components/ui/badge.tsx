@@ -29,6 +29,8 @@ const badgeVariants = cva(
           "border-transparent dark:border-transparent bg-warning text-warning-foreground hover:bg-warning/80 [&_span.bubble]:bg-warning",
         retail:
           "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-zinc-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
+        "retail-discount":
+          "border-transparent bg-yellow-500 text-zinc-950 hover:bg-yellow-400/80 dark:border-transparent dark:bg-yellow-400 dark:text-zinc-950 dark:hover:bg-yellow-500/80 [&_span.bubble]:bg-yellow-400",
         light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
         dark: "border-transparent bg-zinc-900 text-zinc-50 dark:border-transparent hover:bg-zinc-900/80",
         outline:

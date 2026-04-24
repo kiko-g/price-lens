@@ -853,6 +853,7 @@
       "removeLabel": "Remover dos favoritos"
     },
     "actions": {
+      "menuTitle": "Ações",
       "details": "Detalhes",
       "inspectData": "Inspecionar dados do produto",
       "storeProductDetails": "Detalhes do produto na loja",

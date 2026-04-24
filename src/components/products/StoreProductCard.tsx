@@ -249,7 +249,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           <Badge
             size="xs"
             variant="outline-white"
-            className="border-muted w-fit max-w-20 opacity-100 transition-opacity duration-300 [--background:var(--color-white)] [--foreground:var(--base-800)] group-hover:opacity-50"
+            className="w-fit max-w-20 border-transparent opacity-100 transition-opacity duration-300 [--background:var(--color-white)] [--foreground:var(--base-800)] group-hover:opacity-50 dark:border-transparent"
           >
             <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
           </Badge>

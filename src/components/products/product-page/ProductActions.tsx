@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 
 import type { StoreProduct } from "@/types"
@@ -32,6 +33,7 @@ export function ProductActions({ sp }: ProductActionsProps) {
   const { promptAndSetPriority, clearPriority, isPending: isPriorityPending } = useSetProductPriority(sp.id)
   const compactActions = useMediaQuery("(max-width: 768px)")
   const t = useTranslations("products.actions")
+  const [storeDetailsOpen, setStoreDetailsOpen] = useState(false)
 
   const supermarketName = getSupermarketChainName(sp?.origin_id) ?? ""
   const elevated = process.env.NODE_ENV === "development" || profile?.role === "admin"
@@ -41,28 +43,22 @@ export function ProductActions({ sp }: ProductActionsProps) {
       <div className="flex items-center gap-3">
         <FavoriteButton storeProduct={sp} compact={compactActions} />
         <AlertButton storeProductId={sp.id} productName={sp.name} variant={compactActions ? "icon" : "default"} />
+        <ShareButton sp={sp} compact={compactActions} />
+      </div>
+      <div className="flex items-center gap-3">
         <ResponsiveActionsMenu
+          title={t("menuTitle")}
           trigger={
             <Button variant="outline" size={compactActions ? "icon-lg" : "icon-sm"}>
               <EllipsisVerticalIcon className="h-4 w-4" />
             </Button>
           }
         >
-          <ResponsiveActionsMenuItem asChild>
-            <DrawerSheet
-              title={t("details")}
-              description={t("inspectData")}
-              trigger={
-                <button type="button" className="flex w-full items-center justify-between gap-2">
-                  {t("storeProductDetails")}
-                  <InfoIcon />
-                </button>
-              }
-            >
-              <div className="w-full">
-                <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
-              </div>
-            </DrawerSheet>
+          <ResponsiveActionsMenuItem onClick={() => setStoreDetailsOpen(true)}>
+            <span className="flex w-full min-w-0 items-center justify-between gap-2">
+              {t("storeProductDetails")}
+            </span>
+            <InfoIcon />
           </ResponsiveActionsMenuItem>
 
           <ResponsiveActionsMenuItem
@@ -96,9 +92,18 @@ export function ProductActions({ sp }: ProductActionsProps) {
             </ResponsiveActionsMenuItem>
           )}
         </ResponsiveActionsMenu>
-      </div>
-      <div className="flex items-center gap-3">
-        <ShareButton sp={sp} compact={compactActions} />
+
+        <DrawerSheet
+          open={storeDetailsOpen}
+          onOpenChange={setStoreDetailsOpen}
+          title={t("details")}
+          description={t("inspectData")}
+          trigger={null}
+        >
+          <div className="w-full">
+            <CodeShowcase code={JSON.stringify(sp, null, 2)} language="json" />
+          </div>
+        </DrawerSheet>
       </div>
     </div>
   )

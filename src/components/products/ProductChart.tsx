@@ -307,6 +307,8 @@ type PricesVariationProps = {
   showImage?: boolean
   showBarcode?: boolean
   showFreshnessInfo?: boolean
+  /** Widen the axis legend (e.g. desktop product page next to the chart). */
+  wideCard?: boolean
 }
 
 function PricesVariation({
@@ -314,6 +316,7 @@ function PricesVariation({
   showImage = false,
   showBarcode = false,
   showFreshnessInfo = true,
+  wideCard = false,
 }: PricesVariationProps) {
   const { sp, activeAxis, variations, handleAxisChange, isLoading } = useProductChartContext()
 
@@ -362,7 +365,7 @@ function PricesVariation({
           onPricePerMajorUnitChange: () => handleAxisChange("price-per-major-unit"),
           onDiscountChange: () => handleAxisChange("discount"),
         }}
-        className="max-w-xs text-xs font-medium md:text-sm"
+        className={cn("text-xs font-medium md:text-sm", wideCard ? "max-w-full" : "max-w-xs")}
       />
 
       {(showImage || showBarcode) && (
@@ -947,9 +950,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
       </div>
 
       {scrollable ? (
-        <ScrollArea className={cn("mt-1 max-w-full min-w-0 rounded-lg border", pricePoints.length > 6 && "h-[250px]")}>
-          {pricePointsTable}
-        </ScrollArea>
+        <ScrollArea className={cn("mt-1 max-w-full min-w-0 rounded-lg border")}>{pricePointsTable}</ScrollArea>
       ) : (
         <div className="mt-1 max-w-full min-w-0 overflow-x-auto rounded-lg border">{pricePointsTable}</div>
       )}
