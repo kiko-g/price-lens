@@ -55,7 +55,7 @@ function ProductChartDefaultAnalyticsGrid() {
 /** Desktop (xl+): table in the left product rail; optional xl row [stability | legend] only — chart stays full width below. */
 function ProductChartLeftRailDesktopLayout({ stabilityCallout }: { stabilityCallout?: ReactNode }) {
   const legend = (
-    <div className="min-w-0 w-full">
+    <div className="w-full min-w-0">
       <ProductChart.PricesVariation showFreshnessInfo={false} wideCard className="mb-0" />
     </div>
   )
@@ -64,21 +64,21 @@ function ProductChartLeftRailDesktopLayout({ stabilityCallout }: { stabilityCall
     <div className="flex min-w-0 flex-col gap-4">
       {stabilityCallout != null ? (
         <div className="grid min-w-0 max-xl:grid-cols-1 max-xl:gap-3 xl:grid-cols-2 xl:items-start xl:gap-4">
-          <div className="min-w-0 max-w-full [&>section]:max-w-full">{stabilityCallout}</div>
+          <div className="max-w-full min-w-0 [&>section]:max-w-full">{stabilityCallout}</div>
           {legend}
         </div>
       ) : (
         legend
       )}
 
-      <div className="max-xl:block w-full min-w-0 xl:hidden">
+      <div className="w-full min-w-0 max-xl:block xl:hidden">
         <ProductChart.PriceTable
-          className="w-full min-w-0 [font-variant-numeric:tabular-nums] text-xs"
+          className="w-full min-w-0 text-xs [font-variant-numeric:tabular-nums]"
           scrollable={true}
         />
       </div>
 
-      <div className="bg-foreground/2 dark:bg-foreground/2 flex min-w-0 w-full flex-col gap-2 rounded-lg px-0 pt-1 pb-0">
+      <div className="bg-foreground/2 dark:bg-foreground/2 flex w-full min-w-0 flex-col gap-2 rounded-lg px-0 pt-1 pb-0">
         <ProductChart.RangeSelector className="xl:justify-start" />
         <ProductChart.Graph />
       </div>
@@ -129,7 +129,13 @@ type ChartSectionProps = {
   useLeftRailAtXl?: boolean
 }
 
-function ChartSection({ sp, rangeFromUrl, onRangeChange, onPriceHistoryHint, useLeftRailAtXl = false }: ChartSectionProps) {
+function ChartSection({
+  sp,
+  rangeFromUrl,
+  onRangeChange,
+  onPriceHistoryHint,
+  useLeftRailAtXl = false,
+}: ChartSectionProps) {
   return (
     <ProductChart.Root
       sp={sp}
@@ -192,8 +198,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
 
   const priceStatsSufficient = hasSufficientPriceStats(sp.price_stats_updated_at, sp.price_stats_obs_90d)
   const canShowDesktopStabilityWithLegend =
-    !shouldHideDesktopPriceStabilityCallout(priceHistoryHint) &&
-    (priceStatsSufficient || !priceHistoryHint?.loading)
+    !shouldHideDesktopPriceStabilityCallout(priceHistoryHint) && (priceStatsSufficient || !priceHistoryHint?.loading)
 
   return (
     <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:py-4">
@@ -215,7 +220,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
             isTracked ? (
               <div className="hidden w-full min-w-0 xl:block">
                 <ProductChart.PriceTable
-                  className="w-full min-w-0 [font-variant-numeric:tabular-nums] text-xs"
+                  className="w-full min-w-0 text-xs [font-variant-numeric:tabular-nums]"
                   scrollable={true}
                 />
               </div>
@@ -223,11 +228,11 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           }
         >
           {/* Full-width stack: the prior xl:flex row squeezed the line chart to ~50% of the main column. */}
-          <div className="mt-1 flex min-w-0 w-full max-w-full flex-col gap-3">
+          <div className="mt-1 flex w-full max-w-full min-w-0 flex-col gap-3">
             {!isTracked ? (
               <ProductPriceStatsCallout
                 sp={sp}
-                className="max-w-none w-full"
+                className="w-full max-w-none"
                 placement="desktop"
                 priceHistoryHint={priceHistoryHint}
               />
@@ -239,7 +244,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
                 isTracked && canShowDesktopStabilityWithLegend ? (
                   <ProductPriceStatsCallout
                     sp={sp}
-                    className="max-w-none w-full"
+                    className="w-full max-w-none"
                     placement="desktop"
                     priceHistoryHint={priceHistoryHint}
                   />
@@ -253,7 +258,7 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       {/* Mobile hero (hidden at md+) */}
       <ProductHeroMobile sp={sp} />
 
-      <div className="mt-5 md:hidden">
+      <div className="mt-4 flex flex-col gap-3 md:hidden">
         <ProductPageDealSummary sp={sp} />
       </div>
 

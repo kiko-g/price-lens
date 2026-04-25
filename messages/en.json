@@ -822,7 +822,11 @@
     },
     "hero": {
       "noImage": "No image available",
-      "notAvailable": "Not available"
+      "notAvailable": "Not available",
+      "goodDeal": {
+        "label": "Good buy",
+        "aria": "Strong offer: high price-drop score, big discount, or typical price with a promotion"
+      }
     },
     "freshness": {
       "trigger": "Verified {time}",

@@ -202,7 +202,7 @@ function RelatedProductsSkeleton() {
 export default function ProductLoading() {
   return (
     <div className="relative flex w-full flex-col items-center justify-start gap-4 p-4">
-      <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:py-4">
+      <div className="mx-auto mb-8 flex w-full max-w-[1320px] flex-col py-0 lg:pt-2 lg:pb-4">
         <BreadcrumbSkeleton />
         <DesktopHeroSkeleton />
         <MobileHeroSkeleton />

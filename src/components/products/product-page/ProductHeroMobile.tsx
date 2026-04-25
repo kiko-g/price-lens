@@ -8,6 +8,7 @@ import { discountValueToPercentage } from "@/lib/business/product"
 import type { StoreProduct } from "@/types"
 
 import { Badge } from "@/components/ui/badge"
+import { GoodDealOpportunityBadge } from "@/components/products/product-page/GoodDealOpportunityBadge"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { ProductActions } from "@/components/products/product-page/ProductActions"
@@ -50,13 +51,17 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
         )}
 
         {!sp.available && (
-          <div className="absolute bottom-3 left-3 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <Badge variant="dark" size="md" className="w-fit">
               <WifiOffIcon className="h-4 w-4" />
               {tHero("notAvailable")}
             </Badge>
           </div>
         )}
+
+        <div className="absolute top-3 left-3 z-10">
+          <GoodDealOpportunityBadge sp={sp} />
+        </div>
       </div>
 
       {/* Brand + Store badge row */}

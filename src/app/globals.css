@@ -417,6 +417,30 @@
       background-position: 0% 0%;
     }
   }
+
+  /* Flowing “molten” gradient + soft warm pulse for CTA badges (e.g. retail-deal) */
+  --animate-lava: lava 3.5s ease-in-out infinite;
+  @keyframes lava {
+    0%,
+    100% {
+      background-position: 0% 50%;
+      box-shadow:
+        0 0 0 0 rgb(244 63 94 / 0.12),
+        0 0 0 0 transparent;
+    }
+    25% {
+      background-position: 100% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+      box-shadow:
+        0 0 0 1px rgb(249 115 22 / 0.28),
+        0 0 14px 3px rgb(244 63 94 / 0.2);
+    }
+    75% {
+      background-position: 0% 100%;
+    }
+  }
 }
 
 .carousel-progress-ring {

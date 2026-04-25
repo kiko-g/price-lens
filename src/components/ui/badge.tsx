@@ -31,6 +31,8 @@ const badgeVariants = cva(
           "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-zinc-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
         "retail-discount":
           "border-transparent bg-yellow-500 text-zinc-950 hover:bg-yellow-400/80 dark:border-transparent dark:bg-yellow-400 dark:text-zinc-950 dark:hover:bg-yellow-500/80 [&_span.bubble]:bg-yellow-400",
+        "retail-deal":
+          "border border-rose-500/20 bg-size-[200%_200%] bg-linear-to-br from-rose-500/20 via-orange-500/20 to-rose-500/18 text-rose-950 motion-reduce:animate-none motion-reduce:ring-1 motion-reduce:ring-rose-500/30 motion-reduce:shadow-none animate-lava hover:brightness-105 focus-visible:ring-rose-500/45 dark:border-rose-400/30 dark:from-rose-400/30 dark:via-orange-400/25 dark:to-rose-500/25 dark:text-rose-950 dark:hover:brightness-110 [&_span.bubble]:bg-rose-500 dark:[&_span.bubble]:bg-rose-400",
         light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
         dark: "border-transparent bg-zinc-900 text-zinc-50 dark:border-transparent hover:bg-zinc-900/80",
         outline:

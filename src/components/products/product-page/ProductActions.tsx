@@ -55,9 +55,7 @@ export function ProductActions({ sp }: ProductActionsProps) {
           }
         >
           <ResponsiveActionsMenuItem onClick={() => setStoreDetailsOpen(true)}>
-            <span className="flex w-full min-w-0 items-center justify-between gap-2">
-              {t("storeProductDetails")}
-            </span>
+            <span className="flex w-full min-w-0 items-center justify-between gap-2">{t("storeProductDetails")}</span>
             <InfoIcon />
           </ResponsiveActionsMenuItem>
 

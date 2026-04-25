@@ -822,7 +822,11 @@
     },
     "hero": {
       "noImage": "Sem imagem disponível",
-      "notAvailable": "Indisponível"
+      "notAvailable": "Indisponível",
+      "goodDeal": {
+        "label": "Boa oportunidade",
+        "aria": "Oferta forte: pontuação alta de descida, grande desconto, ou preço habitual com promoção"
+      }
     },
     "freshness": {
       "trigger": "Verificado {time}",

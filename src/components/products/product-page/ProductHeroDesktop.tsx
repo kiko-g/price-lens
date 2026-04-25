@@ -16,6 +16,7 @@ import { useIsAdmin } from "@/contexts/UserContext"
 import { PriorityBadge } from "@/components/products/PriorityBadge"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
+import { GoodDealOpportunityBadge } from "@/components/products/product-page/GoodDealOpportunityBadge"
 import { ProductActions } from "@/components/products/product-page/ProductActions"
 
 import { AlertTriangleIcon } from "lucide-react"
@@ -50,9 +51,9 @@ export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductH
   const tHero = useTranslations("products.hero")
 
   return (
-    <article className="hidden w-full grid-cols-21 gap-8 md:grid md:items-start">
+    <article className="hidden w-full grid-cols-20 gap-8 md:grid md:items-start">
       {/* Left column: Image + Barcode (+ optional left-rail content) */}
-      <aside className="col-span-7 flex w-full min-w-0 flex-col items-center">
+      <aside className="col-span-6 flex w-full min-w-0 flex-col items-center">
         <div className="relative aspect-8/7 w-full overflow-hidden rounded-lg border bg-white">
           {sp.image ? (
             <Image
@@ -73,13 +74,17 @@ export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductH
           )}
 
           {!sp.available && (
-            <div className="absolute top-3 left-3 z-10">
+            <div className="absolute top-3 right-3 z-10">
               <Badge variant="destructive" size="sm" roundedness="sm" className="w-fit">
                 <AlertTriangleIcon className="h-4 w-4" />
                 {tHero("notAvailable")}
               </Badge>
             </div>
           )}
+
+          <div className="absolute top-3 left-3 z-10">
+            <GoodDealOpportunityBadge sp={sp} />
+          </div>
         </div>
 
         <div className="mt-4 inline-flex w-full flex-wrap items-start justify-center gap-4">
@@ -118,7 +123,7 @@ export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductH
         </div>
 
         {/* Pricing */}
-        <div className="flex flex-col items-start justify-start gap-1">
+        <div className="flex flex-col items-start justify-start gap-2">
           <div className="flex flex-wrap items-center gap-2">
             {hasDiscount ? (
               <>
