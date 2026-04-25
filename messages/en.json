@@ -323,15 +323,43 @@
       "subtitle": "The biggest price drops and best discounts right now across Portuguese supermarkets."
     },
     "filters": {
-      "allStores": "All Stores"
+      "allStores": "All stores",
+      "drawerTitle": "Supermarket",
+      "drawerDescription": "Show deals from one chain or from all tracked stores.",
+      "mobileTriggerHint": "Tap to change store",
+      "drawerClose": "Close"
     },
     "tabs": {
       "priceDrops": "Price Drops",
       "discounts": "Discounts"
     },
+    "pagination": {
+      "showingRange": "Showing {from}–{to}",
+      "previous": "Previous",
+      "next": "Next",
+      "showingOfTotal": "Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> deals",
+      "showingNoTotal": "Showing <strong>{from}</strong> to <strong>{to}</strong> deals"
+    },
+    "batch": {
+      "productsCount": "{count, plural, one {# deal} other {# deals}}",
+      "loadedSoFar": "{count, plural, one {# deal loaded so far} other {# deals loaded so far}}"
+    },
+    "states": {
+      "loading": "Loading deals…",
+      "loadingMore": "Loading more…"
+    },
+    "mobile": {
+      "scrollHint": "{count, plural, one {# deal loaded · scroll for more} other {# deals loaded · scroll for more}}",
+      "endOfList": "You're viewing all deals loaded for this filter."
+    },
+    "error": {
+      "message": "Could not load deals. Please try again.",
+      "retry": "Retry"
+    },
     "empty": {
       "drops": "No recent price drops match these rules (valid price, change within the last two weeks, plausible size). Try another store or check back later: the list fills as data updates.",
-      "discounts": "No standout discounts for this filter. Try another store."
+      "discounts": "No standout discounts for this filter. Try another store.",
+      "all": "No deals match this filter right now (we combine recent price drops and on-shelf discounts with sensible limits). Try another store or check back later as prices update."
     }
   },
   "favoritesPage": {

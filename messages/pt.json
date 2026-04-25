@@ -323,15 +323,43 @@
       "subtitle": "As maiores descidas de preço e os melhores descontos no momento, em supermercados portugueses."
     },
     "filters": {
-      "allStores": "Todas as lojas"
+      "allStores": "Todas as lojas",
+      "drawerTitle": "Supermercado",
+      "drawerDescription": "Mostra promoções de uma cadeia ou de todas as lojas acompanhadas.",
+      "mobileTriggerHint": "Toca para mudar de loja",
+      "drawerClose": "Fechar"
     },
     "tabs": {
       "priceDrops": "Descidas",
       "discounts": "Descontos"
     },
+    "pagination": {
+      "showingRange": "A mostrar {from}–{to}",
+      "previous": "Anterior",
+      "next": "Seguinte",
+      "showingOfTotal": "A mostrar <strong>{from}</strong> a <strong>{to}</strong> de <strong>{total}</strong> promoções",
+      "showingNoTotal": "A mostrar <strong>{from}</strong> a <strong>{to}</strong> promoções"
+    },
+    "batch": {
+      "productsCount": "{count, plural, one {# promoção} other {# promoções}}",
+      "loadedSoFar": "{count, plural, one {# promoção carregada até agora} other {# promoções carregadas até agora}}"
+    },
+    "states": {
+      "loading": "A carregar promoções…",
+      "loadingMore": "A carregar mais…"
+    },
+    "mobile": {
+      "scrollHint": "{count, plural, one {# promoção carregada · desliza para mais} other {# promoções carregadas · desliza para mais}}",
+      "endOfList": "Estás a ver todas as promoções carregadas para este filtro."
+    },
+    "error": {
+      "message": "Não foi possível carregar as promoções. Tenta novamente.",
+      "retry": "Tentar de novo"
+    },
     "empty": {
       "drops": "Não há descidas recentes que cumpram estas regras (preço válido, variação nas últimas duas semanas, tamanho plausível). Tenta outra loja ou volta mais tarde: a lista preenche à medida que os dados são atualizados.",
-      "discounts": "Sem descontos relevantes para este filtro. Tenta outra loja."
+      "discounts": "Sem descontos relevantes para este filtro. Tenta outra loja.",
+      "all": "Não há promoções que correspondam a este filtro de momento (juntamos descidas recentes e descontos em loja com limites sensatos). Tenta outra loja ou volta mais tarde à medida que os preços são atualizados."
     }
   },
   "favoritesPage": {

@@ -1,0 +1,2 @@
+export const DEFAULT_DEALS_PAGE_LIMIT = 20
+export const MAX_DEALS_PAGE_LIMIT = 100

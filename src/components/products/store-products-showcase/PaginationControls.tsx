@@ -11,6 +11,8 @@ interface PaginationControlsProps {
   isLoading: boolean
   onPageChange: (page: number) => void
   className?: string
+  /** next-intl messages namespace for previous/next (and bottom summary when used there) */
+  namespace?: "products.pagination" | "deals.pagination"
 }
 
 export function PaginationControls({
@@ -20,9 +22,10 @@ export function PaginationControls({
   isLoading,
   onPageChange,
   className,
+  namespace = "products.pagination",
 }: PaginationControlsProps) {
   const isNextDisabled = isLoading || !hasNextPage
-  const t = useTranslations("products.pagination")
+  const t = useTranslations(namespace)
 
   return (
     <div className={cn("text-foreground isolate flex items-center gap-1 md:gap-2", className)}>
@@ -78,6 +81,7 @@ export function BottomPagination({
   totalCount,
   hasNextPage,
   onPageChange,
+  namespace = "products.pagination",
 }: {
   currentPage: number
   totalPages: number | null
@@ -86,8 +90,9 @@ export function BottomPagination({
   totalCount: number | null
   hasNextPage: boolean
   onPageChange: (page: number) => void
+  namespace?: "products.pagination" | "deals.pagination"
 }) {
-  const t = useTranslations("products.pagination")
+  const t = useTranslations(namespace)
   return (
     <div className="mt-8 flex items-center justify-between border-t py-4">
       <div className="text-muted-foreground flex w-full flex-col text-sm">
@@ -113,6 +118,7 @@ export function BottomPagination({
         hasNextPage={hasNextPage}
         isLoading={false}
         onPageChange={onPageChange}
+        namespace={namespace}
       />
     </div>
   )
