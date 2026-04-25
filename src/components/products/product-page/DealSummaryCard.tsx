@@ -2,10 +2,17 @@
 
 import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
+import { useMemo } from "react"
 
 import type { PricePoint, StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
-import { getProductDealSummary, type DealSummaryTier } from "@/lib/business/product-deal-summary"
+import {
+  getProductDealSummary,
+  type DealModalLabel,
+  type DealSummaryTier,
+  type DealSummaryTierLabelKey,
+  type FreqPhraseData,
+} from "@/lib/business/product-deal-summary"
 import { isLocale, type Locale } from "@/i18n/config"
 import { formatPrice } from "@/lib/i18n/format"
 
@@ -70,11 +77,45 @@ export function DealSummaryCard({
   className,
 }: DealSummaryCardProps) {
   const t = useTranslations("products.dealSummary")
+  const deal = isLoading ? null : getProductDealSummary(sp, pricePoints, mostCommon, { historyDays })
+
+  const summaryParagraph = useMemo(() => {
+    if (!deal) return null
+    const body = deal.body
+    const fmtModal = (m: DealModalLabel) => (m.type === "price" ? m.formatted : t("modalUnknown"))
+    const fmtFreq = (f: FreqPhraseData) => {
+      if (f.kind === "lessThan1") return t("freqPhrase.lessThan1")
+      if (f.kind === "zero") return t("freqPhrase.zero")
+      return t("freqPhrase.about", { pct: f.pct })
+    }
+    switch (body.kind) {
+      case "single":
+        return t("summary.singlePrice")
+      case "unmatched":
+        return t("summary.unmatched")
+      case "mostCommon":
+        return t("summary.mostCommon", {
+          priceLabel: body.priceLabel ?? t("indefiniteCurrentPrice"),
+          freqPct: body.freqPct,
+        })
+      case "nascent":
+        return t("summary.nascent", {
+          days: body.daysAtLevel,
+          historyDays: body.historyDays,
+          freqPhrase: fmtFreq(body.freq),
+          modalPrice: fmtModal(body.modal),
+        })
+      case "frequency":
+        return t("summary.frequency", {
+          freqPhrase: fmtFreq(body.freq),
+          modalPrice: fmtModal(body.modal),
+        })
+    }
+  }, [deal, t])
+
   if (isLoading) {
     return <Skeleton variant="shimmer" className={cn("h-24 w-full rounded-xl", className)} />
   }
-
-  const deal = getProductDealSummary(sp, pricePoints, mostCommon, { historyDays })
 
   if (!deal && !cheaperHint) return null
 
@@ -146,12 +187,21 @@ export function DealSummaryCard({
               <IconComponent className="size-4 sm:size-5" aria-hidden />
             </div>
 
-            {deal.tierLabel ? (
+            {deal.tierLabelKey ? (
               <Badge variant={badgeVariant} size="xs" className="w-fit font-semibold">
-                {deal.tierLabel}
+                {
+                  (
+                    {
+                      habitual: t("tierLabels.habitual"),
+                      nascent: t("tierLabels.nascent"),
+                      infrequent: t("tierLabels.infrequent"),
+                      middle: t("tierLabels.middle"),
+                    } satisfies Record<DealSummaryTierLabelKey, string>
+                  )[deal.tierLabelKey]
+                }
               </Badge>
             ) : null}
-            <p className="text-foreground text-sm leading-snug font-medium wrap-break-word">{deal.summaryLine}</p>
+            <p className="text-foreground text-sm leading-snug font-medium wrap-break-word">{summaryParagraph}</p>
           </>
         ) : (
           <p className="text-muted-foreground text-sm font-medium">{t("compareBelow")}</p>

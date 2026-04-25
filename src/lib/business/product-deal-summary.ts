@@ -2,11 +2,32 @@ import type { PricePoint, StoreProduct } from "@/types"
 
 export type DealSummaryTier = "habitual" | "infrequent" | "nascent" | "middle" | "single" | "unknown"
 
+export type DealSummaryTierLabelKey = "habitual" | "nascent" | "infrequent" | "middle"
+
+/** Drives `freqPhrase.*` i18n under products.dealSummary */
+export type FreqPhraseData = { kind: "lessThan1" } | { kind: "zero" } | { kind: "about"; pct: number }
+
+/** Most common price display, or unknown when we cannot name a modal level */
+export type DealModalLabel = { type: "price"; formatted: string } | { type: "unknown" }
+
+export type DealSummaryBody =
+  | { kind: "single" }
+  | { kind: "unmatched" }
+  | { kind: "mostCommon"; priceLabel: string | null; freqPct: number }
+  | {
+      kind: "nascent"
+      daysAtLevel: number
+      historyDays: number
+      modal: DealModalLabel
+      freq: FreqPhraseData
+    }
+  | { kind: "frequency"; modal: DealModalLabel; freq: FreqPhraseData }
+
 export type ProductDealSummary = {
-  summaryLine: string
-  /** Short label for a badge; null when the summary alone is enough */
-  tierLabel: string | null
   tier: DealSummaryTier
+  /** Maps to i18n `products.dealSummary.tierLabels.*`; null when the badge is omitted */
+  tierLabelKey: DealSummaryTierLabelKey | null
+  body: DealSummaryBody
 }
 
 export type ProductDealSummaryOptions = {
@@ -41,6 +62,16 @@ function isNascentShortObservation(
   return daysAtLevel <= MAX_STINT_DAYS_FOR_NASCENT
 }
 
+function buildFreqPhraseData(freqPct: number, ratio: number | null | undefined): FreqPhraseData {
+  if (freqPct === 0 && ratio != null && ratio > 0) {
+    return { kind: "lessThan1" }
+  }
+  if (freqPct === 0) {
+    return { kind: "zero" }
+  }
+  return { kind: "about", pct: freqPct }
+}
+
 export function getProductDealSummary(
   sp: StoreProduct,
   pricePoints: PricePoint[] | null,
@@ -52,8 +83,8 @@ export function getProductDealSummary(
   const distinct = pricePoints.length
   if (distinct === 1) {
     return {
-      summaryLine: "Only one price has been recorded in this window.",
-      tierLabel: null,
+      body: { kind: "single" },
+      tierLabelKey: null,
       tier: "single",
     }
   }
@@ -63,8 +94,8 @@ export function getProductDealSummary(
 
   if (freqPct == null) {
     return {
-      summaryLine: "We couldn't match the current price to the aggregated history.",
-      tierLabel: null,
+      body: { kind: "unmatched" },
+      tierLabelKey: null,
       tier: "unknown",
     }
   }
@@ -75,54 +106,54 @@ export function getProductDealSummary(
   const nascent = currentPoint != null && isNascentShortObservation(currentPoint, freqPct, isMostCommon, historyDays)
 
   let tier: DealSummaryTier
-  let tierLabel: string | null
+  let tierLabelKey: DealSummaryTierLabelKey | null
   if (isMostCommon || freqPct >= 50) {
     tier = "habitual"
-    tierLabel = "Usually this price"
+    tierLabelKey = "habitual"
   } else if (nascent) {
     tier = "nascent"
-    tierLabel = "Short time at this level"
+    tierLabelKey = "nascent"
   } else if (freqPct < 15) {
     tier = "infrequent"
-    tierLabel = "Less common in our chart"
+    tierLabelKey = "infrequent"
   } else {
     tier = "middle"
-    tierLabel = "Mixed frequency"
+    tierLabelKey = "middle"
   }
 
-  const priceLabel = sp.price != null ? `${sp.price.toFixed(2)}€` : "this price"
+  const priceLabel: string | null = sp.price != null ? `${sp.price.toFixed(2)}€` : null
   const ratio = currentPoint?.frequencyRatio
-  const freqPhrase =
-    freqPct === 0 && ratio != null && ratio > 0
-      ? "less than 1% of tracked time"
-      : freqPct === 0
-        ? "0% of tracked time"
-        : `about ${freqPct}% of tracked time`
+  const freq = buildFreqPhraseData(freqPct, ratio)
 
   if (isMostCommon) {
     return {
-      summaryLine: `Current price (${priceLabel}) is the most common in our sample (~${freqPct}% of observations).`,
-      tierLabel,
+      body: { kind: "mostCommon", priceLabel, freqPct },
+      tierLabelKey,
       tier,
     }
   }
 
-  const modalLabel = mostCommon != null ? `${mostCommon.price.toFixed(2)}€` : "another level"
+  const modal: DealModalLabel =
+    mostCommon != null ? { type: "price", formatted: `${mostCommon.price.toFixed(2)}€` } : { type: "unknown" }
 
   if (nascent && currentPoint != null) {
     const daysAtLevel = Math.max(1, Math.round(currentPoint.totalDuration / MS_PER_DAY))
     return {
-      summaryLine: `This price has only been at this level for about ${daysAtLevel} day${
-        daysAtLevel === 1 ? "" : "s"
-      } in our ~${historyDays}-day sample (${freqPhrase}), so it looks uncommon—that often means a new or brief price, not only a special deal. The most common price is ${modalLabel}.`,
-      tierLabel,
+      body: {
+        kind: "nascent",
+        daysAtLevel,
+        historyDays,
+        modal,
+        freq,
+      },
+      tierLabelKey,
       tier,
     }
   }
 
   return {
-    summaryLine: `Across our tracked history (time-weighted), this price appears ${freqPhrase}. The most common price is ${modalLabel}.`,
-    tierLabel,
+    body: { kind: "frequency", modal, freq },
+    tierLabelKey,
     tier,
   }
 }

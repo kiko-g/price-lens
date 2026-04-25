@@ -4,14 +4,17 @@ import { useLocale, useTranslations } from "next-intl"
 
 import type { StoreProduct } from "@/types"
 import {
+  type InsufficientPriceStatsKind,
+  type PriceGuidanceScenario,
   type PriceHistoryHint,
-  getInsufficientPriceStatsMessage,
+  type VolatilityLeadKey,
+  getInsufficientPriceStatsResult,
   getPriceMovementGuidance,
+  getVolatilityLeadKey,
   hasSufficientPriceStats,
   shouldHideDesktopPriceStabilityCallout,
   shouldShowMobilePriceStatsCallout,
   volatilityBandFromCv,
-  volatilityCasualLead,
 } from "@/lib/business/price-volatility"
 import { Callout } from "@/components/ui/callout"
 import { useIsAdmin } from "@/contexts/UserContext"
@@ -19,6 +22,62 @@ import { AlertTriangleIcon, BarChart3Icon, InfoIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { isLocale, type Locale } from "@/i18n/config"
 import { formatDate } from "@/lib/i18n/format"
+
+type PriceStatsT = ReturnType<typeof useTranslations<"products.priceStats">>
+
+function leadCopy(t: PriceStatsT, key: VolatilityLeadKey) {
+  switch (key) {
+    case "collecting":
+      return t("leads.collecting")
+    case "steady":
+      return t("leads.steady")
+    case "medium":
+      return t("leads.medium")
+    case "jumpy":
+      return t("leads.jumpy")
+    case "unclear":
+      return t("leads.unclear")
+  }
+}
+
+function guidanceCopy(t: PriceStatsT, scenario: PriceGuidanceScenario, mode: "compact" | "long") {
+  const compact = mode === "compact"
+  switch (scenario) {
+    case "fewPointsBigMove":
+      return compact ? t("guidance.fewPointsBigMove.compact") : t("guidance.fewPointsBigMove.long")
+    case "hugeSwing":
+      return compact ? t("guidance.hugeSwing.compact") : t("guidance.hugeSwing.long")
+    case "seeChart":
+      return compact ? t("guidance.seeChart.compact") : t("guidance.seeChart.long")
+    case "dropWhenVolatile":
+      return compact ? t("guidance.dropWhenVolatile.compact") : t("guidance.dropWhenVolatile.long")
+    case "calmNoRecentDrop":
+      return compact ? t("guidance.calmNoRecentDrop.compact") : t("guidance.calmNoRecentDrop.long")
+    case "unusualDropWhenCalm":
+      return compact ? t("guidance.unusualDropWhenCalm.compact") : t("guidance.unusualDropWhenCalm.long")
+  }
+}
+
+function insufficientCopy(t: PriceStatsT, kind: InsufficientPriceStatsKind) {
+  switch (kind) {
+    case "sameLevel":
+      return t("insufficient.sameLevel")
+    case "stillSyncing":
+      return t("insufficient.stillSyncing")
+    case "noSummaryYet":
+      return t("insufficient.noSummaryYet")
+    case "noHistory":
+      return t("insufficient.noHistory")
+    case "oneCheck":
+      return t("insufficient.oneCheck")
+    case "noChecks90d":
+      return t("insufficient.noChecks90d")
+    case "needMoreData":
+      return t("insufficient.needMoreData")
+    case "fallback":
+      return t("insufficient.fallback")
+  }
+}
 
 type Props = {
   sp: StoreProduct
@@ -48,7 +107,6 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
   }
 
   const guidance = sufficient ? getPriceMovementGuidance(guidanceInput) : null
-  const guidanceCompact = sufficient ? getPriceMovementGuidance(guidanceInput, { compact: true }) : null
 
   const updatedLabel =
     sp.price_stats_updated_at != null
@@ -68,7 +126,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
     ) : null
 
   if (placement === "mobile") {
-    if (!showMobile || !guidance || !guidanceCompact) return null
+    if (!showMobile || !guidance) return null
 
     const isWarning = guidance.tone === "warning"
     const StatusIcon = isWarning ? AlertTriangleIcon : BarChart3Icon
@@ -79,8 +137,12 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
           <div className="flex gap-2.5">
             <StatusIcon className="text-foreground mt-0.5 size-4 shrink-0 opacity-90" aria-hidden />
             <div className="min-w-0 space-y-1.5">
-              <p className="text-foreground text-sm leading-snug font-semibold">{volatilityCasualLead(band, true)}</p>
-              <p className="text-muted-foreground text-sm leading-snug">{guidanceCompact.body}</p>
+              <p className="text-foreground text-sm leading-snug font-semibold">
+                {leadCopy(t, getVolatilityLeadKey(band, true))}
+              </p>
+              <p className="text-muted-foreground text-sm leading-snug">
+                {guidanceCopy(t, guidance.scenario, "compact")}
+              </p>
               <p className="text-muted-foreground text-[11px] leading-snug">{t("infoOnlyShort")}</p>
             </div>
           </div>
@@ -99,8 +161,8 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
 
   const statsSyncGraceAnchorAt = sp.priority_updated_at ?? sp.created_at
 
-  const insufficientMessage = !sufficient
-    ? getInsufficientPriceStatsMessage(
+  const insufficient = !sufficient
+    ? getInsufficientPriceStatsResult(
         sp.price_stats_updated_at,
         sp.price_stats_obs_90d,
         priceHistoryHint,
@@ -128,15 +190,17 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
         {metaDesktop}
       </div>
 
-      {!sufficient && insufficientMessage ? (
-        <p className="text-muted-foreground text-sm leading-snug md:mt-0">{insufficientMessage}</p>
+      {!sufficient && insufficient ? (
+        <p className="text-muted-foreground text-sm leading-snug md:mt-0">{insufficientCopy(t, insufficient.kind)}</p>
       ) : null}
 
-      {sufficient && guidance && guidanceCompact ? (
+      {sufficient && guidance ? (
         <Callout variant={guidance.tone === "warning" ? "warning" : "info"} icon={InfoIcon}>
           <div className="hidden md:block">
-            <p className="text-foreground text-sm font-semibold">{volatilityCasualLead(band, true)}</p>
-            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{guidance.body}</p>
+            <p className="text-foreground text-sm font-semibold">{leadCopy(t, getVolatilityLeadKey(band, true))}</p>
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+              {guidanceCopy(t, guidance.scenario, "long")}
+            </p>
             <p className="text-muted-foreground mt-3 text-[11px] leading-snug">{t("infoOnlyLong")}</p>
           </div>
 

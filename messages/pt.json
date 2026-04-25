@@ -869,7 +869,27 @@
       "cheaperElsewhere": "Mais barato noutra loja",
       "viewCheaperAria": "Ver preço mais barato na loja parceira (poupa {amount})",
       "compareBelow": "Compara as lojas abaixo para encontrares o melhor preço atual.",
-      "addToFavoritesHint": "Adiciona aos favoritos para construir o histórico de preços. Vais ver quão típico é este preço."
+      "addToFavoritesHint": "Adiciona aos favoritos para construir o histórico de preços. Vais ver quão típico é este preço.",
+      "indefiniteCurrentPrice": "este preço",
+      "modalUnknown": "outro nível",
+      "tierLabels": {
+        "habitual": "Normalmente este preço",
+        "nascent": "Pouco tempo neste nível",
+        "infrequent": "Menos comum no nosso gráfico",
+        "middle": "Frequência mista"
+      },
+      "freqPhrase": {
+        "lessThan1": "menos de 1% do tempo acompanhado",
+        "zero": "0% do tempo acompanhado",
+        "about": "cerca de {pct}% do tempo acompanhado"
+      },
+      "summary": {
+        "singlePrice": "Só foi registado um preço neste período.",
+        "unmatched": "Não conseguimos associar o preço atual ao histórico agregado.",
+        "mostCommon": "O preço atual ({priceLabel}) é o mais comum na nossa amostra (~{freqPct}% das observações).",
+        "nascent": "Este preço está neste nível há cerca de {days, plural, one {# dia} other {# dias}} na nossa amostra de ~{historyDays} dias ({freqPhrase}), por isso parece pouco comum — muitas vezes isso indica um preço novo ou breve, não só uma promoção. O preço mais comum é {modalPrice}.",
+        "frequency": "No nosso histórico (ponderado no tempo), este preço surge {freqPhrase}. O preço mais comum é {modalPrice}."
+      }
     },
     "categoryBreadcrumb": {
       "ariaNav": "Categoria do produto",
@@ -1072,7 +1092,50 @@
       "checksIn90d": "{count, plural, one {# verificação de preço nos últimos 90 dias} other {# verificações de preço nos últimos 90 dias}}",
       "updatedSuffix": " · atualizado {date}",
       "infoOnlyShort": "Apenas informativo. Não é aconselhamento.",
-      "infoOnlyLong": "Apenas informativo. Não é aconselhamento financeiro."
+      "infoOnlyLong": "Apenas informativo. Não é aconselhamento financeiro.",
+      "leads": {
+        "collecting": "Ainda a recolher preços aqui",
+        "steady": "Bastante estável ultimamente",
+        "medium": "Sobe e desce um pouco",
+        "jumpy": "Salta muito entre patamares",
+        "unclear": "O padrão ainda é pouco claro"
+      },
+      "guidance": {
+        "fewPointsBigMove": {
+          "compact": "Movimento grande, poucos preços. Compara lojas.",
+          "long": "A alteração recente é grande e ainda temos poucos preços nesta janela. Vê o gráfico e outras lojas antes de decidires."
+        },
+        "hugeSwing": {
+          "compact": "Mudança enorme. Confirma no gráfico.",
+          "long": "Esta variação parece grande face ao que vimos. Trata-a como aproximada e confirma no gráfico."
+        },
+        "seeChart": {
+          "compact": "Preço típico? Vê o gráfico.",
+          "long": "Usa o gráfico para perceber se o preço de hoje é normal para este produto."
+        },
+        "dropWhenVolatile": {
+          "compact": "Histórico movediço. O gráfico mostra se é negócio.",
+          "long": "Este preço mexe-se muitas vezes. Uma queda ainda pode ser boa. Olha o gráfico antes de comprares."
+        },
+        "calmNoRecentDrop": {
+          "compact": "Razoavelmente calmo. Sem pressa por isto sozinho.",
+          "long": "Ultimamente este preço tem estado calmo. Não precisas de te apressar só com base nesta dica."
+        },
+        "unusualDropWhenCalm": {
+          "compact": "Queda rara num preço calmo. Vê o gráfico.",
+          "long": "Uma queda destas é menos comum quando o preço costuma ser estável. Vale a pena comparar o gráfico e outras lojas."
+        }
+      },
+      "insufficient": {
+        "sameLevel": "Todos os preços registados estão no mesmo patamar, por isso a volatilidade é zero.",
+        "stillSyncing": "O resumo de estabilidade ainda está a sincronizar. O gráfico e a tabela de frequência abaixo já mostram como este preço se mexeu.",
+        "noSummaryYet": "Ainda não temos um resumo de estabilidade para este produto. O gráfico e a tabela de frequência abaixo mostram como o preço evoluiu.",
+        "noHistory": "Ainda sem histórico de preço nos nossos registos para este produto.",
+        "oneCheck": "Só uma verificação de preço nesta janela, por isso a volatilidade é zero. Vê o gráfico abaixo para contexto.",
+        "noChecks90d": "Ainda sem verificações nesta janela de 90 dias. O gráfico mostra o que temos.",
+        "needMoreData": "Precisamos de mais preços registados nos últimos 90 dias para as notas de estabilidade fazerem sentido. O gráfico abaixo continua a ser o melhor sítio a consultar.",
+        "fallback": "Estatísticas de estabilidade ainda indisponíveis. O gráfico abaixo continua a ser o melhor sítio a consultar."
+      }
     },
     "barcodeCompare": {
       "best": "Melhor",

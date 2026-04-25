@@ -869,7 +869,27 @@
       "cheaperElsewhere": "Cheaper at another store",
       "viewCheaperAria": "View cheaper price at partner store (save {amount})",
       "compareBelow": "Compare stores below for the best current price.",
-      "addToFavoritesHint": "Add to favorites to build price history. You'll see how typical this price is."
+      "addToFavoritesHint": "Add to favorites to build price history. You'll see how typical this price is.",
+      "indefiniteCurrentPrice": "this price",
+      "modalUnknown": "another level",
+      "tierLabels": {
+        "habitual": "Usually this price",
+        "nascent": "Short time at this level",
+        "infrequent": "Less common in our chart",
+        "middle": "Mixed frequency"
+      },
+      "freqPhrase": {
+        "lessThan1": "less than 1% of tracked time",
+        "zero": "0% of tracked time",
+        "about": "about {pct}% of tracked time"
+      },
+      "summary": {
+        "singlePrice": "Only one price has been recorded in this window.",
+        "unmatched": "We couldn't match the current price to the aggregated history.",
+        "mostCommon": "Current price ({priceLabel}) is the most common in our sample (~{freqPct}% of observations).",
+        "nascent": "This price has only been at this level for about {days, plural, one {# day} other {# days}} in our ~{historyDays}-day sample ({freqPhrase}), so it looks uncommon—that often means a new or brief price, not only a special deal. The most common price is {modalPrice}.",
+        "frequency": "Across our tracked history (time-weighted), this price appears {freqPhrase}. The most common price is {modalPrice}."
+      }
     },
     "categoryBreadcrumb": {
       "ariaNav": "Product category",
@@ -1072,7 +1092,50 @@
       "checksIn90d": "{count, plural, one {# price check in the last 90 days} other {# price checks in the last 90 days}}",
       "updatedSuffix": " · updated {date}",
       "infoOnlyShort": "Informative only. Not advice.",
-      "infoOnlyLong": "Informative only. Not financial advice."
+      "infoOnlyLong": "Informative only. Not financial advice.",
+      "leads": {
+        "collecting": "We're still collecting prices here",
+        "steady": "Mostly steady lately",
+        "medium": "Moves up and down a bit",
+        "jumpy": "Often jumps between levels",
+        "unclear": "Pattern still unclear"
+      },
+      "guidance": {
+        "fewPointsBigMove": {
+          "compact": "Big move, few price points. Compare shops.",
+          "long": "Recent change is large and we still have few price points in this window. Check the chart and other stores before you decide."
+        },
+        "hugeSwing": {
+          "compact": "Huge swing. Verify on the chart.",
+          "long": "This change looks big compared to what we've seen. Treat it as rough and confirm on the chart."
+        },
+        "seeChart": {
+          "compact": "Typical price? See the chart.",
+          "long": "Use the chart to see if today's price is normal for this product."
+        },
+        "dropWhenVolatile": {
+          "compact": "Bumpy history. Chart shows if it's a deal.",
+          "long": "This price often moves. A drop can still be a deal. Glance at the chart before you buy."
+        },
+        "calmNoRecentDrop": {
+          "compact": "Fairly calm. No rush from this alone.",
+          "long": "Recently this price has been fairly calm. No need to rush based on this hint alone."
+        },
+        "unusualDropWhenCalm": {
+          "compact": "Unusual drop for a steady price. Peek at the chart.",
+          "long": "A drop like this is less common when the price is usually steady. Worth comparing the chart and other stores."
+        }
+      },
+      "insufficient": {
+        "sameLevel": "Every recorded price is at the same level, so volatility is zero.",
+        "stillSyncing": "The short stability blurb is still syncing. The chart and frequency table below already show how this price moved.",
+        "noSummaryYet": "We don't have a stability summary for this product yet. The chart and frequency table below show how the price moved.",
+        "noHistory": "No price history in our records for this product yet.",
+        "oneCheck": "Only one price check in this window, so volatility is zero. See the chart below for context.",
+        "noChecks90d": "No checks in this 90-day window yet. The chart shows what we have.",
+        "needMoreData": "We need more recorded prices in the last 90 days before stability notes are meaningful. The chart below is still the best place to look.",
+        "fallback": "Stability stats are not available yet. The chart below is still the best place to look."
+      }
     },
     "barcodeCompare": {
       "best": "Best",

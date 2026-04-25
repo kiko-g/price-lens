@@ -13,16 +13,18 @@ export function volatilityBandFromCv(cv: number | null | undefined): VolatilityB
   return "high"
 }
 
-/** Short plain-English lead for shoppers (not “volatility” jargon). */
-export function volatilityCasualLead(band: VolatilityBand | null, sufficient: boolean): string {
-  if (!sufficient) return "We're still collecting prices here"
-  if (band === "low") return "Mostly steady lately"
-  if (band === "medium") return "Moves up and down a bit"
-  if (band === "high") return "Often jumps between levels"
-  return "Pattern still unclear"
+/** Keys under `products.priceStats.leads` (next-intl). */
+export type VolatilityLeadKey = "collecting" | "steady" | "medium" | "jumpy" | "unclear"
+
+export function getVolatilityLeadKey(band: VolatilityBand | null, sufficient: boolean): VolatilityLeadKey {
+  if (!sufficient) return "collecting"
+  if (band === "low") return "steady"
+  if (band === "medium") return "medium"
+  if (band === "high") return "jumpy"
+  return "unclear"
 }
 
-/** User-facing band label (English); prefer `volatilityCasualLead` on consumer UI. */
+/** User-facing band label (English); not used on consumer UI — prefer `getVolatilityLeadKey` + i18n. */
 export function volatilityBandLabel(band: VolatilityBand): string {
   switch (band) {
     case "low":
@@ -44,92 +46,63 @@ function isRecentPriceDrop(lastChangeAt: string | null | undefined, changeRatio:
 
 export type PriceGuidanceTone = "info" | "warning"
 
+/** Keys under `products.priceStats.guidance.<id>.{compact,long}` (next-intl). */
+export type PriceGuidanceScenario =
+  | "fewPointsBigMove"
+  | "hugeSwing"
+  | "seeChart"
+  | "dropWhenVolatile"
+  | "calmNoRecentDrop"
+  | "unusualDropWhenCalm"
+
 export interface PriceGuidance {
-  body: string
+  /** Message keys: `guidance.<scenario>.compact` and `guidance.<scenario>.long` */
+  scenario: PriceGuidanceScenario
   tone: PriceGuidanceTone
 }
 
-type GuidanceOpts = { compact?: boolean }
+type GuidanceInput = {
+  priceChangePct: number | null | undefined
+  lastPriceChangeAt: string | null | undefined
+  obs90d: number | null | undefined
+  band: VolatilityBand | null
+}
 
 /**
  * Heuristic copy (not predictive). Call only when `hasSufficientPriceStats` is true.
- * Use `compact` on small screens: one short sentence, casual tone.
+ * Resolve body via next-intl: `t(\`guidance.${scenario}.compact\`)` / `...long\``.
  */
-export function getPriceMovementGuidance(
-  input: {
-    priceChangePct: number | null | undefined
-    lastPriceChangeAt: string | null | undefined
-    obs90d: number | null | undefined
-    band: VolatilityBand | null
-  },
-  opts?: GuidanceOpts,
-): PriceGuidance {
-  const compact = opts?.compact ?? false
+export function getPriceMovementGuidance(input: GuidanceInput): PriceGuidance {
   const { priceChangePct, lastPriceChangeAt, obs90d, band } = input
   const obs = obs90d ?? 0
   const pct = priceChangePct ?? 0
   const absPct = Math.abs(pct)
 
   if (obs >= 2 && obs <= 5 && absPct >= 0.12) {
-    return {
-      tone: "warning",
-      body: compact
-        ? "Big move, few price points. Compare shops."
-        : "Recent change is large and we still have few price points in this window. Check the chart and other stores before you decide.",
-    }
+    return { tone: "warning", scenario: "fewPointsBigMove" }
   }
 
   if (absPct >= PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE * 0.85 && obs < 6) {
-    return {
-      tone: "info",
-      body: compact
-        ? "Huge swing. Verify on the chart."
-        : "This change looks big compared to what we've seen. Treat it as rough and confirm on the chart.",
-    }
+    return { tone: "info", scenario: "hugeSwing" }
   }
 
   if (band == null) {
-    return {
-      tone: "info",
-      body: compact
-        ? "Typical price? See the chart."
-        : "Use the chart to see if today's price is normal for this product.",
-    }
+    return { tone: "info", scenario: "seeChart" }
   }
 
   if (isRecentPriceDrop(lastPriceChangeAt, priceChangePct ?? null) && band === "high") {
-    return {
-      tone: "warning",
-      body: compact
-        ? "Bumpy history. Chart shows if it's a deal."
-        : "This price often moves. A drop can still be a deal. Glance at the chart before you buy.",
-    }
+    return { tone: "warning", scenario: "dropWhenVolatile" }
   }
 
   if (band === "low" && !isRecentPriceDrop(lastPriceChangeAt, priceChangePct ?? null)) {
-    return {
-      tone: "info",
-      body: compact
-        ? "Fairly calm. No rush from this alone."
-        : "Recently this price has been fairly calm. No need to rush based on this hint alone.",
-    }
+    return { tone: "info", scenario: "calmNoRecentDrop" }
   }
 
   if (band === "low" && isRecentPriceDrop(lastPriceChangeAt, priceChangePct ?? null)) {
-    return {
-      tone: "info",
-      body: compact
-        ? "Unusual drop for a steady price. Peek at the chart."
-        : "A drop like this is less common when the price is usually steady. Worth comparing the chart and other stores.",
-    }
+    return { tone: "info", scenario: "unusualDropWhenCalm" }
   }
 
-  return {
-    tone: "info",
-    body: compact
-      ? "Typical price? See the chart."
-      : "Use the chart to see if today's price is normal for this product.",
-  }
+  return { tone: "info", scenario: "seeChart" }
 }
 
 export function hasSufficientPriceStats(
@@ -168,46 +141,59 @@ function ageInDaysSince(iso: string | null | undefined): number | null {
   return (Date.now() - t) / 86_400_000
 }
 
-/** Short copy when `hasSufficientPriceStats` is false (consumer UI). */
-export function getInsufficientPriceStatsMessage(
+/** Keys under `products.priceStats.insufficient` (next-intl). */
+export type InsufficientPriceStatsKind =
+  | "sameLevel"
+  | "stillSyncing"
+  | "noSummaryYet"
+  | "noHistory"
+  | "oneCheck"
+  | "noChecks90d"
+  | "needMoreData"
+  | "fallback"
+
+export type InsufficientPriceStatsResult = { kind: InsufficientPriceStatsKind }
+
+/** When consumer UI has no blurb, resolve copy via `t("insufficient." + result.kind)` */
+export function getInsufficientPriceStatsResult(
   updatedAt: string | null | undefined,
   obs90d: number | null | undefined,
   priceHistoryHint?: PriceHistoryHint | null,
   statsSyncGraceAnchorAt?: string | null,
-): string | null {
+): InsufficientPriceStatsResult | null {
   if (priceHistoryHint?.loading) {
     return null
   }
 
   if (priceHistoryHint != null && priceHistoryHint.levels === 1) {
-    return "Every recorded price is at the same level, so volatility is zero."
+    return { kind: "sameLevel" }
   }
 
   if (priceHistoryHint != null && priceHistoryHint.levels != null && priceHistoryHint.levels >= 2) {
     const age = ageInDaysSince(statsSyncGraceAnchorAt)
     const withinSyncGrace = age != null && age <= PRICE_STATS_UI_SYNC_GRACE_DAYS
     if (withinSyncGrace) {
-      return "The short stability blurb is still syncing. The chart and frequency table below already show how this price moved."
+      return { kind: "stillSyncing" }
     }
-    return "We don't have a stability summary for this product yet. The chart and frequency table below show how the price moved."
+    return { kind: "noSummaryYet" }
   }
 
   if (priceHistoryHint != null && priceHistoryHint.levels === 0) {
-    return "No price history in our records for this product yet."
+    return { kind: "noHistory" }
   }
 
   if (updatedAt != null) {
     const obs = obs90d ?? 0
     if (obs === 1) {
-      return "Only one price check in this window, so volatility is zero. See the chart below for context."
+      return { kind: "oneCheck" }
     }
     if (obs === 0) {
-      return "No checks in this 90-day window yet. The chart shows what we have."
+      return { kind: "noChecks90d" }
     }
-    return "We need more recorded prices in the last 90 days before stability notes are meaningful. The chart below is still the best place to look."
+    return { kind: "needMoreData" }
   }
 
-  return "Stability stats are not available yet. The chart below is still the best place to look."
+  return { kind: "fallback" }
 }
 
 /** Show volatility callout on product page mobile only at or above this (reduces noise when history is thin). */
