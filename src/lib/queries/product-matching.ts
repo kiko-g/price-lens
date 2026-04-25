@@ -6,6 +6,7 @@ import {
   calculatePricePerUnitSimilarity,
   calculateSizeSimilarity,
   extractWords,
+  normalizeName,
   parseSize,
 } from "@/lib/canonical/similarity"
 
@@ -86,8 +87,13 @@ function scoreIdenticalMatch(source: StoreProduct, candidate: StoreProduct): Pro
 
 /**
  * Scores a candidate product for "related" matching (same brand, similar category/type)
+ * @param minScore — stricter 20 for primary path; 10 for same-category or RPC fallbacks
  */
-function scoreRelatedMatch(source: StoreProduct, candidate: StoreProduct): ProductMatch | null {
+function scoreRelatedMatch(
+  source: StoreProduct,
+  candidate: StoreProduct,
+  minScore: number = 20,
+): ProductMatch | null {
   const factors: string[] = []
   let score = 0
 
@@ -129,8 +135,7 @@ function scoreRelatedMatch(source: StoreProduct, candidate: StoreProduct): Produ
     score += 10
   }
 
-  // Minimum score threshold
-  if (score < 20) return null
+  if (score < minScore) return null
 
   return {
     product: candidate,
@@ -437,6 +442,98 @@ export async function findRelatedByOffProduct(
   return { data: data ?? [], error: null }
 }
 
+/** Per-query row cap; keep moderate to limit merge/score work on the hot path. */
+const RELATED_CANDIDATE_LIMIT = 120
+/** If the strict path already yields this many matches, skip the looser `textSearch` round. */
+const LOOSE_NAME_SKIP_WHEN_AT_LEAST = 3
+const SCORE_MIN_PRIMARY = 20
+const SCORE_MIN_SAME_CATEGORY = 10
+const SCORE_MIN_SEARCH_RANKED = 8
+
+/** Sanitize for ILIKE %pattern% (strip LIKE metacharacters and noise). */
+function sanitizeForRelatedIlike(value: string): string {
+  return value.replace(/[^a-zA-Z0-9\sÀ-ÖØ-öø-ÿ]/g, "").trim()
+}
+
+function addNameSearchCandidates(
+  source: StoreProduct,
+  rows: StoreProduct[] | null | undefined,
+  map: Map<number, StoreProduct>,
+) {
+  if (!rows) return
+  for (const p of rows) {
+    if (p.id === source.id) continue
+    map.set(p.id, p)
+  }
+}
+
+function addBrandContainsCandidates(
+  source: StoreProduct,
+  rows: StoreProduct[] | null | undefined,
+  map: Map<number, StoreProduct>,
+) {
+  if (!rows) return
+  for (const p of rows) {
+    if (p.id === source.id) continue
+    if (source.brand && !brandsMatch(source.brand, p.brand)) continue
+    map.set(p.id, p)
+  }
+}
+
+function firstSignificantBrandToken(brand: string | null | undefined): string | null {
+  if (!brand?.trim()) return null
+  const n = normalizeName(brand)
+  const tok = n
+    .split(" ")
+    .map((s) => s.trim())
+    .find((w) => w.length >= 3) // avoid ultra-short tokens (too many hits)
+  return tok || null
+}
+
+function strictestNameTextSearchQuery(words: string[]): string | null {
+  if (words.length >= 3) return words.slice(0, 3).join(" & ")
+  if (words.length === 2) return words.slice(0, 2).join(" & ")
+  if (words.length === 1) return words[0]!
+  return null
+}
+
+/** Wider name queries used only if the fast path has not enough matches (saves 1–2 DB round-trips). */
+function buildLooserNameTextSearchQueries(
+  supabase: ReturnType<typeof createClient>,
+  productId: string,
+  words: string[],
+) {
+  const queries = []
+  if (words.length >= 3) {
+    queries.push(
+      supabase
+        .from("store_products")
+        .select("*")
+        .textSearch("name", words.slice(0, 2).join(" & "))
+        .neq("id", productId)
+        .limit(RELATED_CANDIDATE_LIMIT),
+    )
+    queries.push(
+      supabase
+        .from("store_products")
+        .select("*")
+        .textSearch("name", words[0]!)
+        .neq("id", productId)
+        .limit(RELATED_CANDIDATE_LIMIT),
+    )
+  } else if (words.length === 2) {
+    queries.push(
+      supabase
+        .from("store_products")
+        .select("*")
+        .textSearch("name", words[0]!)
+        .neq("id", productId)
+        .limit(RELATED_CANDIDATE_LIMIT),
+    )
+  }
+  return queries
+}
+
 /**
  * Finds related products (same brand, similar type, any store)
  */
@@ -458,47 +555,166 @@ export async function findRelatedProducts(
   }
 
   const brandTrimmed = source.brand?.trim() || null
-
-  const queries = []
-
-  if (brandTrimmed) {
-    queries.push(
-      supabase.from("store_products").select("*").ilike("brand", brandTrimmed).neq("id", productId).limit(100),
-    )
-  }
-
   const words = extractWords(source.name)
-  if (words.length >= 2) {
-    const searchTerms = words.slice(0, 3).join(" & ")
-    queries.push(
-      supabase.from("store_products").select("*").textSearch("name", searchTerms).neq("id", productId).limit(100),
-    )
-  }
-
-  const queryResults = await Promise.all(queries)
   const allCandidates = new Map<number, StoreProduct>()
 
-  for (const result of queryResults) {
-    if (result.error) {
-      console.warn("[findRelatedProducts] candidate query failed:", result.error.code, result.error.message)
+  const hasBrandIlikeQuery = Boolean(brandTrimmed && sanitizeForRelatedIlike(brandTrimmed).length >= 2)
+
+  // ---- Fast path: at most one brand + one strictest name textSearch in parallel. ----
+  const fastQueries = []
+  if (brandTrimmed) {
+    const sanit = sanitizeForRelatedIlike(brandTrimmed)
+    if (sanit.length >= 2) {
+      fastQueries.push(
+        supabase
+          .from("store_products")
+          .select("*")
+          .ilike("brand", `%${sanit}%`)
+          .neq("id", productId)
+          .limit(RELATED_CANDIDATE_LIMIT),
+      )
     }
-    if (result.data) {
-      for (const p of result.data) {
-        allCandidates.set(p.id, p)
+  }
+  const strictNameTs = strictestNameTextSearchQuery(words)
+  if (strictNameTs) {
+    fastQueries.push(
+      supabase
+        .from("store_products")
+        .select("*")
+        .textSearch("name", strictNameTs)
+        .neq("id", productId)
+        .limit(RELATED_CANDIDATE_LIMIT),
+    )
+  }
+
+  const fastResults = await Promise.all(fastQueries)
+  let fastIdx = 0
+  for (const result of fastResults) {
+    if (result.error) {
+      console.warn("[findRelatedProducts] fast candidate query failed:", result.error.code, result.error.message)
+    }
+    if (!result.data) {
+      fastIdx += 1
+      continue
+    }
+    if (hasBrandIlikeQuery && fastIdx === 0) {
+      addBrandContainsCandidates(source, result.data, allCandidates)
+    } else {
+      addNameSearchCandidates(source, result.data, allCandidates)
+    }
+    fastIdx += 1
+  }
+
+  const scoreAndSlice = (min: number) => {
+    const matches: ProductMatch[] = []
+    for (const candidate of allCandidates.values()) {
+      const match = scoreRelatedMatch(source, candidate, min)
+      if (match) matches.push(match)
+    }
+    matches.sort((a, b) => b.score - a.score)
+    return matches
+  }
+
+  let matches = scoreAndSlice(SCORE_MIN_PRIMARY)
+  let looseNameQueries = 0
+
+  // Optional looser `textSearch` (2nd round-trip). Skip when the fast path already has enough
+  // scored results — avoids 1–2 extra DB calls on the common case of a full related strip.
+  const needLooserName =
+    words.length > 0 &&
+    matches.length < limit &&
+    (matches.length === 0 || matches.length < LOOSE_NAME_SKIP_WHEN_AT_LEAST)
+  if (needLooserName) {
+    const loose = buildLooserNameTextSearchQueries(supabase, productId, words)
+    if (loose.length > 0) {
+      looseNameQueries = loose.length
+      const looseResults = await Promise.all(loose)
+      for (const result of looseResults) {
+        if (result.error) {
+          console.warn(
+            "[findRelatedProducts] loose name query failed:",
+            result.error.code,
+            result.error.message,
+          )
+        }
+        if (result.data) {
+          addNameSearchCandidates(source, result.data, allCandidates)
+        }
       }
+      matches = scoreAndSlice(SCORE_MIN_PRIMARY)
     }
   }
 
   console.log(
     `[findRelatedProducts] id=${productId} brand="${brandTrimmed}" name="${source.name}" ` +
-      `candidates=${allCandidates.size} queries=${queries.length}`,
+      `candidates=${allCandidates.size} fastQueries=${fastQueries.length} looseNameQueries=${looseNameQueries}`,
   )
 
-  const matches: ProductMatch[] = []
-  for (const candidate of allCandidates.values()) {
-    const match = scoreRelatedMatch(source, candidate)
-    if (match) {
-      matches.push(match)
+  if (matches.length === 0 && brandTrimmed) {
+    const fullNorm = normalizeName(brandTrimmed)
+    const wordParts = fullNorm.split(" ").filter((w) => w.length > 0)
+    const token = firstSignificantBrandToken(brandTrimmed)
+    if (token && wordParts.length > 1 && token !== fullNorm && token.length >= 3) {
+      const tSanit = sanitizeForRelatedIlike(token)
+      if (tSanit.length >= 2) {
+        const { data, error: tierAError } = await supabase
+          .from("store_products")
+          .select("*")
+          .ilike("brand", `%${tSanit}%`)
+          .neq("id", productId)
+          .limit(RELATED_CANDIDATE_LIMIT)
+        if (tierAError) {
+          console.warn("[findRelatedProducts] tier A brand token query failed:", tierAError.message)
+        } else {
+          addBrandContainsCandidates(source, data, allCandidates)
+        }
+        matches = scoreAndSlice(SCORE_MIN_PRIMARY)
+      }
+    }
+  }
+
+  if (matches.length === 0 && source.category) {
+    const { data, error: catError } = await supabase
+      .from("store_products")
+      .select("*")
+      .eq("category", source.category)
+      .neq("id", productId)
+      .limit(RELATED_CANDIDATE_LIMIT)
+    if (catError) {
+      console.warn("[findRelatedProducts] same-category fallback failed:", catError.message)
+    } else {
+      for (const p of data ?? []) {
+        if (p.id === source.id) continue
+        allCandidates.set(p.id, p)
+      }
+      matches = scoreAndSlice(SCORE_MIN_SAME_CATEGORY)
+    }
+  }
+
+  if (matches.length === 0) {
+    const parts: string[] = []
+    if (brandTrimmed) parts.push(brandTrimmed)
+    if (words.length) parts.push(...words.slice(0, 2))
+    const unique = [...new Set(parts.filter(Boolean))]
+
+    if (unique.length > 0) {
+      const queryText = unique.join(" OR ")
+      const { data, error: rpcError } = await supabase
+        .rpc("search_products_ranked", { query_text: queryText })
+        .eq("available", true)
+        .not("image", "is", null)
+        .neq("id", source.id)
+        .limit(RELATED_CANDIDATE_LIMIT)
+
+      if (rpcError) {
+        console.warn("[findRelatedProducts] search_products_ranked fallback failed:", rpcError.message)
+      } else {
+        for (const p of data ?? []) {
+          if (p.id === source.id) continue
+          allCandidates.set(p.id, p)
+        }
+        matches = scoreAndSlice(SCORE_MIN_SEARCH_RANKED)
+      }
     }
   }
 
@@ -506,8 +722,6 @@ export async function findRelatedProducts(
     `[findRelatedProducts] id=${productId} scored=${matches.length}/${allCandidates.size} ` +
       `top=${matches[0]?.score ?? "n/a"}`,
   )
-
-  matches.sort((a, b) => b.score - a.score)
 
   const final = matches.slice(0, limit).map((m) => ({
     ...m.product,
