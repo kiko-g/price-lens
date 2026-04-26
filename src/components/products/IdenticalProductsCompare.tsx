@@ -15,8 +15,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { EmptyDescription } from "@/components/ui/empty"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
+import { IdenticalCompareSavingsHint } from "@/components/products/IdenticalCompareSavingsHint"
 
-import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon } from "lucide-react"
+import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon } from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
@@ -172,7 +173,7 @@ function LoadingSkeleton() {
 
       {/* Savings hint */}
       <div className="mb-3">
-        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-12 w-full rounded-lg" />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -319,44 +320,14 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         )}
       </div>
 
-      {/* Savings hint */}
-      {cheapestPrice !== null &&
-      currentProduct.price !== null &&
-      hasPriceSpread &&
-      currentProduct.price > cheapestPrice ? (
-        <p className="text-muted-foreground mb-3 text-sm">
-          <ZapIcon className="text-primary mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
-          {t.rich("savingsBySwitching", {
-            amount: (currentProduct.price - cheapestPrice).toFixed(2),
-            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
-          })}
-        </p>
-      ) : cheapestPrice !== null &&
-        currentProduct.price !== null &&
-        hasPriceSpread &&
-        currentProduct.price === cheapestPrice &&
-        hasUniqueCheapest ? (
-        <p className="text-muted-foreground mb-3">
-          <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
-          {t.rich("alreadyCheapest", {
-            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
-          })}
-        </p>
-      ) : cheapestPrice !== null &&
-        currentProduct.price !== null &&
-        hasPriceSpread &&
-        currentProduct.price === cheapestPrice &&
-        !hasUniqueCheapest ? (
-        <p className="text-muted-foreground mb-3">
-          <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
-          {t("tiedCheapest", {
-            cheapest: cheapestPrice.toFixed(2),
-            highest: highestPrice?.toFixed(2) ?? "",
-          })}
-        </p>
-      ) : (
-        <p className="text-muted-foreground mb-3">{t("allSamePrice")}</p>
-      )}
+      <IdenticalCompareSavingsHint
+        className="mb-3"
+        currentPrice={currentProduct.price ?? null}
+        cheapestPrice={cheapestPrice}
+        highestPrice={highestPrice}
+        hasPriceSpread={hasPriceSpread}
+        hasUniqueCheapest={hasUniqueCheapest}
+      />
 
       <div className="flex flex-col gap-2 lg:flex-row lg:gap-3">
         {sortedProducts.map((product) => {
