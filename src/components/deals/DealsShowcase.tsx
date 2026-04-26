@@ -264,7 +264,7 @@ export function DealsShowcase() {
   const showOverlay = isFetching && products.length > 0 && !isLoading
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+    <div className="max-w-10xl mx-auto w-full px-4 py-6 lg:px-8 lg:py-8">
       <div className="mb-6 space-y-1">
         <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">{t("page.title")}</h1>
         <p className="text-muted-foreground text-sm lg:text-base">{t("page.subtitle")}</p>

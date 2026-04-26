@@ -73,7 +73,7 @@ export function SupermarketChainBadge({ originId, variant = "logo", className }:
           alt={info.name}
           width={600}
           height={200}
-          className={cn("h-[15px] w-auto max-w-[54px] overflow-hidden", className)}
+          className={cn("h-[15px] w-auto max-w-[75px] overflow-hidden", className)}
         />
       )
   }

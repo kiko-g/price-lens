@@ -249,7 +249,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           <Badge
             size="xs"
             variant="outline-white"
-            className="w-fit max-w-20 border-transparent opacity-100 transition-opacity duration-300 [--background:var(--color-white)] [--foreground:var(--base-800)] group-hover:opacity-50 dark:border-transparent"
+            className="border-border w-fit max-w-24 py-0 opacity-100 transition-opacity duration-300 [--background:var(--color-white)] [--foreground:var(--base-800)] group-hover:opacity-50"
           >
             <SupermarketChainBadge originId={sp?.origin_id} variant="logoSmall" />
           </Badge>
@@ -344,9 +344,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
-                  <span className="text-2xs w-fit rounded-xs bg-yellow-400 px-1 py-px font-semibold text-black opacity-100 transition-opacity duration-300 group-hover:opacity-0">
+                  <Badge variant="retail-discount" size="xs" className="text-2xs w-fit px-1 py-px leading-none">
                     −{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
-                  </span>
+                  </Badge>
                 </div>
                 <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
                   <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>

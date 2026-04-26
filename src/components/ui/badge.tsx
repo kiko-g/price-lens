@@ -43,7 +43,7 @@ const badgeVariants = cva(
           "border-destructive/50 bg-destructive/10 text-destructive dark:border-destructive/40 dark:bg-destructive/20 [&_span.bubble]:bg-destructive",
         "outline-warning": "border-warning bg-warning/5 text-warning dark:bg-warning/10 [&_span.bubble]:bg-warning",
         "price-per-unit":
-          "border-transparent bg-amber-500 text-white hover:bg-amber-500/80 dark:border-transparent dark:bg-amber-600 dark:text-white dark:hover:bg-amber-600/80 [&_span.bubble]:bg-amber-600 dark:[&_span.bubble]:bg-amber-600",
+          "border-transparent bg-orange-500 text-white hover:bg-orange-500/80 dark:border-transparent dark:bg-orange-600 dark:text-white dark:hover:bg-orange-600/80 [&_span.bubble]:bg-orange-600 dark:[&_span.bubble]:bg-orange-600",
         unit: "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
         blue: "border-transparent dark:border-transparent bg-info text-info-foreground hover:bg-info/80 [&_span.bubble]:bg-info",
         sky: "border-transparent bg-sky-600 text-zinc-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-zinc-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
