@@ -90,17 +90,6 @@ function applyDealsUrlUpdates(
   return qs ? `${pathname}?${qs}` : pathname
 }
 
-function storeChipVisual(active: boolean, isChain: boolean, fullWidth?: boolean) {
-  return cn(
-    STORE_CHIP_BASE,
-    fullWidth ? "w-full" : "w-40 shrink-0",
-    active
-      ? "border-primary bg-primary/10 text-foreground shadow-sm ring-1 ring-primary/25"
-      : "border-border bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
-    isChain && "pl-2.5",
-  )
-}
-
 export function DealsShowcase() {
   const t = useTranslations("deals")
   const tPag = useTranslations("deals.pagination")
@@ -234,18 +223,21 @@ export function DealsShowcase() {
         aria-label={label}
         aria-pressed={active}
         onClick={() => handleStoreSelect(filter.id)}
-        className={storeChipVisual(active, isChain, opts?.fullWidth)}
+        className={cn(
+          STORE_CHIP_BASE,
+          opts?.fullWidth ? "w-full" : "w-40 shrink-0",
+          active
+            ? "border-primary bg-primary/10 text-foreground ring-primary/25 shadow-sm ring-1"
+            : "border-border bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+          isChain && "pl-2.5",
+        )}
       >
         {isChain ? (
-          <>
-            <span
-              className="flex size-8 shrink-0 items-center justify-center self-center [&_img]:object-contain"
-              aria-hidden
-            >
-              <SupermarketChainBadge originId={filter.originId} variant="logoSmall" />
-            </span>
-            <span className="min-w-0 flex-1 truncate leading-tight">{label}</span>
-          </>
+          <SupermarketChainBadge
+            originId={filter.originId}
+            variant="logo"
+            className="h-6! w-auto! max-w-[108px]! rounded-sm"
+          />
         ) : (
           <span className="min-w-0 flex-1 truncate leading-tight">{label}</span>
         )}

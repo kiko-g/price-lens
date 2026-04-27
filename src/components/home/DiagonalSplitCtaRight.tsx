@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { Heart, ArrowRight } from "lucide-react"
+import { ArrowRightIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
@@ -21,13 +21,17 @@ export function DiagonalSplitCtaRight() {
       )}
     >
       <div className="flex h-full flex-col items-end justify-center gap-5 px-8 py-10 text-right md:px-10 md:py-14 md:pl-24">
-        <div className="bg-destructive/80 border-destructive dark:bg-destructive/40 dark:border-destructive/70 flex size-12 items-center justify-center rounded-full border">
-          <Heart className="text-destructive-foreground fill-destructive-foreground size-5" />
-        </div>
+        <h2
+          className={cn(
+            "text-2xl font-extrabold tracking-tight text-balance sm:text-3xl",
+            "bg-linear-to-br from-30% bg-clip-text text-transparent",
+            "from-zinc-950 to-zinc-600 dark:from-zinc-50 dark:to-zinc-400",
+          )}
+        >
+          {t("title")}
+        </h2>
 
-        <h2 className="text-xl font-extrabold tracking-tight text-balance sm:text-2xl">{t("title")}</h2>
-
-        <p className="text-muted-foreground max-w-[260px] text-sm leading-relaxed text-pretty">{t("body")}</p>
+        <p className="text-muted-foreground max-w-[320px] text-sm leading-relaxed text-pretty">{t("body")}</p>
 
         {isLoading ? (
           <div className="h-11" />
@@ -35,11 +39,11 @@ export function DiagonalSplitCtaRight() {
           <Button asChild size="lg" roundedness="xl" className="group gap-2">
             <Link href="/favorites">
               {t("goFavorites")}
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </Button>
         ) : (
-          <Button asChild variant="marketing-default" size="lg" roundedness="xl" className="max-w-xs">
+          <Button asChild variant="marketing-default" size="lg" roundedness="xl" className="w-fit justify-end">
             <Link href="/login">
               <GoogleIcon />
               {t("continueGoogle")}

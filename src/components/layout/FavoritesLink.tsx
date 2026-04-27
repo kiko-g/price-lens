@@ -1,36 +1,16 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/hooks/useUser"
 import { useFavoritesCount } from "@/hooks/useFavorites"
-import { LoginPrompt } from "@/components/auth/LoginPrompt"
 import { HeartIcon } from "lucide-react"
 
 export function FavoritesLink({ onClick }: { onClick?: () => void }) {
   const { user, isLoading } = useUser()
   const { count, isLoading: isFavoritesLoading } = useFavoritesCount(user?.id ?? "")
-  const [loginPromptOpen, setLoginPromptOpen] = useState(false)
 
-  if (isLoading) return null
-
-  if (!user) {
-    return (
-      <>
-        <Button
-          variant="outline"
-          size="icon"
-          className="relative"
-          onClick={() => setLoginPromptOpen(true)}
-          aria-label="Sign in to save favorites"
-        >
-          <HeartIcon className="h-4 w-4" />
-        </Button>
-        <LoginPrompt open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
-      </>
-    )
-  }
+  if (!user || isLoading) return null
 
   return (
     <Button variant="outline" size="icon" className="relative" asChild>
