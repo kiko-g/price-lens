@@ -137,6 +137,8 @@ function AlertsTab() {
         {alerts.map((alert) => {
           const product = alert.store_products
           if (!product) return null
+          const thresholdLabel = alert.threshold_type === "any_drop" ? t("anyDrop") : alert.threshold_type
+          const priceDetail = `${formatPrice(product.price, locale)} · ${thresholdLabel}`
           return (
             <Link
               key={alert.id}
@@ -159,10 +161,7 @@ function AlertsTab() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{product.name}</p>
-                <p className="text-muted-foreground text-xs">
-                  {formatPrice(product.price, locale)} ·{" "}
-                  {alert.threshold_type === "any_drop" ? t("anyDrop") : alert.threshold_type}
-                </p>
+                <p className="text-muted-foreground text-xs">{priceDetail}</p>
               </div>
               <BellIcon className="size-4 shrink-0 text-amber-500" />
             </Link>

@@ -52,7 +52,7 @@ export function OffProductCard({ product, barcode }: OffProductCardProps) {
         )}
         <Badge variant="outline" className="gap-1">
           <OpenFoodFactsIcon className="h-3.5 w-3.5" />
-          Open Food Facts
+          {t("openFoodFacts")}
         </Badge>
       </div>
 

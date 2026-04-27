@@ -833,7 +833,9 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                 <span>{tShowcase("filters.storeOrigin")}</span>
                 {selectedOrigins.length > 0 && (
                   <>
-                    <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
+                    <span className="text-muted-foreground text-xs">
+                      {tShowcase("filters.originCountSelected", { count: selectedOrigins.length })}
+                    </span>
                     <span
                       role="button"
                       tabIndex={0}
@@ -888,7 +890,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             {/* Price Range Filter */}
             <AccordionItem value="price-range">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Price Range
+                {tShowcase("filters.priceRange")}
                 {(localFilters.priceMin || localFilters.priceMax) && (
                   <span
                     role="button"
@@ -900,7 +902,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                     }}
                     className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
                   >
-                    Clear
+                    {tShowcase("filters.clear")}
                   </span>
                 )}
               </AccordionTrigger>
@@ -923,7 +925,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             {/* Brand filter */}
             <AccordionItem value="brand">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Brand
+                {tShowcase("filters.brand")}
                 {localFilters.brand.trim() && (
                   <span
                     role="button"
@@ -934,31 +936,29 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                     }}
                     className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
                   >
-                    Clear
+                    {tShowcase("filters.clear")}
                   </span>
                 )}
               </AccordionTrigger>
               <AccordionContent className="p-px pb-3">
                 <Input
-                  placeholder="e.g. Kinder, Nestlé (comma-separated)"
+                  placeholder={tShowcase("filters.brandPlaceholder")}
                   className="text-sm"
                   value={localFilters.brand}
                   onChange={(e) => handleBrandInputChange(e.target.value)}
-                  aria-label="Filter by brand names"
+                  aria-label={tShowcase("filters.brandInputAria")}
                 />
-                <p className="text-muted-foreground mt-1.5 text-xs">
-                  Exact store brand names; separate multiple with commas.
-                </p>
+                <p className="text-muted-foreground mt-1.5 text-xs">{tShowcase("filters.brandHint")}</p>
               </AccordionContent>
             </AccordionItem>
 
             {/* Categories Filter */}
             <AccordionItem value="categories">
               <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
-                Categories
+                {tShowcase("filters.categoriesHeading")}
                 {localFilters.category && (
                   <>
-                    <span className="text-muted-foreground text-xs">(1)</span>
+                    <span className="text-muted-foreground text-xs">{tShowcase("filters.categoryOneSelected")}</span>
                     <span
                       role="button"
                       tabIndex={0}
@@ -968,7 +968,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                       }}
                       className="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-2 hover:underline"
                     >
-                      Clear
+                      {tShowcase("filters.clear")}
                     </span>
                   </>
                 )}
@@ -986,7 +986,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
               <AccordionItem value="insiders">
                 <AccordionTrigger className="cursor-pointer justify-between gap-2 py-2 text-sm font-medium hover:no-underline">
                   <span className="flex flex-1 items-center gap-1">
-                    Insiders
+                    {tShowcase("filters.dev.insiders")}
                     <DevBadge />
                   </span>
                 </AccordionTrigger>
@@ -994,7 +994,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-2">
                       <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                        Options
+                        {tShowcase("filters.dev.options")}
                       </span>
                       <div className="flex items-center space-x-2">
                         <Checkbox
@@ -1007,7 +1007,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                           className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                         >
                           <CrownIcon className="h-4 w-4" />
-                          Order by priority
+                          {tShowcase("filters.dev.orderByPriority")}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -1021,7 +1021,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                           className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                         >
                           <CircleCheckIcon className="h-4 w-4" />
-                          Only available
+                          {tShowcase("filters.dev.onlyAvailable")}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -1035,7 +1035,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                           className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                         >
                           <BadgePercentIcon className="h-4 w-4" />
-                          Only discounted
+                          {tShowcase("filters.dev.onlyDiscounted")}
                         </Label>
                       </div>
                     </div>
@@ -1043,14 +1043,14 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                          Priority
+                          {tShowcase("filters.dev.priority")}
                         </span>
                         {selectedPriorities.length > 0 && (
                           <button
                             onClick={handleClearPriority}
                             className="text-muted-foreground hover:text-foreground text-xs hover:underline"
                           >
-                            Clear
+                            {tShowcase("filters.clear")}
                           </button>
                         )}
                       </div>
@@ -1076,14 +1076,14 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                          Priority Source
+                          {tShowcase("filters.dev.prioritySource")}
                         </span>
                         {selectedSources.length > 0 && (
                           <button
                             onClick={handleClearSources}
                             className="text-muted-foreground hover:text-foreground text-xs hover:underline"
                           >
-                            Clear
+                            {tShowcase("filters.clear")}
                           </button>
                         )}
                       </div>
@@ -1098,7 +1098,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                           className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                         >
                           <BotIcon className="h-4 w-4" />
-                          AI
+                          {tShowcase("filters.dev.sourceAi")}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -1112,7 +1112,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                           className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                         >
                           <HandIcon className="h-4 w-4" />
-                          Manual
+                          {tShowcase("filters.dev.sourceManual")}
                         </Label>
                       </div>
                     </div>
@@ -1189,7 +1189,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             <LoadingGrid limit={limit} />
             {showSlowLoadMessage && (
               <div className="text-muted-foreground flex flex-col items-center gap-1 text-center text-sm">
-                <p>This is taking longer than usual. Hold on…</p>
+                <p>{tShowcase("slowLoad")}</p>
               </div>
             )}
           </div>
@@ -1208,17 +1208,16 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             {/* Status Bar - Desktop */}
             <div className="text-muted-foreground mb-4 hidden w-full items-center justify-between text-sm lg:flex">
               <span>
-                Showing{" "}
-                <span className="text-foreground font-semibold">
-                  {showingFrom}-{showingTo}
-                </span>
-                {totalCount != null && (
-                  <>
-                    {" "}
-                    of <span className="text-foreground font-semibold">{totalCount}</span>
-                  </>
-                )}{" "}
-                results
+                {totalCount != null
+                  ? tShowcase.rich("statusBar.withTotalRich", {
+                      range: `${showingFrom}-${showingTo}`,
+                      total: totalCount,
+                      s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                    })
+                  : tShowcase.rich("statusBar.rangeOnlyRich", {
+                      range: `${showingFrom}-${showingTo}`,
+                      s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                    })}
               </span>
 
               <PaginationControls
@@ -1240,7 +1239,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                       <div className="flex items-center gap-2">
                         <Loader2Icon className="h-4 w-4 animate-spin" />
                         <span className="text-sm font-medium">
-                          {showSlowLoadMessage ? "This is taking longer than usual. Hold on…" : "Loading..."}
+                          {showSlowLoadMessage ? tShowcase("slowLoad") : tShowcase("loadingShort")}
                         </span>
                       </div>
                     </div>
@@ -1290,36 +1289,34 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   {showLoadingMoreUi && (
                     <div className="text-muted-foreground flex items-center gap-2">
                       <Loader2Icon className="h-4 w-4 animate-spin" />
-                      <span className="text-xs">Loading more...</span>
+                      <span className="text-xs">{tShowcase("loadingMore")}</span>
                     </div>
                   )}
                   <p className="text-muted-foreground text-center text-xs">
-                    {totalCount != null ? (
-                      <>
-                        Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> of{" "}
-                        <span className="text-foreground font-semibold">{totalCount}</span> products
-                      </>
-                    ) : (
-                      <>
-                        Showing <span className="text-foreground font-semibold">{displayProducts.length}</span> products
-                        <span className="text-muted-foreground/80"> · scroll for more</span>
-                      </>
-                    )}
+                    {totalCount != null
+                      ? tShowcase.rich("mobileStatus.withTotalRich", {
+                          loaded: displayProducts.length,
+                          total: totalCount,
+                          s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                        })
+                      : tShowcase.rich("mobileStatus.loadedOnlyRich", {
+                          loaded: displayProducts.length,
+                          s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                          m: (chunks) => <span className="text-muted-foreground/80">{chunks}</span>,
+                        })}
                   </p>
                 </>
               ) : (
                 <p className="text-muted-foreground text-center text-xs">
-                  {totalCount != null ? (
-                    <>
-                      Showing all <span className="text-foreground font-semibold">{totalCount}</span> products matching
-                      filters
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-foreground font-semibold">{displayProducts.length}</span> products match
-                      your filters
-                    </>
-                  )}
+                  {totalCount != null
+                    ? tShowcase.rich("mobileStatus.allLoadedRich", {
+                        total: totalCount,
+                        s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                      })
+                    : tShowcase.rich("mobileStatus.matchRich", {
+                        loaded: displayProducts.length,
+                        s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                      })}
                 </p>
               )}
             </div>

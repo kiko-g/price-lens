@@ -215,7 +215,8 @@
     "unavailable": {
       "title": "Lookup unavailable",
       "body": "Barcode <code>{barcode}</code> is not in our tracked stores, and the external database is temporarily unreachable.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "openFoodFacts": "Open Food Facts"
     },
     "notFound": {
       "title": "Product not found",
@@ -378,7 +379,8 @@
       "store": "Store",
       "allStores": "All stores",
       "clear": "Clear",
-      "active": "{count} active"
+      "active": "{count} active",
+      "originCountSelected": "({count})"
     },
     "summary": {
       "favorites": "<strong>{count}</strong> favorites",
@@ -457,6 +459,7 @@
     },
     "sidebar": {
       "fallbackName": "User",
+      "statZero": "0",
       "favoritesLabel": "Favorites",
       "listsLabel": "Lists",
       "alertsLabel": "Alerts",
@@ -498,6 +501,7 @@
     },
     "savingsTab": {
       "loadError": "Could not load your stats",
+      "achievementsProgress": "{unlocked}/{total}",
       "stats": {
         "savingsLabel": "Est. Savings",
         "savingsDescription": "from {count, plural, one {# price drop} other {# price drops}}",
@@ -755,7 +759,10 @@
         "highest": "Highest rate",
         "highestYear": "Achieved in {year}",
         "fedTarget": "Fed Target",
-        "fedTargetNote": "Long-term goal only {met} out of {total} years"
+        "fedTargetNote": "Long-term goal only {met} out of {total} years",
+        "flagLineUSA": "🇺🇸 {pct}",
+        "flagLinePT": "🇵🇹 {pct}",
+        "flagLineEU": "🇪🇺 {pct}"
       },
       "table": {
         "title": "Historical Inflation Data",
@@ -764,7 +771,10 @@
         "year": "Year",
         "context": "Economic Context",
         "showMore": "Show More",
-        "showLess": "Show Less"
+        "showLess": "Show Less",
+        "colPT": "🇵🇹 PT",
+        "colUSA": "🇺🇸 USA",
+        "colEURO": "🇪🇺 EURO"
       },
       "convergence": {
         "title": "Inflation Convergence",
@@ -772,7 +782,77 @@
         "yLabel": "Rate (%)"
       },
       "impactTitle": "Why USA inflation hits Portugal hard",
-      "impactSubtitle": "Portugal's small open economy is structurally exposed to USA monetary policy and global commodity flows. Here's how shocks propagate."
+      "impactSubtitle": "Portugal's small open economy is structurally exposed to USA monetary policy and global commodity flows. Here's how shocks propagate.",
+      "cumulative": {
+        "title": "Cumulative Effect",
+        "descriptionRich": "Inflation stacked gets pretty scary. Here is how it looks like for the USA, Portugal and Eurozone. <strong>Running rampant recently.</strong>",
+        "yAxisLabel": "Accumulated (%)"
+      },
+      "impactPortugal": {
+        "title": "Impact on Portugal 🇵🇹",
+        "subtitle": "Global events have a significant impact on Portugal's inflation rate. Price Lens tries to raise awareness and protect consumers from the impact of these events."
+      },
+      "impactFactors": {
+        "historicalExamples": "Historical Examples:",
+        "levels": { "critical": "Critical", "high": "High", "structural": "Structural" },
+        "energy": {
+          "title": "Energy Dependency",
+          "description": "Portugal imports 75% of its energy needs. When global oil and gas prices spike (driven by US dollar strength, geopolitical tensions, or Fed policy), Portuguese energy costs surge immediately.",
+          "ex0": "2022: Russian gas crisis → 40% energy price increase",
+          "ex1": "2008: Oil speculation → Transport cost inflation",
+          "ex2": "2000s: Iraq War → Sustained energy price pressure"
+        },
+        "commodities": {
+          "title": "Dollar-Denominated Commodities",
+          "description": "Essential goods like wheat, corn, soybeans, and metals are priced in USD globally. When the Fed prints money or cuts rates, commodity prices inflate, directly hitting Portuguese food costs.",
+          "ex0": "2021-2022: Fed money printing → Global food inflation",
+          "ex1": "2011: QE2 → Commodity speculation boom",
+          "ex2": "2008: Dollar weakness → Food crisis in Portugal"
+        },
+        "supplyChain": {
+          "title": "Supply Chain Integration",
+          "description": "Portuguese retailers depend on global supply chains. US labor costs, shipping rates from Asia, and manufacturing disruptions flow through to Portuguese supermarket prices with 3-6 month delays.",
+          "ex0": "2021: US port congestion → Portuguese import delays",
+          "ex1": "2022: Chinese lockdowns → Product shortages in PT",
+          "ex2": "2018: US-China trade war → Higher electronics prices"
+        },
+        "ecb": {
+          "title": "ECB Policy Following Fed",
+          "description": "The European Central Bank typically follows Federal Reserve policy with a 6-12 month lag. US rate hikes eventually force ECB tightening, affecting Portuguese credit, housing, and business costs.",
+          "ex0": "2022-2023: Fed hikes → ECB forced to follow → PT mortgage rates up",
+          "ex1": "2008-2015: Fed QE → ECB QE → Asset price inflation in PT",
+          "ex2": "1999-2007: Fed easy money → ECB accommodation → PT housing bubble"
+        }
+      },
+      "periodComparisons": {
+        "title": "Economic Period Comparisons",
+        "subtitle": "Relevant intervals and events that have affected the US economy and therefore the world.",
+        "preCrisisTitle": "Pre-Financial Crisis (1999-2007)",
+        "postCrisisTitle": "Post-Financial Crisis (2008-2019)",
+        "covidTitle": "COVID-19 Recession (2020-2024)",
+        "average": "Average",
+        "range": "Range",
+        "preCrisisNote": "Relatively stable period with moderate inflation",
+        "postCrisisNote": "Higher volatility with extreme lows and recent highs",
+        "covidNote": "GDP fell ~3.5% as lockdowns shut down activity",
+        "notableTitle": "Notable Economic Events",
+        "ev2001Title": "2001: Dot-com Bubble Burst & Recession",
+        "ev2001Body": "Tech stock collapse and 9/11 attacks led to a brief recession and economic uncertainty.",
+        "ev2008Title": "2008: US housing market causes world-wide recession",
+        "ev2008Body": "Default through the roof, evil loans and a global collapse as a result.",
+        "ev2014Title": "2014-2015: Near Zero Inflation",
+        "ev2014Body": "Oil price collapse & global disinflation",
+        "ev2020Title": "2020: COVID-19 Recession",
+        "ev2020Body": "GDP fell ~3.5% as lockdowns shut down activity",
+        "ev2021Title": "2021: Fiscal Stimulus Surge",
+        "ev2021Body": "$1.9T American Rescue Plan & follow-on bills drove a spending wave",
+        "ev2022Title": "2022: 40-Year High Inflation",
+        "ev2022Body": "8.0% due to supply-chain strains & energy price shocks"
+      },
+      "whatNext": {
+        "title": "What can we do?",
+        "body": "As consumers we can at the very least be weary of price fluctuations and be more careful and conservative with our budgeting. Price Lens is a project designed to help users understand prices beyond what shelves tell us, make informed decisions, save money and be more aware of the money environment that we live in."
+      }
     },
     "savePotential": {
       "badge": "Smart Shopping Calculator",
@@ -983,7 +1063,37 @@
         "source": "Source",
         "clear": "Clear",
         "apply": "Apply",
-        "active": "{count} active"
+        "active": "{count} active",
+        "originCountSelected": "({count})",
+        "categoryOneSelected": "(1)",
+        "brandPlaceholder": "e.g. Kinder, Nestlé (comma-separated)",
+        "brandInputAria": "Filter by brand names",
+        "brandHint": "Exact store brand names; separate multiple with commas.",
+        "categoriesHeading": "Categories",
+        "dev": {
+          "insiders": "Insiders",
+          "options": "Options",
+          "orderByPriority": "Order by priority",
+          "onlyAvailable": "Only available",
+          "onlyDiscounted": "Only discounted",
+          "priority": "Priority",
+          "prioritySource": "Priority Source",
+          "sourceAi": "AI",
+          "sourceManual": "Manual"
+        }
+      },
+      "statusBar": {
+        "withTotalRich": "Showing <s>{range}</s> of <s>{total}</s> results",
+        "rangeOnlyRich": "Showing <s>{range}</s> results"
+      },
+      "slowLoad": "This is taking longer than usual. Hold on…",
+      "loadingShort": "Loading...",
+      "loadingMore": "Loading more...",
+      "mobileStatus": {
+        "withTotalRich": "Showing <s>{loaded}</s> of <s>{total}</s> products",
+        "loadedOnlyRich": "Showing <s>{loaded}</s> products <m>· scroll for more</m>",
+        "allLoadedRich": "Showing all <s>{total}</s> products matching filters",
+        "matchRich": "<s>{loaded}</s> products match your filters"
       },
       "pagination": {
         "showing": "Showing <strong>{from}-{to}</strong> of <strong>{total}</strong>",
@@ -991,7 +1101,28 @@
         "prev": "Prev",
         "next": "Next"
       },
-      "milestone": "{count} products and counting"
+      "milestone": "{count} products and counting",
+      "mobile": {
+        "navSearchPlaceholder": "Search products...",
+        "navTitleWithTotal": "{loaded} of {total} products loaded",
+        "navTitleWithMore": "{loaded} products loaded, more available",
+        "navTitleLoaded": "{loaded} products loaded",
+        "goBackAria": "Go back",
+        "filtersAndSortTitle": "Filters & Sort",
+        "storeMultiHint": "Several stores are selected. Pick one chain below or All stores to search every chain.",
+        "storeFilterAria": "Store filter",
+        "categorySearchPlaceholder": "Search categories...",
+        "categorySelectedLabel": "Selected:",
+        "categoryEmptySearch": "No categories found.",
+        "categoryAllIn": "All in {name}",
+        "categoryAll": "All categories",
+        "categoryNoFilter": "No category filter",
+        "brandMobilePlaceholder": "e.g. Kinder, Nestlé",
+        "brandExactLabel": "Exact names, comma-separated",
+        "breadcrumbSeparator": " > ",
+        "priceMinPlaceholder": "Min",
+        "priceMaxPlaceholder": "Max"
+      }
     },
     "offDetails": {
       "title": "Product Details",
@@ -1002,6 +1133,9 @@
       "labels": "Labels",
       "ingredients": "Ingredients",
       "allergens": "Allergens",
+      "allergensCallout": "<strong>Allergens</strong>: {allergens}",
+      "ecoScoreBadge": "Eco-Score {grade}",
+      "nutrientLevelRow": "{label}: {level}",
       "ingredientsLabel": "Ingredients Label",
       "packaging": "Packaging",
       "dataQuality": "Data Quality",
@@ -1019,6 +1153,7 @@
         "proteins": "Proteins",
         "salt": "Salt",
         "energyKj": "Energy (kJ)",
+        "kjAmount": "{value} kJ",
         "servingSize": "Serving size: {size}"
       },
       "levels": {
@@ -1029,6 +1164,7 @@
     },
     "offCard": {
       "categories": "Categories",
+      "openFoodFacts": "Open Food Facts",
       "externalNote": "This product was found externally but is not currently tracked in our stores."
     },
     "offActions": {
@@ -1053,7 +1189,9 @@
         "processed": "Processed",
         "ultraProcessed": "Ultra-processed"
       },
-      "sparseData": "Open Food Facts has limited data for this product. <link>Help improve it</link>"
+      "sparseData": "Open Food Facts has limited data for this product. <link>Help improve it</link>",
+      "novaGroupBadge": "NOVA {group}",
+      "novaGroupSuffix": "\u00B7 {label}"
     },
     "pagination": {
       "previous": "Previous",
@@ -1099,7 +1237,15 @@
       }
     },
     "comparisonChart": {
-      "noPriceHistory": "No price history available"
+      "noPriceHistory": "No price history available",
+      "tooltipNamePrefix": "{name}:",
+      "legendSince": "since {date}"
+    },
+    "priorityUi": {
+      "untrackedBadge": "Untracked product",
+      "priorityBadge": "Priority {priority}",
+      "scoreAria": "Priority {label}: {description}",
+      "periodInParens": "({period})"
     },
     "offBrand": {
       "moreFrom": "More from {brand} on Open Food Facts",
@@ -1121,6 +1267,7 @@
       "updatedSuffix": " · updated {date}",
       "infoOnlyShort": "Informative only. Not advice.",
       "infoOnlyLong": "Informative only. Not financial advice.",
+      "devSmartScore": "price_drop_smart_score: {value}",
       "leads": {
         "collecting": "We're still collecting prices here",
         "steady": "Mostly steady lately",
@@ -1181,7 +1328,7 @@
         "perUnit": "Per unit",
         "lowest": "Lowest"
       },
-      "lowShort": "Low: {value}€",
+      "lowShort": "Low: {value}",
       "storesAndListings": "{stores, plural, one {# store} other {# stores}} · {listings, plural, one {# listing} other {# listings}}",
       "barcodesCount": "{count, plural, one {# barcode} other {# barcodes}}",
       "comparePricesTitle": "Compare Prices",
@@ -1282,10 +1429,17 @@
         "setPriority": "Set priority",
         "clearPriority": "Clear priority"
       },
-      "inspectData": "Inspect store product data"
+      "inspectData": "Inspect store product data",
+      "noBarcode": "No barcode available"
     }
   },
   "layout": {
+    "badges": {
+      "earlyAccess": "Early Access"
+    },
+    "favoritesLink": {
+      "ariaLabel": "Your favorites"
+    },
     "themeToggle": {
       "toggle": "Toggle theme",
       "switchTo": {
@@ -1341,6 +1495,7 @@
       "privacy": "Privacy"
     },
     "userMenu": {
+      "githubProfile": "GitHub",
       "profile": "Profile",
       "favorites": "Favorites",
       "preferences": "Preferences",
@@ -1470,6 +1625,8 @@
     }
   },
   "search": {
+    "dialogTitle": "Search products",
+    "dialogDescription": "Search for supermarket products",
     "placeholder": "What product are you looking for?",
     "clear": "Clear search",
     "searchFor": "Search for \"{query}\"",

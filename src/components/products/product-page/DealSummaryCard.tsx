@@ -15,6 +15,7 @@ import {
 } from "@/lib/business/product-deal-summary"
 import { isLocale, type Locale } from "@/i18n/config"
 import { formatPrice } from "@/lib/i18n/format"
+import { UNICODE_MINUS } from "@/lib/i18n/formatting-glyphs"
 
 import { Badge, BadgeKind } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -62,7 +63,10 @@ function CheaperElsewhereInline({ hint }: { hint: CheaperElsewhereHint }) {
       >
         <SupermarketChainBadge originId={hint.originId} variant="logoSmall" />
       </Link>
-      <span className="text-primary text-xs font-semibold tabular-nums">−{formattedSave}</span>
+      <span className="text-primary text-xs font-semibold tabular-nums">
+        {UNICODE_MINUS}
+        {formattedSave}
+      </span>
     </div>
   )
 }

@@ -1,3 +1,6 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Badge, BadgeProps } from "@/components/ui/badge"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
@@ -10,6 +13,7 @@ type Props = {
 } & BadgeProps
 
 export function PriorityBadge({ priority, ...props }: Props) {
+  const t = useTranslations("products.priorityUi")
   const normalizedPriority = priority ?? 0
   const config = PRIORITY_CONFIG[String(normalizedPriority)] ?? PRIORITY_CONFIG["0"]
 
@@ -20,7 +24,7 @@ export function PriorityBadge({ priority, ...props }: Props) {
           <TooltipTrigger asChild>
             <Badge variant="destructive" size="sm" roundedness="sm" {...props}>
               <NavigationOffIcon className="h-4 w-4" />
-              Untracked product
+              {t("untrackedBadge")}
             </Badge>
           </TooltipTrigger>
           <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6} className={cn(props.className)}>
@@ -38,7 +42,7 @@ export function PriorityBadge({ priority, ...props }: Props) {
         <TooltipTrigger asChild>
           <Badge variant={PRIORITY_CONFIG[priority].badgeKind} size="sm" roundedness="sm" {...props}>
             <PickaxeIcon className="h-4 w-4" />
-            Priority {priority}
+            {t("priorityBadge", { priority })}
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="right" align="start" sideOffset={6} alignOffset={-6} className={cn(props.className)}>

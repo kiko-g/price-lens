@@ -157,7 +157,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
             <Button asChild variant="outline">
               <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
                 <OpenFoodFactsIcon className="h-4 w-4" />
-                Open Food Facts
+                {t("openFoodFacts")}
                 <ExternalLinkIcon className="h-3 w-3" />
               </a>
             </Button>

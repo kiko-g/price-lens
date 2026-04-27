@@ -23,6 +23,8 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
  * Bridges the gap between the native PWA splash and React hydration.
  * Uses prefers-color-scheme (not .dark class) because next-themes script may not have run yet.
  */
+const SPLASH_APP_LABEL = "Price Lens"
+
 const SPLASH_STYLES = `
 #__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;transition:opacity .5s ease-out}
 #__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
@@ -162,7 +164,7 @@ export default async function RootLayout({
           <div className="sc">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/price-lens.svg" alt="" width={64} height={64} className="si" fetchPriority="high" />
-            <span className="st">Price Lens</span>
+            <span className="st">{SPLASH_APP_LABEL}</span>
           </div>
           <div className="sb" />
         </div>

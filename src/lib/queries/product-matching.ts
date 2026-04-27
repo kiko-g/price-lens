@@ -89,11 +89,7 @@ function scoreIdenticalMatch(source: StoreProduct, candidate: StoreProduct): Pro
  * Scores a candidate product for "related" matching (same brand, similar category/type)
  * @param minScore — stricter 20 for primary path; 10 for same-category or RPC fallbacks
  */
-function scoreRelatedMatch(
-  source: StoreProduct,
-  candidate: StoreProduct,
-  minScore: number = 20,
-): ProductMatch | null {
+function scoreRelatedMatch(source: StoreProduct, candidate: StoreProduct, minScore: number = 20): ProductMatch | null {
   const factors: string[] = []
   let score = 0
 
@@ -631,11 +627,7 @@ export async function findRelatedProducts(
       const looseResults = await Promise.all(loose)
       for (const result of looseResults) {
         if (result.error) {
-          console.warn(
-            "[findRelatedProducts] loose name query failed:",
-            result.error.code,
-            result.error.message,
-          )
+          console.warn("[findRelatedProducts] loose name query failed:", result.error.code, result.error.message)
         }
         if (result.data) {
           addNameSearchCandidates(source, result.data, allCandidates)

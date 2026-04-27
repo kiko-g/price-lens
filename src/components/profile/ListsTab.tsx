@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { STORE_NAMES } from "@/types/business"
 import { isLocale, type Locale } from "@/i18n/config"
 import { formatPrice } from "@/lib/i18n/format"
+import { MULTIPLY_SIGN } from "@/lib/i18n/formatting-glyphs"
 
 import { EmptyStateView } from "@/components/ui/combo/state-views"
 import { Button } from "@/components/ui/button"
@@ -236,6 +237,10 @@ function ShoppingListCard({
             {items.map((item) => {
               const product = item.store_products
               if (!product) return null
+              const listPriceLine =
+                item.quantity > 1
+                  ? `${item.quantity}${MULTIPLY_SIGN} ${formatPrice(product.price, locale)}`
+                  : formatPrice(product.price, locale)
               return (
                 <div
                   key={item.id}
@@ -263,10 +268,7 @@ function ShoppingListCard({
                     <p className={cn("truncate text-xs font-medium", item.checked && "line-through")}>{product.name}</p>
                     <div className="flex items-center gap-1">
                       <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
-                      <span className="text-muted-foreground text-[10px]">
-                        {item.quantity > 1 && `${item.quantity}× `}
-                        {formatPrice(product.price, locale)}
-                      </span>
+                      <span className="text-muted-foreground text-[10px]">{listPriceLine}</span>
                     </div>
                   </div>
                   <Button

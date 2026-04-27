@@ -34,7 +34,14 @@ import {
   formatRelativeTime,
   type ChartSamplingMode,
 } from "@/lib/business/chart"
-import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
+import { discountValueToPercentage, formatDiscountPercentWithMinus, generateProductPath } from "@/lib/business/product"
+import {
+  CURRENT_ROW_MARKER,
+  PRICE_PLACEHOLDER,
+  formatEuroCompact,
+  formatEuroPerMajorUnit,
+  formatPercentFixed,
+} from "@/lib/i18n/formatting-glyphs"
 import { imagePlaceholder } from "@/lib/business/data"
 
 import { Badge } from "@/components/ui/badge"
@@ -526,7 +533,7 @@ function DiscountYAxisTick({ x, y, payload }: { x: string | number; y: string | 
       className="fill-foreground/70"
       key={`discount-tick-${payload.value}`}
     >
-      {`${payload.value}%`}
+      {formatPercentFixed(payload.value, 0)}
     </text>
   )
 }
@@ -675,7 +682,7 @@ function Graph({ className }: GraphProps) {
             width={isMobile ? 44 : 52}
             domain={[0, 100]}
             ticks={[0, 25, 50, 75, 100]}
-            tickFormatter={(value) => `${value}%`}
+            tickFormatter={(value) => formatPercentFixed(Number(value), 0)}
             tick={DiscountYAxisTick}
           />
           <ChartTooltip
@@ -873,7 +880,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         {isCurrentPrice && hasMultiplePrices && (
-                          <span className="text-primary text-xs leading-none">▸</span>
+                          <span className="text-primary text-xs leading-none">{CURRENT_ROW_MARKER}</span>
                         )}
 
                         <span className="text-xs font-semibold tracking-tighter">
@@ -907,7 +914,7 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
                         isMostCommon ? "text-success font-semibold" : "",
                       )}
                     >
-                      {(point.frequencyRatio * 100).toFixed(0)}%
+                      {formatPercentFixed(point.frequencyRatio * 100, 0)}
                     </TableCell>
                   </TableRow>
                 )
@@ -1123,23 +1130,29 @@ function FallbackDetails({ className }: FallbackDetailsProps) {
       <div className="flex flex-wrap items-center gap-2">
         {hasDiscount ? (
           <>
-            <span className="text-success text-lg font-bold">{sp.price}€</span>
-            <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+            <span className="text-success text-lg font-bold">{formatEuroCompact(sp.price!)}</span>
+            <span className="text-muted-foreground text-sm line-through">
+              {formatEuroCompact(sp.price_recommended!)}
+            </span>
           </>
         ) : null}
-        {isNormalPrice ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span> : null}
-        {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
+        {isNormalPrice ? (
+          <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{formatEuroCompact(sp.price)}</span>
+        ) : null}
+        {isPriceNotSet ? (
+          <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         {sp.price_per_major_unit && sp.major_unit ? (
           <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit">
-            {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
+            {formatEuroPerMajorUnit(sp.price_per_major_unit, sp.major_unit)}
           </Badge>
         ) : null}
         {sp.discount ? (
           <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-            −{discountValueToPercentage(sp.discount)}
+            {formatDiscountPercentWithMinus(sp.discount)}
           </Badge>
         ) : null}
         <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />

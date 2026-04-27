@@ -27,12 +27,7 @@ export function IdenticalCompareSavingsHint({
 }: Props) {
   const t = useTranslations("products.identical")
 
-  if (
-    cheapestPrice !== null &&
-    currentPrice !== null &&
-    hasPriceSpread &&
-    currentPrice > cheapestPrice
-  ) {
+  if (cheapestPrice !== null && currentPrice !== null && hasPriceSpread && currentPrice > cheapestPrice) {
     return (
       <Callout
         icon={ZapIcon}

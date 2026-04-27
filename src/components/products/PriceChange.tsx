@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { formatPercentFixed, PLUS_SIGN } from "@/lib/i18n/formatting-glyphs"
 import { TriangleIcon, EqualIcon } from "lucide-react"
 
 export function PriceChange({
@@ -10,8 +11,10 @@ export function PriceChange({
   invertColors?: boolean
   decimalPlaces?: number
 }) {
-  const percentage = variation === 0 ? 0 : (variation * 100).toFixed(decimalPlaces)
-  const positiveSign = variation > 0 ? "+" : ""
+  const pctLabel =
+    variation > 0
+      ? `${PLUS_SIGN}${formatPercentFixed(variation * 100, decimalPlaces)}`
+      : formatPercentFixed(variation * 100, decimalPlaces)
 
   const textColor = invertColors
     ? variation < 0
@@ -35,10 +38,7 @@ export function PriceChange({
 
   return (
     <div className="flex min-w-16 items-center justify-end gap-1">
-      <span className={cn(textColor)}>
-        {positiveSign}
-        {percentage}%
-      </span>
+      <span className={cn(textColor)}>{pctLabel}</span>
       {variation === 0 ? (
         <EqualIcon className="text-muted-foreground h-3 w-3" />
       ) : (

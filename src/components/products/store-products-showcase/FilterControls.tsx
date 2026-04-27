@@ -1,4 +1,8 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import { EM_DASH } from "@/lib/i18n/punctuation"
 import { SMART_VIEW_PRESETS } from "@/lib/business/filters"
 import { type SortByType } from "@/types/business"
 import { Input } from "@/components/ui/input"
@@ -22,6 +26,7 @@ export function PriceRangeFilter({
   onChange: (min: string, max: string) => void
   className?: string
 }) {
+  const t = useTranslations("products.showcase.mobile")
   const activeChipIdx = PRICE_RANGE_CHIPS.findIndex((c) => c.min === priceMin && c.max === priceMax)
 
   return (
@@ -51,17 +56,17 @@ export function PriceRangeFilter({
       <div className="flex items-center gap-2">
         <Input
           type="number"
-          placeholder="Min"
+          placeholder={t("priceMinPlaceholder")}
           className="h-8 max-w-[33%] text-xs md:h-7 md:max-w-full"
           value={priceMin}
           min={0}
           step={0.5}
           onChange={(e) => onChange(e.target.value, priceMax)}
         />
-        <span className="text-muted-foreground text-xs">–</span>
+        <span className="text-muted-foreground text-xs">{EM_DASH}</span>
         <Input
           type="number"
-          placeholder="Max"
+          placeholder={t("priceMaxPlaceholder")}
           className="h-8 max-w-[33%] text-xs md:h-7 md:max-w-full"
           value={priceMax}
           min={0}

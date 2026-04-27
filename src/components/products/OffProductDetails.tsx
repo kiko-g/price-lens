@@ -114,7 +114,7 @@ export function OffProductDetails({
                 <div>
                   <h3 className="mb-1.5 text-sm font-semibold">{t("environmentalImpact")}</h3>
                   <Badge variant="secondary" className="gap-1 text-xs font-medium">
-                    Eco-Score {ecoscoreGrade!.toUpperCase()}
+                    {t("ecoScoreBadge", { grade: ecoscoreGrade!.toUpperCase() })}
                   </Badge>
                 </div>
               )}
@@ -143,8 +143,10 @@ export function OffProductDetails({
               {hasAllergens && (
                 <Callout variant="warning" className="mt-2">
                   <p className="text-sm">
-                    <span className="font-semibold">{t("allergens")}: </span>
-                    {allergens}
+                    {t.rich("allergensCallout", {
+                      allergens: allergens!,
+                      strong: (chunks) => <span className="font-semibold">{chunks}</span>,
+                    })}
                   </p>
                 </Callout>
               )}
@@ -260,7 +262,9 @@ function NutritionTable({ nutriments, servingSize }: { nutriments: OffNutriments
             {hasEnergyKj && (
               <tr className="hover:bg-muted/30 transition-colors">
                 <td className="text-muted-foreground px-4 py-2 pl-8">{t("energyKj")}</td>
-                <td className="px-4 py-2 text-right tabular-nums">{Math.round(nutriments.energyKj100g!)} kJ</td>
+                <td className="px-4 py-2 text-right tabular-nums">
+                  {t("kjAmount", { value: Math.round(nutriments.energyKj100g!) })}
+                </td>
               </tr>
             )}
           </tbody>
@@ -288,6 +292,7 @@ const LEVEL_LABEL_KEYS: Record<string, "fat" | "saturatedFat" | "sugars" | "salt
 
 function NutrientLevelIndicators({ levels }: { levels: Record<string, string> }) {
   const t = useTranslations("products.offDetails.nutrition")
+  const tDetails = useTranslations("products.offDetails")
   const tLevel = useTranslations("products.offDetails.levels")
   const entries = Object.entries(levels).filter(([key]) => key in LEVEL_LABEL_KEYS)
   if (entries.length === 0) return null
@@ -303,7 +308,10 @@ function NutrientLevelIndicators({ levels }: { levels: Record<string, string> })
         <span key={key} className="flex items-center gap-1.5 text-xs">
           <span className={`inline-block h-2.5 w-2.5 rounded-full ${LEVEL_COLORS[level] ?? "bg-gray-400"}`} />
           <span className="text-muted-foreground">
-            {t(LEVEL_LABEL_KEYS[key])}: <span className="font-medium">{localizeLevel(level)}</span>
+            {tDetails("nutrientLevelRow", {
+              label: t(LEVEL_LABEL_KEYS[key]),
+              level: localizeLevel(level),
+            })}
           </span>
         </span>
       ))}

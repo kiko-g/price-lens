@@ -1,8 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import {
+  BULLET,
+  EM_DASH,
+  formatPercentFixed,
+  formatPercentRange,
+  formatPercentSigned,
+} from "@/lib/i18n/formatting-glyphs"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -96,69 +103,29 @@ export function InflationTrends() {
     [{ year: 1999, usa: 100, pt: 100, eu: 100 }],
   )
 
-  const impactFactors = [
-    {
-      title: "Energy Dependency",
-      icon: <FuelIcon className="h-5 w-5" />,
-      impact: "Critical",
-      description:
-        "Portugal imports 75% of its energy needs. When global oil and gas prices spike (driven by US dollar strength, geopolitical tensions, or Fed policy), Portuguese energy costs surge immediately.",
-      examples: [
-        "2022: Russian gas crisis → 40% energy price increase",
-        "2008: Oil speculation → Transport cost inflation",
-        "2000s: Iraq War → Sustained energy price pressure",
-      ],
-    },
-    {
-      title: "Dollar-Denominated Commodities",
-      icon: <WheatIcon className="h-5 w-5" />,
-      impact: "High",
-      description:
-        "Essential goods like wheat, corn, soybeans, and metals are priced in USD globally. When the Fed prints money or cuts rates, commodity prices inflate, directly hitting Portuguese food costs.",
-      examples: [
-        "2021-2022: Fed money printing → Global food inflation",
-        "2011: QE2 → Commodity speculation boom",
-        "2008: Dollar weakness → Food crisis in Portugal",
-      ],
-    },
-    {
-      title: "Supply Chain Integration",
-      icon: <ShipIcon className="h-5 w-5" />,
-      impact: "High",
-      description:
-        "Portuguese retailers depend on global supply chains. US labor costs, shipping rates from Asia, and manufacturing disruptions flow through to Portuguese supermarket prices with 3-6 month delays.",
-      examples: [
-        "2021: US port congestion → Portuguese import delays",
-        "2022: Chinese lockdowns → Product shortages in PT",
-        "2018: US-China trade war → Higher electronics prices",
-      ],
-    },
-    {
-      title: "ECB Policy Following Fed",
-      icon: <BuildingIcon className="h-5 w-5" />,
-      impact: "Structural",
-      description:
-        "The European Central Bank typically follows Federal Reserve policy with a 6-12 month lag. US rate hikes eventually force ECB tightening, affecting Portuguese credit, housing, and business costs.",
-      examples: [
-        "2022-2023: Fed hikes → ECB forced to follow → PT mortgage rates up",
-        "2008-2015: Fed QE → ECB QE → Asset price inflation in PT",
-        "1999-2007: Fed easy money → ECB accommodation → PT housing bubble",
-      ],
-    },
-  ]
-
   type ImpactKind = "destructive" | "primary" | "outline" | "default"
 
-  const getImpactColor = (impact: string): ImpactKind => {
+  const impactFactorDefs = useMemo(
+    () =>
+      [
+        { id: "energy" as const, icon: <FuelIcon className="h-5 w-5" />, impactLevel: "critical" as const },
+        { id: "commodities" as const, icon: <WheatIcon className="h-5 w-5" />, impactLevel: "high" as const },
+        { id: "supplyChain" as const, icon: <ShipIcon className="h-5 w-5" />, impactLevel: "high" as const },
+        { id: "ecb" as const, icon: <BuildingIcon className="h-5 w-5" />, impactLevel: "structural" as const },
+      ] as const,
+    [],
+  )
+
+  const getImpactColor = (impact: "critical" | "high" | "structural"): ImpactKind => {
     switch (impact) {
-      case "Critical":
-        return "destructive" as const
-      case "High":
-        return "primary" as const
-      case "Structural":
-        return "outline" as const
+      case "critical":
+        return "destructive"
+      case "high":
+        return "primary"
+      case "structural":
+        return "outline"
       default:
-        return "default" as const
+        return "default"
     }
   }
 
@@ -256,9 +223,13 @@ export function InflationTrends() {
               <CardContent className="p-3 md:p-4">
                 <div className="text-muted-foreground text-sm font-medium">{t("stats.average25")}</div>
                 <div className={cn("flex flex-col text-2xl font-bold", getInflationBadge(stats.usa.average).className)}>
-                  <span className="hidden md:block">🇺🇸 {stats.usa.average.toFixed(1)}%</span>
-                  <span>🇵🇹 {stats.pt.average.toFixed(1)}%</span>
-                  <span className="hidden md:block">🇪🇺 {stats.eu.average.toFixed(1)}%</span>
+                  <span className="hidden md:block">
+                    {t("stats.flagLineUSA", { pct: formatPercentFixed(stats.usa.average) })}
+                  </span>
+                  <span>{t("stats.flagLinePT", { pct: formatPercentFixed(stats.pt.average) })}</span>
+                  <span className="hidden md:block">
+                    {t("stats.flagLineEU", { pct: formatPercentFixed(stats.eu.average) })}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -269,9 +240,13 @@ export function InflationTrends() {
                 <div
                   className={cn("flex flex-col text-2xl font-bold", getInflationBadge(stats.usa.average5).className)}
                 >
-                  <span className="hidden md:block">🇺🇸 {stats.usa.average5.toFixed(1)}%</span>
-                  <span>🇵🇹 {stats.pt.average5.toFixed(1)}%</span>
-                  <span className="hidden md:block">🇪🇺 {stats.eu.average5.toFixed(1)}%</span>
+                  <span className="hidden md:block">
+                    {t("stats.flagLineUSA", { pct: formatPercentFixed(stats.usa.average5) })}
+                  </span>
+                  <span>{t("stats.flagLinePT", { pct: formatPercentFixed(stats.pt.average5) })}</span>
+                  <span className="hidden md:block">
+                    {t("stats.flagLineEU", { pct: formatPercentFixed(stats.eu.average5) })}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -280,12 +255,16 @@ export function InflationTrends() {
               <CardContent className="p-3 md:p-4">
                 <div className="text-muted-foreground text-sm font-medium">{t("stats.highest")}</div>
                 <div className="flex flex-col text-2xl font-bold">
-                  <span className="hidden md:block">🇺🇸 {stats.usa.highest.toFixed(1)}%</span>
-                  <span>🇵🇹 {stats.pt.highest.toFixed(1)}%</span>
-                  <span className="hidden md:block">🇪🇺 {stats.eu.highest.toFixed(1)}%</span>
+                  <span className="hidden md:block">
+                    {t("stats.flagLineUSA", { pct: formatPercentFixed(stats.usa.highest) })}
+                  </span>
+                  <span>{t("stats.flagLinePT", { pct: formatPercentFixed(stats.pt.highest) })}</span>
+                  <span className="hidden md:block">
+                    {t("stats.flagLineEU", { pct: formatPercentFixed(stats.eu.highest) })}
+                  </span>
                 </div>
                 <div className="text-muted-foreground text-xs">
-                  {t("stats.highestYear", { year: stats.usa.highestYear ?? "—" })}
+                  {t("stats.highestYear", { year: stats.usa.highestYear ?? EM_DASH })}
                 </div>
               </CardContent>
             </Card>
@@ -293,7 +272,7 @@ export function InflationTrends() {
             <Card>
               <CardContent className="p-3 md:p-4">
                 <div className="text-muted-foreground text-sm font-medium">{t("stats.fedTarget")}</div>
-                <div className="text-primary text-2xl font-bold">2.0%</div>
+                <div className="text-primary text-2xl font-bold">{formatPercentFixed(2.0, 1)}</div>
                 <div className="text-muted-foreground text-xs">
                   {t("stats.fedTargetNote", {
                     met: inflationData.filter((item) => item.rateUSA <= 2.0).length,
@@ -331,9 +310,9 @@ export function InflationTrends() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("table.year")}</TableHead>
-                    <TableHead>🇵🇹 PT</TableHead>
-                    <TableHead>🇺🇸 USA</TableHead>
-                    <TableHead>🇪🇺 EURO</TableHead>
+                    <TableHead>{t("table.colPT")}</TableHead>
+                    <TableHead>{t("table.colUSA")}</TableHead>
+                    <TableHead>{t("table.colEURO")}</TableHead>
                     <TableHead>{t("table.context")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -353,8 +332,7 @@ export function InflationTrends() {
                               size="xs"
                             >
                               {badgeProps.icon}
-                              {item.ratePT >= 0 ? "+" : ""}
-                              {item.ratePT.toFixed(1)}%
+                              {formatPercentSigned(item.ratePT)}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -364,8 +342,7 @@ export function InflationTrends() {
                               size="xs"
                             >
                               {badgeProps.icon}
-                              {item.rateUSA >= 0 ? "+" : ""}
-                              {item.rateUSA.toFixed(1)}%
+                              {formatPercentSigned(item.rateUSA)}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -375,8 +352,7 @@ export function InflationTrends() {
                               size="xs"
                             >
                               {badgeProps.icon}
-                              {item.rateEU >= 0 ? "+" : ""}
-                              {item.rateEU.toFixed(1)}%
+                              {formatPercentSigned(item.rateEU)}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-muted-foreground">{item.description}</TableCell>
@@ -473,11 +449,12 @@ export function InflationTrends() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <TrendingUpIcon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                  Cumulative Effect
+                  {t("cumulative.title")}
                 </CardTitle>
                 <CardDescription className="text-sm">
-                  Inflation stacked gets pretty scary. Here is how it looks like for the USA, Portugal and Eurozone.{" "}
-                  <strong className="text-destructive">Running rampant recently.</strong>
+                  {t.rich("cumulative.descriptionRich", {
+                    strong: (chunks) => <strong className="text-destructive">{chunks}</strong>,
+                  })}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-2 sm:p-6">
@@ -496,7 +473,7 @@ export function InflationTrends() {
                       width={35}
                       domain={[100, 200]}
                       label={{
-                        value: "Accumulated (%)",
+                        value: t("cumulative.yAxisLabel"),
                         angle: -90,
                         position: "insideLeft",
                         style: { textAnchor: "middle", fontSize: "12px" },
@@ -541,39 +518,40 @@ export function InflationTrends() {
       <section className="bg-secondary/5 border-secondary/30 hidden w-full border-b px-4 py-12 md:py-16 lg:py-24">
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            Impact on Portugal 🇵🇹
+            {t("impactPortugal.title")}
           </h2>
           <p className="text-muted-foreground mx-auto max-w-4xl text-center text-sm md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
-            Global events have a significant impact on Portugal&apos;s inflation rate. Price Lens tries to raise
-            awareness and protect consumers from the impact of these events.
+            {t("impactPortugal.subtitle")}
           </p>
         </div>
 
         <div className="mx-auto mt-5 flex w-full max-w-5xl flex-col gap-6 px-5 md:px-16">
           {/* Factors */}
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-            {impactFactors.map((factor, index) => (
-              <Card key={index} className="h-full">
+            {impactFactorDefs.map((factor) => (
+              <Card key={factor.id} className="h-full">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="flex items-center gap-2 text-base leading-tight sm:text-lg">
                       <span className="shrink-0">{factor.icon}</span>
-                      <span className="wrap-break-word">{factor.title}</span>
+                      <span className="wrap-break-word">{t(`impactFactors.${factor.id}.title`)}</span>
                     </CardTitle>
-                    <Badge variant={getImpactColor(factor.impact) as ImpactKind} className="shrink-0 text-xs">
-                      {factor.impact}
+                    <Badge variant={getImpactColor(factor.impactLevel) as ImpactKind} className="shrink-0 text-xs">
+                      {t(`impactFactors.levels.${factor.impactLevel}`)}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4">
-                  <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">{factor.description}</p>
+                  <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
+                    {t(`impactFactors.${factor.id}.description`)}
+                  </p>
                   <div className="space-y-1 md:space-y-2">
-                    <div className="text-xs font-medium sm:text-sm">Historical Examples:</div>
+                    <div className="text-xs font-medium sm:text-sm">{t("impactFactors.historicalExamples")}</div>
                     <ul className="space-y-1">
-                      {factor.examples.map((example, i) => (
-                        <li key={i} className="text-muted-foreground flex items-start gap-2 text-xs">
-                          <span className="text-primary mt-1 shrink-0">•</span>
-                          <span className="leading-relaxed">{example}</span>
+                      {(["ex0", "ex1", "ex2"] as const).map((ex) => (
+                        <li key={ex} className="text-muted-foreground flex items-start gap-2 text-xs">
+                          <span className="text-primary mt-1 shrink-0">{BULLET}</span>
+                          <span className="leading-relaxed">{t(`impactFactors.${factor.id}.${ex}`)}</span>
                         </li>
                       ))}
                     </ul>
@@ -589,10 +567,10 @@ export function InflationTrends() {
       <section className="border-border w-full px-4 py-12 md:py-16 lg:py-24">
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            Economic Period Comparisons
+            {t("periodComparisons.title")}
           </h2>
           <p className="text-muted-foreground mx-auto max-w-4xl text-center md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
-            Relevant intervals and events that have affected the US economy and therefore the world.
+            {t("periodComparisons.subtitle")}
           </p>
         </div>
 
@@ -601,74 +579,79 @@ export function InflationTrends() {
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Pre-Financial Crisis (1999-2007)</CardTitle>
+                  <CardTitle className="text-lg">{t("periodComparisons.preCrisisTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1 md:space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium">Average</span>
+                    <span className="text-sm font-medium">{t("periodComparisons.average")}</span>
                     <span className="text-sm">
-                      {(
-                        preFinancialCrisis.reduce((sum, item) => sum + item.rateUSA, 0) / preFinancialCrisis.length
-                      ).toFixed(1)}
-                      %
+                      {formatPercentFixed(
+                        preFinancialCrisis.reduce((sum, item) => sum + item.rateUSA, 0) / preFinancialCrisis.length,
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium">Range</span>
+                    <span className="text-sm font-medium">{t("periodComparisons.range")}</span>
                     <span className="text-sm">
-                      {Math.min(...preFinancialCrisis.map((item) => item.rateUSA)).toFixed(1)}% to{" "}
-                      {Math.max(...preFinancialCrisis.map((item) => item.rateUSA)).toFixed(1)}%
+                      {formatPercentRange(
+                        Math.min(...preFinancialCrisis.map((item) => item.rateUSA)),
+                        Math.max(...preFinancialCrisis.map((item) => item.rateUSA)),
+                      )}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-xs">Relatively stable period with moderate inflation</p>
+                  <p className="text-muted-foreground text-xs">{t("periodComparisons.preCrisisNote")}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Post-Financial Crisis (2008-2019)</CardTitle>
+                  <CardTitle className="text-lg">{t("periodComparisons.postCrisisTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1 md:space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium">Average</span>
+                    <span className="text-sm font-medium">{t("periodComparisons.average")}</span>
                     <span className="text-sm">
-                      {(
-                        postFinancialCrisis.reduce((sum, item) => sum + item.rateUSA, 0) / postFinancialCrisis.length
-                      ).toFixed(1)}
-                      %
+                      {formatPercentFixed(
+                        postFinancialCrisis.reduce((sum, item) => sum + item.rateUSA, 0) / postFinancialCrisis.length,
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium">Range</span>
+                    <span className="text-sm font-medium">{t("periodComparisons.range")}</span>
                     <span className="text-sm">
-                      {Math.min(...postFinancialCrisis.map((item) => item.rateUSA)).toFixed(1)}% to{" "}
-                      {Math.max(...postFinancialCrisis.map((item) => item.rateUSA)).toFixed(1)}%
+                      {formatPercentRange(
+                        Math.min(...postFinancialCrisis.map((item) => item.rateUSA)),
+                        Math.max(...postFinancialCrisis.map((item) => item.rateUSA)),
+                      )}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-xs">Higher volatility with extreme lows and recent highs</p>
+                  <p className="text-muted-foreground text-xs">{t("periodComparisons.postCrisisNote")}</p>
                 </CardContent>
               </Card>
 
               <Card className="bg-destructive/10 border-destructive/30">
                 <CardHeader>
-                  <CardTitle className="text-lg">COVID-19 Recession (2020-2024)</CardTitle>
+                  <CardTitle className="text-lg">{t("periodComparisons.covidTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1 md:space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium">Average</span>
+                    <span className="text-sm font-medium">{t("periodComparisons.average")}</span>
                     <span className="text-sm">
-                      {(covidRecession.reduce((sum, item) => sum + item.rateUSA, 0) / covidRecession.length).toFixed(1)}
-                      %
+                      {formatPercentFixed(
+                        covidRecession.reduce((sum, item) => sum + item.rateUSA, 0) / covidRecession.length,
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium">Range</span>
+                    <span className="text-sm font-medium">{t("periodComparisons.range")}</span>
                     <span className="text-sm">
-                      {Math.min(...covidRecession.map((item) => item.rateUSA)).toFixed(1)}% to{" "}
-                      {Math.max(...covidRecession.map((item) => item.rateUSA)).toFixed(1)}%
+                      {formatPercentRange(
+                        Math.min(...covidRecession.map((item) => item.rateUSA)),
+                        Math.max(...covidRecession.map((item) => item.rateUSA)),
+                      )}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-xs">GDP fell ~3.5% as lockdowns shut down activity</p>
+                  <p className="text-muted-foreground text-xs">{t("periodComparisons.covidNote")}</p>
                 </CardContent>
               </Card>
             </div>
@@ -676,40 +659,32 @@ export function InflationTrends() {
             {/* Key Economic Events */}
             <Card className="border-foreground/20 bg-foreground/5">
               <CardHeader>
-                <CardTitle className="text-lg">Notable Economic Events</CardTitle>
+                <CardTitle className="text-lg">{t("periodComparisons.notableTitle")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="flex flex-col">
-                  <div className="font-medium">2001: Dot-com Bubble Burst & Recession</div>
-                  <div className="text-muted-foreground text-sm">
-                    Tech stock collapse and 9/11 attacks led to a brief recession and economic uncertainty.
-                  </div>
+                  <div className="font-medium">{t("periodComparisons.ev2001Title")}</div>
+                  <div className="text-muted-foreground text-sm">{t("periodComparisons.ev2001Body")}</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="font-medium">2008: US housing market causes world-wide recession</div>
-                  <div className="text-muted-foreground text-sm">
-                    Default through the roof, evil loans and a global collapse as a result.
-                  </div>
+                  <div className="font-medium">{t("periodComparisons.ev2008Title")}</div>
+                  <div className="text-muted-foreground text-sm">{t("periodComparisons.ev2008Body")}</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="font-medium">2014-2015: Near Zero Inflation</div>
-                  <div className="text-muted-foreground text-sm">Oil price collapse &amp; global disinflation</div>
+                  <div className="font-medium">{t("periodComparisons.ev2014Title")}</div>
+                  <div className="text-muted-foreground text-sm">{t("periodComparisons.ev2014Body")}</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="font-medium">2020: COVID-19 Recession</div>
-                  <div className="text-muted-foreground text-sm">GDP fell ~3.5% as lockdowns shut down activity</div>
+                  <div className="font-medium">{t("periodComparisons.ev2020Title")}</div>
+                  <div className="text-muted-foreground text-sm">{t("periodComparisons.ev2020Body")}</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="font-medium">2021: Fiscal Stimulus Surge</div>
-                  <div className="text-muted-foreground text-sm">
-                    $1.9T American Rescue Plan &amp; follow-on bills drove a spending wave
-                  </div>
+                  <div className="font-medium">{t("periodComparisons.ev2021Title")}</div>
+                  <div className="text-muted-foreground text-sm">{t("periodComparisons.ev2021Body")}</div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="font-medium">2022: 40-Year High Inflation</div>
-                  <div className="text-muted-foreground text-sm">
-                    8.0% due to supply-chain strains &amp; energy price shocks
-                  </div>
+                  <div className="font-medium">{t("periodComparisons.ev2022Title")}</div>
+                  <div className="text-muted-foreground text-sm">{t("periodComparisons.ev2022Body")}</div>
                 </div>
               </CardContent>
             </Card>
@@ -721,13 +696,10 @@ export function InflationTrends() {
       <section className="bg-secondary/5 w-full px-4 py-12 md:py-16 lg:py-24">
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="max-w-5xl text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            {" "}
-            What can we do?{" "}
+            {t("whatNext.title")}
           </h2>
           <p className="text-muted-foreground mx-auto max-w-4xl text-center md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
-            As consumers we can at the very least be weary of price fluctuations and be more careful and conservative
-            with our budgeting. Price Lens is a project designed to help users understand prices beyond what shelves
-            tell us, make informed decisions, save money and be more aware of the money environment that we live in.
+            {t("whatNext.body")}
           </p>
         </div>
       </section>

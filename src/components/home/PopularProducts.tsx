@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/business/data"
-import { discountValueToPercentage, formatPrice as formatPriceLocaleAware } from "@/lib/business/product"
+import { formatDiscountPercentWithMinus, formatPrice as formatPriceLocaleAware } from "@/lib/business/product"
 import { isLocale } from "@/i18n/config"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { Marquee } from "@/components/ui/marquee"
@@ -89,7 +89,7 @@ function ProductCard({ product, compact = false }: { product: HeroProduct; compa
         <div className="flex items-center gap-1.5">
           {hasDiscount && (
             <span className="rounded bg-emerald-600 px-1 py-px text-[10px] leading-none font-bold text-white">
-              −{discountValueToPercentage(product.discount!, 0)}
+              {formatDiscountPercentWithMinus(product.discount!, 0)}
             </span>
           )}
           <SupermarketChainBadge

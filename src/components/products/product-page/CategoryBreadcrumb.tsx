@@ -75,7 +75,7 @@ export function CategoryBreadcrumb({ sp, className }: CategoryBreadcrumbProps) {
                   <TooltipContent side="bottom" align="start" sideOffset={6}>
                     <div className="flex flex-col gap-0">
                       <span className="mb-1 flex items-center gap-1 text-xs font-medium">
-                        {t("originalIn")}{" "}
+                        <span>{t("originalIn")}</span>
                         <span className="inline-flex items-center justify-center rounded-full bg-white px-1.5 py-0.5 [--background:var(--color-white)] [--foreground:var(--base-800)]">
                           <SupermarketChainBadge originId={sp.origin_id} variant="logoSmall" />
                         </span>

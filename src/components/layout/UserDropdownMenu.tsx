@@ -133,7 +133,7 @@ export function UserDropdownMenu() {
             <Button variant="outline" size="icon-sm" asChild>
               <Link href="https://github.com/kiko-g" target="_blank" rel="noopener noreferrer">
                 <GithubIcon />
-                <span className="sr-only">GitHub</span>
+                <span className="sr-only">{t("githubProfile")}</span>
               </Link>
             </Button>
           </div>

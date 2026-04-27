@@ -109,3 +109,8 @@ export function formatProductName(name: string | undefined) {
 export function discountValueToPercentage(discount: number, decimalPlaces = 1) {
   return `${(Math.round(discount * 1000) / 10).toFixed(decimalPlaces)}%`
 }
+
+/** Unicode minus (U+2212) + percentage; use in JSX instead of raw `−` text + {@link discountValueToPercentage}. */
+export function formatDiscountPercentWithMinus(discount: number, decimalPlaces = 1) {
+  return `\u2212${discountValueToPercentage(discount, decimalPlaces)}`
+}

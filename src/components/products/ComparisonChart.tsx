@@ -9,6 +9,8 @@ import type { StoreProduct, Price } from "@/types"
 import { STORE_NAMES, STORE_COLORS, STORE_COLORS_SECONDARY, DateRange } from "@/types/business"
 import { cn } from "@/lib/utils"
 import { buildChartData, calculateChartBounds, chartTimeMsFromRawDate, formatChartAxisTick } from "@/lib/business/chart"
+import { formatEuroLeading } from "@/lib/i18n/formatting-glyphs"
+import { EM_DASH } from "@/lib/i18n/punctuation"
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
@@ -68,6 +70,7 @@ function formatTrackingSince(dateStr: string | null): string {
 }
 
 export function ComparisonChart({ productsWithPrices, selectedRange, className }: ComparisonChartProps) {
+  const t = useTranslations("products.comparisonChart")
   const isMobile = useMediaQuery("(max-width: 768px)")
   // Build chart data for each product and merge by date
   const { mergedData, chartBounds, storeKeys } = useMemo(() => {
@@ -209,7 +212,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
             type="number"
             domain={[chartBounds.floor, chartBounds.ceiling]}
             ticks={chartBounds.ticks}
-            tickFormatter={(value) => `€${value.toFixed(value < 10 ? 2 : 0)}`}
+            tickFormatter={(value) => formatEuroLeading(value, value < 10 ? 2 : 0)}
           />
           <ChartTooltip
             cursor={{ strokeDasharray: "3 3" }}
@@ -226,15 +229,16 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                 }}
                 formatter={(value, name) => {
                   const storeKey = storeKeys.find((s) => s.key === name)
-                  const displayName = storeKey?.name || name
+                  const displayName = storeKey?.name || String(name)
+                  const valueStr = typeof value === "number" ? formatEuroLeading(value, 2) : EM_DASH
                   return (
                     <span className="flex items-center gap-2">
                       <span
                         className="h-2 w-2 rounded-full"
                         style={{ backgroundColor: storeKey?.color || "var(--chart-1)" }}
                       />
-                      <span>{displayName}:</span>
-                      <span className="font-semibold">{typeof value === "number" ? `€${value.toFixed(2)}` : "-"}</span>
+                      <span>{t("tooltipNamePrefix", { name: displayName })}</span>
+                      <span className="font-semibold">{valueStr}</span>
                     </span>
                   )
                 }}
@@ -249,7 +253,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
                 {payload?.map((entry, index) => {
                   const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
                   const trackingSinceText = storeKey?.trackingSince
-                    ? `since ${formatTrackingSince(storeKey.trackingSince)}`
+                    ? t("legendSince", { date: formatTrackingSince(storeKey.trackingSince) })
                     : ""
                   return (
                     <div key={`legend-${index}`} className="flex items-center gap-1.5">

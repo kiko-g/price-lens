@@ -1,6 +1,8 @@
 import Link from "next/link"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { CheckIcon } from "lucide-react"
+import { formatPrice } from "@/lib/i18n/format"
+import { isLocale } from "@/i18n/config"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,6 +23,10 @@ const plusKeys = [
 export async function PricingSection() {
   const isComingSoon = true
   const t = await getTranslations("home.pricing")
+  const localeRaw = await getLocale()
+  const locale = isLocale(localeRaw) ? localeRaw : "pt"
+  const freePriceLabel = formatPrice(0, locale)
+  const plusPriceLabel = formatPrice(5, locale)
 
   return (
     <section className="w-full bg-linear-to-b py-12 md:py-16 lg:py-24">
@@ -42,7 +48,7 @@ export async function PricingSection() {
               <CardTitle className="text-2xl font-bold">{t("free.name")}</CardTitle>
               <CardDescription>{t("free.description")}</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">€0</span>
+                <span className="text-4xl font-bold">{freePriceLabel}</span>
                 <span className="text-muted-foreground ml-1">{t("perMonth")}</span>
               </div>
             </CardHeader>
@@ -83,7 +89,7 @@ export async function PricingSection() {
               <CardTitle className="text-2xl font-bold">{t("plus.name")}</CardTitle>
               <CardDescription>{t("plus.description")}</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">€5</span>
+                <span className="text-4xl font-bold">{plusPriceLabel}</span>
                 <span className="text-muted-foreground ml-1">{t("perMonth")}</span>
               </div>
             </CardHeader>

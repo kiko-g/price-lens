@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useTranslations } from "next-intl"
 import { CircleCheckIcon, ChevronDownIcon } from "lucide-react"
 
 export type FlatCategory = {
@@ -63,13 +64,15 @@ function CategorySearchList({
   selectedSlug: string
   onSelect: (slug: string) => void
 }) {
+  const t = useTranslations("products.showcase.mobile")
   const selectedId = parseCategoryId(selectedSlug)
+  const breadcrumbSep = t("breadcrumbSeparator")
 
   return (
     <Command className="rounded-md border" shouldFilter>
-      <CommandInput placeholder="Search categories..." className="h-9 border-0 focus:ring-0" />
+      <CommandInput placeholder={t("categorySearchPlaceholder")} className="h-9 border-0 focus:ring-0" />
       <CommandList className="max-h-[280px]">
-        <CommandEmpty>No categories found.</CommandEmpty>
+        <CommandEmpty>{t("categoryEmptySearch")}</CommandEmpty>
         <CommandGroup>
           {flatCategories.map((cat) => (
             <CommandItem
@@ -86,8 +89,8 @@ function CategorySearchList({
                   <span className="font-medium">{cat.name}</span>
                 ) : (
                   <span className="text-muted-foreground">
-                    {cat.breadcrumb.split(" > ").slice(0, -1).join(" > ")}
-                    {" > "}
+                    {cat.breadcrumb.split(breadcrumbSep).slice(0, -1).join(breadcrumbSep)}
+                    {breadcrumbSep}
                     <span className="text-foreground">{cat.name}</span>
                   </span>
                 )}
@@ -107,6 +110,7 @@ interface CategoryFilterProps {
 }
 
 export function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChange, className }: CategoryFilterProps) {
+  const t = useTranslations("products.showcase.mobile")
   const { categories, isLoading } = useCanonicalCategories()
   const flatCategories = useFlatCategories(categories)
   const [popoverOpen, setPopoverOpen] = useState(false)
@@ -138,7 +142,7 @@ export function CanonicalCategoryCascade({ selectedCategorySlug, onCategoryChang
             selectedCategory && "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
           )}
         >
-          <span className="truncate">{selectedCategory ? selectedCategory.breadcrumb : "All categories"}</span>
+          <span className="truncate">{selectedCategory ? selectedCategory.breadcrumb : t("categoryAll")}</span>
           <ChevronDownIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
         </Button>
       </PopoverTrigger>

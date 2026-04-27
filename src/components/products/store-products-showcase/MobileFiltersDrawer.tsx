@@ -33,6 +33,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+const BREADCRUMB_DISPLAY_SEP = " > "
 
 // ============================================================================
 // MobileNav
@@ -60,8 +63,17 @@ export function MobileNav({
   filterParts,
   onFilterPress,
 }: MobileNavProps) {
+  const t = useTranslations("products.showcase")
   const scrollDirection = useScrollDirection()
   const hidden = scrollDirection === "down"
+  const countBadgeText =
+    loadedCount > 0
+      ? totalCount != null
+        ? `${loadedCount}/${totalCount}`
+        : hasMoreProducts
+          ? `${loadedCount}+`
+          : String(loadedCount)
+      : ""
 
   return (
     <div
@@ -96,24 +108,22 @@ export function MobileNav({
                   ))}
                 </span>
               ) : (
-                <span className="text-muted-foreground flex-1 truncate text-left text-sm">Search products...</span>
+                <span className="text-muted-foreground flex-1 truncate text-left text-sm">
+                  {t("mobile.navSearchPlaceholder")}
+                </span>
               )}
               {loadedCount > 0 && (
                 <span
                   className="text-muted-foreground shrink-0 text-xs tabular-nums"
                   title={
                     totalCount != null
-                      ? `${loadedCount} of ${totalCount} products loaded`
+                      ? t("mobile.navTitleWithTotal", { loaded: loadedCount, total: totalCount })
                       : hasMoreProducts
-                        ? `${loadedCount} products loaded, more available`
-                        : `${loadedCount} products loaded`
+                        ? t("mobile.navTitleWithMore", { loaded: loadedCount })
+                        : t("mobile.navTitleLoaded", { loaded: loadedCount })
                   }
                 >
-                  {totalCount != null
-                    ? `${loadedCount}/${totalCount}`
-                    : hasMoreProducts
-                      ? `${loadedCount}+`
-                      : String(loadedCount)}
+                  {countBadgeText}
                 </span>
               )}
             </button>
@@ -141,13 +151,14 @@ export function MobileNav({
 // ============================================================================
 
 function SubViewHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  const t = useTranslations("products.showcase")
   return (
     <div className="flex items-center gap-3 px-4 pb-4">
       <button
         type="button"
         onClick={onBack}
         className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
-        aria-label="Go back"
+        aria-label={t("mobile.goBackAria")}
       >
         <ChevronLeftIcon className="h-5 w-5" />
       </button>
@@ -288,6 +299,7 @@ export function MobileFiltersDrawer({
   onBrandChange,
   onPriceRangeChange,
 }: MobileFiltersDrawerProps) {
+  const t = useTranslations("products.showcase")
   const [view, setView] = useState<DrawerView>("filters")
   const { categories } = useCanonicalCategories()
   const flatCategories = useFlatCategories(categories)
@@ -346,7 +358,7 @@ export function MobileFiltersDrawer({
         ) : (
           <MainFiltersView
             sortLabel={sortLabel}
-            categorySummary={selectedCat ? selectedCat.breadcrumb : "All categories"}
+            categorySummary={selectedCat ? selectedCat.breadcrumb : t("mobile.categoryAll")}
             storeSummary={storeOriginSummary(selectedOrigins)}
             brandSummaryText={brandSummary(localFilters.brand)}
             priceSummary={priceRangeSummary(localFilters.priceMin, localFilters.priceMax)}
@@ -401,25 +413,30 @@ function MainFiltersView({
   onPriorityToggle: (level: number) => void
   onClearPriority: () => void
 }) {
+  const t = useTranslations("products.showcase")
   const [insidersOpen, setInsidersOpen] = useState(false)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between px-4 pb-2">
-        <h2 className="text-lg font-semibold">Filters & Sort</h2>
+        <h2 className="text-lg font-semibold">{t("mobile.filtersAndSortTitle")}</h2>
         {activeFilterCount > 0 && (
           <span className="text-foreground bg-accent dark:bg-primary/20 rounded-full px-1.5 py-0.5 text-xs font-medium">
-            {activeFilterCount} active
+            {t("filters.active", { count: activeFilterCount })}
           </span>
         )}
       </div>
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-t px-4">
-        <FilterSummaryRow label="Category" value={categorySummary} onClick={() => onViewChange("categories")} />
-        <FilterSummaryRow label="Sort By" value={sortLabel} onClick={() => onViewChange("sort")} />
-        <FilterSummaryRow label="Store" value={storeSummary} onClick={() => onViewChange("stores")} />
-        <FilterSummaryRow label="Brand" value={brandSummaryText} onClick={() => onViewChange("brand")} />
         <FilterSummaryRow
-          label="Price Range"
+          label={t("filters.category")}
+          value={categorySummary}
+          onClick={() => onViewChange("categories")}
+        />
+        <FilterSummaryRow label={t("filters.sortBy")} value={sortLabel} onClick={() => onViewChange("sort")} />
+        <FilterSummaryRow label={t("filters.store")} value={storeSummary} onClick={() => onViewChange("stores")} />
+        <FilterSummaryRow label={t("filters.brand")} value={brandSummaryText} onClick={() => onViewChange("brand")} />
+        <FilterSummaryRow
+          label={t("filters.priceRange")}
           value={priceSummary}
           onClick={() => onViewChange("price")}
           isLast={process.env.NODE_ENV !== "development"}
@@ -434,7 +451,7 @@ function MainFiltersView({
               className="flex w-full items-center justify-between py-4"
             >
               <span className="flex items-center gap-1 text-sm font-semibold">
-                Insiders
+                {t("filters.dev.insiders")}
                 <DevBadge />
               </span>
               <ChevronDownIcon
@@ -444,7 +461,9 @@ function MainFiltersView({
             {insidersOpen && (
               <div className="flex flex-col gap-3 pb-4">
                 <div className="flex flex-col gap-2">
-                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">Options</span>
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    {t("filters.dev.options")}
+                  </span>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="mobile-order-by-priority"
@@ -456,7 +475,7 @@ function MainFiltersView({
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
                       <CrownIcon className="h-4 w-4" />
-                      Order by priority
+                      {t("filters.dev.orderByPriority")}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -470,7 +489,7 @@ function MainFiltersView({
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
                       <CircleCheckIcon className="h-4 w-4" />
-                      Only available
+                      {t("filters.dev.onlyAvailable")}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -484,17 +503,19 @@ function MainFiltersView({
                       className="flex w-full cursor-pointer items-center gap-2 text-sm hover:opacity-80"
                     >
                       <BadgePercentIcon className="h-4 w-4" />
-                      Only discounted
+                      {t("filters.dev.onlyDiscounted")}
                     </Label>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">Priority</span>
+                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      {t("filters.dev.priority")}
+                    </span>
                     {selectedPriorities.length > 0 && (
                       <button onClick={onClearPriority} className="text-muted-foreground text-xs hover:underline">
-                        Clear
+                        {t("filters.clear")}
                       </button>
                     )}
                   </div>
@@ -538,6 +559,7 @@ function MobileSortPickerView({
   onSelect: (sort: SortByType) => void
   onBack: () => void
 }) {
+  const t = useTranslations("products.showcase")
   const sortGroups = useMemo(() => {
     if (showSearchRelevance) return SORT_OPTIONS_GROUPS
     return SORT_OPTIONS_GROUPS.filter((g) => g.label !== "Search")
@@ -545,7 +567,7 @@ function MobileSortPickerView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <SubViewHeader title="Sort By" onBack={onBack} />
+      <SubViewHeader title={t("filters.sortBy")} onBack={onBack} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4">
         <RadioGroup value={currentSort} onValueChange={(v) => onSelect(v as SortByType)} className="gap-0">
           {sortGroups.map((group, gi) => (
@@ -583,16 +605,17 @@ function MobileBrandFilterView({
   onChange: (value: string) => void
   onBack: () => void
 }) {
+  const t = useTranslations("products.showcase")
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <SubViewHeader title="Brand" onBack={onBack} />
+      <SubViewHeader title={t("filters.brand")} onBack={onBack} />
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 pb-4">
         <Label htmlFor="mobile-brand-filter" className="text-muted-foreground text-xs font-medium">
-          Exact names, comma-separated
+          {t("mobile.brandExactLabel")}
         </Label>
         <Input
           id="mobile-brand-filter"
-          placeholder="e.g. Kinder, Nestlé"
+          placeholder={t("mobile.brandMobilePlaceholder")}
           value={brand}
           onChange={(e) => onChange(e.target.value)}
           className="text-base"
@@ -617,6 +640,7 @@ function MobileStorePickerView({
   onSetOrigins: (originIds: number[]) => void
   onBack: () => void
 }) {
+  const t = useTranslations("products.showcase")
   const groupValue =
     selectedOrigins.length === 0 ? "all" : selectedOrigins.length === 1 ? String(selectedOrigins[0]!) : ""
   const multiFromDesktop = selectedOrigins.length > 1
@@ -634,18 +658,14 @@ function MobileStorePickerView({
           type="button"
           onClick={onBack}
           className="active:bg-accent -ml-1 flex h-8 w-8 items-center justify-center rounded-full"
-          aria-label="Go back"
+          aria-label={t("mobile.goBackAria")}
         >
           <ChevronLeftIcon className="h-5 w-5" />
         </button>
-        <h2 className="flex-1 text-lg font-semibold">Store</h2>
+        <h2 className="flex-1 text-lg font-semibold">{t("filters.store")}</h2>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 pb-4">
-        {multiFromDesktop && (
-          <p className="text-muted-foreground text-xs leading-snug">
-            Several stores are selected. Pick one chain below or All stores to search every chain.
-          </p>
-        )}
+        {multiFromDesktop && <p className="text-muted-foreground text-xs leading-snug">{t("mobile.storeMultiHint")}</p>}
         <RadioGroup
           value={groupValue}
           onValueChange={(v) => {
@@ -653,11 +673,11 @@ function MobileStorePickerView({
             else onSetOrigins([Number(v)])
           }}
           className="flex flex-col gap-1"
-          aria-label="Store filter"
+          aria-label={t("mobile.storeFilterAria")}
         >
           <label className={rowClass(groupValue === "all")}>
             <StoreIcon className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
-            <span className="flex-1 text-[15px]">All stores</span>
+            <span className="flex-1 text-[15px]">{t("filters.allStores")}</span>
             <RadioGroupItem value="all" className="shrink-0" />
           </label>
           {STORE_IDS.map((id) => (
@@ -697,9 +717,10 @@ function MobilePriceRangeView({
   onChange: (min: string, max: string) => void
   onBack: () => void
 }) {
+  const t = useTranslations("products.showcase")
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <SubViewHeader title="Price Range" onBack={onBack} />
+      <SubViewHeader title={t("filters.priceRange")} onBack={onBack} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-1">
         <PriceRangeFilter className="gap-4" priceMin={priceMin} priceMax={priceMax} onChange={onChange} />
       </div>
@@ -729,6 +750,7 @@ function MobileCategoryPickerView({
   onSelect: (slug: string) => void
   onBack: () => void
 }) {
+  const t = useTranslations("products.showcase")
   const [navStack, setNavStack] = useState<CanonicalCategory[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const listRef = useRef<HTMLDivElement>(null)
@@ -738,7 +760,7 @@ function MobileCategoryPickerView({
 
   const currentParent = navStack[navStack.length - 1] ?? null
   const currentItems = currentParent?.children ?? categories
-  const title = currentParent?.name ?? "Categories"
+  const title = currentParent?.name ?? t("filters.categoriesHeading")
 
   const handleDrillDown = (cat: CanonicalCategory) => {
     setNavStack((prev) => [...prev, cat])
@@ -785,7 +807,7 @@ function MobileCategoryPickerView({
           <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="search"
-            placeholder="Search categories..."
+            placeholder={t("mobile.categorySearchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -799,7 +821,7 @@ function MobileCategoryPickerView({
       {selectedCat && !isSearching && (
         <div className="bg-primary/10 dark:bg-primary/15 mx-4 mb-3 flex items-center justify-between rounded-lg px-3 py-2">
           <span className="text-xs">
-            <span className="text-muted-foreground">Selected: </span>
+            <span className="text-muted-foreground">{t("mobile.categorySelectedLabel")} </span>
             <span className="font-medium">{selectedCat.breadcrumb}</span>
           </span>
           <button
@@ -807,7 +829,7 @@ function MobileCategoryPickerView({
             onClick={() => handleSelect(null)}
             className="text-muted-foreground ml-2 text-xs font-medium hover:underline"
           >
-            Clear
+            {t("filters.clear")}
           </button>
         </div>
       )}
@@ -816,35 +838,39 @@ function MobileCategoryPickerView({
       <div ref={listRef} className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
         {isSearching ? (
           searchResults.length === 0 ? (
-            <p className="text-muted-foreground px-4 py-8 text-center text-sm">No categories found.</p>
+            <p className="text-muted-foreground px-4 py-8 text-center text-sm">{t("mobile.categoryEmptySearch")}</p>
           ) : (
-            searchResults.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => onSelect(cat.id === selectedId ? "" : cat.slug)}
-                className={cn(
-                  "active:bg-accent hover:bg-accent flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors",
-                  cat.id === selectedId && "bg-accent dark:bg-primary/20",
-                )}
-              >
-                <CircleCheckIcon
-                  className={cn("h-4 w-4 shrink-0", cat.id === selectedId ? "text-primary" : "text-transparent")}
-                />
-                <span className="flex-1 text-[15px]">
-                  {cat.level === 1 ? (
-                    <span className="font-medium">{cat.name}</span>
-                  ) : (
-                    <span>
-                      <span className="text-muted-foreground text-xs">
-                        {cat.breadcrumb.split(" > ").slice(0, -1).join(" > ")} &gt;{" "}
-                      </span>
-                      <span className="font-medium">{cat.name}</span>
-                    </span>
+            searchResults.map((cat) => {
+              const crumbPrefix = cat.breadcrumb.split(" > ").slice(0, -1).join(BREADCRUMB_DISPLAY_SEP)
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => onSelect(cat.id === selectedId ? "" : cat.slug)}
+                  className={cn(
+                    "active:bg-accent hover:bg-accent flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors",
+                    cat.id === selectedId && "bg-accent dark:bg-primary/20",
                   )}
-                </span>
-              </button>
-            ))
+                >
+                  <CircleCheckIcon
+                    className={cn("h-4 w-4 shrink-0", cat.id === selectedId ? "text-primary" : "text-transparent")}
+                  />
+                  <span className="flex-1 text-[15px]">
+                    {cat.level === 1 ? (
+                      <span className="font-medium">{cat.name}</span>
+                    ) : (
+                      <span>
+                        <span className="text-muted-foreground text-xs">
+                          {crumbPrefix}
+                          {BREADCRUMB_DISPLAY_SEP}
+                        </span>
+                        <span className="font-medium">{cat.name}</span>
+                      </span>
+                    )}
+                  </span>
+                </button>
+              )
+            })
           )
         ) : (
           <>
@@ -867,10 +893,12 @@ function MobileCategoryPickerView({
                   />
                   <span className="flex flex-1 flex-col items-start gap-0.5 text-left">
                     <span className={cn("text-[15px] font-medium", allRowSelected && "text-foreground")}>
-                      {currentParent ? `All in ${currentParent.name}` : "All categories"}
+                      {currentParent
+                        ? t("mobile.categoryAllIn", { name: currentParent.name })
+                        : t("mobile.categoryAll")}
                     </span>
                     {allRowSelected && !currentParent && (
-                      <span className="text-muted-foreground text-xs font-normal">No category filter</span>
+                      <span className="text-muted-foreground text-xs font-normal">{t("mobile.categoryNoFilter")}</span>
                     )}
                   </span>
                 </button>

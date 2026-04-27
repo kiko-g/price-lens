@@ -14,7 +14,14 @@ import { formatDate } from "@/lib/i18n/format"
 import { cn } from "@/lib/utils"
 import { imagePlaceholder } from "@/lib/business/data"
 import { formatRelativeTime } from "@/lib/business/chart"
-import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
+import { formatDiscountPercentWithMinus, generateProductPath } from "@/lib/business/product"
+import {
+  PRICE_PLACEHOLDER,
+  formatEuroCompact,
+  formatEuroPerMajorUnit,
+  formatPercentFixed,
+  PLUS_SIGN,
+} from "@/lib/i18n/formatting-glyphs"
 import { PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE } from "@/lib/business/price-change"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -48,6 +55,8 @@ import {
   TriangleIcon,
   ExternalLinkIcon,
 } from "lucide-react"
+
+const CATEGORY_TOOLTIP_SEP = " > "
 
 const StoreProductCardDrawerChart = dynamic(
   () => import("@/components/products/StoreProductCardDrawerChart").then((mod) => mod.StoreProductCardDrawerChart),
@@ -92,6 +101,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
   const t = useTranslations("products.card")
   const localeRaw = useLocale()
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
+  const drawerCategoryTooltip = [sp.category, sp.category_2, sp.category_3].filter(Boolean).join(CATEGORY_TOOLTIP_SEP)
 
   if (!sp || !sp.url) {
     return null
@@ -165,8 +175,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
         <div className="absolute top-1.5 left-1.5 flex flex-col items-start gap-1">
           {sp.price_per_major_unit && sp.major_unit ? (
             <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit lowercase">
-              {sp.price_per_major_unit.toFixed(2)}€/
-              {sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
+              {formatEuroPerMajorUnit(sp.price_per_major_unit, sp.major_unit)}
             </Badge>
           ) : null}
         </div>
@@ -343,13 +352,17 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             {hasDiscount && sp.discount ? (
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-muted-foreground text-sm line-through">{sp.price_recommended}€</span>
+                  <span className="text-muted-foreground text-sm line-through">
+                    {formatEuroCompact(sp.price_recommended!)}
+                  </span>
                   <Badge variant="retail-discount" size="xs" className="text-2xs w-fit px-1 py-px leading-none">
-                    −{discountValueToPercentage(sp.discount, DISCOUNT_DECIMAL_PLACES)}
+                    {formatDiscountPercentWithMinus(sp.discount, DISCOUNT_DECIMAL_PLACES)}
                   </Badge>
                 </div>
                 <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
-                  <span className="text-lg font-bold text-green-600 dark:text-green-500">{sp.price.toFixed(2)}€</span>
+                  <span className="text-lg font-bold text-green-600 dark:text-green-500">
+                    {formatEuroCompact(sp.price!)}
+                  </span>
                   <PriceChangeBadge pct={sp.price_change_pct} />
                 </div>
               </div>
@@ -357,7 +370,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
             {isNormalPrice ? (
               <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
-                <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
+                <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">
+                  {formatEuroCompact(sp.price!)}
+                </span>
                 <PriceChangeBadge pct={sp.price_change_pct} />
               </div>
             ) : null}
@@ -367,14 +382,15 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 <span className="text-muted-foreground text-sm font-medium">{t("priceUnavailable")}</span>
                 {hasUnitPrice ? (
                   <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
-                    {sp.price_per_major_unit!.toFixed(2)}€/
-                    {sp.major_unit!.startsWith("/") ? sp.major_unit!.slice(1) : sp.major_unit}
+                    {formatEuroPerMajorUnit(sp.price_per_major_unit!, sp.major_unit!)}
                   </span>
                 ) : null}
               </div>
             ) : null}
 
-            {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
+            {isPriceNotSet ? (
+              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+            ) : null}
           </div>
 
           <div className="flex items-center gap-2">
@@ -489,10 +505,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <span>
-                          {sp.category} {sp.category_2 ? `> ${sp.category_2}` : ""}{" "}
-                          {sp.category_3 ? `> ${sp.category_3}` : ""}
-                        </span>
+                        <span>{drawerCategoryTooltip}</span>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -564,7 +577,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           showBarcode && (
             <div className="mt-auto flex w-full flex-1 flex-wrap items-center justify-center gap-2">
               <Badge variant="destructive" size="xs" roundedness="sm">
-                No barcode available
+                {t("noBarcode")}
               </Badge>
             </div>
           )
@@ -582,7 +595,7 @@ function PriceChangeBadge({ pct }: { pct: number | null | undefined }) {
 
   const isSignificant = Math.abs(pct) >= 0.05
   const isNegative = pct < 0
-  const formatted = `${pct > 0 ? "+" : ""}${(pct * 100).toFixed(0)}%`
+  const formatted = pct > 0 ? `${PLUS_SIGN}${formatPercentFixed(pct * 100, 0)}` : formatPercentFixed(pct * 100, 0)
 
   return (
     <span

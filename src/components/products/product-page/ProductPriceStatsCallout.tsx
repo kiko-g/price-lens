@@ -206,7 +206,7 @@ export function ProductPriceStatsCallout({ sp, className, placement = "desktop",
 
           {showDevScore && sp.price_drop_smart_score != null ? (
             <p className="text-muted-foreground mt-2 font-mono text-[11px]">
-              price_drop_smart_score: {sp.price_drop_smart_score.toFixed(4)}
+              {t("devSmartScore", { value: sp.price_drop_smart_score.toFixed(4) })}
             </p>
           ) : null}
         </Callout>

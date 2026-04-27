@@ -85,12 +85,12 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
           </div>
           <div className="bg-border h-8 w-px" />
           <div className="flex flex-col items-center">
-            <span className="text-foreground text-base font-bold">0</span>
+            <span className="text-foreground text-base font-bold">{t("statZero")}</span>
             <span>{t("listsLabel")}</span>
           </div>
           <div className="bg-border h-8 w-px" />
           <div className="flex flex-col items-center">
-            <span className="text-foreground text-base font-bold">0</span>
+            <span className="text-foreground text-base font-bold">{t("statZero")}</span>
             <span>{t("alertsLabel")}</span>
           </div>
         </div>

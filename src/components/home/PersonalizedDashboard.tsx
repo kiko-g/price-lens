@@ -9,9 +9,10 @@ import { useRecentlyViewed, type RecentlyViewedItem } from "@/hooks/useRecentlyV
 import { useUserAlerts } from "@/hooks/useUserAlerts"
 import { useUserFavoritesSummary, type FavoriteSummaryItem } from "@/hooks/useUserFavoritesSummary"
 import { cn } from "@/lib/utils"
-import { discountValueToPercentage } from "@/lib/business/product"
+import { formatDiscountPercentWithMinus } from "@/lib/business/product"
 import { isLocale, type Locale } from "@/i18n/config"
 import { formatPrice } from "@/lib/i18n/format"
+import { EM_DASH } from "@/lib/i18n/punctuation"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
@@ -471,7 +472,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
         {/* Discount badge: overlaid on image */}
         {hasDiscount && (
           <div className="bg-primary text-primary-foreground absolute top-1.5 left-1.5 rounded px-1 py-0.5 text-[10px] leading-none font-bold">
-            −{discountValueToPercentage(discount!, 0)}
+            {formatDiscountPercentWithMinus(discount!, 0)}
           </div>
         )}
       </div>
@@ -489,7 +490,7 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
                 hasDiscount ? "text-emerald-600 dark:text-emerald-400" : "text-foreground",
               )}
             >
-              {product.price != null ? formatPrice(product.price, locale) : "—"}
+              {product.price != null ? formatPrice(product.price, locale) : EM_DASH}
             </span>
             {hasStrikethrough && (
               <span className="text-muted-foreground text-xs tabular-nums line-through">
@@ -498,19 +499,30 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
             )}
           </div>
         </div>
-        {pricePerUnit && majorUnit && <MiniProductCardPricePerUnit pricePerUnit={pricePerUnit} majorUnit={majorUnit} />}
+        {pricePerUnit && majorUnit && (
+          <MiniProductCardPricePerUnit pricePerUnit={pricePerUnit} majorUnit={majorUnit} locale={locale} />
+        )}
       </div>
     </Link>
   )
 }
 
-function MiniProductCardPricePerUnit({ pricePerUnit, majorUnit }: { pricePerUnit: number; majorUnit: string }) {
-  const formattedPricePerUnit = pricePerUnit.toFixed(2)
+function MiniProductCardPricePerUnit({
+  pricePerUnit,
+  majorUnit,
+  locale,
+}: {
+  pricePerUnit: number
+  majorUnit: string
+  locale: Locale
+}) {
   const formattedMajorUnit = majorUnit.startsWith("/") ? majorUnit.slice(1) : majorUnit
+  const prefix = `${formatPrice(pricePerUnit, locale)}/`
 
   return (
     <p className="text-2xs text-muted-foreground tabular-nums">
-      {formattedPricePerUnit}€/<span className="lowercase">{formattedMajorUnit}</span>
+      {prefix}
+      <span className="lowercase">{formattedMajorUnit}</span>
     </p>
   )
 }

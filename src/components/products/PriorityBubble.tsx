@@ -1,3 +1,6 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
 
@@ -25,6 +28,7 @@ export function PriorityBubble({
   usePeriod = false,
   className,
 }: PriorityBubbleProps) {
+  const t = useTranslations("products.priorityUi")
   const key = priority === null ? "null" : String(priority)
   const config = PRIORITY_CONFIG[key] ?? PRIORITY_CONFIG["null"]
 
@@ -43,7 +47,9 @@ export function PriorityBubble({
         <span className="flex flex-col gap-0 leading-tight">
           {useDescription && <span className="text-sm font-medium">{config.description}</span>}
           {usePeriod && config.period != null && (
-            <span className="text-muted-foreground text-xs font-normal">({config.period})</span>
+            <span className="text-muted-foreground text-xs font-normal">
+              {t("periodInParens", { period: config.period })}
+            </span>
           )}
         </span>
       )}

@@ -1,3 +1,6 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { PRIORITY_CONFIG, PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -71,20 +74,18 @@ export function PriorityScore({
   className,
   wrapperClassName,
 }: PriorityScoreProps) {
+  const t = useTranslations("products.priorityUi")
   const normalizedPriority = priority ?? 0
   const config = PRIORITY_CONFIG[String(normalizedPriority)] ?? PRIORITY_CONFIG["0"]
   const s = SIZE_MAP[size]
+  const scoreAria = t("scoreAria", { label: config.label, description: config.description })
 
   return (
     <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={cn("flex flex-col items-center gap-0.5", wrapperClassName)}>
-            <div
-              role="img"
-              className={cn("inline-flex items-center", s.wrapper, className)}
-              aria-label={`Priority ${config.label}: ${config.description}`}
-            >
+            <div role="img" className={cn("inline-flex items-center", s.wrapper, className)} aria-label={scoreAria}>
               <div className={cn("flex items-center", s.gap)}>
                 {PRODUCT_PRIORITY_LEVELS.map((level) => {
                   const levelKey = String(level)

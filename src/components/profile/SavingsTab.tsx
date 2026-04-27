@@ -107,7 +107,10 @@ export function SavingsTab() {
             <TrophyIcon className="size-4 text-amber-500" />
             {t("achievementsTitle")}
             <Badge variant="secondary" className="text-[10px]">
-              {stats.achievements.length}/{ACHIEVEMENTS.length}
+              {t("achievementsProgress", {
+                unlocked: stats.achievements.length,
+                total: ACHIEVEMENTS.length,
+              })}
             </Badge>
           </CardTitle>
         </CardHeader>

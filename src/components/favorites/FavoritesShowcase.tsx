@@ -352,7 +352,9 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
                 <span>{t("filters.storeOrigin")}</span>
                 {selectedOrigins.length > 0 && (
                   <>
-                    <span className="text-muted-foreground text-xs">({selectedOrigins.length})</span>
+                    <span className="text-muted-foreground text-xs">
+                      {t("filters.originCountSelected", { count: selectedOrigins.length })}
+                    </span>
                     <span
                       role="button"
                       tabIndex={0}

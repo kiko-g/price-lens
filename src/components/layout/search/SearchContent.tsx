@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
+import { MIDDLE_DOT, formatEuroCompact } from "@/lib/i18n/formatting-glyphs"
 import { STORE_NAMES } from "@/types/business"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { generateProductPath, getPopularProducts } from "@/lib/business/product"
@@ -284,7 +285,7 @@ function ProductItem({ product, onClick }: ProductItemProps) {
           {storeSegment}
           {storeSegment && metaRest ? (
             <span className="shrink-0 opacity-80" aria-hidden>
-              •
+              {MIDDLE_DOT}
             </span>
           ) : null}
           {metaRest ? <span className="min-w-0 flex-1 truncate">{metaRest}</span> : null}
@@ -294,11 +295,11 @@ function ProductItem({ product, onClick }: ProductItemProps) {
       <div className="flex shrink-0 flex-col">
         {hasDiscount ? (
           <>
-            <p className="text-base font-semibold text-green-600 tabular-nums">{price.toFixed(2)}€</p>
-            {pvpr && <p className="text-muted-foreground text-sm line-through">{pvpr.toFixed(2)}€</p>}
+            <p className="text-base font-semibold text-green-600 tabular-nums">{formatEuroCompact(price)}</p>
+            {pvpr && <p className="text-muted-foreground text-sm line-through">{formatEuroCompact(pvpr)}</p>}
           </>
         ) : (
-          <p className="text-base font-semibold tabular-nums">{price.toFixed(2)}€</p>
+          <p className="text-base font-semibold tabular-nums">{formatEuroCompact(price)}</p>
         )}
       </div>
     </div>

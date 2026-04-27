@@ -3,7 +3,8 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
-import { discountValueToPercentage } from "@/lib/business/product"
+import { formatDiscountPercentWithMinus } from "@/lib/business/product"
+import { PRICE_PLACEHOLDER, formatEuroCompact, formatEuroPerMajorUnit } from "@/lib/i18n/formatting-glyphs"
 
 import type { StoreProduct } from "@/types"
 
@@ -95,26 +96,32 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
           {hasDiscount ? (
             <>
-              <span className="text-xl font-bold text-green-700 dark:text-green-600">{sp.price}€</span>
-              <span className="text-muted-foreground text-base line-through">{sp.price_recommended}€</span>
+              <span className="text-xl font-bold text-green-700 dark:text-green-600">
+                {formatEuroCompact(sp.price!)}
+              </span>
+              <span className="text-muted-foreground text-base line-through">
+                {formatEuroCompact(sp.price_recommended!)}
+              </span>
             </>
           ) : null}
 
           {isNormalPrice ? (
-            <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{sp.price}€</span>
+            <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{formatEuroCompact(sp.price)}</span>
           ) : null}
 
-          {isPriceNotSet ? <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">--.--€</span> : null}
+          {isPriceNotSet ? (
+            <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+          ) : null}
 
           {sp.discount ? (
             <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
-              −{discountValueToPercentage(sp.discount)}
+              {formatDiscountPercentWithMinus(sp.discount)}
             </Badge>
           ) : null}
 
           {sp.price_per_major_unit && sp.major_unit ? (
             <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit shrink-0">
-              {sp.price_per_major_unit}€/{sp.major_unit.startsWith("/") ? sp.major_unit.slice(1) : sp.major_unit}
+              {formatEuroPerMajorUnit(sp.price_per_major_unit, sp.major_unit)}
             </Badge>
           ) : null}
         </div>

@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl"
 
 import type { StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
-import { generateProductPath, discountValueToPercentage } from "@/lib/business/product"
+import { generateProductPath, formatDiscountPercentWithMinus } from "@/lib/business/product"
+import { PRICE_MISSING_SHORT, PLUS_SIGN, formatEuroCompact, formatEuroPerMajorUnit } from "@/lib/i18n/formatting-glyphs"
 import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
 import { Badge } from "@/components/ui/badge"
@@ -21,14 +22,6 @@ import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon } from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
-}
-
-/** Normalize scraped unit strings (e.g. lt/Lt/l) for consistent display. */
-function formatMajorUnitSuffix(majorUnit: string): string {
-  const raw = majorUnit.trim().replace(/^\//, "")
-  const lower = raw.toLowerCase()
-  if (lower === "lt" || lower === "l") return "l"
-  return raw
 }
 
 function CompactStoreCard({
@@ -57,6 +50,7 @@ function CompactStoreCard({
     product.price !== null && product.price !== undefined
       ? t("priceLabel", { value: product.price.toFixed(2) })
       : t("priceUnknown")
+  const priceDiffBadge = priceDiff !== null && priceDiff > 0 ? PLUS_SIGN + formatEuroCompact(priceDiff) : null
 
   return (
     <Link
@@ -117,12 +111,12 @@ function CompactStoreCard({
 
               {hasDiscount && (
                 <Badge variant="retail-discount" size="xs" className="text-2xs w-fit px-1 py-px leading-none">
-                  −{discountValueToPercentage(product.discount!)}
+                  {formatDiscountPercentWithMinus(product.discount!)}
                 </Badge>
               )}
 
               <span className="text-muted-foreground text-sm tabular-nums line-through">
-                {product.price_recommended?.toFixed(2)}€
+                {product.price_recommended != null ? formatEuroCompact(product.price_recommended) : null}
               </span>
 
               <span
@@ -132,23 +126,23 @@ function CompactStoreCard({
                   !showFloorHighlight && "text-foreground",
                 )}
               >
-                {product.price.toFixed(2)}€
+                {formatEuroCompact(product.price)}
               </span>
             </div>
           ) : (
-            <span className="text-muted-foreground text-base font-bold">--€</span>
+            <span className="text-muted-foreground text-base font-bold">{PRICE_MISSING_SHORT}</span>
           )}
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             {product.price_per_major_unit && product.major_unit && (
               <Badge variant="price-per-unit" size="xs" className="tabular-nums">
-                {product.price_per_major_unit}€/{formatMajorUnitSuffix(product.major_unit)}
+                {formatEuroPerMajorUnit(product.price_per_major_unit, product.major_unit)}
               </Badge>
             )}
 
-            {priceDiff !== null && priceDiff > 0 && (
+            {priceDiffBadge != null && (
               <Badge variant="boring" size="xs" className="tabular-nums">
-                +{priceDiff.toFixed(2)}€
+                {priceDiffBadge}
               </Badge>
             )}
           </div>

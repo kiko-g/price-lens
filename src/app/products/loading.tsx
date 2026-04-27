@@ -7,6 +7,8 @@ import { HideFooter } from "@/contexts/FooterContext"
 
 const LIMIT = 20
 
+const SEARCH_INPUT_SKELETON_PLACEHOLDER = "Search products..."
+
 // Approximate widths of each SmartViewPresets chip label + icon at text-xs
 const PRESET_WIDTHS = ["w-[90px]", "w-[76px]", "w-[104px]", "w-[118px]"]
 
@@ -54,7 +56,7 @@ export default function ProductsLoading() {
           <div className="flex w-full items-center gap-2 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
             <div className="flex flex-1 items-center gap-2.5 rounded-lg border px-3 py-2.5">
               <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
-              <span className="text-muted-foreground flex-1 text-sm">Search products...</span>
+              <span className="text-muted-foreground flex-1 text-sm">{SEARCH_INPUT_SKELETON_PLACEHOLDER}</span>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
               <FilterIcon className="text-muted-foreground h-4 w-4" />

@@ -3,12 +3,15 @@
 import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import type { StoreProduct, Price } from "@/types"
+import { isLocale, type Locale } from "@/i18n/config"
+import { formatPrice } from "@/lib/i18n/format"
+import { EM_DASH, PLUS_SIGN } from "@/lib/i18n/formatting-glyphs"
 import { RANGES, DateRange } from "@/types/business"
 import { cn } from "@/lib/utils"
-import { generateProductPath, discountValueToPercentage } from "@/lib/business/product"
+import { generateProductPath, formatDiscountPercentWithMinus } from "@/lib/business/product"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,6 +27,20 @@ import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 export interface ProductWithPrices {
   product: StoreProduct
   prices: Price[]
+}
+
+const BARCODE_PRICE_PLACEHOLDER = "--.--€"
+
+function majorUnitSuffix(unit: string): string {
+  return unit.startsWith("/") ? unit : `/${unit}`
+}
+
+function formatPerUnitLine(pricePerUnit: number, unit: string, locale: Locale): string {
+  return `${formatPrice(pricePerUnit, locale)}${majorUnitSuffix(unit)}`
+}
+
+function formatPackBullet(pack: string): string {
+  return `\u00B7 ${pack}`
 }
 
 interface BarcodeCompareProps {
@@ -119,7 +136,14 @@ function CompareCard({
   insights: DealInsights
 }) {
   const t = useTranslations("products.barcodeCompare")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
   const hasDiscount = product.price_recommended && product.price && product.price_recommended !== product.price
+  const perUnitLabel =
+    product.price_per_major_unit != null && product.major_unit
+      ? formatPerUnitLine(product.price_per_major_unit, product.major_unit, locale)
+      : null
+  const priceDiffLabel = priceDiff !== null && priceDiff > 0 ? `${PLUS_SIGN}${formatPrice(priceDiff, locale)}` : null
 
   return (
     <Link
@@ -168,35 +192,33 @@ function CompareCard({
             {hasDiscount ? (
               <>
                 <span className={cn("text-xl font-bold", isCheapest && "text-success")}>
-                  {product.price?.toFixed(2)}€
+                  {product.price != null ? formatPrice(product.price, locale) : EM_DASH}
                 </span>
-                <span className="text-muted-foreground text-sm line-through">{product.price_recommended}€</span>
+                <span className="text-muted-foreground text-sm line-through">
+                  {product.price_recommended != null ? formatPrice(Number(product.price_recommended), locale) : EM_DASH}
+                </span>
                 {product.discount && (
                   <Badge variant="destructive" size="xs">
-                    <TagIcon className="h-2.5 w-2.5" />−{discountValueToPercentage(product.discount)}
+                    <TagIcon className="h-2.5 w-2.5" />
+                    {formatDiscountPercentWithMinus(product.discount)}
                   </Badge>
                 )}
               </>
             ) : product.price ? (
               <span className={cn("text-xl font-bold", isCheapest && "text-success")}>
-                {product.price?.toFixed(2)}€
+                {formatPrice(product.price, locale)}
               </span>
             ) : (
-              <span className="text-muted-foreground text-xl font-bold">--.--€</span>
+              <span className="text-muted-foreground text-xl font-bold">{BARCODE_PRICE_PLACEHOLDER}</span>
             )}
           </div>
 
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-            {product.price_per_major_unit && product.major_unit && (
-              <span>
-                {product.price_per_major_unit}€
-                {product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}
-              </span>
-            )}
-            {product.pack && <span>· {product.pack}</span>}
-            {priceDiff !== null && priceDiff > 0 && (
+            {perUnitLabel && <span>{perUnitLabel}</span>}
+            {product.pack && <span>{formatPackBullet(product.pack)}</span>}
+            {priceDiffLabel && (
               <Badge variant="retail" size="xs">
-                +{priceDiff.toFixed(2)}€
+                {priceDiffLabel}
               </Badge>
             )}
           </div>
@@ -338,6 +360,8 @@ function StoreComparisonTable({
   cheapestPrice: number | null
 }) {
   const t = useTranslations("products.barcodeCompare")
+  const localeRaw = useLocale()
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "pt"
   const rows = useMemo(() => {
     return products.map((product) => {
       const pwp = productsWithPrices.find((p) => p.product.id === product.id)
@@ -371,67 +395,74 @@ function StoreComparisonTable({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {rows.map(({ product, historicalLow, isCheapest }) => (
-              <tr key={product.id} className={cn(isCheapest && "bg-success/5")}>
-                <td className="px-3 py-2.5">
-                  <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
-                </td>
-                <td className="px-3 py-2.5 text-right tabular-nums">
-                  <span className={cn("font-semibold", isCheapest && "text-success")}>
-                    {product.price ? `${product.price.toFixed(2)}€` : "—"}
-                  </span>
-                  {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
-                </td>
-                <td
-                  className={cn(
-                    "px-3 py-2.5 text-right tabular-nums",
-                    product.price_recommended !== product.price && "text-muted-foreground line-through",
-                  )}
-                >
-                  {product.price_recommended ? `${product.price_recommended.toFixed(2)}€` : "—"}
-                </td>
-                <td className="px-3 py-2.5 text-right tabular-nums">
-                  {product.price_per_major_unit && product.major_unit
-                    ? `${product.price_per_major_unit}€${product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}`
-                    : "—"}
-                </td>
-                <td className="px-3 py-2.5 text-right tabular-nums">
-                  {historicalLow !== null ? `${historicalLow.toFixed(2)}€` : "—"}
-                </td>
-              </tr>
-            ))}
+            {rows.map(({ product, historicalLow, isCheapest }) => {
+              const perUnitCell =
+                product.price_per_major_unit != null && product.major_unit
+                  ? formatPerUnitLine(product.price_per_major_unit, product.major_unit, locale)
+                  : EM_DASH
+              return (
+                <tr key={product.id} className={cn(isCheapest && "bg-success/5")}>
+                  <td className="px-3 py-2.5">
+                    <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
+                  </td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">
+                    <span className={cn("font-semibold", isCheapest && "text-success")}>
+                      {product.price != null ? formatPrice(product.price, locale) : EM_DASH}
+                    </span>
+                    {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
+                  </td>
+                  <td
+                    className={cn(
+                      "px-3 py-2.5 text-right tabular-nums",
+                      product.price_recommended !== product.price && "text-muted-foreground line-through",
+                    )}
+                  >
+                    {product.price_recommended != null
+                      ? formatPrice(Number(product.price_recommended), locale)
+                      : EM_DASH}
+                  </td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">{perUnitCell}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">
+                    {historicalLow !== null ? formatPrice(historicalLow, locale) : EM_DASH}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
 
       {/* Mobile list */}
       <div className="divide-y sm:hidden">
-        {rows.map(({ product, historicalLow, isCheapest }) => (
-          <div key={product.id} className={cn("flex items-center gap-3 px-3 py-3", isCheapest && "bg-success/5")}>
-            <div className="w-14 shrink-0">
-              <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
-            </div>
-            <div className="flex flex-1 items-center justify-between gap-2">
-              <div>
-                <span className={cn("text-base font-semibold tabular-nums", isCheapest && "text-success")}>
-                  {product.price ? `${product.price.toFixed(2)}€` : "—"}
-                </span>
-                {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
-                {product.price_per_major_unit && product.major_unit && (
-                  <span className="text-muted-foreground ml-2 text-xs tabular-nums">
-                    {product.price_per_major_unit}€
-                    {product.major_unit.startsWith("/") ? product.major_unit : `/${product.major_unit}`}
+        {rows.map(({ product, historicalLow, isCheapest }) => {
+          const mobilePerUnit =
+            product.price_per_major_unit != null && product.major_unit
+              ? formatPerUnitLine(product.price_per_major_unit, product.major_unit, locale)
+              : null
+          return (
+            <div key={product.id} className={cn("flex items-center gap-3 px-3 py-3", isCheapest && "bg-success/5")}>
+              <div className="w-14 shrink-0">
+                <SupermarketChainBadge originId={product.origin_id} variant="logoSmall" />
+              </div>
+              <div className="flex flex-1 items-center justify-between gap-2">
+                <div>
+                  <span className={cn("text-base font-semibold tabular-nums", isCheapest && "text-success")}>
+                    {product.price != null ? formatPrice(product.price, locale) : EM_DASH}
+                  </span>
+                  {isCheapest && <TrophyIcon className="text-success ml-1 inline h-3 w-3" />}
+                  {mobilePerUnit && (
+                    <span className="text-muted-foreground ml-2 text-xs tabular-nums">{mobilePerUnit}</span>
+                  )}
+                </div>
+                {historicalLow !== null && (
+                  <span className="text-muted-foreground text-xs tabular-nums">
+                    {t("lowShort", { value: formatPrice(historicalLow, locale) })}
                   </span>
                 )}
               </div>
-              {historicalLow !== null && (
-                <span className="text-muted-foreground text-xs tabular-nums">
-                  {t("lowShort", { value: historicalLow.toFixed(2) })}
-                </span>
-              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

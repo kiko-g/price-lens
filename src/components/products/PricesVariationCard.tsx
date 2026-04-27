@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import { EUR_SUFFIX } from "@/lib/i18n/formatting-glyphs"
 import { discountValueToPercentage, generateProductPath } from "@/lib/business/product"
 import { type StoreProduct } from "@/types"
 
@@ -100,7 +101,7 @@ export function PricesVariationCard({ className, data, actions, state, options =
           onClick={actions.onDiscountChange}
           chartColor="chart-4"
           label={t("discount")}
-          value={discount ? discountValueToPercentage(discount, 0) : "0%"}
+          value={discount ? discountValueToPercentage(discount, 0) : discountValueToPercentage(0, 0)}
           variation={discountVariation}
           invertColors
           showEuro={false}
@@ -188,7 +189,7 @@ function PriceAxisButton({
       <div className="flex items-center justify-end gap-1">
         <span className="mr-1">
           {value}
-          {showEuro ? "€" : ""}
+          {showEuro ? EUR_SUFFIX : ""}
         </span>
         <PriceChange invertColors={invertColors} variation={variation} decimalPlaces={variationDecimalPlaces} />
       </div>

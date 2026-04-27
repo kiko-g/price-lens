@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { findRelatedProducts } from "../product-matching"
-import {
-  createMockStoreProduct,
-  createQueryBuilderMock,
-  setMockResult,
-} from "./mocks/supabase"
+import { createMockStoreProduct, createQueryBuilderMock, setMockResult } from "./mocks/supabase"
 
 const mockFrom = vi.fn()
 const mockRpc = vi.fn()

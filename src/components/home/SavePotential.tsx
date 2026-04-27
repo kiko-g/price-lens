@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 
 import { ArrowRight, TrendingUp, Zap, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { EUR_SUFFIX } from "@/lib/i18n/formatting-glyphs"
 
 const AVG_PRICE = 4
 const DISCOUNT_RATE = 0.2
@@ -141,7 +142,7 @@ function StatCard({
     >
       <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">{label}</span>
       <div className="flex items-baseline gap-1">
-        <span className={cn("text-lg font-medium", highlight ? "text-primary" : "text-foreground")}>€</span>
+        <span className={cn("text-lg font-medium", highlight ? "text-primary" : "text-foreground")}>{EUR_SUFFIX}</span>
         <span
           className={cn(
             "text-5xl font-bold tracking-tight tabular-nums md:text-6xl",

@@ -189,9 +189,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
             )}
             {hasNova && (
               <Badge variant="secondary" className="gap-1 text-xs font-medium">
-                NOVA {product.novaGroup}
+                {t("novaGroupBadge", { group: String(product.novaGroup) })}
                 <span className="text-muted-foreground font-normal">
-                  &middot; {t(`novaLabels.${NOVA_KEYS[product.novaGroup!]}` as const)}
+                  {t("novaGroupSuffix", { label: t(`novaLabels.${NOVA_KEYS[product.novaGroup!]}` as const) })}
                 </span>
               </Badge>
             )}
@@ -284,9 +284,9 @@ export function OffProductPage({ product, barcode, children }: OffProductPagePro
           )}
           {hasNova && (
             <Badge variant="secondary" size="sm" className="gap-1 text-xs font-medium">
-              NOVA {product.novaGroup}
+              {t("novaGroupBadge", { group: String(product.novaGroup) })}
               <span className="text-muted-foreground font-normal">
-                &middot; {t(`novaLabels.${NOVA_KEYS[product.novaGroup!]}` as const)}
+                {t("novaGroupSuffix", { label: t(`novaLabels.${NOVA_KEYS[product.novaGroup!]}` as const) })}
               </span>
             </Badge>
           )}

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { CircleCheckIcon } from "lucide-react"
+import { MIDDLE_DOT } from "@/lib/i18n/formatting-glyphs"
 import { cn } from "@/lib/utils"
 
 type FreshnessKind = "justNow" | "hoursAgo" | "today" | "recent"
@@ -20,7 +21,7 @@ export async function FreshnessBadge({ computedAt, className }: { computedAt: st
     <div className={cn("text-muted-foreground flex items-center gap-1.5 text-xs", className)}>
       <CircleCheckIcon className="size-3 text-emerald-500" />
       <span>{label}</span>
-      <span className="mx-1">·</span>
+      <span className="mx-1">{MIDDLE_DOT}</span>
       <span>{t("trackingSince")}</span>
     </div>
   )
