@@ -30,9 +30,9 @@ const badgeVariants = cva(
         retail:
           "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-zinc-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
         "retail-discount":
-          "border-transparent bg-yellow-950 text-white hover:bg-yellow-400/80 dark:border-transparent dark:bg-yellow-400 dark:text-zinc-950 dark:hover:bg-yellow-500/80 [&_span.bubble]:bg-yellow-400",
+          "border-transparent bg-zinc-950 text-white shadow-sm hover:bg-zinc-900 dark:border-transparent dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 [&_span.bubble]:bg-zinc-700 dark:[&_span.bubble]:bg-zinc-600",
         "retail-deal":
-          "border border-rose-500/20 bg-size-[200%_200%] bg-linear-to-br from-rose-500/20 via-orange-500/20 to-rose-500/18 text-rose-950 motion-reduce:animate-none motion-reduce:ring-1 motion-reduce:ring-rose-500/30 motion-reduce:shadow-none animate-lava hover:brightness-105 focus-visible:ring-rose-500/45 dark:border-rose-400/30 dark:from-rose-400/30 dark:via-orange-400/25 dark:to-rose-500/25 dark:text-rose-950 dark:hover:brightness-110 [&_span.bubble]:bg-rose-500 dark:[&_span.bubble]:bg-rose-400",
+          "border border-rose-400/90 bg-size-[200%_200%] bg-linear-to-br from-rose-100 via-orange-50 to-rose-100 text-rose-950 shadow-sm motion-reduce:animate-none motion-reduce:ring-1 motion-reduce:ring-rose-400/50 motion-reduce:shadow-none animate-lava hover:brightness-105 focus-visible:ring-rose-500/45 dark:border-rose-400/90 dark:from-rose-100 dark:via-orange-50 dark:to-rose-100 dark:text-rose-950 dark:shadow-sm dark:shadow-zinc-950/45 dark:animate-none dark:hover:brightness-105 [&_span.bubble]:bg-rose-600 dark:[&_span.bubble]:bg-rose-600",
         light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
         dark: "border-transparent bg-zinc-900 text-zinc-50 dark:border-transparent hover:bg-zinc-900/80",
         outline:

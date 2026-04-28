@@ -166,19 +166,32 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
                 blurDataURL={imagePlaceholder.productBlur}
                 priority={imagePriority}
               />
+              {hasDiscount && sp.discount ? (
+                <Badge
+                  variant="retail-discount"
+                  size="xs"
+                  roundedness="sm"
+                  className="absolute top-1.5 left-1.5 z-10 w-fit px-1.5 py-px text-[11px] leading-none font-bold tracking-tight"
+                >
+                  {formatDiscountPercentWithMinus(sp.discount, DISCOUNT_DECIMAL_PLACES)}
+                </Badge>
+              ) : null}
             </div>
           ) : (
-            <div className="aspect-8/7 w-full bg-zinc-100 dark:bg-zinc-800" />
+            <div className="relative aspect-8/7 w-full bg-zinc-100 dark:bg-zinc-800">
+              {hasDiscount && sp.discount ? (
+                <Badge
+                  variant="retail-discount"
+                  size="xs"
+                  roundedness="sm"
+                  className="absolute top-1.5 left-1.5 z-10 w-fit px-1.5 py-px text-[11px] leading-none font-bold tracking-tight"
+                >
+                  {formatDiscountPercentWithMinus(sp.discount, DISCOUNT_DECIMAL_PLACES)}
+                </Badge>
+              ) : null}
+            </div>
           )}
         </Link>
-
-        <div className="absolute top-1.5 left-1.5 flex flex-col items-start gap-1">
-          {sp.price_per_major_unit && sp.major_unit ? (
-            <Badge variant="price-per-unit" size="xs" roundedness="sm" className="w-fit lowercase">
-              {formatEuroPerMajorUnit(sp.price_per_major_unit, sp.major_unit)}
-            </Badge>
-          ) : null}
-        </div>
 
         <div className="absolute top-1.5 right-1.5 flex flex-col items-end gap-1">
           {isError ? (
@@ -347,44 +360,50 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
         </div>
 
         {/* Prices and Actions */}
-        <div className="mt-auto flex w-full flex-1 flex-wrap items-start justify-between gap-2 lg:mt-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            {hasDiscount && sp.discount ? (
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-muted-foreground text-sm line-through">
-                    {formatEuroCompact(sp.price_recommended!)}
-                  </span>
-                  <Badge variant="retail-discount" size="xs" className="text-2xs w-fit px-1 py-px leading-none">
-                    {formatDiscountPercentWithMinus(sp.discount, DISCOUNT_DECIMAL_PLACES)}
-                  </Badge>
-                </div>
-                <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
-                  <span className="text-lg font-bold text-green-600 dark:text-green-500">
+        <div className="mt-auto flex w-full flex-1 flex-wrap items-center justify-between gap-x-2 gap-y-1 lg:mt-1">
+          <div className="flex min-w-0 flex-1 flex-col items-stretch">
+            {hasDiscount ? (
+              <div className="flex min-w-0 flex-col items-start gap-[3px]">
+                <span className="text-muted-foreground text-sm leading-tight line-through">
+                  {formatEuroCompact(sp.price_recommended!)}
+                </span>
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <span className="text-lg leading-none font-bold tracking-tight text-green-600 dark:text-green-500">
                     {formatEuroCompact(sp.price!)}
                   </span>
                   <PriceChangeBadge pct={sp.price_change_pct} />
                 </div>
+                <UnitPriceFootnote
+                  unitFormatted={hasUnitPrice ? formatEuroPerMajorUnit(sp.price_per_major_unit!, sp.major_unit!) : null}
+                />
               </div>
             ) : null}
 
             {isNormalPrice ? (
-              <div className="flex flex-col items-start gap-1 md:flex-col md:items-start md:gap-0">
-                <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">
-                  {formatEuroCompact(sp.price!)}
-                </span>
-                <PriceChangeBadge pct={sp.price_change_pct} />
+              <div className="flex min-w-0 flex-col items-start gap-[3px]">
+                <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="text-lg leading-none font-bold tracking-tight text-zinc-700 dark:text-zinc-200">
+                    {formatEuroCompact(sp.price!)}
+                  </span>
+                  <PriceChangeBadge pct={sp.price_change_pct} />
+                </div>
+                <UnitPriceFootnote
+                  unitFormatted={hasUnitPrice ? formatEuroPerMajorUnit(sp.price_per_major_unit!, sp.major_unit!) : null}
+                />
               </div>
             ) : null}
 
             {isPriceMissingWithReference ? (
-              <div className="flex flex-col gap-0.5">
-                <span className="text-muted-foreground text-sm font-medium">{t("priceUnavailable")}</span>
+              <div className="flex min-w-0 flex-col items-start gap-[3px]">
+                <span className="text-muted-foreground text-sm leading-tight font-medium">{t("priceUnavailable")}</span>
                 {hasUnitPrice ? (
-                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+                  <span className="text-sm leading-tight font-semibold text-zinc-700 dark:text-zinc-200">
                     {formatEuroPerMajorUnit(sp.price_per_major_unit!, sp.major_unit!)}
                   </span>
                 ) : null}
+                <div className="empty:hidden">
+                  <PriceChangeBadge pct={sp.price_change_pct} />
+                </div>
               </div>
             ) : null}
 
@@ -393,10 +412,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             ) : null}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:gap-1.5">
             <ResponsiveActionsMenu
               trigger={
-                <Button variant="outline" size="icon-sm" className="bg-background">
+                <Button variant="ghost" size="icon-sm" className="bg-background">
                   <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               }
@@ -588,6 +607,15 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 }
 
 const PRICE_CHANGE_THRESHOLD = 0.01
+
+function UnitPriceFootnote({ unitFormatted }: { unitFormatted: string | null }) {
+  if (!unitFormatted) return null
+  return (
+    <span className="text-muted-foreground text-[11px] leading-none font-medium lowercase tabular-nums">
+      {unitFormatted}
+    </span>
+  )
+}
 
 function PriceChangeBadge({ pct }: { pct: number | null | undefined }) {
   if (pct == null || Math.abs(pct) < PRICE_CHANGE_THRESHOLD) return null
