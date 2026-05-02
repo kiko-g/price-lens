@@ -381,7 +381,8 @@
       "store": "Store",
       "allStores": "All stores",
       "clear": "Clear",
-      "active": "{count} active"
+      "active": "{count} active",
+      "originCountSelected": "{count, plural, one {# store selected} other {# stores selected}}"
     },
     "summary": {
       "favorites": "<strong>{count}</strong> favorites",
@@ -461,6 +462,7 @@
     "sidebar": {
       "fallbackName": "User",
       "favoritesLabel": "Favorites",
+      "statZero": "0",
       "listsLabel": "Lists",
       "alertsLabel": "Alerts",
       "memberSince": "Member since <strong>{date}</strong>",
@@ -512,7 +514,8 @@
         "streakValue": "{count, plural, one {# day} other {# days}}",
         "streakDescription": "checking prices"
       },
-      "achievementsTitle": "Achievements"
+      "achievementsTitle": "Achievements",
+      "achievementsProgress": "{unlocked} / {total}"
     },
     "planTab": {
       "title": "Price Lens is free",
@@ -758,7 +761,10 @@
         "highest": "Highest rate",
         "highestYear": "Achieved in {year}",
         "fedTarget": "Fed Target",
-        "fedTargetNote": "Long-term goal only {met} out of {total} years"
+        "fedTargetNote": "Long-term goal only {met} out of {total} years",
+        "flagLineUSA": "{pct}/year · USA",
+        "flagLinePT": "{pct}/year · PT",
+        "flagLineEU": "{pct}/year · Eurozone"
       },
       "table": {
         "title": "Historical Inflation Data",
@@ -767,15 +773,90 @@
         "year": "Year",
         "context": "Economic Context",
         "showMore": "Show More",
-        "showLess": "Show Less"
+        "showLess": "Show Less",
+        "colPT": "Portugal (%)",
+        "colUSA": "USA (%)",
+        "colEURO": "Eurozone (%)"
       },
       "convergence": {
         "title": "Inflation Convergence",
         "description": "Take a look at the yearly fluctuations of inflation for the USA, Portugal and Eurozone.",
         "yLabel": "Rate (%)"
       },
-      "impactTitle": "Why USA inflation hits Portugal hard",
-      "impactSubtitle": "Portugal's small open economy is structurally exposed to USA monetary policy and global commodity flows. Here's how shocks propagate."
+      "cumulative": {
+        "title": "Cumulative price level (1999 = 100)",
+        "descriptionRich": "Shows how <strong>compound inflation</strong> lifts the price level over time — small yearly rates stack into large gaps by 2024.",
+        "yAxisLabel": "Index (1999 = 100)"
+      },
+      "impactPortugal": {
+        "title": "Why USA inflation hits Portugal hard",
+        "subtitle": "Portugal's small open economy is structurally exposed to USA monetary policy and global commodity flows. Here's how shocks propagate."
+      },
+      "impactFactors": {
+        "energy": {
+          "title": "Energy and fuels",
+          "description": "Oil and gas prices feed quickly into transportation, heating, and food costs across Europe.",
+          "ex0": "2008 commodity spike",
+          "ex1": "2021–22 energy shock",
+          "ex2": "Euro-denominated import bills"
+        },
+        "commodities": {
+          "title": "Food and agricultural commodities",
+          "description": "Global grain and protein markets set floors for supermarket shelf prices.",
+          "ex0": "Weather-driven crop swings",
+          "ex1": "Ukraine war grain disruption",
+          "ex2": "FX pass-through to EUR prices"
+        },
+        "supplyChain": {
+          "title": "Global supply chains",
+          "description": "Bottlenecks and shipping costs propagate from Asia and the US into EU retail.",
+          "ex0": "COVID-era container rates",
+          "ex1": "Chip and parts shortages",
+          "ex2": "Just-in-time retail exposure"
+        },
+        "ecb": {
+          "title": "Monetary policy and the ECB",
+          "description": "Euro-area rates and EUR liquidity conditions shape borrowing costs for households and firms.",
+          "ex0": "2011–14 periphery stress",
+          "ex1": "2022 hiking cycle",
+          "ex2": "Transmission to mortgage rates"
+        },
+        "levels": {
+          "high": "High impact",
+          "critical": "Critical impact",
+          "structural": "Structural exposure"
+        },
+        "historicalExamples": "Historical episodes"
+      },
+      "periodComparisons": {
+        "title": "Period comparisons",
+        "subtitle": "Average inflation and ranges across key macro windows.",
+        "preCrisisTitle": "Pre-crisis stability (1999–2007)",
+        "average": "Average",
+        "range": "Range",
+        "preCrisisNote": "Calmer macro backdrop before the global financial crisis.",
+        "postCrisisTitle": "Post-crisis / austerity (2008–2019)",
+        "postCrisisNote": "Slower growth, unconventional policy, and European debt stress.",
+        "covidTitle": "COVID and reopening (2020–2021)",
+        "covidNote": "Pandemic disruptions followed by a sharp demand rebound.",
+        "notableTitle": "Notable years",
+        "ev2001Title": "2001",
+        "ev2001Body": "Early Euro adoption effects and energy pressures.",
+        "ev2008Title": "2008",
+        "ev2008Body": "Commodity spike into the global financial crisis.",
+        "ev2014Title": "2014",
+        "ev2014Body": "Oil collapse and euro-area stagnation.",
+        "ev2020Title": "2020",
+        "ev2020Body": "Pandemic shock and policy response.",
+        "ev2021Title": "2021",
+        "ev2021Body": "Reopening and supply-chain inflation.",
+        "ev2022Title": "2022",
+        "ev2022Body": "Energy crisis and peak headline rates."
+      },
+      "whatNext": {
+        "title": "What this means for grocery prices",
+        "body": "Macro CPI shows the pressure supermarkets face on costs. Price Lens focuses on the product level — the same forces show up on the shelf with a delay."
+      }
     },
     "savePotential": {
       "badge": "Smart Shopping Calculator",
@@ -978,7 +1059,11 @@
         "allStores": "All stores",
         "category": "Category",
         "allCategories": "All categories",
+        "originCountSelected": "{count, plural, one {# store selected} other {# stores selected}}",
         "brand": "Brand",
+        "brandPlaceholder": "Filter by brand name…",
+        "brandInputAria": "Filter by brand",
+        "brandHint": "Matches the brand field we store for each product.",
         "priceRange": "Price range",
         "discounted": "Only discounted",
         "available": "Only available",
@@ -986,7 +1071,20 @@
         "source": "Source",
         "clear": "Clear",
         "apply": "Apply",
-        "active": "{count} active"
+        "active": "{count} active",
+        "categoriesHeading": "Categories",
+        "categoryOneSelected": "One category selected",
+        "dev": {
+          "insiders": "Insiders",
+          "options": "Developer options",
+          "orderByPriority": "Queue: priority order",
+          "onlyAvailable": "Only available listings",
+          "onlyDiscounted": "Only discounted",
+          "priority": "Priority filter",
+          "prioritySource": "Assignee source",
+          "sourceAi": "AI / automated",
+          "sourceManual": "Manual"
+        }
       },
       "pagination": {
         "showing": "Showing <strong>{from}-{to}</strong> of <strong>{total}</strong>",
@@ -994,7 +1092,41 @@
         "prev": "Prev",
         "next": "Next"
       },
-      "milestone": "{count} products and counting"
+      "statusBar": {
+        "withTotalRich": "Showing <s>{range}</s> of <s>{total}</s>",
+        "rangeOnlyRich": "Showing <s>{range}</s>"
+      },
+      "mobileStatus": {
+        "withTotalRich": "<s>{loaded}</s> of <s>{total}</s> on screen",
+        "loadedOnlyRich": "<s>{loaded}</s> <m>shown (total still loading)</m>",
+        "allLoadedRich": "All <s>{total}</s> matches loaded",
+        "matchRich": "<s>{loaded}</s> in this list"
+      },
+      "mobile": {
+        "breadcrumbSeparator": " > ",
+        "navSearchPlaceholder": "Search products…",
+        "navTitleWithTotal": "{loaded} of {total} shown",
+        "navTitleWithMore": "{loaded}+ shown",
+        "navTitleLoaded": "{loaded} shown",
+        "goBackAria": "Go back",
+        "filtersAndSortTitle": "Filters & sort",
+        "brandExactLabel": "Exact match",
+        "brandMobilePlaceholder": "Brand…",
+        "storeMultiHint": "Multiple stores are selected. Pick one below to use on mobile.",
+        "storeFilterAria": "Choose store",
+        "categorySearchPlaceholder": "Search categories…",
+        "categorySelectedLabel": "Selected",
+        "categoryEmptySearch": "No category found.",
+        "categoryAll": "All categories",
+        "categoryAllIn": "All in {name}",
+        "categoryNoFilter": "No category filter",
+        "priceMinPlaceholder": "Min €",
+        "priceMaxPlaceholder": "Max €"
+      },
+      "milestone": "{count} products and counting",
+      "slowLoad": "Still loading — the catalog is large. Thanks for waiting.",
+      "loadingShort": "Loading…",
+      "loadingMore": "Loading more…"
     },
     "offDetails": {
       "title": "Product Details",
@@ -1010,6 +1142,9 @@
       "dataQuality": "Data Quality",
       "percentComplete": "{percent}% complete",
       "dataQualityNote": "Based on Open Food Facts data completeness score",
+      "ecoScoreBadge": "Eco-Score {grade}",
+      "allergensCallout": "Allergens on the label: <strong>{allergens}</strong>",
+      "nutrientLevelRow": "{label} ({level})",
       "nutrition": {
         "per100g": "Per 100g",
         "amount": "Amount",
@@ -1022,7 +1157,8 @@
         "proteins": "Proteins",
         "salt": "Salt",
         "energyKj": "Energy (kJ)",
-        "servingSize": "Serving size: {size}"
+        "servingSize": "Serving size: {size}",
+        "kjAmount": "{value} kJ"
       },
       "levels": {
         "low": "low",
@@ -1032,7 +1168,8 @@
     },
     "offCard": {
       "categories": "Categories",
-      "externalNote": "This product was found externally but is not currently tracked in our stores."
+      "externalNote": "This product was found externally but is not currently tracked in our stores.",
+      "openFoodFacts": "Open Food Facts"
     },
     "offActions": {
       "shareText": "Check out {name} on Price Lens",
@@ -1050,6 +1187,8 @@
       "breadcrumbProducts": "Products",
       "breadcrumbScan": "Barcode scan",
       "perServing": "{size} per serving",
+      "novaGroupBadge": "NOVA {group}",
+      "novaGroupSuffix": "· {label}",
       "novaLabels": {
         "unprocessed": "Unprocessed",
         "processedIngredients": "Processed ingredients",
@@ -1102,7 +1241,9 @@
       }
     },
     "comparisonChart": {
-      "noPriceHistory": "No price history available"
+      "noPriceHistory": "No price history available",
+      "tooltipNamePrefix": "{name}",
+      "legendSince": "since {date}"
     },
     "offBrand": {
       "moreFrom": "More from {brand} on Open Food Facts",
@@ -1133,6 +1274,7 @@
       "updatedSuffix": " · updated {date}",
       "infoOnlyShort": "Informative only. Not advice.",
       "infoOnlyLong": "Informative only. Not financial advice.",
+      "devSmartScore": "dev: price_drop_smart_score = {value}",
       "leads": {
         "collecting": "We're still collecting prices here",
         "steady": "Mostly steady lately",
@@ -1270,6 +1412,12 @@
       "label": "Priority {value}",
       "noPriority": "No priority"
     },
+    "priorityUi": {
+      "untrackedBadge": "Untracked",
+      "priorityBadge": "P{priority}",
+      "periodInParens": "({period})",
+      "scoreAria": "Priority {label}: {description}"
+    },
     "card": {
       "favorite": {
         "add": "Add to favorites",
@@ -1281,6 +1429,7 @@
       "noBrand": "No brand",
       "untitled": "Untitled",
       "priceUnavailable": "Price unavailable",
+      "noBarcode": "No barcode",
       "hierarchy": {
         "title": "Hierarchy",
         "originalIn": "Original hierarchy in",
@@ -1360,7 +1509,8 @@
       "themeDark": "Dark Theme",
       "signOut": "Sign out",
       "signIn": "Sign in",
-      "openUserMenu": "Open user menu"
+      "openUserMenu": "Open user menu",
+      "githubProfile": "GitHub profile"
     },
     "welcomeToast": {
       "title": "Welcome back!",
@@ -1371,6 +1521,12 @@
       "installBody": "Add the app to your home screen for a faster experience.",
       "install": "Install",
       "dismiss": "Not now"
+    },
+    "badges": {
+      "earlyAccess": "Early access"
+    },
+    "favoritesLink": {
+      "ariaLabel": "Favorites"
     }
   },
   "pwa": {
@@ -1482,6 +1638,8 @@
     }
   },
   "search": {
+    "dialogTitle": "Search products",
+    "dialogDescription": "Type to find products across stores.",
     "placeholder": "What product are you looking for?",
     "clear": "Clear search",
     "searchFor": "Search for \"{query}\"",
