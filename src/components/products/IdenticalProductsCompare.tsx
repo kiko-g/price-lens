@@ -1,13 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useTranslations } from "next-intl"
 
 import type { StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
-import { generateProductPath, formatDiscountPercentWithMinus } from "@/lib/business/product"
-import { PRICE_MISSING_SHORT, PLUS_SIGN, formatEuroCompact, formatEuroPerMajorUnit } from "@/lib/i18n/formatting-glyphs"
+import { generateProductPath, discountValueToPercentage } from "@/lib/business/product"
 import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
 import { Badge } from "@/components/ui/badge"
@@ -16,12 +14,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-views"
 import { EmptyDescription } from "@/components/ui/empty"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
-import { IdenticalCompareSavingsHint } from "@/components/products/IdenticalCompareSavingsHint"
+import { LightRays } from "@/components/ui/magic/light-rays"
+import { floorCompareLightRaysPreset } from "@/components/products/product-page/deal-tier-light-rays"
 
-import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon } from "lucide-react"
+import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon } from "lucide-react"
 
 interface Props {
   currentProduct: StoreProduct
+}
+
+/** Normalize scraped unit strings (e.g. lt/Lt/l) for consistent display. */
+function formatMajorUnitSuffix(majorUnit: string): string {
+  const raw = majorUnit.trim().replace(/^\//, "")
+  const lower = raw.toLowerCase()
+  if (lower === "lt" || lower === "l") return "l"
+  return raw
 }
 
 function CompactStoreCard({
@@ -50,7 +57,6 @@ function CompactStoreCard({
     product.price !== null && product.price !== undefined
       ? t("priceLabel", { value: product.price.toFixed(2) })
       : t("priceUnknown")
-  const priceDiffBadge = priceDiff !== null && priceDiff > 0 ? PLUS_SIGN + formatEuroCompact(priceDiff) : null
 
   return (
     <Link
@@ -60,64 +66,51 @@ function CompactStoreCard({
         "group hover:border-foreground/20 dark:hover:border-foreground/30 relative min-h-15 w-full overflow-hidden rounded-lg border p-3 transition-all",
         showFloorHighlight && "isolate",
         showFloorHighlight &&
-          "border-primary/40 bg-primary/5 shadow-primary/30 dark:border-primary/40 dark:bg-primary/10 dark:shadow-primary/40",
+          "border-secondary/40 bg-secondary/5 shadow-secondary/30 dark:border-secondary/40 dark:bg-secondary/10 dark:shadow-secondary/40",
       )}
     >
-      <div className="relative z-1 flex w-full flex-row items-start gap-3 sm:gap-4">
-        <div className="flex shrink-0 items-start justify-start gap-2">
-          {product.image && (
-            <Image
-              src={product.image}
-              alt={product.name}
-              width={80}
-              height={80}
-              className="aspect-square size-12 rounded-md border object-cover"
-            />
-          )}
-          <div className="flex shrink-0 flex-col items-start gap-2 self-start">
-            <SupermarketChainBadge
-              originId={product.origin_id}
-              variant="logo"
-              className="h-6! w-auto! max-w-[108px]! rounded-sm bg-transparent object-contain object-left px-0 py-0 md:h-6! md:max-w-[108px]!"
-            />
+      {showFloorHighlight ? <LightRays {...floorCompareLightRaysPreset} /> : null}
 
-            {isCurrent && (
-              <Badge size="xs" variant="glass-primary" className="w-fit">
-                <MapPinIcon className="h-3 w-3" />
-                {t("thisPage")}
-              </Badge>
-            )}
-            {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
-              <Badge size="xs" variant="secondary" className="w-fit">
-                <TrophyIcon className="h-3 w-3" />
-                {t("cheapest")}
-              </Badge>
-            )}
-            {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
-              <Badge size="xs" variant="retail" className="w-fit">
-                <TrophyIcon className="h-3 w-3" />
-                {t("bestPrice")}
-              </Badge>
-            )}
-          </div>
+      <div className="relative z-1 flex w-full flex-row items-center gap-3 sm:gap-4">
+        <div className="flex shrink-0 flex-col items-start gap-2 self-start">
+          <SupermarketChainBadge
+            originId={product.origin_id}
+            variant="logo"
+            className="h-6! w-auto! max-w-[108px]! rounded-md bg-white object-contain object-left px-1 py-0.5 md:h-6! md:max-w-[108px]!"
+          />
+
+          {isCurrent && (
+            <Badge size="xs" variant="glass-primary" className="w-fit">
+              <MapPinIcon className="h-3 w-3" />
+              {t("thisPage")}
+            </Badge>
+          )}
+          {!isCurrent && atLowestPriceTier && hasUniqueCheapest && hasPriceSpread && (
+            <Badge size="xs" variant="secondary" className="w-fit">
+              <TrophyIcon className="h-3 w-3" />
+              {t("cheapest")}
+            </Badge>
+          )}
+          {!isCurrent && atLowestPriceTier && !hasUniqueCheapest && hasPriceSpread && (
+            <Badge size="xs" variant="retail" className="w-fit">
+              <TrophyIcon className="h-3 w-3" />
+              {t("bestPrice")}
+            </Badge>
+          )}
         </div>
 
         <div className="flex w-full flex-1 shrink-0 flex-col items-end justify-end gap-2 text-right">
           {product.price !== null && product.price !== undefined ? (
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2">
               {duplicateChain && product.pack ? (
                 <p className="text-muted-foreground mt-1 line-clamp-2 text-xs leading-snug">{product.pack}</p>
               ) : null}
 
-              {hasDiscount && (
-                <Badge variant="retail-discount" size="xs" className="text-2xs w-fit px-1 py-px leading-none">
-                  {formatDiscountPercentWithMinus(product.discount!)}
-                </Badge>
-              )}
-
-              <span className="text-muted-foreground text-sm tabular-nums line-through">
-                {product.price_recommended != null ? formatEuroCompact(product.price_recommended) : null}
-              </span>
+              {hasDiscount && product.price_recommended != null ? (
+                <span className="text-muted-foreground text-sm tabular-nums line-through">
+                  {product.price_recommended.toFixed(2)}€
+                </span>
+              ) : null}
 
               <span
                 className={cn(
@@ -126,23 +119,29 @@ function CompactStoreCard({
                   !showFloorHighlight && "text-foreground",
                 )}
               >
-                {formatEuroCompact(product.price)}
+                {product.price.toFixed(2)}€
               </span>
             </div>
           ) : (
-            <span className="text-muted-foreground text-base font-bold">{PRICE_MISSING_SHORT}</span>
+            <span className="text-muted-foreground text-base font-bold">--€</span>
           )}
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
-            {product.price_per_major_unit && product.major_unit && (
-              <Badge variant="price-per-unit" size="xs" className="tabular-nums">
-                {formatEuroPerMajorUnit(product.price_per_major_unit, product.major_unit)}
+            {hasDiscount && (
+              <Badge variant="destructive" size="xs" className="shrink-0">
+                −{discountValueToPercentage(product.discount!)}
               </Badge>
             )}
 
-            {priceDiffBadge != null && (
+            {product.price_per_major_unit && product.major_unit && (
+              <Badge variant="price-per-unit" size="xs" className="tabular-nums">
+                {product.price_per_major_unit}€/{formatMajorUnitSuffix(product.major_unit)}
+              </Badge>
+            )}
+
+            {priceDiff !== null && priceDiff > 0 && (
               <Badge variant="boring" size="xs" className="tabular-nums">
-                {priceDiffBadge}
+                +{priceDiff.toFixed(2)}€
               </Badge>
             )}
           </div>
@@ -167,7 +166,7 @@ function LoadingSkeleton() {
 
       {/* Savings hint */}
       <div className="mb-3">
-        <Skeleton className="h-12 w-full rounded-lg" />
+        <Skeleton className="h-4 w-64" />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -314,16 +313,46 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         )}
       </div>
 
-      <IdenticalCompareSavingsHint
-        className="mb-3"
-        currentPrice={currentProduct.price ?? null}
-        cheapestPrice={cheapestPrice}
-        highestPrice={highestPrice}
-        hasPriceSpread={hasPriceSpread}
-        hasUniqueCheapest={hasUniqueCheapest}
-      />
+      {/* Savings hint */}
+      {cheapestPrice !== null &&
+      currentProduct.price !== null &&
+      hasPriceSpread &&
+      currentProduct.price > cheapestPrice ? (
+        <p className="text-muted-foreground mb-3 text-sm">
+          <ZapIcon className="text-primary mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
+          {t.rich("savingsBySwitching", {
+            amount: (currentProduct.price - cheapestPrice).toFixed(2),
+            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+          })}
+        </p>
+      ) : cheapestPrice !== null &&
+        currentProduct.price !== null &&
+        hasPriceSpread &&
+        currentProduct.price === cheapestPrice &&
+        hasUniqueCheapest ? (
+        <p className="text-muted-foreground mb-3">
+          <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
+          {t.rich("alreadyCheapest", {
+            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+          })}
+        </p>
+      ) : cheapestPrice !== null &&
+        currentProduct.price !== null &&
+        hasPriceSpread &&
+        currentProduct.price === cheapestPrice &&
+        !hasUniqueCheapest ? (
+        <p className="text-muted-foreground mb-3">
+          <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
+          {t("tiedCheapest", {
+            cheapest: cheapestPrice.toFixed(2),
+            highest: highestPrice?.toFixed(2) ?? "",
+          })}
+        </p>
+      ) : (
+        <p className="text-muted-foreground mb-3">{t("allSamePrice")}</p>
+      )}
 
-      <div className="flex flex-col gap-2 lg:flex-row lg:gap-3">
+      <div className="flex flex-col gap-2 md:flex-row md:gap-3">
         {sortedProducts.map((product) => {
           const atLowestPriceTier = cheapestPrice !== null && product.price === cheapestPrice
           const isCurrent = product.id === currentProduct.id

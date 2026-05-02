@@ -258,13 +258,17 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
       {/* Mobile hero (hidden at md+) */}
       <ProductHeroMobile sp={sp} />
 
+      <div className="mt-4 md:hidden">
+        <IdenticalProductsCompare currentProduct={sp} />
+      </div>
+
       <div className="mt-4 flex flex-col gap-3 md:hidden">
         <ProductPageDealSummary sp={sp} />
       </div>
 
       <ProductPriceStatsCallout sp={sp} placement="mobile" className="mt-4 px-0 md:hidden" />
 
-      {/* Mobile: price history accordion (compact when collapsed) before the full compare list */}
+      {/* Mobile: price history accordion (compact when collapsed) after compare and deal context */}
       <div className="mt-5 md:hidden">
         <ChartSection
           sp={sp}
@@ -272,10 +276,6 @@ export function StoreProductPage({ sp }: { sp: StoreProduct }) {
           onRangeChange={handleRangeChange}
           onPriceHistoryHint={handlePriceHistoryHint}
         />
-      </div>
-
-      <div className="mt-6 md:hidden">
-        <IdenticalProductsCompare currentProduct={sp} />
       </div>
 
       <Separator className="mt-3 mb-3 h-0 md:mt-8 md:mb-4 md:h-px" />
