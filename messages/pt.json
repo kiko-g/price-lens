@@ -25,7 +25,9 @@
     "errorFlashlight": "A lanterna não está disponível neste dispositivo ou browser.",
     "errorVideoPlay": "Não foi possível reproduzir a câmara.",
     "errorNoBarcodeInImage": "Nenhum código encontrado na imagem. Tenta outra imagem.",
-    "errorImageLoad": "Falha ao carregar a imagem."
+    "errorImageLoad": "Falha ao carregar a imagem.",
+    "barcodeRead": "Código lido",
+    "loadingProduct": "A carregar o produto…"
   },
   "ui": {
     "share": {
@@ -215,8 +217,7 @@
     "unavailable": {
       "title": "Pesquisa indisponível",
       "body": "O código de barras <code>{barcode}</code> não está nas lojas que acompanhamos e a base de dados externa está temporariamente inacessível.",
-      "retry": "Tentar novamente",
-      "openFoodFacts": "Open Food Facts"
+      "retry": "Tentar novamente"
     },
     "notFound": {
       "title": "Produto não encontrado",
@@ -379,8 +380,7 @@
       "store": "Loja",
       "allStores": "Todas as lojas",
       "clear": "Limpar",
-      "active": "{count} ativos",
-      "originCountSelected": "({count})"
+      "active": "{count} ativos"
     },
     "summary": {
       "favorites": "<strong>{count}</strong> favoritos",
@@ -459,7 +459,6 @@
     },
     "sidebar": {
       "fallbackName": "Utilizador",
-      "statZero": "0",
       "favoritesLabel": "Favoritos",
       "listsLabel": "Listas",
       "alertsLabel": "Alertas",
@@ -501,7 +500,6 @@
     },
     "savingsTab": {
       "loadError": "Não foi possível carregar as estatísticas",
-      "achievementsProgress": "{unlocked}/{total}",
       "stats": {
         "savingsLabel": "Poupança est.",
         "savingsDescription": "de {count, plural, one {# descida de preço} other {# descidas de preço}}",
@@ -759,10 +757,7 @@
         "highest": "Taxa mais alta",
         "highestYear": "Atingida em {year}",
         "fedTarget": "Meta da Fed",
-        "fedTargetNote": "Objetivo de longo prazo cumprido em {met} de {total} anos",
-        "flagLineUSA": "🇺🇸 {pct}",
-        "flagLinePT": "🇵🇹 {pct}",
-        "flagLineEU": "🇪🇺 {pct}"
+        "fedTargetNote": "Objetivo de longo prazo cumprido em {met} de {total} anos"
       },
       "table": {
         "title": "Dados históricos de inflação",
@@ -771,10 +766,7 @@
         "year": "Ano",
         "context": "Contexto económico",
         "showMore": "Ver mais",
-        "showLess": "Ver menos",
-        "colPT": "🇵🇹 PT",
-        "colUSA": "🇺🇸 USA",
-        "colEURO": "🇪🇺 EURO"
+        "showLess": "Ver menos"
       },
       "convergence": {
         "title": "Convergência da inflação",
@@ -782,77 +774,7 @@
         "yLabel": "Taxa (%)"
       },
       "impactTitle": "Porque a inflação dos EUA atinge fortemente Portugal",
-      "impactSubtitle": "A pequena economia aberta de Portugal está estruturalmente exposta à política monetária dos EUA e aos fluxos de matérias-primas globais. Vê como os choques se propagam.",
-      "cumulative": {
-        "title": "Efeito acumulado",
-        "descriptionRich": "A inflação acumulada assusta. Eis como se traduz nos EUA, Portugal e Zona Euro. <strong>Com picos recentes muito fortes.</strong>",
-        "yAxisLabel": "Acumulado (%)"
-      },
-      "impactPortugal": {
-        "title": "Impacto em Portugal 🇵🇹",
-        "subtitle": "Os eventos globais influenciam fortemente a inflação em Portugal. O Price Lens procura sensibilizar e proteger os consumidores face a esses efeitos."
-      },
-      "impactFactors": {
-        "historicalExamples": "Exemplos históricos:",
-        "levels": { "critical": "Crítico", "high": "Elevado", "structural": "Estrutural" },
-        "energy": {
-          "title": "Dependência energética",
-          "description": "Portugal importa cerca de 75% da energia. Quando o petróleo e o gás disparam (dólar, geopolítica ou política da Fed), os custos energéticos sobem de imediato.",
-          "ex0": "2022: Crise do gás russo → +40% nos preços da energia",
-          "ex1": "2008: Especulação no petróleo → Inflação nos transportes",
-          "ex2": "2000s: Guerra no Iraque → Pressão prolongada nos preços"
-        },
-        "commodities": {
-          "title": "Matérias-primas em dólar",
-          "description": "Trigo, milho, soja e metais cotam em USD. Quando a Fed afrouxa ou imprime, os preços das matérias-primas sobem e isso chega ao supermercado português.",
-          "ex0": "2021-2022: Liquidez da Fed → Inflação alimentar global",
-          "ex1": "2011: QE2 → Boom de especulação em commodities",
-          "ex2": "2008: Dólar fraco → Crise alimentar em Portugal"
-        },
-        "supplyChain": {
-          "title": "Integração nas cadeias de abastecimento",
-          "description": "O retalho português depende de cadeias globais. Custos laborais nos EUA, fretes da Ásia e ruturas na produção refletem-se nos preços com 3–6 meses de atraso.",
-          "ex0": "2021: Congestionamento nos portos dos EUA → Atrasos nas importações",
-          "ex1": "2022: Lockdowns na China → Ruturas em PT",
-          "ex2": "2018: Guerra comercial EUA-China → Eletrónica mais cara"
-        },
-        "ecb": {
-          "title": "BCE a seguir a Fed",
-          "description": "O Banco Central Europeu costuma seguir a Reserva Federal com 6–12 meses de defasagem. Subidas de juros nos EUA acabam por forçar o BCE e afetar crédito, habitação e empresas em Portugal.",
-          "ex0": "2022-2023: Subidas da Fed → BCE obrigado a acompanhar → Crédito à habitação em PT",
-          "ex1": "2008-2015: QE da Fed → QE do BCE → Inflação de ativos em PT",
-          "ex2": "1999-2007: Política frouxa da Fed → BCE acomodatício → Bolha imobiliária em PT"
-        }
-      },
-      "periodComparisons": {
-        "title": "Comparação de períodos económicos",
-        "subtitle": "Intervalos e eventos que marcaram a economia dos EUA e, por arrastamento, o mundo.",
-        "preCrisisTitle": "Pré-crise financeira (1999-2007)",
-        "postCrisisTitle": "Pós-crise financeira (2008-2019)",
-        "covidTitle": "Recessão COVID-19 (2020-2024)",
-        "average": "Média",
-        "range": "Intervalo",
-        "preCrisisNote": "Período relativamente estável com inflação moderada",
-        "postCrisisNote": "Maior volatilidade com mínimos extremos e máximos recentes",
-        "covidNote": "O PIB caiu ~3,5% com os confinamentos",
-        "notableTitle": "Eventos económicos notáveis",
-        "ev2001Title": "2001: Estoirar da bolha tecnológica e recessão",
-        "ev2001Body": "Queda das tecnológicas e os atentados de 11 de setembro levaram a uma recessão breve e incerteza.",
-        "ev2008Title": "2008: Mercado imobiliário dos EUA e recessão mundial",
-        "ev2008Body": "Incumprimentos em massa, crédito frouxo e colapso financeiro global.",
-        "ev2014Title": "2014-2015: Inflação quase nula",
-        "ev2014Body": "Queda do petróleo e desinflação global",
-        "ev2020Title": "2020: Recessão COVID-19",
-        "ev2020Body": "O PIB caiu ~3,5% com os confinamentos",
-        "ev2021Title": "2021: Onda de estímulos fiscais",
-        "ev2021Body": "American Rescue Plan de 1,9 biliões USD e leis seguintes impulsionaram o consumo",
-        "ev2022Title": "2022: Inflação máxima em 40 anos",
-        "ev2022Body": "8,0% por ruturas nas cadeias de abastecimento e choques energéticos"
-      },
-      "whatNext": {
-        "title": "O que podemos fazer?",
-        "body": "Enquanto consumidores, podemos pelo menos estar atentos às flutuações de preços e ser mais cuidadosos com o orçamento. O Price Lens existe para ajudar a perceber preços para além do que as prateleiras mostram, decidir melhor, poupar dinheiro e compreender o contexto económico em que vivemos."
-      }
+      "impactSubtitle": "A pequena economia aberta de Portugal está estruturalmente exposta à política monetária dos EUA e aos fluxos de matérias-primas globais. Vê como os choques se propagam."
     },
     "savePotential": {
       "badge": "Calculadora de compras inteligentes",
@@ -1063,37 +985,7 @@
         "source": "Origem",
         "clear": "Limpar",
         "apply": "Aplicar",
-        "active": "{count} ativos",
-        "originCountSelected": "({count})",
-        "categoryOneSelected": "(1)",
-        "brandPlaceholder": "ex.: Kinder, Nestlé (separados por vírgula)",
-        "brandInputAria": "Filtrar por marcas",
-        "brandHint": "Nomes exatos das marcas na loja; separa várias por vírgulas.",
-        "categoriesHeading": "Categorias",
-        "dev": {
-          "insiders": "Insiders",
-          "options": "Opções",
-          "orderByPriority": "Ordenar por prioridade",
-          "onlyAvailable": "Só disponíveis",
-          "onlyDiscounted": "Só em desconto",
-          "priority": "Prioridade",
-          "prioritySource": "Origem da prioridade",
-          "sourceAi": "IA",
-          "sourceManual": "Manual"
-        }
-      },
-      "statusBar": {
-        "withTotalRich": "A mostrar <s>{range}</s> de <s>{total}</s> resultados",
-        "rangeOnlyRich": "A mostrar <s>{range}</s> resultados"
-      },
-      "slowLoad": "Isto está a demorar mais que o habitual. Aguenta…",
-      "loadingShort": "A carregar...",
-      "loadingMore": "A carregar mais...",
-      "mobileStatus": {
-        "withTotalRich": "A mostrar <s>{loaded}</s> de <s>{total}</s> produtos",
-        "loadedOnlyRich": "A mostrar <s>{loaded}</s> produtos <m>· desliza para mais</m>",
-        "allLoadedRich": "A mostrar todos os <s>{total}</s> produtos que correspondem aos filtros",
-        "matchRich": "<s>{loaded}</s> produtos correspondem aos filtros"
+        "active": "{count} ativos"
       },
       "pagination": {
         "showing": "A mostrar <strong>{from}-{to}</strong> de <strong>{total}</strong>",
@@ -1101,28 +993,7 @@
         "prev": "Anterior",
         "next": "Seguinte"
       },
-      "milestone": "{count} produtos e a crescer",
-      "mobile": {
-        "navSearchPlaceholder": "Pesquisar produtos...",
-        "navTitleWithTotal": "{loaded} de {total} produtos carregados",
-        "navTitleWithMore": "{loaded} produtos carregados, há mais disponíveis",
-        "navTitleLoaded": "{loaded} produtos carregados",
-        "goBackAria": "Voltar",
-        "filtersAndSortTitle": "Filtros e ordenação",
-        "storeMultiHint": "Várias lojas estão selecionadas. Escolhe uma cadeia abaixo ou Todas as lojas para pesquisar em todas.",
-        "storeFilterAria": "Filtro de loja",
-        "categorySearchPlaceholder": "Pesquisar categorias...",
-        "categorySelectedLabel": "Selecionado:",
-        "categoryEmptySearch": "Nenhuma categoria encontrada.",
-        "categoryAllIn": "Tudo em {name}",
-        "categoryAll": "Todas as categorias",
-        "categoryNoFilter": "Sem filtro de categoria",
-        "brandMobilePlaceholder": "ex.: Kinder, Nestlé",
-        "brandExactLabel": "Nomes exatos, separados por vírgula",
-        "breadcrumbSeparator": " > ",
-        "priceMinPlaceholder": "Mín",
-        "priceMaxPlaceholder": "Máx"
-      }
+      "milestone": "{count} produtos e a crescer"
     },
     "offDetails": {
       "title": "Detalhes do produto",
@@ -1133,9 +1004,6 @@
       "labels": "Rótulos",
       "ingredients": "Ingredientes",
       "allergens": "Alergénios",
-      "allergensCallout": "<strong>Alergénios</strong>: {allergens}",
-      "ecoScoreBadge": "Eco-Score {grade}",
-      "nutrientLevelRow": "{label}: {level}",
       "ingredientsLabel": "Rótulo de ingredientes",
       "packaging": "Embalagem",
       "dataQuality": "Qualidade dos dados",
@@ -1153,7 +1021,6 @@
         "proteins": "Proteínas",
         "salt": "Sal",
         "energyKj": "Energia (kJ)",
-        "kjAmount": "{value} kJ",
         "servingSize": "Dose: {size}"
       },
       "levels": {
@@ -1164,7 +1031,6 @@
     },
     "offCard": {
       "categories": "Categorias",
-      "openFoodFacts": "Open Food Facts",
       "externalNote": "Este produto foi encontrado externamente mas não é acompanhado nas nossas lojas."
     },
     "offActions": {
@@ -1189,9 +1055,7 @@
         "processed": "Processado",
         "ultraProcessed": "Ultra processado"
       },
-      "sparseData": "O Open Food Facts tem dados limitados para este produto. <link>Ajuda a melhorar</link>",
-      "novaGroupBadge": "NOVA {group}",
-      "novaGroupSuffix": "\u00B7 {label}"
+      "sparseData": "O Open Food Facts tem dados limitados para este produto. <link>Ajuda a melhorar</link>"
     },
     "pagination": {
       "previous": "Anterior",
@@ -1237,21 +1101,21 @@
       }
     },
     "comparisonChart": {
-      "noPriceHistory": "Sem histórico de preços disponível",
-      "tooltipNamePrefix": "{name}:",
-      "legendSince": "desde {date}"
-    },
-    "priorityUi": {
-      "untrackedBadge": "Produto não acompanhado",
-      "priorityBadge": "Prioridade {priority}",
-      "scoreAria": "Prioridade {label}: {description}",
-      "periodInParens": "({period})"
+      "noPriceHistory": "Sem histórico de preços disponível"
     },
     "offBrand": {
       "moreFrom": "Mais de {brand} no Open Food Facts",
       "seeMoreFrom": "Ver mais de {brand} no Open Food Facts",
       "loading": "A carregar…",
       "loadError": "Não foi possível carregar produtos. Tenta mais tarde."
+    },
+    "barcodeNav": {
+      "title": "A procurar o produto",
+      "subtitle": "A corresponder este código no nosso catálogo…",
+      "takingLong": "Isto está a demorar mais que o habitual — o Wi‑Fi na loja pode ser lento.",
+      "stillWaiting": "Ainda a processar. Podes pesquisar manualmente se preferires:",
+      "searchOurs": "Pesquisar nos nossos produtos",
+      "browseProducts": "Ver produtos"
     },
     "offLookup": {
       "notFoundCallout": "Este produto não foi encontrado nas lojas que acompanhamos, mas podemos tentar encontrá-lo noutro sítio",
@@ -1267,7 +1131,6 @@
       "updatedSuffix": " · atualizado {date}",
       "infoOnlyShort": "Apenas informativo. Não é aconselhamento.",
       "infoOnlyLong": "Apenas informativo. Não é aconselhamento financeiro.",
-      "devSmartScore": "price_drop_smart_score: {value}",
       "leads": {
         "collecting": "Ainda a recolher preços aqui",
         "steady": "Bastante estável ultimamente",
@@ -1328,7 +1191,7 @@
         "perUnit": "Por unidade",
         "lowest": "Mínimo"
       },
-      "lowShort": "Mín: {value}",
+      "lowShort": "Mín: {value}€",
       "storesAndListings": "{stores, plural, one {# loja} other {# lojas}} · {listings, plural, one {# listagem} other {# listagens}}",
       "barcodesCount": "{count, plural, one {# código} other {# códigos}}",
       "comparePricesTitle": "Comparar preços",
@@ -1429,17 +1292,10 @@
         "setPriority": "Definir prioridade",
         "clearPriority": "Limpar prioridade"
       },
-      "inspectData": "Inspecionar dados do produto",
-      "noBarcode": "Sem código de barras disponível"
+      "inspectData": "Inspecionar dados do produto"
     }
   },
   "layout": {
-    "badges": {
-      "earlyAccess": "Early Access"
-    },
-    "favoritesLink": {
-      "ariaLabel": "Os teus favoritos"
-    },
     "themeToggle": {
       "toggle": "Alternar tema",
       "switchTo": {
@@ -1495,7 +1351,6 @@
       "privacy": "Privacidade"
     },
     "userMenu": {
-      "githubProfile": "GitHub",
       "profile": "Perfil",
       "favorites": "Favoritos",
       "preferences": "Preferências",
@@ -1625,8 +1480,6 @@
     }
   },
   "search": {
-    "dialogTitle": "Pesquisar produtos",
-    "dialogDescription": "Pesquisar produtos de supermercado",
     "placeholder": "Que produto procuras?",
     "clear": "Limpar pesquisa",
     "searchFor": "Pesquisar \"{query}\"",

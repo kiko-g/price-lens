@@ -1,20 +1,21 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { BrowserMultiFormatReader } from "@zxing/browser"
 import { Slot } from "@radix-ui/react-slot"
 
+import { LAST_BARCODE_LOOKUP_STORAGE_KEY } from "@/lib/barcode-scan-storage"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
-import { CameraIcon, FlashlightIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
+import { CameraIcon, CheckCircle2Icon, FlashlightIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
 
-function navigateToCompare(router: ReturnType<typeof useRouter>, barcode: string) {
-  router.push(`/products/barcode/${encodeURIComponent(barcode)}`)
+function productBarcodePath(barcode: string) {
+  return `/products/barcode/${encodeURIComponent(barcode)}`
 }
 
 function isProductBarcode(value: string): boolean {
@@ -67,10 +68,12 @@ type BarcodeScanButtonProps = {
 
 export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange }: BarcodeScanButtonProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [internalOpen, setInternalOpen] = useState(false)
   const open = controlledOpen ?? internalOpen
   const [error, setError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [pendingLookup, setPendingLookup] = useState<{ code: string } | null>(null)
   const t = useTranslations("scan")
 
   const [isScanningCamera, setIsScanningCamera] = useState(false)
@@ -86,6 +89,8 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
   const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraAbortRef = useRef<AbortController | null>(null)
+  const navigationLockRef = useRef(false)
+  const pathBeforeNavRef = useRef<string | null>(null)
 
   const stopScanning = useCallback(() => {
     cameraAbortRef.current?.abort()
@@ -119,13 +124,61 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
     [controlledOpen, onOpenChange, stopScanning],
   )
 
+  const handleDialogOpenChange = useCallback(
+    (next: boolean) => {
+      if (!next) {
+        navigationLockRef.current = false
+        pathBeforeNavRef.current = null
+        setPendingLookup(null)
+      }
+      updateOpen(next)
+    },
+    [updateOpen],
+  )
+
+  const beginBarcodeLookup = useCallback(
+    (rawCode: string) => {
+      const code = rawCode.replace(/\D/g, "")
+      if (!isProductBarcode(code)) return
+      if (navigationLockRef.current) return
+      navigationLockRef.current = true
+
+      try {
+        sessionStorage.setItem(LAST_BARCODE_LOOKUP_STORAGE_KEY, code)
+      } catch {
+        /* ignore */
+      }
+
+      try {
+        navigator.vibrate?.(15)
+      } catch {
+        /* ignore */
+      }
+
+      stopScanning()
+      const target = productBarcodePath(code)
+
+      if (pathname === target) {
+        navigationLockRef.current = false
+        pathBeforeNavRef.current = null
+        updateOpen(false)
+        router.refresh()
+        return
+      }
+
+      pathBeforeNavRef.current = pathname
+      setPendingLookup({ code })
+      router.push(target)
+    },
+    [pathname, router, stopScanning, updateOpen],
+  )
+
   const handleScanSuccess = useCallback(
     (code: string) => {
       if (!isProductBarcode(code)) return
-      updateOpen(false)
-      navigateToCompare(router, code)
+      beginBarcodeLookup(code)
     },
-    [router, updateOpen],
+    [beginBarcodeLookup],
   )
 
   const handleManualSubmit = useCallback(
@@ -136,10 +189,9 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
         setError(t("errorInvalidBarcode"))
         return
       }
-      updateOpen(false)
-      navigateToCompare(router, digits)
+      beginBarcodeLookup(digits)
     },
-    [manualTextValue, router, updateOpen, t],
+    [manualTextValue, beginBarcodeLookup, t],
   )
 
   const handleOpenManualEntry = useCallback(() => {
@@ -254,6 +306,17 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
     }
   }, [isScanningCamera, handleScanSuccess, stopScanning, t])
 
+  useEffect(() => {
+    const before = pathBeforeNavRef.current
+    if (!pendingLookup || before === null) return
+    if (pathname !== before) {
+      navigationLockRef.current = false
+      pathBeforeNavRef.current = null
+      setPendingLookup(null)
+      updateOpen(false)
+    }
+  }, [pathname, pendingLookup, updateOpen])
+
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
@@ -273,8 +336,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
           const result = await codeReader.decodeFromImageUrl(imageUrl)
           const code = result?.getText()
           if (code && isProductBarcode(code)) {
-            updateOpen(false)
-            navigateToCompare(router, code)
+            beginBarcodeLookup(code)
           } else {
             setError(t("errorNoBarcodeInImage"))
           }
@@ -292,22 +354,22 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       }
       img.src = imageUrl
     },
-    [open, router, stopScanning, updateOpen, t],
+    [open, stopScanning, beginBarcodeLookup, t],
   )
 
   useEffect(() => {
-    if (open && !isScanningCamera) {
+    if (open && !isScanningCamera && !pendingLookup) {
       startScanning()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [open, pendingLookup])
 
   useEffect(() => {
     return () => stopScanning()
   }, [stopScanning])
 
-  const showViewfinder = open && (isStartingCamera || isScanningCamera)
-  const showFallbackControls = open && !isStartingCamera && !isScanningCamera
+  const showViewfinder = open && !pendingLookup && (isStartingCamera || isScanningCamera)
+  const showFallbackControls = open && !pendingLookup && !isStartingCamera && !isScanningCamera
 
   return (
     <>
@@ -326,7 +388,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
         {children}
       </Slot>
 
-      <Dialog open={open} onOpenChange={updateOpen}>
+      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
         <DialogContent
           overlayVisualViewportSync={open}
           className={cn(
@@ -339,18 +401,38 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
           )}
         >
           <DialogHeader>
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
+            <DialogTitle>{pendingLookup ? t("loadingProduct") : t("title")}</DialogTitle>
+            {!pendingLookup ? <DialogDescription>{t("description")}</DialogDescription> : null}
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
-            {error && (
+            {pendingLookup ? (
+              <div
+                className="flex flex-col items-center gap-4 py-3 text-center"
+                role="status"
+                aria-live="polite"
+              >
+                <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
+                  <CheckCircle2Icon className="text-primary h-8 w-8" aria-hidden />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium">{t("barcodeRead")}</p>
+                  <p className="font-mono text-sm font-medium tracking-tight">{pendingLookup.code}</p>
+                  <p className="text-muted-foreground mt-2 flex items-center justify-center gap-2 text-sm">
+                    <Loader2Icon className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                    {t("loadingProduct")}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            {!pendingLookup && error && (
               <p className="text-destructive text-sm" role="alert">
                 {error}
               </p>
             )}
 
-            {showViewfinder && (
+            {!pendingLookup && showViewfinder && (
               <div className="flex flex-col gap-3">
                 <div className="relative aspect-video overflow-hidden rounded-md bg-black">
                   {isScanningCamera ? (
@@ -408,7 +490,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
               </div>
             )}
 
-            {showFallbackControls && !manualTextOpen && (
+            {!pendingLookup && showFallbackControls && !manualTextOpen && (
               <div className="flex flex-col gap-3">
                 <Button
                   type="button"
@@ -447,7 +529,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
               </div>
             )}
 
-            {manualTextOpen && !showViewfinder && (
+            {!pendingLookup && manualTextOpen && !showViewfinder && (
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
@@ -478,16 +560,16 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
               </div>
             )}
 
-            <input
+            {!pendingLookup ? <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               className="sr-only"
               aria-hidden
               onChange={handleFileChange}
-            />
+            /> : null}
 
-            {manualTextOpen ? (
+            {!pendingLookup && manualTextOpen ? (
               <form onSubmit={handleManualSubmit} className="flex gap-2">
                 <Input
                   type="text"
@@ -504,7 +586,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
                   {t("go")}
                 </Button>
               </form>
-            ) : (
+            ) : !pendingLookup ? (
               <button
                 type="button"
                 className="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
@@ -512,7 +594,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
               >
                 {t("typeBarcodeManually")}
               </button>
-            )}
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>
