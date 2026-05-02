@@ -217,7 +217,8 @@
     "unavailable": {
       "title": "Lookup unavailable",
       "body": "Barcode <code>{barcode}</code> is not in our tracked stores, and the external database is temporarily unreachable.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "openFoodFacts": "Open Food Facts"
     },
     "notFound": {
       "title": "Product not found",
@@ -1112,6 +1113,7 @@
     "barcodeNav": {
       "title": "Looking up product",
       "subtitle": "Matching this barcode in our catalog…",
+      "lookingForProducts": "Looking for products with this barcode",
       "takingLong": "This is taking longer than usual — store Wi‑Fi can be slow.",
       "stillWaiting": "Still working. You can search manually if you prefer:",
       "searchOurs": "Search our products",

@@ -24,6 +24,7 @@ import { StoreProductCard } from "@/components/products/StoreProductCard"
 
 import { SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, StoreIcon } from "lucide-react"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
+import { BarcodeLookupSessionCleanup } from "@/components/products/BarcodeLookupSessionCleanup"
 import { OffLookupSkeleton } from "@/components/products/OffLookupSkeleton"
 
 interface PageProps {
@@ -91,14 +92,17 @@ export default async function ProductByBarcodePage({ params }: PageProps) {
     const productsWithPrices = await getProductsWithPrices(products)
 
     return (
-      <div className="flex w-full flex-col items-center justify-start p-4">
-        <BarcodeCompare
-          products={products}
-          productsWithPrices={productsWithPrices}
-          barcode={displayBarcode}
-          barcodes={barcodes}
-        />
-      </div>
+      <>
+        <BarcodeLookupSessionCleanup />
+        <div className="flex w-full flex-col items-center justify-start p-4">
+          <BarcodeCompare
+            products={products}
+            productsWithPrices={productsWithPrices}
+            barcode={displayBarcode}
+            barcodes={barcodes}
+          />
+        </div>
+      </>
     )
   }
 
@@ -117,11 +121,14 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
 
   if (offResult.status === "found") {
     return (
-      <OffProductPage product={offResult.product} barcode={barcode}>
-        <Suspense fallback={<RelatedProductsSkeleton />}>
-          <RelatedProductsSection product={offResult.product} />
-        </Suspense>
-      </OffProductPage>
+      <>
+        <BarcodeLookupSessionCleanup />
+        <OffProductPage product={offResult.product} barcode={barcode}>
+          <Suspense fallback={<RelatedProductsSkeleton />}>
+            <RelatedProductsSection product={offResult.product} />
+          </Suspense>
+        </OffProductPage>
+      </>
     )
   }
 
@@ -130,6 +137,54 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
     const t = await getTranslations("barcode.unavailable")
 
     return (
+      <>
+        <BarcodeLookupSessionCleanup />
+        <div className="flex w-full grow flex-col items-center justify-center">
+          <HeroGridPattern
+            withGradient
+            variant="grid"
+            className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
+          />
+
+          <div className="flex w-full flex-col items-center justify-center gap-5 px-4">
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <WifiOffIcon className="text-muted-foreground h-6 w-6" />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
+              <p className="text-muted-foreground max-w-sm text-center text-sm">
+                {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button asChild>
+                <a href={`/products/barcode/${encodeURIComponent(barcode)}`}>
+                  <RefreshCwIcon className="h-4 w-4" />
+                  {t("retry")}
+                </a>
+              </Button>
+              <Button asChild variant="outline">
+                <a
+                  href={`https://world.openfoodfacts.org/product/${barcode}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <OpenFoodFactsIcon className="h-4 w-4" />
+                  {t("openFoodFacts")}
+                  <ExternalLinkIcon className="h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const t = await getTranslations("barcode.notFound")
+  return (
+    <>
+      <BarcodeLookupSessionCleanup />
       <div className="flex w-full grow flex-col items-center justify-center">
         <HeroGridPattern
           withGradient
@@ -138,82 +193,44 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
         />
 
         <div className="flex w-full flex-col items-center justify-center gap-5 px-4">
-          <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-            <WifiOffIcon className="text-muted-foreground h-6 w-6" />
-          </div>
+          <Barcode value={barcode} height={50} width={2} />
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
             <p className="text-muted-foreground max-w-sm text-center text-sm">
               {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
             </p>
+
+            <p className="text-muted-foreground mt-1 max-w-sm text-center text-sm">
+              {t.rich("searchedOff", {
+                off: (chunks) => (
+                  <span className="inline-flex items-center gap-1 font-bold">
+                    <OpenFoodFactsIcon className="inline h-4 w-4" /> {chunks}
+                  </span>
+                ),
+              })}
+            </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button asChild>
-              <a href={`/products/barcode/${encodeURIComponent(barcode)}`}>
-                <RefreshCwIcon className="h-4 w-4" />
-                {t("retry")}
-              </a>
+              <Link href="/products" prefetch={false}>
+                <SearchIcon className="h-4 w-4" />
+                {t("searchOurs")}
+              </Link>
             </Button>
             <Button asChild variant="outline">
-              <a href={`https://world.openfoodfacts.org/product/${barcode}`} target="_blank" rel="noopener noreferrer">
-                <OpenFoodFactsIcon className="h-4 w-4" />
-                {t("openFoodFacts")}
-                <ExternalLinkIcon className="h-3 w-3" />
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLinkIcon className="h-4 w-4" />
+                {t("searchGoogle")}
               </a>
             </Button>
           </div>
         </div>
       </div>
-    )
-  }
-
-  const t = await getTranslations("barcode.notFound")
-  return (
-    <div className="flex w-full grow flex-col items-center justify-center">
-      <HeroGridPattern
-        withGradient
-        variant="grid"
-        className="mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.5),transparent_100%)] md:mask-[linear-gradient(to_bottom_right,rgba(255,255,255,0.8),transparent_60%)]"
-      />
-
-      <div className="flex w-full flex-col items-center justify-center gap-5 px-4">
-        <Barcode value={barcode} height={50} width={2} />
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
-          <p className="text-muted-foreground max-w-sm text-center text-sm">
-            {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
-          </p>
-
-          <p className="text-muted-foreground mt-1 max-w-sm text-center text-sm">
-            {t.rich("searchedOff", {
-              off: (chunks) => (
-                <span className="inline-flex items-center gap-1 font-bold">
-                  <OpenFoodFactsIcon className="inline h-4 w-4" /> {chunks}
-                </span>
-              ),
-            })}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button asChild>
-            <Link href="/products" prefetch={false}>
-              <SearchIcon className="h-4 w-4" />
-              {t("searchOurs")}
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <a
-              href={`https://www.google.com/search?q=${encodeURIComponent(barcode + " barcode product")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLinkIcon className="h-4 w-4" />
-              {t("searchGoogle")}
-            </a>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }
 

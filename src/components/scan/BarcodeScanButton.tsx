@@ -6,10 +6,11 @@ import { useTranslations } from "next-intl"
 import { BrowserMultiFormatReader } from "@zxing/browser"
 import { Slot } from "@radix-ui/react-slot"
 
-import { LAST_BARCODE_LOOKUP_STORAGE_KEY } from "@/lib/barcode-scan-storage"
+import { setLastBarcodeLookup } from "@/lib/barcode-scan-storage"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Barcode } from "@/components/ui/combo/barcode"
 import { cn } from "@/lib/utils"
 
 import { CameraIcon, CheckCircle2Icon, FlashlightIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react"
@@ -75,6 +76,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
   const [isProcessing, setIsProcessing] = useState(false)
   const [pendingLookup, setPendingLookup] = useState<{ code: string } | null>(null)
   const t = useTranslations("scan")
+  const tBarcode = useTranslations("products.barcodeNav")
 
   const [isScanningCamera, setIsScanningCamera] = useState(false)
   const [isStartingCamera, setIsStartingCamera] = useState(false)
@@ -143,11 +145,7 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
       if (navigationLockRef.current) return
       navigationLockRef.current = true
 
-      try {
-        sessionStorage.setItem(LAST_BARCODE_LOOKUP_STORAGE_KEY, code)
-      } catch {
-        /* ignore */
-      }
+      setLastBarcodeLookup(code)
 
       try {
         navigator.vibrate?.(15)
@@ -309,12 +307,24 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
   useEffect(() => {
     const before = pathBeforeNavRef.current
     if (!pendingLookup || before === null) return
-    if (pathname !== before) {
+    if (pathname === before) return
+
+    const onBarcodeInterstitial = pathname.startsWith("/products/barcode/")
+
+    const finish = () => {
       navigationLockRef.current = false
       pathBeforeNavRef.current = null
       setPendingLookup(null)
       updateOpen(false)
     }
+
+    if (!onBarcodeInterstitial) {
+      finish()
+      return
+    }
+
+    const id = window.setTimeout(finish, 700)
+    return () => clearTimeout(id)
   }, [pathname, pendingLookup, updateOpen])
 
   const handleFileChange = useCallback(
@@ -407,18 +417,22 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
 
           <div className="flex flex-col gap-4">
             {pendingLookup ? (
-              <div
-                className="flex flex-col items-center gap-4 py-3 text-center"
-                role="status"
-                aria-live="polite"
-              >
+              <div className="flex flex-col items-center gap-4 py-3 text-center" role="status" aria-live="polite">
                 <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
                   <CheckCircle2Icon className="text-primary h-8 w-8" aria-hidden />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col items-center gap-3">
                   <p className="font-medium">{t("barcodeRead")}</p>
-                  <p className="font-mono text-sm font-medium tracking-tight">{pendingLookup.code}</p>
-                  <p className="text-muted-foreground mt-2 flex items-center justify-center gap-2 text-sm">
+                  <p className="text-muted-foreground max-w-xs text-sm leading-snug">
+                    {tBarcode("lookingForProducts")}
+                  </p>
+                  <Barcode
+                    value={pendingLookup.code}
+                    height={30}
+                    width={1.7}
+                    className="rounded-md border bg-white p-2 shadow-sm dark:bg-white"
+                  />
+                  <p className="text-muted-foreground mt-1 flex items-center justify-center gap-2 text-sm">
                     <Loader2Icon className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                     {t("loadingProduct")}
                   </p>
@@ -560,14 +574,16 @@ export function BarcodeScanButton({ children, open: controlledOpen, onOpenChange
               </div>
             )}
 
-            {!pendingLookup ? <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              aria-hidden
-              onChange={handleFileChange}
-            /> : null}
+            {!pendingLookup ? (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                aria-hidden
+                onChange={handleFileChange}
+              />
+            ) : null}
 
             {!pendingLookup && manualTextOpen ? (
               <form onSubmit={handleManualSubmit} className="flex gap-2">

@@ -217,7 +217,8 @@
     "unavailable": {
       "title": "Pesquisa indisponível",
       "body": "O código de barras <code>{barcode}</code> não está nas lojas que acompanhamos e a base de dados externa está temporariamente inacessível.",
-      "retry": "Tentar novamente"
+      "retry": "Tentar novamente",
+      "openFoodFacts": "Open Food Facts"
     },
     "notFound": {
       "title": "Produto não encontrado",
@@ -1112,6 +1113,7 @@
     "barcodeNav": {
       "title": "A procurar o produto",
       "subtitle": "A corresponder este código no nosso catálogo…",
+      "lookingForProducts": "A procurar produtos com este código de barras",
       "takingLong": "Isto está a demorar mais que o habitual — o Wi‑Fi na loja pode ser lento.",
       "stillWaiting": "Ainda a processar. Podes pesquisar manualmente se preferires:",
       "searchOurs": "Pesquisar nos nossos produtos",

@@ -7,3 +7,5 @@ Sentry.init({
   // Error monitoring only — no tracing, no replay, no feedback
   tracesSampleRate: 0,
 })
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
