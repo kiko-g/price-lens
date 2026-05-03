@@ -168,10 +168,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               />
               {hasDiscount && sp.discount ? (
                 <Badge
-                  variant="retail-discount"
+                  variant="unit"
                   size="xs"
                   roundedness="sm"
-                  className="absolute top-1.5 left-1.5 z-10 w-fit px-1.5 py-px text-[11px] leading-none font-bold tracking-tight"
+                  className="absolute top-2 left-2 z-10 w-fit px-1.5 py-px text-[11px] leading-none font-bold tracking-tight"
                 >
                   {formatDiscountPercentWithMinus(sp.discount, DISCOUNT_DECIMAL_PLACES)}
                 </Badge>
@@ -181,10 +181,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             <div className="relative aspect-8/7 w-full bg-zinc-100 dark:bg-zinc-800">
               {hasDiscount && sp.discount ? (
                 <Badge
-                  variant="retail-discount"
+                  variant="unit"
                   size="xs"
                   roundedness="sm"
-                  className="absolute top-1.5 left-1.5 z-10 w-fit px-1.5 py-px text-[11px] leading-none font-bold tracking-tight"
+                  className="absolute top-2 left-2 z-10 w-fit px-1.5 py-px text-[11px] leading-none font-bold tracking-tight"
                 >
                   {formatDiscountPercentWithMinus(sp.discount, DISCOUNT_DECIMAL_PLACES)}
                 </Badge>
@@ -193,7 +193,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
           )}
         </Link>
 
-        <div className="absolute top-1.5 right-1.5 flex flex-col items-end gap-1">
+        <div className="absolute top-1.5 right-1.5 z-10 flex flex-col items-end gap-1">
           {isError ? (
             <Badge variant="destructive" size="sm" roundedness="sm">
               <TriangleAlertIcon />
@@ -396,11 +396,9 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             {isPriceMissingWithReference ? (
               <div className="flex min-w-0 flex-col items-start gap-[3px]">
                 <span className="text-muted-foreground text-sm leading-tight font-medium">{t("priceUnavailable")}</span>
-                {hasUnitPrice ? (
-                  <span className="text-sm leading-tight font-semibold text-zinc-700 dark:text-zinc-200">
-                    {formatEuroPerMajorUnit(sp.price_per_major_unit!, sp.major_unit!)}
-                  </span>
-                ) : null}
+                <UnitPriceFootnote
+                  unitFormatted={hasUnitPrice ? formatEuroPerMajorUnit(sp.price_per_major_unit!, sp.major_unit!) : null}
+                />
                 <div className="empty:hidden">
                   <PriceChangeBadge pct={sp.price_change_pct} />
                 </div>
@@ -611,9 +609,14 @@ const PRICE_CHANGE_THRESHOLD = 0.01
 function UnitPriceFootnote({ unitFormatted }: { unitFormatted: string | null }) {
   if (!unitFormatted) return null
   return (
-    <span className="text-muted-foreground text-[11px] leading-none font-medium lowercase tabular-nums">
+    <Badge
+      variant="price-per-unit"
+      size="2xs"
+      roundedness="sm"
+      className="w-fit leading-none font-medium lowercase tabular-nums"
+    >
       {unitFormatted}
-    </span>
+    </Badge>
   )
 }
 

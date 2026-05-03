@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useTranslations } from "next-intl"
 
 import type { StoreProduct } from "@/types"
 import { cn } from "@/lib/utils"
+import { imagePlaceholder } from "@/lib/business/data"
 import { generateProductPath, discountValueToPercentage } from "@/lib/business/product"
 import { useIdenticalStoreProducts } from "@/hooks/useProducts"
 
@@ -29,6 +31,21 @@ function formatMajorUnitSuffix(majorUnit: string): string {
   const lower = raw.toLowerCase()
   if (lower === "lt" || lower === "l") return "l"
   return raw
+}
+
+/** CDN-friendly thumbnail for compare rows (64px layout, 2× src for sharpness). */
+function resolveCompareThumbUrl(image: string, pixelSize = 128) {
+  try {
+    const url = new URL(image)
+    const p = url.searchParams
+    for (const k of ["sm", "w", "h", "sw", "sh"]) p.delete(k)
+    p.set("sw", String(pixelSize))
+    p.set("sh", String(pixelSize))
+    p.set("sm", "fit")
+    return url.toString()
+  } catch {
+    return image
+  }
 }
 
 function CompactStoreCard({
@@ -71,8 +88,23 @@ function CompactStoreCard({
     >
       {showFloorHighlight ? <LightRays {...floorCompareLightRaysPreset} /> : null}
 
-      <div className="relative z-1 flex w-full flex-row items-center gap-3 sm:gap-4">
-        <div className="flex shrink-0 flex-col items-start gap-2 self-start">
+      <div className="relative z-1 flex w-full flex-row items-center gap-2.5 sm:gap-3 md:gap-4">
+        {product.image ? (
+          <div className="border-border relative size-16 shrink-0 overflow-hidden rounded-md border bg-white">
+            <Image
+              src={resolveCompareThumbUrl(product.image)}
+              alt={product.name ?? ""}
+              fill
+              className="object-contain p-0.5"
+              sizes="64px"
+              unoptimized
+              placeholder="blur"
+              blurDataURL={imagePlaceholder.productBlur}
+            />
+          </div>
+        ) : null}
+
+        <div className="flex min-w-0 shrink flex-col items-start gap-2 self-start">
           <SupermarketChainBadge
             originId={product.origin_id}
             variant="logo"
@@ -99,7 +131,7 @@ function CompactStoreCard({
           )}
         </div>
 
-        <div className="flex w-full flex-1 shrink-0 flex-col items-end justify-end gap-2 text-right">
+        <div className="flex w-full min-w-0 flex-1 flex-col items-end justify-end gap-2 text-right">
           {product.price !== null && product.price !== undefined ? (
             <div className="flex items-center justify-end gap-2">
               {duplicateChain && product.pack ? (
@@ -128,7 +160,7 @@ function CompactStoreCard({
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             {hasDiscount && (
-              <Badge variant="destructive" size="xs" className="shrink-0">
+              <Badge variant="discount" size="xs" className="shrink-0">
                 −{discountValueToPercentage(product.discount!)}
               </Badge>
             )}
@@ -171,9 +203,12 @@ function LoadingSkeleton() {
 
       <div className="flex flex-col gap-2">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex min-h-15 flex-row items-center gap-3 rounded-lg border p-3">
-            <Skeleton className="h-11 w-18 shrink-0 rounded-full" />
-            <Skeleton className="h-4 flex-1 rounded" />
+          <div key={i} className="flex min-h-15 flex-row items-center gap-2.5 rounded-lg border p-3 sm:gap-3">
+            <Skeleton className="size-16 shrink-0 rounded-md" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Skeleton className="h-6 w-24 rounded-md" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
               <Skeleton className="h-6 w-16 rounded" />
               <Skeleton className="h-4 w-20 rounded-full" />

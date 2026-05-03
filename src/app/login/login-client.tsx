@@ -201,7 +201,7 @@ export function LoginClient({ stats }: { stats: HomeStats }) {
                     {t("valueVisual.mockPriceCurrent")}
                   </span>
                   <span className="text-muted-foreground text-xs line-through">{t("valueVisual.mockPriceWas")}</span>
-                  <Badge variant="destructive" size="2xs" roundedness="sm" className="tabular-nums">
+                  <Badge variant="discount" size="2xs" roundedness="sm" className="tabular-nums">
                     {t("valueVisual.mockDiscountBadge")}
                   </Badge>
                 </div>

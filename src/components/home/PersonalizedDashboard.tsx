@@ -14,6 +14,7 @@ import { isLocale, type Locale } from "@/i18n/config"
 import { formatPrice } from "@/lib/i18n/format"
 import { EM_DASH } from "@/lib/i18n/punctuation"
 
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
@@ -471,8 +472,15 @@ function MiniProductCard({ product }: { product: FavoriteItem | RecentlyViewedIt
 
         {/* Discount badge: overlaid on image */}
         {hasDiscount && (
-          <div className="bg-primary text-primary-foreground absolute top-1.5 left-1.5 rounded px-1 py-0.5 text-[10px] leading-none font-bold">
-            {formatDiscountPercentWithMinus(discount!, 0)}
+          <div className="absolute top-1.5 left-1.5 z-10">
+            <Badge
+              variant="discount"
+              size="2xs"
+              roundedness="sm"
+              className="text-[10px] leading-none font-bold tracking-tight"
+            >
+              {formatDiscountPercentWithMinus(discount!, 0)}
+            </Badge>
           </div>
         )}
       </div>
@@ -520,9 +528,9 @@ function MiniProductCardPricePerUnit({
   const prefix = `${formatPrice(pricePerUnit, locale)}/`
 
   return (
-    <p className="text-2xs text-muted-foreground tabular-nums">
+    <Badge variant="price-per-unit" size="2xs" roundedness="sm" className="w-fit leading-none font-medium tabular-nums">
       {prefix}
       <span className="lowercase">{formattedMajorUnit}</span>
-    </p>
+    </Badge>
   )
 }

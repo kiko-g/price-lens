@@ -9,6 +9,7 @@ import { imagePlaceholder } from "@/lib/business/data"
 import { formatDiscountPercentWithMinus, formatPrice as formatPriceLocaleAware } from "@/lib/business/product"
 import { isLocale } from "@/i18n/config"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
+import { Badge } from "@/components/ui/badge"
 import { Marquee } from "@/components/ui/marquee"
 import type { HeroProduct } from "@/lib/business/hero"
 
@@ -88,9 +89,14 @@ function ProductCard({ product, compact = false }: { product: HeroProduct; compa
 
         <div className="flex items-center gap-1.5">
           {hasDiscount && (
-            <span className="rounded bg-emerald-600 px-1 py-px text-[10px] leading-none font-bold text-white">
+            <Badge
+              variant="discount"
+              size="2xs"
+              roundedness="sm"
+              className="px-1 py-px text-[10px] leading-none font-bold"
+            >
               {formatDiscountPercentWithMinus(product.discount!, 0)}
-            </span>
+            </Badge>
           )}
           <SupermarketChainBadge
             originId={product.originId}

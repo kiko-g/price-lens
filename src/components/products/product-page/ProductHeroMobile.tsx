@@ -114,7 +114,7 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
           ) : null}
 
           {sp.discount ? (
-            <Badge variant="destructive" size="xs" roundedness="sm" className="w-fit">
+            <Badge variant="discount" size="xs" roundedness="sm" className="w-fit">
               {formatDiscountPercentWithMinus(sp.discount)}
             </Badge>
           ) : null}

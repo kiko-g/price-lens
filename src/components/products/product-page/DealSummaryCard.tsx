@@ -20,16 +20,7 @@ import { UNICODE_MINUS } from "@/lib/i18n/formatting-glyphs"
 import { Badge, BadgeKind } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
-import {
-  AlertCircleIcon,
-  BadgeCheckIcon,
-  BarChart2Icon,
-  BinocularsIcon,
-  CircleQuestionMarkIcon,
-  ClockIcon,
-  InfoIcon,
-  LucideIcon,
-} from "lucide-react"
+import { BinocularsIcon } from "lucide-react"
 
 export type CheaperElsewhereHint = {
   originId: number
@@ -125,51 +116,17 @@ export function DealSummaryCard({
 
   const tier: DealSummaryTier = deal?.tier ?? "middle"
 
-  const resolveDealMetadata = (tier: DealSummaryTier): { icon: LucideIcon; ring: string; badgeVariant: BadgeKind } => {
-    if (tier === "habitual")
-      return {
-        icon: BadgeCheckIcon,
-        ring: "bg-primary/15 text-primary",
-        badgeVariant: "glass-primary",
-      }
-    if (tier === "nascent")
-      return {
-        icon: ClockIcon,
-        ring: "bg-muted text-muted-foreground",
-        badgeVariant: "outline",
-      }
-    if (tier === "infrequent")
-      return {
-        icon: AlertCircleIcon,
-        ring: "bg-success/10 text-success",
-        badgeVariant: "success",
-      }
-    if (tier === "middle")
-      return {
-        icon: BarChart2Icon,
-        ring: "bg-foreground/15 text-foreground",
-        badgeVariant: "dark",
-      }
-    if (tier === "single")
-      return {
-        icon: InfoIcon,
-        ring: "bg-primary/15 text-primary",
-        badgeVariant: "glass-primary",
-      }
-    if (tier === "unknown")
-      return {
-        icon: CircleQuestionMarkIcon,
-        ring: "bg-muted text-muted-foreground",
-        badgeVariant: "boring",
-      }
-    return {
-      icon: BarChart2Icon,
-      ring: "bg-primary/15 text-primary",
-      badgeVariant: "glass-primary",
-    }
+  const resolveDealBadgeVariant = (tier: DealSummaryTier): BadgeKind => {
+    if (tier === "habitual") return "glass-primary"
+    if (tier === "nascent") return "outline"
+    if (tier === "infrequent") return "success"
+    if (tier === "middle") return "dark"
+    if (tier === "single") return "glass-primary"
+    if (tier === "unknown") return "boring"
+    return "glass-primary"
   }
 
-  const { icon: IconComponent, ring: IconComponentRingClass, badgeVariant } = resolveDealMetadata(tier)
+  const badgeVariant = resolveDealBadgeVariant(tier)
 
   return (
     <div
@@ -178,19 +135,9 @@ export function DealSummaryCard({
         className,
       )}
     >
-      <div className="relative z-1 flex flex-col gap-2 p-3 pt-2.5 pr-11 sm:gap-2.5 sm:p-4 sm:pt-3 sm:pr-14">
+      <div className="relative z-1 flex flex-col gap-2 p-3 pt-2.5 sm:gap-2.5 sm:p-4 sm:pt-3">
         {deal ? (
           <>
-            <div
-              className={cn(
-                "absolute top-2.5 right-2.5 z-10 sm:top-3 sm:right-3",
-                "flex size-8 items-center justify-center rounded-full ring-0 sm:size-9",
-                IconComponentRingClass,
-              )}
-            >
-              <IconComponent className="size-4 sm:size-5" aria-hidden />
-            </div>
-
             {deal.tierLabelKey ? (
               <Badge variant={badgeVariant} size="xs" className="w-fit font-semibold">
                 {

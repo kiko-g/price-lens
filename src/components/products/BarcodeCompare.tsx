@@ -198,7 +198,7 @@ function CompareCard({
                   {product.price_recommended != null ? formatPrice(Number(product.price_recommended), locale) : EM_DASH}
                 </span>
                 {product.discount && (
-                  <Badge variant="destructive" size="xs">
+                  <Badge variant="discount" size="xs">
                     <TagIcon className="h-2.5 w-2.5" />
                     {formatDiscountPercentWithMinus(product.discount)}
                   </Badge>
