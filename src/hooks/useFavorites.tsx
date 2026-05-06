@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { useUser } from "@/hooks/useUser"
@@ -281,7 +281,7 @@ export function useFavoritesInfiniteScroll(user: User | null, limit: number = 20
     staleTime: 1000 * 60 * 2,
   })
 
-  const favorites = infiniteQuery.data?.pages.flatMap((page) => page.data) ?? []
+  const favorites = useMemo(() => infiniteQuery.data?.pages.flatMap((page) => page.data) ?? [], [infiniteQuery.data])
   const total = infiniteQuery.data?.pages[0]?.pagination.total ?? 0
 
   const addMutation = useMutation({

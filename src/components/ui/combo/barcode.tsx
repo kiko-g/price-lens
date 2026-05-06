@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
 
 import { TriangleAlertIcon } from "lucide-react"
 
@@ -22,11 +23,12 @@ export function Barcode({
   showMissingValue = false,
   className,
 }: BarcodeProps) {
+  const t = useTranslations("common.ui")
   if (showMissingValue && !value) {
     return (
       <Badge size="sm" variant="boring" className={cn(className)}>
         <TriangleAlertIcon className="h-4 w-4" />
-        No barcode available
+        {t("noBarcodeAvailable")}
       </Badge>
     )
   }

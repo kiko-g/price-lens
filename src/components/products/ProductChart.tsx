@@ -52,6 +52,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ChartFreqMostCommonStrong, ChartFreqNotMostCommonStrong, PwaRichStrong } from "@/components/i18n/rich-tags"
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
@@ -944,13 +945,13 @@ function PriceTable({ className, scrollable = true }: PriceTableProps) {
         {sp.price === mostCommon?.price ? (
           <span className="min-w-0 wrap-break-word">
             {t.rich("isMostCommon", {
-              strong: (chunks) => <span className="text-success font-bold">{chunks}</span>,
+              strong: ChartFreqMostCommonStrong,
             })}
           </span>
         ) : (
           <span className="min-w-0 wrap-break-word">
             {t.rich("notMostCommon", {
-              strong: (chunks) => <span className="text-destructive font-bold">{chunks}</span>,
+              strong: ChartFreqNotMostCommonStrong,
             })}
           </span>
         )}
@@ -996,7 +997,7 @@ function NotTrackedDisplay({ className }: NotTrackedDisplayProps) {
       <p className="text-sm">
         {t.rich("body", {
           ago: formatDistanceToNow(sp.updated_at),
-          strong: (chunks) => <strong>{chunks}</strong>,
+          strong: PwaRichStrong,
         })}
       </p>
     </div>

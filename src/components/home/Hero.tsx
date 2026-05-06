@@ -13,6 +13,7 @@ import { ChainQuickFilters } from "@/components/home/ChainQuickFilters"
 import { StoreOverviewCards } from "@/components/home/StoreOverviewCards"
 import { FreshnessBadge } from "@/components/home/FreshnessBadge"
 import { PopularProducts } from "@/components/home/PopularProducts"
+import { HeroSubtitleStrongDesktop, HeroSubtitleStrongMobile, RichLineBreak } from "@/components/i18n/rich-tags"
 
 async function HeroContent() {
   const [stats, heroProducts, t] = await Promise.all([getHomeStats(), getHeroProducts(), getTranslations("home.hero")])
@@ -30,12 +31,12 @@ async function HeroContent() {
               "w-full max-w-full text-center text-3xl leading-[1.1] font-semibold tracking-tight opacity-0 [--animation-delay:100ms] sm:w-full sm:max-w-full sm:text-4xl",
             )}
           >
-            {t.rich("titleMobile", { br: () => <br /> })}
+            {t.rich("titleMobile", { br: RichLineBreak })}
           </h1>
 
           <p className="text-muted-foreground animate-fade-in my-2.5 text-center text-sm opacity-0 [--animation-delay:150ms]">
             {t.rich("subtitleMobile", {
-              strong: (c) => <strong className="text-foreground dark:text-foreground font-semibold">{c}</strong>,
+              strong: HeroSubtitleStrongMobile,
             })}
           </p>
 
@@ -87,8 +88,8 @@ async function HeroContent() {
 
             <p className="text-muted-foreground max-w-lg text-base text-balance">
               {t.rich("subtitleDesktop", {
-                br: () => <br />,
-                strong: (c) => <strong className="text-foreground dark:text-foreground font-bold">{c}</strong>,
+                br: RichLineBreak,
+                strong: HeroSubtitleStrongDesktop,
               })}
             </p>
 

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { InflationBasketEm } from "@/components/i18n/rich-tags"
 
 import { TrendingUpIcon, MicroscopeIcon, ShoppingBasketIcon } from "lucide-react"
 
@@ -21,7 +22,7 @@ export async function InflationBasketConcept() {
             </h2>
             <p className="text-muted-foreground mx-auto max-w-3xl md:text-xl/relaxed lg:text-base/relaxed xl:text-lg/relaxed">
               {t.rich("body", {
-                em: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+                em: InflationBasketEm,
               })}
             </p>
           </div>

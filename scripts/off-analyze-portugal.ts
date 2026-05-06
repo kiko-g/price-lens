@@ -78,7 +78,7 @@ async function main() {
   if (!res.ok || !res.body) throw new Error(`Download failed: HTTP ${res.status}`)
 
   const gunzip = createGunzip()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const readable = Readable.fromWeb(res.body as any)
   readable.pipe(gunzip)
   const rl = createInterface({ input: gunzip, crlfDelay: Infinity })

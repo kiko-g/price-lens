@@ -5,8 +5,7 @@ import { InfoIcon, SmilePlusIcon, ZapIcon } from "lucide-react"
 
 import { Callout } from "@/components/ui/callout"
 import { cn } from "@/lib/utils"
-
-const highlightClass = "text-primary font-semibold"
+import { IdenticalSavingsHintHighlight } from "@/components/i18n/rich-tags"
 
 type Props = {
   currentPrice: number | null
@@ -39,7 +38,7 @@ export function IdenticalCompareSavingsHint({
         <p className="text-sm leading-snug">
           {t.rich("savingsBySwitching", {
             amount: (currentPrice - cheapestPrice).toFixed(2),
-            highlight: (chunks) => <span className={highlightClass}>{chunks}</span>,
+            highlight: IdenticalSavingsHintHighlight,
           })}
         </p>
       </Callout>
@@ -57,7 +56,7 @@ export function IdenticalCompareSavingsHint({
       <Callout icon={SmilePlusIcon} variant="success" className={className}>
         <p className="text-foreground text-sm leading-snug">
           {t.rich("alreadyCheapest", {
-            highlight: (chunks) => <span className={highlightClass}>{chunks}</span>,
+            highlight: IdenticalSavingsHintHighlight,
           })}
         </p>
       </Callout>

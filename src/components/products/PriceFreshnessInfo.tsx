@@ -6,6 +6,7 @@ import { formatRelativeTime } from "@/lib/business/chart"
 import { PRIORITY_REFRESH_HOURS, formatHoursDuration } from "@/lib/business/priority"
 import { isLocale, type Locale } from "@/i18n/config"
 import { formatDateTime } from "@/lib/i18n/format"
+import { PwaRichStrong, RichSpanForegroundMedium } from "@/components/i18n/rich-tags"
 
 import { ResponsiveTooltip } from "@/components/ui/combo/responsive-tooltip"
 import { ClockIcon } from "lucide-react"
@@ -77,14 +78,14 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
               {t.rich("priorityDesktop", {
                 priority,
                 refresh: refreshLabel,
-                strong: (chunks) => <strong>{chunks}</strong>,
+                strong: PwaRichStrong,
               })}
             </p>
             <p className="text-muted-foreground text-sm leading-relaxed md:hidden">
               {t.rich("priorityMobile", {
                 priority,
                 refresh: refreshLabel,
-                strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                strong: RichSpanForegroundMedium,
               })}
             </p>
           </>
@@ -92,13 +93,11 @@ export function PriceFreshnessInfo({ updatedAt, priority, className }: PriceFres
 
         {(priority === null || priority < 2) && (
           <>
-            <p className="mt-1 hidden md:block">
-              {t.rich("addToTrackDesktop", { strong: (chunks) => <strong>{chunks}</strong> })}
-            </p>
+            <p className="mt-1 hidden md:block">{t.rich("addToTrackDesktop", { strong: PwaRichStrong })}</p>
             <div className="border-border/60 border-t pt-5 md:hidden">
               <p className="text-muted-foreground text-sm leading-relaxed">
                 {t.rich("addToTrackMobile", {
-                  strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                  strong: RichSpanForegroundMedium,
                 })}
               </p>
             </div>

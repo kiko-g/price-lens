@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -211,7 +212,16 @@ export function LinkBarcodeDialog({ canonicalId, canonicalName, onLinked }: Prop
                   <div className="flex flex-col gap-2">
                     {preview.storeProducts.map((sp) => (
                       <div key={sp.id} className="flex items-center gap-2">
-                        {sp.image && <img src={sp.image} alt="" className="size-10 shrink-0 rounded object-cover" />}
+                        {sp.image && (
+                          <Image
+                            src={sp.image}
+                            alt=""
+                            width={40}
+                            height={40}
+                            unoptimized
+                            className="size-10 shrink-0 rounded object-cover"
+                          />
+                        )}
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm">{sp.name}</p>
                           <div className="flex items-center gap-1.5">

@@ -99,6 +99,55 @@
     "languages": {
       "en": "English",
       "pt": "Português"
+    },
+    "a11y": {
+      "carouselPreviousSlide": "Previous slide",
+      "carouselNextSlide": "Next slide",
+      "paginationNavigation": "Pagination",
+      "goToPreviousPage": "Go to previous page",
+      "goToNextPage": "Go to next page",
+      "previousPage": "Previous",
+      "nextPage": "Next",
+      "morePages": "More pages",
+      "toggleSidebar": "Toggle Sidebar",
+      "sidebarTitle": "Sidebar",
+      "sidebarDescription": "Displays the mobile sidebar."
+    },
+    "nutriScore": {
+      "mark": "NUTRI-SCORE",
+      "newCalculation": "New calculation",
+      "ariaBadge": "Nutri-Score {grade}",
+      "ariaCallout": "{label}: {description}",
+      "grades": {
+        "A": {
+          "label": "Nutri-Score A",
+          "description": "Excellent nutritional quality"
+        },
+        "B": {
+          "label": "Nutri-Score B",
+          "description": "Good nutritional quality"
+        },
+        "C": {
+          "label": "Nutri-Score C",
+          "description": "Average nutritional quality"
+        },
+        "D": {
+          "label": "Nutri-Score D",
+          "description": "Poor nutritional quality"
+        },
+        "E": {
+          "label": "Nutri-Score E",
+          "description": "Lower nutritional quality"
+        }
+      }
+    },
+    "ui": {
+      "goBack": "Go back",
+      "noBarcodeAvailable": "No barcode available",
+      "devBadge": "DEV",
+      "tryAgain": "Try again",
+      "errorUnexpectedTitle": "Something went wrong",
+      "errorUnexpectedMessage": "An unexpected error occurred."
     }
   },
   "metadata": {
@@ -1365,6 +1414,11 @@
       "storesCount": "{count, plural, one {# store} other {# stores}}",
       "chainsCount": "{count, plural, one {# chain} other {# chains}}",
       "listingsCount": "{count, plural, one {# listing} other {# listings}}",
+      "amountEuro": "{value}€",
+      "priceDash": "--€",
+      "discountMinus": "−{value}",
+      "perMajorUnit": "{price}€/{unit}",
+      "diffMore": "+{value}€",
       "savingsBySwitching": "<highlight>Save {amount}€</highlight> by switching to the cheapest store",
       "alreadyCheapest": "<highlight>You're already on</highlight> the cheapest option.",
       "tiedCheapest": "You're viewing a listing at the lowest price ({cheapest}€). Other offers go up to {highest}€.",

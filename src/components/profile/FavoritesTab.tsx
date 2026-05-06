@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyStateView } from "@/components/ui/combo/state-views"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
+import { RichSpanForegroundMedium } from "@/components/i18n/rich-tags"
 
 import { ArrowRightIcon, HeartIcon, SearchIcon } from "lucide-react"
 
@@ -64,7 +65,7 @@ export function FavoritesTab() {
         <p className="text-muted-foreground text-sm">
           {t.rich("recent", {
             count: totalCount,
-            strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+            strong: RichSpanForegroundMedium,
           })}
         </p>
         <Button variant="link" size="sm" asChild className="gap-1 px-0">

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 
 import { Callout } from "@/components/ui/callout"
 import { Skeleton } from "@/components/ui/skeleton"
-import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
+import { OffLookupOffIconInline, RichMonoMedium } from "@/components/i18n/rich-tags"
 
 import { BrainIcon, Loader2Icon, SearchIcon } from "lucide-react"
 
@@ -37,8 +37,8 @@ export function OffLookupSkeleton({ barcode }: OffLookupSkeletonProps) {
           <p className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm">
             {t.rich("lookingUp", {
               barcode,
-              code: (chunks) => <span className="font-mono font-medium">{chunks}</span>,
-              icon: () => <OpenFoodFactsIcon className="inline h-4 w-4" />,
+              code: RichMonoMedium,
+              icon: OffLookupOffIconInline,
             })}
           </p>
         </div>

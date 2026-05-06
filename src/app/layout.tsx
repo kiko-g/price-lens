@@ -149,7 +149,11 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://www.pingodoce.pt" />
         {useReactScan && (
           <>
-            <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
+            <Script
+              src="https://unpkg.com/react-scan/dist/auto.global.js"
+              strategy="afterInteractive"
+              crossOrigin="anonymous"
+            />
             <Script src="https://unpkg.com/react-scan/dist/install-hook.global.js" strategy="beforeInteractive" />
             <Monitoring
               apiKey="6Hm7zTRByXQvcIe273l-uPC2VeXLbMV7"

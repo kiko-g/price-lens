@@ -99,6 +99,55 @@
     "languages": {
       "en": "English",
       "pt": "Português"
+    },
+    "a11y": {
+      "carouselPreviousSlide": "Diapositivo anterior",
+      "carouselNextSlide": "Diapositivo seguinte",
+      "paginationNavigation": "Paginação",
+      "goToPreviousPage": "Ir para a página anterior",
+      "goToNextPage": "Ir para a página seguinte",
+      "previousPage": "Anterior",
+      "nextPage": "Seguinte",
+      "morePages": "Mais páginas",
+      "toggleSidebar": "Alternar barra lateral",
+      "sidebarTitle": "Barra lateral",
+      "sidebarDescription": "Mostra a barra lateral no telemóvel."
+    },
+    "nutriScore": {
+      "mark": "NUTRI-SCORE",
+      "newCalculation": "Novo cálculo",
+      "ariaBadge": "Nutri-Score {grade}",
+      "ariaCallout": "{label}: {description}",
+      "grades": {
+        "A": {
+          "label": "Nutri-Score A",
+          "description": "Qualidade nutricional excelente"
+        },
+        "B": {
+          "label": "Nutri-Score B",
+          "description": "Boa qualidade nutricional"
+        },
+        "C": {
+          "label": "Nutri-Score C",
+          "description": "Qualidade nutricional média"
+        },
+        "D": {
+          "label": "Nutri-Score D",
+          "description": "Fraca qualidade nutricional"
+        },
+        "E": {
+          "label": "Nutri-Score E",
+          "description": "Menor qualidade nutricional"
+        }
+      }
+    },
+    "ui": {
+      "goBack": "Voltar",
+      "noBarcodeAvailable": "Sem código de barras",
+      "devBadge": "DEV",
+      "tryAgain": "Tentar novamente",
+      "errorUnexpectedTitle": "Ocorreu um erro",
+      "errorUnexpectedMessage": "Ocorreu um erro inesperado."
     }
   },
   "metadata": {
@@ -1365,6 +1414,11 @@
       "storesCount": "{count, plural, one {# loja} other {# lojas}}",
       "chainsCount": "{count, plural, one {# cadeia} other {# cadeias}}",
       "listingsCount": "{count, plural, one {# listagem} other {# listagens}}",
+      "amountEuro": "{value}€",
+      "priceDash": "--€",
+      "discountMinus": "−{value}",
+      "perMajorUnit": "{price}€/{unit}",
+      "diffMore": "+{value}€",
       "savingsBySwitching": "<highlight>Poupa {amount}€</highlight> a mudar para a loja mais barata",
       "alreadyCheapest": "<highlight>Já estás na</highlight> opção mais barata.",
       "tiedCheapest": "Estás a ver uma listagem ao preço mais baixo ({cheapest}€). As outras ofertas vão até {highest}€.",

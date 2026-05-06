@@ -30,6 +30,7 @@ import {
   FuelIcon,
 } from "lucide-react"
 import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts"
+import { RichStrongDestructive, RichStrongForegroundBold } from "@/components/i18n/rich-tags"
 
 interface InflationData {
   year: number
@@ -293,14 +294,14 @@ export function InflationTrends() {
                     usa: stats.usa.cumulative.toFixed(2),
                     pt: stats.pt.cumulative.toFixed(2),
                     eu: stats.eu.cumulative.toFixed(2),
-                    strong: (chunks) => <strong className="text-destructive">{chunks}</strong>,
+                    strong: RichStrongDestructive,
                   })}
                 </p>
 
                 <p className="mt-0 hidden md:block">
                   {t.rich("table.summary2", {
                     value: (100 * (1 + stats.usa.cumulative / 100)).toFixed(2),
-                    strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                    strong: RichStrongForegroundBold,
                   })}
                 </p>
               </CardDescription>
@@ -453,7 +454,7 @@ export function InflationTrends() {
                 </CardTitle>
                 <CardDescription className="text-sm">
                   {t.rich("cumulative.descriptionRich", {
-                    strong: (chunks) => <strong className="text-destructive">{chunks}</strong>,
+                    strong: RichStrongDestructive,
                   })}
                 </CardDescription>
               </CardHeader>

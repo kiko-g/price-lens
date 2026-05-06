@@ -20,6 +20,7 @@ import { Barcode } from "@/components/ui/combo/barcode"
 import { NutriScoreBadge } from "@/components/ui/combo/nutri-score"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { ComparisonChart } from "@/components/products/ComparisonChart"
+import { BarcodeCompareSaveHighlight } from "@/components/i18n/rich-tags"
 
 import { TrophyIcon, TagIcon, Loader2Icon, LinkIcon, TrendingDownIcon, ShieldCheckIcon } from "lucide-react"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
@@ -531,7 +532,7 @@ export function BarcodeCompare({ products, productsWithPrices, barcode, barcodes
             <p className="text-sm">
               {t.rich("saveUpTo", {
                 amount: savings.toFixed(2),
-                highlight: (chunks) => <span className="text-success font-semibold">{chunks}</span>,
+                highlight: BarcodeCompareSaveHighlight,
               })}
             </p>
           </div>

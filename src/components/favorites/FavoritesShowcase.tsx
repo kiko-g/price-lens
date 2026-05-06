@@ -40,6 +40,7 @@ import { ErrorStateView, EmptyStateView } from "@/components/ui/combo/state-view
 import { SearchContainer } from "@/components/layout/search"
 import { getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
+import { RichSpanForegroundSemibold, RichStrongForeground } from "@/components/i18n/rich-tags"
 
 import {
   ChevronLeftIcon,
@@ -329,7 +330,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
               <p className="text-muted-foreground text-xs">
                 {t.rich("summary.favorites", {
                   count: totalCount,
-                  strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                  strong: RichStrongForeground,
                 })}
                 {urlState.query && t("summary.matching", { query: urlState.query })}
                 {showOverlay && (
@@ -493,7 +494,7 @@ export function FavoritesShowcase({ limit = 24, children }: { limit?: number; ch
                   from: showingFrom,
                   to: showingTo,
                   total: totalCount,
-                  strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                  strong: RichSpanForegroundSemibold,
                 })}
               </span>
               {totalPages > 1 && (
@@ -1144,7 +1145,7 @@ function BottomPagination({
             from: showingFrom,
             to: showingTo,
             total: totalCount,
-            strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+            strong: RichSpanForegroundSemibold,
           })}
         </span>
       </div>

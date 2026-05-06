@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/i18n/format"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
+import { PwaRichStrong } from "@/components/i18n/rich-tags"
 
 import { HeartIcon, MailIcon, PackageSearchIcon } from "lucide-react"
 
@@ -98,7 +99,7 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
         <p className="text-muted-foreground mt-2 text-xs">
           {t.rich("memberSince", {
             date: memberSinceFormatted,
-            strong: (chunks) => <strong>{chunks}</strong>,
+            strong: PwaRichStrong,
           })}
         </p>
 
@@ -146,7 +147,7 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
               {t.rich("favoritesAndMember", {
                 count: t("favoritesShort", { count: favoritesCount }),
                 date: memberSinceFormatted,
-                strong: (chunks) => <strong>{chunks}</strong>,
+                strong: PwaRichStrong,
               })}
             </span>
           </div>

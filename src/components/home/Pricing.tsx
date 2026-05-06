@@ -7,6 +7,7 @@ import { isLocale } from "@/i18n/config"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { BorderBeam } from "@/components/ui/magic/border-beam"
+import { PricingFooterMailLink } from "@/components/i18n/rich-tags"
 
 const freeKeys = ["history14", "basket", "compare", "weeklyAlerts"] as const
 const plusKeys = [
@@ -114,14 +115,7 @@ export async function PricingSection() {
         <div className="mt-12 text-center">
           <p className="text-muted-foreground">
             {t.rich("footer", {
-              link: (chunks) => (
-                <Link
-                  href="mailto:kikojpgoncalves@gmail.com"
-                  className="text-secondary hover:text-secondary/80 underline underline-offset-4"
-                >
-                  {chunks}
-                </Link>
-              ),
+              link: PricingFooterMailLink,
             })}
           </p>
         </div>

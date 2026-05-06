@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +7,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 
 import { TrendingUpIcon } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { InflationContextAboutLink, RichStrongDestructive } from "@/components/i18n/rich-tags"
 
 const inflationData = [
   { year: 1999, rateUSA: 2.2, ratePT: 2.2, rateEU: 1.1 },
@@ -71,7 +71,7 @@ export function InflationContext() {
           <p className="text-muted-foreground max-w-3xl text-sm md:text-lg/relaxed">
             {t.rich("body", {
               value: latestPT.toFixed(0),
-              strong: (chunks) => <strong className="text-destructive">{chunks}</strong>,
+              strong: RichStrongDestructive,
             })}
           </p>
         </div>
@@ -131,11 +131,7 @@ export function InflationContext() {
 
         <p className="text-muted-foreground text-center text-xs md:text-sm">
           {t.rich("footer", {
-            link: (chunks) => (
-              <Link href="/about" className="text-primary hover:underline">
-                {chunks}
-              </Link>
-            ),
+            link: InflationContextAboutLink,
           })}
         </p>
       </div>

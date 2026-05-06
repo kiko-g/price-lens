@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { ArrowRight, MapPinIcon, PiggyBankIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
+import { SavingsSpotlightHighlight } from "@/components/i18n/rich-tags"
 
 const AVERAGE_SPEND = 2500
 const MAX_REALISTIC_SAVING_RATE = 0.2
@@ -38,7 +39,7 @@ export async function SavingsSpotlightWithFeatures() {
           <h2 className="text-xl font-bold tracking-tight text-balance sm:text-2xl md:text-3xl">
             {t.rich("spotlightTitle", {
               savings: YEARLY_SAVINGS,
-              highlight: (chunks) => <span className="text-primary">{chunks}</span>,
+              highlight: SavingsSpotlightHighlight,
             })}
           </h2>
 

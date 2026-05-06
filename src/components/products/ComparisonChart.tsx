@@ -1,9 +1,18 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useCallback, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, Legend } from "recharts"
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  Legend,
+  type LegendPayload,
+  type DefaultLegendContentProps,
+} from "recharts"
 
 import type { StoreProduct, Price } from "@/types"
 import { STORE_NAMES, STORE_COLORS, STORE_COLORS_SECONDARY, DateRange } from "@/types/business"
@@ -49,6 +58,57 @@ type MergedDataPoint = {
   [key: string]: number | string | null // Dynamic keys for each store's price
 }
 
+type ComparisonStoreKey = {
+  key: string
+  originId: number | null
+  name: string
+  color: string
+  dashPattern: string
+  index: number
+  dataPointCount: number
+  trackingSince: string | null
+}
+
+type ComparisonChartLegendT = (key: "legendSince", values: { date: string }) => string
+
+function ComparisonChartLegendBody({
+  payload,
+  storeKeys,
+  t,
+}: {
+  payload?: ReadonlyArray<LegendPayload>
+  storeKeys: ComparisonStoreKey[]
+  t: ComparisonChartLegendT
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-3">
+      {payload?.map((entry, index) => {
+        const storeKey = storeKeys.find((s) => s.key === entry.dataKey?.toString())
+        const trackingSinceText = storeKey?.trackingSince
+          ? t("legendSince", { date: formatTrackingSince(storeKey.trackingSince) })
+          : ""
+        return (
+          <div key={`legend-${index}`} className="flex items-center gap-1.5">
+            <svg width="20" height="10" className="shrink-0">
+              <line
+                x1="0"
+                y1="5"
+                x2="20"
+                y2="5"
+                stroke={entry.color}
+                strokeWidth={2.5}
+                strokeDasharray={storeKey?.dashPattern || "0"}
+              />
+            </svg>
+            {storeKey?.originId && <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />}
+            {trackingSinceText && <span className="text-muted-foreground text-[11px]">{trackingSinceText}</span>}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function getStoreColor(originId: number | null, index: number): string {
   if (originId && STORE_CHART_COLORS[originId]) {
     return STORE_CHART_COLORS[originId]
@@ -75,7 +135,11 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
   // Build chart data for each product and merge by date
   const { mergedData, chartBounds, storeKeys } = useMemo(() => {
     if (productsWithPrices.length === 0) {
-      return { mergedData: [], chartBounds: { floor: 0, ceiling: 1, ticks: [0, 1] }, storeKeys: [] }
+      return {
+        mergedData: [],
+        chartBounds: { floor: 0, ceiling: 1, ticks: [0, 1] },
+        storeKeys: [] as ComparisonStoreKey[],
+      }
     }
 
     // Build chart data for each product
@@ -88,16 +152,7 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
     const dateMap = new Map<string, MergedDataPoint>()
 
     // Generate store keys based on origin_id
-    const storeKeys: {
-      key: string
-      originId: number | null
-      name: string
-      color: string
-      dashPattern: string
-      index: number
-      dataPointCount: number
-      trackingSince: string | null
-    }[] = []
+    const storeKeys: ComparisonStoreKey[] = []
 
     allChartData.forEach(({ product, data }, index) => {
       const originId = product.origin_id
@@ -180,6 +235,40 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
     return config
   }, [storeKeys])
 
+  const tooltipLabelFormatter = useCallback((_: ReactNode, payload: unknown[]) => {
+    const item = payload[0] as { payload?: { rawDate?: string } } | undefined
+    const rawDate = item?.payload?.rawDate
+    if (!rawDate) return ""
+    return new Date(rawDate).toLocaleDateString("pt-PT", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+  }, [])
+
+  const tooltipFormatter = useCallback(
+    (value: unknown, name: unknown) => {
+      const storeKey = storeKeys.find((s) => s.key === name)
+      const displayName = storeKey?.name || String(name)
+      const valueStr = typeof value === "number" ? formatEuroLeading(value, 2) : EM_DASH
+      return (
+        <span className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: storeKey?.color || "var(--chart-1)" }} />
+          <span>{t("tooltipNamePrefix", { name: displayName })}</span>
+          <span className="font-semibold">{valueStr}</span>
+        </span>
+      )
+    },
+    [storeKeys, t],
+  )
+
+  const renderLegend = useCallback(
+    (props: DefaultLegendContentProps) => (
+      <ComparisonChartLegendBody payload={props.payload} storeKeys={storeKeys} t={t} />
+    ),
+    [storeKeys, t],
+  )
+
   if (mergedData.length === 0) {
     return (
       <div className={cn("bg-muted/20 flex h-[300px] items-center justify-center rounded-lg border", className)}>
@@ -216,68 +305,9 @@ export function ComparisonChart({ productsWithPrices, selectedRange, className }
           />
           <ChartTooltip
             cursor={{ strokeDasharray: "3 3" }}
-            content={
-              <ChartTooltipContent
-                labelFormatter={(_, payload) => {
-                  const rawDate = (payload[0] as { payload?: { rawDate?: string } })?.payload?.rawDate
-                  if (!rawDate) return ""
-                  return new Date(rawDate).toLocaleDateString("pt-PT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-                }}
-                formatter={(value, name) => {
-                  const storeKey = storeKeys.find((s) => s.key === name)
-                  const displayName = storeKey?.name || String(name)
-                  const valueStr = typeof value === "number" ? formatEuroLeading(value, 2) : EM_DASH
-                  return (
-                    <span className="flex items-center gap-2">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: storeKey?.color || "var(--chart-1)" }}
-                      />
-                      <span>{t("tooltipNamePrefix", { name: displayName })}</span>
-                      <span className="font-semibold">{valueStr}</span>
-                    </span>
-                  )
-                }}
-              />
-            }
+            content={<ChartTooltipContent labelFormatter={tooltipLabelFormatter} formatter={tooltipFormatter} />}
           />
-          <Legend
-            verticalAlign="bottom"
-            height={44}
-            content={({ payload }) => (
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-3">
-                {payload?.map((entry, index) => {
-                  const storeKey = storeKeys.find((s) => s.key === entry.dataKey)
-                  const trackingSinceText = storeKey?.trackingSince
-                    ? t("legendSince", { date: formatTrackingSince(storeKey.trackingSince) })
-                    : ""
-                  return (
-                    <div key={`legend-${index}`} className="flex items-center gap-1.5">
-                      <svg width="20" height="10" className="shrink-0">
-                        <line
-                          x1="0"
-                          y1="5"
-                          x2="20"
-                          y2="5"
-                          stroke={entry.color}
-                          strokeWidth={2.5}
-                          strokeDasharray={storeKey?.dashPattern || "0"}
-                        />
-                      </svg>
-                      {storeKey?.originId && <SupermarketChainBadge originId={storeKey.originId} variant="logoSmall" />}
-                      {trackingSinceText && (
-                        <span className="text-muted-foreground text-[11px]">{trackingSinceText}</span>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          />
+          <Legend verticalAlign="bottom" height={44} content={renderLegend} />
           {storeKeys.map(({ key, color, dashPattern }) => (
             <Line
               key={key}

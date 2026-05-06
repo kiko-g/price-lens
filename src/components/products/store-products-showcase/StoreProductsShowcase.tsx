@@ -28,6 +28,8 @@ import { PriceRangeFilter, SmartViewPresets } from "./FilterControls"
 import { PaginationControls, BottomPagination } from "./PaginationControls"
 import { DebounceProgressBar, LoadingGrid, EmptyState } from "./StateViews"
 
+import { RichSpanForegroundSemibold, RichSpanMutedSoft, RichStrongForeground } from "@/components/i18n/rich-tags"
+
 import { DevBadge } from "@/components/ui/combo/dev-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -767,7 +769,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                 {totalCount != null ? (
                   tShowcase.rich("count.totalFound", {
                     count: totalCount,
-                    strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                    strong: RichStrongForeground,
                   })
                 ) : showingFrom === 0 && showingTo === 0 ? (
                   <>{tShowcase("count.noneFound")}</>
@@ -775,7 +777,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   tShowcase.rich("count.showing", {
                     from: showingFrom,
                     to: showingTo,
-                    strong: (chunks) => <strong className="text-foreground">{chunks}</strong>,
+                    strong: RichStrongForeground,
                   })
                 )}
                 {urlState.query && tShowcase("count.matchingSuffix", { query: urlState.query })}
@@ -1212,11 +1214,11 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   ? tShowcase.rich("statusBar.withTotalRich", {
                       range: `${showingFrom}-${showingTo}`,
                       total: totalCount,
-                      s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                      s: RichSpanForegroundSemibold,
                     })
                   : tShowcase.rich("statusBar.rangeOnlyRich", {
                       range: `${showingFrom}-${showingTo}`,
-                      s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                      s: RichSpanForegroundSemibold,
                     })}
               </span>
 
@@ -1297,12 +1299,12 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                       ? tShowcase.rich("mobileStatus.withTotalRich", {
                           loaded: displayProducts.length,
                           total: totalCount,
-                          s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                          s: RichSpanForegroundSemibold,
                         })
                       : tShowcase.rich("mobileStatus.loadedOnlyRich", {
                           loaded: displayProducts.length,
-                          s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
-                          m: (chunks) => <span className="text-muted-foreground/80">{chunks}</span>,
+                          s: RichSpanForegroundSemibold,
+                          m: RichSpanMutedSoft,
                         })}
                   </p>
                 </>
@@ -1311,11 +1313,11 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
                   {totalCount != null
                     ? tShowcase.rich("mobileStatus.allLoadedRich", {
                         total: totalCount,
-                        s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                        s: RichSpanForegroundSemibold,
                       })
                     : tShowcase.rich("mobileStatus.matchRich", {
                         loaded: displayProducts.length,
-                        s: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                        s: RichSpanForegroundSemibold,
                       })}
                 </p>
               )}

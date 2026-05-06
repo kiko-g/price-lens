@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 import { Input } from "@/components/ui/input"
@@ -562,7 +563,16 @@ function OrphanCard({ orphan, onRefresh }: { orphan: OrphanItem; onRefresh: () =
 function StoreProductRow({ sp }: { sp: StoreProductInfo }) {
   return (
     <div className="flex gap-2">
-      {sp.image && <img src={sp.image} alt="" className="size-20 shrink-0 rounded-lg object-cover p-0.5" />}
+      {sp.image && (
+        <Image
+          src={sp.image}
+          alt=""
+          width={80}
+          height={80}
+          unoptimized
+          className="size-20 shrink-0 rounded-lg object-cover p-0.5"
+        />
+      )}
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs leading-tight">{sp.name}</p>
         <div className="mt-0.5 flex flex-wrap items-center gap-2">

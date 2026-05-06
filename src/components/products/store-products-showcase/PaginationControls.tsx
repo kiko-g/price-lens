@@ -3,6 +3,7 @@ import { cn, getCenteredArray } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { RichSpanForegroundSemibold } from "@/components/i18n/rich-tags"
 
 interface PaginationControlsProps {
   currentPage: number
@@ -102,12 +103,12 @@ export function BottomPagination({
                 from: showingFrom,
                 to: showingTo,
                 total: totalCount,
-                strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                strong: RichSpanForegroundSemibold,
               })
             : t.rich("showingNoTotal", {
                 from: showingFrom,
                 to: showingTo,
-                strong: (chunks) => <span className="text-foreground font-semibold">{chunks}</span>,
+                strong: RichSpanForegroundSemibold,
               })}
         </span>
       </div>

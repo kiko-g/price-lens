@@ -1,13 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
 
 import { Button } from "@/components/ui/button"
 import { InstagramIcon, LinkedinIcon, XTwitterIcon } from "@/components/icons"
+import { FooterBuiltByLink, FooterOpenSourceLink } from "@/components/i18n/rich-tags"
 
 export function Footer({ className }: { className?: string }) {
   const t = useTranslations("layout.footerFull")
@@ -21,30 +21,13 @@ export function Footer({ className }: { className?: string }) {
       <div className="flex flex-col items-start justify-start gap-0">
         <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
           {t.rich("builtBy", {
-            link: (chunks) => (
-              <Link
-                target="_blank"
-                href={siteConfig.links.github}
-                className="inline-flex items-center gap-2 font-medium text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
-              >
-                {chunks}
-                <Image src="/profile.svg" alt="" width={24} height={24} className="rounded-full" />
-              </Link>
-            ),
+            link: FooterBuiltByLink,
           })}
         </p>
 
         <p className="text-2xs text-muted-foreground leading-5 md:text-sm">
           {t.rich("openSource", {
-            link: (chunks) => (
-              <Link
-                target="_blank"
-                href={siteConfig.links.repo}
-                className="inline-flex items-center gap-2 font-semibold text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
-              >
-                {chunks}
-              </Link>
-            ),
+            link: FooterOpenSourceLink,
           })}
         </p>
 

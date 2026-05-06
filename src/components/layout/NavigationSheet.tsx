@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useUser } from "@/hooks/useUser"
 import { navigation, siteConfig, type NavigationItem } from "@/lib/config"
+import { NavSheetBuiltByName } from "@/components/i18n/rich-tags"
 
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -240,7 +241,7 @@ export function NavigationSheet({ onRequestSearch, onRequestBarcodeScan }: Navig
               target="_blank"
               className="text-muted-foreground hover:text-foreground text-xs transition-colors"
             >
-              {tSheet.rich("builtBy", { name: (chunks) => <span className="font-medium">{chunks}</span> })}
+              {tSheet.rich("builtBy", { name: NavSheetBuiltByName })}
             </Link>
             <Link
               href={siteConfig.links.repo}

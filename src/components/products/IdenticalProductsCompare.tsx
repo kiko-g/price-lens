@@ -18,6 +18,7 @@ import { EmptyDescription } from "@/components/ui/empty"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
 import { LightRays } from "@/components/ui/magic/light-rays"
 import { floorCompareLightRaysPreset } from "@/components/products/product-page/deal-tier-light-rays"
+import { IdenticalCompareHighlight } from "@/components/i18n/rich-tags"
 
 import { ArrowRightIcon, ScaleIcon, TrophyIcon, MapPinIcon, ZapIcon, SmilePlusIcon } from "lucide-react"
 
@@ -140,7 +141,7 @@ function CompactStoreCard({
 
               {hasDiscount && product.price_recommended != null ? (
                 <span className="text-muted-foreground text-sm tabular-nums line-through">
-                  {product.price_recommended.toFixed(2)}€
+                  {t("amountEuro", { value: product.price_recommended.toFixed(2) })}
                 </span>
               ) : null}
 
@@ -151,29 +152,32 @@ function CompactStoreCard({
                   !showFloorHighlight && "text-foreground",
                 )}
               >
-                {product.price.toFixed(2)}€
+                {t("amountEuro", { value: product.price.toFixed(2) })}
               </span>
             </div>
           ) : (
-            <span className="text-muted-foreground text-base font-bold">--€</span>
+            <span className="text-muted-foreground text-base font-bold">{t("priceDash")}</span>
           )}
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             {hasDiscount && (
               <Badge variant="discount" size="xs" className="shrink-0">
-                −{discountValueToPercentage(product.discount!)}
+                {t("discountMinus", { value: discountValueToPercentage(product.discount!) })}
               </Badge>
             )}
 
             {product.price_per_major_unit && product.major_unit && (
               <Badge variant="price-per-unit" size="xs" className="tabular-nums">
-                {product.price_per_major_unit}€/{formatMajorUnitSuffix(product.major_unit)}
+                {t("perMajorUnit", {
+                  price: String(product.price_per_major_unit),
+                  unit: formatMajorUnitSuffix(product.major_unit),
+                })}
               </Badge>
             )}
 
             {priceDiff !== null && priceDiff > 0 && (
               <Badge variant="boring" size="xs" className="tabular-nums">
-                +{priceDiff.toFixed(2)}€
+                {t("diffMore", { value: priceDiff.toFixed(2) })}
               </Badge>
             )}
           </div>
@@ -357,7 +361,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
           <ZapIcon className="text-primary mr-1 inline-flex h-3.5 w-3.5 md:h-4 md:w-4" />
           {t.rich("savingsBySwitching", {
             amount: (currentProduct.price - cheapestPrice).toFixed(2),
-            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+            highlight: IdenticalCompareHighlight,
           })}
         </p>
       ) : cheapestPrice !== null &&
@@ -368,7 +372,7 @@ export function IdenticalProductsCompare({ currentProduct }: Props) {
         <p className="text-muted-foreground mb-3">
           <SmilePlusIcon className="text-primary mr-1 inline-flex h-4 w-4" />
           {t.rich("alreadyCheapest", {
-            highlight: (chunks) => <span className="text-primary font-medium">{chunks}</span>,
+            highlight: IdenticalCompareHighlight,
           })}
         </p>
       ) : cheapestPrice !== null &&

@@ -1,5 +1,8 @@
+import type { ReactNode } from "react"
+
 import { cn } from "@/lib/utils"
 import { getErrorDisplay } from "@/lib/errors"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from "@/components/ui/empty"
@@ -27,9 +30,10 @@ export function ErrorStateView({
   icon: Icon = CircleOffIcon,
   className,
 }: ErrorStateViewProps) {
+  const t = useTranslations("common.ui")
   const display = error
     ? getErrorDisplay(error)
-    : { title: "Something went wrong", message: "An unexpected error occurred." }
+    : { title: t("errorUnexpectedTitle"), message: t("errorUnexpectedMessage") }
   const resolvedTitle = title ?? display.title
   const resolvedMessage = message ?? display.message
 
@@ -46,7 +50,7 @@ export function ErrorStateView({
         <EmptyContent>
           <Button variant="outline" size="sm" onClick={onRetry}>
             <RefreshCcwIcon className="size-4" />
-            Try again
+            {t("tryAgain")}
           </Button>
         </EmptyContent>
       )}
@@ -60,9 +64,9 @@ export function ErrorStateView({
 
 interface EmptyStateViewProps {
   title: string
-  message?: string | React.ReactNode
+  message?: string | ReactNode
   icon?: LucideIcon
-  actions?: React.ReactNode
+  actions?: ReactNode
   className?: string
 }
 

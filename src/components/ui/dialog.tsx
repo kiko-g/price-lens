@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { useTranslations } from "next-intl"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -77,6 +78,7 @@ type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.
 
 const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, DialogContentProps>(
   ({ className, children, overlayVisualViewportSync = false, ...props }, ref) => {
+    const t = useTranslations("common.actions")
     const overlayStyle = useVisualViewportOverlayStyle(overlayVisualViewportSync)
     const useVvOverlay = overlayVisualViewportSync && overlayStyle != null
 
@@ -97,7 +99,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
           {children}
           <DialogPrimitive.Close className="ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
             <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t("close")}</span>
           </DialogPrimitive.Close>
         </DialogPrimitive.Content>
       </DialogPortal>

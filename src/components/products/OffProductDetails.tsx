@@ -8,6 +8,7 @@ import type { OffNutriments } from "@/lib/canonical/open-food-facts"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Callout } from "@/components/ui/callout"
+import { OffAllergensStrong } from "@/components/i18n/rich-tags"
 import { Separator } from "@/components/ui/separator"
 import { DrawerSheet } from "@/components/ui/combo/drawer-sheet"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
@@ -145,7 +146,7 @@ export function OffProductDetails({
                   <p className="text-sm">
                     {t.rich("allergensCallout", {
                       allergens: allergens!,
-                      strong: (chunks) => <span className="font-semibold">{chunks}</span>,
+                      strong: OffAllergensStrong,
                     })}
                   </p>
                 </Callout>

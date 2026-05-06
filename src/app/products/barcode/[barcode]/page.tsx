@@ -23,6 +23,7 @@ import { OffProductPage } from "@/components/products/OffProductPage"
 import { StoreProductCard } from "@/components/products/StoreProductCard"
 
 import { SearchIcon, ExternalLinkIcon, WifiOffIcon, RefreshCwIcon, StoreIcon } from "lucide-react"
+import { BarcodeNotFoundOffLabel, RichMonoMedium } from "@/components/i18n/rich-tags"
 import { OpenFoodFactsIcon } from "@/components/icons/OpenFoodFactsIcon"
 import { BarcodeLookupSessionCleanup } from "@/components/products/BarcodeLookupSessionCleanup"
 import { OffLookupSkeleton } from "@/components/products/OffLookupSkeleton"
@@ -153,7 +154,7 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
               <p className="text-muted-foreground max-w-sm text-center text-sm">
-                {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
+                {t.rich("body", { barcode, code: RichMonoMedium })}
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -197,16 +198,12 @@ async function OffLookupResult({ barcode }: { barcode: string }) {
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
             <p className="text-muted-foreground max-w-sm text-center text-sm">
-              {t.rich("body", { barcode, code: (chunks) => <span className="font-mono font-medium">{chunks}</span> })}
+              {t.rich("body", { barcode, code: RichMonoMedium })}
             </p>
 
             <p className="text-muted-foreground mt-1 max-w-sm text-center text-sm">
               {t.rich("searchedOff", {
-                off: (chunks) => (
-                  <span className="inline-flex items-center gap-1 font-bold">
-                    <OpenFoodFactsIcon className="inline h-4 w-4" /> {chunks}
-                  </span>
-                ),
+                off: BarcodeNotFoundOffLabel,
               })}
             </p>
           </div>

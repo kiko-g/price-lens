@@ -2,18 +2,11 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useTranslations } from "next-intl"
-import {
-  DownloadIcon,
-  ShareIcon,
-  PlusSquareIcon,
-  SmartphoneIcon,
-  CheckCircle2Icon,
-  MonitorIcon,
-  ChromeIcon,
-} from "lucide-react"
+import { DownloadIcon, SmartphoneIcon, CheckCircle2Icon, MonitorIcon, ChromeIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import type { BeforeInstallPromptEvent } from "@/hooks/usePWAInstall"
+import { PwaIosPlusIconInline, PwaIosShareIconInline, PwaRichStrong } from "@/components/i18n/rich-tags"
 
 type Platform = "android" | "ios" | "desktop"
 
@@ -84,7 +77,7 @@ export function AppInstallContent() {
           </div>
 
           <p className="text-muted-foreground max-w-lg text-sm md:text-base/relaxed">
-            {t.rich("subtitle", { strong: (chunks) => <strong>{chunks}</strong> })}
+            {t.rich("subtitle", { strong: PwaRichStrong })}
           </p>
 
           {installed && (
@@ -107,15 +100,15 @@ export function AppInstallContent() {
             expanded={platform === "ios"}
             className={platform === "ios" ? "order-first" : ""}
             steps={[
-              tIos.rich("step1", { strong: (c) => <strong>{c}</strong> }),
+              tIos.rich("step1", { strong: PwaRichStrong }),
               tIos.rich("step2", {
-                strong: (c) => <strong>{c}</strong>,
-                icon: () => <ShareIcon className="mb-0.5 inline size-3.5" />,
+                strong: PwaRichStrong,
+                icon: PwaIosShareIconInline,
               }),
-              tIos.rich("step3", { strong: (c) => <strong>{c}</strong> }),
+              tIos.rich("step3", { strong: PwaRichStrong }),
               tIos.rich("step4", {
-                strong: (c) => <strong>{c}</strong>,
-                icon: () => <PlusSquareIcon className="mb-0.5 inline size-3.5" />,
+                strong: PwaRichStrong,
+                icon: PwaIosPlusIconInline,
               }),
             ]}
           />
@@ -137,9 +130,9 @@ export function AppInstallContent() {
               )
             }
             steps={[
-              tAndroid.rich("step1", { strong: (c) => <strong>{c}</strong> }),
-              tAndroid.rich("step2", { strong: (c) => <strong>{c}</strong> }),
-              tAndroid.rich("step3", { strong: (c) => <strong>{c}</strong> }),
+              tAndroid.rich("step1", { strong: PwaRichStrong }),
+              tAndroid.rich("step2", { strong: PwaRichStrong }),
+              tAndroid.rich("step3", { strong: PwaRichStrong }),
             ]}
           />
 
@@ -160,8 +153,8 @@ export function AppInstallContent() {
               )
             }
             steps={[
-              tDesktop.rich("step1", { strong: (c) => <strong>{c}</strong> }),
-              tDesktop.rich("step2", { strong: (c) => <strong>{c}</strong> }),
+              tDesktop.rich("step1", { strong: PwaRichStrong }),
+              tDesktop.rich("step2", { strong: PwaRichStrong }),
             ]}
           />
         </div>

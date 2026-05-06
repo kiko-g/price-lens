@@ -1,4 +1,7 @@
+"use client"
+
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 type NutriScoreGrade = "A" | "B" | "C" | "D" | "E"
 
@@ -10,32 +13,12 @@ const GRADE_COLORS: Record<NutriScoreGrade, string> = {
   E: "#E63E11",
 }
 
-const GRADE_DESCRIPTIONS: Record<NutriScoreGrade, { label: string; description: string; cardBg: string }> = {
-  A: {
-    label: "Nutri-Score A",
-    description: "Excellent nutritional quality",
-    cardBg: "rgba(3, 129, 65, 0.08)",
-  },
-  B: {
-    label: "Nutri-Score B",
-    description: "Good nutritional quality",
-    cardBg: "rgba(133, 187, 47, 0.08)",
-  },
-  C: {
-    label: "Nutri-Score C",
-    description: "Average nutritional quality",
-    cardBg: "rgba(254, 203, 2, 0.08)",
-  },
-  D: {
-    label: "Nutri-Score D",
-    description: "Poor nutritional quality",
-    cardBg: "rgba(238, 129, 0, 0.08)",
-  },
-  E: {
-    label: "Nutri-Score E",
-    description: "Lower nutritional quality",
-    cardBg: "rgba(230, 62, 17, 0.08)",
-  },
+const GRADE_CARD_BG: Record<NutriScoreGrade, string> = {
+  A: "rgba(3, 129, 65, 0.08)",
+  B: "rgba(133, 187, 47, 0.08)",
+  C: "rgba(254, 203, 2, 0.08)",
+  D: "rgba(238, 129, 0, 0.08)",
+  E: "rgba(230, 62, 17, 0.08)",
 }
 
 const GRADES: NutriScoreGrade[] = ["A", "B", "C", "D", "E"]
@@ -60,10 +43,12 @@ export function NutriScoreBadge({
   size = 1,
   compact = true,
 }: NutriScoreBadgeProps) {
+  const t = useTranslations("common.nutriScore")
+
   const content = (
     <>
       <span className="text-foreground/70 dark:text-foreground/80 mb-[0.15em] text-[1em] leading-none font-extrabold tracking-wider">
-        NUTRI-SCORE
+        {t("mark")}
       </span>
 
       <div className="relative flex items-center">
@@ -129,7 +114,7 @@ export function NutriScoreBadge({
             className="font-extrabold tracking-wider text-white uppercase"
             style={{ fontSize: "0.6em", lineHeight: 1 }}
           >
-            New Calculation
+            {t("newCalculation")}
           </span>
         </div>
       )}
@@ -145,7 +130,7 @@ export function NutriScoreBadge({
         className,
       )}
       role="img"
-      aria-label={`Nutri-Score ${grade}`}
+      aria-label={t("ariaBadge", { grade })}
       style={{ fontSize: `${size}rem` }}
     >
       {content}
@@ -163,23 +148,26 @@ interface NutriScoreCalloutProps {
 }
 
 export function NutriScoreCallout({ grade, showNewCalculation = true, className }: NutriScoreCalloutProps) {
-  const info = GRADE_DESCRIPTIONS[grade]
+  const t = useTranslations("common.nutriScore")
   const color = GRADE_COLORS[grade]
+  const cardBg = GRADE_CARD_BG[grade]
+  const label = t(`grades.${grade}.label` as "grades.A.label")
+  const description = t(`grades.${grade}.description` as "grades.A.description")
 
   return (
     <div
       className={cn("flex items-center gap-5 rounded-xl px-5 py-4", className)}
-      style={{ backgroundColor: info.cardBg }}
+      style={{ backgroundColor: cardBg }}
       role="status"
-      aria-label={`${info.label}: ${info.description}`}
+      aria-label={t("ariaCallout", { label, description })}
     >
       <NutriScoreBadge grade={grade} showNewCalculation={showNewCalculation} size={0.85} />
 
       <div className="flex flex-col gap-0.5">
         <span className="text-lg font-semibold" style={{ color }}>
-          {info.label}
+          {label}
         </span>
-        <span className="text-foreground/70 text-sm">{info.description}</span>
+        <span className="text-foreground/70 text-sm">{description}</span>
       </div>
     </div>
   )
