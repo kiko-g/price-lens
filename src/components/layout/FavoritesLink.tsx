@@ -15,7 +15,7 @@ export function FavoritesLink({ onClick }: { onClick?: () => void }) {
   if (!user || isLoading) return null
 
   return (
-    <Button variant="outline" size="icon" className="relative" asChild>
+    <Button variant="outline" size="icon" className="relative hidden lg:flex" asChild>
       <Link href="/favorites" onClick={() => onClick?.()} aria-label={t("ariaLabel")}>
         <HeartIcon className="h-4 w-4" />
         {!isFavoritesLoading && count > 0 && (

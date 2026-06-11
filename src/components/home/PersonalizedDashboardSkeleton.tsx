@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { MiniProductCardSkeleton } from "@/components/home/MiniProductCardSkeleton"
+import { MiniProductCardSkeleton } from "@/components/products/MiniProductCardSkeleton"
 
 export function PersonalizedDashboardSkeleton() {
   return (

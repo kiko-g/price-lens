@@ -81,6 +81,12 @@ export function Header() {
           </div>
 
           <div className="flex shrink-0 items-center justify-center gap-2.5 md:gap-3">
+            <div className="hidden md:flex">
+              <ThemeToggle size="icon" variant="outline" />
+            </div>
+
+            <FavoritesLink />
+
             {!isMobile && (
               <SearchContainer>
                 <button
@@ -94,14 +100,6 @@ export function Header() {
                 </button>
               </SearchContainer>
             )}
-
-            <div className="hidden md:flex">
-              <ThemeToggle size="icon" variant="outline" />
-            </div>
-
-            <div className="hidden lg:flex">
-              <FavoritesLink />
-            </div>
 
             <UserDropdownMenu />
           </div>
