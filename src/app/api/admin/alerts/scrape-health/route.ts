@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { STORE_NAMES } from "@/types/business"
 import { ACTIVE_PRIORITIES } from "@/lib/business/priority"
+import { getResend, FROM_EMAIL } from "@/lib/email/resend"
 
 export const maxDuration = 30
 
@@ -28,8 +29,9 @@ interface Alert {
  * 2. Per-origin scrape freshness (% of high-priority products updated recently)
  * 3. HTTP 403 spike per origin (possible anti-bot blocking)
  *
- * When SCRAPE_ALERT_WEBHOOK_URL is set, fires a Discord/Slack-compatible webhook
- * for warn/critical alerts. Works as a Vercel cron target.
+ * Alert delivery for warn/critical states (both optional, independent):
+ * - SCRAPE_ALERT_WEBHOOK_URL: Discord/Slack-compatible webhook
+ * - SCRAPE_ALERT_EMAIL: plain email via Resend (already configured for price-drop alerts)
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization")
@@ -157,6 +159,16 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // --- Send email if there are alerts ---
+  const alertEmail = process.env.SCRAPE_ALERT_EMAIL
+  if (alertEmail && alerts.length > 0) {
+    try {
+      await sendEmailAlert(alertEmail, alerts, overallSeverity)
+    } catch (err) {
+      console.error("[ScrapeHealth] Alert email failed:", err)
+    }
+  }
+
   console.log(`[ScrapeHealth] ${overallSeverity.toUpperCase()}: ${alerts.length} alert(s)`)
   if (alerts.length > 0) {
     for (const a of alerts) {
@@ -202,5 +214,22 @@ async function sendWebhookAlert(url: string, alerts: Alert[], severity: Severity
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+  })
+}
+
+async function sendEmailAlert(to: string, alerts: Alert[], severity: Severity) {
+  const emoji = severity === "critical" ? "\u{1F6A8}" : "\u26A0\uFE0F"
+  const rows = alerts
+    .map(
+      (a) =>
+        `<li style="margin-bottom:8px"><strong style="color:${a.severity === "critical" ? "#dc2626" : "#d97706"}">[${a.severity.toUpperCase()}]</strong> ${a.message}</li>`,
+    )
+    .join("")
+
+  await getResend().emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: `${emoji} Price Lens scrape health: ${severity.toUpperCase()} (${alerts.length} alert${alerts.length === 1 ? "" : "s"})`,
+    html: `<div style="font-family:sans-serif;max-width:600px"><h2>Scrape health: ${severity.toUpperCase()}</h2><ul style="padding-left:16px">${rows}</ul><p style="color:#6b7280;font-size:12px">Sent by /api/admin/alerts/scrape-health · ${new Date().toISOString()}</p></div>`,
   })
 }

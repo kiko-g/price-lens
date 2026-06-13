@@ -42,9 +42,11 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Allow Vercel cron invocations to admin API cron targets (CRON_SECRET is sent by Vercel)
-  const cronPaths = ["/api/admin/analytics/compute-worker", "/api/admin/discovery", "/api/admin/discovery/triage"]
-  if (process.env.CRON_SECRET && cronPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+  // Allow authenticated automation (Vercel cron / QStash) on any API route.
+  // Vercel sends `Authorization: Bearer ${CRON_SECRET}` on cron invocations.
+  // NOTE: do not reintroduce a hardcoded path allowlist here — that is how
+  // price-stats-worker and scrape-health silently 401'd for months.
+  if (process.env.CRON_SECRET && pathname.startsWith("/api/")) {
     const authHeader = request.headers.get("authorization")
     if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
       return supabaseResponse

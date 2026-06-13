@@ -12,6 +12,10 @@ export const maxDuration = 120
  */
 async function handler(req: NextRequest) {
   const triggeredBy = req.method === "GET" ? "cron" : "manual"
+  const authHeader = req.headers.get("authorization")
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   try {
     console.log(`[compute-worker] Starting analytics snapshot (${triggeredBy})…`)
