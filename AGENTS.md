@@ -32,4 +32,5 @@ See `.cursor/rules/` for context-specific rules:
 - [Data fetching](.cursor/rules/data-fetching.mdc) - TanStack Query for client data, useEffect only for side effects, server fetch cache intent
 - [Performance](.cursor/rules/performance.mdc) - Small client boundaries, no barrel exports, lazy-load heavy components
 - [Database and business logic](.cursor/rules/supabase.mdc) - Supabase limits, queries, and business context
+- [Supabase derived types](.cursor/rules/supabase-derived-types.mdc) - `Pick<Tables<>>` for query projections; no hand-written Row duplicates
 - [Vercel](.cursor/rules/vercel.mdc) - Deployment, Pro plan, cron routes, `CRON_SECRET`, env vars

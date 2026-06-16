@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 import {
   qstash,
   getBaseUrl,
@@ -10,28 +10,30 @@ import {
   CRON_FREQUENCY_MINUTES,
 } from "@/lib/qstash"
 import { analyzeSchedulerCapacity } from "@/lib/business/priority"
+import { getLaneQuotasPerRun } from "@/lib/business/scrape-budget"
+import { persistSchedulerRun } from "@/lib/business/scheduler-runs"
+import {
+  buildLaneFillStats,
+  fetchHealingLaneProducts,
+  fetchLongTailLaneProducts,
+  fetchSlaLaneProducts,
+  mergeLaneProducts,
+  type LaneProduct,
+} from "@/lib/business/scheduler-lanes"
+import { isScrapeableLaneProduct, toScrapeBatchProductPayload } from "@/lib/business/scheduler-product"
 
 export const maxDuration = 300 // 5 minutes at most to find and queue products
 
 /**
- * ADAPTIVE SCHEDULER
+ * ADAPTIVE SCHEDULER — budgeted lane economy (ROADMAP §2)
  *
- * Triggered by Vercel cron every 15 minutes.
+ * Triggered by Vercel cron every 30 minutes.
  *
- * Uses the "pull" architecture:
- * 1. Query database for overdue products (database is source of truth)
- * 2. Calculate urgency score for each product
- * 3. Batch products into groups of ~50
- * 4. Send batched messages to QStash (cheap - one message per batch, not per product)
- * 5. Batch worker processes all products in the batch
- *
- * Urgency Score = hoursOverdue / thresholdHours
- * - Score > 1 means product is overdue
- * - Higher score = more urgent
- * - A P5 product 48h overdue (score=2) is more urgent than P3 product 72h overdue (score=1)
+ * Lane A (SLA, ~80%): overdue P5..P2 available products, urgency-sorted
+ * Lane B (Healing, ~10%): favorites/views, failed scrapes, phantoms, graveyard
+ * Lane C (Long tail, ~10%): P1 round-robin + discovery skeleton triage drip
  */
 export async function GET(req: NextRequest) {
-  // Immediately log to confirm function is called
   console.log("[Scheduler] === CRON INVOKED ===")
 
   const startTime = Date.now()
@@ -39,7 +41,6 @@ export async function GET(req: NextRequest) {
   const isManualTest = searchParams.get("test") === "true"
   const dryRun = searchParams.get("dry") === "true"
 
-  // Log every invocation for debugging
   const authHeader = req.headers.get("authorization")
   console.log("[Scheduler] Config:", {
     isManualTest,
@@ -55,13 +56,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const baseUrl = getBaseUrl()
     const batchWorkerUrl = `${baseUrl}/api/scrape/batch-worker`
     const now = new Date()
+    const laneQuotas = getLaneQuotasPerRun(CRON_FREQUENCY_MINUTES)
 
-    // Query product counts by priority for capacity analysis using proper count queries
-    // NOTE: Simple select without count has a default 1000 row limit in Supabase!
     const productCountsByPriority: Record<number, number> = {}
     for (const priority of ACTIVE_PRIORITIES) {
       const { count } = await supabase
@@ -72,7 +72,6 @@ export async function GET(req: NextRequest) {
       productCountsByPriority[priority] = count ?? 0
     }
 
-    // Calculate capacity health
     const capacityAnalysis = analyzeSchedulerCapacity(
       productCountsByPriority,
       WORKER_BATCH_SIZE,
@@ -80,7 +79,6 @@ export async function GET(req: NextRequest) {
       CRON_FREQUENCY_MINUTES,
     )
 
-    // Log capacity status
     console.log(
       `[Scheduler] Capacity: ${capacityAnalysis.status} (${capacityAnalysis.utilizationPercent}% utilization)`,
     )
@@ -88,154 +86,96 @@ export async function GET(req: NextRequest) {
       console.warn(`[Scheduler] CRITICAL: Deficit of ${capacityAnalysis.deficit} scrapes/day`)
     }
 
-    // Build OR conditions for each priority's staleness threshold
-    const orConditions = ACTIVE_PRIORITIES.map((priority) => {
-      const thresholdHours = PRIORITY_REFRESH_HOURS[priority]
-      if (!thresholdHours) return null
-      const cutoffTime = new Date(now.getTime() - thresholdHours * 60 * 60 * 1000).toISOString()
-      return `and(priority.eq.${priority},or(updated_at.lt.${cutoffTime},updated_at.is.null))`
-    }).filter(Boolean)
+    console.log(
+      `[Scheduler] Lane quotas/run: SLA=${laneQuotas.sla} healing=${laneQuotas.healing} long_tail=${laneQuotas.longTail} (budget ${laneQuotas.perRunBudget}/run)`,
+    )
 
-    if (orConditions.length === 0) {
-      return NextResponse.json({ message: "No active priorities configured", scheduled: 0 })
-    }
+    const [slaResult, healingResult, longTailResult] = await Promise.all([
+      fetchSlaLaneProducts(supabase, now, laneQuotas.sla),
+      fetchHealingLaneProducts(supabase, now, laneQuotas.healing),
+      fetchLongTailLaneProducts(supabase, laneQuotas.longTail),
+    ])
 
-    // Fetch overdue products with count to get accurate backlog size
-    // Use a high limit to get the real backlog count, then we'll slice for actual scheduling
-    // Fetch wider column set so the batch worker doesn't need to re-read each product.
-    // The extra fields are passed through QStash to eliminate per-product SELECTs.
-    const SCHEDULER_COLUMNS =
-      "id, url, name, origin_id, priority, priority_source, barcode, brand, image, pack, category, category_2, category_3, created_at, updated_at, price_stats_cv_ln_90d"
+    const laneFill = buildLaneFillStats(laneQuotas, slaResult, healingResult, longTailResult)
+    console.log(
+      `[Scheduler] Lane fill: SLA ${laneFill.sla.filled}/${laneFill.sla.requested} (backlog ${laneFill.sla.backlog ?? "?"}) | healing ${laneFill.healing.filled}/${laneFill.healing.requested} | long_tail ${laneFill.long_tail.filled}/${laneFill.long_tail.requested}`,
+    )
 
-    const {
-      data: products,
-      count: backlogSize,
-      error,
-    } = await supabase
-      .from("store_products")
-      .select(SCHEDULER_COLUMNS, { count: "exact" })
-      .or(orConditions.join(","))
-      .not("url", "is", null)
-      .eq("available", true)
-      .in("priority", [...ACTIVE_PRIORITIES])
-      .limit(WORKER_BATCH_SIZE * MAX_BATCHES_PER_RUN)
-
-    if (error) {
-      console.error("Scheduler query error:", error)
-      return NextResponse.json({ error: "Failed to query products" }, { status: 500 })
-    }
-
-    // Smart revival: re-check unavailable products, prioritizing high-value ones
-    const RECHECK_BATCH_SIZE = 50
-    const recheckCutoff = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
-
-    // Priority 1: products that are favorited by users (most valuable to revive)
-    const { data: favoritedUnavailable } = await supabase
-      .from("store_products")
-      .select(SCHEDULER_COLUMNS)
-      .eq("available", false)
-      .not("url", "is", null)
-      .not("barcode", "is", null)
-      .in(
-        "id",
-        (await supabase.from("user_favorites").select("store_product_id")).data?.map((f) => f.store_product_id) || [],
-      )
-      .or(`updated_at.lt.${recheckCutoff},updated_at.is.null`)
-      .limit(20)
-
-    // Priority 2: high-priority products with barcodes
-    const remainingSlots = RECHECK_BATCH_SIZE - (favoritedUnavailable?.length || 0)
-    const { data: highPriorityUnavailable } = await supabase
-      .from("store_products")
-      .select(SCHEDULER_COLUMNS)
-      .eq("available", false)
-      .not("url", "is", null)
-      .not("barcode", "is", null)
-      .in("priority", [4, 5])
-      .or(`updated_at.lt.${recheckCutoff},updated_at.is.null`)
-      .order("priority", { ascending: false })
-      .limit(remainingSlots)
-
-    const recheckProducts = [
-      ...(favoritedUnavailable || []),
-      ...(highPriorityUnavailable || []).filter((p) => !favoritedUnavailable?.some((f) => f.id === p.id)),
-    ]
-
-    if (recheckProducts.length > 0) {
-      console.log(
-        `[Scheduler] Smart revival: ${favoritedUnavailable?.length || 0} favorited + ${recheckProducts.length - (favoritedUnavailable?.length || 0)} high-priority = ${recheckProducts.length} total`,
-      )
-    }
-
-    // Merge main products with re-check products
-    const allProducts = [...(products || []), ...(recheckProducts || [])]
+    const slaSorted = sortSlaByUrgency(slaResult.products, now)
+    const allProducts = mergeLaneProducts(slaSorted, healingResult.products, longTailResult.products).filter(
+      isScrapeableLaneProduct,
+    )
 
     if (allProducts.length === 0) {
-      console.info("🛜 [Scheduler] No overdue products found")
+      console.info("🛜 [Scheduler] No products to schedule across any lane")
+      const duration = Date.now() - startTime
+      const schedulerRunId = await persistSchedulerRun(supabase, {
+        startedAt: now,
+        durationMs: duration,
+        scheduledTotal: 0,
+        batchesSent: 0,
+        dryRun,
+        laneQuotas,
+        laneFill,
+      })
       return NextResponse.json({
-        message: "No overdue products",
+        message: "No products to schedule",
         scheduled: 0,
-        duration: Date.now() - startTime,
+        lanes: laneFill,
+        schedulerRunId,
+        duration,
       })
     }
 
-    // DYNAMIC BATCH SIZING based on actual backlog
-    // backlogSize is the total count of overdue products (may exceed our limit)
-    const actualBacklogSize = backlogSize ?? allProducts.length
+    const actualBacklogSize = slaResult.backlogSize ?? allProducts.length
     const MIN_BATCHES = 5
-    const batchesNeeded = Math.ceil(actualBacklogSize / WORKER_BATCH_SIZE)
+    const batchesNeeded = Math.ceil(allProducts.length / WORKER_BATCH_SIZE)
     let dynamicMaxBatches: number
 
     if (capacityAnalysis.status === "critical") {
-      // Critical: always use max batches to try to catch up
       dynamicMaxBatches = MAX_BATCHES_PER_RUN
-    } else if (actualBacklogSize <= WORKER_BATCH_SIZE * MIN_BATCHES) {
-      // Small backlog: use only what we need
+    } else if (allProducts.length <= WORKER_BATCH_SIZE * MIN_BATCHES) {
       dynamicMaxBatches = Math.max(MIN_BATCHES, batchesNeeded)
     } else {
-      // Normal: scale between MIN and MAX based on backlog
-      const utilizationFactor = Math.min(1, actualBacklogSize / (WORKER_BATCH_SIZE * MAX_BATCHES_PER_RUN * 2))
+      const utilizationFactor = Math.min(1, allProducts.length / (WORKER_BATCH_SIZE * MAX_BATCHES_PER_RUN * 2))
       dynamicMaxBatches = Math.round(MIN_BATCHES + (MAX_BATCHES_PER_RUN - MIN_BATCHES) * utilizationFactor)
     }
 
-    // Never exceed the configured max
     dynamicMaxBatches = Math.min(dynamicMaxBatches, MAX_BATCHES_PER_RUN)
+    const maxProductsToSend = Math.min(allProducts.length, dynamicMaxBatches * WORKER_BATCH_SIZE, laneQuotas.perRunBudget)
+    const productsToSchedule = allProducts.slice(0, maxProductsToSend)
 
     console.log(
-      `[Scheduler] Backlog: ${actualBacklogSize} products, using ${dynamicMaxBatches} batches (max: ${MAX_BATCHES_PER_RUN})`,
+      `[Scheduler] Backlog: ${actualBacklogSize} SLA overdue, scheduling ${productsToSchedule.length} products in up to ${dynamicMaxBatches} batches`,
     )
 
-    // Calculate urgency score for each product and sort by most urgent first
-    const productsWithUrgency = allProducts
-      .map((product) => {
-        const thresholdHours = PRIORITY_REFRESH_HOURS[product.priority ?? 0] ?? 24
-        const updatedAt = product.updated_at ? new Date(product.updated_at) : new Date(0) // Never scraped = very old
-        const hoursAgo = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60)
-        const baseUrgency = hoursAgo / thresholdHours
-        const cv = product.price_stats_cv_ln_90d
-        const volatilityBoost =
-          typeof cv === "number" && Number.isFinite(cv) && cv > 1e-9 ? Math.min(0.35, cv / 0.12) : 0
-        const urgencyScore = baseUrgency * (1 + volatilityBoost)
+    const productsWithMeta = productsToSchedule.map((product) => {
+      if (product.lane !== "sla") {
+        return { ...product, urgencyScore: 0, hoursOverdue: 0 }
+      }
+      const thresholdHours = PRIORITY_REFRESH_HOURS[product.priority ?? 0] ?? 24
+      const updatedAt = product.updated_at ? new Date(product.updated_at) : new Date(0)
+      const hoursAgo = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60)
+      const baseUrgency = hoursAgo / thresholdHours
+      const cv = product.price_stats_cv_ln_90d
+      const volatilityBoost =
+        typeof cv === "number" && Number.isFinite(cv) && cv > 1e-9 ? Math.min(0.35, cv / 0.12) : 0
+      const urgencyScore = baseUrgency * (1 + volatilityBoost)
+      return {
+        ...product,
+        urgencyScore,
+        hoursOverdue: Math.max(0, hoursAgo - thresholdHours),
+      }
+    })
 
-        return {
-          ...product,
-          urgencyScore,
-          hoursOverdue: Math.max(0, hoursAgo - thresholdHours),
-        }
-      })
-      .sort((a, b) => b.urgencyScore - a.urgencyScore) // Most urgent first
-
-    // Split into batches
-    const batches: (typeof productsWithUrgency)[] = []
-    for (let i = 0; i < productsWithUrgency.length; i += WORKER_BATCH_SIZE) {
-      batches.push(productsWithUrgency.slice(i, i + WORKER_BATCH_SIZE))
+    const batches: (typeof productsWithMeta)[] = []
+    for (let i = 0; i < productsWithMeta.length; i += WORKER_BATCH_SIZE) {
+      batches.push(productsWithMeta.slice(i, i + WORKER_BATCH_SIZE))
     }
 
-    // Limit to dynamic max batches (already calculated based on backlog)
     const batchesToSend = batches.slice(0, dynamicMaxBatches)
 
-    // Log stats by priority (calculate early for dry run)
-    const byPriority = productsWithUrgency.reduce(
+    const byPriority = productsWithMeta.reduce(
       (acc, p) => {
         acc[p.priority ?? 0] = (acc[p.priority ?? 0] || 0) + 1
         return acc
@@ -243,62 +183,71 @@ export async function GET(req: NextRequest) {
       {} as Record<number, number>,
     )
 
-    console.log(
-      `[Scheduler] Found ${allProducts.length} products (${products?.length ?? 0} overdue + ${recheckProducts?.length ?? 0} re-check), sending ${batchesToSend.length} batches`,
+    const byLane = productsWithMeta.reduce(
+      (acc, p) => {
+        acc[p.lane] = (acc[p.lane] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>,
     )
 
-    // Send batched messages to QStash
-    // NOTE: batchJSON() auto-stringifies, so pass objects NOT strings
-    const qstashMessages = batchesToSend.map((batch, index) => ({
-      url: batchWorkerUrl,
-      body: {
-        batchId: `${now.toISOString()}-${index}`,
-        products: batch.map((p) => ({
-          id: p.id,
-          url: p.url,
-          name: p.name,
-          originId: p.origin_id,
-          priority: p.priority,
-          prioritySource: p.priority_source ?? null,
-          barcode: p.barcode ?? null,
-          brand: p.brand ?? null,
-          image: p.image ?? null,
-          pack: p.pack ?? null,
-          category: p.category ?? null,
-          category2: p.category_2 ?? null,
-          category3: p.category_3 ?? null,
-          createdAt: p.created_at ?? null,
-          updatedAt: p.updated_at ?? null,
-        })),
-      },
-      headers: {
-        "Content-Type": "application/json",
-      },
-      retries: 2,
-    }))
+    console.log(
+      `[Scheduler] Queuing ${productsWithMeta.length} products (lanes: ${JSON.stringify(byLane)}), ${batchesToSend.length} batches`,
+    )
+
+    const qstashMessages = batchesToSend.map((batch, index) => {
+      const lane = batch[0]?.lane ?? "sla"
+      return {
+        url: batchWorkerUrl,
+        body: {
+          batchId: `${lane}-${now.toISOString()}-${index}`,
+          lane,
+          products: batch.map((p) => toScrapeBatchProductPayload(p)),
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        retries: 2,
+      }
+    })
 
     let qstashSuccess = 0
     let qstashFailed = 0
     let qstashError: string | undefined
 
-    // Dry run mode - just return what would be scheduled
     if (dryRun) {
       console.info(`🛜 [Scheduler] Dry run - would send ${qstashMessages.length} batches to ${batchWorkerUrl}`)
+      const duration = Date.now() - startTime
+      const schedulerRunId = await persistSchedulerRun(supabase, {
+        startedAt: now,
+        durationMs: duration,
+        scheduledTotal: productsWithMeta.length,
+        batchesSent: batchesToSend.length,
+        dryRun: true,
+        laneQuotas,
+        laneFill,
+        byLane,
+        byPriority,
+      })
       return NextResponse.json({
         dryRun: true,
-        message: `Would schedule ${productsWithUrgency.length} products in ${batchesToSend.length} batches`,
+        message: `Would schedule ${productsWithMeta.length} products in ${batchesToSend.length} batches`,
         scheduled: 0,
-        wouldSchedule: productsWithUrgency.length,
+        wouldSchedule: productsWithMeta.length,
         batches: batchesToSend.length,
         byPriority,
+        byLane,
+        lanes: laneFill,
+        schedulerRunId,
         batchWorkerUrl,
         hasQstashToken: !!process.env.QSTASH_TOKEN,
         nodeEnv: process.env.NODE_ENV,
-        duration: Date.now() - startTime,
-        sampleProducts: productsWithUrgency.slice(0, 5).map((p) => ({
+        duration,
+        sampleProducts: productsWithMeta.slice(0, 5).map((p) => ({
           id: p.id,
           name: p.name,
           priority: p.priority,
+          lane: p.lane,
           urgencyScore: p.urgencyScore.toFixed(2),
           hoursOverdue: p.hoursOverdue.toFixed(1),
         })),
@@ -307,6 +256,7 @@ export async function GET(req: NextRequest) {
           maxBatches: MAX_BATCHES_PER_RUN,
           cronFrequencyMinutes: CRON_FREQUENCY_MINUTES,
           activePriorities: ACTIVE_PRIORITIES,
+          laneQuotas,
         },
         dynamicBatching: {
           backlogSize: actualBacklogSize,
@@ -315,7 +265,7 @@ export async function GET(req: NextRequest) {
           reason:
             capacityAnalysis.status === "critical"
               ? "critical-capacity"
-              : actualBacklogSize <= WORKER_BATCH_SIZE * 5
+              : allProducts.length <= WORKER_BATCH_SIZE * 5
                 ? "small-backlog"
                 : "scaled",
         },
@@ -323,7 +273,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Send to QStash
     const hasQstash = !!process.env.QSTASH_TOKEN
     console.log(`[Scheduler] QStash token present: ${hasQstash}, sending to: ${batchWorkerUrl}`)
 
@@ -346,6 +295,19 @@ export async function GET(req: NextRequest) {
     const totalScheduled = batchesToSend.reduce((sum, batch) => sum + batch.length, 0)
     const duration = Date.now() - startTime
 
+    const schedulerRunId = await persistSchedulerRun(supabase, {
+      startedAt: now,
+      durationMs: duration,
+      scheduledTotal: totalScheduled,
+      batchesSent: batchesToSend.length,
+      dryRun: false,
+      laneQuotas,
+      laneFill,
+      byLane,
+      byPriority,
+      qstashError,
+    })
+
     console.log(`[Scheduler] COMPLETE: Scheduled ${totalScheduled} products in ${duration}ms`)
 
     return NextResponse.json({
@@ -353,6 +315,9 @@ export async function GET(req: NextRequest) {
       scheduled: totalScheduled,
       batches: batchesToSend.length,
       byPriority,
+      byLane,
+      lanes: laneFill,
+      schedulerRunId,
       qstash: {
         success: qstashSuccess,
         failed: qstashFailed,
@@ -366,6 +331,7 @@ export async function GET(req: NextRequest) {
         maxBatches: MAX_BATCHES_PER_RUN,
         cronFrequencyMinutes: CRON_FREQUENCY_MINUTES,
         activePriorities: ACTIVE_PRIORITIES,
+        laneQuotas,
       },
       dynamicBatching: {
         backlogSize: actualBacklogSize,
@@ -374,7 +340,7 @@ export async function GET(req: NextRequest) {
         reason:
           capacityAnalysis.status === "critical"
             ? "critical-capacity"
-            : actualBacklogSize <= WORKER_BATCH_SIZE * 5
+            : allProducts.length <= WORKER_BATCH_SIZE * 5
               ? "small-backlog"
               : "scaled",
       },
@@ -387,4 +353,22 @@ export async function GET(req: NextRequest) {
       { status: 500 },
     )
   }
+}
+
+function sortSlaByUrgency(products: LaneProduct[], now: Date): LaneProduct[] {
+  return [...products].sort((a, b) => {
+    const scoreA = urgencyForProduct(a, now)
+    const scoreB = urgencyForProduct(b, now)
+    return scoreB - scoreA
+  })
+}
+
+function urgencyForProduct(product: LaneProduct, now: Date): number {
+  const thresholdHours = PRIORITY_REFRESH_HOURS[product.priority ?? 0] ?? 24
+  const updatedAt = product.updated_at ? new Date(product.updated_at) : new Date(0)
+  const hoursAgo = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60)
+  const baseUrgency = hoursAgo / thresholdHours
+  const cv = product.price_stats_cv_ln_90d
+  const volatilityBoost = typeof cv === "number" && Number.isFinite(cv) && cv > 1e-9 ? Math.min(0.35, cv / 0.12) : 0
+  return baseUrgency * (1 + volatilityBoost)
 }

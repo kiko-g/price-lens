@@ -1,0 +1,39 @@
+---
+description: Derive Supabase query types from generated Tables<> — never hand-write Row subsets
+globs: src/lib/**/*.ts,src/app/api/**/*.ts
+alwaysApply: false
+---
+
+## Supabase-derived types
+
+`src/types/supabase.ts` is the schema source of truth (regenerate with `pnpm supabase:generate:types`).
+
+### Do
+
+- Use `Tables<"table_name">` and `Pick<>` for column subsets tied to a `.select()`.
+- Single-source column lists: `const KEYS = [...] as const satisfies readonly (keyof Tables<"…">)[]`, then `KEYS.join(", ")` for the select string.
+- Use `Enums<"enum_name">` or indexed access (`Tables<"store_products">["priority_source"]`) for enum columns — never widen to `string`.
+- For JSON/API wire formats (e.g. QStash camelCase), derive payload field types from the Row (`SchedulerProductRow["barcode"]`) in a dedicated mapper module.
+- After `.select(COLUMNS)` with a joined string, use `parseSchedulerProductRows(data)` — Supabase cannot infer dynamic select strings.
+
+```ts
+import type { Tables } from "@/types/supabase"
+
+const COLUMN_KEYS = ["id", "url", "priority_source"] as const satisfies readonly (keyof Tables<"store_products">)[]
+export const COLUMNS = COLUMN_KEYS.join(", ")
+export type ProductRow = Pick<Tables<"store_products">, (typeof COLUMN_KEYS)[number]>
+```
+
+### Don't
+
+- Hand-write interfaces that duplicate `Row` fields (drifts on migration, weakens enums to `string`).
+- Maintain a parallel `COLUMNS` string and type with no compile-time link.
+
+### Exceptions
+
+- **Domain/view models** (`StoreProduct` in `@/types`) may stay hand-written when they represent UI/API shape, not a DB projection — document the mapping.
+- **Tables missing from generated types** (migration not applied locally): cast narrowly at the query site with a TODO; regenerate types after `pnpm db:restore`.
+
+### Scrape pipeline reference
+
+`src/lib/business/scheduler-product.ts` — `SchedulerProductRow`, `ScrapeBatchProductPayload`, `toScrapeBatchProductPayload()`.

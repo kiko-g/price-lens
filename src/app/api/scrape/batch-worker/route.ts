@@ -4,36 +4,13 @@ import { createClient } from "@/lib/supabase/server"
 import { scrapeAndReplaceProduct } from "@/lib/scrapers"
 import { updatePricePoint } from "@/lib/business/pricing"
 import { incrementBulkScrapeProgress, getBulkScrapeJob } from "@/lib/kv"
+import type { ScrapeBatchRequest } from "@/lib/business/scheduler-product"
+import type { ScrapeLane } from "@/lib/business/scrape-budget"
 import type { StoreProduct } from "@/types"
 
 // 5 minutes max for batch processing
 // With ~40 products and ~5 sec each = ~200 seconds, leaving buffer
 export const maxDuration = 300
-
-interface BatchProduct {
-  id: number
-  url: string
-  name: string
-  originId: number
-  priority: number
-  // Pre-fetched by scheduler to avoid per-product SELECTs (egress optimization)
-  prioritySource?: string | null
-  barcode?: string | null
-  brand?: string | null
-  image?: string | null
-  pack?: string | null
-  category?: string | null
-  category2?: string | null
-  category3?: string | null
-  createdAt?: string | null
-  updatedAt?: string | null
-}
-
-interface BatchRequest {
-  batchId: string
-  bulkJobId?: string
-  products: BatchProduct[]
-}
 
 interface ProductResult {
   id: number
@@ -70,7 +47,7 @@ async function handler(req: NextRequest) {
     console.log(`[BatchWorker] Raw body preview: ${rawBody.substring(0, 500)}`)
 
     // Parse the body - handle potential double-encoding from QStash
-    let body: BatchRequest
+    let body: ScrapeBatchRequest
     try {
       let parsed = JSON.parse(rawBody)
       // If QStash double-encoded, parsed will be a string, not an object
@@ -84,8 +61,15 @@ async function handler(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body", rawPreview: rawBody.substring(0, 200) }, { status: 400 })
     }
 
-    console.log(`[BatchWorker] Batch ID: ${body.batchId}, Products: ${body.products?.length || 0}`)
-    const { batchId, bulkJobId, products } = body
+    console.log(`[BatchWorker] Batch ID: ${body.batchId}, Lane: ${body.lane ?? "?"}, Products: ${body.products?.length || 0}`)
+    const { batchId, bulkJobId, products, lane: laneFromBody } = body
+    const lane: ScrapeLane | null =
+      laneFromBody ??
+      (() => {
+        const prefix = batchId.split("-")[0]
+        if (prefix === "sla" || prefix === "healing" || prefix === "long_tail") return prefix
+        return null
+      })()
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return NextResponse.json({ error: "No products in batch" }, { status: 400 })
@@ -201,6 +185,7 @@ async function handler(req: NextRequest) {
     try {
       await supabase.from("scrape_runs").insert({
         batch_id: batchId,
+        lane,
         started_at: new Date(batchStartTime).toISOString(),
         finished_at: new Date().toISOString(),
         duration_ms: totalDuration,

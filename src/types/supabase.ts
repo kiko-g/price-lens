@@ -329,6 +329,7 @@ export type Database = {
           failed: number
           finished_at: string | null
           id: number
+          lane: string | null
           started_at: string
           success: number
           total: number
@@ -341,6 +342,7 @@ export type Database = {
           failed?: number
           finished_at?: string | null
           id?: number
+          lane?: string | null
           started_at?: string
           success?: number
           total?: number
@@ -353,9 +355,58 @@ export type Database = {
           failed?: number
           finished_at?: string | null
           id?: number
+          lane?: string | null
           started_at?: string
           success?: number
           total?: number
+        }
+        Relationships: []
+      }
+      scheduler_runs: {
+        Row: {
+          batches_sent: number
+          by_lane: Json | null
+          by_priority: Json | null
+          dry_run: boolean
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: number
+          lane_fill: Json
+          lane_quotas: Json
+          qstash_error: string | null
+          scheduled_total: number
+          started_at: string
+        }
+        Insert: {
+          batches_sent?: number
+          by_lane?: Json | null
+          by_priority?: Json | null
+          dry_run?: boolean
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: number
+          lane_fill: Json
+          lane_quotas: Json
+          qstash_error?: string | null
+          scheduled_total?: number
+          started_at?: string
+        }
+        Update: {
+          batches_sent?: number
+          by_lane?: Json | null
+          by_priority?: Json | null
+          dry_run?: boolean
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: number
+          lane_fill?: Json
+          lane_quotas?: Json
+          qstash_error?: string | null
+          scheduled_total?: number
+          started_at?: string
         }
         Relationships: []
       }

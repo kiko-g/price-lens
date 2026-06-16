@@ -29,7 +29,7 @@ alwaysApply: true
 
 Dump files are gitignored. Restore writes only to local (`127.0.0.1:54322`), never production.
 
-- **Types:** `pnpm supabase:generate:types` generates from the **local** DB (`--local`) so `src/types/supabase.ts` matches the running schema (e.g. includes `trade_items`, `canonical_products` if migrations were applied locally). Remote project is used only for dump/restore and linking.
+- **Types:** `pnpm supabase:generate:types` generates from the **local** DB (`--local`) so `src/types/supabase.ts` matches the running schema (e.g. includes `trade_items`, `canonical_products` if migrations were applied locally). Remote project is used only for dump/restore and linking. For query projections, derive types with `Pick<Tables<"…">>` — see [supabase-derived-types.mdc](supabase-derived-types.mdc).
 
 ### Supabase 1000-row limit
 
