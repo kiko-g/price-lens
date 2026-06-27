@@ -2,10 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import { ACTIVE_PRIORITIES, PRIORITY_REFRESH_HOURS } from "@/lib/business/priority"
 import type { ScrapeLane } from "@/lib/business/scrape-budget"
 import {
+  isScrapeableLaneProduct,
   isScrapeableSchedulerProduct,
   parseSchedulerProductRows,
   SCHEDULER_COLUMNS,
   type LaneProduct,
+  type ScrapeableLaneProduct,
   type SchedulerProductRow,
 } from "@/lib/business/scheduler-product"
 import type { Database } from "@/types/supabase"
@@ -305,6 +307,33 @@ export function mergeLaneProducts(
   longTail: LaneProduct[],
 ): LaneProduct[] {
   return dedupeById([...sla, ...healing, ...longTail])
+}
+
+/**
+ * Build the queue actually sent to QStash — per-lane caps, SLA wins dedup.
+ * Unlike mergeLaneProducts + slice(0, N), this guarantees healing/long_tail slots.
+ */
+export function buildScheduleQueue(
+  sla: LaneProduct[],
+  healing: LaneProduct[],
+  longTail: LaneProduct[],
+  quotas: { sla: number; healing: number; longTail: number },
+): ScrapeableLaneProduct[] {
+  const slaQueue = sla.filter(isScrapeableLaneProduct).slice(0, quotas.sla)
+  const slaIds = new Set(slaQueue.map((p) => p.id))
+
+  const healingQueue = healing
+    .filter(isScrapeableLaneProduct)
+    .filter((p) => !slaIds.has(p.id))
+    .slice(0, quotas.healing)
+  const healingIds = new Set(healingQueue.map((p) => p.id))
+
+  const longTailQueue = longTail
+    .filter(isScrapeableLaneProduct)
+    .filter((p) => !slaIds.has(p.id) && !healingIds.has(p.id))
+    .slice(0, quotas.longTail)
+
+  return [...slaQueue, ...healingQueue, ...longTailQueue]
 }
 
 export type LaneFillStats = Record<ScrapeLane, { requested: number; filled: number; backlog: number | null }>

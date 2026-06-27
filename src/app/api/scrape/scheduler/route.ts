@@ -14,13 +14,13 @@ import { getLaneQuotasPerRun } from "@/lib/business/scrape-budget"
 import { persistSchedulerRun } from "@/lib/business/scheduler-runs"
 import {
   buildLaneFillStats,
+  buildScheduleQueue,
   fetchHealingLaneProducts,
   fetchLongTailLaneProducts,
   fetchSlaLaneProducts,
-  mergeLaneProducts,
   type LaneProduct,
 } from "@/lib/business/scheduler-lanes"
-import { isScrapeableLaneProduct, toScrapeBatchProductPayload } from "@/lib/business/scheduler-product"
+import { toScrapeBatchProductPayload } from "@/lib/business/scheduler-product"
 
 export const maxDuration = 300 // 5 minutes at most to find and queue products
 
@@ -102,11 +102,18 @@ export async function GET(req: NextRequest) {
     )
 
     const slaSorted = sortSlaByUrgency(slaResult.products, now)
-    const allProducts = mergeLaneProducts(slaSorted, healingResult.products, longTailResult.products).filter(
-      isScrapeableLaneProduct,
+    const productsToSchedule = buildScheduleQueue(
+      slaSorted,
+      healingResult.products,
+      longTailResult.products,
+      {
+        sla: laneQuotas.sla,
+        healing: laneQuotas.healing,
+        longTail: laneQuotas.longTail,
+      },
     )
 
-    if (allProducts.length === 0) {
+    if (productsToSchedule.length === 0) {
       console.info("🛜 [Scheduler] No products to schedule across any lane")
       const duration = Date.now() - startTime
       const schedulerRunId = await persistSchedulerRun(supabase, {
@@ -127,29 +134,24 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    const actualBacklogSize = slaResult.backlogSize ?? allProducts.length
-    const MIN_BATCHES = 5
-    const batchesNeeded = Math.ceil(allProducts.length / WORKER_BATCH_SIZE)
-    let dynamicMaxBatches: number
-
-    if (capacityAnalysis.status === "critical") {
-      dynamicMaxBatches = MAX_BATCHES_PER_RUN
-    } else if (allProducts.length <= WORKER_BATCH_SIZE * MIN_BATCHES) {
-      dynamicMaxBatches = Math.max(MIN_BATCHES, batchesNeeded)
-    } else {
-      const utilizationFactor = Math.min(1, allProducts.length / (WORKER_BATCH_SIZE * MAX_BATCHES_PER_RUN * 2))
-      dynamicMaxBatches = Math.round(MIN_BATCHES + (MAX_BATCHES_PER_RUN - MIN_BATCHES) * utilizationFactor)
-    }
-
-    dynamicMaxBatches = Math.min(dynamicMaxBatches, MAX_BATCHES_PER_RUN)
-    const maxProductsToSend = Math.min(allProducts.length, dynamicMaxBatches * WORKER_BATCH_SIZE, laneQuotas.perRunBudget)
-    const productsToSchedule = allProducts.slice(0, maxProductsToSend)
+    const actualBacklogSize = slaResult.backlogSize ?? productsToSchedule.length
+    const batchesNeeded = Math.ceil(productsToSchedule.length / WORKER_BATCH_SIZE)
+    const dynamicMaxBatches = Math.min(
+      MAX_BATCHES_PER_RUN,
+      Math.max(5, batchesNeeded),
+    )
+    const maxProductsToSend = Math.min(
+      productsToSchedule.length,
+      dynamicMaxBatches * WORKER_BATCH_SIZE,
+      laneQuotas.perRunBudget,
+    )
+    const scheduledProducts = productsToSchedule.slice(0, maxProductsToSend)
 
     console.log(
-      `[Scheduler] Backlog: ${actualBacklogSize} SLA overdue, scheduling ${productsToSchedule.length} products in up to ${dynamicMaxBatches} batches`,
+      `[Scheduler] Backlog: ${actualBacklogSize} SLA overdue, scheduling ${scheduledProducts.length} products in up to ${dynamicMaxBatches} batches`,
     )
 
-    const productsWithMeta = productsToSchedule.map((product) => {
+    const productsWithMeta = scheduledProducts.map((product) => {
       if (product.lane !== "sla") {
         return { ...product, urgencyScore: 0, hoursOverdue: 0 }
       }
@@ -265,7 +267,7 @@ export async function GET(req: NextRequest) {
           reason:
             capacityAnalysis.status === "critical"
               ? "critical-capacity"
-              : allProducts.length <= WORKER_BATCH_SIZE * 5
+              : scheduledProducts.length <= WORKER_BATCH_SIZE * 5
                 ? "small-backlog"
                 : "scaled",
         },
@@ -340,7 +342,7 @@ export async function GET(req: NextRequest) {
         reason:
           capacityAnalysis.status === "critical"
             ? "critical-capacity"
-            : allProducts.length <= WORKER_BATCH_SIZE * 5
+            : scheduledProducts.length <= WORKER_BATCH_SIZE * 5
               ? "small-backlog"
               : "scaled",
       },
