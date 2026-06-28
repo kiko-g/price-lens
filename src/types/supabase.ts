@@ -52,6 +52,30 @@ export type Database = {
         }
         Relationships: []
       }
+      data_health_snapshots: {
+        Row: {
+          computed_at: string
+          data: Json
+          duration_ms: number | null
+          id: number
+          triggered_by: string
+        }
+        Insert: {
+          computed_at?: string
+          data: Json
+          duration_ms?: number | null
+          id?: never
+          triggered_by?: string
+        }
+        Update: {
+          computed_at?: string
+          data?: Json
+          duration_ms?: number | null
+          id?: never
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       canonical_categories: {
         Row: {
           created_at: string | null
@@ -762,6 +786,14 @@ export type Database = {
       }
       compute_analytics_snapshot: {
         Args: { p_triggered_by?: string }
+        Returns: Json
+      }
+      compute_data_health_snapshot: {
+        Args: { p_triggered_by?: string }
+        Returns: Json
+      }
+      suggest_product_successors: {
+        Args: { p_limit?: number }
         Returns: Json
       }
       refresh_store_product_price_stats_batch: {

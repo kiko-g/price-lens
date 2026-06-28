@@ -18,6 +18,10 @@
       "schedule": "0 */8 * * *"
     },
     {
+      "path": "/api/admin/data-health/compute-worker",
+      "schedule": "0 4 * * *"
+    },
+    {
       "path": "/api/admin/discovery?action=run&origin=1",
       "schedule": "0 3 * * 0"
     },

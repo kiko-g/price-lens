@@ -58,6 +58,7 @@ import {
   PickaxeIcon,
   ScanBarcodeIcon,
   ScanFaceIcon,
+  ShieldCheckIcon,
   ShoppingBasketIcon,
   ShoppingCartIcon,
   SparklesIcon,
@@ -77,6 +78,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
     label: null,
     items: [
       { title: "Analytics", href: "/admin/analytics", icon: GaugeIcon },
+      { title: "Saúde dos Dados", href: "/admin/data-health", icon: ShieldCheckIcon },
       { title: "Performance", href: "/admin/performance", icon: TimerIcon },
       { title: "Marketing", href: "/admin/marketing", icon: BriefcaseIcon },
     ],
