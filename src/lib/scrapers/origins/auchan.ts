@@ -3,6 +3,8 @@ import { BaseProductScraper } from "@/lib/scrapers/base"
 import { StoreOrigin, type RawProduct } from "@/lib/scrapers/types"
 import { formatProductName, priceToNumber, resizeImgSrc } from "@/lib/scrapers/utils"
 
+// Volta deposit: Auchan shows "+0,10 € Depósito" in `.container-pricing__text` — not implemented yet.
+
 export type ScrapedSchemaAuchan = {
   "@context": string
   "@type": string

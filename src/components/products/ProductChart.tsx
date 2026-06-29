@@ -55,6 +55,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ChartFreqMostCommonStrong, ChartFreqNotMostCommonStrong, PwaRichStrong } from "@/components/i18n/rich-tags"
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
+import { VoltaDepositLabel } from "@/components/products/VoltaDepositLabel"
 import { PricesVariationCard } from "@/components/products/PricesVariationCard"
 
 import { formatDistanceToNow } from "date-fns"
@@ -1158,6 +1159,10 @@ function FallbackDetails({ className }: FallbackDetailsProps) {
         ) : null}
         <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
       </div>
+
+      {sp.deposit_amount && sp.deposit_amount > 0 ? (
+        <VoltaDepositLabel depositAmount={sp.deposit_amount} size="xs" />
+      ) : null}
     </div>
   )
 }

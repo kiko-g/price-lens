@@ -38,6 +38,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { LoginPrompt } from "@/components/auth/LoginPrompt"
 import { PriorityChip } from "@/components/products/PriorityChip"
 import { SupermarketChainBadge, getSupermarketChainName } from "@/components/products/SupermarketChainBadge"
+import { VoltaDepositLabel } from "@/components/products/VoltaDepositLabel"
 import { StoreProductCardDrawerChartSkeleton } from "@/components/products/skeletons/StoreProductCardDrawerChartSkeleton"
 import { StoreProductCardSkeleton } from "@/components/products/skeletons/StoreProductCardSkeleton"
 
@@ -407,6 +408,10 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
 
             {isPriceNotSet ? (
               <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+            ) : null}
+
+            {sp.deposit_amount && sp.deposit_amount > 0 ? (
+              <VoltaDepositLabel depositAmount={sp.deposit_amount} size="xs" className="mt-0.5" />
             ) : null}
           </div>
 

@@ -67,6 +67,8 @@ export interface StoreProduct {
   price_per_major_unit: number | null
   major_unit: string | null
   discount: number | null
+  /** Volta/SDR refundable deposit in EUR; null = unknown or not applicable */
+  deposit_amount?: number | null
   image: string | null
   category: string | null
   category_2: string | null
@@ -109,6 +111,7 @@ export interface Price {
   price_recommended: number | null
   price_per_major_unit: number | null
   discount: number | null
+  deposit_amount?: number | null
   valid_from: string | null
   valid_to: string | null
   created_at: string | null

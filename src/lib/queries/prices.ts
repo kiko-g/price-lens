@@ -12,7 +12,7 @@ export const priceQueries = {
       supabase
         .from("prices")
         .select(
-          "id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at",
+          "id, store_product_id, price, price_recommended, price_per_major_unit, discount, deposit_amount, valid_from, valid_to, created_at, updated_at",
         ),
     )
 
@@ -245,7 +245,7 @@ export const priceQueries = {
     const { data, error } = await supabase
       .from("prices")
       .select(
-        "id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at",
+        "id, store_product_id, price, price_recommended, price_per_major_unit, discount, deposit_amount, valid_from, valid_to, created_at, updated_at",
       )
       .eq("store_product_id", store_product_id)
       .order("valid_from", { ascending: false })
@@ -423,7 +423,7 @@ export const priceQueries = {
       supabase
         .from("prices")
         .select(
-          "id, store_product_id, price, price_recommended, price_per_major_unit, discount, valid_from, valid_to, created_at, updated_at",
+          "id, store_product_id, price, price_recommended, price_per_major_unit, discount, deposit_amount, valid_from, valid_to, created_at, updated_at",
         )
         .order("store_product_id", { ascending: true })
         .order("valid_from", { ascending: false }),

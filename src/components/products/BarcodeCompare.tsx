@@ -19,6 +19,7 @@ import { BackButton } from "@/components/ui/combo/back-button"
 import { Barcode } from "@/components/ui/combo/barcode"
 import { NutriScoreBadge } from "@/components/ui/combo/nutri-score"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
+import { VoltaDepositLabel } from "@/components/products/VoltaDepositLabel"
 import { ComparisonChart } from "@/components/products/ComparisonChart"
 import { BarcodeCompareSaveHighlight } from "@/components/i18n/rich-tags"
 
@@ -217,6 +218,9 @@ function CompareCard({
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
             {perUnitLabel && <span>{perUnitLabel}</span>}
             {product.pack && <span>{formatPackBullet(product.pack)}</span>}
+            {product.deposit_amount && product.deposit_amount > 0 ? (
+              <VoltaDepositLabel depositAmount={product.deposit_amount} size="xs" />
+            ) : null}
             {priceDiffLabel && (
               <Badge variant="retail" size="xs">
                 {priceDiffLabel}

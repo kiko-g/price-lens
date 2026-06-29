@@ -3,6 +3,8 @@ import { BaseProductScraper } from "@/lib/scrapers/base"
 import { StoreOrigin, type RawProduct } from "@/lib/scrapers/types"
 import { isValidJson, resizeImgSrc } from "@/lib/scrapers/utils"
 
+// Volta deposit: legal copy mentions 0,10 € deposit in product details — not implemented yet.
+
 interface PingoDoceGtmItem {
   item_name?: string
   item_brand?: string

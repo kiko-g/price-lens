@@ -41,6 +41,8 @@ export interface RawProduct {
   category2: string | null
   category3: string | null
   available?: boolean
+  /** Volta/SDR refundable deposit in EUR; null when absent or unknown */
+  depositAmount?: number | null
 }
 
 /**

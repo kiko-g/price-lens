@@ -13,6 +13,7 @@ import { GoodDealOpportunityBadge } from "@/components/products/product-page/Goo
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { ProductActions } from "@/components/products/product-page/ProductActions"
+import { VoltaDepositLabel } from "@/components/products/VoltaDepositLabel"
 import { resolveImageUrlForPage } from "@/components/products/product-page/ProductHeroDesktop"
 
 import { WifiOffIcon } from "lucide-react"
@@ -125,6 +126,10 @@ export function ProductHeroMobile({ sp }: ProductHeroMobileProps) {
             </Badge>
           ) : null}
         </div>
+
+        {sp.deposit_amount && sp.deposit_amount > 0 ? (
+          <VoltaDepositLabel depositAmount={sp.deposit_amount} size="xs" />
+        ) : null}
 
         {sp.updated_at ? (
           <div className="w-fit shrink-0 self-center">

@@ -20,6 +20,9 @@ interface ContinenteGtmData {
 
 /**
  * Scraper for Continente supermarket (origin_id: 1)
+ *
+ * Volta (SDR) deposit: shelf price excludes the refundable deposit shown in
+ * `.pwc-tile--price-sdr`. Rollout may replace SKUs — see docs/successor-families-v0.md.
  */
 export class ContinenteScraper extends BaseProductScraper {
   readonly originId = StoreOrigin.Continente
@@ -102,6 +105,7 @@ export class ContinenteScraper extends BaseProductScraper {
       priceRecommended: this.extractPriceRecommended($, gtmItem, root),
       pricePerMajorUnit: this.extractPricePerUnit($, gtmItem, root),
       majorUnit: this.extractMajorUnit($, root),
+      depositAmount: this.extractDepositAmount($, root),
       image: image ? resizeImgSrc(image, 500, 500) : null,
       category: gtmItem?.item_category || breadcrumbs[0] || null,
       category2: gtmItem?.item_category2 || breadcrumbs[1] || null,
@@ -231,6 +235,22 @@ export class ContinenteScraper extends BaseProductScraper {
     // Text format: "63,12€/kg" - extract unit after /
     const unitMatch = text.match(/\/(.+)$/)
     return unitMatch ? unitMatch[1].trim() : null
+  }
+
+  /**
+   * Extracts Volta/SDR deposit from the price tile (e.g. "+ 0,10€ depósito").
+   * Uses `.pwc-tile--price-sdr` only — avoids false positives from product names
+   * like "Ralador com Depósito".
+   */
+  private extractDepositAmount($: cheerio.CheerioAPI, root?: string): number | null {
+    const sdrText = this.getText($, `${root} .pwc-tile--price-sdr`)
+    if (!sdrText) return null
+
+    const match = sdrText.match(/\+\s*([\d]+[,.][\d]{1,2})\s*(?:€|&euro;|eur)?/i)
+    if (!match) return null
+
+    const amount = parseFloat(match[1].replace(",", "."))
+    return Number.isFinite(amount) && amount > 0 ? amount : null
   }
 }
 

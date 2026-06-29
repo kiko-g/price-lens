@@ -344,6 +344,21 @@ describe("Continente Scraper", () => {
     expect(product.discount).toBe(0)
   })
 
+  it("should extract Volta deposit from Continente HTML (Red Bull fixture)", async () => {
+    const fixtureHtml = loadFixture("continente_volta.html")
+    mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
+
+    const result = await scraper.Scrapers.continente.productPage(
+      "https://www.continente.pt/produto/bebida-energetica-em-lata-gaseificada-melancia-edition-red-bull-red-bull-8771915.html",
+    )
+    const product = result as ScrapedProduct
+
+    expect(product.price).toBe(1.19)
+    expect(product.deposit_amount).toBe(0.1)
+    expect(product.barcode).toBeTruthy()
+    expect(product.name).toContain("Red Bull")
+  })
+
   it("should clean URL tracking parameters", async () => {
     const fixtureHtml = loadFixture("continente.html")
     mockAxiosGet.mockResolvedValue({ data: fixtureHtml })
@@ -645,6 +660,7 @@ describe("Output Schema Consistency", () => {
     "price_per_major_unit",
     "major_unit",
     "discount",
+    "deposit_amount",
     "image",
     "category",
     "category_2",

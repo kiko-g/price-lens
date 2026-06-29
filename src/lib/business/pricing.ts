@@ -21,6 +21,7 @@ export function mergePrices(a: Price, b: Price): Price {
     price_recommended: a.price_recommended ?? b.price_recommended,
     price_per_major_unit: a.price_per_major_unit ?? b.price_per_major_unit,
     discount: a.discount ?? b.discount,
+    deposit_amount: a.deposit_amount ?? b.deposit_amount,
     valid_from:
       a.valid_from && b.valid_from
         ? new Date(a.valid_from) > new Date(b.valid_from)
@@ -113,7 +114,8 @@ export function arePricePointsEqual(p1: Price, p2: Price) {
   return (
     p1.price === p2.price &&
     p1.price_recommended === p2.price_recommended &&
-    p1.price_per_major_unit === p2.price_per_major_unit
+    p1.price_per_major_unit === p2.price_per_major_unit &&
+    p1.deposit_amount === p2.deposit_amount
   )
 }
 
@@ -145,6 +147,7 @@ export async function updatePricePoint(sp: StoreProduct) {
     p_price_recommended: sp.price_recommended,
     p_price_per_major_unit: sp.price_per_major_unit,
     p_discount: sp.discount,
+    p_deposit_amount: sp.deposit_amount ?? null,
     p_timestamp: timestamp,
   })
 
@@ -178,6 +181,7 @@ async function updatePricePointLegacy(sp: StoreProduct) {
     price_recommended: sp.price_recommended,
     price_per_major_unit: sp.price_per_major_unit,
     discount: sp.discount,
+    deposit_amount: sp.deposit_amount ?? null,
     created_at: timestamp,
     valid_from: timestamp,
     valid_to: null,

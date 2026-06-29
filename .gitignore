@@ -58,3 +58,4 @@ supabase/data.sql
 
 # docs
 docs/*
+*.local.*

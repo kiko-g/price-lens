@@ -620,7 +620,7 @@ export const storeProductQueries = {
         ignoreDuplicates: false,
       })
       .select(
-        "id, url, name, price, price_recommended, price_per_major_unit, discount, barcode, brand, image, pack, category, category_2, category_3, origin_id, priority, available, created_at, updated_at",
+        "id, url, name, price, price_recommended, price_per_major_unit, discount, deposit_amount, barcode, brand, image, pack, category, category_2, category_3, origin_id, priority, available, created_at, updated_at",
       )
       .single()
 

@@ -19,6 +19,7 @@ import { SupermarketChainBadge } from "@/components/products/SupermarketChainBad
 import { PriceFreshnessInfo } from "@/components/products/PriceFreshnessInfo"
 import { GoodDealOpportunityBadge } from "@/components/products/product-page/GoodDealOpportunityBadge"
 import { ProductActions } from "@/components/products/product-page/ProductActions"
+import { VoltaDepositLabel } from "@/components/products/VoltaDepositLabel"
 
 import { AlertTriangleIcon } from "lucide-react"
 
@@ -161,6 +162,10 @@ export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductH
 
             <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
           </div>
+
+          {sp.deposit_amount && sp.deposit_amount > 0 ? (
+            <VoltaDepositLabel depositAmount={sp.deposit_amount} />
+          ) : null}
         </div>
 
         {/* Actions */}

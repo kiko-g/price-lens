@@ -989,6 +989,10 @@
         "aria": "Oferta forte: pontuação alta de descida, grande desconto, ou preço habitual com promoção"
       }
     },
+    "voltaDeposit": {
+      "label": "{amount} depósito Volta",
+      "title": "Depósito Volta reembolsável na devolução da embalagem"
+    },
     "freshness": {
       "trigger": "Verificado {time}",
       "ariaLabel": "Detalhes da verificação de preço. Última verificação {time}.",

@@ -19,7 +19,7 @@ export function TestScrapers() {
   const [scrapers, setScrapers] = useState<Scrapers[]>([
     {
       name: "Continente",
-      url: "https://www.continente.pt/produto/pasta-de-dentes-sensibilidade-e-frescura-extra-sensodyne-6367523.html",
+      url: "https://www.continente.pt/produto/bebida-energetica-em-lata-gaseificada-melancia-edition-red-bull-red-bull-8771915.html",
       result: null,
     },
     {

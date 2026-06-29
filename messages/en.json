@@ -989,6 +989,10 @@
         "aria": "Strong offer: high price-drop score, big discount, or typical price with a promotion"
       }
     },
+    "voltaDeposit": {
+      "label": "{amount} Volta deposit",
+      "title": "Refundable Volta deposit when you return the packaging"
+    },
     "freshness": {
       "trigger": "Verified {time}",
       "ariaLabel": "Price verification details. Last verified {time}.",

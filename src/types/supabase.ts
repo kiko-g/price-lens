@@ -263,6 +263,7 @@ export type Database = {
       prices: {
         Row: {
           created_at: string
+          deposit_amount: number | null
           discount: number | null
           id: number
           price: number | null
@@ -275,6 +276,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deposit_amount?: number | null
           discount?: number | null
           id?: number
           price?: number | null
@@ -287,6 +289,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deposit_amount?: number | null
           discount?: number | null
           id?: number
           price?: number | null
@@ -477,6 +480,7 @@ export type Database = {
           category_2: string | null
           category_3: string | null
           created_at: string | null
+          deposit_amount: number | null
           discount: number | null
           id: number
           image: string | null
@@ -512,6 +516,7 @@ export type Database = {
           category_2?: string | null
           category_3?: string | null
           created_at?: string | null
+          deposit_amount?: number | null
           discount?: number | null
           id?: number
           image?: string | null
@@ -547,6 +552,7 @@ export type Database = {
           category_2?: string | null
           category_3?: string | null
           created_at?: string | null
+          deposit_amount?: number | null
           discount?: number | null
           id?: number
           image?: string | null
@@ -1080,6 +1086,7 @@ export type Database = {
       unaccent: { Args: { "": string }; Returns: string }
       upsert_price_point: {
         Args: {
+          p_deposit_amount?: number
           p_discount: number
           p_price: number
           p_price_per_major_unit: number

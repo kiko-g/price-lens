@@ -220,6 +220,10 @@ export function transformRawProduct(
   const priceRecommended = raw.priceRecommended ? priceToNumber(String(raw.priceRecommended)) : price
   const pricePerMajorUnit = raw.pricePerMajorUnit ? priceToNumber(String(raw.pricePerMajorUnit)) : null
   const discount = priceRecommended && priceRecommended > 0 ? Math.max(0, 1 - (price ?? 0) / priceRecommended) : 0
+  const depositAmount =
+    raw.depositAmount != null && !Number.isNaN(raw.depositAmount) && raw.depositAmount > 0
+      ? raw.depositAmount
+      : null
 
   return {
     url: raw.url,
@@ -232,6 +236,7 @@ export function transformRawProduct(
     price_per_major_unit: pricePerMajorUnit,
     major_unit: raw.majorUnit,
     discount,
+    deposit_amount: depositAmount,
     image: raw.image ? resizeImgSrc(raw.image, 500, 500) : null,
     category: raw.category,
     category_2: raw.category2,
