@@ -386,6 +386,39 @@ export type Database = {
         }
         Relationships: []
       }
+      scrape_runs_daily: {
+        Row: {
+          avg_duration_ms: number | null
+          batch_count: number
+          failed: number
+          lane: string
+          rolled_up_at: string
+          run_day: string
+          success: number
+          total: number
+        }
+        Insert: {
+          avg_duration_ms?: number | null
+          batch_count?: number
+          failed?: number
+          lane?: string
+          rolled_up_at?: string
+          run_day: string
+          success?: number
+          total?: number
+        }
+        Update: {
+          avg_duration_ms?: number | null
+          batch_count?: number
+          failed?: number
+          lane?: string
+          rolled_up_at?: string
+          run_day?: string
+          success?: number
+          total?: number
+        }
+        Relationships: []
+      }
       scheduler_runs: {
         Row: {
           batches_sent: number
@@ -790,6 +823,10 @@ export type Database = {
       }
       compute_data_health_snapshot: {
         Args: { p_triggered_by?: string }
+        Returns: Json
+      }
+      rollup_scrape_runs_retention: {
+        Args: { p_keep_days?: number; p_max_days?: number }
         Returns: Json
       }
       suggest_product_successors: {
