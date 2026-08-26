@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import { isEmbeddedAppShell } from "@/lib/app-shell"
 
 const DISMISS_KEY = "pwa-install-state"
 const INSTALLED_KEY = "pwa-installed"
@@ -21,14 +22,6 @@ function getPlatform(): Platform {
   if (/iP(hone|od|ad)/.test(ua) && /WebKit/.test(ua)) return "ios"
   if (/Android/.test(ua)) return "android"
   return "desktop"
-}
-
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as unknown as { standalone?: boolean }).standalone === true
-  )
 }
 
 function wasInstalledBefore(): boolean {
@@ -104,7 +97,7 @@ export function usePWAInstall() {
       return
     }
 
-    if (isStandalone() || wasInstalledBefore()) {
+    if (isEmbeddedAppShell() || wasInstalledBefore()) {
       setInstalled(true)
       return
     }

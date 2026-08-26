@@ -58,9 +58,7 @@ export function UserDropdownMenu() {
 
   function getUserBadgeText() {
     if (profile?.role === "admin") return "Admin"
-    else if (profile?.plan === "free") return "Free"
-    else if (profile?.plan === "plus") return "Plus"
-    else return ""
+    return ""
   }
 
   const userBadgeText = getUserBadgeText()
@@ -80,13 +78,15 @@ export function UserDropdownMenu() {
           <AvatarFallback>{userInitial}</AvatarFallback>
         </Avatar>
         <span className="sr-only">{user.user_metadata.full_name ?? t("openUserMenu")}</span>
-        <Badge
-          size="3xs"
-          variant="default"
-          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 leading-none capitalize"
-        >
-          {userBadgeText}
-        </Badge>
+        {userBadgeText ? (
+          <Badge
+            size="3xs"
+            variant="default"
+            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 leading-none capitalize"
+          >
+            {userBadgeText}
+          </Badge>
+        ) : null}
       </button>
     )
 
@@ -108,13 +108,15 @@ export function UserDropdownMenu() {
             <AvatarFallback>{userInitial}</AvatarFallback>
           </Avatar>
           <span className="sr-only">{t("openUserMenu")}</span>
-          <Badge
-            size="3xs"
-            variant="default"
-            className="absolute -bottom-1 left-1/2 -translate-x-1/2 leading-none capitalize"
-          >
-            {userBadgeText}
-          </Badge>
+          {userBadgeText ? (
+            <Badge
+              size="3xs"
+              variant="default"
+              className="absolute -bottom-1 left-1/2 -translate-x-1/2 leading-none capitalize"
+            >
+              {userBadgeText}
+            </Badge>
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
 

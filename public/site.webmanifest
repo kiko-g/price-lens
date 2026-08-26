@@ -10,7 +10,7 @@
   "theme_color": "#09090b",
   "background_color": "#09090b",
   "categories": ["shopping", "finance", "food"],
-  "lang": "en",
+  "lang": "pt",
   "prefer_related_applications": false,
   "icons": [
     {
@@ -32,14 +32,14 @@
   ],
   "shortcuts": [
     {
-      "name": "Browse Products",
-      "short_name": "Products",
+      "name": "Explorar produtos",
+      "short_name": "Produtos",
       "url": "/products",
       "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "My Favorites",
-      "short_name": "Favorites",
+      "name": "Os meus favoritos",
+      "short_name": "Favoritos",
       "url": "/favorites",
       "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
     }

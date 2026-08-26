@@ -14,7 +14,6 @@ import { HeroGridPattern } from "@/components/home/HeroGridPattern"
 import { ProfileSidebar } from "@/components/profile/ProfileSidebar"
 import { FavoritesTab } from "@/components/profile/FavoritesTab"
 import { ListsTab } from "@/components/profile/ListsTab"
-import { PlanTab } from "@/components/profile/PlanTab"
 import { SavingsTab } from "@/components/profile/SavingsTab"
 import { SettingsTab } from "@/components/profile/SettingsTab"
 
@@ -22,7 +21,7 @@ import { EmptyStateView } from "@/components/ui/combo/state-views"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { BellIcon, CreditCardIcon, HeartIcon, ListIcon, SettingsIcon, TrophyIcon } from "lucide-react"
+import { BellIcon, HeartIcon, ListIcon, SettingsIcon, TrophyIcon } from "lucide-react"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -68,10 +67,6 @@ export default function ProfilePage() {
                     <TrophyIcon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{tTabs("savings")}</span>
                   </TabsTrigger>
-                  <TabsTrigger value="plan" className="gap-1.5">
-                    <CreditCardIcon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{tTabs("plan")}</span>
-                  </TabsTrigger>
                   <TabsTrigger value="settings" className="gap-1.5">
                     <SettingsIcon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{tTabs("settings")}</span>
@@ -92,10 +87,6 @@ export default function ProfilePage() {
 
                 <TabsContent value="savings" className="mt-4">
                   <SavingsTab />
-                </TabsContent>
-
-                <TabsContent value="plan" className="mt-4">
-                  <PlanTab plan={profile?.plan} />
                 </TabsContent>
 
                 <TabsContent value="settings" className="mt-4">

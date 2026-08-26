@@ -16,7 +16,7 @@ import { HeartIcon, MailIcon, PackageSearchIcon } from "lucide-react"
 
 interface ProfileSidebarProps {
   user: User
-  profile: { plan?: string; role?: string } | null
+  profile: { role?: string } | null
 }
 
 function getProviderIcon(provider: string | undefined) {
@@ -66,11 +66,6 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
         </Badge>
 
         <div className="mt-2 flex items-center gap-2">
-          {profile?.plan && (
-            <Badge variant="primary" roundedness="sm" className="capitalize">
-              {profile.plan}
-            </Badge>
-          )}
           {profile?.role && (
             <Badge variant="secondary" roundedness="sm" className="capitalize">
               {profile.role}
@@ -130,12 +125,6 @@ export function ProfileSidebar({ user, profile }: ProfileSidebarProps) {
           <p className="text-muted-foreground truncate text-xs">{user.email}</p>
           <div className="mt-1 flex flex-col gap-1 md:flex-row md:items-center md:gap-1.5">
             <div className="flex items-center gap-1">
-              {profile?.plan && (
-                <Badge variant="primary" size="xs" roundedness="sm" className="w-fit capitalize">
-                  {profile.plan}
-                </Badge>
-              )}
-
               {profile?.role && (
                 <Badge variant="secondary" size="xs" roundedness="sm" className="w-fit capitalize">
                   {profile.role}

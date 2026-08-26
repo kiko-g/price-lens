@@ -9,7 +9,6 @@ import { PriceCreep } from "@/components/home/PriceCreep"
 import { ValueProposition } from "@/components/home/ValueProposition"
 import { InflationBasketConcept } from "@/components/home/InflationBasketConcept"
 import { SavePotential } from "@/components/home/SavePotential"
-import { PricingSection } from "@/components/home/Pricing"
 
 const InflationContext = dynamic(() => import("@/components/home/InflationContext").then((mod) => mod.InflationContext))
 
@@ -45,8 +44,6 @@ export default async function AboutPage() {
         <ValueProposition />
         <InflationContext />
         <InflationBasketConcept />
-        <PageSeparator />
-        <PricingSection />
       </main>
     </Layout>
   )

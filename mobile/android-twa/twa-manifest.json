@@ -1,0 +1,50 @@
+{
+  "packageId": "pt.pricelens.app",
+  "host": "price-lens.vercel.app",
+  "name": "Price Lens",
+  "launcherName": "Price Lens",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#09090B",
+  "themeColorDark": "#09090B",
+  "navigationColor": "#09090B",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#09090B",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://price-lens.vercel.app/icons/android-chrome-512x512.png",
+  "maskableIconUrl": "https://price-lens.vercel.app/icons/android-chrome-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://price-lens.vercel.app/site.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "enableSiteSettingsShortcut": false,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://price-lens.vercel.app/",
+  "minSdkVersion": 24,
+  "fingerprints": [],
+  "shortcuts": [
+    {
+      "name": "Explorar produtos",
+      "shortName": "Produtos",
+      "url": "/products",
+      "chosenIconUrl": "https://price-lens.vercel.app/icons/android-chrome-192x192.png"
+    },
+    {
+      "name": "Os meus favoritos",
+      "shortName": "Favoritos",
+      "url": "/favorites",
+      "chosenIconUrl": "https://price-lens.vercel.app/icons/android-chrome-192x192.png"
+    }
+  ]
+}

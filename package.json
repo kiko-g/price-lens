@@ -47,7 +47,10 @@
     "backfill:pingo-doce-barcodes:prod": "env-cmd -f .env.production tsx scripts/backfill-pingo-doce-barcodes.ts",
     "scraper:local": "tsx scripts/run-scraper-local.ts",
     "icons:generate": "node scripts/generate-app-icons.mjs",
-    "tailwind:upgrade": "npx @tailwindcss/upgrade --force"
+    "tailwind:upgrade": "npx @tailwindcss/upgrade --force",
+    "mobile:ios:install": "pnpm --dir mobile/ios-shell install",
+    "mobile:ios:sync": "pnpm --dir mobile/ios-shell exec cap sync ios",
+    "mobile:ios:open": "pnpm --dir mobile/ios-shell exec cap open ios"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.91",

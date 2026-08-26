@@ -125,7 +125,7 @@ export async function generateMetadata(): Promise<Metadata> {
         { url: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
       ],
     },
-    manifest: `${siteConfig.url}/site.webmanifest`,
+    manifest: "/site.webmanifest",
   }
 }
 

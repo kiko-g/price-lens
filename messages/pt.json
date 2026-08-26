@@ -170,7 +170,7 @@
       },
       "profile": {
         "title": "Perfil",
-        "description": "Gere a tua conta Price Lens, preferências e subscrição."
+        "description": "Gere a tua conta Price Lens e as tuas preferências."
       },
       "login": {
         "title": "Entrar",
@@ -505,7 +505,6 @@
       "lists": "Listas",
       "alerts": "Alertas",
       "savings": "Poupança",
-      "plan": "Plano",
       "settings": "Definições"
     },
     "sidebar": {
@@ -565,28 +564,6 @@
       },
       "achievementsTitle": "Conquistas",
       "achievementsProgress": "{unlocked} / {total}"
-    },
-    "planTab": {
-      "title": "O Price Lens é gratuito",
-      "intro": "O Price Lens é totalmente gratuito durante o early access. Estamos a construir novas funcionalidades para te ajudar a poupar nas compras. Eis o que está no nosso roadmap:",
-      "status": {
-        "available": "Disponível",
-        "building": "Em desenvolvimento"
-      },
-      "features": {
-        "history": {
-          "title": "Histórico completo",
-          "description": "Acompanhamento ilimitado de produtos com histórico profundo e análise de tendências."
-        },
-        "alerts": {
-          "title": "Alertas de preço",
-          "description": "Sê avisado quando produtos que acompanhas baixarem de preço. Define limites personalizados por produto."
-        },
-        "shoppingList": {
-          "title": "Otimizador de lista de compras",
-          "description": "Otimiza a tua lista de compras entre diferentes supermercados. Apanha os melhores preços e poupa tempo."
-        }
-      }
     },
     "settings": {
       "appearance": {
@@ -735,40 +712,6 @@
       "body": "Guarda os teus favoritos e avisamos-te quando o preço descer. Grátis e sem spam.",
       "goFavorites": "Ir para os favoritos",
       "continueGoogle": "Continuar com Google"
-    },
-    "pricing": {
-      "title": "Preços simples e transparentes",
-      "subtitle": "Acompanha preços de supermercado e fica atento à inflação com o Price Lens. Escolhe o plano que funciona para ti.",
-      "perMonth": "/mês",
-      "popular": "Popular",
-      "comingSoon": "Em breve",
-      "free": {
-        "name": "Free",
-        "description": "Acompanhamento de preços relevante para todos",
-        "cta": "Começar",
-        "items": {
-          "history14": "Histórico de preços de 14 dias",
-          "basket": "Acompanha produtos do cabaz de inflação selecionado",
-          "compare": "Acede e compara entre vários supermercados",
-          "weeklyAlerts": "Alertas de preço semanais básicos"
-        }
-      },
-      "plus": {
-        "name": "Plus",
-        "description": "Acompanhamento avançado para compradores atentos e cépticos da inflação",
-        "cta": "Subscrever Plus",
-        "items": {
-          "everythingFree": "Tudo o que está no Free",
-          "fullHistory": "Histórico de preços completo (não apenas 14 dias)",
-          "unlimitedTracking": "Acompanhamento ilimitado de produtos personalizados",
-          "dailyReports": "Relatórios diários de preços (vs. semanais no Free)",
-          "insights": "Painel de tendências de inflação",
-          "shoppingList": "Otimizador de lista de compras entre lojas",
-          "ppCalculator": "Calculadora de impacto no poder de compra",
-          "exportApi": "Exportação CSV e acesso à API"
-        }
-      },
-      "footer": "Todos os planos incluem a funcionalidade base para transparência de preços e consciência da inflação. Tens dúvidas? <link>Contacta-nos</link>"
     },
     "priceCreep": {
       "title": "A subida invisível dos preços",
@@ -1525,7 +1468,7 @@
       "scanBarcode": "Código",
       "darkMode": "Modo escuro",
       "builtBy": "Desenvolvido por <name>Francisco Gonçalves</name>",
-      "openSource": "Código aberto no GitHub",
+      "openSource": "Código open sourced no GitHub",
       "socialAria": {
         "github": "GitHub",
         "instagram": "Instagram",
@@ -1551,7 +1494,7 @@
     "footer": {
       "builtBy": "Feito por <name>Francisco Gonçalves</name>",
       "rights": "© {year} Price Lens.",
-      "repo": "Código aberto no GitHub"
+      "repo": "Código open sourced no GitHub"
     },
     "footerFull": {
       "builtBy": "Feito por <link>Francisco Gonçalves</link>",

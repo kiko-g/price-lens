@@ -170,7 +170,7 @@
       },
       "profile": {
         "title": "Profile",
-        "description": "Manage your Price Lens account, preferences, and subscription."
+        "description": "Manage your Price Lens account and preferences."
       },
       "login": {
         "title": "Sign in",
@@ -505,7 +505,6 @@
       "lists": "Lists",
       "alerts": "Alerts",
       "savings": "Savings",
-      "plan": "Plan",
       "settings": "Settings"
     },
     "sidebar": {
@@ -565,28 +564,6 @@
       },
       "achievementsTitle": "Achievements",
       "achievementsProgress": "{unlocked} / {total}"
-    },
-    "planTab": {
-      "title": "Price Lens is free",
-      "intro": "Price Lens is completely free during early access. We're actively building new features to help you save money on groceries. Here's what's on our roadmap:",
-      "status": {
-        "available": "Available",
-        "building": "In development"
-      },
-      "features": {
-        "history": {
-          "title": "Full price history",
-          "description": "Unlimited custom product tracking with deep historical data and trend analysis."
-        },
-        "alerts": {
-          "title": "Price alerts",
-          "description": "Get notified when products you track drop in price. Set custom thresholds per product."
-        },
-        "shoppingList": {
-          "title": "Shopping list optimizer",
-          "description": "Optimize your shopping list across different supermarket sources. Get the best deals and save time."
-        }
-      }
     },
     "settings": {
       "appearance": {
@@ -735,40 +712,6 @@
       "body": "Save your favorites and we'll tell you when prices drop. Free, no spam.",
       "goFavorites": "Go to your favorites",
       "continueGoogle": "Continue with Google"
-    },
-    "pricing": {
-      "title": "Simple, Transparent Pricing",
-      "subtitle": "Track supermarket prices and stay aware of inflation with Price Lens. Choose the plan that works for you.",
-      "perMonth": "/month",
-      "popular": "Popular",
-      "comingSoon": "Coming soon",
-      "free": {
-        "name": "Free",
-        "description": "Relevant price tracking for everyone",
-        "cta": "Get Started",
-        "items": {
-          "history14": "14-day price history",
-          "basket": "Track handpicked inflation basket products",
-          "compare": "Access and compare multiple supermarkets origins",
-          "weeklyAlerts": "Basic weekly price alerts"
-        }
-      },
-      "plus": {
-        "name": "Plus",
-        "description": "Advanced tracking for savvy shoppers and inflation doomers",
-        "cta": "Get Plus",
-        "items": {
-          "everythingFree": "Everything in Free",
-          "fullHistory": "Full price history (not just 14 days)",
-          "unlimitedTracking": "Unlimited custom product tracking",
-          "dailyReports": "Daily price reports (vs. weekly in Free)",
-          "insights": "Inflation insights dashboard with trends",
-          "shoppingList": "Shopping list optimizer across stores",
-          "ppCalculator": "Purchasing power impact calculator",
-          "exportApi": "Export CSV data and API access"
-        }
-      },
-      "footer": "All plans include the core functionality for price transparency and inflation awareness. Any questions? <link>Contact us</link>"
     },
     "priceCreep": {
       "title": "The invisible price creep",

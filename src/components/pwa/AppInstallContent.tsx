@@ -6,6 +6,7 @@ import { DownloadIcon, SmartphoneIcon, CheckCircle2Icon, MonitorIcon, ChromeIcon
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import type { BeforeInstallPromptEvent } from "@/hooks/usePWAInstall"
+import { isEmbeddedAppShell } from "@/lib/app-shell"
 import { PwaIosPlusIconInline, PwaIosShareIconInline, PwaRichStrong } from "@/components/i18n/rich-tags"
 
 type Platform = "android" | "ios" | "desktop"
@@ -17,15 +18,6 @@ function getPlatform(): Platform {
   if (/Android/.test(ua)) return "android"
   return "desktop"
 }
-
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as unknown as { standalone?: boolean }).standalone === true
-  )
-}
-
 export function AppInstallContent() {
   const [platform, setPlatform] = useState<Platform>("desktop")
   const [installed, setInstalled] = useState(false)
@@ -38,7 +30,7 @@ export function AppInstallContent() {
 
   useEffect(() => {
     setPlatform(getPlatform())
-    if (isStandalone()) setInstalled(true)
+    if (isEmbeddedAppShell()) setInstalled(true)
 
     const handlePrompt = (e: Event) => {
       e.preventDefault()

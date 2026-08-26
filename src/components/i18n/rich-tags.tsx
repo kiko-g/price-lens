@@ -78,17 +78,6 @@ export function InflationContextAboutLink(chunks: ReactNode) {
   )
 }
 
-export function PricingFooterMailLink(chunks: ReactNode) {
-  return (
-    <Link
-      href="mailto:kikojpgoncalves@gmail.com"
-      className="text-secondary hover:text-secondary/80 underline underline-offset-4"
-    >
-      {chunks}
-    </Link>
-  )
-}
-
 export function SavingsSpotlightHighlight(chunks: ReactNode) {
   return <span className="text-primary">{chunks}</span>
 }

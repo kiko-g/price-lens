@@ -7,7 +7,7 @@ import { HideFooter } from "@/contexts/FooterContext"
 
 const LIMIT = 20
 
-const SEARCH_INPUT_SKELETON_PLACEHOLDER = "Search products..."
+const SEARCH_INPUT_SKELETON_PLACEHOLDER = "Search products"
 
 const PRESET_WIDTHS = ["w-[90px]", "w-[76px]", "w-[104px]", "w-[118px]"]
 

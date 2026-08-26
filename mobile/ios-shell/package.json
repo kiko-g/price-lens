@@ -1,0 +1,24 @@
+{
+  "name": "price-lens-ios-shell",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Capacitor iOS shell for Price Lens — loads production Next.js app",
+  "scripts": {
+    "cap:sync": "cap sync ios",
+    "cap:open": "cap open ios",
+    "cap:run": "cap run ios"
+  },
+  "dependencies": {
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/browser": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
+    "@capacitor/push-notifications": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
+    "typescript": "^5.8.3"
+  }
+}

@@ -59,3 +59,23 @@ supabase/data.sql
 # docs
 docs/*
 *.local.*
+
+# Android TWA (generated project, signing key, Play artifacts)
+mobile/android-twa/android/
+mobile/android-twa/app/
+mobile/android-twa/gradle/
+mobile/android-twa/build.gradle
+mobile/android-twa/settings.gradle
+mobile/android-twa/gradle.properties
+mobile/android-twa/gradlew
+mobile/android-twa/gradlew.bat
+mobile/android-twa/manifest-checksum.txt
+mobile/android-twa/store_icon.png
+mobile/android-twa/*.keystore
+mobile/android-twa/*.jks
+mobile/android-twa/.keystore-pass
+mobile/android-twa/app-release-signed.aab
+mobile/android-twa/app-release-signed.apk
+mobile/android-twa/app-release-bundle.aab
+mobile/android-twa/app-release-unsigned-aligned.apk
+mobile/android-twa/node_modules/
