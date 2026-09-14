@@ -1,19 +1,33 @@
-/* eslint-disable @formatjs/no-literal-string-in-jsx -- brand name is intentionally not localized */
 "use client"
 
 import Link from "next/link"
 
-export function LogoLink() {
+import { cn } from "@/lib/utils"
+import { useBrand } from "@/contexts/BrandContext"
+
+type LogoLinkProps = {
+  className?: string
+  /** Hide the wordmark (e.g. collapsed sidebar rail). */
+  markOnly?: boolean
+}
+
+export function LogoLink({ className, markOnly = false }: LogoLinkProps) {
+  const brand = useBrand()
+
   return (
     <Link
       href="/"
-      className="flex max-w-full min-w-0 items-center justify-start gap-1.5 transition hover:opacity-80 md:justify-center"
+      aria-label={brand.displayName}
+      className={cn(
+        "flex max-w-full min-w-0 items-center justify-start gap-1.5 transition hover:opacity-80 md:justify-center",
+        className,
+      )}
     >
       <span className="flex shrink-0 items-center justify-center rounded-full">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/price-lens.svg" alt="Price Lens" className="logo-animation size-5" />
+        <img src={brand.markSrc} alt="" className="logo-animation size-5" />
       </span>
-      <span className="truncate font-bold tracking-tight">Price Lens</span>
+      {!markOnly && <span className="truncate font-bold tracking-tight">{brand.displayName}</span>}
     </Link>
   )
 }

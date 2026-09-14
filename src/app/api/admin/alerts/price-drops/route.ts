@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { getResend, FROM_EMAIL } from "@/lib/email/resend"
+import { getResend, getFromEmail } from "@/lib/email/resend"
+import { getBrand } from "@/lib/brand/server"
 import { priceDropAlertHtml, priceDropAlertSubject } from "@/lib/email/templates"
 import { siteConfig } from "@/lib/config"
 import { STORE_NAMES } from "@/types/business"
@@ -108,6 +109,8 @@ export async function POST() {
   let sent = 0
   let failed = 0
   const resend = getResend()
+  const brand = await getBrand()
+  const fromEmail = getFromEmail(brand.displayName)
 
   for (const alert of alertsToSend) {
     const email = emailMap.get(alert.subscription.user_id)
@@ -123,7 +126,7 @@ export async function POST() {
 
     try {
       await resend.emails.send({
-        from: FROM_EMAIL,
+        from: fromEmail,
         to: email,
         subject: await priceDropAlertSubject(
           alert.product.name,

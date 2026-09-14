@@ -2,14 +2,15 @@ import { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { HomeIcon, WorkflowIcon, HeartIcon, ShoppingBasketIcon, InfoIcon, SmartphoneIcon, TagIcon } from "lucide-react"
 
+/**
+ * Infrastructure config (URLs, author, social links). Brand strings (name, tagline, description)
+ * intentionally do NOT live here — read them from `getBrand()` / `useBrand()` (Brand Control Center).
+ * Hostnames stay on the current Vercel project until the domain/repo rename ships.
+ */
 export const siteConfig = {
-  name: "Price Lens",
-  title: "Price Lens",
   author: "Francisco Goncalves",
   url: "https://price-lens.vercel.app",
   ogImage: "https://price-lens.vercel.app/og?stats=true",
-  description:
-    "Daily price monitoring for Portuguese supermarkets (Continente, Auchan and Pingo Doce). Turn price swings into savings. More money in your pocket. All in Price Lens.",
   links: {
     linkedin: "https://www.linkedin.com/in/kikogoncalves/",
     instagram: "https://www.instagram.com/kikogoncalves_",
@@ -19,29 +20,6 @@ export const siteConfig = {
     website: "https://kikogoncalves.com",
   },
   socialhandle: "@kikogoncalves_",
-}
-
-export const defaultMetadata: Metadata = {
-  title: siteConfig.title,
-  description: siteConfig.description,
-  openGraph: {
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 628,
-        alt: siteConfig.name,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: [
-      {
-        url: siteConfig.ogImage,
-      },
-    ],
-  },
 }
 
 export function pageMetadata(title: string, description: string): Metadata {
@@ -97,5 +75,6 @@ export const navigation: NavigationItem[] = [
   { key: "favorites", icon: HeartIcon, href: "/favorites", shownOnDesktop: true, shownOnMobile: true },
   { key: "getTheApp", icon: SmartphoneIcon, href: "/app", shownOnDesktop: false, shownOnMobile: true },
   { key: "about", icon: InfoIcon, href: "/about", shownOnDesktop: true, shownOnMobile: true },
-  { key: "admin", icon: WorkflowIcon, href: "/admin", shownOnDesktop: true, shownOnMobile: true },
+  // Staff-only: reachable by URL (and via the sidebar for admins), never in consumer navigation.
+  { key: "admin", icon: WorkflowIcon, href: "/admin", shownOnDesktop: false, shownOnMobile: false },
 ]

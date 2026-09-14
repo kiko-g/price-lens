@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { STORE_NAMES } from "@/types/business"
 import { ACTIVE_PRIORITIES } from "@/lib/business/priority"
-import { getResend, FROM_EMAIL } from "@/lib/email/resend"
+import { getResend, getFromEmail } from "@/lib/email/resend"
+import { getBrand } from "@/lib/brand/server"
 
 export const maxDuration = 30
 
@@ -149,11 +150,13 @@ export async function GET(req: NextRequest) {
       ? "warn"
       : "ok"
 
+  const brand = await getBrand()
+
   // --- Send webhook if there are alerts ---
   const webhookUrl = process.env.SCRAPE_ALERT_WEBHOOK_URL
   if (webhookUrl && alerts.length > 0) {
     try {
-      await sendWebhookAlert(webhookUrl, alerts, overallSeverity)
+      await sendWebhookAlert(webhookUrl, alerts, overallSeverity, brand.displayName)
     } catch (err) {
       console.error("[ScrapeHealth] Webhook failed:", err)
     }
@@ -163,7 +166,7 @@ export async function GET(req: NextRequest) {
   const alertEmail = process.env.SCRAPE_ALERT_EMAIL
   if (alertEmail && alerts.length > 0) {
     try {
-      await sendEmailAlert(alertEmail, alerts, overallSeverity)
+      await sendEmailAlert(alertEmail, alerts, overallSeverity, brand.displayName)
     } catch (err) {
       console.error("[ScrapeHealth] Alert email failed:", err)
     }
@@ -191,9 +194,9 @@ export async function GET(req: NextRequest) {
   })
 }
 
-async function sendWebhookAlert(url: string, alerts: Alert[], severity: Severity) {
+async function sendWebhookAlert(url: string, alerts: Alert[], severity: Severity, brandName: string) {
   const emoji = severity === "critical" ? "\u{1F6A8}" : "\u26A0\uFE0F"
-  const title = `${emoji} Price Lens Scrape Health: ${severity.toUpperCase()}`
+  const title = `${emoji} ${brandName} Scrape Health: ${severity.toUpperCase()}`
 
   const body = alerts.map((a) => `**[${a.severity.toUpperCase()}]** ${a.message}`).join("\n")
 
@@ -217,7 +220,7 @@ async function sendWebhookAlert(url: string, alerts: Alert[], severity: Severity
   })
 }
 
-async function sendEmailAlert(to: string, alerts: Alert[], severity: Severity) {
+async function sendEmailAlert(to: string, alerts: Alert[], severity: Severity, brandName: string) {
   const emoji = severity === "critical" ? "\u{1F6A8}" : "\u26A0\uFE0F"
   const rows = alerts
     .map(
@@ -227,9 +230,9 @@ async function sendEmailAlert(to: string, alerts: Alert[], severity: Severity) {
     .join("")
 
   await getResend().emails.send({
-    from: FROM_EMAIL,
+    from: getFromEmail(brandName),
     to,
-    subject: `${emoji} Price Lens scrape health: ${severity.toUpperCase()} (${alerts.length} alert${alerts.length === 1 ? "" : "s"})`,
+    subject: `${emoji} ${brandName} scrape health: ${severity.toUpperCase()} (${alerts.length} alert${alerts.length === 1 ? "" : "s"})`,
     html: `<div style="font-family:sans-serif;max-width:600px"><h2>Scrape health: ${severity.toUpperCase()}</h2><ul style="padding-left:16px">${rows}</ul><p style="color:#6b7280;font-size:12px">Sent by /api/admin/alerts/scrape-health · ${new Date().toISOString()}</p></div>`,
   })
 }

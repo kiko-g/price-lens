@@ -13,5 +13,7 @@ export function getResend(): Resend {
 
 // Default to Resend's shared sender (works on the free tier without a verified
 // domain, but can only deliver to the account owner's email). Override with
-// RESEND_FROM_EMAIL once a domain is verified.
-export const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Price Lens <onboarding@resend.dev>"
+// RESEND_FROM_EMAIL once a domain is verified. The display part follows the brand.
+export function getFromEmail(brandName: string): string {
+  return process.env.RESEND_FROM_EMAIL || `${brandName} <onboarding@resend.dev>`
+}

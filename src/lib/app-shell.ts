@@ -20,3 +20,6 @@ export function isCapacitorNative(): boolean {
 export function isEmbeddedAppShell(): boolean {
   return isStandaloneDisplayMode() || isCapacitorNative()
 }
+
+/** Cookie persisting the desktop sidebar state ("1" = collapsed). Read on the server, written on the client. */
+export const APP_SIDEBAR_COOKIE = "app_sidebar_collapsed"

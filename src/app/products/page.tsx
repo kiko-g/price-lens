@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Footer } from "@/components/layout/Footer"
 import { HideFooter } from "@/contexts/FooterContext"
 import { siteConfig } from "@/lib/config"
+import { getBrand } from "@/lib/brand/server"
 import type { SearchType, SortByType } from "@/types/business"
 import { DEFAULT_BROWSE_SORT } from "@/types/business"
 import type { PrioritySource } from "@/types"
@@ -56,9 +57,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 
   const ogImageUrl = `${siteConfig.url}/api/og/products${ogParams.toString() ? `?${ogParams}` : ""}`
-  const tMeta = await getTranslations("metadata")
-  const tBrowse = await getTranslations("products.browse.metadata")
-  const ogTitle = `${tMeta("site.name")} | ${title}`
+  const [brand, tBrowse] = await Promise.all([getBrand(), getTranslations("products.browse.metadata")])
+  const ogTitle = `${brand.displayName} | ${title}`
   const description = params.q ? tBrowse("descriptionWithQuery", { query: params.q }) : tBrowse("description")
 
   return {

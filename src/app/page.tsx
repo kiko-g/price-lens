@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
-import { defaultMetadata } from "@/lib/config"
+import { defaultMetadata } from "@/lib/brand/metadata"
 import { getHomeStats } from "@/lib/queries/home-stats"
 import { getHeroProducts } from "@/lib/business/hero"
 
@@ -14,8 +14,8 @@ import { PersonalizedDashboardSkeleton } from "@/components/home/PersonalizedDas
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
-  ...defaultMetadata,
+export async function generateMetadata(): Promise<Metadata> {
+  return defaultMetadata()
 }
 
 function Separator() {

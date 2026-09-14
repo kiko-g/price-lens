@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server"
 
 import { siteConfig } from "@/lib/config"
+import { getBrand } from "@/lib/brand/server"
 import type { Locale } from "@/i18n/config"
 import { isLocale, defaultLocale } from "@/i18n/config"
 import { formatPrice } from "@/lib/i18n/format"
@@ -23,7 +24,7 @@ function resolveLocale(locale: Locale | string | null | undefined): Locale {
 
 export async function priceDropAlertHtml(data: PriceDropAlertData): Promise<string> {
   const locale = resolveLocale(data.locale)
-  const t = await getTranslations({ locale, namespace: "email.priceDrop" })
+  const [t, brand] = await Promise.all([getTranslations({ locale, namespace: "email.priceDrop" }), getBrand()])
   const saving = formatPrice(data.oldPrice - data.newPrice, locale)
   const changeText = Math.abs(data.changePercent).toFixed(1)
 
@@ -70,7 +71,7 @@ export async function priceDropAlertHtml(data: PriceDropAlertData): Promise<stri
 
     <p style="text-align: center; margin: 16px 0 0; font-size: 11px; color: #94a3b8;">
       ${t("footerReason", {
-        site: `<a href="${siteConfig.url}" style="color: #64748b;">${siteConfig.name}</a>`,
+        site: `<a href="${siteConfig.url}" style="color: #64748b;">${brand.displayName}</a>`,
         profile: `<a href="${siteConfig.url}/profile" style="color: #64748b;">${t("profileLink")}</a>`,
       })}
     </p>

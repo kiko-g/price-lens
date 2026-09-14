@@ -1,5 +1,5 @@
 /**
- * Generates app icons (PNG + ICO) from public/price-lens-new.svg.
+ * Generates app icons (PNG + ICO) from public/lince-mark.svg.
  * Run: node scripts/generate-app-icons.mjs
  * Requires: pnpm add -D sharp to-ico
  */
@@ -11,7 +11,7 @@ import { fileURLToPath } from "url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, "..")
-const srcSvg = join(root, "public", "price-lens-new.svg")
+const srcSvg = join(root, "public", "lince-mark.svg")
 const iconsDir = join(root, "public", "icons")
 
 const SIZES = [
