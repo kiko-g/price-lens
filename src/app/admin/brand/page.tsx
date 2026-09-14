@@ -21,6 +21,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { BrandPreview } from "./_components/BrandPreview"
 
 const LOCALE_LABELS: Record<Locale, string> = { pt: "Português", en: "English" }
+// PT-first voice: edit and preview Portuguese before English.
+const VOICE_LOCALES: Locale[] = ["pt", ...locales.filter((locale) => locale !== "pt")]
 
 export default function BrandControlCenterPage() {
   const { data, isPending, error } = useBrandSettings()
@@ -135,7 +137,7 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
             </div>
           </section>
 
-          {locales.map((locale) => (
+          {VOICE_LOCALES.map((locale) => (
             <section key={locale} className="flex flex-col gap-4">
               <SectionHeading
                 title={`Voice · ${LOCALE_LABELS[locale]}`}
@@ -198,7 +200,7 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
       <aside className="flex flex-col gap-4">
         <Tabs value={previewLocale} onValueChange={(value) => isLocale(value) && setPreviewLocale(value)}>
           <TabsList>
-            {locales.map((locale) => (
+            {VOICE_LOCALES.map((locale) => (
               <TabsTrigger key={locale} value={locale}>
                 {LOCALE_LABELS[locale]}
               </TabsTrigger>
