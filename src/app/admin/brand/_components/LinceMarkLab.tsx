@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
-
 import {
   LINCE_LOGO_FASHIONS,
   LINCE_LOGO_SHAPES,
   LINCE_PULSE_ANIMATIONS,
   LINCE_PULSE_SHAPE_PATTERNS,
   LinceMark,
+  getLinceMarkDefaults,
+  type LinceMarkOptions,
   type LinceLogoFashion,
   type LinceLogoShape,
   type LincePulseAnimation,
@@ -16,11 +16,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { MarkPreviewSurface } from "@/app/admin/brand/_components/MarkPreviewSurface"
 
 const SHAPE_LABELS: Record<LinceLogoShape, string> = {
   hunter: "hunter",
   pal: "pal",
   angular: "angular",
+  simple: "simple",
+  "geometric-1": "geometric-1",
 }
 
 const FASHION_LABELS: Record<LinceLogoFashion, string> = {
@@ -43,40 +46,51 @@ const ANIMATION_LABELS: Record<LincePulseAnimation, string> = {
   animated: "animated",
 }
 
-export function LinceMarkLab() {
-  const [logoShape, setLogoShape] = useState<LinceLogoShape>("hunter")
-  const [logoFashion, setLogoFashion] = useState<LinceLogoFashion>("outlined")
-  const [pulseShapePattern, setPulseShapePattern] = useState<LincePulseShapePattern>("quarter-circle")
-  const [pulseAnimation, setPulseAnimation] = useState<LincePulseAnimation>("static")
+export function LinceMarkLab({
+  value,
+  onChange,
+}: {
+  value: LinceMarkOptions
+  onChange: (value: LinceMarkOptions) => void
+}) {
+  const { logoShape, logoFashion, pulseShapePattern, pulseAnimation, monochrome } = value
+  const handleShapeChange = (shape: LinceLogoShape) => {
+    onChange({ ...getLinceMarkDefaults(shape), monochrome })
+  }
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Mark · shape, pulse & fashion</CardTitle>
         <CardDescription>
-          Hunter is the default: neon outline, ember backlight, quarter-circle pulse. Pal and angular stay as options.
+          Explore animal and geometric marks. Shape selection loads its suggested fashion and pulse. These settings
+          update the samples below; saving brand copy does not publish a logo choice.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-2">
-          <PreviewWell label="navy" className="bg-[#0b0f1a]">
-            <LinceMark
-              logoShape={logoShape}
-              logoFashion={logoFashion}
-              pulseShapePattern={pulseShapePattern}
-              pulseAnimation={pulseAnimation}
-              className="size-20"
-            />
-          </PreviewWell>
-          <PreviewWell label="paper" className="bg-[#f6f3ee]">
-            <LinceMark
-              logoShape={logoShape}
-              logoFashion={logoFashion}
-              pulseShapePattern={pulseShapePattern}
-              pulseAnimation={pulseAnimation}
-              className="size-20"
-            />
-          </PreviewWell>
+          {(["navy", "paper"] as const).map((theme) => (
+            <MarkPreviewSurface
+              key={theme}
+              theme={theme}
+              className="flex min-w-0 flex-col items-center gap-5 border px-2 py-5"
+            >
+              <span className="text-[11px] tracking-wide uppercase">{theme}</span>
+              <LinceMark {...value} className="size-20" />
+              <div className="flex w-full flex-wrap items-end justify-around gap-x-3 gap-y-4 pt-2">
+                {[16, 24, 28, 32].map((size) => (
+                  <div
+                    key={size}
+                    className="flex flex-col items-center gap-2"
+                    aria-label={`${size} pixel ${theme} preview`}
+                  >
+                    <LinceMark {...value} width={size} height={size} />
+                    <span className="text-[11px]">{size}px</span>
+                  </div>
+                ))}
+              </div>
+            </MarkPreviewSurface>
+          ))}
         </div>
 
         <PropGroup
@@ -84,46 +98,48 @@ export function LinceMarkLab() {
           options={LINCE_LOGO_SHAPES}
           labels={SHAPE_LABELS}
           value={logoShape}
-          onChange={setLogoShape}
+          onChange={handleShapeChange}
         />
         <PropGroup
           legend="logoFashion"
           options={LINCE_LOGO_FASHIONS}
           labels={FASHION_LABELS}
           value={logoFashion}
-          onChange={setLogoFashion}
+          onChange={(logoFashion) => onChange({ ...value, logoFashion })}
         />
         <PropGroup
           legend="pulseShapePattern"
           options={LINCE_PULSE_SHAPE_PATTERNS}
           labels={PULSE_LABELS}
           value={pulseShapePattern}
-          onChange={setPulseShapePattern}
+          onChange={(pulseShapePattern) => onChange({ ...value, pulseShapePattern })}
         />
         <PropGroup
           legend="pulseAnimation"
           options={LINCE_PULSE_ANIMATIONS}
           labels={ANIMATION_LABELS}
           value={pulseAnimation}
-          onChange={setPulseAnimation}
+          onChange={(pulseAnimation) => onChange({ ...value, pulseAnimation })}
+          disabled={logoFashion === "tile" || pulseShapePattern === "none"}
         />
 
-        <code className="bg-muted block overflow-x-auto p-2 text-[11px] leading-relaxed">
-          {`<LinceMark logoShape="${logoShape}" logoFashion="${logoFashion}" pulseShapePattern="${pulseShapePattern}" pulseAnimation="${pulseAnimation}" />`}
+        <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+          <input
+            type="checkbox"
+            checked={monochrome}
+            onChange={(event) => onChange({ ...value, monochrome: event.target.checked })}
+            className="accent-primary size-4"
+          />
+          One ink, no glow
+        </label>
+
+        {logoFashion === "tile" && <p className="text-muted-foreground text-xs">App tiles omit the outer pulse.</p>}
+
+        <code className="bg-muted block p-2 text-xs leading-relaxed break-words whitespace-pre-wrap">
+          {`<LinceMark logoShape="${logoShape}" logoFashion="${logoFashion}" pulseShapePattern="${pulseShapePattern}" pulseAnimation="${pulseAnimation}" monochrome={${monochrome}} />`}
         </code>
       </CardContent>
     </Card>
-  )
-}
-
-function PreviewWell({ label, className, children }: { label: string; className: string; children: ReactNode }) {
-  return (
-    <div className={cn("flex flex-col items-center justify-center gap-2 border px-2 py-4", className)}>
-      {children}
-      <span className={cn("text-[10px] tracking-wide uppercase", label === "navy" ? "text-zinc-400" : "text-zinc-600")}>
-        {label}
-      </span>
-    </div>
   )
 }
 
@@ -133,15 +149,17 @@ function PropGroup<T extends string>({
   labels,
   value,
   onChange,
+  disabled = false,
 }: {
   legend: string
   options: readonly T[]
   labels: Record<T, string>
   value: T
   onChange: (next: T) => void
+  disabled?: boolean
 }) {
   return (
-    <fieldset className="flex flex-col gap-1.5">
+    <fieldset disabled={disabled} className={cn("flex flex-col gap-1.5", disabled && "opacity-50")}>
       <legend className="text-muted-foreground font-mono text-[11px]">{legend}</legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map((option) => (
@@ -150,7 +168,7 @@ function PropGroup<T extends string>({
             type="button"
             size="sm"
             variant={value === option ? "primary-soft" : "outline"}
-            className="h-7 px-2 text-[11px]"
+            className="min-h-11 px-3 text-xs sm:min-h-9"
             aria-pressed={value === option}
             onClick={() => onChange(option)}
           >
