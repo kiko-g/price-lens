@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils"
 /**
  * Lince mark — Iberian lynx with a pulse ring.
  *
- * `pal` is the sellable default: round sidekick, short lynx ears, two vision-pills.
- * `angular` is the sharp faceted cut (lab option).
+ * `pal` is the sellable default: lynx silhouette inscribed in the pulse circle,
+ * two face-on vision ovals. `angular` is the sharp faceted cut (lab option).
  * Static <img>/OG/email equivalent: `public/lince-mark.svg` (tile + pal).
  */
 export const LINCE_LOGO_SHAPES = ["pal", "angular"] as const
@@ -45,8 +45,7 @@ const ANGULAR = {
   nose: "M29.5 45L34.5 45L32 48.5Z",
 }
 
-const PAL_HEAD =
-  "M20 14L16 26C12 30 12 36 12 40C12 51 20 57 32 57C44 57 52 51 52 40C52 36 52 30 48 26L44 14C41 11 38 14 37 20C34 19 30 19 27 20C26 14 23 11 20 14Z"
+const PAL_HEAD = "M22 14L18.2 27.8A15.5 15.5 0 1 0 45.8 27.8L42 14L37.8 23.7L26.2 23.7Z"
 
 const QUARTER_ARC = "M32 2.5A29.5 29.5 0 0 1 61.5 32"
 const HALF_ARC = "M32 2.5A29.5 29.5 0 0 1 32 61.5"
@@ -157,7 +156,7 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
           strokeLinejoin="round"
           className="drop-shadow-[0_0_4px_var(--primary)]"
         />
-        <PalVisionPills className="fill-current" />
+        <PalEyes className="fill-current" />
       </>
     )
   }
@@ -168,7 +167,7 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
         <rect width={64} height={64} className="fill-base-900" />
         <rect x={0.5} y={0.5} width={63} height={63} className="stroke-base-700" />
         <path d={PAL_HEAD} className="fill-primary" />
-        <PalVisionPills className="fill-base-950" />
+        <PalEyes className="fill-base-950" />
       </>
     )
   }
@@ -177,7 +176,7 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
     return (
       <>
         <path d={PAL_HEAD} fill="#e8ebf2" />
-        <PalVisionPills className="fill-primary" />
+        <PalEyes className="fill-primary" />
       </>
     )
   }
@@ -186,7 +185,7 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
     return (
       <>
         <path d={PAL_HEAD} fill="#14181f" />
-        <PalVisionPills className="fill-primary" />
+        <PalEyes className="fill-primary" />
       </>
     )
   }
@@ -194,32 +193,16 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
   return (
     <>
       <path d={PAL_HEAD} className="fill-foreground" />
-      <PalVisionPills className="fill-primary" />
+      <PalEyes className="fill-primary" />
     </>
   )
 }
 
-function PalVisionPills({ className }: { className?: string }) {
+function PalEyes({ className }: { className?: string }) {
   return (
     <g data-lince-pal-eyes="">
-      <rect
-        x={28.4}
-        y={28.2}
-        width={5.8}
-        height={13.4}
-        rx={2.9}
-        transform="rotate(-30 31.3 34.9)"
-        className={className}
-      />
-      <rect
-        x={37.4}
-        y={25.2}
-        width={4.8}
-        height={11.2}
-        rx={2.4}
-        transform="rotate(-30 39.8 30.8)"
-        className={className}
-      />
+      <ellipse cx={25.6} cy={38.2} rx={3.1} ry={4.7} className={className} />
+      <ellipse cx={38.4} cy={38.2} rx={3.1} ry={4.7} className={className} />
     </g>
   )
 }

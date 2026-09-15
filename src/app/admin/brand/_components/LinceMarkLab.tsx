@@ -53,7 +53,7 @@ export function LinceMarkLab() {
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Mark · shape, pulse & fashion</CardTitle>
         <CardDescription>
-          Pal is the sidekick: round head, short lynx ears, two vision-pills (Grok energy). Angular is the sharp cut.
+          Pal is a lynx head inscribed in the pulse circle, two face-on vision ovals. Angular is the sharp cut.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
