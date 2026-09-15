@@ -159,7 +159,7 @@ function LivePulseCard() {
           : tFresh("recent")
 
   return (
-    <div className="hud-cut border-sidebar-border bg-card/60 flex flex-col gap-1.5 border p-3">
+    <div className="border-sidebar-border bg-card/60 flex flex-col gap-1.5 border p-3">
       <div className="eyebrow text-muted-foreground flex items-center gap-2">
         <span className="relative flex size-1.5">
           <span className="bg-primary absolute inline-flex size-full animate-ping rounded-full opacity-60 motion-reduce:hidden" />

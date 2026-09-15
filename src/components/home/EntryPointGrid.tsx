@@ -80,7 +80,7 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
               key={entry.key}
               href={entry.href}
               className={cn(
-                "hud-cut-sm bg-card/60 border-border text-muted-foreground hover:text-foreground flex min-h-13 flex-col items-center justify-center gap-0.5 border px-1 py-1.5 text-center transition-colors active:opacity-90",
+                "bg-card/60 border-border text-muted-foreground hover:text-foreground flex min-h-13 flex-col items-center justify-center gap-0.5 border px-1 py-1.5 text-center transition-colors active:opacity-90",
               )}
             >
               <entry.icon className="text-primary size-4 shrink-0" strokeWidth={1.75} aria-hidden />
@@ -100,7 +100,7 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
             key={entry.key}
             href={entry.href}
             className={cn(
-              "hud-cut-sm text-muted-foreground hover:text-foreground border-border hover:border-primary/50 bg-card/60 flex shrink-0 items-center gap-2 border px-3 py-1.5 text-[13px] font-medium tracking-tight transition-colors",
+              "text-muted-foreground hover:text-foreground border-border hover:border-primary/50 bg-card/60 flex shrink-0 items-center gap-2 border px-3 py-1.5 text-[13px] font-medium tracking-tight transition-colors",
             )}
           >
             <entry.icon className="text-primary size-3.5 shrink-0" />

@@ -30,7 +30,7 @@ export function Stat({ label, value, delta, href, spark, className }: StatProps)
   )
 
   const classes = cn(
-    "hud-cut border-border bg-card/80 relative flex min-h-[92px] flex-col border px-4 py-3.5 text-left backdrop-blur-sm",
+    "border-border bg-card/80 relative flex min-h-[92px] flex-col border px-4 py-3.5 text-left backdrop-blur-sm",
     href && "hover:border-primary/50 hover:bg-card transition-colors",
     className,
   )

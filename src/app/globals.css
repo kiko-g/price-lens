@@ -105,8 +105,8 @@
   --chart-3: oklch(0.8016 0.1705 73.27);
   --chart-4: oklch(0.7495 0.1664 156.1);
   --chart-5: oklch(0.5439 0.238 311);
-  /* HUD: sharp corners. Components use rounded-* which map to these steps below. */
-  --radius: 0.25rem;
+  /* HUD: no rounded corners. Every rounded-* step below resolves to 0; rounded-full stays for dots/avatars. */
+  --radius: 0px;
   --sidebar: var(--base-100);
   --sidebar-foreground: oklch(0.2 0.02 262);
   --sidebar-primary: var(--primary-600);
@@ -245,14 +245,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-xs: 0px;
-  --radius-sm: max(0px, calc(var(--radius) - 2px));
+  --radius-xs: var(--radius);
+  --radius-sm: var(--radius);
   --radius-md: var(--radius);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 2px);
-  --radius-2xl: calc(var(--radius) + 4px);
-  --radius-3xl: calc(var(--radius) + 4px);
-  --radius-4xl: calc(var(--radius) + 6px);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
 
   --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
   --animate-skeleton-shimmer: skeleton-shimmer 1500ms ease-in-out infinite;
@@ -453,13 +453,6 @@
 }
 
 /* Lince HUD utilities */
-@utility hud-cut {
-  /* faceted corners (top-right + bottom-left); pairs with a 1px border */
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-}
-@utility hud-cut-sm {
-  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
-}
 @utility eyebrow {
   font-size: 10px;
   font-weight: 600;

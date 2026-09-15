@@ -46,7 +46,7 @@ export function BottomNav() {
       aria-label={tBottom("primary")}
     >
       <div className="flex items-center gap-2">
-        <div className="bg-card text-card-foreground border-border hud-cut-sm flex min-w-0 flex-1 items-center justify-around border px-1 py-1 shadow-sm sm:px-2">
+        <div className="bg-card text-card-foreground border-border flex min-w-0 flex-1 items-center justify-around border px-1 py-1 shadow-sm sm:px-2">
           {navItems.map((item) => {
             const isActive =
               item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/")
@@ -76,7 +76,7 @@ export function BottomNav() {
           <SearchContainer registerKeyboardShortcut={false}>
             <button
               type="button"
-              className="border-border bg-card text-card-foreground hover:bg-accent hud-cut-sm flex size-12 items-center justify-center border shadow-sm transition-transform active:scale-95"
+              className="border-border bg-card text-card-foreground hover:bg-accent flex size-12 items-center justify-center border shadow-sm transition-transform active:scale-95"
               aria-label={tHeader("searchProducts")}
             >
               <GlyphSearch className="size-5" />
@@ -85,7 +85,7 @@ export function BottomNav() {
           <BarcodeScanButton>
             <button
               type="button"
-              className="bg-primary text-primary-foreground ember-glow hud-cut-sm flex size-12 items-center justify-center shadow-sm transition-transform active:scale-95"
+              className="bg-primary text-primary-foreground ember-glow flex size-12 items-center justify-center shadow-sm transition-transform active:scale-95"
               aria-label={tBottom("scan")}
             >
               <GlyphScan className="size-5" />
