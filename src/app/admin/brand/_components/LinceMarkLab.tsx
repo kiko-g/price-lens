@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { cn } from "@/lib/utils"
 
 const SHAPE_LABELS: Record<LinceLogoShape, string> = {
+  hunter: "hunter",
   pal: "pal",
   angular: "angular",
 }
@@ -43,8 +44,8 @@ const ANIMATION_LABELS: Record<LincePulseAnimation, string> = {
 }
 
 export function LinceMarkLab() {
-  const [logoShape, setLogoShape] = useState<LinceLogoShape>("pal")
-  const [logoFashion, setLogoFashion] = useState<LinceLogoFashion>("filled")
+  const [logoShape, setLogoShape] = useState<LinceLogoShape>("hunter")
+  const [logoFashion, setLogoFashion] = useState<LinceLogoFashion>("outlined")
   const [pulseShapePattern, setPulseShapePattern] = useState<LincePulseShapePattern>("quarter-circle")
   const [pulseAnimation, setPulseAnimation] = useState<LincePulseAnimation>("static")
 
@@ -53,7 +54,7 @@ export function LinceMarkLab() {
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Mark · shape, pulse & fashion</CardTitle>
         <CardDescription>
-          Pal is a lynx head inscribed in the pulse circle, two face-on vision ovals. Angular is the sharp cut.
+          Hunter is the default: neon outline, ember backlight, quarter-circle pulse. Pal and angular stay as options.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

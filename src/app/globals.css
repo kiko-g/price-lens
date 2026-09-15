@@ -574,6 +574,11 @@
     overflow: visible;
   }
 
+  .lince-mark .lince-hunter-backlight {
+    filter: drop-shadow(0 0 5px var(--primary))
+      drop-shadow(0 0 14px color-mix(in srgb, var(--primary) 60%, transparent));
+  }
+
   .lince-mark .lince-pulse-wave {
     fill: none;
     stroke: var(--primary);

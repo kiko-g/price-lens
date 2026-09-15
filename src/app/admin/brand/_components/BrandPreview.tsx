@@ -59,8 +59,8 @@ export function BrandPreview({ brand, locale, isDirty }: BrandPreviewProps) {
         <CardContent>
           <div className="bg-sidebar flex h-16 items-center gap-2.5 border px-4">
             <LinceMark
-              logoShape="pal"
-              logoFashion="filled"
+              logoShape="hunter"
+              logoFashion="outlined"
               pulseShapePattern="quarter-circle"
               pulseAnimation="static"
               className="size-9"

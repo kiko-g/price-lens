@@ -18,10 +18,10 @@ export default function RootLoading() {
     >
       <div className="flex animate-[fadeInScale_0.6s_ease-out_both] flex-col items-center gap-5">
         <LinceMark
-          logoShape="pal"
-          logoFashion="filled"
+          logoShape="hunter"
+          logoFashion="outlined"
           pulseShapePattern="quarter-circle"
-          pulseAnimation="animated"
+          pulseAnimation="static"
           className="size-16 drop-shadow-[0_0_24px_rgba(234,88,12,0.4)]"
         />
         <span className="text-foreground text-lg font-bold tracking-tight">{brand.displayName}</span>

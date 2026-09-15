@@ -5,11 +5,10 @@ import { cn } from "@/lib/utils"
 /**
  * Lince mark — Iberian lynx with a pulse ring.
  *
- * `pal` is the sellable default: lynx silhouette inscribed in the pulse circle,
- * two face-on vision ovals. `angular` is the sharp faceted cut (lab option).
- * Static <img>/OG/email equivalent: `public/lince-mark.svg` (tile + pal).
+ * Default: `hunter` + `outlined` + quarter-circle pulse, static, with ember backlight.
+ * `pal` and `angular` remain lab options. Static <img>/OG/email: `public/lince-mark.svg`.
  */
-export const LINCE_LOGO_SHAPES = ["pal", "angular"] as const
+export const LINCE_LOGO_SHAPES = ["hunter", "pal", "angular"] as const
 export type LinceLogoShape = (typeof LINCE_LOGO_SHAPES)[number]
 
 export const LINCE_LOGO_FASHIONS = ["filled", "filledWhite", "filledInk", "outlined", "tile"] as const
@@ -22,7 +21,7 @@ export const LINCE_PULSE_ANIMATIONS = ["static", "animated"] as const
 export type LincePulseAnimation = (typeof LINCE_PULSE_ANIMATIONS)[number]
 
 export type LinceMarkProps = SVGProps<SVGSVGElement> & {
-  /** Silhouette. `pal` is the product default; `angular` is the sharp cut. */
+  /** Silhouette. `hunter` is the product default. */
   logoShape?: LinceLogoShape
   /** Facet treatment. `filled` follows the theme (white on navy, ink on paper). */
   logoFashion?: LinceLogoFashion
@@ -45,6 +44,8 @@ const ANGULAR = {
   nose: "M29.5 45L34.5 45L32 48.5Z",
 }
 
+const HUNTER_HEAD = "M18 18l4 12-6 6 6 10 10 8 10-8 6-10-6-6 4-12-9 8h-10z"
+const HUNTER_EYES = "M26 33l3 2-1 3z M38 33l-3 2 1 3z"
 const PAL_HEAD = "M22 14L18.2 27.8A15.5 15.5 0 1 0 45.8 27.8L42 14L37.8 23.7L26.2 23.7Z"
 
 const QUARTER_ARC = "M32 2.5A29.5 29.5 0 0 1 61.5 32"
@@ -53,8 +54,8 @@ const QUARTER_CLIP = "M32 32L32 0A32 32 0 0 1 64 32Z"
 const HALF_CLIP = "M32 32L32 0A32 32 0 0 1 32 64Z"
 
 export function LinceMark({
-  logoShape = "pal",
-  logoFashion = "filled",
+  logoShape = "hunter",
+  logoFashion = "outlined",
   pulseShapePattern = "quarter-circle",
   pulseAnimation = "static",
   className,
@@ -81,7 +82,13 @@ export function LinceMark({
       {logoFashion !== "tile" && pulseShapePattern !== "none" ? (
         <PulseLayer pattern={pulseShapePattern} animation={pulseAnimation} clipId={clipId} />
       ) : null}
-      {logoShape === "pal" ? <PalHead fashion={logoFashion} /> : <AngularHead fashion={logoFashion} />}
+      {logoShape === "hunter" ? (
+        <HunterHead fashion={logoFashion} />
+      ) : logoShape === "pal" ? (
+        <PalHead fashion={logoFashion} />
+      ) : (
+        <AngularHead fashion={logoFashion} />
+      )}
     </svg>
   )
 }
@@ -141,6 +148,55 @@ function PulseLayer({
           </>
         )}
       </g>
+    </>
+  )
+}
+
+function HunterHead({ fashion }: { fashion: LinceLogoFashion }) {
+  if (fashion === "outlined") {
+    return (
+      <g className="lince-hunter-backlight">
+        <path d={HUNTER_HEAD} stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" />
+        <path d={HUNTER_EYES} fill="currentColor" />
+      </g>
+    )
+  }
+
+  if (fashion === "tile") {
+    return (
+      <>
+        <rect width={64} height={64} className="fill-base-900" />
+        <rect x={0.5} y={0.5} width={63} height={63} className="stroke-base-700" />
+        <g className="lince-hunter-backlight text-primary">
+          <path d={HUNTER_HEAD} stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" />
+          <path d={HUNTER_EYES} fill="currentColor" />
+        </g>
+      </>
+    )
+  }
+
+  if (fashion === "filledWhite") {
+    return (
+      <>
+        <path d={HUNTER_HEAD} fill="#e8ebf2" />
+        <path d={HUNTER_EYES} className="fill-primary" />
+      </>
+    )
+  }
+
+  if (fashion === "filledInk") {
+    return (
+      <>
+        <path d={HUNTER_HEAD} fill="#14181f" />
+        <path d={HUNTER_EYES} className="fill-primary" />
+      </>
+    )
+  }
+
+  return (
+    <>
+      <path d={HUNTER_HEAD} className="fill-foreground" />
+      <path d={HUNTER_EYES} className="fill-primary" />
     </>
   )
 }

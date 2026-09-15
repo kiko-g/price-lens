@@ -25,8 +25,8 @@ export function LogoLink({ className, markOnly = false, withEyebrow = false, mar
       className={cn("flex max-w-full min-w-0 items-center gap-2.5 transition hover:opacity-80", className)}
     >
       <LinceMark
-        logoShape="pal"
-        logoFashion="filled"
+        logoShape="hunter"
+        logoFashion="outlined"
         pulseShapePattern="quarter-circle"
         pulseAnimation="static"
         className={cn("logo-animation size-7 shrink-0", markClassName)}
