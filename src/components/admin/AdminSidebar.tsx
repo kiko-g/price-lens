@@ -221,6 +221,7 @@ function SiteNavigationDropup() {
         >
           <span className="flex size-7 shrink-0 items-center justify-center">
             <LinceMark
+              logoShape="pal"
               logoFashion="filled"
               pulseShapePattern="quarter-circle"
               pulseAnimation="static"

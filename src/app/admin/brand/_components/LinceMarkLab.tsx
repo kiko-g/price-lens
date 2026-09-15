@@ -4,16 +4,23 @@ import { useState, type ReactNode } from "react"
 
 import {
   LINCE_LOGO_FASHIONS,
+  LINCE_LOGO_SHAPES,
   LINCE_PULSE_ANIMATIONS,
   LINCE_PULSE_SHAPE_PATTERNS,
   LinceMark,
   type LinceLogoFashion,
+  type LinceLogoShape,
   type LincePulseAnimation,
   type LincePulseShapePattern,
 } from "@/components/icons/LinceMark"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+
+const SHAPE_LABELS: Record<LinceLogoShape, string> = {
+  pal: "pal",
+  angular: "angular",
+}
 
 const FASHION_LABELS: Record<LinceLogoFashion, string> = {
   filled: "filled (theme)",
@@ -36,23 +43,25 @@ const ANIMATION_LABELS: Record<LincePulseAnimation, string> = {
 }
 
 export function LinceMarkLab() {
+  const [logoShape, setLogoShape] = useState<LinceLogoShape>("pal")
   const [logoFashion, setLogoFashion] = useState<LinceLogoFashion>("filled")
   const [pulseShapePattern, setPulseShapePattern] = useState<LincePulseShapePattern>("quarter-circle")
-  const [pulseAnimation, setPulseAnimation] = useState<LincePulseAnimation>("animated")
+  const [pulseAnimation, setPulseAnimation] = useState<LincePulseAnimation>("static")
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm">Mark · pulse & fashion</CardTitle>
+        <CardTitle className="text-sm">Mark · shape, pulse & fashion</CardTitle>
         <CardDescription>
-          Geometric lynx: alert, not kid-like, no mouth. Sidebar uses filled + quarter-circle + static; splash uses the
-          same pattern animated.
+          Pal is the sellable default (scan-eyes, your-side lynx). Angular is the sharp cut. Pulse and fashion layer on
+          either shape.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-2">
           <PreviewWell label="navy" className="bg-[#0b0f1a]">
             <LinceMark
+              logoShape={logoShape}
               logoFashion={logoFashion}
               pulseShapePattern={pulseShapePattern}
               pulseAnimation={pulseAnimation}
@@ -61,6 +70,7 @@ export function LinceMarkLab() {
           </PreviewWell>
           <PreviewWell label="paper" className="bg-[#f6f3ee]">
             <LinceMark
+              logoShape={logoShape}
               logoFashion={logoFashion}
               pulseShapePattern={pulseShapePattern}
               pulseAnimation={pulseAnimation}
@@ -69,6 +79,13 @@ export function LinceMarkLab() {
           </PreviewWell>
         </div>
 
+        <PropGroup
+          legend="logoShape"
+          options={LINCE_LOGO_SHAPES}
+          labels={SHAPE_LABELS}
+          value={logoShape}
+          onChange={setLogoShape}
+        />
         <PropGroup
           legend="logoFashion"
           options={LINCE_LOGO_FASHIONS}
@@ -92,7 +109,7 @@ export function LinceMarkLab() {
         />
 
         <code className="bg-muted block overflow-x-auto p-2 text-[11px] leading-relaxed">
-          {`<LinceMark logoFashion="${logoFashion}" pulseShapePattern="${pulseShapePattern}" pulseAnimation="${pulseAnimation}" />`}
+          {`<LinceMark logoShape="${logoShape}" logoFashion="${logoFashion}" pulseShapePattern="${pulseShapePattern}" pulseAnimation="${pulseAnimation}" />`}
         </code>
       </CardContent>
     </Card>

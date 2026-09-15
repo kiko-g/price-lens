@@ -28,7 +28,7 @@ export default function BrandControlCenterPage() {
   const { data, isPending, error } = useBrandSettings()
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-6 overflow-y-auto px-6 py-8 lg:px-10">
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-6 overflow-y-auto px-6 py-8 lg:px-10 xl:overflow-hidden">
       <header className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold tracking-tight">Brand Control Center</h1>
         <p className="text-muted-foreground max-w-2xl text-sm">
@@ -79,122 +79,126 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
   }
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+    <div className="grid min-h-0 flex-1 gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] xl:overflow-hidden">
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <section className="flex flex-col gap-4">
-            <SectionHeading title="Identity" description="Locale-neutral. These are the values that must cascade." />
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-col gap-6 xl:h-full">
+          <div className="flex flex-col gap-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
+            <section className="flex flex-col gap-4">
+              <SectionHeading title="Identity" description="Locale-neutral. These are the values that must cascade." />
 
-            <FormField
-              control={form.control}
-              name="displayName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Display name</FormLabel>
-                  <FormControl>
-                    <Input {...field} autoComplete="off" />
-                  </FormControl>
-                  <FormDescription>
-                    Header wordmark, page titles, splash, OG badge, email sender and every <code>{"{brand}"}</code>{" "}
-                    placeholder in the copy.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
-                name="shortName"
+                name="displayName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Short name</FormLabel>
-                    <FormControl>
-                      <Input {...field} maxLength={12} autoComplete="off" />
-                    </FormControl>
-                    <FormDescription>PWA home-screen label (≤ 12 chars).</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="legalName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Legal / footer name</FormLabel>
+                    <FormLabel>Display name</FormLabel>
                     <FormControl>
                       <Input {...field} autoComplete="off" />
                     </FormControl>
                     <FormDescription>
-                      Copyright line and <code>{"{brandLegal}"}</code> placeholders.
+                      Header wordmark, page titles, splash, OG badge, email sender and every <code>{"{brand}"}</code>{" "}
+                      placeholder in the copy.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-          </section>
 
-          {VOICE_LOCALES.map((locale) => (
-            <section key={locale} className="flex flex-col gap-4">
-              <SectionHeading
-                title={`Voice · ${LOCALE_LABELS[locale]}`}
-                description={
-                  locale === "pt"
-                    ? "Primary voice. Sharp, clean, no slop."
-                    : "Secondary locale; keep it aligned with PT."
-                }
-              />
-              <FormField
-                control={form.control}
-                name={`eyebrow.${locale}`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Eyebrow</FormLabel>
-                    <FormControl>
-                      <Input {...field} maxLength={32} autoComplete="off" />
-                    </FormControl>
-                    <FormDescription>
-                      Small-caps line under the wordmark (system language, not the name).
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`tagline.${locale}`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tagline</FormLabel>
-                    <FormControl>
-                      <Input {...field} autoComplete="off" />
-                    </FormControl>
-                    <FormDescription>Sidebar footer, OG stats card, install banner.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`metaDescription.${locale}`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Meta description</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} rows={3} />
-                    </FormControl>
-                    <FormDescription>Root metadata, Open Graph, Twitter card and manifest description.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="shortName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Short name</FormLabel>
+                      <FormControl>
+                        <Input {...field} maxLength={12} autoComplete="off" />
+                      </FormControl>
+                      <FormDescription>PWA home-screen label (≤ 12 chars).</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="legalName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Legal / footer name</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoComplete="off" />
+                      </FormControl>
+                      <FormDescription>
+                        Copyright line and <code>{"{brandLegal}"}</code> placeholders.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </section>
-          ))}
 
-          <div className="bg-background/95 sticky bottom-0 flex flex-wrap items-center gap-3 border-t py-3 backdrop-blur">
+            {VOICE_LOCALES.map((locale) => (
+              <section key={locale} className="flex flex-col gap-4">
+                <SectionHeading
+                  title={`Voice · ${LOCALE_LABELS[locale]}`}
+                  description={
+                    locale === "pt"
+                      ? "Primary voice. Sharp, clean, no slop."
+                      : "Secondary locale; keep it aligned with PT."
+                  }
+                />
+                <FormField
+                  control={form.control}
+                  name={`eyebrow.${locale}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Eyebrow</FormLabel>
+                      <FormControl>
+                        <Input {...field} maxLength={32} autoComplete="off" />
+                      </FormControl>
+                      <FormDescription>
+                        Small-caps line under the wordmark (system language, not the name).
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`tagline.${locale}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tagline</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoComplete="off" />
+                      </FormControl>
+                      <FormDescription>Sidebar footer, OG stats card, install banner.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`metaDescription.${locale}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meta description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={3} />
+                      </FormControl>
+                      <FormDescription>
+                        Root metadata, Open Graph, Twitter card and manifest description.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </section>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 border-t py-3 xl:shrink-0">
             <Button type="submit" disabled={!isDirty || update.isPending || !form.formState.isValid}>
               <SaveIcon className="size-4" />
               {update.isPending ? "Saving…" : "Save changes"}
@@ -213,7 +217,7 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
         </form>
       </Form>
 
-      <aside className="flex flex-col gap-4">
+      <aside className="flex flex-col gap-4 xl:min-h-0 xl:overflow-y-auto">
         <Tabs value={previewLocale} onValueChange={(value) => isLocale(value) && setPreviewLocale(value)}>
           <TabsList>
             {VOICE_LOCALES.map((locale) => (

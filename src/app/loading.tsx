@@ -18,6 +18,7 @@ export default function RootLoading() {
     >
       <div className="flex animate-[fadeInScale_0.6s_ease-out_both] flex-col items-center gap-5">
         <LinceMark
+          logoShape="pal"
           logoFashion="filled"
           pulseShapePattern="quarter-circle"
           pulseAnimation="animated"
