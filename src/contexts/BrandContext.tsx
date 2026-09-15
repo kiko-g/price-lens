@@ -13,7 +13,8 @@ export function BrandProvider({ brand, children }: { brand: BrandSettings; child
 }
 
 export type BrandView = BrandSettings & {
-  /** Tagline / meta description resolved for the active locale. */
+  /** Eyebrow / tagline / meta description resolved for the active locale. */
+  eyebrowText: string
   taglineText: string
   metaDescriptionText: string
   markSrc: string
@@ -24,6 +25,7 @@ export function useBrand(): BrandView {
   const locale = useLocale()
   return {
     ...brand,
+    eyebrowText: getBrandText(brand.eyebrow, locale),
     taglineText: getBrandText(brand.tagline, locale),
     metaDescriptionText: getBrandText(brand.metaDescription, locale),
     markSrc: BRAND_MARK_SRC,

@@ -30,12 +30,15 @@ export const brandSettingsSchema = z.object({
   displayName: brandText,
   shortName: z.string().trim().min(1).max(12),
   legalName: brandText,
+  /** Small-caps line under the wordmark (system language, e.g. "Pulso dos preços"). */
+  eyebrow: localizedTextSchema,
   tagline: localizedTextSchema,
   metaDescription: localizedTextSchema,
 })
 
 // Stored rows may predate a field or a locale; nested partials keep them loadable.
 const storedBrandSettingsSchema = brandSettingsSchema.partial().extend({
+  eyebrow: localizedTextSchema.partial().optional(),
   tagline: localizedTextSchema.partial().optional(),
   metaDescription: localizedTextSchema.partial().optional(),
 })
@@ -48,6 +51,10 @@ export const BRAND_DEFAULTS: BrandSettings = {
   displayName: "Lince",
   shortName: "Lince",
   legalName: "Lince",
+  eyebrow: {
+    pt: "Pulso dos preços",
+    en: "Price pulse",
+  },
   tagline: {
     pt: "O pulso dos preços dos supermercados em Portugal.",
     en: "The pulse of supermarket prices in Portugal.",
@@ -76,6 +83,7 @@ export function mergeBrandSettings(stored: unknown): BrandSettings {
     displayName: partial.displayName ?? BRAND_DEFAULTS.displayName,
     shortName: partial.shortName ?? BRAND_DEFAULTS.shortName,
     legalName: partial.legalName ?? BRAND_DEFAULTS.legalName,
+    eyebrow: { ...BRAND_DEFAULTS.eyebrow, ...partial.eyebrow },
     tagline: { ...BRAND_DEFAULTS.tagline, ...partial.tagline },
     metaDescription: { ...BRAND_DEFAULTS.metaDescription, ...partial.metaDescription },
   }

@@ -7,15 +7,22 @@ import { cn } from "@/lib/utils"
 import { useScrollDirection } from "@/hooks/useScrollDirection"
 import { useUser } from "@/hooks/useUser"
 
-import { HomeIcon, ShoppingBasketIcon, ScanBarcodeIcon, HeartIcon, UserIcon, SearchIcon } from "lucide-react"
+import {
+  GlyphExplore,
+  GlyphFavorites,
+  GlyphHome,
+  GlyphProfile,
+  GlyphScan,
+  GlyphSearch,
+} from "@/components/icons/lince-glyphs"
 import { BarcodeScanButton } from "@/components/scan"
 import { SearchContainer } from "@/components/layout/search"
 
 const navItems = [
-  { href: "/", key: "home", icon: HomeIcon },
-  { href: "/products", key: "browse", icon: ShoppingBasketIcon },
-  { href: "/favorites", key: "favorites", icon: HeartIcon },
-  { href: "/profile", key: "profile", icon: UserIcon },
+  { href: "/", key: "home", icon: GlyphHome },
+  { href: "/products", key: "browse", icon: GlyphExplore },
+  { href: "/favorites", key: "favorites", icon: GlyphFavorites },
+  { href: "/profile", key: "profile", icon: GlyphProfile },
 ] as const
 
 export function BottomNav() {
@@ -39,7 +46,7 @@ export function BottomNav() {
       aria-label={tBottom("primary")}
     >
       <div className="flex items-center gap-2">
-        <div className="bg-card text-card-foreground border-border flex min-w-0 flex-1 items-center justify-around rounded-full border px-1 py-1 shadow-sm sm:px-2">
+        <div className="bg-card text-card-foreground border-border hud-cut-sm flex min-w-0 flex-1 items-center justify-around border px-1 py-1 shadow-sm sm:px-2">
           {navItems.map((item) => {
             const isActive =
               item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/")
@@ -52,12 +59,13 @@ export function BottomNav() {
                 key={item.key}
                 href={resolvedHref}
                 className={cn(
-                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-2 py-1 transition-all duration-200 sm:px-2.5",
-                  isActive ? "bg-accent text-foreground" : "text-accent-foreground",
+                  "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-2 py-1 transition-all duration-200 sm:px-2.5",
+                  isActive ? "text-foreground" : "text-muted-foreground",
                 )}
                 aria-label={label}
               >
-                <item.icon className={cn("size-5 shrink-0", isActive && "fill-foreground/10")} />
+                {isActive && <span aria-hidden className="bg-primary ember-glow absolute -top-1.5 h-0.5 w-6" />}
+                <item.icon className={cn("size-5 shrink-0", isActive && "text-primary")} />
                 <span className="text-[10px] leading-tight font-medium max-[380px]:hidden">{label}</span>
               </Link>
             )
@@ -68,19 +76,19 @@ export function BottomNav() {
           <SearchContainer registerKeyboardShortcut={false}>
             <button
               type="button"
-              className="border-border bg-card text-card-foreground hover:bg-accent flex size-12 items-center justify-center rounded-full border shadow-sm transition-transform active:scale-95"
+              className="border-border bg-card text-card-foreground hover:bg-accent hud-cut-sm flex size-12 items-center justify-center border shadow-sm transition-transform active:scale-95"
               aria-label={tHeader("searchProducts")}
             >
-              <SearchIcon className="size-5" />
+              <GlyphSearch className="size-5" />
             </button>
           </SearchContainer>
           <BarcodeScanButton>
             <button
               type="button"
-              className="bg-foreground text-background flex size-12 items-center justify-center rounded-full shadow-sm transition-transform active:scale-95"
+              className="bg-primary text-primary-foreground ember-glow hud-cut-sm flex size-12 items-center justify-center shadow-sm transition-transform active:scale-95"
               aria-label={tBottom("scan")}
             >
-              <ScanBarcodeIcon className="size-5" />
+              <GlyphScan className="size-5" />
             </button>
           </BarcodeScanButton>
         </div>

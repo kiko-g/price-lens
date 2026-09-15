@@ -66,12 +66,12 @@ export function Header() {
               <SearchContainer>
                 <button
                   type="button"
-                  className="text-muted-foreground hover:border-input hover:text-foreground border-border bg-accent hidden h-[34px] max-w-[320px] min-w-[240px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors md:flex"
+                  className="text-muted-foreground hover:border-primary/50 hover:text-foreground border-border bg-card hidden h-[34px] max-w-[320px] min-w-[240px] cursor-pointer items-center gap-2 border px-3 py-2 transition-colors md:flex"
                 >
                   <SearchIcon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 truncate text-left text-sm">{tHeader("searchProducts")}</span>
                   {/* eslint-disable-next-line @formatjs/no-literal-string-in-jsx -- keyboard shortcut symbol */}
-                  <Kbd className="bg-muted dark:bg-foreground/10 h-5 min-w-5 px-1.5 text-[10px]">⌘K</Kbd>
+                  <Kbd className="bg-muted dark:bg-foreground/10 h-5 min-w-5 rounded-none px-1.5 text-[10px]">⌘K</Kbd>
                 </button>
               </SearchContainer>
             )}

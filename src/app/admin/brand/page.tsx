@@ -149,6 +149,22 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
               />
               <FormField
                 control={form.control}
+                name={`eyebrow.${locale}`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Eyebrow</FormLabel>
+                    <FormControl>
+                      <Input {...field} maxLength={32} autoComplete="off" />
+                    </FormControl>
+                    <FormDescription>
+                      Small-caps line under the wordmark (system language, not the name).
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name={`tagline.${locale}`}
                 render={({ field }) => (
                   <FormItem>

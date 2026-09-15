@@ -1,6 +1,14 @@
 import { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { HomeIcon, WorkflowIcon, HeartIcon, ShoppingBasketIcon, InfoIcon, SmartphoneIcon, TagIcon } from "lucide-react"
+import {
+  GlyphAbout,
+  GlyphAdmin,
+  GlyphApp,
+  GlyphDeals,
+  GlyphExplore,
+  GlyphFavorites,
+  GlyphHome,
+} from "@/components/icons/lince-glyphs"
 
 /**
  * Infrastructure config (URLs, author, social links). Brand strings (name, tagline, description)
@@ -69,12 +77,12 @@ export type NavigationItem = {
 }
 
 export const navigation: NavigationItem[] = [
-  { key: "home", icon: HomeIcon, href: "/", shownOnDesktop: true, shownOnMobile: true },
-  { key: "browse", icon: ShoppingBasketIcon, href: "/products", shownOnDesktop: true, shownOnMobile: true },
-  { key: "deals", icon: TagIcon, href: "/deals", shownOnDesktop: true, shownOnMobile: true },
-  { key: "favorites", icon: HeartIcon, href: "/favorites", shownOnDesktop: true, shownOnMobile: true },
-  { key: "getTheApp", icon: SmartphoneIcon, href: "/app", shownOnDesktop: false, shownOnMobile: true },
-  { key: "about", icon: InfoIcon, href: "/about", shownOnDesktop: true, shownOnMobile: true },
+  { key: "home", icon: GlyphHome, href: "/", shownOnDesktop: true, shownOnMobile: true },
+  { key: "browse", icon: GlyphExplore, href: "/products", shownOnDesktop: true, shownOnMobile: true },
+  { key: "deals", icon: GlyphDeals, href: "/deals", shownOnDesktop: true, shownOnMobile: true },
+  { key: "favorites", icon: GlyphFavorites, href: "/favorites", shownOnDesktop: true, shownOnMobile: true },
+  { key: "getTheApp", icon: GlyphApp, href: "/app", shownOnDesktop: false, shownOnMobile: true },
+  { key: "about", icon: GlyphAbout, href: "/about", shownOnDesktop: true, shownOnMobile: true },
   // Staff-only: reachable by URL (and via the sidebar for admins), never in consumer navigation.
-  { key: "admin", icon: WorkflowIcon, href: "/admin", shownOnDesktop: false, shownOnMobile: false },
+  { key: "admin", icon: GlyphAdmin, href: "/admin", shownOnDesktop: false, shownOnMobile: false },
 ]

@@ -1,13 +1,13 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { useBrand } from "@/contexts/BrandContext"
+import { LinceMark } from "@/components/icons/LinceMark"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -220,7 +220,7 @@ function SiteNavigationDropup() {
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <span className="flex size-7 shrink-0 items-center justify-center">
-            <Image src={brand.markSrc} alt="" width={28} height={28} className="size-7" aria-hidden />
+            <LinceMark className="size-7" />
           </span>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{brand.displayName}</span>

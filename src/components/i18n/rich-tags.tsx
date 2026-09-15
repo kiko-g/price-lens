@@ -9,6 +9,11 @@ export function RichLineBreak() {
   return <br />
 }
 
+/** Ember-lit word in the hero title (Lince HUD). */
+export function HeroEmphasis(chunks: ReactNode) {
+  return <em className="text-primary ember-text-glow not-italic">{chunks}</em>
+}
+
 export function HeroSubtitleStrongMobile(chunks: ReactNode) {
   return <strong className="text-foreground dark:text-foreground font-semibold">{chunks}</strong>
 }

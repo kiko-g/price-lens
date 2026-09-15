@@ -49,6 +49,9 @@ const badgeVariants = cva(
         sky: "border-transparent bg-sky-600 text-zinc-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-zinc-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
         white:
           "border-transparent bg-white text-zinc-900 hover:bg-white/80 dark:border-transparent dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-zinc-900",
+        hud: "hud-cut-sm rounded-none border-primary/50 bg-primary/5 text-primary eyebrow gap-1 px-2 py-1 dark:text-primary-200 [&_span.bubble]:bg-primary",
+        "hud-muted":
+          "hud-cut-sm rounded-none border-border bg-transparent text-muted-foreground eyebrow gap-1 px-2 py-1 [&_span.bubble]:bg-muted-foreground",
         "glass-primary":
           "border-primary/20 bg-primary/10 text-foreground hover:bg-primary/20 dark:border-primary/40 dark:bg-primary/20 dark:text-foreground dark:hover:bg-primary/30 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         "glass-success":

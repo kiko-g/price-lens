@@ -1,13 +1,11 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="125" fill="url(#lince-bg)"/>
-  <circle cx="256" cy="256" r="170" stroke="white" stroke-opacity="0.28" stroke-width="18"/>
-  <path d="M256 86A170 170 0 0 1 426 256" stroke="white" stroke-width="18" stroke-linecap="round"/>
-  <circle cx="256" cy="256" r="112" stroke="white" stroke-opacity="0.72" stroke-width="24"/>
-  <circle cx="256" cy="256" r="54" fill="white"/>
-  <defs>
-    <linearGradient id="lince-bg" x1="27" y1="0" x2="465" y2="512" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F97316"/>
-      <stop offset="1" stop-color="#DC2626"/>
-    </linearGradient>
-  </defs>
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M6 0H58L64 6V58L58 64H6L0 58V6Z" fill="#111726"/>
+  <path d="M6 .5H58L63.5 6V58L58 63.5H6L.5 58V6Z" stroke="#2a3552"/>
+  <path d="M17 6l2 5M47 6l-2 5" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M19 11L24 23L10 29L12 38L9 45L23 50L32 59L41 50L55 45L52 38L54 29L40 23L45 11L37 19H27Z" fill="#ff5a1f"/>
+  <path d="M19 11L24 23L27 19Z M45 11L40 23L37 19Z" fill="#ffb08f"/>
+  <path d="M24 23L32 27L40 23L45 33L32 30L19 33Z" fill="#e0470f"/>
+  <path d="M27 44L32 30L37 44L32 53Z" fill="#ff8a5b"/>
+  <path d="M21 34L28 35L26.5 38.5Z M43 34L36 35L37.5 38.5Z" fill="#0b0f1a"/>
+  <path d="M29.5 45L34.5 45L32 48.5Z" fill="#0b0f1a"/>
 </svg>

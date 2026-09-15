@@ -598,10 +598,11 @@
   },
   "home": {
     "hero": {
-      "titleMobile": "Price tracking for<br></br>Portuguese supermarkets",
-      "subtitleMobile": "Turn price swings into savings. <strong>Money in your pocket</strong>.",
-      "titleDesktop": "Price tracking for Portuguese supermarkets",
-      "subtitleDesktop": "Daily price monitoring across Continente, Auchan and Pingo Doce.<br></br>Turn supermarket swings into savings. More <strong>money in your pocket</strong>."
+      "kicker": "Supermarkets · Portugal",
+      "title": "See prices <em>before</em> you pay.",
+      "lead": "{brand} tracks Continente, Auchan and Pingo Doce every day. It reveals what crept up in silence and shows you when to buy.",
+      "ctaExplore": "Explore products",
+      "ctaScan": "Scan a barcode"
     },
     "searchBar": {
       "placeholder": "Search products…",
@@ -1455,7 +1456,12 @@
       "collapse": "Collapse sidebar",
       "expand": "Expand sidebar",
       "preferences": "Preferences",
-      "staff": "Staff"
+      "explore": "Explore",
+      "account": "Account",
+      "staff": "Staff",
+      "live": "Live",
+      "livePulse": "{products} products · {drops} drops today",
+      "liveUnavailable": "Live pulse unavailable"
     },
     "header": {
       "openSearchFromMenu": "Open search from menu",

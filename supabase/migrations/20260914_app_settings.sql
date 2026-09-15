@@ -28,6 +28,10 @@ VALUES (
     'displayName', 'Lince',
     'shortName', 'Lince',
     'legalName', 'Lince',
+    'eyebrow', jsonb_build_object(
+      'pt', 'Pulso dos preços',
+      'en', 'Price pulse'
+    ),
     'tagline', jsonb_build_object(
       'pt', 'O pulso dos preços dos supermercados em Portugal.',
       'en', 'The pulse of supermarket prices in Portugal.'

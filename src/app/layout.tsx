@@ -30,13 +30,13 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
  * Accent rgb(234,88,12) mirrors --primary-500 (orange→red) in globals.css.
  */
 const SPLASH_STYLES = `
-#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;transition:opacity .5s ease-out}
+#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f6f3ee;transition:opacity .5s ease-out}
 #__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
 #__splash .si{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(234,88,12,.4))}
 #__splash .st{font-size:1.125rem;font-weight:700;letter-spacing:-.025em;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 #__splash .sb{position:absolute;bottom:5rem;width:40px;height:3px;border-radius:9999px;overflow:hidden;background:rgba(28,25,23,.1)}
 #__splash .sb::after{content:'';position:absolute;inset:0;border-radius:9999px;background:rgba(234,88,12,.6);animation:__sl 1.2s ease-in-out infinite}
-@media(prefers-color-scheme:dark){#__splash{background:#09090b}#__splash .st{color:#fafafa}#__splash .sb{background:rgba(250,250,249,.1)}#__splash .sb::after{background:rgba(234,88,12,.8)}}
+@media(prefers-color-scheme:dark){#__splash{background:#0b0f1a}#__splash .st{color:#fafafa}#__splash .sb{background:rgba(250,250,249,.1)}#__splash .sb::after{background:rgba(234,88,12,.8)}}
 @keyframes __sf{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 @keyframes __sl{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 #__splash[data-hidden]{opacity:0;pointer-events:none}
@@ -49,8 +49,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f3ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0f1a" },
   ],
 }
 

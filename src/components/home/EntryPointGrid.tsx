@@ -80,10 +80,10 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
               key={entry.key}
               href={entry.href}
               className={cn(
-                "bg-muted/35 border-border/60 text-muted-foreground hover:bg-muted/55 hover:text-foreground flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl border px-1 py-1.5 text-center transition-colors active:opacity-90",
+                "hud-cut-sm bg-card/60 border-border text-muted-foreground hover:text-foreground flex min-h-13 flex-col items-center justify-center gap-0.5 border px-1 py-1.5 text-center transition-colors active:opacity-90",
               )}
             >
-              <entry.icon className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+              <entry.icon className="text-primary size-4 shrink-0" strokeWidth={1.75} aria-hidden />
               <span className="text-foreground text-[10px] leading-tight font-medium">
                 {t(`${entry.key}.label` as const)}
               </span>
@@ -100,10 +100,10 @@ export function EntryPointGrid({ variant = "grid" }: { variant?: "grid" | "row" 
             key={entry.key}
             href={entry.href}
             className={cn(
-              "text-foreground hover:bg-accent bg-accent/50 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium tracking-tight transition-colors md:gap-1.5 md:px-3.5 md:py-1.5 md:tracking-normal",
+              "hud-cut-sm text-muted-foreground hover:text-foreground border-border hover:border-primary/50 bg-card/60 flex shrink-0 items-center gap-2 border px-3 py-1.5 text-[13px] font-medium tracking-tight transition-colors",
             )}
           >
-            <entry.icon className="text-foreground size-3.5 shrink-0" />
+            <entry.icon className="text-primary size-3.5 shrink-0" />
             <span className="whitespace-nowrap">{t(`${entry.key}.label` as const)}</span>
           </Link>
         ))}

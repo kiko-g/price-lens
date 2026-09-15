@@ -41,17 +41,12 @@ export function UserDropdownMenu() {
 
   if (!user)
     return isMobile ? (
-      <Button
-        variant="secondary"
-        size="sm"
-        className="text-foreground hover:bg-muted/80 bg-muted/45 shrink-0 gap-2 rounded-full border border-transparent px-3.5 shadow-none"
-        onClick={() => router.push("/login")}
-      >
+      <Button variant="default" size="sm" className="shrink-0 gap-2 px-3.5" onClick={() => router.push("/login")}>
         <LogIn className="size-4 shrink-0" aria-hidden />
         <span className="whitespace-nowrap">{t("signIn")}</span>
       </Button>
     ) : (
-      <Button variant="primary" className="relative" onClick={() => router.push("/login")}>
+      <Button variant="default" className="relative" onClick={() => router.push("/login")}>
         <span className="hidden md:inline-flex">{t("signIn")}</span>
       </Button>
     )

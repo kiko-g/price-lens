@@ -598,10 +598,11 @@
   },
   "home": {
     "hero": {
-      "titleMobile": "Acompanha os preços dos<br></br>supermercados",
-      "subtitleMobile": "Transforma oscilações de preço <strong>dinheiro no teu bolso</strong>.",
-      "titleDesktop": "Acompanha os preços dos supermercados portugueses",
-      "subtitleDesktop": "Monitorização diária de preços no Continente, Auchan e Pingo Doce.<br></br>Transforma variações em poupança. Mais <strong>dinheiro no teu bolso</strong>."
+      "kicker": "Supermercados · Portugal",
+      "title": "Vê os preços <em>antes</em> de pagar.",
+      "lead": "O {brand} acompanha Continente, Auchan e Pingo Doce todos os dias. Revela o que subiu em silêncio e mostra-te quando comprar.",
+      "ctaExplore": "Explorar produtos",
+      "ctaScan": "Ler código de barras"
     },
     "searchBar": {
       "placeholder": "Pesquisar produtos…",
@@ -1455,7 +1456,12 @@
       "collapse": "Recolher barra lateral",
       "expand": "Expandir barra lateral",
       "preferences": "Preferências",
-      "staff": "Equipa"
+      "explore": "Explorar",
+      "account": "Conta",
+      "staff": "Equipa",
+      "live": "Ao vivo",
+      "livePulse": "{products} produtos · {drops} descidas hoje",
+      "liveUnavailable": "Pulso indisponível"
     },
     "header": {
       "openSearchFromMenu": "Abrir pesquisa a partir do menu",
