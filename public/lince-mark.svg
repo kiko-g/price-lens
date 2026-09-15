@@ -1,12 +1,11 @@
 <svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="64" height="64" fill="#111726"/>
   <rect x=".5" y=".5" width="63" height="63" stroke="#2a3552"/>
-  <path d="M4 22L18 26L14 44L4 46Z M60 22L46 26L50 44L60 46Z" fill="#9a1f0f"/>
-  <path d="M15.5 13.5L13 9.5M48.5 13.5L51 9.5" stroke="#e8ebf2" stroke-width="1.7" stroke-linecap="round"/>
-  <path d="M15.5 13.5L23 21Q32 17.5 41 21L48.5 13.5L46 26L55 29L50 37L53 45L43 47L38 55L32 51L26 55L21 47L11 45L14 37L9 29L18 26Z" fill="#e8ebf2"/>
-  <path d="M9 29L18 26L14 37Z M55 29L46 26L50 37Z M14 37L21 47L11 45Z M50 37L43 47L53 45Z" fill="#c9ced9"/>
-  <path d="M19.5 31L27.5 30L28 34L21.5 35.5Z M44.5 31L36.5 30L36 34L42.5 35.5Z" fill="#ff5a1f"/>
-  <path d="M27 35.5L29.5 42L31 41Z M37 35.5L34.5 42L33 41Z" fill="#111726"/>
-  <path d="M29 44L35 44L32 48Z" fill="#111726"/>
-  <path d="M32 48L32 50M32 50L28.5 52.5M32 50L35.5 52.5" stroke="#111726" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M17 6l2 5M47 6l-2 5" stroke="#ff5a1f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M19 11L24 23L10 29L12 38L9 45L23 50L32 59L41 50L55 45L52 38L54 29L40 23L45 11L37 19H27Z" fill="#ff5a1f"/>
+  <path d="M19 11L24 23L27 19Z M45 11L40 23L37 19Z" fill="#ffb08f"/>
+  <path d="M24 23L32 27L40 23L45 33L32 30L19 33Z" fill="#e0470f"/>
+  <path d="M27 44L32 30L37 44L32 53Z" fill="#ff8a5b"/>
+  <path d="M21 34L28 35L26.5 38.5Z M43 34L36 35L37.5 38.5Z" fill="#0b0f1a"/>
+  <path d="M29.5 45L34.5 45L32 48.5Z" fill="#0b0f1a"/>
 </svg>

@@ -4,6 +4,7 @@ import { useMemo } from "react"
 
 import { BRAND_MARK_SRC, brandPlaceholders, type BrandSettings } from "@/lib/brand/brand"
 import { LinceMark } from "@/components/icons/LinceMark"
+import { LinceMarkLab } from "@/app/admin/brand/_components/LinceMarkLab"
 import { substituteBrandInString } from "@/lib/brand/messages"
 import type { Locale } from "@/i18n/config"
 
@@ -49,13 +50,20 @@ export function BrandPreview({ brand, locale, isDirty }: BrandPreviewProps) {
         )}
       </div>
 
+      <LinceMarkLab />
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">Sidebar · wordmark + eyebrow</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="bg-sidebar flex h-16 items-center gap-2.5 border px-4">
-            <LinceMark className="size-9" />
+            <LinceMark
+              logoFashion="filled"
+              pulseShapePattern="quarter-circle"
+              pulseAnimation="static"
+              className="size-9"
+            />
             <span className="flex flex-col leading-none">
               <span className="text-[17px] font-bold tracking-tight">{brand.displayName}</span>
               <span className="eyebrow text-primary mt-1">{brand.eyebrow[locale]}</span>

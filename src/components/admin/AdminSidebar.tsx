@@ -220,7 +220,12 @@ function SiteNavigationDropup() {
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <span className="flex size-7 shrink-0 items-center justify-center">
-            <LinceMark className="size-7" />
+            <LinceMark
+              logoFashion="filled"
+              pulseShapePattern="quarter-circle"
+              pulseAnimation="static"
+              className="size-7"
+            />
           </span>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{brand.displayName}</span>

@@ -4,6 +4,7 @@
 // provider (no translations: the next-intl provider may not have hydrated yet).
 
 import { useBrand } from "@/contexts/BrandContext"
+import { LinceMark } from "@/components/icons/LinceMark"
 
 export default function RootLoading() {
   const brand = useBrand()
@@ -16,14 +17,10 @@ export default function RootLoading() {
       aria-label="Loading"
     >
       <div className="flex animate-[fadeInScale_0.6s_ease-out_both] flex-col items-center gap-5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={brand.markSrc}
-          alt=""
-          width={64}
-          height={64}
-          fetchPriority="high"
-          loading="eager"
+        <LinceMark
+          logoFashion="filled"
+          pulseShapePattern="quarter-circle"
+          pulseAnimation="animated"
           className="size-16 drop-shadow-[0_0_24px_rgba(234,88,12,0.4)]"
         />
         <span className="text-foreground text-lg font-bold tracking-tight">{brand.displayName}</span>

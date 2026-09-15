@@ -570,6 +570,49 @@
     animation: rotate 0.5s backwards;
   }
 
+  .lince-mark {
+    overflow: visible;
+  }
+
+  .lince-mark .lince-pulse-wave {
+    fill: none;
+    stroke: var(--primary);
+    transform-box: view-box;
+    transform-origin: 32px 32px;
+  }
+
+  .lince-mark[data-pulse-animation="animated"] .lince-pulse-wave {
+    opacity: 0;
+    animation: lince-radar-pulse 2.4s ease-out infinite;
+  }
+
+  .lince-mark[data-pulse-animation="animated"] .lince-pulse-wave-2 {
+    animation-delay: 0.8s;
+  }
+
+  .lince-mark[data-pulse-animation="animated"] .lince-pulse-wave-3 {
+    animation-delay: 1.6s;
+  }
+
+  @keyframes lince-radar-pulse {
+    0% {
+      transform: scale(0.92);
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(1.42);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lince-mark[data-pulse-animation="animated"] .lince-pulse-wave {
+      animation: none;
+      opacity: 0.28;
+      transform: none;
+    }
+  }
+
   [data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
     height: 0 !important;
   }

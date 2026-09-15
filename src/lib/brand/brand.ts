@@ -17,7 +17,7 @@ import type { Locale } from "@/i18n/config"
 export const BRAND_SETTINGS_KEY = "brand"
 export const BRAND_CACHE_TAG = "brand-settings"
 
-/** Path to the primary mark (pulse-ring / eye). Swap the file to change the identity everywhere. */
+/** Static tile mark for <img>, OG, email and PWA. The live SVG is `LinceMark`. */
 export const BRAND_MARK_SRC = "/lince-mark.svg"
 
 const brandText = z.string().trim().min(1).max(80)
