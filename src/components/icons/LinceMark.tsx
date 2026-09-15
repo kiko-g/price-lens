@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils"
 /**
  * Lince mark — Iberian lynx with a pulse ring.
  *
- * `pal` is the sellable default: shield head, scan-eyes, ears as tufts.
- * `angular` is the sharp faceted variant (kept for the lab).
+ * `pal` is the sellable default: round sidekick, short lynx ears, two vision-pills.
+ * `angular` is the sharp faceted cut (lab option).
  * Static <img>/OG/email equivalent: `public/lince-mark.svg` (tile + pal).
  */
 export const LINCE_LOGO_SHAPES = ["pal", "angular"] as const
@@ -45,21 +45,8 @@ const ANGULAR = {
   nose: "M29.5 45L34.5 45L32 48.5Z",
 }
 
-const PAL = {
-  head: "M18 5L21 17L16 25L15 39L23 50L28 53.5L32 54.5L36 53.5L41 50L49 39L48 25L43 17L46 5L35 16L29 16Z",
-  innerL: "M21.2 15.5L19.4 8L27.5 15.2Z",
-  innerR: "M42.8 15.5L44.6 8L36.5 15.2Z",
-  forehead: "M23 21L32 24L41 21L42.5 29L32 27L21.5 29Z",
-  cheekL: "M16 33L30 31L25 43L15 39Z",
-  cheekR: "M48 33L34 31L39 43L49 39Z",
-  muzzle: "M26 41L32 36L38 41L32 49Z",
-  brow: "M23 21L32 24L41 21",
-  nose: "M29.8 43.2L34.2 43.2L32 46Z",
-  eyes: [
-    { cx: 23.3, cy: 31.6, rx: 4.4, ry: 3.9 },
-    { cx: 40.7, cy: 31.6, rx: 4.4, ry: 3.9 },
-  ] as const,
-}
+const PAL_HEAD =
+  "M20 14L16 26C12 30 12 36 12 40C12 51 20 57 32 57C44 57 52 51 52 40C52 36 52 30 48 26L44 14C41 11 38 14 37 20C34 19 30 19 27 20C26 14 23 11 20 14Z"
 
 const QUARTER_ARC = "M32 2.5A29.5 29.5 0 0 1 61.5 32"
 const HALF_ARC = "M32 2.5A29.5 29.5 0 0 1 32 61.5"
@@ -164,14 +151,13 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
     return (
       <>
         <path
-          d={PAL.head}
+          d={PAL_HEAD}
           stroke="currentColor"
-          strokeWidth={1.8}
+          strokeWidth={1.9}
           strokeLinejoin="round"
           className="drop-shadow-[0_0_4px_var(--primary)]"
         />
-        <path d={PAL.brow} stroke="currentColor" strokeWidth={1.2} strokeOpacity={0.7} />
-        <ScanEyes wellClass="fill-background" irisFill="currentColor" />
+        <PalVisionPills className="fill-current" />
       </>
     )
   }
@@ -181,111 +167,60 @@ function PalHead({ fashion }: { fashion: LinceLogoFashion }) {
       <>
         <rect width={64} height={64} className="fill-base-900" />
         <rect x={0.5} y={0.5} width={63} height={63} className="stroke-base-700" />
-        <path d={PAL.head} className="fill-primary" />
-        <path d={PAL.innerL} className="fill-primary-200" />
-        <path d={PAL.innerR} className="fill-primary-200" />
-        <path d={PAL.forehead} className="fill-primary-700" />
-        <path d={PAL.muzzle} className="fill-primary-400" />
-        <ScanEyes wellClass="fill-base-950" irisClass="fill-primary-200" />
-        <path d={PAL.nose} className="fill-base-950" />
+        <path d={PAL_HEAD} className="fill-primary" />
+        <PalVisionPills className="fill-base-950" />
       </>
     )
   }
 
   if (fashion === "filledWhite") {
     return (
-      <PalFacets head="#e8ebf2" forehead="#c9ced9" cheek="#dfe3ec" muzzle="#f4f6fa" nose="#0b0f1a" well="#0b0f1a" />
+      <>
+        <path d={PAL_HEAD} fill="#e8ebf2" />
+        <PalVisionPills className="fill-primary" />
+      </>
     )
   }
 
   if (fashion === "filledInk") {
     return (
-      <PalFacets head="#14181f" forehead="#2a3040" cheek="#1c2230" muzzle="#3b4150" nose="#f6f3ee" well="#0b0f1a" />
+      <>
+        <path d={PAL_HEAD} fill="#14181f" />
+        <PalVisionPills className="fill-primary" />
+      </>
     )
   }
 
   return (
     <>
-      <path d={PAL.head} className="fill-foreground" />
-      <path d={PAL.innerL} className="fill-primary" />
-      <path d={PAL.innerR} className="fill-primary" />
-      <path d={PAL.forehead} className="fill-black/20" />
-      <path d={PAL.cheekL} className="fill-black/10" />
-      <path d={PAL.cheekR} className="fill-black/10" />
-      <path d={PAL.muzzle} className="fill-white/15" />
-      <ScanEyes wellClass="fill-base-950" irisClass="fill-primary" />
-      <path d={PAL.nose} className="fill-background" />
+      <path d={PAL_HEAD} className="fill-foreground" />
+      <PalVisionPills className="fill-primary" />
     </>
   )
 }
 
-function PalFacets({
-  head,
-  forehead,
-  cheek,
-  muzzle,
-  nose,
-  well,
-}: {
-  head: string
-  forehead: string
-  cheek: string
-  muzzle: string
-  nose: string
-  well: string
-}) {
+function PalVisionPills({ className }: { className?: string }) {
   return (
-    <>
-      <path d={PAL.head} fill={head} />
-      <path d={PAL.innerL} className="fill-primary" />
-      <path d={PAL.innerR} className="fill-primary" />
-      <path d={PAL.forehead} fill={forehead} />
-      <path d={PAL.cheekL} fill={cheek} />
-      <path d={PAL.cheekR} fill={cheek} />
-      <path d={PAL.muzzle} fill={muzzle} />
-      <ScanEyes wellFill={well} irisClass="fill-primary" />
-      <path d={PAL.nose} fill={nose} />
-    </>
-  )
-}
-
-function ScanEyes({
-  wellClass,
-  wellFill,
-  irisClass,
-  irisFill,
-}: {
-  wellClass?: string
-  wellFill?: string
-  irisClass?: string
-  irisFill?: string
-}) {
-  return (
-    <>
-      {PAL.eyes.map((eye) => (
-        <g key={`${eye.cx}-${eye.cy}`}>
-          <ellipse cx={eye.cx} cy={eye.cy} rx={eye.rx} ry={eye.ry} className={wellClass} fill={wellFill} />
-          <ellipse
-            cx={eye.cx}
-            cy={eye.cy}
-            rx={eye.rx}
-            ry={eye.ry}
-            fill="none"
-            className="stroke-primary"
-            strokeWidth={1.25}
-          />
-          <ellipse
-            cx={eye.cx}
-            cy={eye.cy}
-            rx={eye.rx * 0.52}
-            ry={eye.ry * 0.55}
-            className={irisClass}
-            fill={irisFill}
-          />
-          <circle cx={eye.cx - 1.15} cy={eye.cy - 1.15} r={0.8} fill="#f4f6fa" />
-        </g>
-      ))}
-    </>
+    <g data-lince-pal-eyes="">
+      <rect
+        x={28.4}
+        y={28.2}
+        width={5.8}
+        height={13.4}
+        rx={2.9}
+        transform="rotate(-30 31.3 34.9)"
+        className={className}
+      />
+      <rect
+        x={37.4}
+        y={25.2}
+        width={4.8}
+        height={11.2}
+        rx={2.4}
+        transform="rotate(-30 39.8 30.8)"
+        className={className}
+      />
+    </g>
   )
 }
 

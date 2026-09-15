@@ -16,14 +16,14 @@ describe("LinceMark", () => {
     expect(svg?.getAttribute("data-pulse-animation")).toBe("static")
     expect(container.querySelector("clipPath")).not.toBeNull()
     expect(container.querySelector("[data-lince-pulse-waves]")).not.toBeNull()
-    expect(container.querySelector("ellipse")).not.toBeNull()
+    expect(container.querySelector("[data-lince-pal-eyes]")).not.toBeNull()
   })
 
   it("keeps the angular silhouette when requested", () => {
     const { container } = render(<LinceMark logoShape="angular" pulseShapePattern="none" />)
     const svg = container.querySelector("svg")
     expect(svg?.getAttribute("data-logo-shape")).toBe("angular")
-    expect(container.querySelector("ellipse")).toBeNull()
+    expect(container.querySelector("[data-lince-pal-eyes]")).toBeNull()
   })
 
   it("clips radar waves to the requested sector and animates when asked", () => {
