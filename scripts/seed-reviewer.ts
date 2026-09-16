@@ -5,7 +5,7 @@
  * `profiles.role = 'reviewer'`. Idempotent: re-running updates the password (when
  * REVIEWER_PASSWORD is set) and re-asserts the role.
  *
- * Required env (never commit these; see docs/reviewer-role.md):
+ * Required env (never commit these; see REVIEWER_ROLE.md):
  *   NEXT_PUBLIC_SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
  *   REVIEWER_PASSWORD             (>= 12 chars)

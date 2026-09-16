@@ -24,7 +24,7 @@ const ERROR_KEYS = new Set(["missing", "invalid"])
 /**
  * Email + password sign-in for the dedicated read-only reviewer account.
  * Intentionally unlinked from the consumer login page: shoppers keep Google OAuth.
- * Requires the Email provider to be enabled in Supabase Auth (see docs/reviewer-role.md).
+ * Requires the Email provider to be enabled in Supabase Auth (see REVIEWER_ROLE.md).
  */
 export default async function ReviewerLoginPage({ searchParams }: { searchParams: SearchParams }) {
   const { error, next } = await searchParams
