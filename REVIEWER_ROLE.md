@@ -98,11 +98,13 @@ Sign in at `/login/reviewer` with the seeded account, then:
    are hidden and replaced by "Read-only reviewer — actions hidden".
 3. **Admin write is blocked (fail closed)** — from the browser console while signed in:
    ```js
-   await fetch("/api/admin/brand", { method: "PUT", headers: { "content-type": "application/json" }, body: "{}" }).then(r => r.status)          // 403
-   await fetch("/api/admin/analytics/recompute", { method: "POST" }).then(r => r.status)                                                      // 403
-   await fetch("/api/admin/discovery?action=run&origin=all").then(r => r.status)                                                              // 403
-   await fetch("/api/admin/cron?priority=5").then(r => r.status)                                                                              // 403
-   await fetch("/api/admin/analytics").then(r => r.status)                                                                                    // 200
+   await fetch("/api/admin/brand", { method: "PUT", headers: { "content-type": "application/json" }, body: "{}" }).then(
+     (r) => r.status,
+   ) // 403
+   await fetch("/api/admin/analytics/recompute", { method: "POST" }).then((r) => r.status) // 403
+   await fetch("/api/admin/discovery?action=run&origin=all").then((r) => r.status) // 403
+   await fetch("/api/admin/cron?priority=5").then((r) => r.status) // 403
+   await fetch("/api/admin/analytics").then((r) => r.status) // 200
    ```
 4. **No self-promotion** — with the reviewer's JWT, `PATCH /rest/v1/profiles?id=eq.<uid>` with
    `{"role":"admin"}` returns `42501 profiles.role can only be changed by the service role`.
