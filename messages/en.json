@@ -362,6 +362,19 @@
         "origin-missing": "Something went wrong starting the sign-in flow. Please try again.",
         "default": "Sign-in failed. Please try again."
       }
+    },
+    "reviewerLogin": {
+      "title": "Reviewer sign-in",
+      "subtitle": "Email and password access for the read-only review account. Shoppers sign in with Google.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "backToGoogle": "Back to Google sign-in",
+      "readOnlyHint": "This account can browse everything but cannot change data.",
+      "errors": {
+        "missing": "Enter your email and password.",
+        "invalid": "Wrong email or password, or the email provider is disabled in Supabase Auth."
+      }
     }
   },
   "deals": {

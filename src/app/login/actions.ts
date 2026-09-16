@@ -6,44 +6,35 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { headers } from "next/headers"
 
-export async function login(formData: FormData) {
-  const supabase = await createClient()
+const REVIEWER_LOGIN_PATH = "/login/reviewer"
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+const safeNextPath = (raw: unknown): string =>
+  typeof raw === "string" && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/profile"
+
+/**
+ * Email + password sign-in used by the dedicated reviewer account (and any other
+ * password user created via the Supabase admin API). Consumers keep Google OAuth;
+ * this action is only reachable from /login/reviewer and never creates accounts.
+ */
+export async function signInWithPassword(formData: FormData) {
+  const email = formData.get("email")
+  const password = formData.get("password")
+  const next = safeNextPath(formData.get("next"))
+
+  if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
+    redirect(`${REVIEWER_LOGIN_PATH}?error=missing`)
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
 
   if (error) {
-    redirect("/error")
+    console.error("[signInWithPassword] failed:", error.message)
+    redirect(`${REVIEWER_LOGIN_PATH}?error=invalid&next=${encodeURIComponent(next)}`)
   }
 
   revalidatePath("/", "layout")
-  redirect("/")
-}
-
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  }
-
-  const { error } = await supabase.auth.signUp(data)
-
-  if (error) {
-    redirect("/error")
-  }
-
-  revalidatePath("/", "layout")
-  redirect("/")
+  redirect(next)
 }
 
 export async function signInWithGoogle(formData: FormData) {
