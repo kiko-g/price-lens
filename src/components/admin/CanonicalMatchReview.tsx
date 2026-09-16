@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { STORE_NAMES, STORE_COLORS, STORE_COLORS_SECONDARY } from "@/types/business"
 
 import { LinkBarcodeDialog } from "@/components/admin/LinkBarcodeDialog"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import { LinkToCanonicalDialog } from "@/components/admin/LinkToCanonicalDialog"
 
 import {
@@ -374,11 +375,13 @@ function CanonicalCard({ canonical, onRefresh }: { canonical: CanonicalProduct; 
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <LinkBarcodeDialog
-              canonicalId={canonical.canonicalId}
-              canonicalName={canonical.name}
-              onLinked={onRefresh}
-            />
+            <AdminWriteOnly>
+              <LinkBarcodeDialog
+                canonicalId={canonical.canonicalId}
+                canonicalName={canonical.name}
+                onLinked={onRefresh}
+              />
+            </AdminWriteOnly>
             <div className="flex gap-1">
               {storeIds.map((sid) => (
                 <StoreBadge key={sid} originId={sid} />
@@ -407,17 +410,23 @@ function CanonicalCard({ canonical, onRefresh }: { canonical: CanonicalProduct; 
                 <div key={ti.id} className="flex items-center gap-1 rounded-md border px-2 py-1 text-xs">
                   <span className="font-mono">{ti.gtin}</span>
                   {ti.off_product_name && <span className="text-muted-foreground ml-1">({ti.off_product_name})</span>}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive ml-1 h-5 w-5 p-0"
-                    onClick={() => handleUnlink(ti.gtin)}
-                    disabled={unlinking === ti.gtin}
-                    aria-label={`Unlink ${ti.gtin}`}
-                    tabIndex={0}
-                  >
-                    {unlinking === ti.gtin ? <Loader2 className="size-3 animate-spin" /> : <XIcon className="size-3" />}
-                  </Button>
+                  <AdminWriteOnly>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive ml-1 h-5 w-5 p-0"
+                      onClick={() => handleUnlink(ti.gtin)}
+                      disabled={unlinking === ti.gtin}
+                      aria-label={`Unlink ${ti.gtin}`}
+                      tabIndex={0}
+                    >
+                      {unlinking === ti.gtin ? (
+                        <Loader2 className="size-3 animate-spin" />
+                      ) : (
+                        <XIcon className="size-3" />
+                      )}
+                    </Button>
+                  </AdminWriteOnly>
                 </div>
               ))}
             </div>
@@ -448,29 +457,31 @@ function CanonicalCard({ canonical, onRefresh }: { canonical: CanonicalProduct; 
           </div>
 
           {/* Delete section */}
-          <div className="mt-4 flex justify-end border-t pt-3">
-            {confirmDelete ? (
-              <div className="flex items-center gap-2">
-                <span className="text-destructive text-sm">Delete this canonical?</span>
-                <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
-                  {deleting ? <Loader2 className="size-4 animate-spin" /> : "Confirm"}
+          <AdminWriteOnly>
+            <div className="mt-4 flex justify-end border-t pt-3">
+              {confirmDelete ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-destructive text-sm">Delete this canonical?</span>
+                  <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
+                    {deleting ? <Loader2 className="size-4 animate-spin" /> : "Confirm"}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive gap-1.5"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  <Trash2Icon className="size-3.5" />
+                  Delete
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive gap-1.5"
-                onClick={() => setConfirmDelete(true)}
-              >
-                <Trash2Icon className="size-3.5" />
-                Delete
-              </Button>
-            )}
-          </div>
+              )}
+            </div>
+          </AdminWriteOnly>
         </CardContent>
       )}
     </Card>
@@ -519,7 +530,9 @@ function OrphanCard({ orphan, onRefresh }: { orphan: OrphanItem; onRefresh: () =
             )}
           </div>
           <div className="flex items-start gap-2">
-            <LinkToCanonicalDialog barcode={orphan.gtin} onLinked={onRefresh} />
+            <AdminWriteOnly>
+              <LinkToCanonicalDialog barcode={orphan.gtin} onLinked={onRefresh} />
+            </AdminWriteOnly>
             <div className="flex gap-1">
               {storeIds.map((sid) => (
                 <StoreBadge key={sid} originId={sid} />

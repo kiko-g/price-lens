@@ -8,6 +8,7 @@ import axios from "axios"
 import { Loader2Icon, RefreshCwIcon, DatabaseIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -85,14 +86,16 @@ export default function DataHealthPage() {
                   Atualizar
                 </Button>
               )}
-              <Button size="sm" onClick={handleRecompute} disabled={isRecomputing}>
-                {isRecomputing ? (
-                  <Loader2Icon className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCwIcon className="h-4 w-4" />
-                )}
-                {isRecomputing ? "A recomputar…" : "Recomputar"}
-              </Button>
+              <AdminWriteOnly>
+                <Button size="sm" onClick={handleRecompute} disabled={isRecomputing}>
+                  {isRecomputing ? (
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCwIcon className="h-4 w-4" />
+                  )}
+                  {isRecomputing ? "A recomputar…" : "Recomputar"}
+                </Button>
+              </AdminWriteOnly>
             </div>
           </div>
         </div>
@@ -123,7 +126,9 @@ export default function DataHealthPage() {
             <RevivalSection data={data} isLoading={isLoading} />
             <SuccessorSection />
             <DbVolatilitySection data={data} isLoading={isLoading} />
-            <ManualTriggersSection onRecompute={handleRecompute} isRecomputing={isRecomputing} />
+            <AdminWriteOnly>
+              <ManualTriggersSection onRecompute={handleRecompute} isRecomputing={isRecomputing} />
+            </AdminWriteOnly>
           </>
         )}
       </div>

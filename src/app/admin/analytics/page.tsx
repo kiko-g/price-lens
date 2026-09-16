@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import type { AnalyticsSnapshot } from "@/types/analytics"
 
 import {
@@ -100,14 +101,16 @@ export default function AnalyticsPage() {
                   Refresh
                 </Button>
               )}
-              <Button size="sm" onClick={handleRecompute} disabled={isRecomputing}>
-                {isRecomputing ? (
-                  <Loader2Icon className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCwIcon className="h-4 w-4" />
-                )}
-                {isRecomputing ? "Recomputing…" : "Recompute"}
-              </Button>
+              <AdminWriteOnly>
+                <Button size="sm" onClick={handleRecompute} disabled={isRecomputing}>
+                  {isRecomputing ? (
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCwIcon className="h-4 w-4" />
+                  )}
+                  {isRecomputing ? "Recomputing…" : "Recompute"}
+                </Button>
+              </AdminWriteOnly>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -220,10 +221,12 @@ export function CategoryMappingsTable({ canonicalCategories }: CategoryMappingsT
               )}
               Check mappings (dry run)
             </Button>
-            <Button onClick={() => setMapDialogOpen(true)} disabled={selectedTuples.size === 0}>
-              <LinkIcon className="h-4 w-4" />
-              Map {selectedTuples.size} Selected
-            </Button>
+            <AdminWriteOnly>
+              <Button onClick={() => setMapDialogOpen(true)} disabled={selectedTuples.size === 0}>
+                <LinkIcon className="h-4 w-4" />
+                Map {selectedTuples.size} Selected
+              </Button>
+            </AdminWriteOnly>
           </div>
         </div>
       </CardHeader>
@@ -655,23 +658,25 @@ function MappingCell({ tuple, flatCategories, onUpdate }: MappingCellProps) {
       <span className="truncate text-xs" title={currentCategory?.path}>
         {currentCategory?.name || "Unknown"}
       </span>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="h-6 w-6 opacity-0 group-hover:opacity-100"
-        onClick={() => setEditing(true)}
-      >
-        <FilterIcon className="h-3 w-3" />
-      </Button>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="text-destructive h-6 w-6 opacity-0 group-hover:opacity-100"
-        onClick={() => deleteMutation.mutate()}
-        disabled={deleteMutation.isPending}
-      >
-        <XIcon className="h-3 w-3" />
-      </Button>
+      <AdminWriteOnly>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-6 w-6 opacity-0 group-hover:opacity-100"
+          onClick={() => setEditing(true)}
+        >
+          <FilterIcon className="h-3 w-3" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="text-destructive h-6 w-6 opacity-0 group-hover:opacity-100"
+          onClick={() => deleteMutation.mutate()}
+          disabled={deleteMutation.isPending}
+        >
+          <XIcon className="h-3 w-3" />
+        </Button>
+      </AdminWriteOnly>
     </div>
   )
 }
