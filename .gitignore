@@ -79,3 +79,6 @@ mobile/android-twa/app-release-signed.apk
 mobile/android-twa/app-release-bundle.aab
 mobile/android-twa/app-release-unsigned-aligned.apk
 mobile/android-twa/node_modules/
+
+# local archive
+archive

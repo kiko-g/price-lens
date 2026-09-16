@@ -8,7 +8,7 @@ import { DollarSignIcon, ShoppingCartIcon } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | Admin",
-  description: "Admin dashboard hub for Price Lens",
+  description: "Admin dashboard hub",
 }
 
 export default function AdminDashboard() {

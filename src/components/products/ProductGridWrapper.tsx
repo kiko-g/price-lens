@@ -16,9 +16,8 @@ export function ProductGridWrapper({ children, className }: ProductGridWrapperPr
         "sm:grid-cols-3",
         "md:grid-cols-4 md:gap-x-4 md:gap-y-4",
         "lg:grid-cols-4",
-        "xl:grid-cols-6",
-        "2xl:grid-cols-7",
-        "3xl:grid-cols-8",
+        "xl:grid-cols-5",
+        "2xl:grid-cols-6",
         className,
       )}
     >

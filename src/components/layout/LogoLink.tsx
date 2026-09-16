@@ -1,19 +1,36 @@
-/* eslint-disable @formatjs/no-literal-string-in-jsx -- brand name is intentionally not localized */
 "use client"
 
 import Link from "next/link"
 
-export function LogoLink() {
+import { cn } from "@/lib/utils"
+import { useBrand } from "@/contexts/BrandContext"
+import { LinceMark } from "@/components/icons/LinceMark"
+
+type LogoLinkProps = {
+  className?: string
+  /** Hide the wordmark (e.g. collapsed sidebar rail). */
+  markOnly?: boolean
+  /** Show the small-caps eyebrow under the wordmark (sidebar header). */
+  withEyebrow?: boolean
+  markClassName?: string
+}
+
+export function LogoLink({ className, markOnly = false, withEyebrow = false, markClassName }: LogoLinkProps) {
+  const brand = useBrand()
+
   return (
     <Link
       href="/"
-      className="flex max-w-full min-w-0 items-center justify-start gap-1.5 transition hover:opacity-80 md:justify-center"
+      aria-label={brand.displayName}
+      className={cn("flex max-w-full min-w-0 items-center gap-2.5 transition hover:opacity-80", className)}
     >
-      <span className="flex shrink-0 items-center justify-center rounded-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/price-lens.svg" alt="Price Lens" className="logo-animation size-5" />
-      </span>
-      <span className="truncate font-bold tracking-tight">Price Lens</span>
+      <LinceMark {...brand.mark} className={cn("logo-animation size-7 shrink-0", markClassName)} />
+      {!markOnly && (
+        <span className="flex min-w-0 flex-col leading-none">
+          <span className="truncate text-[17px] font-bold tracking-tight">{brand.displayName}</span>
+          {withEyebrow && <span className="eyebrow text-primary mt-1 truncate">{brand.eyebrowText}</span>}
+        </span>
+      )}
     </Link>
   )
 }

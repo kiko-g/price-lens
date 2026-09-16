@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" fill="#0b0f1a"/>
+  <defs>
+    <filter id="hunter-glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 1  0 0 0 0 0.35  0 0 0 0 0.12  0 0 0 0.7 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#hunter-glow)" stroke="#ff5a1f" fill="none">
+    <path d="M18 18l4 12-6 6 6 10 10 8 10-8 6-10-6-6 4-12-9 8h-10z" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M26 33l3 2-1 3z M38 33l-3 2 1 3z" fill="#ff5a1f" stroke="none"/>
+  </g>
+</svg>

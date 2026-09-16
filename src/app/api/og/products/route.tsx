@@ -1,3 +1,4 @@
+import { getBrandMarkUrl } from "@/lib/brand/brand"
 import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { queryStoreProducts, SupermarketChain } from "@/lib/queries/store-products"
@@ -11,6 +12,7 @@ import {
   DEFAULT_BROWSE_SORT,
 } from "@/types/business"
 import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
+import { getBrand } from "@/lib/brand/server"
 import type { PrioritySource } from "@/types"
 
 export const runtime = "nodejs"
@@ -99,10 +101,14 @@ export async function GET(request: Request) {
   })
 
   const products = result.data ?? []
-  const fonts = await loadGeistFontsLight()
+  const [fonts, brand] = await Promise.all([loadGeistFontsLight(), getBrand()])
 
   return new ImageResponse(
-    <OGFrame baseUrl={baseUrl}>
+    <OGFrame
+      baseUrl={baseUrl}
+      brandName={brand.displayName}
+      brandMarkSrc={getBrandMarkUrl(brand, { format: "png", size: 192, tile: true })}
+    >
       <div tw="flex flex-col w-full h-full">
         {/* Header */}
         <div tw="flex items-center px-10 pt-8 pb-4">

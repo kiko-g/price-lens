@@ -1,22 +1,12 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_751_2)">
-<mask id="mask0_751_2" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-<path d="M512 0H0V512H512V0Z" fill="white"/>
-</mask>
-<g mask="url(#mask0_751_2)">
-<rect width="512" height="512" rx="125" fill="url(#paint0_linear_751_2)"/>
-<path d="M352 256H288C270.326 256 256 270.326 256 288V352C256 369.674 270.326 384 288 384H352C369.674 384 384 369.674 384 352V288C384 270.326 369.674 256 352 256Z" fill="white" fill-opacity="0.4"/>
-<path d="M288 192H224C206.326 192 192 206.326 192 224V288C192 305.674 206.326 320 224 320H288C305.674 320 320 305.674 320 288V224C320 206.326 305.674 192 288 192Z" fill="white" fill-opacity="0.5"/>
-<path d="M224 128H160C142.327 128 128 142.327 128 160V224C128 241.674 142.327 256 160 256H224C241.674 256 256 241.674 256 224V160C256 142.327 241.674 128 224 128Z" fill="white"/>
-</g>
-</g>
-<defs>
-<linearGradient id="paint0_linear_751_2" x1="27" y1="-1.65834e-07" x2="465.5" y2="512" gradientUnits="userSpaceOnUse">
-<stop stop-color="#3B8AEC"/>
-<stop offset="0.790239" stop-color="#636AD7"/>
-</linearGradient>
-<clipPath id="clip0_751_2">
-<rect width="512" height="512" fill="white"/>
-</clipPath>
-</defs>
+<svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" fill="#111726"/>
+  <rect x=".5" y=".5" width="63" height="63" stroke="#2a3552"/>
+  <path d="M4 22L18 26L14 44L4 46Z M60 22L46 26L50 44L60 46Z" fill="#9a1f0f"/>
+  <path d="M15.5 13.5L13 9.5M48.5 13.5L51 9.5" stroke="#e8ebf2" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="M15.5 13.5L23 21Q32 17.5 41 21L48.5 13.5L46 26L55 29L50 37L53 45L43 47L38 55L32 51L26 55L21 47L11 45L14 37L9 29L18 26Z" fill="#e8ebf2"/>
+  <path d="M9 29L18 26L14 37Z M55 29L46 26L50 37Z M14 37L21 47L11 45Z M50 37L43 47L53 45Z" fill="#c9ced9"/>
+  <path d="M19.5 31L27.5 30L28 34L21.5 35.5Z M44.5 31L36.5 30L36 34L42.5 35.5Z" fill="#ff5a1f"/>
+  <path d="M27 35.5L29.5 42L31 41Z M37 35.5L34.5 42L33 41Z" fill="#111726"/>
+  <path d="M29 44L35 44L32 48Z" fill="#111726"/>
+  <path d="M32 48L32 50M32 50L28.5 52.5M32 50L35.5 52.5" stroke="#111726" stroke-width="1.4" stroke-linecap="round"/>
 </svg>

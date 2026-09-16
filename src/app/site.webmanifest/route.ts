@@ -1,0 +1,62 @@
+import { NextResponse } from "next/server"
+
+import { getBrand } from "@/lib/brand/server"
+import { getBrandMarkUrl, getBrandText } from "@/lib/brand/brand"
+import { defaultLocale } from "@/i18n/config"
+
+export const dynamic = "force-dynamic"
+
+/**
+ * PWA manifest built from the Brand Control Center. Served at the legacy `/site.webmanifest` URL so
+ * `<link rel="manifest">`, the Android TWA config and installed PWAs keep resolving.
+ */
+export async function GET() {
+  const brand = await getBrand()
+
+  const manifest = {
+    name: brand.displayName,
+    short_name: brand.shortName,
+    description: getBrandText(brand.metaDescription, defaultLocale),
+    id: "/",
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    orientation: "portrait",
+    theme_color: "#0b0f1a",
+    background_color: "#0b0f1a",
+    categories: ["shopping", "finance", "food"],
+    lang: defaultLocale,
+    prefer_related_applications: false,
+    icons: [
+      { src: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192", type: "image/png" },
+      { src: getBrandMarkUrl(brand, { format: "png", size: 512, tile: true }), sizes: "512x512", type: "image/png" },
+      {
+        src: getBrandMarkUrl(brand, { format: "png", size: 512, tile: true }),
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+    shortcuts: [
+      {
+        name: "Explorar produtos",
+        short_name: "Produtos",
+        url: "/products",
+        icons: [{ src: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192" }],
+      },
+      {
+        name: "Os meus favoritos",
+        short_name: "Favoritos",
+        url: "/favorites",
+        icons: [{ src: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192" }],
+      },
+    ],
+  }
+
+  return NextResponse.json(manifest, {
+    headers: {
+      "Content-Type": "application/manifest+json",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+    },
+  })
+}

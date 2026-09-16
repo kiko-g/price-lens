@@ -1,11 +1,12 @@
 "use client"
 
 import { useId } from "react"
-import Image from "next/image"
 import { redirect, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { signInWithGoogle } from "./actions"
 import { useUser } from "@/hooks/useUser"
+import { useBrand } from "@/contexts/BrandContext"
+import { LinceMark } from "@/components/icons/LinceMark"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -64,6 +65,7 @@ export function LoginClient({ stats }: { stats: HomeStats }) {
   const errorParam = searchParams.get("error")
   const nextParam = searchParams.get("next")
   const t = useTranslations("auth.login")
+  const brand = useBrand()
 
   if (isLoading) {
     return (
@@ -117,8 +119,8 @@ export function LoginClient({ stats }: { stats: HomeStats }) {
             <h1 className="text-foreground mb-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-2xl font-semibold md:justify-start">
               <span>{t("loginTo")}</span>
               <span className="inline-flex items-center">
-                <Image src="/price-lens.svg" alt="" width={24} height={24} className="mr-1" />
-                <span className="tracking-tighter">{t("brandName")}</span>
+                <LinceMark {...brand.mark} pulseShapePattern="none" className="mr-1 size-6" />
+                <span className="tracking-tighter">{brand.displayName}</span>
               </span>
             </h1>
             <p className="text-muted-foreground mb-6 text-sm leading-relaxed">{t("subtitle")}</p>

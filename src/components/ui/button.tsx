@@ -9,7 +9,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: `bg-zinc-800 text-white shadow hover:bg-zinc-800/90 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
+        default: `bg-foreground text-background shadow hover:bg-foreground/90`,
+        /* Lince HUD: ember outline + glow. Use for the secondary brand action next to `default`. */
+        hud: `border-primary/60 bg-primary/5 text-primary shadow-none hover:bg-primary/12 hover:border-primary ember-glow dark:text-primary-200`,
         inverted: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-700`,
         white: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
 

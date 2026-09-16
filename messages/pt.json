@@ -34,7 +34,7 @@
       "share": "Partilhar",
       "tooltip": "Partilhar este produto",
       "ariaShare": "Partilhar produto",
-      "checkOut": "Vê {name} no Price Lens",
+      "checkOut": "Vê {name} no {brand}",
       "shared": "Partilhado com sucesso",
       "copyLink": "Copiar link",
       "copiedLink": "Link copiado:",
@@ -151,34 +151,30 @@
     }
   },
   "metadata": {
-    "site": {
-      "name": "Price Lens",
-      "description": "Monitorização diária de preços dos supermercados portugueses (Continente, Auchan e Pingo Doce). Transforma variações de preço em poupança. Mais dinheiro no teu bolso. Tudo no Price Lens."
-    },
     "pages": {
       "about": {
         "title": "Sobre",
-        "description": "Sabe mais sobre o Price Lens e explora mais de 25 anos de dados históricos de inflação para Portugal, EUA e Zona Euro."
+        "description": "Sabe mais sobre o {brand} e explora mais de 25 anos de dados históricos de inflação para Portugal, EUA e Zona Euro."
       },
       "terms": {
         "title": "Termos de Serviço",
-        "description": "Consulta os termos de serviço e condições de utilização do Price Lens."
+        "description": "Consulta os termos de serviço e condições de utilização do {brand}."
       },
       "privacy": {
         "title": "Política de Privacidade",
-        "description": "Consulta a política de privacidade do Price Lens para saberes como tratamos os teus dados."
+        "description": "Consulta a política de privacidade do {brand} para saberes como tratamos os teus dados."
       },
       "profile": {
         "title": "Perfil",
-        "description": "Gere a tua conta Price Lens e as tuas preferências."
+        "description": "Gere a tua conta {brand} e as tuas preferências."
       },
       "login": {
         "title": "Entrar",
-        "description": "Inicia sessão no Price Lens para acompanhar preços, guardar favoritos e receber alertas sobre produtos de supermercados portugueses."
+        "description": "Inicia sessão no {brand} para acompanhar preços, guardar favoritos e receber alertas sobre produtos de supermercados portugueses."
       },
       "app": {
         "title": "Obter a App",
-        "description": "Instala o Price Lens como app gratuita no teu telemóvel para uma experiência mais rápida, com suporte offline e ecrã inteiro."
+        "description": "Instala o {brand} como app gratuita no teu telemóvel para uma experiência mais rápida, com suporte offline e ecrã inteiro."
       },
       "deals": {
         "title": "Promoções & Descidas de Preço",
@@ -194,7 +190,7 @@
       },
       "offline": {
         "title": "Offline",
-        "description": "O Price Lens precisa de ligação à internet para mostrar os preços mais recentes."
+        "description": "O {brand} precisa de ligação à internet para mostrar os preços mais recentes."
       },
       "authError": {
         "title": "Falha no início de sessão",
@@ -210,24 +206,24 @@
       },
       "productLookup": {
         "title": "Pesquisa de produto - {barcode}",
-        "description": "A pesquisar {barcode} no Price Lens."
+        "description": "A pesquisar {barcode} no {brand}."
       },
       "compare": {
         "title": "Comparar preços",
-        "description": "Compara preços de produtos entre supermercados no Price Lens."
+        "description": "Compara preços de produtos entre supermercados no {brand}."
       }
     },
     "compare": {
       "title": "Comparar preços - {name}",
-      "description": "Compara preços de {name} em {count} lojas no Price Lens.",
+      "description": "Compara preços de {name} em {count} lojas no {brand}.",
       "genericProduct": "produto",
       "lookupTitle": "Pesquisa de produto - Canónico #{id}",
-      "lookupDescription": "A pesquisar Canónico #{id} no Price Lens."
+      "lookupDescription": "A pesquisar Canónico #{id} no {brand}."
     }
   },
   "about": {
-    "title": "Sobre o Price Lens",
-    "body": "O Price Lens acompanha as variações diárias de preços nos supermercados portugueses para tornar visível a subida silenciosa dos preços. Em baixo podes explorar mais de 25 anos de dados de inflação e perceber o panorama por trás dos números nas prateleiras."
+    "title": "Sobre o {brand}",
+    "body": "O {brand} acompanha as variações diárias de preços nos supermercados portugueses para tornar visível a subida silenciosa dos preços. Em baixo podes explorar mais de 25 anos de dados de inflação e perceber o panorama por trás dos números nas prateleiras."
   },
   "errors": {
     "page": {
@@ -250,7 +246,7 @@
     },
     "offline": {
       "title": "Estás offline",
-      "body": "O Price Lens precisa de ligação à internet para mostrar os preços mais recentes. Verifica a tua ligação e tenta novamente."
+      "body": "O {brand} precisa de ligação à internet para mostrar os preços mais recentes. Verifica a tua ligação e tenta novamente."
     },
     "authCode": {
       "title": "Falha no início de sessão",
@@ -324,7 +320,6 @@
     },
     "login": {
       "loginTo": "Inicia sessão no",
-      "brandName": "Price Lens",
       "subtitle": "Guarda favoritos, recebe alertas de descida de preço e mantém a tua lista sincronizada.",
       "noSpam": "Nunca usaremos o teu email para spam",
       "noSpamMicrocopy": "Sem spam, prometido. 😊",
@@ -464,7 +459,7 @@
   },
   "onboarding": {
     "welcome": {
-      "title": "Bem-vindo ao Price Lens",
+      "title": "Bem-vindo ao {brand}",
       "subtitle": "Acompanha preços nos supermercados portugueses e nunca mais pagues a mais. Vamos pôr-te a usar em 30 segundos.",
       "cta": "Começar",
       "skip": "Saltar por agora"
@@ -575,7 +570,7 @@
         "links": {
           "questions": {
             "title": "Dúvidas?",
-            "description": "Envia email ao programador do Price Lens para kikojpgoncalves@gmail.com"
+            "description": "Envia email ao programador do {brand} para kikojpgoncalves@gmail.com"
           },
           "bug": {
             "title": "Encontraste um bug?",
@@ -589,7 +584,7 @@
       },
       "account": {
         "signOutTitle": "Terminar sessão",
-        "signOutHint": "Termina a sessão da tua conta Price Lens neste dispositivo"
+        "signOutHint": "Termina a sessão da tua conta {brand} neste dispositivo"
       },
       "danger": {
         "title": "Zona de perigo",
@@ -603,10 +598,11 @@
   },
   "home": {
     "hero": {
-      "titleMobile": "Acompanha os preços dos<br></br>supermercados",
-      "subtitleMobile": "Transforma oscilações de preço <strong>dinheiro no teu bolso</strong>.",
-      "titleDesktop": "Acompanha os preços dos supermercados portugueses",
-      "subtitleDesktop": "Monitorização diária de preços no Continente, Auchan e Pingo Doce.<br></br>Transforma variações em poupança. Mais <strong>dinheiro no teu bolso</strong>."
+      "kicker": "Supermercados · Portugal",
+      "title": "Vê os preços <em>antes</em> de pagar.",
+      "lead": "O {brand} acompanha Continente, Auchan e Pingo Doce todos os dias. Revela o que subiu em silêncio e mostra-te quando comprar.",
+      "ctaExplore": "Explorar produtos",
+      "ctaScan": "Ler código de barras"
     },
     "searchBar": {
       "placeholder": "Pesquisar produtos…",
@@ -614,7 +610,7 @@
       "scanBarcode": "Código de barras"
     },
     "valueProposition": {
-      "title": "Como o Price Lens ajuda",
+      "title": "Como o {brand} ajuda",
       "subtitle": "Nós fazemos o acompanhamento para tomares decisões mais inteligentes no supermercado.",
       "pillars": {
         "track": {
@@ -663,8 +659,8 @@
     "diagonalCta": {
       "headingEuros": "{euros} em poupança em {count} produtos em promoção",
       "headingDrops": "{count} descidas de preço detetadas hoje",
-      "bodyWithStores": "Os preços variam todas as semanas em {count} grandes cadeias. O que custa 6,99€ hoje custava 4,49€ no mês passado. O Price Lens acompanha tudo para comprares no momento certo.",
-      "body": "Os preços variam todas as semanas nos supermercados. O que custa 6,99€ hoje custava 4,49€ no mês passado. O Price Lens acompanha tudo para comprares no momento certo.",
+      "bodyWithStores": "Os preços variam todas as semanas em {count} grandes cadeias. O que custa 6,99€ hoje custava 4,49€ no mês passado. O {brand} acompanha tudo para comprares no momento certo.",
+      "body": "Os preços variam todas as semanas nos supermercados. O que custa 6,99€ hoje custava 4,49€ no mês passado. O {brand} acompanha tudo para comprares no momento certo.",
       "cta": "Ver as descidas de preço de hoje"
     },
     "personalizedDashboard": {
@@ -692,7 +688,7 @@
         "viewAll": "Ver todos"
       },
       "ctaCard": {
-        "title": "Tira mais partido do Price Lens",
+        "title": "Tira mais partido do {brand}",
         "body": "Marca produtos como favoritos, define alertas de preço e explora promoções para começares a poupar.",
         "browseDeals": "Ver promoções"
       },
@@ -726,13 +722,13 @@
     "inflationBasket": {
       "badge": "A inflação depende de um cabaz de produtos selecionados",
       "title": "Atenção às tendências de preço dos produtos chave",
-      "body": "O cabaz da inflação representa produtos essenciais escolhidos pelas autoridades económicas para acompanhar os preços ao consumidor. A seleção pode mudar com o tempo, mas o Price Lens está atento às tendências de preço dos produtos que sempre importam. Quem é que não se importa com o preço de <em>essenciais</em> como atum, ovos, leite, etc.?",
+      "body": "O cabaz da inflação representa produtos essenciais escolhidos pelas autoridades económicas para acompanhar os preços ao consumidor. A seleção pode mudar com o tempo, mas o {brand} está atento às tendências de preço dos produtos que sempre importam. Quem é que não se importa com o preço de <em>essenciais</em> como atum, ovos, leite, etc.?",
       "ctaRelevant": "Produtos relevantes",
       "ctaSupermarkets": "Listagens dos supermercados"
     },
     "inflationContext": {
       "title": "Não são só os mantimentos",
-      "body": "A inflação acumula em silêncio. Desde 1999, €100 em produtos em Portugal custam agora <strong>€{value}</strong>. O mesmo padrão repete-se a nível de produto, exatamente o que o Price Lens acompanha.",
+      "body": "A inflação acumula em silêncio. Desde 1999, €100 em produtos em Portugal custam agora <strong>€{value}</strong>. O mesmo padrão repete-se a nível de produto, exatamente o que o {brand} acompanha.",
       "chart": {
         "title": "Inflação acumulada (1999 a 2024)",
         "description": "O que €100 de 1999 representam hoje em Portugal, EUA e Zona Euro."
@@ -847,7 +843,7 @@
       },
       "whatNext": {
         "title": "O que isto significa para preços no supermercado",
-        "body": "O IPC macro mostra a pressão sobre custos das superfícies. O Price Lens foca-se no produto — as mesmas forças aparecem na prateleira com algum atraso."
+        "body": "O IPC macro mostra a pressão sobre custos das superfícies. O {brand} foca-se no produto — as mesmas forças aparecem na prateleira com algum atraso."
       }
     },
     "savePotential": {
@@ -861,7 +857,7 @@
       "savedMonth": "Poupança por mês",
       "savedYear": "Poupança por ano",
       "highlight": "Só por comprares com mais cabeça",
-      "cta": "Começa a poupar com o Price Lens",
+      "cta": "Começa a poupar com o {brand}",
       "trust": {
         "noPayment": "Sem pagamento",
         "averageSavings": "Média de 20% de poupança",
@@ -875,7 +871,7 @@
       "headlinePart2": "exceto no",
       "headlinePart3": "supermercado",
       "spotlightTitle": "O comprador médio pode poupar até <highlight>€{savings}/ano</highlight> só por comprar na altura certa",
-      "spotlightBody": "Os supermercados rodam promoções constantemente entre marcas e lojas. O Price Lens acompanha esses descontos, para fazeres stock quando os preços estão mais baixos e parares de pagar a mais nas compras.",
+      "spotlightBody": "Os supermercados rodam promoções constantemente entre marcas e lojas. O {brand} acompanha esses descontos, para fazeres stock quando os preços estão mais baixos e parares de pagar a mais nas compras.",
       "spotlightCta": "Começa a poupar nas compras",
       "comingSoon": "Em breve",
       "features": {
@@ -885,7 +881,7 @@
         },
         "trackSavings": {
           "title": "Acompanha a tua poupança",
-          "description": "Vê quanto poupaste ao longo do tempo a comprar com mais cabeça com o Price Lens."
+          "description": "Vê quanto poupaste ao longo do tempo a comprar com mais cabeça com o {brand}."
         }
       }
     },
@@ -903,12 +899,12 @@
         },
         "timing": {
           "title": "Compra na altura certa",
-          "text": "A maioria dos produtos passa por ciclos de desconto. O Price Lens mostra-te quando os preços descem."
+          "text": "A maioria dos produtos passa por ciclos de desconto. O {brand} mostra-te quando os preços descem."
         }
       },
       "cta": {
         "title": "Vê o panorama completo",
-        "body": "Descobre os dados por trás da inflação alimentar portuguesa e como o Price Lens ajuda."
+        "body": "Descobre os dados por trás da inflação alimentar portuguesa e como o {brand} ajuda."
       }
     }
   },
@@ -921,7 +917,7 @@
     },
     "pdp": {
       "metadata": {
-        "viewDetails": "Vê os detalhes do produto no Price Lens"
+        "viewDetails": "Vê os detalhes do produto no {brand}"
       }
     },
     "hero": {
@@ -1168,7 +1164,7 @@
       "openFoodFacts": "Open Food Facts"
     },
     "offActions": {
-      "shareText": "Vê {name} no Price Lens",
+      "shareText": "Vê {name} no {brand}",
       "share": "Partilhar",
       "copied": "Link copiado",
       "copyFailed": "Falha ao copiar link"
@@ -1455,6 +1451,18 @@
         "light": "Mudar para tema claro"
       }
     },
+    "sidebar": {
+      "primary": "Navegação principal",
+      "collapse": "Recolher barra lateral",
+      "expand": "Expandir barra lateral",
+      "preferences": "Preferências",
+      "explore": "Explorar",
+      "account": "Conta",
+      "staff": "Equipa",
+      "live": "Ao vivo",
+      "livePulse": "{products} produtos · {drops} descidas hoje",
+      "liveUnavailable": "Pulso indisponível"
+    },
     "header": {
       "openSearchFromMenu": "Abrir pesquisa a partir do menu",
       "openBarcodeFromMenu": "Abrir leitura de código a partir do menu",
@@ -1493,7 +1501,7 @@
     },
     "footer": {
       "builtBy": "Feito por <name>Francisco Gonçalves</name>",
-      "rights": "© {year} Price Lens.",
+      "rights": "© {year} {brandLegal}.",
       "repo": "Código open sourced no GitHub"
     },
     "footerFull": {
@@ -1518,7 +1526,7 @@
       "description": "Sessão iniciada. Boas poupanças!"
     },
     "pwa": {
-      "installTitle": "Instalar o Price Lens",
+      "installTitle": "Instalar o {brand}",
       "installBody": "Adiciona a app ao ecrã principal para uma experiência mais rápida.",
       "install": "Instalar",
       "dismiss": "Agora não"
@@ -1533,7 +1541,7 @@
   "pwa": {
     "appPage": {
       "title": "Obter a App",
-      "subtitle": "O Price Lens funciona melhor como app fora do browser. Instala-o no teu dispositivo para uma experiência <strong>mais rápida</strong>, <strong>preparada para offline</strong> e em <strong>ecrã inteiro</strong>, sem passares pela App Store.",
+      "subtitle": "O {brand} funciona melhor como app fora do browser. Instala-o no teu dispositivo para uma experiência <strong>mais rápida</strong>, <strong>preparada para offline</strong> e em <strong>ecrã inteiro</strong>, sem passares pela App Store.",
       "alreadyInstalled": "Já está instalado. Tudo pronto!",
       "installing": "A instalar…",
       "installNow": "Instalar agora",
@@ -1557,14 +1565,14 @@
       }
     },
     "banner": {
-      "aria": "Instalar a app Price Lens",
+      "aria": "Instalar a app {brand}",
       "title": "Obtém a app",
       "subtitle": "Mais rápida, offline, ecrã inteiro",
       "install": "Instalar",
       "dismiss": "Dispensar"
     },
     "fab": {
-      "install": "Instalar a app Price Lens",
+      "install": "Instalar a app {brand}",
       "dismiss": "Dispensar sugestão de instalação"
     }
   },
@@ -1581,27 +1589,27 @@
   "legal": {
     "terms": {
       "heading": "Termos de Serviço",
-      "intro": "Ao aceder ao website do Price Lens, concordas em ficar vinculado a estes termos de serviço, às leis e regulamentos aplicáveis, e ficas responsável pelo cumprimento de eventuais leis locais aplicáveis.",
+      "intro": "Ao aceder ao website do {brand}, concordas em ficar vinculado a estes termos de serviço, às leis e regulamentos aplicáveis, e ficas responsável pelo cumprimento de eventuais leis locais aplicáveis.",
       "sections": {
         "license": {
           "title": "1. Licença de utilização",
-          "body": "É concedida permissão para descarregar temporariamente uma cópia dos materiais (informação ou software) presentes no website do Price Lens apenas para utilização pessoal, não comercial e transitória. Esta é uma licença, não uma transferência de propriedade, e ao abrigo desta licença não podes:",
+          "body": "É concedida permissão para descarregar temporariamente uma cópia dos materiais (informação ou software) presentes no website do {brand} apenas para utilização pessoal, não comercial e transitória. Esta é uma licença, não uma transferência de propriedade, e ao abrigo desta licença não podes:",
           "items": {
             "modify": "modificar ou copiar os materiais;",
             "commercial": "utilizar os materiais para qualquer fim comercial ou para qualquer exibição pública (comercial ou não);",
-            "reverse": "tentar descompilar ou fazer engenharia reversa de qualquer software presente no website do Price Lens;",
+            "reverse": "tentar descompilar ou fazer engenharia reversa de qualquer software presente no website do {brand};",
             "copyright": "remover direitos de autor ou outras notações proprietárias dos materiais; ou",
             "transfer": "transferir os materiais para outra pessoa ou fazer \"mirror\" dos materiais noutro servidor."
           },
-          "termination": "Esta licença termina automaticamente caso violes qualquer destas restrições e pode ser terminada pelo Price Lens a qualquer momento."
+          "termination": "Esta licença termina automaticamente caso violes qualquer destas restrições e pode ser terminada pelo {brand} a qualquer momento."
         },
         "disclaimer": {
           "title": "2. Limitação de responsabilidade",
-          "body": "Os materiais no website do Price Lens são fornecidos \"no estado em que se encontram\". O Price Lens não oferece garantias, expressas ou implícitas, e rejeita todas as outras garantias, incluindo, sem limitação, garantias ou condições implícitas de comercialização, adequação a um determinado fim ou não violação de propriedade intelectual ou outros direitos."
+          "body": "Os materiais no website do {brand} são fornecidos \"no estado em que se encontram\". O {brand} não oferece garantias, expressas ou implícitas, e rejeita todas as outras garantias, incluindo, sem limitação, garantias ou condições implícitas de comercialização, adequação a um determinado fim ou não violação de propriedade intelectual ou outros direitos."
         },
         "limitations": {
           "title": "3. Limitações",
-          "body": "Em nenhuma circunstância o Price Lens ou os seus fornecedores serão responsáveis por danos (incluindo, sem limitação, danos por perda de dados ou lucros, ou devido a interrupção de negócio) decorrentes do uso ou incapacidade de uso dos materiais no website do Price Lens, mesmo que o Price Lens ou um representante autorizado tenha sido notificado verbalmente ou por escrito da possibilidade de tais danos."
+          "body": "Em nenhuma circunstância o {brand} ou os seus fornecedores serão responsáveis por danos (incluindo, sem limitação, danos por perda de dados ou lucros, ou devido a interrupção de negócio) decorrentes do uso ou incapacidade de uso dos materiais no website do {brand}, mesmo que o {brand} ou um representante autorizado tenha sido notificado verbalmente ou por escrito da possibilidade de tais danos."
         },
         "governingLaw": {
           "title": "4. Lei aplicável",
@@ -1611,7 +1619,7 @@
     },
     "privacy": {
       "heading": "Política de Privacidade",
-      "intro": "A tua privacidade é importante para nós. É política do Price Lens respeitar a tua privacidade relativamente a qualquer informação que possamos recolher através do nosso website.",
+      "intro": "A tua privacidade é importante para nós. É política do {brand} respeitar a tua privacidade relativamente a qualquer informação que possamos recolher através do nosso website.",
       "sections": {
         "collect": {
           "title": "1. Informação que recolhemos",

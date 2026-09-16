@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { PRIORITY_CONFIG } from "@/lib/business/priority"
 import { useUser } from "@/hooks/useUser"
+import { useBrand } from "@/contexts/BrandContext"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +20,7 @@ import { CheckIcon } from "lucide-react"
 
 export function TrackingInformationDialog({ children }: { children: React.ReactNode }) {
   const { user } = useUser()
+  const brand = useBrand()
 
   return (
     <Dialog>
@@ -30,10 +32,11 @@ export function TrackingInformationDialog({ children }: { children: React.ReactN
 
           <div className="prose dark:prose-invert space-y-2 text-left text-sm">
             <p>
-              Price Lens collects price information across time and finds prices of <strong>store products</strong> on
-              their store origins. Given that there are so many products out there, with varying relevancy of price
-              tracking, we employed a simple priority tracking system. Each store product has a priority level, from 0
-              to 5 which determines how often the prices are scheduled to be checked.
+              {brand.displayName} collects price information across time and finds prices of{" "}
+              <strong>store products</strong> on their store origins. Given that there are so many products out there,
+              with varying relevancy of price tracking, we employed a simple priority tracking system. Each store
+              product has a priority level, from 0 to 5 which determines how often the prices are scheduled to be
+              checked.
             </p>
 
             <div className="flex flex-col gap-1">

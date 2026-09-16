@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { DownloadIcon, SmartphoneIcon, CheckCircle2Icon, MonitorIcon, ChromeIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useBrand } from "@/contexts/BrandContext"
 import { Button } from "@/components/ui/button"
 import type { BeforeInstallPromptEvent } from "@/hooks/usePWAInstall"
 import { isEmbeddedAppShell } from "@/lib/app-shell"
@@ -24,6 +25,7 @@ export function AppInstallContent() {
   const [installing, setInstalling] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
   const t = useTranslations("pwa.appPage")
+  const brand = useBrand()
   const tIos = useTranslations("pwa.appPage.ios")
   const tAndroid = useTranslations("pwa.appPage.android")
   const tDesktop = useTranslations("pwa.appPage.desktop")
@@ -63,7 +65,7 @@ export function AppInstallContent() {
           <div className="flex items-center gap-4">
             <div className="bg-primary/10 dark:bg-primary/15 flex size-16 items-center justify-center rounded-2xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/price-lens.svg" alt="" width={36} height={36} className="size-9" />
+              <img src={brand.markSrc} alt="" width={36} height={36} className="size-9" />
             </div>
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">{t("title")}</h1>
           </div>

@@ -1,14 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { navigation } from "@/lib/config"
-import { usePathname } from "next/navigation"
 
-import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 
 import { LogoLink } from "@/components/layout/LogoLink"
@@ -24,12 +19,10 @@ import { NavigationSheetProvider } from "@/contexts/NavigationSheetContext"
 import { SearchIcon } from "lucide-react"
 
 export function Header() {
-  const pathname = usePathname()
   const isMobile = useMediaQuery("(max-width: 768px)")
   const isEarlyAccess = false
   const [navSheetSearchOpen, setNavSheetSearchOpen] = useState(false)
   const [navSheetScanOpen, setNavSheetScanOpen] = useState(false)
-  const tNav = useTranslations("nav")
   const tHeader = useTranslations("layout.header")
 
   return (
@@ -57,31 +50,13 @@ export function Header() {
               </button>
             </BarcodeScanButton>
 
-            <LogoLink />
+            {/* On lg+ the sidebar owns the logo and primary navigation. */}
+            <LogoLink className="lg:hidden" />
             {isEarlyAccess && <EarlyAccessBadge />}
-
-            <nav className="ml-3 hidden items-center gap-1.5 lg:flex">
-              {navigation
-                .filter((item) => item.shownOnDesktop)
-                .map((item) => {
-                  const hrefSanitized = item.href.split("?")[0]
-                  return (
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className={cn("", pathname === hrefSanitized && "bg-zinc-200 dark:bg-zinc-100/20")}
-                      key={item.href}
-                    >
-                      <Link href={item.href}>{tNav(item.key)}</Link>
-                    </Button>
-                  )
-                })}
-            </nav>
           </div>
 
           <div className="flex shrink-0 items-center justify-center gap-2.5 md:gap-3">
-            <div className="hidden md:flex">
+            <div className="hidden md:flex lg:hidden">
               <ThemeToggle size="icon" variant="outline" />
             </div>
 
@@ -91,12 +66,12 @@ export function Header() {
               <SearchContainer>
                 <button
                   type="button"
-                  className="text-muted-foreground hover:border-input hover:text-foreground border-border bg-accent hidden h-[34px] max-w-[320px] min-w-[240px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors md:flex"
+                  className="text-muted-foreground hover:border-primary/50 hover:text-foreground border-border bg-card hidden h-[34px] max-w-[320px] min-w-[240px] cursor-pointer items-center gap-2 border px-3 py-2 transition-colors md:flex"
                 >
                   <SearchIcon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 truncate text-left text-sm">{tHeader("searchProducts")}</span>
                   {/* eslint-disable-next-line @formatjs/no-literal-string-in-jsx -- keyboard shortcut symbol */}
-                  <Kbd className="bg-muted dark:bg-foreground/10 h-5 min-w-5 px-1.5 text-[10px]">⌘K</Kbd>
+                  <Kbd className="bg-muted dark:bg-foreground/10 h-5 min-w-5 rounded-none px-1.5 text-[10px]">⌘K</Kbd>
                 </button>
               </SearchContainer>
             )}

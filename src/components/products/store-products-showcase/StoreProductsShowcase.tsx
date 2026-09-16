@@ -8,6 +8,7 @@ import { useStoreProducts, fetchStoreProducts } from "@/hooks/useStoreProducts"
 import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback"
 import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { useBrand } from "@/contexts/BrandContext"
 import { searchTypes, type SearchType, type SortByType, DEFAULT_BROWSE_SORT } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import { cn, serializeArray } from "@/lib/utils"
@@ -86,6 +87,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
   const tShowcase = useTranslations("products.showcase")
+  const brand = useBrand()
 
   useEffect(() => {
     if (!urlState.query.trim() && urlState.sortBy === "relevance") {
@@ -302,8 +304,8 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
 
   // Update document title based on active filters
   useEffect(() => {
-    document.title = `Price Lens | ${pageTitle}`
-  }, [pageTitle])
+    document.title = `${brand.displayName} | ${pageTitle}`
+  }, [pageTitle, brand.displayName])
 
   // Sync URL state back to local state (e.g., browser back/forward navigation)
   useEffect(() => {

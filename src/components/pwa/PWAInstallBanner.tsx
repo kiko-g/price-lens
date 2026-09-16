@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { DownloadIcon, XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useBrand } from "@/contexts/BrandContext"
 
 interface PWAInstallBannerProps {
   visible: boolean
@@ -24,6 +25,7 @@ export function PWAInstallBanner({
   const [mounted, setMounted] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
   const t = useTranslations("pwa.banner")
+  const brand = useBrand()
 
   useEffect(() => {
     if (visible) {
@@ -55,7 +57,7 @@ export function PWAInstallBanner({
         <div className="flex items-center gap-3 px-3.5 py-3">
           <div className="bg-primary/10 dark:bg-primary/15 flex size-9 shrink-0 items-center justify-center rounded-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/price-lens.svg" alt="" width={20} height={20} className="size-5" />
+            <img src={brand.markSrc} alt="" width={20} height={20} className="size-5" />
           </div>
 
           <div className="min-w-0 flex-1">

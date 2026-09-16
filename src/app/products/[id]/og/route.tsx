@@ -1,9 +1,11 @@
+import { getBrandMarkUrl } from "@/lib/brand/brand"
 import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { storeProductQueries } from "@/lib/queries/products"
 import { extractProductIdFromSlug } from "@/lib/business/product"
 import { STORE_NAMES, STORE_LOGO_PATHS } from "@/types/business"
 import { OGFrame, OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
+import { getBrand } from "@/lib/brand/server"
 
 export const runtime = "nodejs"
 
@@ -28,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return new Response("Product not found", { status: 404 })
   }
 
-  const fonts = await loadGeistFontsLight()
+  const [fonts, brand] = await Promise.all([loadGeistFontsLight(), getBrand()])
   const storeName = product.origin_id ? STORE_NAMES[product.origin_id] : null
   const storeLogoPath = product.origin_id ? STORE_LOGO_PATHS[product.origin_id] : null
 
@@ -39,7 +41,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const discountPercent = product.discount ? Math.round(product.discount * 1000) / 10 : null
 
   return new ImageResponse(
-    <OGFrame baseUrl={baseUrl}>
+    <OGFrame
+      baseUrl={baseUrl}
+      brandName={brand.displayName}
+      brandMarkSrc={getBrandMarkUrl(brand, { format: "png", size: 192, tile: true })}
+    >
       <div tw="flex w-[500px] h-full items-center justify-center bg-[#111] p-8">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element

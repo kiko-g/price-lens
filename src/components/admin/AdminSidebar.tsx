@@ -1,12 +1,13 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
+import { useBrand } from "@/contexts/BrandContext"
+import { LinceMark } from "@/components/icons/LinceMark"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -55,6 +56,7 @@ import {
   LucideIcon,
   MapIcon,
   MoreHorizontalIcon,
+  PaletteIcon,
   PickaxeIcon,
   ScanBarcodeIcon,
   ScanFaceIcon,
@@ -81,6 +83,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { title: "Saúde dos Dados", href: "/admin/data-health", icon: ShieldCheckIcon },
       { title: "Performance", href: "/admin/performance", icon: TimerIcon },
       { title: "Marketing", href: "/admin/marketing", icon: BriefcaseIcon },
+      { title: "Brand", href: "/admin/brand", icon: PaletteIcon },
     ],
   },
   {
@@ -207,6 +210,7 @@ const SITE_NAV_ITEMS = [
 ]
 
 function SiteNavigationDropup() {
+  const brand = useBrand()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -216,10 +220,10 @@ function SiteNavigationDropup() {
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <span className="flex size-7 shrink-0 items-center justify-center">
-            <Image src="/price-lens.svg" alt="" width={28} height={28} className="size-7" aria-hidden />
+            <LinceMark {...brand.mark} className="size-7" />
           </span>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Price Lens</span>
+            <span className="truncate font-semibold">{brand.displayName}</span>
             <span className="text-muted-foreground truncate text-xs">Admin Dashboard</span>
           </div>
           <ChevronUp className="ml-auto size-4" />

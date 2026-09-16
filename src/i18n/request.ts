@@ -1,9 +1,32 @@
 import { getRequestConfig } from "next-intl/server"
+
+import { getBrand } from "@/lib/brand/server"
+import { brandPlaceholders } from "@/lib/brand/brand"
+import { applyBrandToMessages } from "@/lib/brand/messages"
+import type { Messages } from "./types"
 import { resolveLocale } from "./locale"
+
+// Brand-resolved message trees are memoised per (locale, brand strings) so the substitution
+// runs once per brand change instead of once per request.
+const resolvedMessagesCache = new Map<string, Messages>()
+
+async function loadMessages(locale: string): Promise<Messages> {
+  const brand = await getBrand()
+  const placeholders = brandPlaceholders(brand)
+  const cacheKey = `${locale}|${Object.values(placeholders).join("|")}`
+
+  const cached = resolvedMessagesCache.get(cacheKey)
+  if (cached) return cached
+
+  const raw = (await import(`../../messages/${locale}.json`)).default as Messages
+  const resolved = applyBrandToMessages(raw, placeholders)
+  resolvedMessagesCache.set(cacheKey, resolved)
+  return resolved
+}
 
 export default getRequestConfig(async () => {
   const locale = await resolveLocale()
-  const messages = (await import(`../../messages/${locale}.json`)).default
+  const messages = await loadMessages(locale)
 
   return {
     locale,

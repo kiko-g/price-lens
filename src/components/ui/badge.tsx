@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex gap-1.5 items-center rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 dark:border-zinc-800 dark:focus:ring-zinc-300 [&_span.bubble]:pointer-events-none [&_span.bubble]:size-2 [&_span.bubble]:rounded-full [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0",
+  "inline-flex gap-1.5 items-center rounded-none border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 dark:border-zinc-800 dark:focus:ring-zinc-300 [&_span.bubble]:pointer-events-none [&_span.bubble]:size-2 [&_span.bubble]:rounded-full [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -49,6 +49,9 @@ const badgeVariants = cva(
         sky: "border-transparent bg-sky-600 text-zinc-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-zinc-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
         white:
           "border-transparent bg-white text-zinc-900 hover:bg-white/80 dark:border-transparent dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-zinc-900",
+        hud: "rounded-none border-primary/50 bg-primary/5 text-primary eyebrow gap-1 px-2 py-1 dark:text-primary-200 [&_span.bubble]:bg-primary",
+        "hud-muted":
+          "rounded-none border-border bg-transparent text-muted-foreground eyebrow gap-1 px-2 py-1 [&_span.bubble]:bg-muted-foreground",
         "glass-primary":
           "border-primary/20 bg-primary/10 text-foreground hover:bg-primary/20 dark:border-primary/40 dark:bg-primary/20 dark:text-foreground dark:hover:bg-primary/30 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         "glass-success":

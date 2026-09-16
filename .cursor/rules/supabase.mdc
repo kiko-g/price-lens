@@ -5,9 +5,9 @@ alwaysApply: true
 ## Supabase details
 
 - Production is on Supabase free tier (org ID: xfgtjrilgugxlqsczqdp).
-- **Local development uses a local Supabase stack** via Docker. Run `pnpm db:start` before `pnpm dev`. Use `pnpm db:status` to verify and see URLs/keys.
-  - `.env.development.local` points to the local instance (auto-loaded by `next dev`).
-  - `.env.local` keeps production credentials (used by `next build` and Vercel).
+- **Development currently uses the production Supabase database**, by explicit owner choice (September 2026). Brand Control Center saves therefore update the shared `public.app_settings` row with key `brand`.
+  - Gitignored `.env.development.local` and `.env.local` use the same Supabase project as `.env.production`. Do not print or commit credentials.
+  - Docker is optional. To return to local data, start `pnpm db:start`, use `pnpm db:status` for local connection details, update the development environment overrides, and restart Next.js.
 
 ### Local ports (config.toml)
 

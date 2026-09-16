@@ -5,7 +5,13 @@ import { cn } from "@/lib/utils"
 import { getHomeStats } from "@/lib/queries/home-stats"
 import { getHeroProducts } from "@/lib/business/hero"
 
+import Link from "next/link"
+
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import { BarcodeScanButton } from "@/components/scan"
+import { GlyphScan } from "@/components/icons/lince-glyphs"
+import { ArrowRightIcon } from "lucide-react"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 import { MarketPulseCard } from "@/components/home/MarketPulseCard"
 import { EntryPointGrid } from "@/components/home/EntryPointGrid"
@@ -13,7 +19,7 @@ import { ChainQuickFilters } from "@/components/home/ChainQuickFilters"
 import { StoreOverviewCards } from "@/components/home/StoreOverviewCards"
 import { FreshnessBadge } from "@/components/home/FreshnessBadge"
 import { PopularProducts } from "@/components/home/PopularProducts"
-import { HeroSubtitleStrongDesktop, HeroSubtitleStrongMobile, RichLineBreak } from "@/components/i18n/rich-tags"
+import { HeroEmphasis } from "@/components/i18n/rich-tags"
 
 async function HeroContent() {
   const [stats, heroProducts, t] = await Promise.all([getHomeStats(), getHeroProducts(), getTranslations("home.hero")])
@@ -23,21 +29,20 @@ async function HeroContent() {
       {/* ─── Mobile layout ─── */}
       <div className="lg:hidden">
         <div className="flex flex-col items-center pt-6 pb-6">
+          <span className="eyebrow text-primary animate-fade-in mb-3 opacity-0 [--animation-delay:50ms]">
+            {t("kicker")}
+          </span>
           <h1
             className={cn(
-              "animate-fade-in",
-              "bg-linear-to-br from-30% bg-clip-text text-transparent",
-              "from-zinc-950 to-zinc-500 dark:from-zinc-50 dark:to-zinc-400",
-              "w-full max-w-full text-center text-3xl leading-[1.1] font-semibold tracking-tight opacity-0 [--animation-delay:100ms] sm:w-full sm:max-w-full sm:text-4xl",
+              "animate-fade-in text-foreground",
+              "w-full max-w-full text-center text-[2.1rem] leading-[1.05] font-bold tracking-[-0.03em] opacity-0 [--animation-delay:100ms] sm:text-4xl",
             )}
           >
-            {t.rich("titleMobile", { br: RichLineBreak })}
+            {t.rich("title", { em: HeroEmphasis })}
           </h1>
 
-          <p className="text-muted-foreground animate-fade-in my-2.5 text-center text-sm opacity-0 [--animation-delay:150ms]">
-            {t.rich("subtitleMobile", {
-              strong: HeroSubtitleStrongMobile,
-            })}
+          <p className="text-muted-foreground animate-fade-in my-3 max-w-md text-center text-sm leading-relaxed opacity-0 [--animation-delay:150ms]">
+            {t("lead")}
           </p>
 
           <div className="animate-fade-in mb-4 w-full opacity-0 [--animation-delay:250ms]">
@@ -76,28 +81,31 @@ async function HeroContent() {
         {/* Row 1: Two-column left: title/subtitle/search/stats, right: store cards */}
         <div className="flex gap-10 pt-20 pb-6">
           <div className="animate-fade-in flex flex-1 flex-col gap-5 opacity-0 [--animation-delay:100ms]">
-            <h1
-              className={cn(
-                "bg-linear-to-br from-30% bg-clip-text text-transparent",
-                "from-zinc-950 to-zinc-500 dark:from-zinc-50 dark:to-zinc-400",
-                "max-w-3xl text-5xl leading-[1.1] font-bold tracking-tight xl:text-6xl",
-              )}
-            >
-              {t("titleDesktop")}
+            <span className="eyebrow text-primary">{t("kicker")}</span>
+            <h1 className="text-foreground -mt-2 max-w-3xl text-5xl leading-[1.02] font-bold tracking-[-0.035em] xl:text-[3.6rem]">
+              {t.rich("title", { em: HeroEmphasis })}
             </h1>
 
-            <p className="text-muted-foreground max-w-lg text-base text-balance">
-              {t.rich("subtitleDesktop", {
-                br: RichLineBreak,
-                strong: HeroSubtitleStrongDesktop,
-              })}
-            </p>
+            <p className="text-muted-foreground max-w-xl text-[17px] leading-relaxed text-balance">{t("lead")}</p>
 
-            <div className="w-full max-w-lg">
-              <HomeSearchBar totalProducts={stats.totalProducts} />
+            <div className="flex flex-wrap items-center gap-3">
+              <Button asChild variant="default" size="lg" className="px-5 text-[15px]">
+                <Link href="/products">
+                  {t("ctaExplore")}
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              </Button>
+              <BarcodeScanButton>
+                <Button variant="hud" size="lg" className="px-5 text-[15px]">
+                  <GlyphScan className="size-4" />
+                  {t("ctaScan")}
+                </Button>
+              </BarcodeScanButton>
             </div>
 
-            <MarketPulseCard stats={stats} variant="inline" />
+            <div className="mt-6 max-w-3xl">
+              <MarketPulseCard stats={stats} variant="inline" />
+            </div>
           </div>
 
           <div className="animate-fade-in w-[200px] shrink-0 opacity-0 [--animation-delay:200ms] xl:w-[260px]">

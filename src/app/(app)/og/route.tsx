@@ -2,6 +2,9 @@ import { ImageResponse } from "next/og"
 import { loadGeistFonts } from "@/lib/og-fonts"
 import { OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 import { siteConfig } from "@/lib/config"
+import { getBrand } from "@/lib/brand/server"
+import { getBrandMarkUrl, getBrandText } from "@/lib/brand/brand"
+import { defaultLocale } from "@/i18n/config"
 import { getHomeStats } from "@/lib/queries/home-stats"
 
 export const runtime = "nodejs"
@@ -17,7 +20,8 @@ export async function GET(request: Request) {
   const showStats = url.searchParams.get("stats") === "true"
   const origin = url.origin ?? siteConfig.url
 
-  const [fonts, stats] = await Promise.all([loadGeistFonts(), showStats ? getHomeStats() : null])
+  const [fonts, stats, brand] = await Promise.all([loadGeistFonts(), showStats ? getHomeStats() : null, getBrand()])
+  const markSrc = `${origin}${getBrandMarkUrl(brand, { format: "png", size: 192, tile: true })}`
 
   const kpis = stats
     ? [
@@ -41,7 +45,7 @@ export async function GET(request: Request) {
             height: 600,
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse at center, rgba(99,106,215,0.11) 0%, rgba(59,138,236,0.04) 50%, transparent 70%)",
+              "radial-gradient(ellipse at center, rgba(234,88,12,0.11) 0%, rgba(220,38,38,0.04) 50%, transparent 70%)",
           }}
         />
         <div
@@ -52,7 +56,7 @@ export async function GET(request: Request) {
             width: 500,
             height: 400,
             borderRadius: "50%",
-            background: "radial-gradient(ellipse at center, rgba(99,106,215,0.06) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse at center, rgba(234,88,12,0.06) 0%, transparent 60%)",
           }}
         />
 
@@ -83,7 +87,7 @@ export async function GET(request: Request) {
           {/* Top: Logo + divider + text */}
           <div tw="flex items-center" style={{ gap: 36 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${origin}/price-lens.svg`} alt="" width={96} height={96} style={{ objectFit: "contain" }} />
+            <img src={markSrc} alt="" width={96} height={96} style={{ objectFit: "contain" }} />
 
             {/* Divider */}
             <div tw="flex" style={{ width: 1, height: 110, backgroundColor: "rgba(255,255,255,0.08)" }} />
@@ -91,13 +95,13 @@ export async function GET(request: Request) {
             {/* Text */}
             <div tw="flex flex-col">
               <div tw="text-white" style={{ fontSize: 56, fontWeight: 600, letterSpacing: "-0.045em", lineHeight: 1 }}>
-                Price Lens
+                {brand.displayName}
               </div>
               <div
                 tw="text-zinc-400 mt-2"
                 style={{ fontSize: 24, fontWeight: 400, letterSpacing: "-0.015em", lineHeight: 1.3 }}
               >
-                Price tracking for Portuguese supermarkets
+                {getBrandText(brand.tagline, defaultLocale)}
               </div>
               <div tw="text-zinc-500 mt-1" style={{ fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}>
                 Continente · Auchan · Pingo Doce
@@ -143,7 +147,7 @@ export async function GET(request: Request) {
           height: 600,
           borderRadius: "50%",
           background:
-            "radial-gradient(ellipse at center, rgba(99,106,215,0.11) 0%, rgba(59,138,236,0.04) 50%, transparent 70%)",
+            "radial-gradient(ellipse at center, rgba(234,88,12,0.11) 0%, rgba(220,38,38,0.04) 50%, transparent 70%)",
         }}
       />
       <div
@@ -154,7 +158,7 @@ export async function GET(request: Request) {
           width: 500,
           height: 400,
           borderRadius: "50%",
-          background: "radial-gradient(ellipse at center, rgba(99,106,215,0.06) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at center, rgba(234,88,12,0.06) 0%, transparent 60%)",
         }}
       />
 
@@ -174,7 +178,7 @@ export async function GET(request: Request) {
       <div tw="flex absolute items-center justify-center" style={{ inset: 0, padding: "60px 80px" }}>
         <div tw="flex items-center" style={{ gap: 36 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`${origin}/price-lens.svg`} alt="" width={96} height={96} style={{ objectFit: "contain" }} />
+          <img src={markSrc} alt="" width={96} height={96} style={{ objectFit: "contain" }} />
 
           <div tw="flex" style={{ width: 1, height: 110, backgroundColor: "rgba(255,255,255,0.08)" }} />
 
@@ -188,7 +192,7 @@ export async function GET(request: Request) {
                 lineHeight: 1.15,
               }}
             >
-              {title || "Price Lens"}
+              {title || brand.displayName}
             </div>
             {description && (
               <div

@@ -6,15 +6,20 @@ import "./globals.css"
 import React from "react"
 import { GeistSans } from "geist/font/sans"
 import { NextIntlClientProvider } from "next-intl"
-import { getLocale, getMessages, getTranslations } from "next-intl/server"
+import { getLocale, getMessages } from "next-intl/server"
+import { cookies } from "next/headers"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
 import { isLocale, toLocaleTag, toOpenGraphLocale } from "@/i18n/config"
+import { getBrand } from "@/lib/brand/server"
+import { getBrandMarkUrl, getBrandText } from "@/lib/brand/brand"
+import { BrandProvider } from "@/contexts/BrandContext"
 
 import { Providers } from "./providers"
 import { Analytics } from "@/components/layout/Analytics"
 import { Toaster } from "@/components/ui/sonner"
 import { MainLayout } from "@/components/layout/MainLayout"
+import { APP_SIDEBAR_COOKIE } from "@/lib/app-shell"
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration"
 import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
 
@@ -22,17 +27,16 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
  * Inline splash screen CSS: rendered with the HTML before any external CSS/JS loads.
  * Bridges the gap between the native PWA splash and React hydration.
  * Uses prefers-color-scheme (not .dark class) because next-themes script may not have run yet.
+ * Accent rgb(234,88,12) mirrors --primary-500 (orange→red) in globals.css.
  */
-const SPLASH_APP_LABEL = "Price Lens"
-
 const SPLASH_STYLES = `
-#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;transition:opacity .5s ease-out}
+#__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f6f3ee;transition:opacity .5s ease-out}
 #__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
-#__splash .si{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(99,106,215,.4))}
+#__splash .si{width:64px;height:64px}
 #__splash .st{font-size:1.125rem;font-weight:700;letter-spacing:-.025em;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 #__splash .sb{position:absolute;bottom:5rem;width:40px;height:3px;border-radius:9999px;overflow:hidden;background:rgba(28,25,23,.1)}
-#__splash .sb::after{content:'';position:absolute;inset:0;border-radius:9999px;background:rgba(99,106,215,.6);animation:__sl 1.2s ease-in-out infinite}
-@media(prefers-color-scheme:dark){#__splash{background:#09090b}#__splash .st{color:#fafafa}#__splash .sb{background:rgba(250,250,249,.1)}#__splash .sb::after{background:rgba(99,106,215,.8)}}
+#__splash .sb::after{content:'';position:absolute;inset:0;border-radius:9999px;background:rgba(234,88,12,.6);animation:__sl 1.2s ease-in-out infinite}
+@media(prefers-color-scheme:dark){#__splash{background:#0b0f1a}#__splash .st{color:#fafafa}#__splash .sb{background:rgba(250,250,249,.1)}#__splash .sb::after{background:rgba(234,88,12,.8)}}
 @keyframes __sf{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 @keyframes __sl{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 #__splash[data-hidden]{opacity:0;pointer-events:none}
@@ -45,16 +49,15 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f3ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0f1a" },
   ],
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = (await getLocale()) as "en" | "pt"
-  const t = await getTranslations({ locale, namespace: "metadata.site" })
-  const description = t("description")
-  const name = t("name")
+  const [locale, brand] = await Promise.all([getLocale(), getBrand()])
+  const description = getBrandText(brand.metaDescription, locale)
+  const name = brand.displayName
 
   return {
     title: {
@@ -114,15 +117,16 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/favicon.svg", type: "image/svg+xml" },
-        { url: "/favicon.ico", sizes: "any" },
-        { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-        { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { tile: true }), type: "image/svg+xml" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 16, tile: true }), sizes: "16x16", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 32, tile: true }), sizes: "32x32", type: "image/png" },
       ],
-      apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+      apple: [
+        { url: getBrandMarkUrl(brand, { format: "png", size: 180, tile: true }), sizes: "180x180", type: "image/png" },
+      ],
       other: [
-        { url: "/icons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-        { url: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 512, tile: true }), sizes: "512x512", type: "image/png" },
       ],
     },
     manifest: "/site.webmanifest",
@@ -135,15 +139,28 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const useReactScan = false
-  const locale = await getLocale()
-  const messages = await getMessages()
+  const [locale, messages, brand, cookieStore] = await Promise.all([getLocale(), getMessages(), getBrand(), cookies()])
+  const sidebarDefaultCollapsed = cookieStore.get(APP_SIDEBAR_COOKIE)?.value === "1"
   const htmlLang = toLocaleTag(isLocale(locale) ? locale : "pt")
 
   return (
     <html lang={htmlLang} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: SPLASH_STYLES }} />
-        <link rel="preload" href="/price-lens.svg" as="image" type="image/svg+xml" />
+        <link
+          rel="preload"
+          href={getBrandMarkUrl(brand, { theme: "paper" })}
+          as="image"
+          type="image/svg+xml"
+          media="(prefers-color-scheme: light)"
+        />
+        <link
+          rel="preload"
+          href={getBrandMarkUrl(brand, { theme: "navy" })}
+          as="image"
+          type="image/svg+xml"
+          media="(prefers-color-scheme: dark)"
+        />
         <link rel="preconnect" href="https://www.continente.pt" />
         <link rel="preconnect" href="https://www.auchan.pt" />
         <link rel="preconnect" href="https://www.pingodoce.pt" />
@@ -166,9 +183,18 @@ export default async function RootLayout({
         {/* Inline splash: visible immediately, before CSS/JS loads. Dismissed by React on hydration. */}
         <div id="__splash" aria-hidden="true">
           <div className="sc">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/price-lens.svg" alt="" width={64} height={64} className="si" fetchPriority="high" />
-            <span className="st">{SPLASH_APP_LABEL}</span>
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcSet={getBrandMarkUrl(brand, { theme: "navy" })} />
+              <img
+                src={getBrandMarkUrl(brand, { theme: "paper" })}
+                alt=""
+                width={64}
+                height={64}
+                className="si"
+                fetchPriority="high"
+              />
+            </picture>
+            <span className="st">{brand.displayName}</span>
           </div>
           <div className="sb" />
         </div>
@@ -179,13 +205,15 @@ export default async function RootLayout({
           }}
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>
-            <Analytics />
-            <ServiceWorkerRegistration />
-            <PWAInstallPrompt />
-            <MainLayout>{children}</MainLayout>
-            <Toaster />
-          </Providers>
+          <BrandProvider brand={brand}>
+            <Providers>
+              <Analytics />
+              <ServiceWorkerRegistration />
+              <PWAInstallPrompt />
+              <MainLayout sidebarDefaultCollapsed={sidebarDefaultCollapsed}>{children}</MainLayout>
+              <Toaster />
+            </Providers>
+          </BrandProvider>
         </NextIntlClientProvider>
       </body>
     </html>

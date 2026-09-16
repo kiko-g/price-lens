@@ -5,12 +5,14 @@ import { useState, useRef, useCallback, useEffect } from "react"
 import { toPng } from "html-to-image"
 
 import { Button } from "@/components/ui/button"
+import { useBrand } from "@/contexts/BrandContext"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
 import PingoDocePng from "@/images/brands/pingo-doce.png"
 
 import { DownloadIcon, CheckCircleIcon } from "lucide-react"
 
 function LinkedInBanner() {
+  const brand = useBrand()
   const BANNER_W = 1600
   const BANNER_H = 400
 
@@ -41,12 +43,12 @@ function LinkedInBanner() {
       })
       const a = document.createElement("a")
       a.href = dataUrl
-      a.download = "price-lens-linkedin-banner.png"
+      a.download = `${brand.displayName.toLowerCase()}-linkedin-banner.png`
       a.click()
     } finally {
       setDownloading(false)
     }
-  }, [])
+  }, [brand.displayName])
 
   const [preview, setPreview] = useState<string | null>(null)
 
@@ -97,7 +99,7 @@ function LinkedInBanner() {
               height: 600,
               borderRadius: "50%",
               background:
-                "radial-gradient(ellipse at center, rgba(99,106,215,0.11) 20%, rgba(59,138,236,0.04) 50%, transparent 70%)",
+                "radial-gradient(ellipse at center, rgba(234,88,12,0.11) 20%, rgba(220,38,38,0.04) 50%, transparent 70%)",
             }}
           />
           <div
@@ -108,7 +110,7 @@ function LinkedInBanner() {
               width: 500,
               height: 400,
               borderRadius: "50%",
-              background: "radial-gradient(ellipse at center, rgba(99,106,215,0.06) 0%, transparent 60%)",
+              background: "radial-gradient(ellipse at center, rgba(234,88,12,0.06) 0%, transparent 60%)",
             }}
           />
 
@@ -129,12 +131,12 @@ function LinkedInBanner() {
             <div className="flex items-center gap-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/price-lens.svg"
+                src={brand.markSrc}
                 alt=""
                 width={96}
                 height={96}
                 className="shrink-0"
-                style={{ filter: "drop-shadow(0 0 36px rgba(99,106,215,0.4))" }}
+                style={{ filter: "drop-shadow(0 0 36px rgba(234,88,12,0.4))" }}
               />
               <div className="h-28 w-px shrink-0 bg-white/8" />
               <div className="flex shrink-0 flex-col">
@@ -142,10 +144,10 @@ function LinkedInBanner() {
                   className="font-semibold text-white"
                   style={{ fontSize: 48, lineHeight: 1, letterSpacing: "-0.045em" }}
                 >
-                  Price Lens
+                  {brand.displayName}
                 </h1>
                 <p className="mt-2 text-zinc-400" style={{ fontSize: 20, lineHeight: 1.3 }}>
-                  Price tracking for Portuguese supermarkets.
+                  {brand.taglineText}
                 </p>
                 <p className="mt-1 text-zinc-400" style={{ fontSize: 20, lineHeight: 1.3 }}>
                   Helping consumers save money by buying at the right time.
@@ -284,16 +286,14 @@ function OGPreview({ src, filename, width, height }: { src: string; filename: st
 }
 
 export default function MarketingPage() {
+  const brand = useBrand()
+  const slug = brand.displayName.toLowerCase().replace(/\s+/g, "-")
+  const ogParams = new URLSearchParams({ title: brand.displayName, description: brand.taglineText })
   return (
     <div className="flex w-full flex-1 flex-col gap-12 overflow-y-auto px-16 py-12">
       <LinkedInBanner />
-      <OGPreview src="/og?stats=true" filename="price-lens-og-stats.png" width={1200} height={630} />
-      <OGPreview
-        src="/og?title=Price+Lens&description=Price+tracking+for+Portuguese+supermarkets"
-        filename="price-lens-og.png"
-        width={1200}
-        height={630}
-      />
+      <OGPreview src="/og?stats=true" filename={`${slug}-og-stats.png`} width={1200} height={630} />
+      <OGPreview src={`/og?${ogParams.toString()}`} filename={`${slug}-og.png`} width={1200} height={630} />
     </div>
   )
 }
