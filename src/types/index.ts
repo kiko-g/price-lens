@@ -1,4 +1,5 @@
 import { StaticImageData } from "next/image"
+import type { Database } from "@/types/supabase"
 
 export interface BasketProduct {
   name_en: string
@@ -159,11 +160,13 @@ export interface UserFavorite {
   created_at: string
 }
 
+export type UserRole = Database["public"]["Enums"]["user_role"]
+
 export type Profile = {
   id: string
   full_name: string | null
   avatar_url: string | null
-  role: "user" | "admin"
+  role: UserRole
   updated_at: string | null
 }
 

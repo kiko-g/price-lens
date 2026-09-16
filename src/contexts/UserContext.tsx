@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import type { User, Session } from "@supabase/supabase-js"
 import { Profile } from "@/types"
+import { canAccessAdmin, canMutateAdmin, isReviewer } from "@/lib/auth/roles"
 
 // Query keys for react-query
 const PROFILE_QUERY_KEY = ["profile"] as const
@@ -136,7 +137,20 @@ export function useProfile() {
   )
 }
 
+/** Full admin (reads + writes). Use for elevated controls that mutate data. */
 export function useIsAdmin() {
   const { profile } = useUserContext()
-  return profile?.role === "admin"
+  return canMutateAdmin(profile?.role)
+}
+
+/** Read-only reviewer: may browse /admin but every mutation is blocked server-side. */
+export function useIsReviewer() {
+  const { profile } = useUserContext()
+  return isReviewer(profile?.role)
+}
+
+/** Admin or reviewer: may open /admin pages and read admin dashboards. */
+export function useCanAccessAdmin() {
+  const { profile } = useUserContext()
+  return canAccessAdmin(profile?.role)
 }
