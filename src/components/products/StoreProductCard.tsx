@@ -179,7 +179,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
               ) : null}
             </div>
           ) : (
-            <div className="relative aspect-8/7 w-full bg-zinc-100 dark:bg-zinc-800">
+            <div className="bg-base-100 dark:bg-base-800 relative aspect-8/7 w-full">
               {hasDiscount && sp.discount ? (
                 <Badge
                   variant="unit"
@@ -383,7 +383,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             {isNormalPrice ? (
               <div className="flex min-w-0 flex-col items-start gap-[3px]">
                 <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="text-lg leading-none font-bold tracking-tight text-zinc-700 dark:text-zinc-200">
+                  <span className="text-base-700 dark:text-base-200 text-lg leading-none font-bold tracking-tight">
                     {formatEuroCompact(sp.price!)}
                   </span>
                   <PriceChangeBadge pct={sp.price_change_pct} />
@@ -407,7 +407,7 @@ export function StoreProductCard({ sp, imagePriority = false, favoritedAt, showB
             ) : null}
 
             {isPriceNotSet ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+              <span className="text-base-700 dark:text-base-200 text-lg font-bold">{PRICE_PLACEHOLDER}</span>
             ) : null}
 
             {sp.deposit_amount && sp.deposit_amount > 0 ? (

@@ -146,10 +146,10 @@ function LinkedInBanner() {
                 >
                   {brand.displayName}
                 </h1>
-                <p className="mt-2 text-zinc-400" style={{ fontSize: 20, lineHeight: 1.3 }}>
+                <p className="text-base-400 mt-2" style={{ fontSize: 20, lineHeight: 1.3 }}>
                   {brand.taglineText}
                 </p>
-                <p className="mt-1 text-zinc-400" style={{ fontSize: 20, lineHeight: 1.3 }}>
+                <p className="text-base-400 mt-1" style={{ fontSize: 20, lineHeight: 1.3 }}>
                   Helping consumers save money by buying at the right time.
                 </p>
                 <div className="mt-3 flex items-center gap-6">
@@ -181,13 +181,13 @@ function LinkedInBanner() {
                       >
                         {kpi.value}
                       </span>
-                      <span className="mt-1 font-medium tracking-tight text-zinc-300" style={{ fontSize: 13 }}>
+                      <span className="text-base-300 mt-1 font-medium tracking-tight" style={{ fontSize: 13 }}>
                         {kpi.label}
                       </span>
                     </div>
                   ))}
                 </div>
-                <p className="text-center text-zinc-200" style={{ fontSize: 13 }}>
+                <p className="text-base-200 text-center" style={{ fontSize: 13 }}>
                   <CheckCircleIcon className="mr-1 inline size-3.5 text-emerald-400" />
                   {LINKEDIN_TRACKING_TEXT}
                 </p>

@@ -151,7 +151,7 @@ export function ScrapeStatusSection({ data, isLoading }: { data?: AnalyticsSnaps
             label="Vetoed products"
             value={ss?.vetoed ?? 0}
             detail="Excluded products by canonical category"
-            color="text-zinc-500"
+            color="text-base-500"
             isLoading={isLoading}
           />
           <StatBox

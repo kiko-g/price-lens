@@ -82,10 +82,16 @@
   --card-foreground: oklch(0.2 0.02 262);
   --popover: var(--base-50);
   --popover-foreground: oklch(0.2 0.02 262);
+
   --primary: var(--primary-600);
   --primary-foreground: var(--color-white);
   --secondary: var(--secondary-600);
   --secondary-foreground: var(--color-white);
+  --tertiary: var(--tertiary-500);
+  --tertiary-foreground: var(--color-white);
+  --quaternary: var(--quaternary-500);
+  --quaternary-foreground: var(--color-white);
+
   --muted: var(--base-200);
   --muted-foreground: var(--base-500);
   --accent: var(--base-100);
@@ -105,8 +111,9 @@
   --chart-3: oklch(0.8016 0.1705 73.27);
   --chart-4: oklch(0.7495 0.1664 156.1);
   --chart-5: oklch(0.5439 0.238 311);
+
   /* HUD: no rounded corners. Every rounded-* step below resolves to 0; rounded-full stays for dots/avatars. */
-  --radius: 0px;
+  --radius: 1px;
   --sidebar: var(--base-100);
   --sidebar-foreground: oklch(0.2 0.02 262);
   --sidebar-primary: var(--primary-600);
@@ -127,10 +134,16 @@
   --card-foreground: var(--base-200);
   --popover: var(--base-900);
   --popover-foreground: var(--base-200);
+
   --primary: var(--primary-500);
   --primary-foreground: var(--color-white);
   --secondary: var(--secondary-500);
   --secondary-foreground: var(--color-white);
+  --tertiary: var(--tertiary-500);
+  --tertiary-foreground: var(--color-white);
+  --quaternary: var(--quaternary-500);
+  --quaternary-foreground: var(--color-white);
+
   --muted: var(--base-900);
   --muted-foreground: var(--base-400);
   --accent: var(--base-900);
@@ -208,6 +221,32 @@
   --color-secondary-950: var(--secondary-950);
   --color-secondary-1000: var(--secondary-1000);
 
+  --color-tertiary-50: var(--tertiary-50);
+  --color-tertiary-100: var(--tertiary-100);
+  --color-tertiary-200: var(--tertiary-200);
+  --color-tertiary-300: var(--tertiary-300);
+  --color-tertiary-400: var(--tertiary-400);
+  --color-tertiary-500: var(--tertiary-500);
+  --color-tertiary-600: var(--tertiary-600);
+  --color-tertiary-700: var(--tertiary-700);
+  --color-tertiary-800: var(--tertiary-800);
+  --color-tertiary-900: var(--tertiary-900);
+  --color-tertiary-950: var(--tertiary-950);
+  --color-tertiary-1000: var(--tertiary-1000);
+
+  --color-quaternary-50: var(--quaternary-50);
+  --color-quaternary-100: var(--quaternary-100);
+  --color-quaternary-200: var(--quaternary-200);
+  --color-quaternary-300: var(--quaternary-300);
+  --color-quaternary-400: var(--quaternary-400);
+  --color-quaternary-500: var(--quaternary-500);
+  --color-quaternary-600: var(--quaternary-600);
+  --color-quaternary-700: var(--quaternary-700);
+  --color-quaternary-800: var(--quaternary-800);
+  --color-quaternary-900: var(--quaternary-900);
+  --color-quaternary-950: var(--quaternary-950);
+  --color-quaternary-1000: var(--quaternary-1000);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -237,10 +276,16 @@
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
+
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-quaternary-foreground: var(--quaternary-foreground);
+  --color-quaternary: var(--quaternary);
+
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -484,7 +529,7 @@
   }
 
   * {
-    @apply border-border outline-ring/50 scrollbar-thin scrollbar-thumb-zinc-300;
+    @apply border-border outline-ring/50 scrollbar-thin scrollbar-thumb-base-300;
   }
 
   body {
@@ -500,7 +545,7 @@
   }
 
   code {
-    @apply rounded-md bg-orange-100 px-1.5 py-0.5 text-orange-700 dark:bg-orange-600/30 dark:text-orange-200;
+    @apply bg-quaternary-100 text-quaternary-700 dark:bg-quaternary-600/30 dark:text-quaternary-200 rounded-full px-1 py-0 text-xs leading-none;
   }
 
   pre,

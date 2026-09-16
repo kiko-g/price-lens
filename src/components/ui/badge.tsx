@@ -4,16 +4,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex gap-1.5 items-center rounded-none border border-zinc-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 dark:border-zinc-800 dark:focus:ring-zinc-300 [&_span.bubble]:pointer-events-none [&_span.bubble]:size-2 [&_span.bubble]:rounded-full [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0",
+  "inline-flex gap-1.5 items-center rounded-none border border-base-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-base-950 focus:ring-offset-2 dark:border-base-800 dark:focus:ring-base-300 [&_span.bubble]:pointer-events-none [&_span.bubble]:size-2 [&_span.bubble]:rounded-full [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80 dark:border-transparent dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
+          "border-transparent bg-base-900 text-base-50 hover:bg-base-900/80 dark:border-transparent dark:bg-base-50 dark:text-base-900 dark:hover:bg-base-50/80 [&_span.bubble]:bg-base-100 dark:[&_span.bubble]:bg-base-800",
         boring:
-          "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
+          "border-transparent bg-base-200 text-base-900 hover:bg-base-200/80 dark:border-transparent dark:bg-base-800 dark:text-base-50 dark:hover:bg-base-800/80 [&_span.bubble]:bg-base-100 dark:[&_span.bubble]:bg-base-800",
         ghost:
-          "border-transparent bg-transparent text-zinc-900 hover:bg-zinc-900/80 dark:border-transparent dark:bg-transparent dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
+          "border-transparent bg-transparent text-base-900 hover:bg-base-900/80 dark:border-transparent dark:bg-transparent dark:text-base-50 dark:hover:bg-base-900/80 [&_span.bubble]:bg-base-100 dark:[&_span.bubble]:bg-base-800",
         primary:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80 dark:border-transparent dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80 [&_span.bubble]:bg-primary dark:[&_span.bubble]:bg-primary",
         secondary:
@@ -28,14 +28,14 @@ const badgeVariants = cva(
         warning:
           "border-transparent dark:border-transparent bg-warning text-warning-foreground hover:bg-warning/80 [&_span.bubble]:bg-warning",
         retail:
-          "border-transparent bg-orange-600 text-zinc-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-zinc-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
+          "border-transparent bg-orange-600 text-base-50 hover:bg-orange-600/80 dark:border-transparent dark:bg-orange-700 dark:text-base-50 dark:hover:bg-orange-700/80 [&_span.bubble]:bg-orange-600",
         "retail-deal":
-          "border border-rose-400/90 bg-size-[200%_200%] bg-linear-to-br from-rose-100 via-orange-50 to-rose-100 text-rose-950 shadow-sm motion-reduce:animate-none motion-reduce:ring-1 motion-reduce:ring-rose-400/50 motion-reduce:shadow-none animate-lava hover:brightness-105 focus-visible:ring-rose-500/45 dark:border-rose-400/90 dark:from-rose-100 dark:via-orange-50 dark:to-rose-100 dark:text-rose-950 dark:shadow-sm dark:shadow-zinc-950/45 dark:animate-none dark:hover:brightness-105 [&_span.bubble]:bg-rose-600 dark:[&_span.bubble]:bg-rose-600",
-        light: "border-transparent dark:border-transparent bg-white text-zinc-900 hover:bg-white/80",
-        dark: "border-transparent bg-zinc-900 text-zinc-50 dark:border-transparent hover:bg-zinc-900/80",
+          "border border-rose-400/90 bg-size-[200%_200%] bg-linear-to-br from-rose-100 via-orange-50 to-rose-100 text-rose-950 shadow-sm motion-reduce:animate-none motion-reduce:ring-1 motion-reduce:ring-rose-400/50 motion-reduce:shadow-none animate-lava hover:brightness-105 focus-visible:ring-rose-500/45 dark:border-rose-400/90 dark:from-rose-100 dark:via-orange-50 dark:to-rose-100 dark:text-rose-950 dark:shadow-sm dark:shadow-base-950/45 dark:animate-none dark:hover:brightness-105 [&_span.bubble]:bg-rose-600 dark:[&_span.bubble]:bg-rose-600",
+        light: "border-transparent dark:border-transparent bg-white text-base-900 hover:bg-white/80",
+        dark: "border-transparent bg-base-900 text-base-50 dark:border-transparent hover:bg-base-900/80",
         outline:
-          "border-zinc-300 text-zinc-950 dark:border-zinc-300 dark:text-zinc-200 [&_span.bubble]:bg-zinc-300 dark:[&_span.bubble]:bg-zinc-800",
-        "outline-white": "border-base-400 border bg-white text-zinc-900 [&_span.bubble]:bg-white dark:border-base-300",
+          "border-base-300 text-base-950 dark:border-base-300 dark:text-base-200 [&_span.bubble]:bg-base-300 dark:[&_span.bubble]:bg-base-800",
+        "outline-white": "border-base-400 border bg-white text-base-900 [&_span.bubble]:bg-white dark:border-base-300",
         "outline-success": "border-success bg-success/5 text-success dark:bg-success/10 [&_span.bubble]:bg-success",
         "outline-destructive":
           "border-destructive/50 bg-destructive/10 text-destructive dark:border-destructive/40 dark:bg-destructive/20 [&_span.bubble]:bg-destructive",
@@ -43,12 +43,12 @@ const badgeVariants = cva(
         discount:
           "border border-rose-200/80 bg-rose-50 text-rose-800 shadow-none hover:bg-rose-100/90 dark:border-rose-500/40 dark:bg-rose-800/80 dark:text-rose-50 dark:hover:bg-rose-950/65 [&_span.bubble]:bg-rose-400 dark:[&_span.bubble]:bg-rose-500",
         "price-per-unit":
-          "border-zinc-200 gap-0 bg-transparent text-zinc-800 shadow-none hover:bg-zinc-50 dark:border-zinc-600 dark:bg-transparent dark:text-zinc-300 dark:hover:bg-zinc-800/40 [&_span.bubble]:bg-zinc-400 dark:[&_span.bubble]:bg-zinc-500",
-        unit: "border-transparent bg-zinc-200 text-zinc-900 hover:bg-zinc-200/80 dark:border-transparent dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-800/80 [&_span.bubble]:bg-zinc-100 dark:[&_span.bubble]:bg-zinc-800",
+          "border-base-200 gap-0 bg-transparent text-base-800 shadow-none hover:bg-base-50 dark:border-base-600 dark:bg-transparent dark:text-base-300 dark:hover:bg-base-800/40 [&_span.bubble]:bg-base-400 dark:[&_span.bubble]:bg-base-500",
+        unit: "border-transparent bg-base-200 text-base-900 hover:bg-base-200/80 dark:border-transparent dark:bg-base-800 dark:text-base-50 dark:hover:bg-base-800/80 [&_span.bubble]:bg-base-100 dark:[&_span.bubble]:bg-base-800",
         blue: "border-transparent dark:border-transparent bg-info text-info-foreground hover:bg-info/80 [&_span.bubble]:bg-info",
-        sky: "border-transparent bg-sky-600 text-zinc-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-zinc-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
+        sky: "border-transparent bg-sky-600 text-base-50 hover:bg-sky-600/80 dark:border-transparent dark:bg-sky-800 dark:text-base-50 dark:hover:bg-sky-800/80 [&_span.bubble]:bg-sky-600 dark:[&_span.bubble]:bg-sky-800",
         white:
-          "border-transparent bg-white text-zinc-900 hover:bg-white/80 dark:border-transparent dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-zinc-900",
+          "border-transparent bg-white text-base-900 hover:bg-white/80 dark:border-transparent dark:bg-base-900 dark:text-base-50 dark:hover:bg-base-900/80 [&_span.bubble]:bg-white dark:[&_span.bubble]:bg-base-900",
         hud: "rounded-none border-primary/50 bg-primary/5 text-primary eyebrow gap-1 px-2 py-1 dark:text-primary-200 [&_span.bubble]:bg-primary",
         "hud-muted":
           "rounded-none border-border bg-transparent text-muted-foreground eyebrow gap-1 px-2 py-1 [&_span.bubble]:bg-muted-foreground",

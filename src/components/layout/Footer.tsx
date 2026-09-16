@@ -14,7 +14,7 @@ export function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "mx-auto hidden w-full items-center justify-between border-t bg-zinc-50 px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl sm:px-6 lg:flex lg:px-8 lg:pt-8 lg:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] dark:bg-inherit",
+        "bg-base-50 mx-auto hidden w-full items-center justify-between border-t px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl sm:px-6 lg:flex lg:px-8 lg:pt-8 lg:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] dark:bg-inherit",
         className,
       )}
     >
@@ -45,7 +45,7 @@ export function Footer({ className }: { className?: string }) {
         <li>
           <Button variant="ghost-dark" size="icon" asChild>
             <Link href={siteConfig.links.instagram} target="_blank" rel="noopener noreferrer">
-              <InstagramIcon className="size-4 fill-zinc-900 dark:fill-white" />
+              <InstagramIcon className="fill-base-900 size-4 dark:fill-white" />
             </Link>
           </Button>
         </li>
@@ -53,7 +53,7 @@ export function Footer({ className }: { className?: string }) {
         <li>
           <Button variant="ghost-dark" size="icon" asChild>
             <Link href={siteConfig.links.twitter} target="_blank" rel="noopener noreferrer">
-              <XTwitterIcon className="size-4 fill-zinc-900 dark:fill-white" />
+              <XTwitterIcon className="fill-base-900 size-4 dark:fill-white" />
             </Link>
           </Button>
         </li>
@@ -61,7 +61,7 @@ export function Footer({ className }: { className?: string }) {
         <li>
           <Button variant="ghost-dark" size="icon" asChild>
             <Link href={siteConfig.links.linkedin} target="_blank" rel="noopener noreferrer">
-              <LinkedinIcon className="size-4 fill-zinc-900 stroke-transparent dark:fill-white dark:stroke-transparent" />
+              <LinkedinIcon className="fill-base-900 size-4 stroke-transparent dark:fill-white dark:stroke-transparent" />
             </Link>
           </Button>
         </li>

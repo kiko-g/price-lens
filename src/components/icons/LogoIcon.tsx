@@ -16,7 +16,7 @@ export function LogoIcon(props: React.SVGProps<SVGSVGElement>) {
           strokeOpacity={0.0}
           rx={10}
           transform="rotate(-45 37.99 107.632)"
-          className="fill-zinc-950 stroke-zinc-950 dark:fill-zinc-50 dark:stroke-zinc-50"
+          className="fill-base-950 stroke-base-950 dark:fill-base-50 dark:stroke-base-50"
         />
       </g>
       <path
@@ -25,7 +25,7 @@ export function LogoIcon(props: React.SVGProps<SVGSVGElement>) {
         strokeOpacity={0.0}
         d="M45.768 25.99 63.626 8.134a9 9 0 0 1 12.728 0L94.212 25.99a9 9 0 0 1 0 12.727L76.354 56.576a9 9 0 0 1-12.728 0L45.768 38.718a9 9 0 0 1 0-12.728Z"
         opacity={1.0}
-        className="fill-zinc-950 stroke-zinc-950 dark:fill-zinc-50 dark:stroke-zinc-50"
+        className="fill-base-950 stroke-base-950 dark:fill-base-50 dark:stroke-base-50"
       />
       <rect
         width={43.255}
@@ -38,7 +38,7 @@ export function LogoIcon(props: React.SVGProps<SVGSVGElement>) {
         strokeOpacity={0.0}
         opacity={1.0}
         transform="rotate(-45 77.043 69.993)"
-        className="fill-zinc-950 stroke-zinc-950 dark:fill-zinc-50 dark:stroke-zinc-50"
+        className="fill-base-950 stroke-base-950 dark:fill-base-50 dark:stroke-base-50"
       />
       <rect
         width={43.255}
@@ -51,7 +51,7 @@ export function LogoIcon(props: React.SVGProps<SVGSVGElement>) {
         opacity={1.0}
         rx={9}
         transform="rotate(-45 1.766 69.993)"
-        className="fill-zinc-950 stroke-zinc-950 dark:fill-zinc-50 dark:stroke-zinc-50"
+        className="fill-base-950 stroke-base-950 dark:fill-base-50 dark:stroke-base-50"
       />
     </svg>
   )

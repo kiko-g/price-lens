@@ -139,11 +139,11 @@ export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductH
             ) : null}
 
             {isNormalPrice ? (
-              <span className="text-xl font-bold text-zinc-700 dark:text-zinc-200">{formatEuroCompact(sp.price)}</span>
+              <span className="text-base-700 dark:text-base-200 text-xl font-bold">{formatEuroCompact(sp.price)}</span>
             ) : null}
 
             {isPriceNotSet ? (
-              <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+              <span className="text-base-700 dark:text-base-200 text-lg font-bold">{PRICE_PLACEHOLDER}</span>
             ) : null}
           </div>
 
@@ -163,9 +163,7 @@ export function ProductHeroDesktop({ sp, asideBelowBarcode, children }: ProductH
             <PriceFreshnessInfo updatedAt={sp.updated_at} priority={sp.priority} />
           </div>
 
-          {sp.deposit_amount && sp.deposit_amount > 0 ? (
-            <VoltaDepositLabel depositAmount={sp.deposit_amount} />
-          ) : null}
+          {sp.deposit_amount && sp.deposit_amount > 0 ? <VoltaDepositLabel depositAmount={sp.deposit_amount} /> : null}
         </div>
 
         {/* Actions */}

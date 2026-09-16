@@ -37,7 +37,7 @@ export const AsyncTimerLoader = ({ isLoading, className }: AsyncTimerLoaderProps
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950",
+        "border-base-200 dark:border-base-800 dark:bg-base-950 relative overflow-hidden rounded-xl border bg-white px-3 py-2",
         className,
       )}
     >
@@ -46,7 +46,7 @@ export const AsyncTimerLoader = ({ isLoading, className }: AsyncTimerLoaderProps
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
         </div>
-        <div className="font-mono text-xs font-semibold tracking-tight text-zinc-500 dark:text-zinc-400">
+        <div className="text-base-500 dark:text-base-400 font-mono text-xs font-semibold tracking-tight">
           {formatTime(elapsed)}
         </div>
       </div>

@@ -39,7 +39,7 @@ export function FooterBuiltByLink(chunks: ReactNode) {
     <Link
       target="_blank"
       href={siteConfig.links.github}
-      className="inline-flex items-center gap-2 font-medium text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
+      className="text-base-900 inline-flex items-center gap-2 font-medium hover:underline hover:opacity-80 dark:text-white"
     >
       {chunks}
       <Image src="/profile.svg" alt="" width={24} height={24} className="rounded-full" />
@@ -52,7 +52,7 @@ export function FooterOpenSourceLink(chunks: ReactNode) {
     <Link
       target="_blank"
       href={siteConfig.links.repo}
-      className="inline-flex items-center gap-2 font-semibold text-zinc-900 hover:underline hover:opacity-80 dark:text-white"
+      className="text-base-900 inline-flex items-center gap-2 font-semibold hover:underline hover:opacity-80 dark:text-white"
     >
       {chunks}
     </Link>

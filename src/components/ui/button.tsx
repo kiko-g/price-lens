@@ -12,8 +12,8 @@ const buttonVariants = cva(
         default: `bg-foreground text-background shadow hover:bg-foreground/90`,
         /* Lince HUD: ember outline + glow. Use for the secondary brand action next to `default`. */
         hud: `border-primary/60 bg-primary/5 text-primary shadow-none hover:bg-primary/12 hover:border-primary ember-glow dark:text-primary-200`,
-        inverted: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-700`,
-        white: `bg-white text-zinc-900 shadow hover:bg-zinc-200 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200`,
+        inverted: `bg-white text-base-900 shadow hover:bg-base-200 dark:bg-base-900 dark:text-white dark:hover:bg-base-700`,
+        white: `bg-white text-base-900 shadow hover:bg-base-200 dark:bg-white dark:text-base-900 dark:hover:bg-base-200`,
 
         primary: `bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90 dark:text-primary-foreground`,
         secondary: `bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90 dark:bg-secondary dark:hover:bg-secondary/90 dark:text-secondary-foreground`,
@@ -22,18 +22,18 @@ const buttonVariants = cva(
         destructive: `bg-destructive text-white shadow-sm hover:bg-destructive/90 dark:bg-destructive dark:hover:bg-destructive/90 dark:text-white`,
         orange: `bg-orange-600 text-white shadow-sm hover:bg-orange-600/90 dark:bg-orange-700 dark:hover:bg-orange-700/90 dark:text-white`,
         success: `bg-emerald-600 text-white shadow-sm hover:bg-emerald-600/90 dark:bg-emerald-700 dark:hover:bg-emerald-700/90 dark:text-white`,
-        outline: `border-input bg-transparent shadow-sm hover:bg-zinc-200/80 dark:bg-zinc-800/10 dark:hover:bg-zinc-800`,
+        outline: `border-input bg-transparent shadow-sm hover:bg-base-200/80 dark:bg-base-800/10 dark:hover:bg-base-800`,
         "outline-destructive": `border-destructive/50 bg-destructive/10 shadow-sm hover:bg-destructive/10 dark:border-destructive dark:hover:bg-destructive/10 dark:text-white`,
 
-        ghost: `hover:bg-zinc-200/80 dark:hover:bg-zinc-100/20`,
+        ghost: `hover:bg-base-200/80 dark:hover:bg-base-100/20`,
         "ghost-inverted": "bg-accent hover:bg-accent/80",
-        "ghost-light": `hover:bg-zinc-200/80`,
-        "ghost-dark": `hover:bg-zinc-100/20`,
+        "ghost-light": `hover:bg-base-200/80`,
+        "ghost-dark": `hover:bg-base-100/20`,
         "ghost-destructive": `text-destructive hover:bg-destructive/10`,
 
-        glass: `bg-zinc-100 backdrop-blur text-zinc-900 hover:bg-zinc-500/20 dark:bg-zinc-900/80 dark:text-white dark:hover:bg-zinc-950/80`,
+        glass: `bg-base-100 backdrop-blur text-base-900 hover:bg-base-500/20 dark:bg-base-900/80 dark:text-white dark:hover:bg-base-950/80`,
 
-        active: `bg-zinc-200/80 dark:bg-zinc-100/20`,
+        active: `bg-base-200/80 dark:bg-base-100/20`,
 
         link: `text-primary underline-offset-4 hover:underline`,
         "dropdown-item": `bg-transparent font-normal w-full justify-between border-0`,
@@ -43,9 +43,9 @@ const buttonVariants = cva(
 
         "marketing-secondary": `bg-secondary text-secondary-foreground ring-secondary-foreground/10 before:from-secondary-foreground/10 after:from-secondary-foreground/5 relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-linear-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-linear-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,
 
-        "marketing-default": `bg-zinc-800 text-white ring-zinc-800/10 before:from-zinc-800/10 after:from-zinc-800/5 relative isolate inline-flex w-full items-center justify-center dark:bg-white dark:text-zinc-900 overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-linear-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-linear-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,
+        "marketing-default": `bg-base-800 text-white ring-base-800/10 before:from-base-800/10 after:from-base-800/5 relative isolate inline-flex w-full items-center justify-center dark:bg-white dark:text-base-900 overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-linear-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-linear-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,
 
-        "marketing-white": `bg-white text-zinc-900 ring-zinc-900/10 before:from-zinc-900/10 after:from-zinc-900/5 relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-linear-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-linear-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,
+        "marketing-white": `bg-white text-base-900 ring-base-900/10 before:from-base-900/10 after:from-base-900/5 relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-md px-3 text-left text-sm font-medium ring-1 transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-linear-to-b before:opacity-80 before:transition-opacity before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-md after:bg-linear-to-b after:to-transparent after:mix-blend-overlay hover:opacity-90`,
       },
       size: {
         default: `px-3 py-1.5`,

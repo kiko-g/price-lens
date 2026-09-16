@@ -45,7 +45,7 @@ function BrandBadge({
           tw="w-9 h-9"
           style={{ objectFit: "contain" }}
         />
-        <span tw="ml-2.5 text-xl font-semibold text-zinc-50" style={{ letterSpacing: "-0.02em" }}>
+        <span tw="ml-2.5 text-xl font-semibold text-base-50" style={{ letterSpacing: "-0.02em" }}>
           {brandName}
         </span>
       </div>

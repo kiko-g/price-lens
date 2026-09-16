@@ -50,7 +50,7 @@ export function ProductGridLoadingSkeleton() {
         </aside>
 
         <div className="sticky top-(--header-height) z-50 lg:hidden">
-          <div className="flex w-full items-center gap-2 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter dark:bg-zinc-950/95">
+          <div className="dark:bg-base-950/95 flex w-full items-center gap-2 border-b bg-white/95 px-4 py-2.5 backdrop-blur backdrop-filter">
             <div className="flex flex-1 items-center gap-2.5 rounded-lg border px-3 py-2.5">
               <SearchIcon className="text-muted-foreground h-4 w-4 shrink-0" />
               <span className="text-muted-foreground flex-1 text-sm">{SEARCH_INPUT_SKELETON_PLACEHOLDER}</span>

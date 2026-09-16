@@ -116,7 +116,7 @@ export async function GET(request: Request) {
             <h1 tw="text-4xl font-semibold m-0 text-white" style={{ letterSpacing: "-0.02em" }}>
               {title}
             </h1>
-            {query && <p tw="text-base text-zinc-500 m-0 mt-1">Results for &quot;{query}&quot;</p>}
+            {query && <p tw="text-base text-base-500 m-0 mt-1">Results for &quot;{query}&quot;</p>}
           </div>
         </div>
 
@@ -140,8 +140,8 @@ export async function GET(request: Request) {
                           style={{ objectFit: "contain" }}
                         />
                       ) : (
-                        <div tw="flex w-full h-full bg-zinc-100 rounded items-center justify-center">
-                          <span tw="text-zinc-400 text-xs">No img</span>
+                        <div tw="flex w-full h-full bg-base-100 rounded items-center justify-center">
+                          <span tw="text-base-400 text-xs">No img</span>
                         </div>
                       )}
                     </div>
@@ -160,7 +160,7 @@ export async function GET(request: Request) {
 
                       <div tw="flex flex-1 items-start mt-0.5">
                         <span
-                          tw="text-sm font-medium text-zinc-300"
+                          tw="text-sm font-medium text-base-300"
                           style={{
                             lineHeight: "18px",
                             letterSpacing: "-0.01em",
@@ -211,7 +211,7 @@ export async function GET(request: Request) {
             </div>
           ) : (
             <div tw="flex flex-1 items-center justify-center">
-              <p tw="text-xl text-zinc-500">No products found</p>
+              <p tw="text-xl text-base-500">No products found</p>
             </div>
           )}
         </div>

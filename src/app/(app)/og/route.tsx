@@ -98,12 +98,12 @@ export async function GET(request: Request) {
                 {brand.displayName}
               </div>
               <div
-                tw="text-zinc-400 mt-2"
+                tw="text-base-400 mt-2"
                 style={{ fontSize: 24, fontWeight: 400, letterSpacing: "-0.015em", lineHeight: 1.3 }}
               >
                 {getBrandText(brand.tagline, defaultLocale)}
               </div>
-              <div tw="text-zinc-500 mt-1" style={{ fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}>
+              <div tw="text-base-500 mt-1" style={{ fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}>
                 Continente · Auchan · Pingo Doce
               </div>
             </div>
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
                 >
                   {kpi.value}
                 </span>
-                <span tw="text-zinc-500 mt-2" style={{ fontSize: 15, fontWeight: 400 }}>
+                <span tw="text-base-500 mt-2" style={{ fontSize: 15, fontWeight: 400 }}>
                   {kpi.label}
                 </span>
               </div>
@@ -196,7 +196,7 @@ export async function GET(request: Request) {
             </div>
             {description && (
               <div
-                tw="mt-3 text-zinc-400"
+                tw="mt-3 text-base-400"
                 style={{ fontSize: 24, fontWeight: 400, lineHeight: 1.4, letterSpacing: "-0.01em" }}
               >
                 {description}

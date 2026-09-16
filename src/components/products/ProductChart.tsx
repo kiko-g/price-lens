@@ -1139,10 +1139,10 @@ function FallbackDetails({ className }: FallbackDetailsProps) {
           </>
         ) : null}
         {isNormalPrice ? (
-          <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{formatEuroCompact(sp.price)}</span>
+          <span className="text-lg font-bold text-base-700 dark:text-base-200">{formatEuroCompact(sp.price)}</span>
         ) : null}
         {isPriceNotSet ? (
-          <span className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{PRICE_PLACEHOLDER}</span>
+          <span className="text-lg font-bold text-base-700 dark:text-base-200">{PRICE_PLACEHOLDER}</span>
         ) : null}
       </div>
 
