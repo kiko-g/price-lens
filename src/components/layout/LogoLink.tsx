@@ -24,13 +24,7 @@ export function LogoLink({ className, markOnly = false, withEyebrow = false, mar
       aria-label={brand.displayName}
       className={cn("flex max-w-full min-w-0 items-center gap-2.5 transition hover:opacity-80", className)}
     >
-      <LinceMark
-        logoShape="hunter"
-        logoFashion="outlined"
-        pulseShapePattern="quarter-circle"
-        pulseAnimation="static"
-        className={cn("logo-animation size-7 shrink-0", markClassName)}
-      />
+      <LinceMark {...brand.mark} className={cn("logo-animation size-7 shrink-0", markClassName)} />
       {!markOnly && (
         <span className="flex min-w-0 flex-col leading-none">
           <span className="truncate text-[17px] font-bold tracking-tight">{brand.displayName}</span>

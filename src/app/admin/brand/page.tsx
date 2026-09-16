@@ -32,8 +32,8 @@ export default function BrandControlCenterPage() {
       <header className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold tracking-tight">Brand Control Center</h1>
         <p className="text-muted-foreground max-w-2xl text-sm">
-          Single source of truth for the product name and brand copy. Changing the display name cascades to the header,
-          metadata, PWA manifest, footer, onboarding, emails and OG images — no code change required.
+          Manage the product name, brand copy and logo. Save changes to apply them to the header, metadata, PWA
+          manifest, footer, onboarding, emails and OG images — no code change required.
         </p>
       </header>
 
@@ -63,15 +63,14 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
 
   // Re-sync when the server row changes (e.g. after a save in another tab).
   useEffect(() => {
-    form.reset(initial)
+    form.reset(initial, { keepDirtyValues: true })
   }, [initial, form])
 
   const values = form.watch()
   const isDirty = form.formState.isDirty
 
-  const handleSubmit = form.handleSubmit(async (input) => {
-    const saved = await update.mutateAsync(input)
-    form.reset(saved.brand)
+  const handleSubmit = form.handleSubmit((input) => {
+    update.mutate(input, { onSuccess: (saved) => form.reset(saved.brand) })
   })
 
   const handleResetToDefaults = () => {
@@ -79,7 +78,10 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
   }
 
   return (
-    <div className="grid min-h-0 flex-1 gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] xl:overflow-hidden">
+    <fieldset
+      disabled={update.isPending}
+      className="grid min-h-0 min-w-0 flex-1 gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] xl:overflow-hidden"
+    >
       <Form {...form}>
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-col gap-6 xl:h-full">
           <div className="flex flex-col gap-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
@@ -227,9 +229,14 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
             ))}
           </TabsList>
         </Tabs>
-        <BrandPreview brand={values} locale={previewLocale} isDirty={isDirty} />
+        <BrandPreview
+          brand={values}
+          locale={previewLocale}
+          isDirty={isDirty}
+          onMarkChange={(mark) => form.setValue("mark", mark, { shouldDirty: true, shouldValidate: true })}
+        />
       </aside>
-    </div>
+    </fieldset>
   )
 }
 

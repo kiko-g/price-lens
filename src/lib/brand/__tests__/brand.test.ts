@@ -30,6 +30,38 @@ describe("mergeBrandSettings", () => {
 })
 
 describe("brandSettingsSchema", () => {
+  it("round-trips every logo setting through the stored JSON", () => {
+    const mark = {
+      logoShape: "geometric-1",
+      logoFashion: "filledInk",
+      pulseShapePattern: "half-circle",
+      pulseAnimation: "animated",
+      monochrome: true,
+    }
+    const saved = brandSettingsSchema.parse({ ...BRAND_DEFAULTS, mark })
+    expect(mergeBrandSettings(JSON.parse(JSON.stringify(saved))).mark).toEqual(mark)
+  })
+
+  it("loads legacy rows and supplies shape-appropriate defaults for partial marks", () => {
+    expect(mergeBrandSettings({ displayName: "Vista" }).mark).toEqual(BRAND_DEFAULTS.mark)
+    expect(mergeBrandSettings({ mark: { logoShape: "simple", monochrome: true } }).mark).toEqual({
+      logoShape: "simple",
+      logoFashion: "filled",
+      pulseShapePattern: "none",
+      pulseAnimation: "static",
+      monochrome: true,
+    })
+  })
+
+  it("rejects unknown shapes and non-boolean monochrome values before writing", () => {
+    for (const mark of [
+      { ...BRAND_DEFAULTS.mark, logoShape: "missing" },
+      { ...BRAND_DEFAULTS.mark, monochrome: "true" },
+    ]) {
+      expect(brandSettingsSchema.safeParse({ ...BRAND_DEFAULTS, mark }).success).toBe(false)
+    }
+  })
+
   it("rejects a short name longer than 12 chars", () => {
     const result = brandSettingsSchema.safeParse({ ...BRAND_DEFAULTS, shortName: "A".repeat(13) })
     expect(result.success).toBe(false)

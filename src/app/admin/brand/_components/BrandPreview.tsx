@@ -1,9 +1,9 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 
 import { brandPlaceholders, type BrandSettings } from "@/lib/brand/brand"
-import { LinceMark, getLinceMarkDefaults } from "@/components/icons/LinceMark"
+import { LinceMark, type LinceMarkOptions } from "@/components/icons/LinceMark"
 import { LinceMarkLab } from "@/app/admin/brand/_components/LinceMarkLab"
 import { MarkPreviewSurface } from "@/app/admin/brand/_components/MarkPreviewSurface"
 import { substituteBrandInString } from "@/lib/brand/messages"
@@ -32,10 +32,11 @@ type BrandPreviewProps = {
   brand: BrandSettings
   locale: Locale
   isDirty: boolean
+  onMarkChange: (mark: LinceMarkOptions) => void
 }
 
-export function BrandPreview({ brand, locale, isDirty }: BrandPreviewProps) {
-  const [mark, setMark] = useState(getLinceMarkDefaults)
+export function BrandPreview({ brand, locale, isDirty, onMarkChange }: BrandPreviewProps) {
+  const mark = brand.mark
   const placeholders = useMemo(() => brandPlaceholders(brand), [brand])
   // Other ICU args stay visible as placeholders; only the brand ones are resolved here.
   const resolve = (template: string) =>
@@ -52,7 +53,7 @@ export function BrandPreview({ brand, locale, isDirty }: BrandPreviewProps) {
         )}
       </div>
 
-      <LinceMarkLab value={mark} onChange={setMark} />
+      <LinceMarkLab value={mark} onChange={onMarkChange} />
 
       <Card>
         <CardHeader className="pb-3">
@@ -84,7 +85,7 @@ export function BrandPreview({ brand, locale, isDirty }: BrandPreviewProps) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">PWA manifest · install</CardTitle>
-          <CardDescription>Home-screen label and proposed app tile. Published icons remain unchanged.</CardDescription>
+          <CardDescription>Home-screen label and app tile generated from the saved mark.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-sm">
           <PreviewRow label="name" value={brand.displayName} />

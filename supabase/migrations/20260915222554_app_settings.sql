@@ -12,10 +12,13 @@ CREATE TABLE IF NOT EXISTS app_settings (
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow read for anon" ON app_settings
-  FOR SELECT TO anon USING (true);
+  FOR SELECT TO anon USING (key = 'brand');
 
 CREATE POLICY "Allow read for authenticated" ON app_settings
-  FOR SELECT TO authenticated USING (true);
+  FOR SELECT TO authenticated USING (key = 'brand');
+
+GRANT SELECT ON app_settings TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON app_settings TO service_role;
 
 -- No INSERT/UPDATE/DELETE policies: only the service role can write.
 
@@ -28,6 +31,13 @@ VALUES (
     'displayName', 'Lince',
     'shortName', 'Lince',
     'legalName', 'Lince',
+    'mark', jsonb_build_object(
+      'logoShape', 'hunter',
+      'logoFashion', 'outlined',
+      'pulseShapePattern', 'quarter-circle',
+      'pulseAnimation', 'static',
+      'monochrome', false
+    ),
     'eyebrow', jsonb_build_object(
       'pt', 'Pulso dos preços',
       'en', 'Price pulse'

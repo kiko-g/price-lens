@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 import type { BrandSettings, BrandSettingsInput } from "@/lib/brand/brand"
 
@@ -16,14 +17,21 @@ export function useBrandSettings() {
   return useQuery({
     queryKey: BRAND_SETTINGS_QUERY_KEY,
     queryFn: async () => {
-      const { data } = await axios.get<BrandSettingsResponse>("/api/admin/brand")
-      return data
+      try {
+        const { data } = await axios.get<BrandSettingsResponse>("/api/admin/brand")
+        return data
+      } catch (error) {
+        const message = axios.isAxiosError(error) ? error.response?.data?.error : null
+        throw new Error(typeof message === "string" ? message : "Could not connect to brand storage")
+      }
     },
     staleTime: 0,
+    refetchOnWindowFocus: false,
   })
 }
 
 export function useUpdateBrandSettings() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (input: BrandSettingsInput) => {
@@ -32,7 +40,8 @@ export function useUpdateBrandSettings() {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(BRAND_SETTINGS_QUERY_KEY, data)
-      toast.success("Brand settings saved. Public pages update on the next request.")
+      router.refresh()
+      toast.success("Brand settings saved and applied.")
     },
     onError: (err) => {
       console.error("[useUpdateBrandSettings] failed:", err)

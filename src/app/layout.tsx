@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/config"
 import { isLocale, toLocaleTag, toOpenGraphLocale } from "@/i18n/config"
 import { getBrand } from "@/lib/brand/server"
-import { BRAND_MARK_SRC, getBrandText } from "@/lib/brand/brand"
+import { getBrandMarkUrl, getBrandText } from "@/lib/brand/brand"
 import { BrandProvider } from "@/contexts/BrandContext"
 
 import { Providers } from "./providers"
@@ -32,7 +32,7 @@ import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt"
 const SPLASH_STYLES = `
 #__splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f6f3ee;transition:opacity .5s ease-out}
 #__splash .sc{display:flex;flex-direction:column;align-items:center;gap:1.25rem;animation:__sf .6s ease-out both}
-#__splash .si{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(234,88,12,.4))}
+#__splash .si{width:64px;height:64px}
 #__splash .st{font-size:1.125rem;font-weight:700;letter-spacing:-.025em;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 #__splash .sb{position:absolute;bottom:5rem;width:40px;height:3px;border-radius:9999px;overflow:hidden;background:rgba(28,25,23,.1)}
 #__splash .sb::after{content:'';position:absolute;inset:0;border-radius:9999px;background:rgba(234,88,12,.6);animation:__sl 1.2s ease-in-out infinite}
@@ -117,15 +117,16 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/favicon.svg", type: "image/svg+xml" },
-        { url: "/favicon.ico", sizes: "any" },
-        { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-        { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { tile: true }), type: "image/svg+xml" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 16, tile: true }), sizes: "16x16", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 32, tile: true }), sizes: "32x32", type: "image/png" },
       ],
-      apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+      apple: [
+        { url: getBrandMarkUrl(brand, { format: "png", size: 180, tile: true }), sizes: "180x180", type: "image/png" },
+      ],
       other: [
-        { url: "/icons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-        { url: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192", type: "image/png" },
+        { url: getBrandMarkUrl(brand, { format: "png", size: 512, tile: true }), sizes: "512x512", type: "image/png" },
       ],
     },
     manifest: "/site.webmanifest",
@@ -146,7 +147,20 @@ export default async function RootLayout({
     <html lang={htmlLang} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: SPLASH_STYLES }} />
-        <link rel="preload" href={BRAND_MARK_SRC} as="image" type="image/svg+xml" />
+        <link
+          rel="preload"
+          href={getBrandMarkUrl(brand, { theme: "paper" })}
+          as="image"
+          type="image/svg+xml"
+          media="(prefers-color-scheme: light)"
+        />
+        <link
+          rel="preload"
+          href={getBrandMarkUrl(brand, { theme: "navy" })}
+          as="image"
+          type="image/svg+xml"
+          media="(prefers-color-scheme: dark)"
+        />
         <link rel="preconnect" href="https://www.continente.pt" />
         <link rel="preconnect" href="https://www.auchan.pt" />
         <link rel="preconnect" href="https://www.pingodoce.pt" />
@@ -169,8 +183,17 @@ export default async function RootLayout({
         {/* Inline splash: visible immediately, before CSS/JS loads. Dismissed by React on hydration. */}
         <div id="__splash" aria-hidden="true">
           <div className="sc">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={BRAND_MARK_SRC} alt="" width={64} height={64} className="si" fetchPriority="high" />
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcSet={getBrandMarkUrl(brand, { theme: "navy" })} />
+              <img
+                src={getBrandMarkUrl(brand, { theme: "paper" })}
+                alt=""
+                width={64}
+                height={64}
+                className="si"
+                fetchPriority="high"
+              />
+            </picture>
             <span className="st">{brand.displayName}</span>
           </div>
           <div className="sb" />

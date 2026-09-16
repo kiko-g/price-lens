@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache"
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
 import { createAdminClient } from "@/lib/supabase/server"
+import { brandStorageError } from "@/lib/brand/storage-error"
 import type { Database } from "@/types/supabase"
 import {
   BRAND_CACHE_TAG,
@@ -29,30 +30,25 @@ function createPublicClient() {
   return createSupabaseClient<Database>(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } })
 }
 
-async function fetchStoredBrandSettings(): Promise<unknown> {
-  const supabase = createPublicClient()
-  if (!supabase) {
-    console.warn("[brand] Supabase env missing, using BRAND_DEFAULTS")
-    return null
-  }
+export type BrandSettingsSnapshot = { brand: BrandSettings; updatedAt: string | null }
 
+export async function getBrandSnapshot(): Promise<BrandSettingsSnapshot> {
+  const supabase = createPublicClient()
+  if (!supabase)
+    throw new Error(
+      "Brand storage is not configured. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+    )
   const { data, error } = await supabase
     .from("app_settings")
-    .select("value")
+    .select("value,updated_at")
     .eq("key", BRAND_SETTINGS_KEY)
     .maybeSingle()
-
-  if (error) {
-    // Table missing (migration not applied yet) or transient failure: brand must never take the site down.
-    console.warn("[brand] failed to load brand settings, using BRAND_DEFAULTS:", error.message)
-    return null
-  }
-
-  return data?.value ?? null
+  if (error) throw brandStorageError(error)
+  return { brand: mergeBrandSettings(data?.value), updatedAt: data?.updated_at ?? null }
 }
 
 const getCachedBrandSettings = unstable_cache(
-  async (): Promise<BrandSettings> => mergeBrandSettings(await fetchStoredBrandSettings()),
+  async (): Promise<BrandSettings> => (await getBrandSnapshot()).brand,
   ["brand-settings"],
   { tags: [BRAND_CACHE_TAG], revalidate: BRAND_REVALIDATE_SECONDS },
 )
@@ -72,28 +68,36 @@ export const getBrand = cache(async (): Promise<BrandSettings> => {
 
 /** Uncached read for the admin editor so it always reflects the latest stored row. */
 export async function getBrandUncached(): Promise<BrandSettings> {
-  return mergeBrandSettings(await fetchStoredBrandSettings())
+  return (await getBrandSnapshot()).brand
 }
 
-export async function saveBrandSettings(input: BrandSettingsInput, updatedBy: string | null): Promise<BrandSettings> {
+export async function saveBrandSettings(
+  input: BrandSettingsInput,
+  updatedBy: string | null,
+): Promise<BrandSettingsSnapshot> {
   const brand = brandSettingsSchema.parse(input)
   const supabase = createAdminClient()
 
-  const { error } = await supabase.from("app_settings").upsert(
-    {
-      key: BRAND_SETTINGS_KEY,
-      value: brand,
-      updated_at: new Date().toISOString(),
-      updated_by: updatedBy,
-    },
-    { onConflict: "key" },
-  )
+  const { data, error } = await supabase
+    .from("app_settings")
+    .upsert(
+      {
+        key: BRAND_SETTINGS_KEY,
+        value: brand,
+        updated_at: new Date().toISOString(),
+        updated_by: updatedBy,
+      },
+      { onConflict: "key" },
+    )
+    .select("value,updated_at")
+    .single()
 
-  if (error) throw new Error(`Failed to save brand settings: ${error.message}`)
+  if (error) throw brandStorageError(error)
+  if (!data) throw new Error("Brand storage did not confirm the saved settings.")
 
-  revalidateTag(BRAND_CACHE_TAG, "max")
+  revalidateTag(BRAND_CACHE_TAG, { expire: 0 })
   // Brand name is baked into metadata, manifest and messages on every route.
   revalidatePath("/", "layout")
 
-  return brand
+  return { brand: mergeBrandSettings(data.value), updatedAt: data.updated_at }
 }

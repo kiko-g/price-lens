@@ -3,7 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react"
 import { useLocale } from "next-intl"
 
-import { BRAND_DEFAULTS, BRAND_MARK_SRC, getBrandText, type BrandSettings } from "@/lib/brand/brand"
+import { BRAND_DEFAULTS, getBrandMarkUrl, getBrandText, type BrandSettings } from "@/lib/brand/brand"
 
 const BrandContext = createContext<BrandSettings>(BRAND_DEFAULTS)
 
@@ -28,6 +28,6 @@ export function useBrand(): BrandView {
     eyebrowText: getBrandText(brand.eyebrow, locale),
     taglineText: getBrandText(brand.tagline, locale),
     metaDescriptionText: getBrandText(brand.metaDescription, locale),
-    markSrc: BRAND_MARK_SRC,
+    markSrc: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }),
   }
 }

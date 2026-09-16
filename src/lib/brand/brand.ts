@@ -1,6 +1,13 @@
 import { z } from "zod"
 
 import type { Locale } from "@/i18n/config"
+import {
+  LINCE_LOGO_SHAPES,
+  LINCE_LOGO_FASHIONS,
+  LINCE_PULSE_SHAPE_PATTERNS,
+  LINCE_PULSE_ANIMATIONS,
+  getLinceMarkDefaults,
+} from "@/lib/brand/mark"
 
 /**
  * Brand Control Center — single source of truth for every user-visible brand string.
@@ -17,8 +24,16 @@ import type { Locale } from "@/i18n/config"
 export const BRAND_SETTINGS_KEY = "brand"
 export const BRAND_CACHE_TAG = "brand-settings"
 
-/** Static hunter mark for <img>, OG, email and PWA. The live SVG is `LinceMark`. */
-export const BRAND_MARK_SRC = "/lince-mark.svg"
+/** Saved mark rendered for image, OG and PWA consumers. The live SVG is `LinceMark`. */
+export const BRAND_MARK_SRC = "/api/brand/mark"
+
+export const brandMarkSchema = z.object({
+  logoShape: z.enum(LINCE_LOGO_SHAPES),
+  logoFashion: z.enum(LINCE_LOGO_FASHIONS),
+  pulseShapePattern: z.enum(LINCE_PULSE_SHAPE_PATTERNS),
+  pulseAnimation: z.enum(LINCE_PULSE_ANIMATIONS),
+  monochrome: z.boolean(),
+})
 
 const brandText = z.string().trim().min(1).max(80)
 const longText = z.string().trim().min(1).max(400)
@@ -34,6 +49,7 @@ export const brandSettingsSchema = z.object({
   eyebrow: localizedTextSchema,
   tagline: localizedTextSchema,
   metaDescription: localizedTextSchema,
+  mark: brandMarkSchema,
 })
 
 // Stored rows may predate a field or a locale; nested partials keep them loadable.
@@ -41,6 +57,7 @@ const storedBrandSettingsSchema = brandSettingsSchema.partial().extend({
   eyebrow: localizedTextSchema.partial().optional(),
   tagline: localizedTextSchema.partial().optional(),
   metaDescription: localizedTextSchema.partial().optional(),
+  mark: brandMarkSchema.partial().optional(),
 })
 
 export type LocalizedText = Record<Locale, string>
@@ -51,6 +68,7 @@ export const BRAND_DEFAULTS: BrandSettings = {
   displayName: "Lince",
   shortName: "Lince",
   legalName: "Lince",
+  mark: getLinceMarkDefaults(),
   eyebrow: {
     pt: "Pulso dos preços",
     en: "Price pulse",
@@ -86,7 +104,23 @@ export function mergeBrandSettings(stored: unknown): BrandSettings {
     eyebrow: { ...BRAND_DEFAULTS.eyebrow, ...partial.eyebrow },
     tagline: { ...BRAND_DEFAULTS.tagline, ...partial.tagline },
     metaDescription: { ...BRAND_DEFAULTS.metaDescription, ...partial.metaDescription },
+    mark: { ...getLinceMarkDefaults(partial.mark?.logoShape), ...partial.mark },
   }
+}
+
+export function getBrandMarkUrl(
+  brand: BrandSettings,
+  options: { format?: "svg" | "png"; size?: number; tile?: boolean; theme?: "navy" | "paper" } = {},
+): string {
+  const { logoShape, logoFashion, pulseShapePattern, pulseAnimation, monochrome } = brand.mark
+  const params = new URLSearchParams({
+    v: [logoShape, logoFashion, pulseShapePattern, pulseAnimation, Number(monochrome)].join("-"),
+  })
+  if (options.format) params.set("format", options.format)
+  if (options.size) params.set("size", String(options.size))
+  if (options.tile) params.set("tile", "1")
+  if (options.theme) params.set("theme", options.theme)
+  return `${BRAND_MARK_SRC}?${params}`
 }
 
 export function getBrandText(text: LocalizedText, locale: string): string {

@@ -3,8 +3,8 @@ import { ZodError } from "zod"
 
 import { createClient } from "@/lib/supabase/server"
 import { resolveUser } from "@/lib/supabase/tools"
-import { brandSettingsSchema, BRAND_SETTINGS_KEY } from "@/lib/brand/brand"
-import { getBrandUncached, saveBrandSettings } from "@/lib/brand/server"
+import { brandSettingsSchema } from "@/lib/brand/brand"
+import { getBrandSnapshot, saveBrandSettings } from "@/lib/brand/server"
 
 export const dynamic = "force-dynamic"
 
@@ -13,12 +13,7 @@ export const dynamic = "force-dynamic"
 /** GET /api/admin/brand — latest stored brand settings merged over defaults. */
 export async function GET() {
   try {
-    const supabase = createClient()
-    const [brand, { data: row }] = await Promise.all([
-      getBrandUncached(),
-      supabase.from("app_settings").select("updated_at").eq("key", BRAND_SETTINGS_KEY).maybeSingle(),
-    ])
-    return NextResponse.json({ brand, updatedAt: row?.updated_at ?? null })
+    return NextResponse.json(await getBrandSnapshot(), { headers: { "Cache-Control": "no-store" } })
   } catch (error) {
     console.error("[admin/brand] GET error:", error)
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 })
@@ -33,10 +28,11 @@ export async function PUT(request: Request) {
 
     const supabase = createClient()
     const user = await resolveUser(supabase)
-    const brand = await saveBrandSettings(input, user?.id ?? null)
+    const saved = await saveBrandSettings(input, user?.id ?? null)
 
-    return NextResponse.json({ brand, updatedAt: new Date().toISOString() })
+    return NextResponse.json(saved, { headers: { "Cache-Control": "no-store" } })
   } catch (error) {
+    if (error instanceof SyntaxError) return NextResponse.json({ error: "Invalid JSON request" }, { status: 400 })
     if (error instanceof ZodError) {
       return NextResponse.json({ error: "Invalid brand settings", issues: error.issues }, { status: 400 })
     }

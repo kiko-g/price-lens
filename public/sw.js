@@ -39,6 +39,9 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return
 
+  // The brand editor must report storage failures, never show cached settings as current.
+  if (url.pathname === "/api/admin/brand") return
+
   // Product images: cache-first (they rarely change)
   if (
     url.pathname.match(/\.(png|jpg|jpeg|webp|avif|svg)$/i) ||

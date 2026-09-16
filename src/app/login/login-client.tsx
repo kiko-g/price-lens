@@ -119,7 +119,7 @@ export function LoginClient({ stats }: { stats: HomeStats }) {
             <h1 className="text-foreground mb-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-2xl font-semibold md:justify-start">
               <span>{t("loginTo")}</span>
               <span className="inline-flex items-center">
-                <LinceMark logoShape="hunter" logoFashion="outlined" pulseShapePattern="none" className="mr-1 size-6" />
+                <LinceMark {...brand.mark} pulseShapePattern="none" className="mr-1 size-6" />
                 <span className="tracking-tighter">{brand.displayName}</span>
               </span>
             </h1>

@@ -207,7 +207,7 @@ function SidebarSection({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-1.5">
       {!collapsed && <span className="eyebrow text-muted-foreground px-3 pb-1.5">{label}</span>}
       {children}
     </div>
@@ -246,7 +246,7 @@ function SidebarItem({ href, icon: Icon, label, isActive, collapsed }: SidebarIt
       aria-current={isActive ? "page" : undefined}
       title={collapsed ? label : undefined}
       className={cn(
-        "relative flex h-10 items-center gap-3 text-[13.5px] transition-colors",
+        "relative flex h-8 items-center gap-3 text-[13.5px] transition-colors",
         collapsed ? "justify-center px-0" : "px-3",
         isActive
           ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"

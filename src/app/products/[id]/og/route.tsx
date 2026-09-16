@@ -1,3 +1,4 @@
+import { getBrandMarkUrl } from "@/lib/brand/brand"
 import { ImageResponse } from "next/og"
 import { loadGeistFontsLight } from "@/lib/og-fonts"
 import { storeProductQueries } from "@/lib/queries/products"
@@ -40,7 +41,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const discountPercent = product.discount ? Math.round(product.discount * 1000) / 10 : null
 
   return new ImageResponse(
-    <OGFrame baseUrl={baseUrl} brandName={brand.displayName}>
+    <OGFrame
+      baseUrl={baseUrl}
+      brandName={brand.displayName}
+      brandMarkSrc={getBrandMarkUrl(brand, { format: "png", size: 192, tile: true })}
+    >
       <div tw="flex w-[500px] h-full items-center justify-center bg-[#111] p-8">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element

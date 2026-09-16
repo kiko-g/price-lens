@@ -63,8 +63,8 @@ export function LinceMarkLab({
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Mark · shape, pulse & fashion</CardTitle>
         <CardDescription>
-          Explore animal and geometric marks. Shape selection loads its suggested fashion and pulse. These settings
-          update the samples below; saving brand copy does not publish a logo choice.
+          Explore animal and geometric marks. Shape selection loads its suggested fashion and pulse. Save changes to
+          apply the mark across the app, favicon, install icons and shared images.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

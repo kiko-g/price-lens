@@ -3,7 +3,7 @@ import { loadGeistFonts } from "@/lib/og-fonts"
 import { OG_WIDTH, OG_HEIGHT } from "@/lib/og-layout"
 import { siteConfig } from "@/lib/config"
 import { getBrand } from "@/lib/brand/server"
-import { BRAND_MARK_SRC, getBrandText } from "@/lib/brand/brand"
+import { getBrandMarkUrl, getBrandText } from "@/lib/brand/brand"
 import { defaultLocale } from "@/i18n/config"
 import { getHomeStats } from "@/lib/queries/home-stats"
 
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const origin = url.origin ?? siteConfig.url
 
   const [fonts, stats, brand] = await Promise.all([loadGeistFonts(), showStats ? getHomeStats() : null, getBrand()])
-  const markSrc = `${origin}${BRAND_MARK_SRC}`
+  const markSrc = `${origin}${getBrandMarkUrl(brand, { format: "png", size: 192, tile: true })}`
 
   const kpis = stats
     ? [

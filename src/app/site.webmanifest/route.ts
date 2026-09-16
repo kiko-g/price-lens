@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { getBrand } from "@/lib/brand/server"
-import { getBrandText } from "@/lib/brand/brand"
+import { getBrandMarkUrl, getBrandText } from "@/lib/brand/brand"
 import { defaultLocale } from "@/i18n/config"
 
 export const dynamic = "force-dynamic"
@@ -28,22 +28,27 @@ export async function GET() {
     lang: defaultLocale,
     prefer_related_applications: false,
     icons: [
-      { src: "/icons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
-      { src: "/icons/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192", type: "image/png" },
+      { src: getBrandMarkUrl(brand, { format: "png", size: 512, tile: true }), sizes: "512x512", type: "image/png" },
+      {
+        src: getBrandMarkUrl(brand, { format: "png", size: 512, tile: true }),
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
     ],
     shortcuts: [
       {
         name: "Explorar produtos",
         short_name: "Produtos",
         url: "/products",
-        icons: [{ src: "/icons/android-chrome-192x192.png", sizes: "192x192" }],
+        icons: [{ src: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192" }],
       },
       {
         name: "Os meus favoritos",
         short_name: "Favoritos",
         url: "/favorites",
-        icons: [{ src: "/icons/android-chrome-192x192.png", sizes: "192x192" }],
+        icons: [{ src: getBrandMarkUrl(brand, { format: "png", size: 192, tile: true }), sizes: "192x192" }],
       },
     ],
   }
@@ -51,7 +56,7 @@ export async function GET() {
   return NextResponse.json(manifest, {
     headers: {
       "Content-Type": "application/manifest+json",
-      "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      "Cache-Control": "public, max-age=0, must-revalidate",
     },
   })
 }

@@ -7,47 +7,31 @@ import { cn } from "@/lib/utils"
  *
  * Default: `hunter` + `outlined` + quarter-circle pulse, static, with ember backlight.
  * Additional animal and geometric shapes are available in the brand studio.
- * Static <img>/OG/email: `public/lince-mark.svg`.
+ * Standalone images: `/api/brand/mark` uses the same geometry.
  */
-export const LINCE_LOGO_SHAPES = ["hunter", "pal", "angular", "simple", "geometric-1"] as const
-export type LinceLogoShape = (typeof LINCE_LOGO_SHAPES)[number]
+import {
+  getLinceMarkDefaults,
+  type LinceMarkOptions,
+  type LinceLogoFashion,
+  type LincePulseShapePattern,
+  type LincePulseAnimation,
+} from "@/lib/brand/mark"
+export {
+  LINCE_LOGO_SHAPES,
+  LINCE_LOGO_FASHIONS,
+  LINCE_PULSE_SHAPE_PATTERNS,
+  LINCE_PULSE_ANIMATIONS,
+  getLinceMarkDefaults,
+} from "@/lib/brand/mark"
+export type {
+  LinceLogoShape,
+  LinceLogoFashion,
+  LincePulseShapePattern,
+  LincePulseAnimation,
+  LinceMarkOptions,
+} from "@/lib/brand/mark"
 
-export const LINCE_LOGO_FASHIONS = ["filled", "filledWhite", "filledInk", "outlined", "tile"] as const
-export type LinceLogoFashion = (typeof LINCE_LOGO_FASHIONS)[number]
-
-export const LINCE_PULSE_SHAPE_PATTERNS = ["none", "quarter-circle", "half-circle", "full-circle"] as const
-export type LincePulseShapePattern = (typeof LINCE_PULSE_SHAPE_PATTERNS)[number]
-
-export const LINCE_PULSE_ANIMATIONS = ["static", "animated"] as const
-export type LincePulseAnimation = (typeof LINCE_PULSE_ANIMATIONS)[number]
-
-export type LinceMarkProps = SVGProps<SVGSVGElement> & {
-  /** Silhouette. `hunter` is the product default. */
-  logoShape?: LinceLogoShape
-  /** Facet treatment. `filled` follows the theme (white on navy, ink on paper). */
-  logoFashion?: LinceLogoFashion
-  /** Radar sector around the ring. Ignored for `tile`. */
-  pulseShapePattern?: LincePulseShapePattern
-  /** Expanding waves vs rest rings. No-op when the pattern is `none`. */
-  pulseAnimation?: LincePulseAnimation
-  /** One ink, no glow. Keeps the selected silhouette, fashion and pulse geometry. */
-  monochrome?: boolean
-}
-
-export type LinceMarkOptions = Required<
-  Pick<LinceMarkProps, "logoShape" | "logoFashion" | "pulseShapePattern" | "pulseAnimation" | "monochrome">
->
-
-export function getLinceMarkDefaults(logoShape: LinceLogoShape = "hunter"): LinceMarkOptions {
-  const flat = logoShape === "simple" || logoShape === "geometric-1"
-  return {
-    logoShape,
-    logoFashion: flat ? "filled" : "outlined",
-    pulseShapePattern: flat ? "none" : "quarter-circle",
-    pulseAnimation: "static",
-    monochrome: false,
-  }
-}
+export type LinceMarkProps = SVGProps<SVGSVGElement> & Partial<LinceMarkOptions>
 
 const ANGULAR = {
   tufts: "M17 6l2 5M47 6l-2 5",
@@ -73,7 +57,14 @@ const HALF_ARC = "M32 2.5A29.5 29.5 0 0 1 32 61.5"
 const QUARTER_CLIP = "M32 32V-16H80V32Z"
 const HALF_CLIP = "M32-16H80V80H32Z"
 
-export function LinceMark({
+export function LinceMark(props: LinceMarkProps) {
+  const instanceId = useId()
+  return <LinceMarkSvg {...props} instanceId={instanceId} />
+}
+
+/** Shared geometry for live marks and standalone brand assets. */
+export function LinceMarkSvg({
+  instanceId,
   logoShape = "hunter",
   logoFashion = getLinceMarkDefaults(logoShape).logoFashion,
   pulseShapePattern = getLinceMarkDefaults(logoShape).pulseShapePattern,
@@ -81,8 +72,8 @@ export function LinceMark({
   monochrome = false,
   className,
   ...props
-}: LinceMarkProps) {
-  const reactId = useId()
+}: LinceMarkProps & { instanceId: string }) {
+  const reactId = instanceId
   const clipId = `lince-pulse-clip-${reactId.replace(/:/g, "")}`
   const maskId = `lince-ink-mask-${reactId.replace(/:/g, "")}`
   const showPulse = logoFashion !== "tile" && pulseShapePattern !== "none"

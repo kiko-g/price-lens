@@ -1,5 +1,4 @@
 import { siteConfig } from "@/lib/config"
-import { BRAND_MARK_SRC } from "@/lib/brand/brand"
 
 export const OG_WIDTH = 1200
 export const OG_HEIGHT = 630
@@ -9,18 +8,27 @@ type OGFrameProps = {
   baseUrl?: string
   /** Brand display name from `getBrand()` — route handlers resolve it and pass it down. */
   brandName: string
+  brandMarkSrc: string
 }
 
-export function OGFrame({ children, baseUrl, brandName }: OGFrameProps) {
+export function OGFrame({ children, baseUrl, brandName, brandMarkSrc }: OGFrameProps) {
   return (
     <div tw="flex h-full w-full bg-[#0a0a0a] text-white" style={{ fontFamily: "Geist" }}>
       {children}
-      <BrandBadge baseUrl={baseUrl} brandName={brandName} />
+      <BrandBadge baseUrl={baseUrl} brandName={brandName} brandMarkSrc={brandMarkSrc} />
     </div>
   )
 }
 
-function BrandBadge({ baseUrl, brandName }: { baseUrl?: string; brandName: string }) {
+function BrandBadge({
+  baseUrl,
+  brandName,
+  brandMarkSrc,
+}: {
+  baseUrl?: string
+  brandName: string
+  brandMarkSrc: string
+}) {
   const origin = baseUrl ?? siteConfig.url
   return (
     <div tw="absolute bottom-6 right-6 flex items-center">
@@ -30,7 +38,7 @@ function BrandBadge({ baseUrl, brandName }: { baseUrl?: string; brandName: strin
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${origin}${BRAND_MARK_SRC}`}
+          src={`${origin}${brandMarkSrc}`}
           alt=""
           width={36}
           height={36}
