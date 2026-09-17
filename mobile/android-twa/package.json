@@ -2,7 +2,7 @@
   "name": "price-lens-android-twa",
   "version": "0.1.0",
   "private": true,
-  "description": "Bubblewrap TWA wrapper for Price Lens Play Store listing",
+  "description": "Bubblewrap TWA wrapper for Lince (aka Price Lens) Play Store listing",
   "scripts": {
     "twa:update": "bubblewrap update --skipVersionUpgrade",
     "twa:build": "bubblewrap build --skipPwaValidation"

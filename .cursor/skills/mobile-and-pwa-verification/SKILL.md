@@ -6,7 +6,7 @@ description: >-
   inputs that open the keyboard, or installable PWA behavior.
 ---
 
-# Mobile & PWA verification (Price Lens)
+# Mobile & PWA verification (Lince (aka Price Lens))
 
 ## When to use
 

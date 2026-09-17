@@ -1,13 +1,13 @@
 # Android — Trusted Web Activity (Play Store)
 
-Packages the live Price Lens PWA as a Play Store app using Chrome Trusted Web Activity (TWA). No WebView — Chrome renders your site full-screen.
+Packages the live Lince (aka Price Lens) PWA as a Play Store app using Chrome Trusted Web Activity (TWA). No WebView — Chrome renders your site full-screen.
 
 ## Current package
 
-| | |
-| --- | --- |
-| **Package name** | `pt.pricelens.app` |
-| **AAB (upload this)** | `mobile/android-twa/app-release-bundle.aab` |
+|                        |                                                                    |
+| ---------------------- | ------------------------------------------------------------------ |
+| **Package name**       | `pt.pricelens.app`                                                 |
+| **AAB (upload this)**  | `mobile/android-twa/app-release-bundle.aab`                        |
 | **Upload-key SHA-256** | `DB8D94D9C423F4B2FDC1C90D4AB91B37EA86FCC0DBEFA26ADAE95A220B456F1A` |
 
 The signing keystore is **gitignored**. Back up both files somewhere safe (password manager + encrypted drive):
@@ -42,7 +42,7 @@ If verification fails, the app opens with a Chrome URL bar instead of full-scree
 ## 2. Play Console — create the app
 
 1. [Play Console](https://play.google.com/console) → **Create app**
-2. Name: **Price Lens**
+2. Name: **Lince (aka Price Lens)**
 3. Default language: **Portuguese (Portugal)**
 4. App or game: **App**
 5. Free
@@ -59,7 +59,7 @@ Compara preços no Continente, Auchan e Pingo Doce. Poupa no supermercado.
 **Full description:**
 
 ```
-O Price Lens acompanha os preços dos supermercados em Portugal para comprares no momento certo.
+O Lince (aka Price Lens) acompanha os preços dos supermercados em Portugal para comprares no momento certo.
 
 • Pesquisa produtos no Continente, Auchan e Pingo Doce
 • Vê o histórico de preços e as descidas de hoje

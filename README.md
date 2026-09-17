@@ -1,6 +1,6 @@
-# Price Lens
+# Lince (aka Price Lens)
 
-Price Lens is a project for tracking supermarket prices and all the goods that come from that. The idea for the project came from a desire to gather inflation data into the future and help shoppers be aware of what the shelves do not tell the buyer.
+Lince (aka Price Lens) is a project for tracking supermarket prices and all the goods that come from that. The idea for the project came from a desire to gather inflation data into the future and help shoppers be aware of what the shelves do not tell the buyer.
 
 Tracking portuguese supermarkets: Continente, Auchan, Pingo Doce and more to come. Started development in December 2024. Price data collection only consistently during 2026.
 

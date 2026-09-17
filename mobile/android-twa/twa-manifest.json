@@ -1,8 +1,8 @@
 {
   "packageId": "pt.pricelens.app",
   "host": "price-lens.vercel.app",
-  "name": "Price Lens",
-  "launcherName": "Price Lens",
+  "name": "Lince (aka Price Lens)",
+  "launcherName": "Lince (aka Price Lens)",
   "display": "standalone",
   "orientation": "portrait",
   "themeColor": "#09090B",

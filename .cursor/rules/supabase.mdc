@@ -44,5 +44,5 @@ The Supabase JS client / PostgREST API returns **at most 1000 rows per request b
 
 Production runs on Supabase free tier with strict limits. **Always consider these before proposing schema or query changes:**
 
-- **Database: 500MB max.** Price Lens stores 100k–200k products with periodic price history. Tables like `prices`, `store_products`, and `scrape_runs` grow continuously. New indexes consume disk — weigh each index against remaining headroom. Prefer query/application changes over new indexes when storage is tight.
+- **Database: 500MB max.** Lince (aka Price Lens) stores 100k–200k products with periodic price history. Tables like `prices`, `store_products`, and `scrape_runs` grow continuously. New indexes consume disk — weigh each index against remaining headroom. Prefer query/application changes over new indexes when storage is tight.
 - **Egress: 5GB/month.** Periodic scraping and bulk reads drive egress. Minimize large SELECTs, avoid unbounded pagination, and use RPCs that process data server-side instead of returning large result sets to the app.

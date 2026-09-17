@@ -4,7 +4,7 @@ const productionUrl = process.env.CAPACITOR_SERVER_URL ?? "https://price-lens.ve
 
 const config: CapacitorConfig = {
   appId: "pt.pricelens.app",
-  appName: "Price Lens",
+  appName: "Lince (aka Price Lens)",
   webDir: "www",
   server: {
     url: productionUrl,
@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
   },
   ios: {
     contentInset: "automatic",
-    scheme: "Price Lens",
+    scheme: "Lince (aka Price Lens)",
     allowsLinkPreview: false,
   },
   plugins: {

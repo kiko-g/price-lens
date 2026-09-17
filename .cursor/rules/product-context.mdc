@@ -1,9 +1,9 @@
 ---
-description: What Price Lens is — product, audience, and stack (always read)
+description: What Lince (aka Price Lens) is — product, audience, and stack (always read)
 alwaysApply: true
 ---
 
-# Price Lens — product context
+# Lince (aka Price Lens) — product context
 
 - **What**: Consumer web app to **compare supermarket prices** in **Portugal** (Continente, Pingo Doce, Auchan, etc.), track history, deals, favorites, and **barcode lookup**. TLDR: WE WANT PORTUGAL SUPERMARKET USERS TO SAVE MONEY AND SHOW THEM THEIR SAVINGS!
 - **Who**: Portuguese shoppers; **UI copy and dates** should align with **`pt-PT`** where the codebase already specifies locale (see hydration rules).
