@@ -21,16 +21,22 @@ does not run on the founder's Google account and never gets `admin`.
 ## Where enforcement lives
 
 1. **Middleware** — `src/lib/supabase/middleware.ts` calls the pure policy in
-   `src/lib/auth/roles.ts`. For a reviewer it allows `GET/HEAD/OPTIONS` on admin routes only,
-   minus an explicit denylist of GET endpoints that have side effects
-   (`/api/admin/cron`, `/api/admin/scrape/ai-priority`, `/api/admin/discovery/triage`, the
-   `compute-worker`/`price-stats-worker`/`retention-worker` cron targets) and minus mutating
-   `?action=` values (`/api/admin/discovery?action=run`, `/api/admin/schedule?action=fix-phantom-scraped`;
-   unknown actions are denied too). It also denies reviewer writes on the "elevated" routes that
-   live outside `/api/admin` but are admin tooling by intent: `PUT /api/prices`,
-   `GET /api/prices/sanitize/*`, `POST /api/store_products/add|scrape`,
-   `PATCH /api/store_products/bulk-priority`, `PUT /api/store_products/:id/priority`.
-   Every denial is a `403 { error: "Forbidden: reviewer role is read-only" }` and is logged.
+   `src/lib/auth/roles.ts`. For a reviewer on the admin surface only `GET/HEAD/OPTIONS` to an
+   **allowlisted** read-only endpoint passes (`REVIEWER_ALLOWED_ADMIN_GETS`); anything else,
+   including any new `/api/admin` route nobody has classified yet, is denied. Endpoints driven by
+   `?action=` only pass for read-only values (`discovery?action=status`,
+   `schedule?action=overview|activity-log|products-by-staleness|scrape-runs`). Side-effecting GETs
+   (`cron`, `scrape/ai-priority`, `discovery/triage`, `alerts/scrape-health`, the cron worker
+   targets) are declared in `SIDE_EFFECT_ADMIN_GETS`; `roles.test.ts` scans
+   `src/app/api/admin/**/route.ts` and fails if a GET route is missing from both lists, so the
+   lists cannot drift. Paths are normalised (trailing/duplicate slashes) before matching. It also
+   denies reviewer writes on the "elevated" routes that live outside `/api/admin` but are admin
+   tooling by intent: `PUT /api/prices`, `GET /api/prices/sanitize/*`,
+   `POST /api/store_products/add|scrape`, `PATCH /api/store_products/bulk-priority`,
+   `PUT /api/store_products/:id/priority`. Every denial is a
+   `403 { error: "Forbidden: reviewer role is read-only" }` and is logged.
+   The `updateProductPriority` server action re-checks the role itself (server actions can be
+   posted to any page URL).
 2. **UI** — `AdminWriteOnly` / `ReadOnlyNote` / `ReviewerReadOnlyBanner`
    (`src/components/admin/AdminWriteOnly.tsx`) hide every write control in `/admin` and show a
    persistent banner. `useIsAdmin()` stays admin-only (elevated controls), `useCanAccessAdmin()`
@@ -43,22 +49,27 @@ does not run on the founder's Google account and never gets `admin`.
    - `supabase/migrations/20260916120100_profiles_role_lock.sql` adds a trigger that rejects any
      change to `profiles.role` coming from the `anon`/`authenticated` PostgREST roles. Without it
      any signed-in user could `PATCH /rest/v1/profiles` and make themselves `admin`.
+   - `supabase/migrations/20260916120200_reviewer_read_only_rls.sql` adds `is_reviewer()` and
+     RESTRICTIVE policies on `store_products` and `prices` so the reviewer's own JWT cannot write
+     those tables through PostgREST either (they are permissive for everyone else; the scraper
+     depends on that). Own-row consumer tables stay writable on purpose.
 
 ## One-time setup (Francisco)
 
 ### 1. Apply the migrations
 
-Run the two files in `supabase/migrations/` against the project (SQL editor or
-`supabase db push`), **in order** — the enum value must be committed before anything references it.
-Deploying the app before the migrations is safe: nobody has the role yet.
+Run the three `20260916*` files in `supabase/migrations/` against the project (SQL editor or
+`supabase db push`), **in order** and as separate transactions — the enum value must be committed
+before anything references it. Deploying the app before the migrations is safe: nobody has the
+role yet.
 
 ### 2. Enable password sign-in
 
-Login is Google-only today. The reviewer signs in with email + password at **`/login/reviewer`**
-(not linked from `/login`; consumers keep Google).
+Login is Google-only in the UI today. The reviewer signs in with email + password at
+**`/login/reviewer`** (not linked from `/login`; consumers keep Google).
 
-Supabase Dashboard → **Authentication → Sign In / Providers → Email**: turn **Enable Email provider**
-on. Leave Google as is. You do **not** need to allow email signups: the seed script creates the
+Supabase Dashboard → **Authentication → Sign In / Providers → Email** must be **Enabled** (it
+already is on the production project). Leave Google as is. You do **not** need to allow email signups: the seed script creates the
 user through the admin API and the app never calls `signUp`. If you prefer, keep
 "Allow new users to sign up" off for email.
 
@@ -118,8 +129,9 @@ Automated coverage: `src/lib/auth/__tests__/roles.test.ts` (policy matrix) and
 
 - `store_products` and `prices` have permissive RLS (`INSERT/UPDATE`, and `DELETE` on prices) for
   `anon` **and** `authenticated`. The scraper relies on this through the anon client. Anyone with
-  the anon key can write to those tables directly via PostgREST — reviewer included, but that
-  is not role-specific. Fixing it means moving scraper writes to the service role first.
+  the anon key can write to those tables directly via PostgREST. The reviewer is now excluded by
+  the restrictive policies above; fixing it for everyone means moving scraper writes to the
+  service role first.
 - `profiles.plan` is user-updatable the same way `role` was; the trigger only locks `role`.
 - `/api/store_products/add`, `/api/store_products/scrape`, `/api/prices` (PUT) and the priority
   routes are not admin-gated for regular users; this change denies them for reviewers only.

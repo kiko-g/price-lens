@@ -1,11 +1,16 @@
 import { describe, it, expect } from "vitest"
+import { readFileSync, readdirSync, statSync } from "node:fs"
+import { join, relative } from "node:path"
 import {
+  REVIEWER_ALLOWED_ADMIN_GETS,
+  SIDE_EFFECT_ADMIN_GETS,
   canAccessAdmin,
   canMutateAdmin,
   evaluateReviewerRequest,
   isAdminPath,
   isElevatedApiPath,
   isReviewer,
+  normalizePathname,
   requiresRoleCheck,
 } from "@/lib/auth/roles"
 
@@ -33,8 +38,16 @@ describe("role predicates", () => {
 })
 
 describe("path classification", () => {
+  it("normalizes duplicate and trailing slashes", () => {
+    expect(normalizePathname("/api/admin/discovery/")).toBe("/api/admin/discovery")
+    expect(normalizePathname("//api//admin///discovery//")).toBe("/api/admin/discovery")
+    expect(normalizePathname("/")).toBe("/")
+  })
+
   it("matches admin pages and APIs", () => {
     expect(isAdminPath("/admin")).toBe(true)
+    expect(isAdminPath("/admin/")).toBe(true)
+    expect(isAdminPath("/api/admin/brand/")).toBe(true)
     expect(isAdminPath("/admin/analytics")).toBe(true)
     expect(isAdminPath("/api/admin/brand")).toBe(true)
     expect(isAdminPath("/administrator")).toBe(false)
@@ -127,6 +140,20 @@ describe("evaluateReviewerRequest — denied (fail closed)", () => {
     expect(evaluateReviewerRequest(method, path, params()).allowed).toBe(false)
   })
 
+  it("denies admin GET routes that are not allowlisted (fail closed for new endpoints)", () => {
+    expect(evaluateReviewerRequest("GET", "/api/admin/some-new-route", params()).allowed).toBe(false)
+    expect(evaluateReviewerRequest("GET", "/api/admin/bulk-scrape/a/b", params()).allowed).toBe(false)
+    expect(evaluateReviewerRequest("GET", "/api/admin", params()).allowed).toBe(false)
+  })
+
+  it("cannot be dodged with trailing or duplicate slashes", () => {
+    expect(evaluateReviewerRequest("GET", "/api/admin/discovery/", params("action=run")).allowed).toBe(false)
+    expect(evaluateReviewerRequest("GET", "/api/admin//discovery", params("action=run")).allowed).toBe(false)
+    expect(evaluateReviewerRequest("GET", "/api/admin/cron/", params()).allowed).toBe(false)
+    expect(evaluateReviewerRequest("PUT", "/api/prices/", params()).allowed).toBe(false)
+    expect(evaluateReviewerRequest("GET", "/api/admin/analytics/", params()).allowed).toBe(true)
+  })
+
   it("denies server-action POSTs to /admin pages", () => {
     expect(evaluateReviewerRequest("POST", "/admin/priorities", params()).allowed).toBe(false)
     expect(evaluateReviewerRequest("POST", "/admin", params()).allowed).toBe(false)
@@ -171,5 +198,62 @@ describe("evaluateReviewerRequest — denied (fail closed)", () => {
     const verdict = evaluateReviewerRequest("PUT", "/api/admin/brand", params())
     expect(verdict.allowed).toBe(false)
     if (!verdict.allowed) expect(verdict.reason).toContain("/api/admin/brand")
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Exhaustiveness: every GET route under src/app/api/admin must be classified.
+// ---------------------------------------------------------------------------
+
+const ADMIN_API_DIR = join(process.cwd(), "src/app/api/admin")
+
+function walkRouteFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const full = join(dir, entry)
+    if (statSync(full).isDirectory()) return walkRouteFiles(full)
+    return entry === "route.ts" ? [full] : []
+  })
+}
+
+const exportsGet = (source: string): boolean => /export\s+(async\s+function\s+GET\b|const\s+GET\b)/.test(source)
+
+const routePathFor = (file: string): string =>
+  "/api/admin/" +
+  relative(ADMIN_API_DIR, file)
+    .replace(/\/?route\.ts$/, "")
+    .replace(/\[([^\]]+)\]/g, ":$1")
+    .replace(/\\/g, "/")
+
+describe("admin GET route classification", () => {
+  const getRoutes = walkRouteFiles(ADMIN_API_DIR)
+    .filter((file) => exportsGet(readFileSync(file, "utf8")))
+    .map(routePathFor)
+    .map((p) => p.replace(/\/$/, ""))
+    .sort()
+
+  it("finds the admin GET routes", () => {
+    expect(getRoutes.length).toBeGreaterThan(20)
+  })
+
+  it.each(getRoutes)("%s is either allowlisted or a declared side-effect GET", (route) => {
+    const allowed = REVIEWER_ALLOWED_ADMIN_GETS.includes(route)
+    const sideEffect = SIDE_EFFECT_ADMIN_GETS.includes(route)
+    expect(
+      allowed || sideEffect,
+      `${route} exports GET but is not classified in src/lib/auth/roles.ts — add it to REVIEWER_ALLOWED_ADMIN_GETS (read-only) or SIDE_EFFECT_ADMIN_GETS (writes/triggers)`,
+    ).toBe(true)
+    expect(allowed && sideEffect, `${route} is in both lists`).toBe(false)
+  })
+
+  it("does not classify routes that no longer exist", () => {
+    for (const route of [...REVIEWER_ALLOWED_ADMIN_GETS, ...SIDE_EFFECT_ADMIN_GETS]) {
+      expect(getRoutes, `${route} is classified but has no GET route file`).toContain(route)
+    }
+  })
+
+  it("denies every declared side-effect GET for reviewers", () => {
+    for (const route of SIDE_EFFECT_ADMIN_GETS) {
+      expect(evaluateReviewerRequest("GET", route, params()).allowed).toBe(false)
+    }
   })
 })
