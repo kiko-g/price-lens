@@ -53,6 +53,7 @@ export function UserDropdownMenu() {
 
   function getUserBadgeText() {
     if (profile?.role === "admin") return "Admin"
+    if (profile?.role === "reviewer") return "Reviewer"
     return ""
   }
 

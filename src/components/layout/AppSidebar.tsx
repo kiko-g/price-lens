@@ -9,7 +9,7 @@ import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { navigation, type NavigationKey } from "@/lib/config"
 import { APP_SIDEBAR_COOKIE } from "@/lib/app-shell"
-import { useIsAdmin } from "@/contexts/UserContext"
+import { useCanAccessAdmin } from "@/contexts/UserContext"
 import { useUser } from "@/hooks/useUser"
 import { useLivePulse } from "@/hooks/useLivePulse"
 
@@ -33,7 +33,7 @@ type AppSidebarProps = {
 export function AppSidebar({ defaultCollapsed = false }: AppSidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
-  const isAdmin = useIsAdmin()
+  const canAccessAdmin = useCanAccessAdmin()
   const { user } = useUser()
   const tNav = useTranslations("nav")
   const tSidebar = useTranslations("layout.sidebar")
@@ -106,7 +106,7 @@ export function AppSidebar({ defaultCollapsed = false }: AppSidebarProps) {
           ))}
         </SidebarSection>
 
-        {isAdmin && (
+        {canAccessAdmin && (
           <SidebarSection label={tSidebar("staff")} collapsed={collapsed}>
             <SidebarItem
               href="/admin"

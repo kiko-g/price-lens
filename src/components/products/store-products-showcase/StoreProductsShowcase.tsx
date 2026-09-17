@@ -9,6 +9,7 @@ import { useTrackedDebouncedCallback } from "@/hooks/useTrackedDebouncedCallback
 import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useBrand } from "@/contexts/BrandContext"
+import { useIsReviewer } from "@/contexts/UserContext"
 import { searchTypes, type SearchType, type SortByType, DEFAULT_BROWSE_SORT } from "@/types/business"
 import { PRODUCT_PRIORITY_LEVELS } from "@/lib/business/priority"
 import { cn, serializeArray } from "@/lib/utils"
@@ -87,6 +88,7 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
   const router = useRouter()
   const { urlState, updateUrl, pageTitle } = useUrlState()
   const tShowcase = useTranslations("products.showcase")
+  const isReviewer = useIsReviewer()
   const brand = useBrand()
 
   useEffect(() => {
@@ -683,31 +685,34 @@ export function StoreProductsShowcase({ limit = 20, children }: StoreProductsSho
             ) : null}
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <MoreHorizontalIcon className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          {/* Tooling writes (add product, bulk priority) — hidden for the read-only reviewer role */}
+          {!isReviewer && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon-sm">
+                  <MoreHorizontalIcon className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-48" align="start">
-              <DropdownMenuLabel>{tShowcase("tooling")}</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <ScrapeUrlDialog />
-              </DropdownMenuItem>
-
-              {process.env.NODE_ENV === "development" && (
-                <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
-                  <BulkPriorityDialog filterParams={bulkPriorityFilterParams} filterSummary={filterSummary}>
-                    <button className="flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1.5 text-sm">
-                      {tShowcase("bulkSetPriority")}
-                      <DevBadge />
-                    </button>
-                  </BulkPriorityDialog>
+              <DropdownMenuContent className="w-48" align="start">
+                <DropdownMenuLabel>{tShowcase("tooling")}</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <ScrapeUrlDialog />
                 </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+                {process.env.NODE_ENV === "development" && (
+                  <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                    <BulkPriorityDialog filterParams={bulkPriorityFilterParams} filterSummary={filterSummary}>
+                      <button className="flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1.5 text-sm">
+                        {tShowcase("bulkSetPriority")}
+                        <DevBadge />
+                      </button>
+                    </BulkPriorityDialog>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {process.env.NODE_ENV === "development" && (

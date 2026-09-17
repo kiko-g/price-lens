@@ -9,6 +9,8 @@ import { AlertCircleIcon, RotateCcwIcon, SaveIcon } from "lucide-react"
 import { BRAND_DEFAULTS, brandSettingsSchema, type BrandSettings } from "@/lib/brand/brand"
 import { isLocale, locales, type Locale } from "@/i18n/config"
 import { useBrandSettings, useUpdateBrandSettings } from "@/hooks/useBrandSettings"
+import { useIsAdmin } from "@/contexts/UserContext"
+import { AdminWriteOnly, ReadOnlyNote } from "@/components/admin/AdminWriteOnly"
 
 import { Button } from "@/components/ui/button"
 import { Callout } from "@/components/ui/callout"
@@ -54,6 +56,7 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
   const activeLocale = useLocale()
   const [previewLocale, setPreviewLocale] = useState<Locale>(isLocale(activeLocale) ? activeLocale : "pt")
   const update = useUpdateBrandSettings()
+  const canEdit = useIsAdmin()
 
   const form = useForm<BrandSettings>({
     resolver: zodResolver(brandSettingsSchema),
@@ -84,7 +87,10 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
     >
       <Form {...form}>
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-col gap-6 xl:h-full">
-          <div className="flex flex-col gap-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
+          <fieldset
+            disabled={!canEdit}
+            className="flex min-w-0 flex-col gap-6 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
+          >
             <section className="flex flex-col gap-4">
               <SectionHeading title="Identity" description="Locale-neutral. These are the values that must cascade." />
 
@@ -198,20 +204,22 @@ function BrandEditor({ initial, updatedAt }: { initial: BrandSettings; updatedAt
                 />
               </section>
             ))}
-          </div>
+          </fieldset>
 
           <div className="flex flex-wrap items-center gap-3 border-t py-3 xl:shrink-0">
-            <Button type="submit" disabled={!isDirty || update.isPending || !form.formState.isValid}>
-              <SaveIcon className="size-4" />
-              {update.isPending ? "Saving…" : "Save changes"}
-            </Button>
-            <Button type="button" variant="outline" onClick={() => form.reset(initial)} disabled={!isDirty}>
-              Discard
-            </Button>
-            <Button type="button" variant="ghost" onClick={handleResetToDefaults}>
-              <RotateCcwIcon className="size-4" />
-              Load code defaults
-            </Button>
+            <AdminWriteOnly fallback={<ReadOnlyNote />}>
+              <Button type="submit" disabled={!isDirty || update.isPending || !form.formState.isValid}>
+                <SaveIcon className="size-4" />
+                {update.isPending ? "Saving…" : "Save changes"}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => form.reset(initial)} disabled={!isDirty}>
+                Discard
+              </Button>
+              <Button type="button" variant="ghost" onClick={handleResetToDefaults}>
+                <RotateCcwIcon className="size-4" />
+                Load code defaults
+              </Button>
+            </AdminWriteOnly>
             <span className="text-muted-foreground ml-auto text-xs">
               {updatedAt ? `Last saved ${formatSavedAt(updatedAt)}` : "Not saved yet — using code defaults"}
             </span>

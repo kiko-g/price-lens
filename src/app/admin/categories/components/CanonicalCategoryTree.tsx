@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useIsAdmin } from "@/contexts/UserContext"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -96,10 +98,12 @@ export function CanonicalCategoryTree({ categories, isLoading }: CanonicalCatego
             <Button variant="ghost" size="sm" onClick={collapseAll}>
               Collapse All
             </Button>
-            <Button size="sm" onClick={() => handleAddChild(null)}>
-              <PlusIcon className="mr-1 h-4 w-4" />
-              Add Root
-            </Button>
+            <AdminWriteOnly>
+              <Button size="sm" onClick={() => handleAddChild(null)}>
+                <PlusIcon className="mr-1 h-4 w-4" />
+                Add Root
+              </Button>
+            </AdminWriteOnly>
           </div>
         </div>
       </CardHeader>
@@ -119,10 +123,12 @@ export function CanonicalCategoryTree({ categories, isLoading }: CanonicalCatego
               Start building your canonical taxonomy by adding root categories. These will serve as the foundation for
               normalizing store-specific categories.
             </p>
-            <Button className="mt-4" onClick={() => handleAddChild(null)}>
-              <PlusIcon className="h-4 w-4" />
-              Create First Category
-            </Button>
+            <AdminWriteOnly>
+              <Button className="mt-4" onClick={() => handleAddChild(null)}>
+                <PlusIcon className="h-4 w-4" />
+                Create First Category
+              </Button>
+            </AdminWriteOnly>
           </div>
         ) : (
           <div className="space-y-1">
@@ -165,6 +171,7 @@ function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: Ca
   const hasGovernanceControl = isL1 || isL2
   const isUntracked = !category.tracked
 
+  const canEdit = useIsAdmin()
   const governanceMutation = useMutation({
     mutationFn: async (update: { tracked?: boolean; default_priority?: number }) => {
       const res = await axios.put(`/api/admin/categories/canonical/${category.id}`, update)
@@ -237,7 +244,7 @@ function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: Ca
                       <Switch
                         checked={category.tracked}
                         onCheckedChange={(checked) => governanceMutation.mutate({ tracked: checked })}
-                        disabled={governanceMutation.isPending}
+                        disabled={governanceMutation.isPending || !canEdit}
                         className="scale-75"
                       />
                       {isUntracked && <EyeOffIcon className="text-muted-foreground h-3.5 w-3.5" />}
@@ -270,7 +277,7 @@ function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: Ca
                 <Select
                   value={String(category.default_priority)}
                   onValueChange={(val) => governanceMutation.mutate({ default_priority: parseInt(val, 10) })}
-                  disabled={governanceMutation.isPending}
+                  disabled={governanceMutation.isPending || !canEdit}
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -322,24 +329,26 @@ function CategoryNode({ category, expandedIds, onToggle, onAddChild, depth }: Ca
         <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">L{category.level}</span>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          {canAddChild && (
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onAddChild(category)}>
-              <PlusIcon className="h-3.5 w-3.5" />
+        <AdminWriteOnly>
+          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            {canAddChild && (
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onAddChild(category)}>
+                <PlusIcon className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditDialogOpen(true)}>
+              <EditIcon className="h-3.5 w-3.5" />
             </Button>
-          )}
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditDialogOpen(true)}>
-            <EditIcon className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-destructive hover:text-destructive h-7 w-7"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <Trash2Icon className="h-3.5 w-3.5" />
-          </Button>
-        </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive h-7 w-7"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2Icon className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </AdminWriteOnly>
       </div>
 
       {/* Children */}

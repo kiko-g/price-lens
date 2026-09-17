@@ -1,4 +1,4 @@
-# Price Lens
+# Lince (aka Price Lens)
 
 Price tracking app for Portuguese supermarkets built with Next.js 16, React 19, Supabase, and TailwindCSS.
 

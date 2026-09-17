@@ -2,7 +2,7 @@
   "name": "price-lens-ios-shell",
   "version": "0.1.0",
   "private": true,
-  "description": "Capacitor iOS shell for Price Lens — loads production Next.js app",
+  "description": "Capacitor iOS shell for Lince (aka Price Lens) — loads production Next.js app",
   "scripts": {
     "cap:sync": "cap sync ios",
     "cap:open": "cap open ios",

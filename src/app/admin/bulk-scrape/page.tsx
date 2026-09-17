@@ -27,6 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useSidebar } from "@/components/ui/sidebar"
+import { AdminWriteOnly, ReadOnlyNote } from "@/components/admin/AdminWriteOnly"
 
 import { PriorityBubble } from "@/components/products/PriorityBubble"
 import { AuchanSvg, ContinenteSvg, PingoDoceSvg } from "@/components/logos"
@@ -1077,29 +1078,33 @@ export default function BulkScrapePage() {
               <span className="text-lg font-bold">{count.toLocaleString()}</span>
             )}
           </button>
-          <Button
-            size="lg"
-            onClick={handleStart}
-            disabled={count === 0 || startJobMutation.isPending || isJobRunning}
-            className="mt-3 w-full"
+          <AdminWriteOnly
+            fallback={<ReadOnlyNote className="text-muted-foreground mt-3 flex items-center gap-1.5 text-xs" />}
           >
-            {startJobMutation.isPending || isDirectProcessing ? (
-              <>
-                <Loader2Icon className="h-4 w-4 animate-spin" />
-                {isDirectProcessing ? "Processing..." : "Starting..."}
-              </>
-            ) : isJobRunning ? (
-              <>
-                <Loader2Icon className="h-4 w-4 animate-spin" />
-                Job Running...
-              </>
-            ) : (
-              <>
-                <PlayIcon className="h-4 w-4" />
-                Start Scrape
-              </>
-            )}
-          </Button>
+            <Button
+              size="lg"
+              onClick={handleStart}
+              disabled={count === 0 || startJobMutation.isPending || isJobRunning}
+              className="mt-3 w-full"
+            >
+              {startJobMutation.isPending || isDirectProcessing ? (
+                <>
+                  <Loader2Icon className="h-4 w-4 animate-spin" />
+                  {isDirectProcessing ? "Processing..." : "Starting..."}
+                </>
+              ) : isJobRunning ? (
+                <>
+                  <Loader2Icon className="h-4 w-4 animate-spin" />
+                  Job Running...
+                </>
+              ) : (
+                <>
+                  <PlayIcon className="h-4 w-4" />
+                  Start Scrape
+                </>
+              )}
+            </Button>
+          </AdminWriteOnly>
         </div>
       </aside>
 
@@ -1134,19 +1139,21 @@ export default function BulkScrapePage() {
                       {isDirectProcessing ? "running" : jobProgress?.status}
                     </Badge>
                     {(jobProgress?.status === "running" || isDirectProcessing) && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => activeJobId && cancelJobMutation.mutate(activeJobId)}
-                        disabled={cancelJobMutation.isPending || isCancelling}
-                      >
-                        <SquareIcon className="h-3 w-3" />
-                        {isCancelling
-                          ? inFlightCount > 0
-                            ? `Waiting (${inFlightCount} items)...`
-                            : "Cancelling..."
-                          : "Cancel"}
-                      </Button>
+                      <AdminWriteOnly>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => activeJobId && cancelJobMutation.mutate(activeJobId)}
+                          disabled={cancelJobMutation.isPending || isCancelling}
+                        >
+                          <SquareIcon className="h-3 w-3" />
+                          {isCancelling
+                            ? inFlightCount > 0
+                              ? `Waiting (${inFlightCount} items)...`
+                              : "Cancelling..."
+                            : "Cancel"}
+                        </Button>
+                      </AdminWriteOnly>
                     )}
                   </div>
                 </div>

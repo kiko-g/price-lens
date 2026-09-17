@@ -46,6 +46,8 @@
     "backfill:pingo-doce-barcodes": "tsx scripts/backfill-pingo-doce-barcodes.ts",
     "backfill:pingo-doce-barcodes:prod": "env-cmd -f .env.production tsx scripts/backfill-pingo-doce-barcodes.ts",
     "scraper:local": "tsx scripts/run-scraper-local.ts",
+    "seed:reviewer": "tsx scripts/seed-reviewer.ts",
+    "seed:reviewer:prod": "env-cmd -f .env.production tsx scripts/seed-reviewer.ts",
     "icons:generate": "node scripts/generate-app-icons.mjs",
     "tailwind:upgrade": "npx @tailwindcss/upgrade --force",
     "mobile:ios:install": "pnpm --dir mobile/ios-shell install",

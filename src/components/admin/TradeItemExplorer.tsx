@@ -13,6 +13,7 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -140,52 +141,54 @@ export function TradeItemExplorer() {
         </div>
       )}
 
-      {/* Live OFF lookup */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ZapIcon className="size-4" />
-            Live OFF Lookup
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter a barcode (e.g. 5601312019183)"
-              value={lookupBarcode}
-              onChange={(e) => setLookupBarcode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLookup()}
-              className="max-w-sm font-mono"
-            />
-            <Button onClick={handleLookup} disabled={lookupLoading || !lookupBarcode.trim()}>
-              {lookupLoading ? <Loader2 className="size-4 animate-spin" /> : "Lookup"}
-            </Button>
-          </div>
-          {lookupResult && (
-            <div className="mt-4 rounded-lg border p-4">
-              <p className="mb-2 font-mono text-sm">
-                Barcode: <span className="font-bold">{lookupResult.barcode}</span>
-              </p>
-              {lookupResult.off ? (
-                <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                  <dt className="text-muted-foreground font-medium">Display Name</dt>
-                  <dd className="font-semibold">{lookupResult.off.displayName ?? "N/A"}</dd>
-                  <dt className="text-muted-foreground font-medium">Raw Name</dt>
-                  <dd className="text-muted-foreground">{lookupResult.off.productName ?? "N/A"}</dd>
-                  <dt className="text-muted-foreground font-medium">Brands</dt>
-                  <dd>{lookupResult.off.brands ?? "N/A"}</dd>
-                  <dt className="text-muted-foreground font-medium">Quantity</dt>
-                  <dd>{lookupResult.off.quantity ?? "N/A"}</dd>
-                  <dt className="text-muted-foreground font-medium">Categories</dt>
-                  <dd className="max-w-lg truncate">{lookupResult.off.categories ?? "N/A"}</dd>
-                </dl>
-              ) : (
-                <p className="text-muted-foreground text-sm italic">Not found in Open Food Facts.</p>
-              )}
+      {/* Live OFF lookup (POST endpoint — hidden for read-only reviewers) */}
+      <AdminWriteOnly>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ZapIcon className="size-4" />
+              Live OFF Lookup
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter a barcode (e.g. 5601312019183)"
+                value={lookupBarcode}
+                onChange={(e) => setLookupBarcode(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+                className="max-w-sm font-mono"
+              />
+              <Button onClick={handleLookup} disabled={lookupLoading || !lookupBarcode.trim()}>
+                {lookupLoading ? <Loader2 className="size-4 animate-spin" /> : "Lookup"}
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            {lookupResult && (
+              <div className="mt-4 rounded-lg border p-4">
+                <p className="mb-2 font-mono text-sm">
+                  Barcode: <span className="font-bold">{lookupResult.barcode}</span>
+                </p>
+                {lookupResult.off ? (
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+                    <dt className="text-muted-foreground font-medium">Display Name</dt>
+                    <dd className="font-semibold">{lookupResult.off.displayName ?? "N/A"}</dd>
+                    <dt className="text-muted-foreground font-medium">Raw Name</dt>
+                    <dd className="text-muted-foreground">{lookupResult.off.productName ?? "N/A"}</dd>
+                    <dt className="text-muted-foreground font-medium">Brands</dt>
+                    <dd>{lookupResult.off.brands ?? "N/A"}</dd>
+                    <dt className="text-muted-foreground font-medium">Quantity</dt>
+                    <dd>{lookupResult.off.quantity ?? "N/A"}</dd>
+                    <dt className="text-muted-foreground font-medium">Categories</dt>
+                    <dd className="max-w-lg truncate">{lookupResult.off.categories ?? "N/A"}</dd>
+                  </dl>
+                ) : (
+                  <p className="text-muted-foreground text-sm italic">Not found in Open Food Facts.</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </AdminWriteOnly>
 
       {/* Filters + search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

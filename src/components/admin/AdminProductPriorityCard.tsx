@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useIsAdmin } from "@/contexts/UserContext"
 import { type StoreProduct } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -29,6 +30,7 @@ function resolveImageUrlForCard(image: string, size = 300) {
 
 export function AdminProductPriorityCard({ product, onUpdate }: Props) {
   const [isUpdating, setIsUpdating] = useState(false)
+  const canEdit = useIsAdmin()
   const supermarketName = getSupermarketChainName(product.origin_id)
 
   const handlePriorityChange = async (value: string) => {
@@ -103,7 +105,7 @@ export function AdminProductPriorityCard({ product, onUpdate }: Props) {
         <Select
           value={product.priority?.toString() || "null"}
           onValueChange={handlePriorityChange}
-          disabled={isUpdating}
+          disabled={isUpdating || !canEdit}
         >
           <SelectTrigger className="w-full text-xs">
             <SelectValue placeholder="Set priority" />

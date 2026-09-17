@@ -2,6 +2,7 @@
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AdminSidebar } from "@/components/admin/AdminSidebar"
+import { ReviewerReadOnlyBanner } from "@/components/admin/AdminWriteOnly"
 import { Separator } from "@/components/ui/separator"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Separator orientation="vertical" className="mr-2 h-4" />
           <span className="text-muted-foreground text-sm font-medium">Admin</span>
         </header>
+        <ReviewerReadOnlyBanner />
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
       </SidebarInset>
     </SidebarProvider>

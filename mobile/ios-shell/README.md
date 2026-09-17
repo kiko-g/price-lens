@@ -1,6 +1,6 @@
 # iOS — Capacitor shell (App Store)
 
-Loads the production Price Lens site in a native shell. Same UI as the website; native plugins satisfy App Store Guideline 4.2.
+Loads the production Lince (aka Price Lens) site in a native shell. Same UI as the website; native plugins satisfy App Store Guideline 4.2.
 
 ## Setup
 
@@ -53,7 +53,7 @@ Use `@capgo/capacitor-native-biometric` or similar to lock app resume — cheap 
 
 ```xml
 <key>NSCameraUsageDescription</key>
-<string>O Price Lens precisa da câmara para ler códigos de barras nos produtos.</string>
+<string>O Lince (aka Price Lens) precisa da câmara para ler códigos de barras nos produtos.</string>
 ```
 
 Add in Xcode → Target → Info.

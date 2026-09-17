@@ -4,6 +4,7 @@ import { useState, useCallback } from "react"
 import { useAiPriorityClassification } from "@/hooks/useAdmin"
 
 import { Button } from "@/components/ui/button"
+import { AdminWriteOnly, ReadOnlyNote } from "@/components/admin/AdminWriteOnly"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AsyncTimerLoader } from "@/components/ui/combo/async-timer-loader"
@@ -148,9 +149,11 @@ export function AiPriorityClassifier() {
                 </div>
               </div>
 
-              <Button onClick={handleTestAi} disabled={isRunning}>
-                {isRunning ? "Processing..." : "Run AI Classification"}
-              </Button>
+              <AdminWriteOnly fallback={<ReadOnlyNote />}>
+                <Button onClick={handleTestAi} disabled={isRunning}>
+                  {isRunning ? "Processing..." : "Run AI Classification"}
+                </Button>
+              </AdminWriteOnly>
             </div>
 
             {continuousMode && (

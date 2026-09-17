@@ -1,12 +1,12 @@
 # Store distribution
 
-Price Lens ships as one Next.js app on Vercel. Store listings wrap that same deployment — no second UI.
+Lince (aka Price Lens) ships as one Next.js app on Vercel. Store listings wrap that same deployment — no second UI.
 
-| Platform | Approach | Directory |
-| --- | --- | --- |
+| Platform    | Approach                                                                                                     | Directory                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------- |
 | **Android** | [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity) (Chrome, full-screen) | [`android-twa/`](./android-twa/) |
-| **iOS** | [Capacitor](https://capacitorjs.com/) shell loading production URL + native plugins | [`ios-shell/`](./ios-shell/) |
-| **Desktop** | Website (unchanged) | repo root |
+| **iOS**     | [Capacitor](https://capacitorjs.com/) shell loading production URL + native plugins                          | [`ios-shell/`](./ios-shell/)     |
+| **Desktop** | Website (unchanged)                                                                                          | repo root                        |
 
 ## Prerequisites (both stores)
 

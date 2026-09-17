@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
+import { canAccessAdmin, evaluateReviewerRequest, isAdminPath, isReviewer, requiresRoleCheck } from "@/lib/auth/roles"
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -69,12 +70,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Admin routes require admin role (both pages and API routes)
-  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin")
-  if (user && isAdminRoute) {
+  // Admin routes require an admin-capable role (admin or read-only reviewer), both pages and API.
+  // Elevated non-admin API routes (insert price, scrape/add product, priorities) also need the
+  // role so the reviewer can be denied there. Regular users keep their existing behaviour.
+  if (user && requiresRoleCheck(pathname)) {
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+    const role = profile?.role ?? null
 
-    if (profile?.role !== "admin") {
+    if (isAdminPath(pathname) && !canAccessAdmin(role)) {
       // For API routes, return 403 Forbidden
       if (pathname.startsWith("/api/admin")) {
         return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 })
@@ -83,6 +86,16 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = "/"
       return NextResponse.redirect(url)
+    }
+
+    // Reviewer is read-only: fail closed on every mutation (including GET endpoints with
+    // side effects and server-action POSTs to /admin pages).
+    if (isReviewer(role)) {
+      const verdict = evaluateReviewerRequest(request.method, pathname, request.nextUrl.searchParams)
+      if (!verdict.allowed) {
+        console.warn(`[middleware] reviewer denied: ${verdict.reason}`)
+        return NextResponse.json({ error: "Forbidden: reviewer role is read-only" }, { status: 403 })
+      }
     }
   }
 

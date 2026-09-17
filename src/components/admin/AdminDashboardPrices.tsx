@@ -9,6 +9,7 @@ import { discountValueToPercentage } from "@/lib/business/product"
 
 import { HideFooter } from "@/contexts/FooterContext"
 import { InsertPriceModal } from "@/components/admin/InsertPriceModal"
+import { AdminWriteOnly } from "@/components/admin/AdminWriteOnly"
 import { AdminPagination, useAdminPagination } from "@/components/admin/AdminPagination"
 import { Button } from "@/components/ui/button"
 
@@ -65,7 +66,9 @@ export function AdminDashboardPrices() {
           <Button variant="outline" size="icon" onClick={() => refetch()}>
             <RefreshCcwIcon />
           </Button>
-          <InsertPriceModal />
+          <AdminWriteOnly>
+            <InsertPriceModal />
+          </AdminWriteOnly>
         </div>
       </div>
 
@@ -143,14 +146,16 @@ function PriceRow({ price }: { price: Price }) {
           {isCopying ? <CheckIcon className="h-4 w-4 text-green-500" /> : <CopyIcon />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={() => price.store_product_id && sanitizeMutation.mutate(price.store_product_id)}
-          disabled={sanitizeMutation.isPending}
-        >
-          {sanitizeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <SparklesIcon />}
-        </Button>
+        <AdminWriteOnly>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => price.store_product_id && sanitizeMutation.mutate(price.store_product_id)}
+            disabled={sanitizeMutation.isPending}
+          >
+            {sanitizeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <SparklesIcon />}
+          </Button>
+        </AdminWriteOnly>
       </Cell>
     </tr>
   )
@@ -211,19 +216,21 @@ function DuplicateStatsCard() {
           <Button variant="ghost" size="icon" onClick={() => refetch()}>
             <RefreshCcwIcon className="h-4 w-4" />
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => deleteMutation.mutate()}
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2Icon className="h-4 w-4" />
-            )}
-            Clean Up
-          </Button>
+          <AdminWriteOnly>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2Icon className="h-4 w-4" />
+              )}
+              Clean Up
+            </Button>
+          </AdminWriteOnly>
         </div>
       </div>
     </div>

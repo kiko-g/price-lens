@@ -362,6 +362,19 @@
         "origin-missing": "Ocorreu um erro ao iniciar o processo. Tenta novamente.",
         "default": "Falha no início de sessão. Tenta novamente."
       }
+    },
+    "reviewerLogin": {
+      "title": "Entrada de revisor",
+      "subtitle": "Acesso por email e palavra-passe para a conta de revisão só de leitura. Os utilizadores entram com Google.",
+      "emailLabel": "Email",
+      "passwordLabel": "Palavra-passe",
+      "submit": "Entrar",
+      "backToGoogle": "Voltar à entrada com Google",
+      "readOnlyHint": "Esta conta pode consultar tudo mas não altera dados.",
+      "errors": {
+        "missing": "Indica o email e a palavra-passe.",
+        "invalid": "Email ou palavra-passe errados, ou o provider de email está desativado no Supabase Auth."
+      }
     }
   },
   "deals": {

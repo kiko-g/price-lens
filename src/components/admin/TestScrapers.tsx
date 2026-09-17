@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { AdminWriteOnly, ReadOnlyNote } from "@/components/admin/AdminWriteOnly"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Code } from "@/components/ui/combo/code"
@@ -70,16 +71,18 @@ export function TestScrapers() {
                 className="w-full text-base md:text-sm"
                 id={`url-${index}`}
               />
-              <Button
-                onClick={() => {
-                  const input = document.getElementById(`url-${index}`) as HTMLInputElement
-                  handleTest(index, input.value)
-                }}
-                disabled={testMutation.isPending}
-              >
-                {testMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Test
-              </Button>
+              <AdminWriteOnly fallback={<ReadOnlyNote />}>
+                <Button
+                  onClick={() => {
+                    const input = document.getElementById(`url-${index}`) as HTMLInputElement
+                    handleTest(index, input.value)
+                  }}
+                  disabled={testMutation.isPending}
+                >
+                  {testMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Test
+                </Button>
+              </AdminWriteOnly>
             </div>
             {scraper.result && (
               <div className="mt-4">

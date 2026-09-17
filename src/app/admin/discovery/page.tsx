@@ -7,6 +7,7 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
+import { AdminWriteOnly, ReadOnlyNote } from "@/components/admin/AdminWriteOnly"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { SupermarketChainBadge } from "@/components/products/SupermarketChainBadge"
@@ -267,19 +268,21 @@ export default function DiscoveryPage() {
 
               <div className="flex-1" />
 
-              <Button onClick={() => handleRunDiscovery("all")} disabled={runningOrigin !== null}>
-                {runningOrigin === "all" ? (
-                  <>
-                    <Loader2Icon className="h-4 w-4 animate-spin" />
-                    Running...
-                  </>
-                ) : (
-                  <>
-                    <PlayIcon className="h-4 w-4" />
-                    Run All Stores
-                  </>
-                )}
-              </Button>
+              <AdminWriteOnly fallback={<ReadOnlyNote />}>
+                <Button onClick={() => handleRunDiscovery("all")} disabled={runningOrigin !== null}>
+                  {runningOrigin === "all" ? (
+                    <>
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                      Running...
+                    </>
+                  ) : (
+                    <>
+                      <PlayIcon className="h-4 w-4" />
+                      Run All Stores
+                    </>
+                  )}
+                </Button>
+              </AdminWriteOnly>
             </div>
           </CardContent>
         </Card>
@@ -300,21 +303,23 @@ export default function DiscoveryPage() {
                       <SupermarketChainBadge originId={store.originId} variant="logoSmall" />
                       <CardTitle className="text-base">{store.name}</CardTitle>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRunDiscovery(store.originId)}
-                      disabled={runningOrigin !== null}
-                    >
-                      {runningOrigin === store.originId ? (
-                        <Loader2Icon className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <SearchIcon className="h-3.5 w-3.5" />
-                          Discover
-                        </>
-                      )}
-                    </Button>
+                    <AdminWriteOnly>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRunDiscovery(store.originId)}
+                        disabled={runningOrigin !== null}
+                      >
+                        {runningOrigin === store.originId ? (
+                          <Loader2Icon className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <SearchIcon className="h-3.5 w-3.5" />
+                            Discover
+                          </>
+                        )}
+                      </Button>
+                    </AdminWriteOnly>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -485,50 +490,52 @@ export default function DiscoveryPage() {
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setLastTriageResult(null)
-                    runAuditMutation.mutate({
-                      scope: auditScope,
-                      force: auditForce,
-                      origin: auditScope === "full" ? auditOrigin : "all",
-                    })
-                  }}
-                  disabled={isTriageRunning}
-                >
-                  {runAuditMutation.isPending ? (
-                    <>
-                      <Loader2Icon className="h-4 w-4 animate-spin" />
-                      Auditing...
-                    </>
-                  ) : (
-                    <>
-                      <ScaleIcon className="h-4 w-4" />
-                      Run Audit
-                    </>
-                  )}
-                </Button>
+                <AdminWriteOnly fallback={<ReadOnlyNote />}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setLastTriageResult(null)
+                      runAuditMutation.mutate({
+                        scope: auditScope,
+                        force: auditForce,
+                        origin: auditScope === "full" ? auditOrigin : "all",
+                      })
+                    }}
+                    disabled={isTriageRunning}
+                  >
+                    {runAuditMutation.isPending ? (
+                      <>
+                        <Loader2Icon className="h-4 w-4 animate-spin" />
+                        Auditing...
+                      </>
+                    ) : (
+                      <>
+                        <ScaleIcon className="h-4 w-4" />
+                        Run Audit
+                      </>
+                    )}
+                  </Button>
 
-                <Button
-                  onClick={() => {
-                    setLastTriageResult(null)
-                    runTriageMutation.mutate()
-                  }}
-                  disabled={isTriageRunning}
-                >
-                  {runTriageMutation.isPending ? (
-                    <>
-                      <Loader2Icon className="h-4 w-4 animate-spin" />
-                      Triaging...
-                    </>
-                  ) : (
-                    <>
-                      <PlayIcon className="h-4 w-4" />
-                      Run Triage
-                    </>
-                  )}
-                </Button>
+                  <Button
+                    onClick={() => {
+                      setLastTriageResult(null)
+                      runTriageMutation.mutate()
+                    }}
+                    disabled={isTriageRunning}
+                  >
+                    {runTriageMutation.isPending ? (
+                      <>
+                        <Loader2Icon className="h-4 w-4 animate-spin" />
+                        Triaging...
+                      </>
+                    ) : (
+                      <>
+                        <PlayIcon className="h-4 w-4" />
+                        Run Triage
+                      </>
+                    )}
+                  </Button>
+                </AdminWriteOnly>
 
                 <div className="border-secondary flex items-center rounded-lg border">
                   <Button
