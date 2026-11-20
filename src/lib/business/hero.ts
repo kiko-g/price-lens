@@ -53,7 +53,10 @@ export async function getHeroProducts(): Promise<HeroProduct[]> {
       .not("price", "is", null)
       .gt("price", 0)
 
-    if (error || !data) return []
+    if (error || !data) {
+      console.error("[getHeroProducts] query failed:", error)
+      return []
+    }
 
     return data
       .filter((p): p is typeof p & { image: string } => !!p.image && !!p.name)
@@ -67,7 +70,8 @@ export async function getHeroProducts(): Promise<HeroProduct[]> {
         priceRecommended: p.price_recommended ?? null,
         discount: p.discount ?? null,
       }))
-  } catch {
+  } catch (error) {
+    console.error("[getHeroProducts] failed:", error)
     return []
   }
 }
