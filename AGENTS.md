@@ -20,6 +20,22 @@ Price tracking app for Portuguese supermarkets built with Next.js 16, React 19, 
 - **Always-applied rule**: [Product context](.cursor/rules/product-context.mdc) — what we’re building and who it’s for.
 - **Mobile & PWA** (when editing `src/**/*.tsx`): [mobile-pwa-ux.mdc](.cursor/rules/mobile-pwa-ux.mdc)
 - **Optional skill**: [.cursor/skills/mobile-and-pwa-verification/SKILL.md](.cursor/skills/mobile-and-pwa-verification/SKILL.md) — checklist before shipping keyboard/camera/modal work
+- **Installed skills** live in [`.agents/skills/`](.agents/skills/) and are pinned in [`skills-lock.json`](skills-lock.json). When a skill and a project rule disagree, follow the project rule (locale, supermarket badges, data fetching, Supabase limits, error handling).
+
+### Design (Emil Kowalski)
+
+All skills from [emilkowalski/skills](https://github.com/emilkowalski/skills). Use them for UI craft and motion. This app is a Next.js web/PWA, so prefer `emil-design-eng`, `mobile-native`, `animate`, `gestures`, `review-animations`, and `break-ui`. `ask-emil` routes to the right one. `animate-expo` and `write-swift` are installed for completeness; they apply only if we add Expo or Swift.
+
+### Correctness, architecture, and bugs (Matt Pocock)
+
+From [mattpocock/skills](https://github.com/mattpocock/skills), only the skills for those three jobs:
+
+- **Correctness**: `tdd`, `code-review`
+- **Architecture**: `codebase-design`, `improve-codebase-architecture`, `domain-modeling`
+- **Finding bugs**: `diagnosing-bugs`
+- **`grilling`** is included because `improve-codebase-architecture` interviews through it
+
+Ticket workflow, triage, and productivity skills are not installed. `code-review` expects `/setup-matt-pocock-skills` for an issue-tracker doc; that setup skill is not installed. Point it at the spec or issue directly. `docs/*` is gitignored, so do not rely on committing files under `docs/agents/`.
 
 ## Detailed guidelines
 
