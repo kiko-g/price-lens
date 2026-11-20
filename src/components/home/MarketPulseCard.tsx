@@ -2,25 +2,24 @@
 
 import { useLocale, useTranslations } from "next-intl"
 
-import { cn } from "@/lib/utils"
 import type { HomeStats } from "@/lib/queries/home-stats"
 import { isLocale, toLocaleTag } from "@/i18n/config"
-import { Stat, sparkFromValue } from "@/components/ui/stat"
+import { Stat } from "@/components/ui/stat"
+import { cn } from "@/lib/utils"
 
 type PulseStat = {
   key: string
   value: string
   label: string
-  shortLabel: string
   href: string
-  raw: number
 }
 
 /**
- * Market pulse — the three live numbers shown as Lince HUD stat cards.
- * `inline` = desktop hero row; `card` = compact mobile grid.
+ * Three live shelf numbers. The third is discount savings when we have them,
+ * otherwise the size of the catalog, so the row never collapses from 3 to 2.
+ * No decorative spark: a fake trend reads as data.
  */
-export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats; variant?: "card" | "inline" }) {
+export function MarketPulseCard({ stats }: { stats: HomeStats }) {
   const localeRaw = useLocale()
   const locale = isLocale(localeRaw) ? localeRaw : "pt"
   const tag = toLocaleTag(locale)
@@ -32,47 +31,50 @@ export function MarketPulseCard({ stats, variant = "card" }: { stats: HomeStats;
   const items: PulseStat[] = [
     {
       key: "drops",
-      raw: stats.priceDropsToday,
       value: formatNumber(stats.priceDropsToday),
       label: t("drops.label"),
-      shortLabel: t("drops.short"),
       href: "/products?sort=price-drop-smart",
     },
     {
       key: "discount",
-      raw: stats.productsOnDiscount,
       value: formatNumber(stats.productsOnDiscount),
       label: t("discount.label"),
-      shortLabel: t("discount.short"),
       href: "/products?discounted=true&sort=best-discount",
     },
+    stats.totalDiscountSavingsEuros > 0
+      ? {
+          key: "savings",
+          value: formatEuros(stats.totalDiscountSavingsEuros),
+          label: t("savings.label"),
+          href: "/products?discounted=true&sort=best-discount",
+        }
+      : {
+          key: "tracked",
+          value: formatNumber(stats.totalProducts),
+          label: t("tracked.label"),
+          href: "/products",
+        },
   ]
 
-  if (stats.totalDiscountSavingsEuros > 0) {
-    items.push({
-      key: "savings",
-      raw: stats.totalDiscountSavingsEuros,
-      value: formatEuros(stats.totalDiscountSavingsEuros),
-      label: t("savings.label"),
-      shortLabel: t("savings.short"),
-      href: "/products?discounted=true&sort=best-discount",
-    })
-  }
-
   return (
-    <div
-      className={cn("grid gap-3", variant === "inline" ? "grid-cols-3" : "grid-cols-2 [&>*:nth-child(3)]:col-span-2")}
-    >
-      {items.map((item) => (
-        <Stat
-          key={item.key}
-          href={item.href}
-          label={variant === "inline" ? item.label : item.shortLabel}
-          value={item.value}
-          spark={sparkFromValue(item.raw)}
-          className={variant === "card" ? "min-h-[84px] px-3.5 py-3 [&_span.tabular-nums]:text-2xl" : undefined}
-        />
-      ))}
-    </div>
+    <section aria-labelledby="market-pulse-heading">
+      <div className="mb-3">
+        <h2 id="market-pulse-heading" className="text-sm font-semibold tracking-tight">
+          {t("heading")}
+        </h2>
+        <p className="text-muted-foreground mt-0.5 text-xs">{t("hint")}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+        {items.map((item, index) => (
+          <Stat
+            key={item.key}
+            href={item.href}
+            label={item.label}
+            value={item.value}
+            className={cn(index === 2 && "col-span-2 sm:col-span-1")}
+          />
+        ))}
+      </div>
+    </section>
   )
 }
