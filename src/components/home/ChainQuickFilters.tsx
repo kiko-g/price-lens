@@ -28,7 +28,7 @@ export function ChainQuickFilters({ perStore, className }: { perStore: PerStoreS
             <span className="text-muted-foreground text-[9px] sm:text-[10px]">{t("products")}</span>
           </div>
           {store.onDiscount > 0 && (
-            <span className="text-[9px] leading-tight font-semibold text-emerald-600 sm:text-[10px] dark:text-emerald-400">
+            <span className="text-success text-[9px] leading-tight font-semibold sm:text-[10px]">
               {t("onSale", { count: formatCount(store.onDiscount) })}
             </span>
           )}

@@ -613,7 +613,7 @@
     "hero": {
       "kicker": "Supermercados · Portugal",
       "title": "Vê os preços <em>antes</em> de pagar.",
-      "lead": "O {brand} acompanha Continente, Auchan e Pingo Doce todos os dias. Revela o que subiu em silêncio e mostra-te quando comprar.",
+      "lead": "Pesquisa e compara Continente, Auchan e Pingo Doce sem conta. Vês o preço de hoje, o que está em promoção e o que desceu.",
       "ctaExplore": "Explorar produtos",
       "ctaScan": "Ler código de barras"
     },
@@ -641,14 +641,20 @@
       }
     },
     "popularProducts": {
-      "title": "Produtos populares"
+      "title": "Preços de agora",
+      "subtitle": "Produtos que as pessoas procuram. O preço é o de hoje, na loja indicada.",
+      "viewAll": "Ver todos"
     },
     "marketPulse": {
-      "drops": { "label": "descidas de preço hoje", "short": "descidas hoje" },
-      "discount": { "label": "em promoção agora", "short": "em promoção" },
-      "savings": { "label": "em poupança em promoção", "short": "poupança" }
+      "heading": "Hoje nas prateleiras",
+      "hint": "Cada número abre a lista de produtos.",
+      "drops": { "label": "descidas hoje", "short": "descidas hoje" },
+      "discount": { "label": "em promoção", "short": "em promoção" },
+      "savings": { "label": "em descontos", "short": "em descontos" },
+      "tracked": { "label": "produtos", "short": "produtos" }
     },
     "chainFilters": {
+      "heading": "Por supermercado",
       "products": "produtos",
       "onSale": "{count} em promoção"
     },
@@ -715,6 +721,13 @@
       "tracked": "Acompanhados",
       "priceDrops": "Descidas",
       "favorites": "Favoritos"
+    },
+    "guestAccount": {
+      "title": "A conta só faz falta para te avisar",
+      "body": "Pesquisar, comparar e ver promoções não pede conta. Com conta guardas favoritos e recebes um aviso quando um preço desce.",
+      "without": "Sem conta: pesquisa, comparação e promoções",
+      "with": "Com conta: favoritos e alertas de preço",
+      "cta": "Continuar com Google"
     },
     "diagonalRight": {
       "title": "Acompanha os produtos que te interessam",

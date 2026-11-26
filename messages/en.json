@@ -613,7 +613,7 @@
     "hero": {
       "kicker": "Supermarkets · Portugal",
       "title": "See prices <em>before</em> you pay.",
-      "lead": "{brand} tracks Continente, Auchan and Pingo Doce every day. It reveals what crept up in silence and shows you when to buy.",
+      "lead": "Search and compare Continente, Auchan and Pingo Doce without an account. You see today's price, what's on sale, and what just dropped.",
       "ctaExplore": "Explore products",
       "ctaScan": "Scan a barcode"
     },
@@ -641,14 +641,20 @@
       }
     },
     "popularProducts": {
-      "title": "Popular products"
+      "title": "Prices right now",
+      "subtitle": "Products people look up. The price is today's, at the store shown.",
+      "viewAll": "View all"
     },
     "marketPulse": {
-      "drops": { "label": "price drops today", "short": "price drops today" },
-      "discount": { "label": "on discount now", "short": "on discount" },
-      "savings": { "label": "in savings on sale", "short": "savings" }
+      "heading": "On the shelves today",
+      "hint": "Each number opens the product list.",
+      "drops": { "label": "drops today", "short": "drops today" },
+      "discount": { "label": "on sale", "short": "on sale" },
+      "savings": { "label": "in discounts", "short": "in discounts" },
+      "tracked": { "label": "products", "short": "products" }
     },
     "chainFilters": {
+      "heading": "By supermarket",
       "products": "products",
       "onSale": "{count} on sale"
     },
@@ -715,6 +721,13 @@
       "tracked": "Tracked",
       "priceDrops": "Price Drops",
       "favorites": "Favorites"
+    },
+    "guestAccount": {
+      "title": "An account is only for the alerts",
+      "body": "Search, compare, and browse deals without signing in. An account saves favorites and tells you when a price drops.",
+      "without": "Without an account: search, compare, and deals",
+      "with": "With an account: favorites and price alerts",
+      "cta": "Continue with Google"
     },
     "diagonalRight": {
       "title": "Track the products you care about",
