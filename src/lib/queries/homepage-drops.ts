@@ -1,6 +1,7 @@
 import "server-only"
 
 import { toHomepageDrop, type HomepageDrop, type HomepageDropRow } from "@/lib/business/homepage-drop"
+import { PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE } from "@/lib/business/price-change"
 import { withTimeout } from "@/lib/resilience"
 import { createClient } from "@/lib/supabase/server"
 
@@ -9,21 +10,16 @@ const SUPABASE_QUERY_TIMEOUT_MS = parseInt(process.env.SUPABASE_QUERY_TIMEOUT_MS
 export const HOMEPAGE_DROP_LIMIT = 8
 
 /**
- * Rows read past the indexed score before the in-memory filters
- * (image, price, plausible drop). Kept small so the homepage stays on
- * `idx_sp_price_drop_smart_score` and returns in one index scan.
- *
- * Do not add `last_price_change_at` or other predicates here. Combined with
- * this ORDER BY they timed out on production (statement timeout 57014) and
- * the section disappeared.
+ * Extra rows so in-memory filters (image, plausible price) can still fill the grid.
+ * The SQL itself must match `idx_sp_price_change_pct` (available, non-empty name,
+ * order by price_change_pct). Ordering by price_drop_smart_score timed out on
+ * production even as a bare index read (statement timeout 57014).
  */
-const SCORE_CANDIDATES = 40
-
-type ScoredRow = HomepageDropRow & { available: boolean | null }
+const CANDIDATES = 24
 
 /**
- * Up to eight history-weighted price drops. Same score as the product listing,
- * without that listing's recency filters — those cannot use the score index.
+ * Up to eight of the largest current price drops still on the shelf.
+ * One indexed read — no count, no recency predicate, no score sort.
  */
 export async function getHomepageDrops(): Promise<HomepageDrop[]> {
   try {
@@ -31,13 +27,17 @@ export async function getHomepageDrops(): Promise<HomepageDrop[]> {
 
     const query = supabase
       .from("store_products")
-      .select("id, name, brand, image, origin_id, price, price_change_pct, available")
-      .not("price_drop_smart_score", "is", null)
-      .order("price_drop_smart_score", { ascending: false, nullsFirst: false })
-      .limit(SCORE_CANDIDATES)
+      .select("id, name, brand, image, origin_id, price, price_change_pct")
+      .eq("available", true)
+      .not("name", "is", null)
+      .neq("name", "")
+      .gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
+      .lt("price_change_pct", 0)
+      .order("price_change_pct", { ascending: true, nullsFirst: false })
+      .limit(CANDIDATES)
 
     const { data, error } = await withTimeout(
-      Promise.resolve(query) as Promise<{ data: ScoredRow[] | null; error: { message: string } | null }>,
+      Promise.resolve(query) as Promise<{ data: HomepageDropRow[] | null; error: { message: string } | null }>,
       SUPABASE_QUERY_TIMEOUT_MS,
     )
 
@@ -48,7 +48,6 @@ export async function getHomepageDrops(): Promise<HomepageDrop[]> {
 
     const drops: HomepageDrop[] = []
     for (const row of data) {
-      if (!row.available) continue
       const drop = toHomepageDrop(row)
       if (!drop) continue
       drops.push(drop)

@@ -28,7 +28,7 @@ export function HomeDropGrid({ products }: { products: HomepageDrop[] }) {
           <p className="text-muted-foreground mt-1 max-w-xl text-sm leading-relaxed">{t("subtitle")}</p>
         </div>
         <Link
-          href="/products?sort=price-drop-smart"
+          href="/products?sort=price-drop"
           className="text-foreground hover:text-primary inline-flex shrink-0 items-center gap-1 text-sm font-medium"
         >
           {t("viewAll")}

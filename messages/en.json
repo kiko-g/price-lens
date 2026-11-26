@@ -641,8 +641,8 @@
       }
     },
     "popularProducts": {
-      "title": "Drops worth a look",
-      "subtitle": "Weighted by price history, not just the percentage. The crossed-out price is the previous one.",
+      "title": "Biggest drops",
+      "subtitle": "The largest drops still on the shelf. The crossed-out price is the previous one.",
       "viewAll": "See drops"
     },
     "marketPulse": {
