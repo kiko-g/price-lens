@@ -15,28 +15,14 @@ import { formatPrice } from "@/lib/i18n/format"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { MiniProductCard, type FavoriteItem } from "@/components/products/MiniProductCard"
+import { HomeDropGrid } from "@/components/home/HomeDropGrid"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 import { MiniProductCardSkeleton } from "@/components/products/MiniProductCardSkeleton"
 
-import {
-  BellIcon,
-  HeartIcon,
-  ClockIcon,
-  ArrowRightIcon,
-  TagIcon,
-  PackageIcon,
-  PinIcon,
-  SparklesIcon,
-} from "lucide-react"
-import type { HeroProduct } from "@/lib/business/hero"
+import { BellIcon, HeartIcon, ClockIcon, ArrowRightIcon, TagIcon, PackageIcon, SparklesIcon } from "lucide-react"
+import type { HomepageDrop } from "@/lib/business/homepage-drop"
 
-export function PersonalizedDashboard({
-  totalProducts,
-  heroProducts,
-}: {
-  totalProducts: number
-  heroProducts: HeroProduct[]
-}) {
+export function PersonalizedDashboard({ totalProducts, drops }: { totalProducts: number; drops: HomepageDrop[] }) {
   const { user, profile } = useUser()
   const { items: recentlyViewed } = useRecentlyViewed()
   const { data: alertsData, isLoading: alertsLoading } = useUserAlerts()
@@ -99,7 +85,9 @@ export function PersonalizedDashboard({
         />
       </div>
 
-      <div className="flex flex-col gap-6">
+      {drops.length > 0 && <HomeDropGrid products={drops} />}
+
+      <div className={cn("flex flex-col gap-6", drops.length > 0 && "mt-6")}>
         {/* Favorites summary */}
         <DashboardSection
           title={t("sections.favorites")}
@@ -187,20 +175,6 @@ export function PersonalizedDashboard({
             </Link>
           </CardContent>
         </Card>
-      )}
-
-      {/* Popular products discovery */}
-      {heroProducts.length > 0 && (
-        <DashboardSection
-          title={t("sections.handpicked")}
-          icon={PinIcon}
-          href="/products"
-          isEmpty={false}
-          isLoading={false}
-          className="mt-6"
-        >
-          <MiniProductCarousel products={heroProducts} desktopLimit={12} />
-        </DashboardSection>
       )}
     </div>
   )
@@ -295,7 +269,7 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size))
 }
 
-function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem | HeroProduct)[] }) {
+function MobileCarousel({ products }: { products: (FavoriteItem | RecentlyViewedItem)[] }) {
   const [page, setPage] = useState(0)
   const pages = chunkArray(products, 6)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -404,7 +378,7 @@ function MiniProductCarousel({
   products,
   desktopLimit,
 }: {
-  products: (FavoriteItem | RecentlyViewedItem | HeroProduct)[]
+  products: (FavoriteItem | RecentlyViewedItem)[]
   desktopLimit?: number
 }) {
   const desktopProducts = desktopLimit ? products.slice(0, desktopLimit) : products

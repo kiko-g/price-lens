@@ -5,17 +5,14 @@ import { ChainQuickFilters } from "@/components/home/ChainQuickFilters"
 import { EntryPointGrid } from "@/components/home/EntryPointGrid"
 import { FreshnessBadge } from "@/components/home/FreshnessBadge"
 import { GuestAccountPrompt } from "@/components/home/GuestAccountPrompt"
-import { GuestProductGrid } from "@/components/home/GuestProductGrid"
+import { HomeDropGrid } from "@/components/home/HomeDropGrid"
 import { HomeSearchBar } from "@/components/home/HomeSearchBar"
 import { MarketPulseCard } from "@/components/home/MarketPulseCard"
-import type { HeroProduct } from "@/lib/business/hero"
+import type { HomepageDrop } from "@/lib/business/homepage-drop"
 import type { HomeStats } from "@/lib/queries/home-stats"
 
-/**
- * Public homepage. Rendered for signed-out visitors and as the first paint for everyone,
- * so auth resolving never swaps this layout for a dashboard skeleton.
- */
-export async function GuestHome({ stats, products }: { stats: HomeStats; products: HeroProduct[] }) {
+/** Public homepage for signed-out visitors. */
+export async function GuestHome({ stats, products }: { stats: HomeStats; products: HomepageDrop[] }) {
   const t = await getTranslations("home.hero")
   const tChains = await getTranslations("home.chainFilters")
 
@@ -54,7 +51,7 @@ export async function GuestHome({ stats, products }: { stats: HomeStats; product
 
       {products.length > 0 && (
         <div className="mt-10">
-          <GuestProductGrid products={products} />
+          <HomeDropGrid products={products} />
         </div>
       )}
 

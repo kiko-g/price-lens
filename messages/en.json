@@ -641,9 +641,9 @@
       }
     },
     "popularProducts": {
-      "title": "Prices right now",
-      "subtitle": "Products people look up. The price is today's, at the store shown.",
-      "viewAll": "View all"
+      "title": "Grocery drops",
+      "subtitle": "Food and drink that dropped, still on the shelf. The crossed-out price is the previous one.",
+      "viewAll": "See drops"
     },
     "marketPulse": {
       "heading": "On the shelves today",

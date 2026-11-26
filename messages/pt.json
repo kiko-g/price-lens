@@ -641,9 +641,9 @@
       }
     },
     "popularProducts": {
-      "title": "Preços de agora",
-      "subtitle": "Produtos que as pessoas procuram. O preço é o de hoje, na loja indicada.",
-      "viewAll": "Ver todos"
+      "title": "Descidas na mercearia",
+      "subtitle": "Comida e bebida que desceu, ainda à venda. O preço riscado é o anterior.",
+      "viewAll": "Ver descidas"
     },
     "marketPulse": {
       "heading": "Hoje nas prateleiras",

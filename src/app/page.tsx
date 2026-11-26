@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 import { defaultMetadata } from "@/lib/brand/metadata"
 import { getHomeStats } from "@/lib/queries/home-stats"
-import { getHeroProducts } from "@/lib/business/hero"
+import { getHomepageDrops } from "@/lib/queries/homepage-drops"
 import { createClient } from "@/lib/supabase/server"
 import { resolveUser } from "@/lib/supabase/tools"
 
@@ -20,13 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function HomeBody({ signedIn }: { signedIn: boolean }) {
-  const [stats, heroProducts] = await Promise.all([getHomeStats(), getHeroProducts()])
+  const [stats, drops] = await Promise.all([getHomeStats(), getHomepageDrops()])
 
   if (signedIn) {
-    return <PersonalizedDashboard totalProducts={stats.totalProducts} heroProducts={heroProducts} />
+    return <PersonalizedDashboard totalProducts={stats.totalProducts} drops={drops} />
   }
 
-  return <GuestHome stats={stats} products={heroProducts} />
+  return <GuestHome stats={stats} products={drops} />
 }
 
 export default async function Home() {
