@@ -641,8 +641,8 @@
       }
     },
     "popularProducts": {
-      "title": "Drops on the shelf",
-      "subtitle": "Between 10% and 40%, still on the shelf. The crossed-out price is the previous one.",
+      "title": "Grocery drops",
+      "subtitle": "Food and drink that dropped, still on the shelf. The crossed-out price is the previous one.",
       "viewAll": "See drops"
     },
     "marketPulse": {

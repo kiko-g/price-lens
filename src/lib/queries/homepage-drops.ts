@@ -13,6 +13,31 @@ const MIN_DROP_RATIO = 0.1
 const MAX_DROP_RATIO = 0.4
 
 /**
+ * Food departments only. Home and beauty dominate the biggest percentage drops.
+ * Names match `existingCategories` in `@/lib/business/data`. Commas omitted so
+ * the PostgREST `in` list stays unambiguous.
+ */
+const GROCERY_CATEGORIES = [
+  "Mercearia",
+  "Frescos",
+  "Congelados",
+  "Laticínios e Ovos",
+  "Bebidas e Garrafeira",
+  "Alimentação",
+  "Produtos Frescos",
+  "Biológicos e Alternativas",
+  "Alternativas Alimentares",
+  "Bebidas",
+  "Charcutaria",
+  "Frigorifico",
+  "Frutas E Vegetais",
+  "Leite Natas E Ovos",
+  "Padaria E Pastelaria",
+  "Peixaria",
+  "Talho",
+] as const
+
+/**
  * Extra rows so in-memory filters (image, plausible price) can still fill the grid.
  * The SQL itself must match `idx_sp_price_change_pct` (available, non-empty name,
  * order by price_change_pct). Ordering by price_drop_smart_score timed out on
@@ -21,7 +46,7 @@ const MAX_DROP_RATIO = 0.4
 const CANDIDATES = 24
 
 /**
- * Up to eight drops between 10% and 40% still on the shelf.
+ * Up to eight grocery drops between 10% and 40% still on the shelf.
  * One indexed read — no count, no recency predicate, no score sort.
  */
 export async function getHomepageDrops(): Promise<HomepageDrop[]> {
@@ -34,6 +59,7 @@ export async function getHomepageDrops(): Promise<HomepageDrop[]> {
       .eq("available", true)
       .not("name", "is", null)
       .neq("name", "")
+      .in("category", [...GROCERY_CATEGORIES])
       .gte("price_change_pct", -MAX_DROP_RATIO)
       .lt("price_change_pct", -MIN_DROP_RATIO)
       .order("price_change_pct", { ascending: true, nullsFirst: false })
