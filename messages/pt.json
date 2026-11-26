@@ -641,9 +641,9 @@
       }
     },
     "popularProducts": {
-      "title": "Preços de agora",
-      "subtitle": "Produtos que as pessoas procuram. O preço é o de hoje, na loja indicada.",
-      "viewAll": "Ver todos"
+      "title": "Descidas que valem a pena",
+      "subtitle": "Ponderadas pelo histórico de preço, não só pela percentagem. O preço riscado é o anterior.",
+      "viewAll": "Ver descidas"
     },
     "marketPulse": {
       "heading": "Hoje nas prateleiras",
