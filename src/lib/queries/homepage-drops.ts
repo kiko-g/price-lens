@@ -1,13 +1,16 @@
 import "server-only"
 
 import { toHomepageDrop, type HomepageDrop, type HomepageDropRow } from "@/lib/business/homepage-drop"
-import { PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE } from "@/lib/business/price-change"
 import { withTimeout } from "@/lib/resilience"
 import { createClient } from "@/lib/supabase/server"
 
 const SUPABASE_QUERY_TIMEOUT_MS = parseInt(process.env.SUPABASE_QUERY_TIMEOUT_MS || "15000", 10)
 
 export const HOMEPAGE_DROP_LIMIT = 8
+
+/** Skip noise under 10% and the 65% ceiling, where the biggest rows cluster. */
+const MIN_DROP_RATIO = 0.1
+const MAX_DROP_RATIO = 0.4
 
 /**
  * Extra rows so in-memory filters (image, plausible price) can still fill the grid.
@@ -18,7 +21,7 @@ export const HOMEPAGE_DROP_LIMIT = 8
 const CANDIDATES = 24
 
 /**
- * Up to eight of the largest current price drops still on the shelf.
+ * Up to eight drops between 10% and 40% still on the shelf.
  * One indexed read — no count, no recency predicate, no score sort.
  */
 export async function getHomepageDrops(): Promise<HomepageDrop[]> {
@@ -31,8 +34,8 @@ export async function getHomepageDrops(): Promise<HomepageDrop[]> {
       .eq("available", true)
       .not("name", "is", null)
       .neq("name", "")
-      .gte("price_change_pct", -PLAUSIBLE_MAX_PRICE_CHANGE_MAGNITUDE)
-      .lt("price_change_pct", 0)
+      .gte("price_change_pct", -MAX_DROP_RATIO)
+      .lt("price_change_pct", -MIN_DROP_RATIO)
       .order("price_change_pct", { ascending: true, nullsFirst: false })
       .limit(CANDIDATES)
 
